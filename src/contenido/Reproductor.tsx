@@ -175,6 +175,9 @@ export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraTok
       }}
       onClick={(e) => {
         e.stopPropagation();
+        // Si no, la apertura pendiente por pasar el ratón llegaría después y dejaría de estar fijada.
+        if (temporizadorApertura) clearTimeout(temporizadorApertura);
+        palabraAtendida = p;
         abrirConsulta(p, l, e.currentTarget, true);
       }}
     >
