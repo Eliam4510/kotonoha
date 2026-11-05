@@ -107,14 +107,20 @@ describe('imagenNegra', () => {
     expect(imagenNegra(imagen(6, 8, 5))).toBe(true);
   });
 
+  it('también con las franjas del fondo de la página, como en Netflix', () => {
+    const d = imagen(0, 0, 0);
+    for (let i = 0; i < 12; i++) d.set([20, 20, 20, 255], i * 4);
+    d.set([70, 70, 70, 255], 12 * 4);
+    expect(imagenNegra(d)).toBe(true);
+  });
+
   it('una imagen con contenido no es negra', () => {
     expect(imagenNegra(imagen(40, 60, 90))).toBe(false);
   });
 
   it('una escena oscura con algo de luz tampoco', () => {
     const d = imagen(0, 0, 0);
-    d.set([200, 200, 200, 255], 0);
-    d.set([200, 200, 200, 255], 4);
+    for (let i = 0; i < 5; i++) d.set([200, 200, 200, 255], i * 4);
     expect(imagenNegra(d)).toBe(false);
   });
 });

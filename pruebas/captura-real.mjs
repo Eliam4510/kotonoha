@@ -45,7 +45,8 @@ const json3 = JSON.stringify({ events: CUES.map(([a, b, t]) => ({ tStartMs: a, d
 
 const pagina = (id, archivo) => `<!doctype html><meta charset="utf-8"><title>${id} - YouTube</title>
 <body style="margin:0;background:#0f0f0f;color:#fff;font-family:sans-serif">
-<div id="movie_player" style="position:relative;width:1000px;height:562px;margin:20px auto;background:#000"><video id="v" src="https://media.test/${archivo}" style="width:100%;height:100%"></video></div>
+<div id="movie_player" style="position:relative;width:1000px;height:562px;margin:20px auto;background:#000"><video id="v" src="https://media.test/${archivo}" style="width:100%;height:100%"></video>
+<div style="position:absolute;left:30px;top:30px;padding:20px 40px;background:#c00;color:#fff;font-size:30px;visibility:visible !important">CLASIFICACIÓN</div></div>
 <script>
   const pistas = [{ languageCode: 'ja', vssId: '.ja', name: { simpleText: '日本語' } }].map((t) => ({ ...t, baseUrl: 'https://www.youtube.com/api/timedtext?v=${id}&lang=ja', url: 'https://www.youtube.com/api/timedtext?v=${id}&pot=x&lang=ja' }));
   const j = document.getElementById('movie_player');

@@ -151,6 +151,8 @@ export interface ApiFondo {
   urlBaseIA(): Promise<string | null>;
   ajustesCompletos(): Promise<unknown>;
   capturaVisible(): Promise<string>;
+  /** Deja a la vista solo el video de la pestaña que lo pide, para capturarla. */
+  soloVideo(si: boolean): Promise<void>;
   alternarCaptura(): Promise<boolean>;
   /** Si se está capturando el audio de la pestaña que pregunta, o de la que está a la vista si no pregunta ninguna. */
   capturaActiva(): Promise<boolean>;

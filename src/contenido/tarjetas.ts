@@ -58,17 +58,6 @@ function fotogramaDeLienzo(v: HTMLVideoElement): string | null {
   return null;
 }
 
-/** Deja en pantalla solo el video, sin los controles del reproductor ni nada más del sitio. */
-function mostrarSoloVideo(si: boolean) {
-  const ID = 'kotonoha-solo-video';
-  document.getElementById(ID)?.remove();
-  if (!si) return;
-  const estilo = document.createElement('style');
-  estilo.id = ID;
-  estilo.textContent = '*{visibility:hidden!important}video{visibility:visible!important}';
-  (document.head ?? document.documentElement).appendChild(estilo);
-}
-
 /** Lo que se ve no cambia en la captura hasta que el navegador lo ha pintado. */
 const pintado = () =>
   new Promise<void>((ok) => {
@@ -97,8 +86,9 @@ async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) 
   if (propio) return { id: nombre, nombre, tipo: 'image/jpeg', datos: propio };
   if (videoProtegido()) return null;
   ocultarOverlay(true);
-  mostrarSoloVideo(true);
   try {
+    // Sin los controles del reproductor ni nada más del sitio. Si no se pudiera, la captura sigue valiendo.
+    await fondo.soloVideo(true).catch(() => {});
     await pintado();
     const url = await fondo.capturaVisible();
     const r = v.getBoundingClientRect();
@@ -114,7 +104,7 @@ async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) 
   } catch {
     return null;
   } finally {
-    mostrarSoloVideo(false);
+    await fondo.soloVideo(false).catch(() => {});
     ocultarOverlay(false);
   }
 }
@@ -178,6 +168,7 @@ async function grabarLinea(l: LineaAnalizada, ocultarOverlay: (v: boolean) => vo
       }
     }
     const clip = await motor.terminarClip();
+    console.info('Kotonoha: grabación', { arranco, mudo: !!clip && 'mudo' in clip, clip: clip ? 'datos' in clip : false, videoMudo: v.muted, volumen: v.volume, desde: inicio, hasta: fin, llego: Math.round(v.currentTime * 1000) });
     if (!arranco) {
       avisar('El video no arrancó para grabar la frase: la tarjeta va sin audio.', 'error', undefined, 7000);
     } else if (clip && 'mudo' in clip) {
