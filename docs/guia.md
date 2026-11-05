@@ -187,15 +187,15 @@ Las tarjetas pueden enviarse a Anki mediante AnkiConnect, con un tipo de nota pr
 
 La pantalla de inicio incluye la tarjeta **Gasto en Claude**, con lo gastado en el mes frente al crédito indicado en Ajustes, una gráfica por días y modelos, el reparto por tareas y un registro de cada petición, con sus tokens. El coste se calcula con los tokens que informa la API y sus precios públicos, y solo cuenta lo pedido desde esta extensión en este navegador.
 
-Lo que más gasta por video es la revisión de lecturas, sentidos y gramática, seguida de la traducción. La revisión cubre unos minutos por delante del punto de reproducción y continúa a medida que avanza; lo revisado queda guardado. Se puede desactivar en **Generar subtítulos**, o pedir el video entero con **Revisar todo el video**.
+Lo que más gasta por video es la corrección de los subtítulos automáticos, seguida de la traducción y de la revisión de lecturas, sentidos y gramática. La revisión cubre unos minutos por delante del punto de reproducción y continúa a medida que avanza; lo revisado queda guardado. Se puede desactivar en **Generar subtítulos**, o pedir el video entero con **Revisar todo el video**. El [estudio de costos](costos.md) da las cifras medidas, por video y por mes.
 
-Tres ajustes de **Comportamiento** deciden cuánto se usa Claude:
+Tres ajustes deciden cuánto se usan las consultas de palabras:
 
-| Ajuste | Por omisión | Efecto |
-|---|---|---|
-| Preguntar el significado al abrir una palabra | Desactivado | Cada palabra nueva que se abra sería una petición |
-| Pestaña al abrir | Solo el diccionario | Una pestaña de Claude preguntaría al abrir cada palabra |
-| Guion completo como contexto | Desactivado | Más contexto para nombres y referencias, a mayor coste por consulta |
+| Ajuste | Dónde | Por omisión | Efecto |
+|---|---|---|---|
+| Preguntar el significado al abrir una palabra | Ajustes, Claude | Desactivado | Cada palabra nueva que se abra sería una petición |
+| Guion completo como contexto | Ajustes, Claude | Desactivado | Más contexto para nombres y referencias, a mayor coste por consulta |
+| Pestaña inicial | Ajustes, Diccionarios | Solo el diccionario | Una pestaña de Claude preguntaría al abrir cada palabra |
 
 ## Datos y copia de seguridad
 

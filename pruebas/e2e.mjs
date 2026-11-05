@@ -434,7 +434,18 @@ if (quiere('local')) {
 
 // ---------- YouTube real ----------
 
-if (quiere('youtube')) {
+/** YouTube suele negarse a reproducir en un navegador automatizado, y eso no dice nada de la extensión. */
+async function youtubeReproduce() {
+  const p = await contexto.newPage();
+  await p.goto('https://www.youtube.com/watch?v=Jh2C7JlWGKU', { waitUntil: 'domcontentloaded' }).catch(() => {});
+  await p.waitForTimeout(6000);
+  const error = await p.evaluate(() => document.querySelector('.ytp-error')?.textContent ?? '').catch(() => '');
+  await p.close();
+  if (error) console.log('\n== YouTube real ==\nSe omite: el reproductor rechaza este navegador automatizado.');
+  return !error;
+}
+
+if (quiere('youtube') && (await youtubeReproduce())) {
   console.log('\n== YouTube real ==');
   const p = await contexto.newPage();
   vigilar(p, 'youtube');

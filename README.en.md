@@ -13,7 +13,7 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-3987e5?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-A9E45B?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/version-0.2.0-A9E45B?style=flat-square" alt="Version 0.2.0">
+  <img src="https://img.shields.io/badge/version-0.2.1-A9E45B?style=flat-square" alt="Version 0.2.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
   <img src="https://img.shields.io/badge/unit%20tests-171-0ca30c?style=flat-square" alt="171 unit tests">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 to N1">
@@ -28,6 +28,7 @@
   <a href="docs/guide.md">User guide</a> ·
   <a href="docs/features.md">Features</a> ·
   <a href="docs/architecture.md">Architecture</a> ·
+  <a href="docs/costs.md">Costs</a> ·
   <a href="AVISOS.md#english">Notices</a>
 </p>
 
@@ -72,7 +73,7 @@ The interface is currently in Spanish. Claude's explanations can be requested in
     <td width="33%" align="center"><img src="docs/img/mover.png" alt="Subtitles dragged to another position on the video"></td>
   </tr>
   <tr>
-    <td valign="top"><b>Spending in plain sight</b><br>The home screen shows what this month has cost in Claude, with a chart by day and model, the tasks it went to and a log of every request with its tokens.</td>
+    <td valign="top"><b>Spending in plain sight</b><br>The home screen shows what this month has cost in Claude, with a chart by day and model, the tasks it went to and a log of every request with its tokens. The <a href="docs/costs.md">cost study</a> gives measured figures.</td>
     <td valign="top"><b>Nothing is paid for twice</b><br>Every answer is stored by word and sentence. Moving between words costs nothing, and an interrupted answer is finished and stored instead of being lost.</td>
     <td valign="top"><b>Subtitles wherever you want them</b><br>Drag them from anywhere to the height and side you prefer, with magnets at the center and at their usual place. Lines change without flicker and stay with the video when the page scrolls.</td>
   </tr>
@@ -199,6 +200,7 @@ npm run typecheck
 | `npm test` | The pure logic in `src/nucleo` |
 | `node pruebas/e2e.mjs` | The extension end to end in Edge |
 | `node pruebas/subtitulos.mjs` | Translating, correcting, exporting and importing, on pages imitating Netflix and YouTube with a simulated Claude API |
+| `node pruebas/experiencia.mjs` | What is perceived on top of the video, frame by frame: flicker, jitter and dragging. It also counts requests to Claude and checks the spending log |
 | `node pruebas/capturas.mjs` | Goes through every screen and saves screenshots |
 | `node pruebas/tarjetas.mjs audio.wav` | Simulated Anki, memory and recording |
 | `node pruebas/medios.mjs audio.wav` | ffmpeg.wasm with a multi-track MKV |
@@ -213,7 +215,7 @@ Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist
 
 ## Project status
 
-Version 0.2.0 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure, and extended validation with real sessions is still pending.
+Version 0.2.1 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure, and extended validation with real sessions is still pending.
 
 ## Privacy
 

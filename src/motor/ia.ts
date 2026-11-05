@@ -434,7 +434,7 @@ export async function traducirSubtitulos(
   await porLotes(lineas.length, TAM_LOTE_TRADUCCION, indice, false, async (l) => {
     if (senal?.aborted) return;
     const usuario = mensajeLote(lineas, l, titulo, 'Líneas a traducir');
-    const texto = await ejecutar({ a, tarea: 'subtitulos', sistema, usuario, maxTokens: 32000, formato: { type: 'json_schema', schema: ESQUEMA_LINEAS } }, undefined, senal);
+    const texto = await ejecutar({ a, tarea: 'subtitulos', sistema, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: ESQUEMA_LINEAS } }, undefined, senal);
     if (!texto) return;
     const datos = JSON.parse(texto) as { lineas: ParteTexto[] };
     hechas += l.hasta - l.desde;
@@ -506,7 +506,7 @@ export async function analisisProfundo(
       despues ? `Líneas siguientes, solo como contexto:\n${despues}` : '',
     ].filter(Boolean).join('\n\n');
     // Sin señal a propósito: este lote ya está pagado. Si te vas del video, termina y queda guardado.
-    const texto = await ejecutar({ a, tarea: 'analisis', sistema, usuario, maxTokens: 32000, formato: { type: 'json_schema', schema: ESQUEMA_ANALISIS } });
+    const texto = await ejecutar({ a, tarea: 'analisis', sistema, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: ESQUEMA_ANALISIS } });
     if (!texto) return;
     const datos = JSON.parse(texto) as { lineas: (AnalisisLinea & { i: number })[] };
     const r = new Map<number, AnalisisLinea>();

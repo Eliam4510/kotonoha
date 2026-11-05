@@ -187,15 +187,15 @@ Cards can be sent to Anki through AnkiConnect, with a custom note type or the on
 
 The home screen has a **Gasto en Claude** card with this month's spending against the credit set in Settings, a chart by day and model, the split by task and a log of every request with its tokens. The cost is worked out from the tokens reported by the API and its public prices, and only counts what was requested from this extension in this browser.
 
-What costs the most per video is the review of readings, meanings and grammar, followed by translation. The review covers a few minutes ahead of the playback position and continues as the video advances, and reviewed lines stay stored. It can be turned off in **Generar subtítulos**, or requested for the whole video with **Revisar todo el video**.
+What costs the most per video is the correction of automatic subtitles, followed by translation and by the review of readings, meanings and grammar. The review covers a few minutes ahead of the playback position and continues as the video advances, and reviewed lines stay stored. It can be turned off in **Generar subtítulos**, or requested for the whole video with **Revisar todo el video**. The [cost study](costs.md) gives measured figures, per video and per month.
 
-Three settings under **Comportamiento** (behavior) decide how much Claude is used:
+Three settings decide how much word queries are used:
 
-| Setting | Default | Effect |
-|---|---|---|
-| Ask for the meaning when opening a word | Off | Every new word opened would be a request |
-| Tab on open | Dictionary only | A Claude tab would ask on every word opened |
-| Full script as context | Off | More context for names and references, at a higher cost per query |
+| Setting | Where | Default | Effect |
+|---|---|---|---|
+| Ask for the meaning when opening a word | Settings, Claude | Off | Every new word opened would be a request |
+| Full script as context | Settings, Claude | Off | More context for names and references, at a higher cost per query |
+| Initial tab | Settings, Dictionaries | Dictionary only | A Claude tab would ask on every word opened |
 
 ## Data and backups
 
