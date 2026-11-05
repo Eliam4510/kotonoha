@@ -9,6 +9,7 @@ Estado de cada función en la versión 0.2.2, con la forma en que se ha verifica
 | Automática | Probada de extremo a extremo con Edge y la extensión cargada |
 | Simulador | El código real corre completo, contra un servidor falso de la API de Claude o de AnkiConnect |
 | Página imitada | Además, en una página con la misma estructura de reproductor que Netflix o YouTube |
+| Sesión real | Comprobada a mano en YouTube, con Chrome, una sesión real y la API de Claude |
 | Pendiente | Requiere una sesión real del sitio o credenciales propias |
 
 ## Sobre el video
@@ -16,17 +17,17 @@ Estado de cada función en la versión 0.2.2, con la forma en que se ha verifica
 | Función | Verificación |
 |---|---|
 | Barra flotante con palabras conocidas, comprensión y frases recomendadas | Automática |
-| La barra aparece al detener el ratón arriba, se queda mientras siga cerca y no se despierta al pasar de largo | Automática |
-| Subtítulos que se arrastran a cualquier punto del video, con imanes y sin salirse de él | Automática |
-| Cambio de línea sin parpadeos, y letra algo menor en los párrafos largos | Automática |
-| Los subtítulos acompañan al video al desplazar la página, sin temblar | Página imitada |
+| La barra aparece al detener el ratón arriba, se queda mientras siga cerca y no se despierta al pasar de largo | Automática y sesión real |
+| Subtítulos que se arrastran a cualquier punto del video, con imanes y sin salirse de él | Automática y sesión real |
+| Cambio de línea sin parpadeos, y letra algo menor en los párrafos largos | Automática y sesión real |
+| Los subtítulos acompañan al video al desplazar la página, sin temblar | Página imitada y sesión real |
 | Una línea que aparece bajo un ratón quieto no abre fichas ni pausa el video | Automática |
 | Subtítulos con furigana, color por acento tonal y subrayado por estado | Automática |
 | Modos de furigana, glosas y color: siempre, al pasar, desconocidas, nunca | Automática |
 | Ficha de palabra: definiciones, estado, frecuencia, audio, imágenes, ejemplos y enlaces | Automática |
-| La ficha abre con el diccionario, sin ninguna petición a Claude | Simulador |
-| Qué significa en esta frase, explicar, desglosar y traducir con Claude, a petición | Simulador |
-| Cada respuesta se guarda: la misma palabra en la misma frase no se vuelve a pedir | Simulador |
+| La ficha abre con el diccionario, sin ninguna petición a Claude | Simulador y sesión real |
+| Qué significa en esta frase, explicar, desglosar y traducir con Claude, a petición | Simulador, y sesión real para el significado en la frase |
+| Cada respuesta se guarda: la misma palabra en la misma frase no se vuelve a pedir | Simulador y sesión real |
 | Preguntas libres sobre una palabra o una frase | Simulador |
 | Gramática JLPT: unas 100 reglas confirmadas por Claude, con un resumen por video | Simulador |
 | Palabras prioritarias: las desconocidas que más se repiten en el video | Automática |
@@ -41,7 +42,7 @@ Estado de cada función en la versión 0.2.2, con la forma en que se ha verifica
 
 | Función | Verificación |
 |---|---|
-| YouTube: pistas firmadas por el reproductor | Página imitada. Pendiente de una sesión real, porque el sitio no sirve subtítulos a un navegador automatizado |
+| YouTube: pistas firmadas por el reproductor | Sesión real. Las pruebas automáticas usan una página imitada, porque el sitio no sirve subtítulos a un navegador automatizado |
 | Netflix: pistas del reproductor, TTML | Página imitada. Pendiente de una sesión real |
 | Disney+, Crunchyroll, Viki, Bilibili, iQIYI y Prime Video, por detección genérica | Pendiente |
 | Segunda pista en el idioma de apoyo | Automática |
