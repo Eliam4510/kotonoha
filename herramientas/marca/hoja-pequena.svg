@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="kk-hoja-p" x1="116" y1="12" x2="14" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E4FA72"/>
+      <stop offset=".46" stop-color="#9DE24F"/>
+      <stop offset="1" stop-color="#2FAB6B"/>
+    </linearGradient>
+  </defs>
+  <path d="M116 11C122 52 112 88 85 104C68 114 45 114 31 106L9 119L23 98C11 74 17 42 42 26C64 12 93 7 116 11Z" fill="url(#kk-hoja-p)" stroke="url(#kk-hoja-p)" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M46 88C58 73 71 60 88 43" fill="none" stroke="#123C24" stroke-width="11" stroke-linecap="round"/>
+</svg>
