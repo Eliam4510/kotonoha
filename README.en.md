@@ -93,7 +93,23 @@ The full list, with how each feature was verified, is in [docs/features.md](docs
 
 ## Installation
 
-Requirements: Node.js 22 or later, and Chrome or Edge 120 or later.
+Requirement: Chrome or Edge 120 or later.
+
+### Compiled version
+
+1. Download `kotonoha-<version>-extension.zip` from [Releases](https://github.com/Eliam4510/kotonoha/releases/latest).
+2. Unzip it somewhere permanent. It creates the `kotonoha` folder. The browser derives the extension ID from that path and stores the data under it, so moving the folder means starting from scratch.
+3. Open `chrome://extensions` or `edge://extensions`.
+4. Enable developer mode.
+5. Click "Load unpacked" and choose the `kotonoha` folder.
+
+To update, simply unzip the new version in the same place, over the previous one: the extension detects it and reloads by itself in under a minute, unless it has work in progress. Open tabs warn that they need reloading.
+
+If a copy loaded from another folder is already in use, this one should not be loaded alongside it: both would act on the same pages.
+
+### From source
+
+This also requires Node.js 22 or later.
 
 ```bash
 git clone https://github.com/Eliam4510/kotonoha.git
@@ -111,13 +127,7 @@ npm install
 npm run build
 ```
 
-Then, in the browser:
-
-1. Open `chrome://extensions` or `edge://extensions`.
-2. Enable developer mode.
-3. Click "Load unpacked" and choose the `dist` folder.
-
-After rebuilding, click "Reload" on that same page, because the browser keeps the previous service worker.
+Then load the `dist` folder as in the steps above. After rebuilding, the extension detects the change and reloads by itself. A copy older than version 0.1.1 cannot do this: it needs "Reload" to be clicked once.
 
 ## Getting started
 
@@ -136,6 +146,8 @@ This is optional. Without it, an online video can only be transcribed while it p
 ```bash
 powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 ```
+
+With the compiled version it is downloaded separately, in `kotonoha-<version>-ayudante.zip`. Its `LEEME.txt` file explains the installation, where the extension ID must be given with `-Extension`.
 
 ## Main shortcuts
 
@@ -194,6 +206,12 @@ npm test
 ```bash
 npm run typecheck
 ```
+
+```bash
+npm run paquete
+```
+
+The last one builds and leaves the extension and helper ZIP files in `release/`, with their SHA-256 sums, ready to publish.
 
 | Test | What it checks |
 |---|---|

@@ -3,6 +3,7 @@ import { build, context } from 'esbuild';
 import { copyFile, cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { generarIconos } from './herramientas/iconos.mjs';
+import { escribirLicencias } from './herramientas/licencias.mjs';
 import { manifiesto } from './manifiesto.mjs';
 
 const vigilar = process.argv.includes('--watch');
@@ -84,6 +85,8 @@ async function estaticos() {
   for (const archivo of await readdir('node_modules/kuromoji/dict')) {
     await copyFile(join('node_modules/kuromoji/dict', archivo), join(SALIDA, 'dict', archivo));
   }
+
+  escribirLicencias(SALIDA);
 }
 
 generarIconos();

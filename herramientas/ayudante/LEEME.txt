@@ -1,0 +1,58 @@
+Ayudante local de Kotonoha
+==========================
+
+Permite transcribir un video de internet entero sin reproducirlo. Descarga el audio
+con yt-dlp y FFmpeg en una carpeta temporal, que se borra al terminar o al cancelar.
+Solo la extensión puede llamarlo, y solo acepta direcciones http o https.
+
+Debe usarse únicamente con contenido que se tenga derecho a descargar, respetando
+las condiciones de cada sitio.
+
+Requisitos: Windows, Python 3 y FFmpeg. El instalador añade yt-dlp si falta.
+FFmpeg se instala con:  winget install Gyan.FFmpeg
+
+Instalación
+-----------
+1. Descomprimir esta carpeta en un sitio definitivo: el navegador la usa cada vez.
+2. Abrir chrome://extensions o edge://extensions y copiar el identificador de Kotonoha.
+3. Ejecutar, desde esta carpeta:
+
+   powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension IDENTIFICADOR
+
+4. Recargar la extensión. El estado se comprueba en Ajustes, Transcripción.
+
+El instalador añade una clave por usuario en HKCU, sin permisos de administrador.
+
+Desinstalación
+--------------
+   powershell -ExecutionPolicy Bypass -File instalar.ps1 -Quitar
+
+
+Kotonoha local helper
+=====================
+
+Lets a whole online video be transcribed without playing it. It downloads the audio
+with yt-dlp and FFmpeg to a temporary folder, which is deleted when it finishes or is
+cancelled. Only the extension can call it, and it only accepts http or https addresses.
+
+It should only be used with content the user has the right to download, in accordance
+with each site's terms.
+
+Requirements: Windows, Python 3 and FFmpeg. The installer adds yt-dlp if it is missing.
+FFmpeg can be installed with:  winget install Gyan.FFmpeg
+
+Installation
+------------
+1. Unzip this folder somewhere permanent: the browser uses it every time.
+2. Open chrome://extensions or edge://extensions and copy the Kotonoha ID.
+3. Run, from this folder:
+
+   powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
+
+4. Reload the extension. The status can be checked in Settings, Transcription.
+
+The installer adds a per-user key in HKCU, without administrator rights.
+
+Uninstalling
+------------
+   powershell -ExecutionPolicy Bypass -File instalar.ps1 -Quitar
