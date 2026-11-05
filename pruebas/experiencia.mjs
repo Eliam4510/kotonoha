@@ -281,6 +281,19 @@ if (quiere('raton')) {
   await p.mouse.move(w.x + 3, w.y);
   await p.waitForTimeout(450);
   comprobar(!(await hayFicha()), 'Tras cerrarla con Esc, un temblor de la mano no la reabre');
+
+  // Un clic rápido, antes de que se abra sola, la deja fijada: alejarse no la cierra.
+  await p.mouse.move(100, 850);
+  await p.waitForTimeout(350);
+  await p.mouse.move(w.x, w.y);
+  await p.mouse.down();
+  await p.mouse.up();
+  await p.waitForTimeout(350);
+  await p.mouse.move(100, 850, { steps: 3 });
+  await p.waitForTimeout(600);
+  comprobar(await hayFicha(), 'Un clic rápido deja la ficha fijada aunque el ratón se vaya');
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(200);
   await p.mouse.move(100, 850);
   await p.waitForTimeout(350);
 }
