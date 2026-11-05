@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="kk-hoja" x1="116" y1="12" x2="14" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E4FA72"/>
+      <stop offset=".46" stop-color="#9DE24F"/>
+      <stop offset="1" stop-color="#2FAB6B"/>
+    </linearGradient>
+    <linearGradient id="kk-brillo" x1="46" y1="16" x2="66" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity=".62"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M114 14C120 53 110 86 84 102C68 112 46 112 32 104L12 116L25 97C13 74 19 44 43 28C64 15 92 10 114 14Z" fill="url(#kk-hoja)" stroke="url(#kk-hoja)" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M111 15C90 11 63 17 44 29C29 39 21 56 21 72C30 50 50 33 76 25C88 21 100 18 111 15Z" fill="url(#kk-brillo)"/>
+  <g fill="none" stroke="#123C24" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M64.5 31.5l3.6 6.2"/>
+    <path d="M45 46.5H88"/>
+    <path d="M53 57H80"/>
+    <path d="M53 67.5H80"/>
+    <rect x="53" y="78" width="27" height="15.5" rx="4"/>
+  </g>
+</svg>

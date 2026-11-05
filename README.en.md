@@ -1,0 +1,224 @@
+<p align="center">
+  <img src="docs/img/banner.en.png" alt="Kotonoha: interactive subtitles, a dictionary, flashcards and explanations from Claude for learning Japanese" width="100%">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Chrome%20%C2%B7%20Edge-Manifest%20V3-A9E45B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome and Edge, Manifest V3">
+  <img src="https://img.shields.io/badge/TypeScript-Preact-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=101218" alt="TypeScript and Preact">
+  <img src="https://img.shields.io/badge/Claude-Sonnet%20%C2%B7%20Opus-BCA9FF?style=for-the-badge&logo=claude&logoColor=white&labelColor=101218" alt="Claude API">
+  <img src="https://img.shields.io/badge/Whisper-WebGPU-8FCBFF?style=for-the-badge&labelColor=101218" alt="Whisper on WebGPU">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-A9E45B?style=for-the-badge&labelColor=101218" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-3987e5?style=flat-square" alt="Español"></a>
+  <a href="README.en.md"><img src="https://img.shields.io/badge/English-A9E45B?style=flat-square" alt="English"></a>
+  <img src="https://img.shields.io/badge/version-0.1.0-A9E45B?style=flat-square" alt="Version 0.1.0">
+  <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
+  <img src="https://img.shields.io/badge/unit%20tests-134-0ca30c?style=flat-square" alt="134 unit tests">
+  <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 to N1">
+</p>
+
+<p align="center">
+  <b>A browser extension for learning Japanese from real video and text.</b>
+</p>
+
+<p align="center">
+  <a href="#installation">Installation</a> ·
+  <a href="docs/guide.md">User guide</a> ·
+  <a href="docs/features.md">Features</a> ·
+  <a href="docs/architecture.md">Architecture</a> ·
+  <a href="AVISOS.md#english">Notices</a>
+</p>
+
+<p align="center">
+  <img src="docs/img/demo.gif" alt="A tour of Kotonoha's interactive subtitles and word card" width="760">
+</p>
+
+## Overview
+
+Kotonoha (言の葉, "leaves of words") overlays interactive subtitles on YouTube, Netflix and other players. Each word shows its furigana, its pitch accent and how well it is known, and hovering over it gives its meaning in that specific sentence. The extension adds a dictionary, flashcard creation for Anki or a built-in review, and explanations in context generated with the Claude API. It also works on web pages, texts, EPUB books and local video files.
+
+The name comes from the preface of the *Kokin Wakashū* (c. 905): the poetry of Japan has the human heart for its seed, and from it grow countless leaves of words.
+
+The interface is currently in Spanish. Claude's explanations can be requested in Spanish, English or simple Japanese, and subtitles can be translated into Spanish, English, Portuguese, French or German.
+
+## Features
+
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/subtitulos.png" alt="Interactive subtitles over a video"></td>
+    <td width="33%" align="center"><img src="docs/img/ficha.png" alt="Word card with the meaning in the sentence"></td>
+    <td width="33%" align="center"><img src="docs/img/navegador.png" alt="Subtitle navigator with corrected lines"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Subtitles made for reading</b><br>Furigana, pitch accent colors, learning status underlines and JLPT grammar points, with an estimated comprehension percentage for each video.</td>
+    <td valign="top"><b>The meaning in that sentence</b><br>Claude receives the full script and gives the word's real meaning, including figurative and literary use. It also reviews furigana readings and stores the result.</td>
+    <td valign="top"><b>Subtitle navigator</b><br>Every line in view, with filters, bookmarks, multiple selection and synchronization with one or two marks. Corrected lines keep their original text.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/traduccion.png" alt="Subtitle translation with Claude in progress"></td>
+    <td width="33%" align="center"><img src="docs/img/pistas.png" alt="Choosing, importing and exporting subtitle tracks"></td>
+    <td width="33%" align="center"><img src="docs/img/transcripcion.png" alt="Whisper transcription settings"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Translation and correction with Claude</b><br>Translation into the support language, starting with the part being watched. Automatic correction of homophones in generated subtitles, using the title and the full text as context, without asking anything.</td>
+    <td valign="top"><b>SRT both ways</b><br>Import and export on any site: SRT, VTT, ASS and TTML. Imported files stay saved for that title, and Japanese subtitles from Netflix are kept even if another region does not offer them.</td>
+    <td valign="top"><b>Local transcription</b><br>Whisper on the graphics card through WebGPU, with audio staying on the computer: 30 minutes of video in about 5, without making the desktop stutter. It works in chunks with rest periods and recovers if the driver restarts.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/inicio.png" alt="Application home screen"></td>
+    <td width="33%" align="center"><img src="docs/img/memoria.png" alt="Built-in flashcard review"></td>
+    <td width="33%" align="center"><img src="docs/img/lector.png" alt="Text reader with furigana and pitch accent"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>A complete application</b><br>Home, a dictionary that understands conjugated forms, a word explorer by status, level assessment, per-task settings and editable prompts. Light and dark themes.</td>
+    <td valign="top"><b>One-click flashcards</b><br>With the audio and frame from the video, straight to Anki through AnkiConnect or to the built-in FSRS review.</td>
+    <td valign="top"><b>Beyond video</b><br>Lookup with <code>Shift</code> on any page without modifying its content, a text reader, an EPUB library, stories matched to the user's level and a local file player with MKV subtitles.</td>
+  </tr>
+</table>
+
+The full list, with how each feature was verified, is in [docs/features.md](docs/features.md).
+
+## Installation
+
+Requirements: Node.js 22 or later, and Chrome or Edge 120 or later.
+
+```bash
+git clone https://github.com/Eliam4510/kotonoha.git
+```
+
+```bash
+cd kotonoha
+```
+
+```bash
+npm install
+```
+
+```bash
+npm run build
+```
+
+Then, in the browser:
+
+1. Open `chrome://extensions` or `edge://extensions`.
+2. Enable developer mode.
+3. Click "Load unpacked" and choose the `dist` folder.
+
+After rebuilding, click "Reload" on that same page, because the browser keeps the previous service worker.
+
+## Getting started
+
+Under **Ajustes** (Settings), in the extension window (`Alt+Shift+W`):
+
+1. Install the dictionaries: JMdict in Spanish and English, pitch accent and frequency.
+2. Add a Claude API key, which is stored only in the browser. This is optional: subtitles, the dictionary, flashcards and Whisper work without it.
+3. Connect to Anki, if used, through the AnkiConnect add-on.
+
+With that, opening a video with Japanese subtitles brings up the Kotonoha bar. The [user guide](docs/guide.md) explains the rest.
+
+### Helper for transcribing online videos
+
+This is optional. Without it, an online video can only be transcribed while it plays. With it, the whole video is transcribed without playing it. It is a local program using [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg that only the extension can call. It requires Python and FFmpeg on Windows, and it is never used on Netflix.
+
+```bash
+powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
+```
+
+## Main shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Q` | Create a card in one click |
+| `E` | Send to the card creator |
+| `N` | Go to the next unknown word |
+| `1` to `4` | Mark the word: unknown, tracked, known, ignored |
+| `A`, `D` | Previous and next sentence |
+| `S` | Repeat the sentence |
+| `G` | Subtitle navigator |
+| `Alt+R` | Allow audio capture |
+| `Shift` + pointer | Look up a word on any page |
+
+## Transcription performance
+
+Measured with a Radeon RX 9060 XT 16 GB, 16 GB of RAM, a 4K 60 Hz monitor and real videos.
+
+| Measure | Result |
+|---|---|
+| Speed in automatic mode | 30 minutes of video in about 5 minutes, 6.1 to 6.4 times real time |
+| Character error rate, on 126 real sentences | 8.8 % |
+| Two hours of audio in a row | 19.7 minutes, with no driver restarts and no memory growth |
+| Desktop smoothness during transcription | 99th percentile of 17.5 ms, no frames over 33 ms |
+| 1080p video during transcription | 0 dropped frames out of 749 |
+
+The full tables, including the accuracy comparison between models, are in [docs/architecture.md](docs/architecture.md#reference-measurements).
+
+## Architecture
+
+```mermaid
+flowchart LR
+  P["Adapters<br/>YouTube, Netflix, generic"] <--> C["Interface on the video<br/>Shadow DOM"]
+  C <--> M["Offscreen engine<br/>tokenizer, dictionaries,<br/>IndexedDB, Whisper"]
+  A["Application window"] <--> M
+  M --> G["GPU<br/>WebGPU"]
+  M --> CL["Claude API"]
+  M --> AN["Anki"]
+  S["Service worker"] <--> M
+  S <-->|Native Messaging| H["Local helper<br/>yt-dlp and FFmpeg"]
+```
+
+The details of each part and of the technical decisions are in [docs/architecture.md](docs/architecture.md).
+
+## Development
+
+```bash
+npm run dev
+```
+
+```bash
+npm test
+```
+
+```bash
+npm run typecheck
+```
+
+| Test | What it checks |
+|---|---|
+| `npm test` | The pure logic in `src/nucleo` |
+| `node pruebas/e2e.mjs` | The extension end to end in Edge |
+| `node pruebas/subtitulos.mjs` | Translating, correcting, exporting and importing, on pages imitating Netflix and YouTube with a simulated Claude API |
+| `node pruebas/capturas.mjs` | Goes through every screen and saves screenshots |
+| `node pruebas/tarjetas.mjs audio.wav` | Simulated Anki, memory and recording |
+| `node pruebas/medios.mjs audio.wav` | ffmpeg.wasm with a multi-track MKV |
+| `node pruebas/ayudante.mjs video.mp4` | The local helper, downloading from the same computer |
+| `node pruebas/ayudante-navegador.mjs video.mp4` | The helper's whole path, from the panel to Whisper on the GPU |
+| `node pruebas/whisper-comparar.mjs corpus` | Model accuracy on real sentences |
+| `node pruebas/whisper-carga.mjs video.mp4 pruebas/sonda-escritorio.ps1 turbo 0.75 9999` | Real speed and desktop smoothness |
+| `node pruebas/whisper-larga.mjs turbo 120 60 audio.pcm` | Two hours in a row, to detect degradation |
+| `node pruebas/whisper-recuperacion.mjs audio.pcm` | GPU loss: wait, continue and stop on a second failure |
+
+Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist-subs node build.mjs`. The test video is generated with `node pruebas/fixtures/generar-video.mjs`. Code, identifiers and comments are in Spanish.
+
+## Project status
+
+Version 0.1.0 is the first published version. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure, and extended validation with real sessions is still pending.
+
+## Privacy
+
+- The Claude API key and all data are stored only in the browser.
+- The audio Whisper transcribes never leaves the computer. Neither does card audio or the video frame, unless sent to Anki.
+- Only the text each task needs is sent to the Claude API: the sentence, the subtitle script and the video title.
+- Word audio and image lookups go directly to JapanesePod101, Wikimedia Commons and Openverse.
+- The extension has no server of its own and collects no usage statistics.
+
+## License and credits
+
+The code is released under the [MIT license](LICENSE). Third-party components, the data downloaded during use and the terms for responsible use are detailed in [AVISOS.md](AVISOS.md#english).
+
+- Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io), in Yomitan format.
+- Transcription: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) with [Transformers.js](https://github.com/huggingface/transformers.js).
+- Icons: [Phosphor](https://phosphoricons.com). Typography: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) and [Nunito](https://fonts.google.com/specimen/Nunito).
+
+An independent project, not affiliated with the services mentioned.

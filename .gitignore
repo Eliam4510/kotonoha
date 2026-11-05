@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.dist-*/
+.perfil-*/
+capturas-e2e/
+*.log
+.env
+
+# Videos de prueba que no son del proyecto
+/*.mp4
+
+# Los genera herramientas/ayudante/instalar.ps1 con las rutas de cada equipo
+herramientas/ayudante/kotonoha_ayudante.bat
+herramientas/ayudante/com.kotonoha.ayudante.json
+
+# Lo crea pruebas/fixtures/generar-video.mjs
+pruebas/fixtures/*.webm

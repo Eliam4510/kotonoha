@@ -1,0 +1,311 @@
+/* ==========================================================================
+   Kotonoha: sistema de diseño
+   Neutros de tinta verdosa (oscuro) o papel washi (claro). Un solo acento, el verde joven
+   de la hoja del logo. El glicina se reserva a lo que hace Claude. Los colores de estado y
+   de acento tonal solo aparecen cuando significan algo.
+   ========================================================================== */
+:host, .kk-raiz {
+  color-scheme: dark;
+
+  /* Superficies, de más profunda a más elevada */
+  --fondo: #0D1210;
+  --superficie: #151B18;
+  --superficie-2: #1C2420;
+  --superficie-3: #27312C;
+  --superficie-4: #333F39;
+  --vidrio: rgba(16, 21, 18, 0.76);
+  --vidrio-denso: rgba(19, 25, 22, 0.94);
+  --borde: rgba(226, 240, 226, 0.08);
+  --borde-2: rgba(226, 240, 226, 0.15);
+
+  /* Texto */
+  --texto: #F2F5EE;
+  --texto-2: #B5BFB5;
+  --texto-3: #828E85;
+
+  /* Marca: wakaba, el verde de la hoja joven */
+  --hoja: #A9E45B;
+  --hoja-2: #6FCB5F;
+  --hoja-tinta: #12300F;
+  --hoja-suave: rgba(169, 228, 91, 0.13);
+  --hoja-media: rgba(169, 228, 91, 0.24);
+  --caramelo: linear-gradient(180deg, #CDF372 0%, #93DF56 100%);
+  --caramelo-relieve: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 0 rgba(36, 110, 40, 0.26), 0 6px 18px rgba(130, 215, 80, 0.24);
+
+  /* Claude: fuji, el glicina */
+  --fuji: #BCA9FF;
+  --fuji-tinta: #241A4D;
+  --fuji-suave: rgba(188, 169, 255, 0.11);
+  --fuji-media: rgba(188, 169, 255, 0.22);
+
+  /* Estado de una palabra */
+  --est-desconocida: #FF9166;
+  --est-aprendiendo: #F7CB52;
+  --est-conocida: #93DF56;
+  --est-ignorada: #828E85;
+  --est-rastreada: #BCA9FF;
+
+  /* Acento tonal, en el color del texto japonés */
+  --ac-heiban: #8FCBFF;
+  --ac-atamadaka: #FF9393;
+  --ac-nakadaka: #D6ABFF;
+  --ac-odaka: #7FE6B3;
+
+  /* Semánticos */
+  --error: #FF8078;
+  --error-suave: rgba(255, 128, 120, 0.13);
+  --exito: #93DF56;
+  --aviso: #F7CB52;
+  --info: #8FCBFF;
+
+  /* Formas. --r-hoja es la silueta de la marca: dos esquinas vivas y dos muy redondas. */
+  --r-1: 8px;
+  --r-2: 12px;
+  --r-3: 16px;
+  --r-4: 22px;
+  --r-5: 30px;
+  --r-pill: 999px;
+  --r-hoja: 6px 22px 6px 22px;
+
+  /* Elevación */
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sombra-2: 0 8px 24px rgba(0, 0, 0, 0.34);
+  --sombra-3: 0 24px 64px rgba(0, 0, 0, 0.52), 0 2px 10px rgba(0, 0, 0, 0.3);
+  --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --brillo-2: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+
+  /* Movimiento */
+  --resorte: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --salida: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Tipografía */
+  --letra: 'Kotonoha Latin', 'Kotonoha JP', 'Hiragino Maru Gothic ProN', 'Yu Gothic UI', Meiryo, 'Segoe UI', system-ui, sans-serif;
+  --letra-ja: 'Kotonoha JP', 'Hiragino Maru Gothic ProN', 'Yu Gothic UI', Meiryo, sans-serif;
+
+  /* Alias de la versión anterior: se eliminan al terminar el rediseño de cada pantalla. */
+  --panel: var(--superficie);
+  --panel-2: var(--superficie-2);
+  --panel-3: var(--superficie-3);
+  --suave: var(--texto-2);
+  --tenue: var(--texto-3);
+  --acento: var(--hoja);
+  --acento-2: var(--hoja-2);
+  --uva: var(--fuji);
+  --menta: var(--hoja);
+  --limon: var(--est-aprendiendo);
+  --cielo: var(--info);
+  --degradado: var(--caramelo);
+  --relieve-dulce: var(--caramelo-relieve);
+  --relieve: var(--brillo-2);
+  --sombra: var(--sombra-3);
+
+  font-family: var(--letra);
+  color: var(--texto);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+}
+
+.kk-raiz[data-tema='claro'] {
+  color-scheme: light;
+
+  --fondo: #F5F2E9;
+  --superficie: #FFFEFA;
+  --superficie-2: #F4F1E7;
+  --superficie-3: #E9E5D8;
+  --superficie-4: #DCD7C6;
+  --vidrio: rgba(255, 254, 250, 0.8);
+  --vidrio-denso: rgba(255, 254, 250, 0.96);
+  --borde: rgba(46, 56, 34, 0.09);
+  --borde-2: rgba(46, 56, 34, 0.18);
+
+  --texto: #1B2217;
+  --texto-2: #525C4C;
+  --texto-3: #848D7C;
+
+  --hoja: #4C9A1F;
+  --hoja-2: #2F8F4D;
+  --hoja-suave: rgba(92, 170, 40, 0.11);
+  --hoja-media: rgba(92, 170, 40, 0.2);
+  --caramelo-relieve: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -2px 0 rgba(36, 110, 40, 0.22), 0 6px 16px rgba(96, 170, 50, 0.26);
+
+  --fuji: #6E52D9;
+  --fuji-tinta: #FFFFFF;
+  --fuji-suave: rgba(110, 82, 217, 0.08);
+  --fuji-media: rgba(110, 82, 217, 0.16);
+
+  --est-desconocida: #E8622E;
+  --est-aprendiendo: #C99400;
+  --est-conocida: #4C9A1F;
+  --est-ignorada: #848D7C;
+  --est-rastreada: #6E52D9;
+
+  --ac-heiban: #1B74CC;
+  --ac-atamadaka: #D5383A;
+  --ac-nakadaka: #8847CC;
+  --ac-odaka: #129360;
+
+  --error: #CF3B32;
+  --error-suave: rgba(207, 59, 50, 0.09);
+  --exito: #4C9A1F;
+  --aviso: #C99400;
+  --info: #1B74CC;
+
+  --sombra-1: 0 1px 2px rgba(70, 60, 30, 0.08);
+  --sombra-2: 0 8px 24px rgba(70, 60, 30, 0.1);
+  --sombra-3: 0 24px 64px rgba(70, 60, 30, 0.16), 0 2px 10px rgba(70, 60, 30, 0.08);
+  --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --brillo-2: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; padding: 0; }
+button:disabled { opacity: 0.42; cursor: not-allowed; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--hoja); outline-offset: 2px; }
+input, select, textarea { font: inherit; color: var(--texto); }
+a { color: var(--hoja); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { margin: 0; line-height: 1.2; font-weight: 800; letter-spacing: -0.012em; }
+p { margin: 0; }
+small { font-size: 0.84em; }
+::selection { background: var(--hoja-media); }
+[lang='ja'] { font-family: var(--letra-ja); }
+.num { font-variant-numeric: tabular-nums; }
+.ico { display: block; flex: none; }
+.ico .d { opacity: var(--ico-opacidad, 0.24); fill: var(--ico-capa, currentColor); }
+.logo { display: block; flex: none; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--superficie-4) transparent; }
+
+/* Marca */
+.marca { display: inline-flex; align-items: center; gap: 0.42em; line-height: 1; }
+.marca-nombre { font-weight: 900; letter-spacing: -0.024em; }
+.marca-kanji { font-size: 0.48em; font-weight: 700; letter-spacing: 0.12em; color: var(--texto-3); }
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 38px; padding: 0 16px; border-radius: var(--r-pill);
+  font-size: 13.5px; font-weight: 700; white-space: nowrap;
+  background: var(--superficie-3); color: var(--texto); box-shadow: var(--brillo-2);
+  transition: transform 0.18s var(--resorte), background 0.15s, filter 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.btn:hover:not(:disabled) { background: var(--superficie-4); }
+.btn:active:not(:disabled) { transform: scale(0.965); }
+.btn.primario { background: var(--caramelo); color: var(--hoja-tinta); font-weight: 800; box-shadow: var(--caramelo-relieve); --ico-opacidad: 0.3; }
+.btn.primario:hover:not(:disabled) { background: var(--caramelo); filter: brightness(1.05); transform: translateY(-1px); }
+.btn.primario:active:not(:disabled) { transform: scale(0.965); }
+.btn.ia { background: var(--fuji-suave); color: var(--fuji); box-shadow: inset 0 0 0 1px var(--fuji-media); }
+.btn.ia:hover:not(:disabled) { background: var(--fuji-media); }
+.btn.fantasma { background: transparent; box-shadow: none; color: var(--texto-2); }
+.btn.fantasma:hover:not(:disabled) { background: var(--superficie-3); color: var(--texto); }
+.btn.peligro { background: var(--error-suave); color: var(--error); box-shadow: none; }
+.btn.peligro:hover:not(:disabled) { background: var(--error); color: #fff; }
+.btn.chico { height: 30px; padding: 0 12px; font-size: 12.5px; gap: 6px; }
+.btn.grande { height: 48px; padding: 0 26px; font-size: 15px; gap: 10px; }
+.btn.bloque { display: flex; width: 100%; }
+
+.btn-icono {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 36px; height: 36px; border-radius: 50%; color: var(--texto-2);
+  transition: transform 0.18s var(--resorte), background 0.15s, color 0.15s;
+}
+.btn-icono:hover:not(:disabled) { background: var(--superficie-3); color: var(--texto); }
+.btn-icono:active:not(:disabled) { transform: scale(0.9); }
+.btn-icono.activo { background: var(--hoja-suave); color: var(--hoja); --ico-opacidad: 0.4; }
+.btn-icono.relleno { background: var(--superficie-3); color: var(--texto); box-shadow: var(--brillo-2); }
+.btn-icono.relleno:hover:not(:disabled) { background: var(--superficie-4); }
+.btn-icono.primario { background: var(--caramelo); color: var(--hoja-tinta); box-shadow: var(--caramelo-relieve); --ico-opacidad: 0.3; }
+.btn-icono.primario:hover:not(:disabled) { background: var(--caramelo); filter: brightness(1.05); }
+.btn-icono.ia { color: var(--fuji); }
+.btn-icono.ia:hover:not(:disabled), .btn-icono.ia.activo { background: var(--fuji-suave); color: var(--fuji); }
+.btn-icono.chico { width: 30px; height: 30px; }
+.btn-icono.grande { width: 44px; height: 44px; }
+
+/* ---------- Formularios ---------- */
+.interruptor { position: relative; flex: none; width: 42px; height: 24px; border-radius: var(--r-pill); background: var(--superficie-4); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28); transition: background 0.2s; }
+.interruptor::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(180deg, #fff, #E9EEE4); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); transition: transform 0.22s var(--resorte); }
+.interruptor.on { background: var(--caramelo); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+.interruptor.on::after { transform: translateX(18px); }
+
+.campo {
+  width: 100%; min-height: 40px; padding: 8px 14px; border-radius: var(--r-3);
+  background: var(--superficie-2); border: 1px solid var(--borde); box-shadow: var(--brillo);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.campo:hover { border-color: var(--borde-2); }
+.campo:focus { outline: none; border-color: var(--hoja); box-shadow: 0 0 0 3px var(--hoja-suave); }
+.campo::placeholder { color: var(--texto-3); }
+textarea.campo { resize: vertical; min-height: 76px; line-height: 1.55; }
+
+.selector {
+  appearance: none; height: 36px; min-width: 0; padding: 0 32px 0 14px; border-radius: var(--r-pill); border: none;
+  font-weight: 700; font-size: 13px; color: var(--texto); background-color: var(--superficie-3);
+  background-image: linear-gradient(45deg, transparent 50%, var(--texto-2) 50%), linear-gradient(135deg, var(--texto-2) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 54%, calc(100% - 13px) 54%; background-size: 5px 5px; background-repeat: no-repeat;
+  box-shadow: var(--brillo-2); cursor: pointer; transition: background-color 0.15s;
+}
+.selector:hover { background-color: var(--superficie-4); }
+.selector option { background: var(--superficie-2); color: var(--texto); }
+
+.segmentado { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--r-pill); background: var(--superficie-2); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.16), inset 0 0 0 1px var(--borde); }
+.segmentado button { height: 30px; padding: 0 14px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 700; color: var(--texto-2); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: background 0.18s, color 0.18s; }
+.segmentado button:hover:not(.activo):not(:disabled) { color: var(--texto); }
+.segmentado button.activo { background: var(--superficie-4); color: var(--texto); box-shadow: var(--brillo-2), var(--sombra-1); }
+.segmentado.acento button.activo { background: var(--caramelo); color: var(--hoja-tinta); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55); }
+
+/* ---------- Piezas ---------- */
+.fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; }
+.fila > .etq { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.ayuda { color: var(--texto-3); font-size: 12.5px; line-height: 1.45; }
+.titulo-seccion { color: var(--texto-3); font-size: 11.5px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; margin: 18px 0 8px; }
+.separador { border: 0; border-top: 1px solid var(--borde); margin: 14px 0; }
+.tecla { display: inline-block; min-width: 22px; padding: 0 6px; text-align: center; border-radius: 7px; font-size: 11px; font-weight: 800; line-height: 20px; color: var(--texto-2); background: var(--superficie-3); box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.22), var(--brillo-2); white-space: nowrap; font-family: var(--letra); }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 700; color: var(--texto-2); background: var(--superficie-3); white-space: nowrap; transition: background 0.15s, color 0.15s; }
+button.chip:hover, a.chip:hover { background: var(--superficie-4); color: var(--texto); text-decoration: none; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-4); padding: 20px; box-shadow: var(--brillo), var(--sombra-1); }
+/* Tejuela con la silueta de hoja, el gesto propio de la marca para iconos destacados. */
+.hoja-icono { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; border-radius: var(--r-hoja); background: var(--hoja-suave); color: var(--hoja); --ico-opacidad: 0.34; }
+.hoja-icono.ia { background: var(--fuji-suave); color: var(--fuji); }
+.hoja-icono.chica { width: 32px; height: 32px; border-radius: 4px 15px 4px 15px; }
+.vacio { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px 24px; text-align: center; color: var(--texto-2); }
+.vacio h3 { font-size: 17px; color: var(--texto); }
+.vacio p { max-width: 42ch; font-size: 13.5px; }
+.barra-progreso { height: 8px; border-radius: var(--r-pill); background: var(--superficie-3); overflow: hidden; }
+.barra-progreso > div { height: 100%; border-radius: var(--r-pill); background: var(--caramelo); transition: width 0.4s var(--salida); }
+
+/* Texto que se está generando o cargando */
+.esqueleto { display: block; height: 0.85em; margin: 0.45em 0; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--superficie-3) 25%, var(--superficie-4) 50%, var(--superficie-3) 75%); background-size: 200% 100%; animation: kk-reflejo 1.5s linear infinite; }
+@keyframes kk-reflejo { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* Información sobre herramientas: <button data-tip="Texto"> y data-tip-lado="arriba|abajo|izq|der". */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip); position: absolute; z-index: 60; left: 50%; top: calc(100% + 8px);
+  padding: 5px 10px; border-radius: 10px; background: #050806; color: #F2F5EE; box-shadow: var(--sombra-2);
+  font: 700 12px/1.3 var(--letra); letter-spacing: 0; white-space: nowrap; pointer-events: none;
+  opacity: 0; transform: translate(-50%, -3px); transition: opacity 0.12s, transform 0.12s;
+}
+[data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0); transition-delay: 0.32s; }
+[data-tip-lado='arriba']::after { top: auto; bottom: calc(100% + 8px); }
+[data-tip-lado='der']::after { left: calc(100% + 10px); top: 50%; transform: translate(-3px, -50%); }
+[data-tip-lado='der']:hover::after, [data-tip-lado='der']:focus-visible::after { transform: translate(0, -50%); }
+[data-tip-lado='izq']::after { left: auto; right: calc(100% + 10px); top: 50%; transform: translate(3px, -50%); }
+[data-tip-lado='izq']:hover::after, [data-tip-lado='izq']:focus-visible::after { transform: translate(0, -50%); }
+
+/* Entradas */
+@keyframes kk-aparecer { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
+@keyframes kk-fundido { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Un botón principal deshabilitado pierde el caramelo: el verde apagado parece sucio. */
+.btn.primario:disabled, .btn-icono.primario:disabled { background: var(--superficie-3); color: var(--texto-3); box-shadow: none; opacity: 0.8; }
+/* En papel, los textos secundarios y el verde necesitan más cuerpo para cumplir AA. */
+.kk-raiz[data-tema='claro'] { --texto-3: #6A7363; --hoja: #3E8417; }
