@@ -6,6 +6,7 @@
   "description": "Extensión de navegador para aprender japonés con video y texto real: subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude.",
   "scripts": {
     "build": "node build.mjs",
+    "paquete": "node herramientas/empaquetar.mjs",
     "dev": "node build.mjs --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

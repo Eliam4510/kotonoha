@@ -1,5 +1,6 @@
 node_modules/
 dist/
+release/
 .dist-*/
 .perfil-*/
 capturas-e2e/

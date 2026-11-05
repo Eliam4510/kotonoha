@@ -20,13 +20,15 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | Modelo de transcripción, descargado al usarlo | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lectura de archivos propios | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | Núcleo de FFmpeg, copiado al compilar | GPL-2.0-or-later |
-| [lamejs](https://github.com/Breezystack/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
+| [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planificación del repaso | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Lectura de archivos ZIP | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Iconos | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) y [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Tipografía | OFL-1.1 |
 
-Este repositorio no incluye binarios de terceros: se obtienen de npm al instalar. La carpeta `dist` que genera la compilación sí contiene `@ffmpeg/core` y `lamejs`, de modo que quien la distribuya debe respetar la GPL y la LGPL correspondientes.
+El código de este repositorio no incluye binarios de terceros: se obtienen de npm al instalar. La carpeta `dist` y los paquetes compilados de cada versión sí contienen `@ffmpeg/core` y `lamejs`, y llevan en su carpeta `licencias` los textos y avisos de todos los componentes.
+
+El código fuente correspondiente está en [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10), que compila [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) con sus bibliotecas, y en [lamejs](https://github.com/gideonstele/lamejs). Quien redistribuya estos paquetes debe respetar la GPL y la LGPL, lo que incluye ofrecer ese código fuente.
 
 ### Datos descargados al usar la extensión
 
@@ -42,7 +44,7 @@ Ninguno de estos datos forma parte del repositorio. La extensión los descarga b
 
 ### Programas externos
 
-El ayudante local utiliza [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) y [FFmpeg](https://ffmpeg.org) (LGPL o GPL, según la compilación). No se incluyen en este repositorio: se usan los instalados en el equipo.
+El ayudante local utiliza [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) y [FFmpeg](https://ffmpeg.org) (LGPL o GPL, según la compilación). No se incluyen ni en este repositorio ni en sus paquetes: se usan los instalados en el equipo.
 
 ### Uso responsable
 
@@ -75,13 +77,15 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | Transcription model, downloaded on use | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Reading local files | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg core, copied at build time | GPL-2.0-or-later |
-| [lamejs](https://github.com/Breezystack/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |
+| [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Review scheduling | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Reading ZIP files | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Icons | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) and [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Typography | OFL-1.1 |
 
-This repository contains no third-party binaries: they come from npm on install. The `dist` folder produced by the build does contain `@ffmpeg/core` and `lamejs`, so anyone distributing it must comply with the corresponding GPL and LGPL.
+The code in this repository contains no third-party binaries: they come from npm on install. The `dist` folder and the compiled packages of each version do contain `@ffmpeg/core` and `lamejs`, and carry the texts and notices of every component in their `licencias` folder.
+
+The corresponding source code is at [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10), which builds [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) with its libraries, and at [lamejs](https://github.com/gideonstele/lamejs). Anyone redistributing these packages must comply with the GPL and LGPL, which includes offering that source code.
 
 ### Data downloaded while using the extension
 
@@ -97,7 +101,7 @@ None of this data is part of the repository. The extension downloads it on deman
 
 ### External programs
 
-The local helper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) and [FFmpeg](https://ffmpeg.org) (LGPL or GPL, depending on the build). They are not included in this repository: the ones installed on the computer are used.
+The local helper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) and [FFmpeg](https://ffmpeg.org) (LGPL or GPL, depending on the build). They are included neither in this repository nor in its packages: the ones installed on the computer are used.
 
 ### Responsible use
 

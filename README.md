@@ -91,7 +91,23 @@ La lista completa, con la forma en que se verificó cada función, está en [doc
 
 ## Instalación
 
-Requisitos: Node.js 22 o posterior, y Chrome o Edge 120 o posterior.
+Requisito: Chrome o Edge 120 o posterior.
+
+### Versión compilada
+
+1. Descargar `kotonoha-<versión>-extension.zip` desde [Releases](https://github.com/Eliam4510/kotonoha/releases/latest).
+2. Descomprimirlo en un sitio definitivo. Crea la carpeta `kotonoha`. El navegador deriva de esa ruta el identificador de la extensión, y con él guarda los datos: cambiarla de sitio equivale a empezar de cero.
+3. Abrir `chrome://extensions` o `edge://extensions`.
+4. Activar el modo de desarrollador.
+5. Pulsar «Cargar descomprimida» y elegir la carpeta `kotonoha`.
+
+Para actualizar, basta con descomprimir la versión nueva en el mismo sitio, encima de la anterior: la extensión lo detecta y se recarga sola en menos de un minuto, salvo que tenga un trabajo en marcha. Las pestañas abiertas avisan de que hay que recargarlas.
+
+Si ya se usa una copia cargada desde otra carpeta, no conviene cargar esta a la vez: las dos actuarían sobre las mismas páginas.
+
+### Desde el código
+
+Requiere además Node.js 22 o posterior.
 
 ```bash
 git clone https://github.com/Eliam4510/kotonoha.git
@@ -109,13 +125,7 @@ npm install
 npm run build
 ```
 
-Después, en el navegador:
-
-1. Abrir `chrome://extensions` o `edge://extensions`.
-2. Activar el modo de desarrollador.
-3. Pulsar «Cargar descomprimida» y elegir la carpeta `dist`.
-
-Tras volver a compilar hay que pulsar «Recargar» en esa misma página, porque el navegador conserva el service worker anterior.
+Después se carga la carpeta `dist` igual que en los pasos anteriores. Al volver a compilar, la extensión detecta el cambio y se recarga sola. Una copia anterior a la versión 0.1.1 no sabe hacerlo: necesita que se pulse «Recargar» una vez.
 
 ## Primeros pasos
 
@@ -134,6 +144,8 @@ Es opcional. Sin él, un video de internet solo puede transcribirse mientras se 
 ```bash
 powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 ```
+
+Con la versión compilada se descarga aparte, en `kotonoha-<versión>-ayudante.zip`. Su archivo `LEEME.txt` explica la instalación, en la que hay que indicar el identificador de la extensión con `-Extension`.
 
 ## Atajos principales
 
@@ -192,6 +204,12 @@ npm test
 ```bash
 npm run typecheck
 ```
+
+```bash
+npm run paquete
+```
+
+El último compila y deja en `release/` los ZIP de la extensión y del ayudante, con sus sumas SHA-256, listos para publicar.
 
 | Prueba | Qué comprueba |
 |---|---|
