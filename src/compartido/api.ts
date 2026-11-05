@@ -98,6 +98,8 @@ export interface ApiMotor {
   empezarClip(): Promise<void>;
   terminarClip(): Promise<{ datos: string; tipo: string } | null>;
   whisperMarca(ms: number, reproduciendo: boolean, velocidad: number, salto: boolean): Promise<void>;
+  /** Trabajos largos en marcha: mientras haya alguno, la extensión no se recarga sola. */
+  flujosActivos(): Promise<number>;
   /** Null si el ayudante local no está instalado. */
   ayudante(): Promise<InfoAyudante | null>;
   whisperDetener(): Promise<void>;
