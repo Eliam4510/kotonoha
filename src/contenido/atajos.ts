@@ -20,7 +20,7 @@ import {
   ajustes,
   avisar,
   consulta,
-  indiceMostrado,
+  indiceVisual,
   lineasObjetivo,
   panel,
   pausado,
@@ -31,8 +31,9 @@ import {
 import { cambiarAjuste, cerrarConsulta, fijarOculto } from './Reproductor';
 import { cancelarUnClic, crearUnClic, enviarACreador } from './tarjetas';
 
+// La que se ve en pantalla, también en el instante en que aguanta entre dos líneas.
 const lineaActual = (): LineaAnalizada | null => {
-  const i = indiceMostrado.value;
+  const i = indiceVisual.value;
   return i >= 0 ? lineasObjetivo.value[i] : null;
 };
 

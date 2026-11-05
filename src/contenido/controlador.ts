@@ -28,7 +28,7 @@ import {
   idObjetivo,
   idSecundaria,
   indiceActivo,
-  indiceMostrado,
+  indiceVisual,
   infoVideo,
   lineaPreparada,
   lineasObjetivo,
@@ -137,7 +137,7 @@ function enlazarVideo(v: HTMLVideoElement) {
 function alPausar() {
   const a = ajustes.value;
   if (!a.autoConsultaAlPausar || consulta.value) return;
-  const i = indiceMostrado.value;
+  const i = indiceVisual.value;
   if (i < 0) return;
   const primera = desconocidas(lineasObjetivo.value[i].palabras)[0];
   if (primera) abrirConsultaDe(primera, lineasObjetivo.value[i]);

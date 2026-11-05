@@ -50,6 +50,7 @@ The cost depends on how much is said. These videos have about 14 lines per minut
 | Explain, break down | USD 0.01 | Estimated from tokens |
 | Translate a sentence | USD 0.002 | Estimated from tokens |
 | Go deeper, with Opus 5.5 | USD 0.06 | Estimated from tokens |
+| Creating a card with a Claude translation and explanation | USD 0.012 | Estimated from tokens. It can be turned off in Settings, Cards and Anki |
 
 ## Per video
 

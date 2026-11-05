@@ -50,6 +50,7 @@ El coste depende de cuánto se hable. Estos videos tienen unas 14 líneas por mi
 | Explicar, desglosar | 0.01 USD | Estimado por tokens |
 | Traducir una frase | 0.002 USD | Estimado por tokens |
 | Profundizar, con Opus 5.5 | 0.06 USD | Estimado por tokens |
+| Crear una tarjeta con traducción y explicación de Claude | 0.012 USD | Estimado por tokens. Se puede desactivar en Ajustes, Tarjetas y Anki |
 
 ## Por video
 

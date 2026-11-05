@@ -420,7 +420,7 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
               lectura={r.lectura}
               ajustes={ajustes}
               contexto={{ frase: frase || undefined }}
-              pestanaInicial={frase ? 'explicar' : 'audio'}
+              pestanaInicial={frase ? 'ninguna' : 'audio'}
               alEnviar={(x) => enviarAlCreador({ palabra: x.lema, lectura: x.lectura, frase, definicion: [...new Set(x.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>') }, false)}
             />
           </div>
