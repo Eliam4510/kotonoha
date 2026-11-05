@@ -4,8 +4,8 @@ import { flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, LineaAnalizada, MedioTarjeta, PalabraToken } from '../compartido/tipos';
 import { aFuriganaAnki, desconocidas, fraseConNegrita } from '../nucleo/frases';
 import { borradorVacio, enviarAlCreador } from '../ui/borrador';
-import { pausar, reproducir, saltar } from './controlador';
-import { ajustes, avisar, capturaActiva, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
+import { actualizarCaptura, empezarGrabacionLinea, pausar, reproducir, saltar, terminarGrabacionLinea } from './controlador';
+import { ajustes, avisar, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
 import type { Control } from './puente';
 
 let control: Control;
@@ -39,11 +39,8 @@ export function contextoDe(frase?: string, l?: LineaAnalizada | null): ContextoI
   return c;
 }
 
-/** Fotograma actual. Con DRM el lienzo sale negro: entonces se captura la pestaña. */
-async function capturarImagen(ocultarOverlay: (v: boolean) => void): Promise<MedioTarjeta | null> {
-  const v = control.video();
-  if (!v) return null;
-  const nombre = `kotonoha_${Date.now()}.jpg`;
+/** El fotograma leído directamente del video, sin tocar la pantalla. No se puede si tiene DRM o viene de otro origen. */
+function fotogramaDeLienzo(v: HTMLVideoElement): string | null {
   try {
     const lienzo = document.createElement('canvas');
     const escala = Math.min(1, 1280 / (v.videoWidth || 1280));
@@ -54,53 +51,72 @@ async function capturarImagen(ocultarOverlay: (v: boolean) => void): Promise<Med
     const muestra = ctx.getImageData(0, 0, lienzo.width, lienzo.height).data;
     let suma = 0;
     for (let i = 0; i < muestra.length; i += 4 * 97) suma += muestra[i] + muestra[i + 1] + muestra[i + 2];
-    if (suma > 0) {
-      return { id: nombre, nombre, tipo: 'image/jpeg', datos: lienzo.toDataURL('image/jpeg', 0.88).split(',')[1] };
-    }
+    if (suma > 0) return lienzo.toDataURL('image/jpeg', 0.88).split(',')[1];
   } catch {
-    // Lienzo contaminado por el origen del video: se usa la captura de pestaña.
+    // Lienzo contaminado por el origen del video: habrá que capturar la pestaña.
   }
+  return null;
+}
+
+/** Deja en pantalla solo el video, sin los controles del reproductor ni nada más del sitio. */
+function mostrarSoloVideo(si: boolean) {
+  const ID = 'kotonoha-solo-video';
+  document.getElementById(ID)?.remove();
+  if (!si) return;
+  const estilo = document.createElement('style');
+  estilo.id = ID;
+  estilo.textContent = '*{visibility:hidden!important}video{visibility:visible!important}';
+  (document.head ?? document.documentElement).appendChild(estilo);
+}
+
+/** Lo que se ve no cambia en la captura hasta que el navegador lo ha pintado. */
+const pintado = () =>
+  new Promise<void>((ok) => {
+    const limite = setTimeout(ok, 250);
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        setTimeout(() => {
+          clearTimeout(limite);
+          ok();
+        }, 40)
+      )
+    );
+  });
+
+// Un sitio con DRM entrega siempre el fotograma en negro. Tras comprobarlo dos veces no se insiste en ese
+// video: la interfaz no parpadea por nada. Una sola vez podría ser una escena a oscuras.
+const NEGRAS_PARA_RENDIRSE = 2;
+let negrasSeguidas = { video: '', veces: 0 };
+const claveVideo = () => infoVideo.value?.idVideo ?? location.href;
+const videoProtegido = () => negrasSeguidas.video === claveVideo() && negrasSeguidas.veces >= NEGRAS_PARA_RENDIRSE;
+
+/** Fotograma actual: del video si se puede, y si no de la pantalla, con el video como única cosa a la vista. */
+async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) => void): Promise<MedioTarjeta | null> {
+  const nombre = `kotonoha_${Date.now()}.jpg`;
+  const propio = fotogramaDeLienzo(v);
+  if (propio) return { id: nombre, nombre, tipo: 'image/jpeg', datos: propio };
+  if (videoProtegido()) return null;
+  ocultarOverlay(true);
+  mostrarSoloVideo(true);
   try {
-    ocultarOverlay(true);
-    await dormir(80);
+    await pintado();
     const url = await fondo.capturaVisible();
     const r = v.getBoundingClientRect();
-    const recorte = await motor.recortarImagen(url, { x: r.left, y: r.top, w: r.width, h: r.height, escala: devicePixelRatio });
-    return { id: nombre, nombre, tipo: 'image/jpeg', datos: recorte.split(',')[1] };
+    const recorte = await motor.recortarImagen(url, { x: r.left, y: r.top, w: r.width, h: r.height, anchoVentana: innerWidth });
+    const clave = claveVideo();
+    if (recorte.negra) {
+      negrasSeguidas = { video: clave, veces: negrasSeguidas.video === clave ? negrasSeguidas.veces + 1 : 1 };
+      avisar('El fotograma salió negro: este sitio lo protege, así que la tarjeta va sin captura del video.', undefined, undefined, 7000);
+      return null;
+    }
+    negrasSeguidas = { video: clave, veces: 0 };
+    return { id: nombre, nombre, tipo: 'image/jpeg', datos: recorte.url.split(',')[1] };
   } catch {
     return null;
   } finally {
+    mostrarSoloVideo(false);
     ocultarOverlay(false);
   }
-}
-
-/** Reproduce la línea en tiempo real mientras graba el audio de la pestaña. */
-async function grabarLinea(l: LineaAnalizada, ocultarOverlay: (v: boolean) => void): Promise<{ audio: MedioTarjeta | null; imagen: MedioTarjeta | null }> {
-  const a = ajustes.value;
-  const v = control.video();
-  if (!v) return { audio: null, imagen: null };
-  const inicio = Math.max(0, l.inicio - a.rellenoInicioMs);
-  const fin = l.fin + a.rellenoFinMs;
-  const estabaPausado = v.paused;
-  const posicion = v.currentTime * 1000;
-
-  await pausar('auto');
-  await saltar(inicio);
-  await esperarSalto(v, inicio);
-  await motor.empezarClip();
-  await reproducir();
-  const duracion = (fin - inicio) / (v.playbackRate || 1);
-  await dormir(duracion / 2);
-  const imagen = await capturarImagen(ocultarOverlay);
-  await dormir(duracion / 2);
-  const clip = await motor.terminarClip();
-  await pausar('auto');
-  if (!estabaPausado) {
-    await saltar(posicion);
-    await reproducir();
-  }
-  const audio = clip ? { id: 'clip', nombre: `kotonoha_${Date.now()}.mp3`, tipo: clip.tipo, datos: clip.datos, etiqueta: 'Video' } : null;
-  return { audio, imagen };
 }
 
 async function esperarSalto(v: HTMLVideoElement, ms: number) {
@@ -109,6 +125,76 @@ async function esperarSalto(v: HTMLVideoElement, ms: number) {
     if (Math.abs(v.currentTime * 1000 - ms) < 500 && !v.seeking && v.readyState >= 3) return;
     await dormir(40);
   }
+}
+
+/** Un reproductor tarda lo suyo en arrancar tras un salto, sobre todo con DRM. Hay que esperar a que avance de verdad. */
+async function esperarAvance(v: HTMLVideoElement, tiempoMs: number): Promise<boolean> {
+  const desde = v.currentTime;
+  const limite = Date.now() + tiempoMs;
+  let reintentado = false;
+  while (Date.now() < limite) {
+    if (!v.paused && v.currentTime > desde + 0.02) return true;
+    if (!reintentado && v.paused && Date.now() > limite - tiempoMs / 2) {
+      reintentado = true;
+      await reproducir();
+    }
+    await dormir(25);
+  }
+  return false;
+}
+
+/** Vuelve a reproducir la línea mientras graba el audio de la pestaña, y deja el video como estaba. */
+async function grabarLinea(l: LineaAnalizada, ocultarOverlay: (v: boolean) => void, conImagen: boolean): Promise<{ audio: MedioTarjeta | null; imagen: MedioTarjeta | null }> {
+  const a = ajustes.value;
+  const v = control.video();
+  if (!v) return { audio: null, imagen: null };
+  const inicio = Math.max(0, l.inicio - a.rellenoInicioMs);
+  const fin = l.fin + a.rellenoFinMs;
+  const estabaPausado = v.paused;
+  const posicion = v.currentTime * 1000;
+  let audio: MedioTarjeta | null = null;
+  let imagen: MedioTarjeta | null = null;
+
+  // Si hará falta capturar la pantalla, la interfaz se va desde el primer momento, no a mitad de la frase.
+  if (conImagen && !fotogramaDeLienzo(v) && !videoProtegido()) ocultarOverlay(true);
+  empezarGrabacionLinea(v);
+  try {
+    await pausar('auto');
+    await saltar(inicio);
+    await esperarSalto(v, inicio);
+    // Lo último que sonó antes de pausar aún viene de camino por la captura: no debe colarse al principio del clip.
+    if (!estabaPausado) await dormir(300);
+    await motor.empezarClip();
+    await reproducir();
+    const arranco = await esperarAvance(v, 6000);
+    let capturando: Promise<MedioTarjeta | null> | null = null;
+    if (arranco) {
+      // Por el reloj del video y no por el de la pared: un arranque lento o una pausa de carga no recortan la frase.
+      const mitad = (inicio + fin) / 2;
+      const limite = Date.now() + (fin - inicio) * 3 + 5000;
+      while (v.currentTime * 1000 < fin && !v.ended && Date.now() < limite) {
+        if (conImagen && !capturando && v.currentTime * 1000 >= mitad) capturando = capturarImagen(v, ocultarOverlay);
+        await dormir(20);
+      }
+    }
+    const clip = await motor.terminarClip();
+    if (!arranco) {
+      avisar('El video no arrancó para grabar la frase: la tarjeta va sin audio.', 'error', undefined, 7000);
+    } else if (clip && 'mudo' in clip) {
+      avisar('La grabación salió muda: comprueba que el video tenga sonido y pulsa Alt+R en esta pestaña.', 'error', undefined, 9000);
+    } else if (clip) {
+      audio = { id: 'clip', nombre: `kotonoha_${Date.now()}.mp3`, tipo: clip.tipo, datos: clip.datos, etiqueta: 'Video' };
+    }
+    if (capturando) imagen = await capturando;
+  } finally {
+    ocultarOverlay(false);
+    await pausar('auto');
+    await saltar(posicion);
+    await esperarSalto(v, posicion);
+    if (!estabaPausado) await reproducir();
+    terminarGrabacionLinea(v);
+  }
+  return { audio, imagen };
 }
 
 function secundariaDe(l: LineaAnalizada): string {
@@ -182,14 +268,20 @@ export async function construirBorrador(p: PalabraToken | null, l: LineaAnalizad
   }
 
   // La grabación va aparte: mueve el video y dura lo que dure la frase.
-  if (l && grabar) {
-    if (pre.audioFraseVideo && capturaActiva.value) {
-      const { audio, imagen } = await grabarLinea(l, ocultarOverlay);
+  const v = control.video();
+  if (l && grabar && v) {
+    // Se pregunta en este momento: la captura pudo cortarse o estar en otra pestaña.
+    const conCaptura = pre.audioFraseVideo && (await actualizarCaptura().catch(() => false));
+    if (conCaptura) {
+      const { audio, imagen } = await grabarLinea(l, ocultarOverlay, pre.imagenCaptura);
       if (audio) b.audioFrase = [audio];
-      if (imagen && pre.imagenCaptura) b.imagenes = [imagen];
-    } else if (pre.imagenCaptura) {
-      const imagen = await capturarImagen(ocultarOverlay);
       if (imagen) b.imagenes = [imagen];
+    } else {
+      if (pre.imagenCaptura) {
+        const imagen = await capturarImagen(v, ocultarOverlay);
+        if (imagen) b.imagenes = [imagen];
+      }
+      if (pre.audioFraseVideo) avisar('Sin audio del video: pulsa Alt+R en esta pestaña para activar la captura.', undefined, undefined, 6000);
     }
   }
   if (!b.audioFrase.length && pre.audioFraseVoz && a.azureClave && b.frase) {
@@ -214,9 +306,6 @@ export async function crearUnClic(p: PalabraToken | null, l: LineaAnalizada | nu
   try {
     const b = await construirBorrador(p, l, ocultarOverlay, true);
     if (cancelada) return;
-    if (!capturaActiva.value && ajustes.value.prellenado.audioFraseVideo && l) {
-      avisar('Sin audio del video: activa la captura con Alt+R.', undefined, undefined, 6000);
-    }
     await motor.crearTarjeta(b);
     const palabra = p ?? (l ? desconocidas(l.palabras)[0] ?? null : null);
     if (palabra && palabra.estado === 'desconocida') {

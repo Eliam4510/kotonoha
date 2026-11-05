@@ -2,7 +2,7 @@
 
 import { CLAVE_API, leerAjustes } from '../compartido/ajustes';
 import { type ApiFondo, type EventoDifundido, HOST_AYUDANTE, PUERTO_AYUDANTE } from '../compartido/api';
-import { atender, motor } from '../compartido/rpc';
+import { atender, motor, type ConRemitente } from '../compartido/rpc';
 
 const RUTA_MOTOR = 'motor.html';
 let creando: Promise<void> | null = null;
@@ -96,9 +96,12 @@ const api: ApiFondo & { _: never } = {
   ajustesCompletos: () => leerAjustes(),
   // Sin tocar teclado ni ratón durante dos minutos se considera que no estás usando el equipo.
   estadoUso: () => chrome.idle.queryState(120),
-  async capturaVisible() {
+  async capturaVisible(this: ConRemitente) {
+    // La ventana de quien pide la captura: la que tenga el foco puede ser otra, como la del creador de tarjetas.
+    const remitente = this.remitente;
+    if (remitente?.tab && !remitente.tab.active) throw new Error('La pestaña del video no está a la vista');
     return new Promise<string>((ok, mal) => {
-      chrome.tabs.captureVisibleTab({ format: 'jpeg', quality: 90 }, (url) => {
+      chrome.tabs.captureVisibleTab(remitente?.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT, { format: 'jpeg', quality: 90 }, (url) => {
         const e = chrome.runtime.lastError;
         if (e || !url) mal(new Error(e?.message ?? 'No se pudo capturar la pestaña'));
         else ok(url);
@@ -106,19 +109,26 @@ const api: ApiFondo & { _: never } = {
     });
   },
   alternarCaptura: () => alternarCaptura(),
-  capturaActiva: async () => (await pestanaCapturada()) !== null,
+  // Es por pestaña: con la captura en otra, lo que se grabaría aquí es el silencio de aquella.
+  async capturaActiva(this: ConRemitente) {
+    const capturada = await pestanaCapturada();
+    if (capturada === null) return false;
+    const id = this.remitente?.tab?.id ?? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]?.id;
+    if (id !== capturada) return false;
+    // El motor puede haberse reiniciado o la captura haberse cortado: el dato guardado no basta.
+    const sigue = await motor.estado().then((e) => e.capturaActiva).catch(() => false);
+    if (!sigue) await chrome.storage.session.remove(CAPTURA);
+    return sigue;
+  },
   abrirApp,
   difundir,
-  async inyectarPagina() {
-    // El último argumento de atender es el remitente; ver miPestana.
-    const remitente = arguments[0] as chrome.runtime.MessageSender | undefined;
-    const tabId = remitente?.tab?.id;
+  async inyectarPagina(this: ConRemitente) {
+    const tabId = this.remitente?.tab?.id;
     if (tabId === undefined) return;
     await chrome.scripting.executeScript({ target: { tabId }, world: 'MAIN', files: ['pagina.js'] });
   },
-  async miPestana() {
-    const remitente = arguments[0] as chrome.runtime.MessageSender | undefined;
-    return remitente?.tab?.id;
+  async miPestana(this: ConRemitente) {
+    return this.remitente?.tab?.id;
   },
   _: undefined as never,
 };

@@ -84,9 +84,36 @@ export function iniciarControlador(c: Control) {
   alRecibirEvento((e) => {
     if (e.tipo === 'palabras') for (const ca of e.cambios) aplicarCambioPalabra(ca.clave, { estado: ca.estado ?? undefined, rastreada: ca.rastreada });
     if (e.tipo === 'palabrasRecargar' || e.tipo === 'diccionarios') reanalizar();
-    if (e.tipo === 'captura') capturaActiva.value = e.activa;
+    // Se pregunta en lugar de usar el dato del aviso: la captura de otra pestaña no sirve para esta.
+    if (e.tipo === 'captura') actualizarCaptura().catch(() => {});
   });
-  fondo.capturaActiva().then((v) => (capturaActiva.value = v)).catch(() => {});
+  actualizarCaptura().catch(() => {});
+}
+
+export async function actualizarCaptura(): Promise<boolean> {
+  capturaActiva.value = await fondo.capturaActiva();
+  return capturaActiva.value;
+}
+
+/**
+ * Mientras se graba una línea, el video es de la grabación: nada debe pausarlo, acelerarlo ni moverlo.
+ * Graba a velocidad normal, sea cual sea la que se esté usando, y al terminar todo queda como estaba.
+ */
+let grabacionEnCurso: { velocidad: number; pausa: typeof tipoPausa.value } | null = null;
+
+export function empezarGrabacionLinea(v: HTMLVideoElement) {
+  grabacionEnCurso = { velocidad: acelerando ? velocidadPrevia : v.playbackRate, pausa: tipoPausa.value };
+  acelerando = false;
+  pausaDiferidaEn = -1;
+  cancelarReanudar();
+  v.playbackRate = 1;
+}
+
+export function terminarGrabacionLinea(v: HTMLVideoElement) {
+  if (!grabacionEnCurso) return;
+  v.playbackRate = grabacionEnCurso.velocidad;
+  if (v.paused) tipoPausa.value = grabacionEnCurso.pausa;
+  grabacionEnCurso = null;
 }
 
 function actualizarRect() {
@@ -136,7 +163,7 @@ function enlazarVideo(v: HTMLVideoElement) {
 
 function alPausar() {
   const a = ajustes.value;
-  if (!a.autoConsultaAlPausar || consulta.value) return;
+  if (!a.autoConsultaAlPausar || consulta.value || grabacionEnCurso) return;
   const i = indiceVisual.value;
   if (i < 0) return;
   const primera = desconocidas(lineasObjetivo.value[i].palabras)[0];
@@ -203,7 +230,7 @@ function tick() {
   tiempoMs.value = Math.round(ms);
   pausado.value = v.paused;
   vigilarRevision();
-  if (v.paused || anuncio.value) return;
+  if (v.paused || anuncio.value || grabacionEnCurso) return;
 
   const a = ajustes.value;
 

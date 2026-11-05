@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.2.2, along with how it has been verified.
+Status of each feature in version 0.2.3, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -73,8 +73,9 @@ Status of each feature in version 0.2.2, along with how it has been verified.
 | One-click creation | Simulator |
 | Creator with every field | Simulator |
 | Sending to Anki through AnkiConnect, with a custom note type or the extension's own | Simulator |
-| Sentence audio recorded from the video, as MP3 | Automated, with simulated audio |
-| Video frame capture, including with DRM | Automated |
+| Sentence audio recorded from the video, to MP3, from the exact stretch and at normal speed | Automated, with real tab capture |
+| Capture is per tab: no silence is recorded from another tab, and a silent recording is not stored | Automated, with real tab capture |
+| Frame capture, with the video as the only thing in view | Automated, with real tab capture |
 | Word audio: JapanesePod101 and Lingua Libre | Automated |
 | Azure neural voices, with a personal key | Pending |
 | Images from Openverse | Automated |
@@ -129,5 +130,6 @@ Status of each feature in version 0.2.2, along with how it has been verified.
 | Study language | Japanese only: the analysis logic is specific to this language |
 | Interface language | Spanish only. Claude's explanations can be requested in Spanish, English or simple Japanese |
 | Platforms | Desktop Chrome and Edge. The local helper is prepared for Windows |
+| Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card is created without a capture |
 | Synchronization | No server: moving between computers is done with a backup |
 | Background music | Whisper can miss quiet conversation under loud music |

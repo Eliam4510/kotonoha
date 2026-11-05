@@ -159,6 +159,8 @@ Si un video no se puede descargar, por ejemplo por ser privado o tener restricci
 
 Las tarjetas pueden enviarse a Anki mediante AnkiConnect, con un tipo de nota propio o con el que crea la extensión, o guardarse en **Memoria**, el repaso integrado con FSRS. Los campos incluyen frase, furigana, traducción, definiciones, audio, imagen y notas. La captura de audio se activa con `Alt+R`.
 
+**Audio e imagen del video.** Para grabar el audio de la frase hay que activar la captura con `Alt+R` en la pestaña del video. La captura es solo de esa pestaña: si está activa en otra, el icono del micrófono aparece apagado y la tarjeta se crea sin audio. Al crear la tarjeta, la línea vuelve a reproducirse a velocidad normal mientras se graba, y después el video queda donde estaba. La imagen no incluye nada de la interfaz. En sitios con DRM, como Netflix, el navegador entrega el fotograma en negro, de modo que la tarjeta se crea sin captura.
+
 ## Audio, imágenes y ejemplos
 
 | Elemento | Origen | ¿Requiere clave? |

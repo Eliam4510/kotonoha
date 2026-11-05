@@ -97,7 +97,8 @@ export interface ApiMotor {
   iniciarCaptura(streamId: string): Promise<void>;
   detenerCaptura(): Promise<void>;
   empezarClip(): Promise<void>;
-  terminarClip(): Promise<{ datos: string; tipo: string } | null>;
+  /** `mudo` si la grabación no tiene ningún sonido: lo que pasa si se captura otra pestaña o el video está silenciado. */
+  terminarClip(): Promise<{ datos: string; tipo: string } | { mudo: true } | null>;
   whisperMarca(ms: number, reproduciendo: boolean, velocidad: number, salto: boolean): Promise<void>;
   /** Trabajos largos en marcha: mientras haya alguno, la extensión no se recarga sola. */
   flujosActivos(): Promise<number>;
@@ -108,7 +109,7 @@ export interface ApiMotor {
   whisperCapturaPrueba(): Promise<void>;
   whisperOcupacionPrueba(ocupacion: number | null): Promise<void>;
   whisperPerderGpuPrueba(): Promise<void>;
-  recortarImagen(dataUrl: string, rect: { x: number; y: number; w: number; h: number; escala: number }): Promise<string>;
+  recortarImagen(dataUrl: string, rect: { x: number; y: number; w: number; h: number; anchoVentana: number }): Promise<{ url: string; negra: boolean }>;
 
   audiosPalabra(lema: string, lectura: string): Promise<ResultadoAudio[]>;
   vozFrase(texto: string, voz: string): Promise<string>;
@@ -151,6 +152,7 @@ export interface ApiFondo {
   ajustesCompletos(): Promise<unknown>;
   capturaVisible(): Promise<string>;
   alternarCaptura(): Promise<boolean>;
+  /** Si se está capturando el audio de la pestaña que pregunta, o de la que está a la vista si no pregunta ninguna. */
   capturaActiva(): Promise<boolean>;
   abrirApp(ruta?: string): Promise<void>;
   difundir(evento: EventoDifundido): Promise<void>;

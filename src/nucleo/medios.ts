@@ -63,3 +63,38 @@ export function formatoExtraccionAudio(codec: string): { args: string[]; extensi
   if (codec === 'flac') return { args: ['-c:a', 'copy'], extension: 'flac', tipo: 'audio/flac' };
   return { args: ['-c:a', 'aac', '-b:a', '192k'], extension: 'm4a', tipo: 'audio/mp4' };
 }
+
+/** Por debajo de esto no hay sonido (unos -70 dB): es el silencio digital de una pestaña muda o de un video parado. */
+export const UMBRAL_SILENCIO = 3e-4;
+
+/** Qué parte de una grabación tiene sonido. Null si está muda de principio a fin. */
+export function tramoConSonido(canales: Float32Array[], umbral = UMBRAL_SILENCIO): { inicio: number; fin: number } | null {
+  let inicio = -1;
+  let fin = -1;
+  for (const c of canales) {
+    for (let i = 0; i < c.length; i++) {
+      if (Math.abs(c[i]) > umbral) {
+        if (inicio < 0 || i < inicio) inicio = i;
+        break;
+      }
+    }
+    for (let i = c.length - 1; i >= 0; i--) {
+      if (Math.abs(c[i]) > umbral) {
+        if (i + 1 > fin) fin = i + 1;
+        break;
+      }
+    }
+  }
+  return inicio < 0 ? null : { inicio, fin };
+}
+
+/** Si una imagen RGBA es negra casi por completo: lo que entrega el navegador de un fotograma protegido con DRM. */
+export function imagenNegra(rgba: Uint8ClampedArray | Uint8Array, umbral = 12, proporcion = 0.995): boolean {
+  const total = Math.floor(rgba.length / 4);
+  if (!total) return false;
+  let negros = 0;
+  for (let i = 0; i < total; i++) {
+    if (rgba[i * 4] <= umbral && rgba[i * 4 + 1] <= umbral && rgba[i * 4 + 2] <= umbral) negros++;
+  }
+  return negros / total >= proporcion;
+}

@@ -186,7 +186,8 @@ const png = await p.evaluate(() => {
   x.fillRect(0, 0, 400, 300);
   return c.toDataURL('image/png');
 });
-const recorte = await motor('recortarImagen', png, { x: 50, y: 50, w: 200, h: 100, escala: 1 });
+const { url: recorte, negra } = await motor('recortarImagen', png, { x: 50, y: 50, w: 200, h: 100, anchoVentana: 400 });
+comprobar(negra === false, 'Una imagen con contenido no se toma por un fotograma protegido');
 const tam = await p.evaluate(async (u) => {
   const i = await createImageBitmap(await (await fetch(u)).blob());
   return [i.width, i.height];

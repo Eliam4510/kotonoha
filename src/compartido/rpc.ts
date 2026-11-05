@@ -59,6 +59,11 @@ export const fondo = new Proxy({} as ApiFondo, {
 });
 
 /** Atiende las llamadas de un canal. El otro contexto ignora el mensaje sin responder. */
+/** Lo que recibe en `this` un método atendido por `atender`. */
+export interface ConRemitente {
+  remitente?: chrome.runtime.MessageSender;
+}
+
 export function atender(canal: MensajeRpc['canal'], api: object): void {
   chrome.runtime.onMessage.addListener((mensaje: MensajeRpc, _remitente, responder) => {
     if (mensaje?.canal !== canal) return false;
@@ -67,8 +72,11 @@ export function atender(canal: MensajeRpc['canal'], api: object): void {
       responder({ ok: false, error: `Método desconocido: ${mensaje.metodo}` } satisfies RespuestaRpc);
       return false;
     }
+    // El remitente va en `this`. Como argumento ocuparía el primer parámetro opcional que no se haya enviado:
+    // `crearTarjeta(b)` recibiría el remitente como destino, y `buscar(lema)` como lectura.
+    const ambito = Object.assign(Object.create(api) as object, { remitente: _remitente } satisfies ConRemitente);
     Promise.resolve()
-      .then(() => (fn as (...a: unknown[]) => unknown).apply(api, [...mensaje.args, _remitente]))
+      .then(() => (fn as (...a: unknown[]) => unknown).apply(ambito, mensaje.args))
       .then(
         (valor) => responder({ ok: true, valor } satisfies RespuestaRpc),
         (e) => responder({ ok: false, error: e instanceof Error ? e.message : String(e) } satisfies RespuestaRpc)
