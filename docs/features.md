@@ -9,6 +9,7 @@ Status of each feature in version 0.2.2, along with how it has been verified.
 | Automated | Tested end to end with Edge and the extension loaded |
 | Simulator | The real code runs in full, against a fake Claude API or AnkiConnect server |
 | Imitation page | Also on a page with the same player structure as Netflix or YouTube |
+| Real session | Checked by hand on YouTube, with Chrome, a real session and the Claude API |
 | Pending | Requires a real site session or personal credentials |
 
 ## On top of the video
@@ -16,17 +17,17 @@ Status of each feature in version 0.2.2, along with how it has been verified.
 | Feature | Verification |
 |---|---|
 | Floating bar with known words, comprehension and recommended sentences | Automated |
-| The bar appears when the pointer rests at the top, stays while it is near and ignores passing movements | Automated |
-| Subtitles that can be dragged anywhere on the video, with magnets and without leaving it | Automated |
-| Line changes without flicker, and slightly smaller text for long paragraphs | Automated |
-| Subtitles stay with the video when the page scrolls, without jitter | Imitation page |
+| The bar appears when the pointer rests at the top, stays while it is near and ignores passing movements | Automated and real session |
+| Subtitles that can be dragged anywhere on the video, with magnets and without leaving it | Automated and real session |
+| Line changes without flicker, and slightly smaller text for long paragraphs | Automated and real session |
+| Subtitles stay with the video when the page scrolls, without jitter | Imitation page and real session |
 | A line appearing under a resting pointer neither opens a card nor pauses the video | Automated |
 | Subtitles with furigana, pitch accent colors and status underlines | Automated |
 | Furigana, gloss and color modes: always, on hover, unknown only, never | Automated |
 | Word card: definitions, status, frequency, audio, images, examples and links | Automated |
-| The card opens with the dictionary, with no request to Claude | Simulator |
-| Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator |
-| Every answer is stored: the same word in the same sentence is never requested again | Simulator |
+| The card opens with the dictionary, with no request to Claude | Simulator and real session |
+| Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator, and real session for the meaning in the sentence |
+| Every answer is stored: the same word in the same sentence is never requested again | Simulator and real session |
 | Free questions about a word or sentence | Simulator |
 | JLPT grammar: about 100 rules confirmed by Claude, with a per-video summary | Simulator |
 | Priority words: the unknown words repeated most in the video | Automated |
@@ -41,7 +42,7 @@ Status of each feature in version 0.2.2, along with how it has been verified.
 
 | Feature | Verification |
 |---|---|
-| YouTube: tracks signed by the player | Imitation page. A real session is pending, since the site does not serve subtitles to an automated browser |
+| YouTube: tracks signed by the player | Real session. Automated tests use an imitation page, since the site does not serve subtitles to an automated browser |
 | Netflix: player tracks, TTML | Imitation page. A real session is pending |
 | Disney+, Crunchyroll, Viki, Bilibili, iQIYI and Prime Video, through generic detection | Pending |
 | Second track in the support language | Automated |
