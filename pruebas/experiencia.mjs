@@ -41,6 +41,7 @@ const PAGINA = `<!doctype html><meta charset="utf-8"><title>講義の動画 - Yo
 <div style="height:56px"></div>
 <div id="movie_player" style="position:relative;width:1280px;height:600px;margin:0 auto;background:#000"><video id="v" src="https://media.test/video.webm" muted style="width:100%;height:100%"></video></div>
 <div style="height:3000px;padding:20px">Comentarios</div>
+<button id="fs" style="position:fixed;right:0;bottom:0;width:40px;height:20px" onclick="document.getElementById('movie_player').requestFullscreen()">FS</button>
 <script>
   const pistas = [
     { languageCode: 'ja', vssId: '.ja', name: { simpleText: '日本語' } },
@@ -423,6 +424,61 @@ if (quiere('scroll')) {
   const volvio = await rectBloque();
   const video = await rectVideo();
   comprobar(volvio.top > video.top && volvio.bottom <= video.bottom, 'Al subir vuelven a su sitio');
+}
+
+// ---------- Otros tamaños ----------
+
+if (quiere('tamanos')) {
+  console.log('\n== Pantalla completa y otros tamaños ==');
+  const enSuSitio = async () => {
+    const b = await rectBloque();
+    const v = await rectVideo();
+    return b && b.top >= v.top - 1 && b.bottom <= v.bottom + 1 && Math.abs(b.left + b.width / 2 - (v.left + v.width / 2)) < 3;
+  };
+  await p.mouse.move(100, 850);
+  await irA(1.5);
+  await hasta((r) => r.querySelector('.subs-bloque:not(.saliendo) .pal') != null);
+  await p.waitForTimeout(300);
+
+  await p.click('#fs');
+  await p.waitForTimeout(700);
+  const completa = await p.evaluate(() => { const h = document.querySelector('kotonoha-overlay'); return { fs: document.fullscreenElement?.id, dentro: !!document.fullscreenElement?.contains(h) }; });
+  comprobar(completa.fs === 'movie_player', 'Entra en pantalla completa');
+  comprobar(completa.dentro, 'La capa de Kotonoha va con él');
+  comprobar(await enSuSitio(), 'Y los subtítulos siguen en su sitio', JSON.stringify(await rectBloque()));
+  await p.screenshot({ path: join(CAPTURAS, 'completa.png') });
+
+  // Arrastrar también funciona ahí, y la posición se conserva en proporción al salir.
+  const a = await rectBloque();
+  await p.mouse.move(a.left + 6, a.top + a.height / 2);
+  await p.waitForTimeout(100);
+  await p.mouse.down();
+  await p.mouse.move(a.left + 6, a.top - 120, { steps: 8 });
+  await p.mouse.up();
+  await p.waitForTimeout(250);
+  const b = await rectBloque();
+  comprobar(b.top < a.top - 80, 'Se pueden arrastrar en pantalla completa', `${Math.round(b.top - a.top)} px`);
+  await p.keyboard.press('Escape');
+  await p.evaluate(() => (document.fullscreenElement ? document.exitFullscreen() : null));
+  await p.waitForTimeout(700);
+  const c = await rectBloque();
+  const v = await rectVideo();
+  comprobar(c.top >= v.top - 1 && c.bottom <= v.bottom + 1, 'Al salir, dentro del video', `${Math.round(c.top - v.top)} px bajo su borde`);
+  await p.evaluate(() => null);
+  await enOverlay((r) => r.querySelector('.subs-fondo')?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, composed: true })));
+  await p.waitForTimeout(300);
+  comprobar((await leerAjustes()).subsPosicion === null, 'Doble clic para volver');
+  comprobar(await enSuSitio(), 'Y vuelve a su sitio');
+
+  // Una ventana más estrecha.
+  await p.setViewportSize({ width: 900, height: 700 });
+  await p.waitForTimeout(500);
+  await p.evaluate(() => { const j = document.getElementById('movie_player'); j.style.width = '860px'; j.style.height = '484px'; });
+  await p.waitForTimeout(400);
+  comprobar(await enSuSitio(), 'Al cambiar el tamaño del video, también', JSON.stringify(await rectBloque()));
+  await p.evaluate(() => { const j = document.getElementById('movie_player'); j.style.width = '1280px'; j.style.height = '600px'; });
+  await p.setViewportSize({ width: 1600, height: 900 });
+  await p.waitForTimeout(400);
 }
 
 // ---------- Párrafos ----------

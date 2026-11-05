@@ -13,7 +13,7 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-A9E45B?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-3987e5?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.2.0-A9E45B?style=flat-square" alt="Versión 0.2.0">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.2.1-A9E45B?style=flat-square" alt="Versión 0.2.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
   <img src="https://img.shields.io/badge/pruebas%20unitarias-171-0ca30c?style=flat-square" alt="171 pruebas unitarias">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 a N1">
@@ -28,6 +28,7 @@
   <a href="docs/guia.md">Guía de uso</a> ·
   <a href="docs/funciones.md">Funciones</a> ·
   <a href="docs/arquitectura.md">Arquitectura</a> ·
+  <a href="docs/costos.md">Costos</a> ·
   <a href="AVISOS.md">Avisos</a>
 </p>
 
@@ -70,7 +71,7 @@ El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Jap�
     <td width="33%" align="center"><img src="docs/img/mover.png" alt="Subtítulos arrastrados a otra posición del video"></td>
   </tr>
   <tr>
-    <td valign="top"><b>El gasto a la vista</b><br>La pantalla de inicio muestra lo gastado este mes en Claude, con una gráfica por días y modelos, en qué tareas se fue y un registro de cada petición, con sus tokens.</td>
+    <td valign="top"><b>El gasto a la vista</b><br>La pantalla de inicio muestra lo gastado este mes en Claude, con una gráfica por días y modelos, en qué tareas se fue y un registro de cada petición, con sus tokens. El <a href="docs/costos.md">estudio de costos</a> da cifras medidas.</td>
     <td valign="top"><b>Nada se paga dos veces</b><br>Cada respuesta se guarda por palabra y frase. Ir y venir entre palabras no gasta nada, y una respuesta interrumpida se termina y se guarda en lugar de perderse.</td>
     <td valign="top"><b>Subtítulos donde se quieran</b><br>Se arrastran desde cualquier punto a la altura y el lado que se prefiera, con imanes al centro y a su sitio. Cambian de línea sin parpadeos y acompañan al video al desplazar la página.</td>
   </tr>
@@ -197,6 +198,7 @@ npm run typecheck
 | `npm test` | La lógica pura de `src/nucleo` |
 | `node pruebas/e2e.mjs` | La extensión de extremo a extremo en Edge |
 | `node pruebas/subtitulos.mjs` | Traducir, corregir, exportar e importar, en páginas que imitan a Netflix y YouTube y con una API de Claude simulada |
+| `node pruebas/experiencia.mjs` | Lo que se percibe sobre el video, fotograma a fotograma: parpadeos, temblores y arrastre. También cuenta las peticiones a Claude y comprueba el registro de gasto |
 | `node pruebas/capturas.mjs` | Recorre todas las pantallas y guarda capturas |
 | `node pruebas/tarjetas.mjs audio.wav` | Anki simulado, memoria y grabación |
 | `node pruebas/medios.mjs audio.wav` | ffmpeg.wasm con un MKV de varias pistas |
@@ -211,7 +213,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.2.0 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor, y queda pendiente la validación prolongada con sesiones reales. La interfaz está en español.
+La versión 0.2.1 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor, y queda pendiente la validación prolongada con sesiones reales. La interfaz está en español.
 
 ## Privacidad
 
