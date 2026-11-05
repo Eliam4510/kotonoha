@@ -13,9 +13,9 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-A9E45B?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-3987e5?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.2.3-A9E45B?style=flat-square" alt="Versión 0.2.3">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.2.4-A9E45B?style=flat-square" alt="Versión 0.2.4">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
-  <img src="https://img.shields.io/badge/pruebas%20unitarias-178-0ca30c?style=flat-square" alt="178 pruebas unitarias">
+  <img src="https://img.shields.io/badge/pruebas%20unitarias-179-0ca30c?style=flat-square" alt="179 pruebas unitarias">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 a N1">
 </p>
 
@@ -232,7 +232,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.2.3 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente hacerlo con Netflix y una validación prolongada. La interfaz está en español.
+La versión 0.2.4 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente hacerlo con Netflix y una validación prolongada. La interfaz está en español.
 
 ## Privacidad
 

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.2.3, along with how it has been verified.
+Status of each feature in version 0.2.4, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -130,6 +130,6 @@ Status of each feature in version 0.2.3, along with how it has been verified.
 | Study language | Japanese only: the analysis logic is specific to this language |
 | Interface language | Spanish only. Claude's explanations can be requested in Spanish, English or simple Japanese |
 | Platforms | Desktop Chrome and Edge. The local helper is prepared for Windows |
-| Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card is created without a capture |
+| Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card carries the episode's official image, if the site offers one |
 | Synchronization | No server: moving between computers is done with a backup |
 | Background music | Whisper can miss quiet conversation under loud music |
