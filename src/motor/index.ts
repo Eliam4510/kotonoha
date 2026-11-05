@@ -2,7 +2,7 @@
 
 import { type Ajustes, completarAjustes } from '../compartido/ajustes';
 import type { ApiMotor, CambioPalabra, FiltroPalabras } from '../compartido/api';
-import { atender, atenderFlujos, fondo } from '../compartido/rpc';
+import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 import * as analisis from './analisis';
@@ -318,6 +318,7 @@ const api: ApiMotor = {
     whisper.marcarVideo(ms, reproduciendo, velocidad, salto);
   },
   ayudante: () => consultarAyudante(),
+  flujosActivos: async () => flujosActivos(),
   async whisperDetener() {
     whisper.detenerEnVivo();
   },

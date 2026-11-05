@@ -136,6 +136,10 @@ export function flujoMotor(metodo: string, args: unknown[], alParte: (acumulado:
   return promesa;
 }
 
+let flujosEnMarcha = 0;
+/** Cuántos trabajos largos hay en marcha: transcripciones, traducciones, revisiones. */
+export const flujosActivos = () => flujosEnMarcha;
+
 /** En el motor: atiende flujos. La función recibe un callback para ir emitiendo texto. */
 export function atenderFlujos(
   api: Record<string, (emitir: (texto: string) => void, senal: AbortSignal, ...args: never[]) => Promise<string>>
@@ -157,10 +161,13 @@ export function atenderFlujos(
         enviarSeguro({ tipo: 'error', error: `Flujo desconocido: ${p.metodo}` });
         return;
       }
-      fn((texto) => enviarSeguro({ tipo: 'parte', texto }), cancelador.signal, ...(p.args as never[])).then(
-        (texto) => enviarSeguro({ tipo: 'fin', texto }),
-        (e) => enviarSeguro({ tipo: 'error', error: e instanceof Error ? e.message : String(e) })
-      );
+      flujosEnMarcha++;
+      fn((texto) => enviarSeguro({ tipo: 'parte', texto }), cancelador.signal, ...(p.args as never[]))
+        .then(
+          (texto) => enviarSeguro({ tipo: 'fin', texto }),
+          (e) => enviarSeguro({ tipo: 'error', error: e instanceof Error ? e.message : String(e) })
+        )
+        .finally(() => flujosEnMarcha--);
     });
   });
 }

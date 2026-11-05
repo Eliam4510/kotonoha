@@ -15,7 +15,7 @@ export const SITIOS_VIDEO = [
 export const manifiesto = {
   manifest_version: 3,
   name: 'Kotonoha',
-  version: '0.1.0',
+  version: '0.1.1',
   description: 'Subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés.',
   minimum_chrome_version: '120',
   icons: { 16: 'icono16.png', 32: 'icono32.png', 48: 'icono48.png', 128: 'icono128.png' },
@@ -30,6 +30,7 @@ export const manifiesto = {
     'tabs',
     'contextMenus',
     'idle', // Saber si estás usando el equipo: Whisper va más suave mientras lo usas
+    'alarms', // Copia de desarrollo: comprobar si hay una compilación nueva y recargarse
     'nativeMessaging', // Ayudante local: descarga el audio de un video con yt-dlp para transcribirlo
     'clipboardRead',
     'clipboardWrite',

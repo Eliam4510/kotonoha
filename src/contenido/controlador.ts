@@ -167,7 +167,17 @@ export function saltar(ms: number) {
   return control.saltar(Math.max(0, ms));
 }
 
+let avisoActualizacion = false;
+
+/** Tras recargarse la extensión, esta página sigue con la versión anterior y sin conexión con el motor. */
+function comprobarConexion() {
+  if (avisoActualizacion || chrome.runtime?.id) return;
+  avisoActualizacion = true;
+  avisar('Kotonoha se actualizó. Recarga la página para usar la versión nueva.', undefined, { texto: 'Recargar', fn: () => location.reload() }, 0);
+}
+
 function tick() {
+  comprobarConexion();
   const v = control.video();
   if (!v) return;
   enlazarVideo(v);

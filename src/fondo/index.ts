@@ -155,6 +155,53 @@ chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === 'kotonoha-leer') abrirApp(`lector?t=${texto}`).catch(console.error);
 });
 
+// ---------- Actualización de la copia de desarrollo ----------
+//
+// Una extensión cargada desde una carpeta no se actualiza sola: tras cada compilación habría que pulsar
+// «Recargar». Aquí se comprueba si la compilación cambió y se recarga, salvo que esté trabajando en algo.
+
+const ALARMA_COMPILACION = 'kotonoha-compilacion';
+const COMPILACION = 'compilacionCargada';
+const esCopiaLocal = () => !('update_url' in chrome.runtime.getManifest());
+
+async function leerCompilacion(): Promise<string | null> {
+  try {
+    const r = await fetch(chrome.runtime.getURL('compilacion.txt'), { cache: 'no-store' });
+    return r.ok ? (await r.text()).trim() : null;
+  } catch {
+    // Durante una compilación el archivo aún no existe: se volverá a mirar.
+    return null;
+  }
+}
+
+async function anotarCompilacion() {
+  const actual = await leerCompilacion();
+  if (actual) await chrome.storage.session.set({ [COMPILACION]: actual });
+}
+
+async function comprobarCompilacion() {
+  const actual = await leerCompilacion();
+  if (!actual) return;
+  const d = await chrome.storage.session.get(COMPILACION);
+  if (!d[COMPILACION]) {
+    await chrome.storage.session.set({ [COMPILACION]: actual });
+    return;
+  }
+  if (d[COMPILACION] === actual) return;
+  // Recargar cortaría una transcripción o una traducción en curso: se espera a que terminen.
+  const ocupado = await motor.flujosActivos().catch(() => 0);
+  if (!ocupado) chrome.runtime.reload();
+}
+
+if (esCopiaLocal()) {
+  chrome.alarms.create(ALARMA_COMPILACION, { periodInMinutes: 0.5 });
+  chrome.alarms.onAlarm.addListener((a) => {
+    if (a.name === ALARMA_COMPILACION) comprobarCompilacion().catch(() => {});
+  });
+  chrome.runtime.onStartup.addListener(() => void anotarCompilacion());
+  chrome.runtime.onInstalled.addListener(() => void anotarCompilacion());
+}
+
 // Puente con el ayudante local. El motor vive en un documento offscreen, que no puede hablar con
 // programas nativos. Mientras la conexión siga abierta, Chrome no detiene este service worker.
 chrome.runtime.onConnect.addListener((puerto) => {

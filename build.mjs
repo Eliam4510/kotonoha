@@ -101,5 +101,7 @@ if (vigilar) {
   await build(opciones);
   await build(opcionesWhisper);
   await estaticos();
+  // Lo último de todo: la extensión se recarga sola al ver que cambia, y para entonces ya está todo escrito.
+  await writeFile(join(SALIDA, 'compilacion.txt'), String(Date.now()));
   console.log(`Compilación lista en ${SALIDA}/`);
 }
