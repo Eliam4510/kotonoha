@@ -94,8 +94,14 @@ export const MODELOS_WHISPER: Record<ModeloWhisper, { id: string; nombre: string
 };
 
 export interface Ajustes {
+  /** Versión de los valores por omisión con la que se guardaron estos ajustes. */
+  migracion: number;
+  /** Crédito mensual de la API, para ver el gasto en contexto. */
+  creditoMensual: number;
   /** Cómo saludar en la pantalla de inicio. Si está vacío, el saludo va sin nombre. */
   nombre: string;
+  /** Dónde se colocan los subtítulos sobre el video, si los has movido. */
+  subsPosicion: { x: number; y: number } | null;
   /** Tema de la ventana de la app y del menú. Sobre el video el overlay siempre es oscuro. */
   tema: Tema;
   whisperModelo: ModeloWhisper;
@@ -194,7 +200,7 @@ export interface Ajustes {
   guardarHistorial: boolean;
 }
 
-export type PestanaDiccionario = 'audio' | 'imagenes' | 'explicar' | 'desglose' | 'traduccion' | 'enlaces' | 'ejemplos';
+export type PestanaDiccionario = 'ninguna' | 'audio' | 'imagenes' | 'explicar' | 'desglose' | 'traduccion' | 'enlaces' | 'ejemplos';
 
 export interface Prellenado {
   fraseVideo: boolean;
@@ -215,7 +221,10 @@ export interface Prellenado {
 const VELO_NO: Velo = { modo: 'no', revelarEnPausa: [], revelarPorEstado: [], revelarAlPasar: true };
 
 export const AJUSTES_INICIALES: Ajustes = {
+  migracion: 1,
+  creditoMensual: 100,
   nombre: '',
+  subsPosicion: null,
   tema: 'auto',
   whisperModelo: 'turbo',
   whisperIntensidad: 'auto',
@@ -294,7 +303,7 @@ export const AJUSTES_INICIALES: Ajustes = {
     explicacionIA: true,
   },
   negritaPalabra: true,
-  diccionarioPestana: 'explicar',
+  diccionarioPestana: 'ninguna',
   ordenContenido: ['definiciones', 'flexiones', 'pestanas'],
 
   // Sonnet 5.5 para el día a día; «Profundizar» recurre a Opus 5.5 cuando un verso se resiste.
@@ -325,13 +334,13 @@ export const AJUSTES_INICIALES: Ajustes = {
     profundo: 'high',
   },
   respaldoSeguridad: true,
-  usarGuion: true,
+  usarGuion: false,
   nivel: 'JLPT N3',
   idiomaExplicaciones: 'español',
   idiomaTraduccion: 'español',
   prompts: {},
   analisisAutomatico: true,
-  sentidoAutomatico: true,
+  sentidoAutomatico: false,
   mostrarGramatica: true,
 
   azureClave: '',
@@ -355,6 +364,13 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
   salida.esfuerzos = { ...AJUSTES_INICIALES.esfuerzos, ...(guardados?.esfuerzos ?? {}) };
   // Un modelo que ya no existe (Kotoba se retiró al comparar con videos reales) pasa al de siempre.
   if (!MODELOS_WHISPER[salida.whisperModelo]) salida.whisperModelo = AJUSTES_INICIALES.whisperModelo;
+  // La ficha pasó a abrirse solo con el diccionario: Claude se usa cuando se pide, no al pasar el ratón.
+  if (guardados && (guardados.migracion ?? 0) < 1) {
+    salida.migracion = 1;
+    salida.sentidoAutomatico = false;
+    salida.usarGuion = false;
+    if (salida.diccionarioPestana === 'explicar') salida.diccionarioPestana = 'ninguna';
+  }
   return salida;
 }
 

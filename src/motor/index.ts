@@ -42,6 +42,7 @@ async function arrancar() {
   analisis.cargarTokenizador().catch((e) => console.error('Tokenizador:', e));
   analisis.recargarTerminos().catch((e) => console.error('Términos:', e));
   repararFrecuencias().catch((e) => console.warn('Frecuencias:', e));
+  ia.limpiarCache().catch(() => {});
 }
 
 const ESPERA_REPARACION_MS = 120000;
@@ -302,6 +303,12 @@ const api: ApiMotor = {
   async glosaBreve(l, f) {
     return ia.glosaBreve(await aj(), l, f);
   },
+  async sentidoGuardado(c, definiciones) {
+    return ia.sentidoGuardado(await aj(), c, definiciones);
+  },
+  async consumo(desde) {
+    return db.consumo.where('t').aboveOrEqual(desde).toArray();
+  },
   async sentidoEnContexto(c, definiciones, recargar) {
     return ia.sentidoEnContexto(await aj(), c, definiciones, recargar);
   },
@@ -363,15 +370,17 @@ const api: ApiMotor = {
       // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
       generados: await db.generados.toArray(),
       correcciones: await db.correcciones.toArray(),
+      consumo: await db.consumo.toArray(),
     });
   },
   async importarDatos(json) {
-    const d = JSON.parse(json) as { palabras?: never[]; biblioteca?: never[]; memoria?: never[]; generados?: never[]; correcciones?: never[] };
+    const d = JSON.parse(json) as { palabras?: never[]; biblioteca?: never[]; memoria?: never[]; generados?: never[]; correcciones?: never[]; consumo?: never[] };
     if (d.palabras) await db.palabras.bulkPut(d.palabras);
     if (d.biblioteca) await db.biblioteca.bulkPut(d.biblioteca);
     if (d.memoria) await db.memoria.bulkPut(d.memoria);
     if (d.generados) await db.generados.bulkPut(d.generados);
     if (d.correcciones) await db.correcciones.bulkPut(d.correcciones);
+    if (d.consumo) await db.consumo.bulkPut(d.consumo);
     await fondo.difundir({ tipo: 'palabrasRecargar' });
   },
   async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen) {
@@ -422,10 +431,13 @@ atenderFlujos({
     return 'ok';
   },
   // Revisa las líneas que aún no se han analizado y guarda lo encontrado por cada trozo terminado.
-  analisisProfundo: async (emitir, senal, lineas: Linea[], titulo?: string, indiceLinea = -1) => {
+  analisisProfundo: async (emitir, senal, lineas: Linea[], titulo?: string, indiceLinea = -1, tope = 0) => {
     const a = await aj();
     const todas = await analisis.entradasAnalisis(lineas);
-    const pendientes = todas.filter((e) => e.pendiente);
+    // Con un tope, solo lo que está por verse desde el punto donde vas.
+    const inicio = Math.max(0, indiceLinea - 3);
+    const alcance = tope > 0 ? todas.slice(inicio, inicio + tope) : todas;
+    const pendientes = alcance.filter((e) => e.pendiente);
     // Una misma línea repetida (un estribillo) solo se analiza una vez.
     const unicas = [...new Map(pendientes.map((e) => [e.clave, e])).values()];
     if (!unicas.length) return '0';
@@ -438,7 +450,7 @@ atenderFlujos({
       await db.analisis.bulkPut([...filas, ...vacias]);
       emitir(`${h}/${t}\n`);
       // Las líneas repetidas se analizan una vez: la posición se aproxima en proporción.
-    }, senal, indiceLinea < 0 ? -1 : Math.floor((indiceLinea / Math.max(lineas.length, 1)) * unicas.length));
+    }, senal, indiceLinea < 0 || tope > 0 ? -1 : Math.floor((indiceLinea / Math.max(lineas.length, 1)) * unicas.length), todas);
     return String(unicas.length);
   },
   // Whisper emite cada evento como una línea de JSON.

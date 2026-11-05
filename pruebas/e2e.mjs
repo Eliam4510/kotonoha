@@ -336,7 +336,8 @@ if (quiere('local')) {
   await p.keyboard.press('n');
   await p.waitForTimeout(800);
   const segundaConN = await tituloFicha();
-  comprobar(segundaConN && segundaConN !== primeraConN, 'N avanza a la siguiente palabra desconocida', segundaConN);
+  const estadoLinea = await p.evaluate(() => [...document.querySelector('kotonoha-overlay').shadowRoot.querySelectorAll('.linea-sub.objetivo .pal')].map((e) => `${e.textContent}:${/est-(\w+)/.exec(e.className)?.[1] ?? '?'}`).join(' '));
+  comprobar(segundaConN && segundaConN !== primeraConN, 'N avanza a la siguiente palabra desconocida', `${segundaConN} · ${estadoLinea}`);
   await p.keyboard.press('Escape');
   await p.waitForTimeout(200);
 

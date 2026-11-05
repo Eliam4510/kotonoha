@@ -2,6 +2,7 @@
 
 import Dexie, { type Table } from 'dexie';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
+import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
 
@@ -100,6 +101,7 @@ class BaseKotonoha extends Dexie {
   generados!: Table<FilaSubtitulosGenerados, string>;
   analisis!: Table<FilaAnalisis, string>;
   correcciones!: Table<FilaCorrecciones, string>;
+  consumo!: Table<FilaConsumo, number>;
 
   constructor() {
     // Nombre de la primera versión. Cambiarlo dejaría atrás los diccionarios y palabras ya guardados.
@@ -119,6 +121,7 @@ class BaseKotonoha extends Dexie {
     });
     this.version(2).stores({ analisis: 'clave' });
     this.version(3).stores({ correcciones: 'clave' });
+    this.version(4).stores({ consumo: '++id, mes, t' });
   }
 }
 

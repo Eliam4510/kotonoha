@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 const TEXTO_LECTOR ='授業の後は、たぶん日本語の勉強を続けると思います。\n12月にJLPTがあるので、文法を毎日少しずつ進めているところです。\n一日でも休むと、ペースが遅れてしまうので、できるだけ毎日やるようにしています。\n赤い星と青い星を食べる夢を見た。';
 
-export async function capturarApp({ RAIZ, ANCHO, ALTO, contexto, idExt, vigilar, foto }) {
+export async function capturarApp({ RAIZ, CAPTURAS, ANCHO, ALTO, contexto, idExt, vigilar, foto }) {
   const p = await contexto.newPage();
   vigilar(p, 'app');
   const app = (r) => `chrome-extension://${idExt}/app.html#/${r}`;
@@ -87,8 +87,53 @@ export async function capturarApp({ RAIZ, ANCHO, ALTO, contexto, idExt, vigilar,
     await motor('crearTarjeta', tarjeta('<b>泥</b>だらけの道でも花は咲いた', '泥', 'どろ', 'Incluso en un camino lleno de barro, la flor brotó', 'barro', ''), 'memoria');
   }
 
+  // Un mes de gasto verosímil, escrito directamente en la base: el motor ya la ha creado.
+  await p.evaluate(async () => {
+    const ahora = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const PRECIOS = { 'claude-sonnet-5-5': [2, 10, 0.2, 2.5], 'claude-opus-5-5': [4, 20, 0.2, 5], 'claude-haiku-5-5': [0.1, 0.5, 0.01, 0.125] };
+    const filas = [];
+    const anadir = (dia, hora, tarea, modelo, entrada, salida, lectura, escritura, titulo) => {
+      const d = new Date(ahora.getFullYear(), ahora.getMonth(), dia, hora, (dia * 7 + filas.length) % 50);
+      const [e, s, l, w] = PRECIOS[modelo];
+      filas.push({ t: d.getTime(), dia: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, mes: `${d.getFullYear()}-${pad(d.getMonth() + 1)}`, tarea, modelo, coste: (entrada * e + salida * s + lectura * l + escritura * w) / 1e6, titulo, entrada, salida, cacheEscritura5m: escritura, cacheEscritura1h: 0, cacheLectura: lectura });
+    };
+    const TITULOS = ['大阪の街を歩く', '心理学の講義 第3回', '千の夜の物語', '東京大学 公開講座'];
+    const dias = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
+    const hasta = Math.max(Math.min(ahora.getDate(), dias), Math.floor(dias * 0.7));
+    for (let dia = 1; dia <= hasta; dia++) {
+      if (dia % 5 === 0) continue;
+      const titulo = TITULOS[dia % TITULOS.length];
+      for (let i = 0; i < 7; i++) anadir(dia, 20, 'analisis', 'claude-sonnet-5-5', 4200, 3400, 900, 600, titulo);
+      if (dia % 2) for (let i = 0; i < 8; i++) anadir(dia, 20, 'subtitulos', 'claude-sonnet-5-5', 2500, 2800, 0, 0, titulo);
+      for (let i = 0; i < 2 + (dia % 4); i++) anadir(dia, 21, 'corregir', 'claude-haiku-5-5', 5200, 1400, 3000, 800, titulo);
+      for (let i = 0; i < 3 + (dia % 6); i++) anadir(dia, 21, 'sentido', 'claude-sonnet-5-5', 1400, 220, 0, 0, titulo);
+      for (let i = 0; i < dia % 4; i++) anadir(dia, 22, 'explicar', 'claude-sonnet-5-5', 1800, 620, 0, 0, titulo);
+      if (dia % 7 === 3) anadir(dia, 22, 'profundo', 'claude-opus-5-5', 2600, 3200, 0, 0, titulo);
+    }
+    await new Promise((ok, mal) => {
+      const q = indexedDB.open('kikitori');
+      q.onsuccess = () => {
+        const d = q.result;
+        const tx = d.transaction('consumo', 'readwrite');
+        tx.objectStore('consumo').clear();
+        for (const f of filas) tx.objectStore('consumo').add(f);
+        tx.oncomplete = () => {
+          d.close();
+          ok();
+        };
+        tx.onerror = () => mal(tx.error);
+      };
+      q.onerror = () => mal(q.error);
+    });
+  });
+
   await ir('inicio', 1200);
   await foto(p, '20b-inicio-con-datos');
+  await p.waitForSelector('.ap-gasto-grafica', { timeout: 8000 }).catch(() => {});
+  await p.locator('.ap-gasto').scrollIntoViewIfNeeded().catch(() => {});
+  await p.waitForTimeout(200);
+  await p.locator('.ap-gasto').screenshot({ path: join(CAPTURAS, '20d-gasto.png') }).catch(() => {});
   await p.evaluate(() => {
     const c = document.querySelector('.ap-principal');
     if (c) c.scrollTop = c.scrollHeight;

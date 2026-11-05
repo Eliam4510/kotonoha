@@ -19,7 +19,8 @@ const SITIOS_VIDEO = /(^|\.)(youtube\.com|netflix\.com|disneyplus\.com|viki\.com
 
 function montar(): HTMLElement {
   const anfitrion = document.createElement('kotonoha-overlay');
-  anfitrion.style.cssText = 'all: initial; position: fixed; inset: 0; z-index: 2147483000; pointer-events: none;';
+  // Sin tamaño y sin fijar: lo fijo va dentro, y los subtítulos se mueven con la página al hacer scroll.
+  anfitrion.style.cssText = 'all: initial; position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2147483000; pointer-events: none;';
   const sombra = anfitrion.attachShadow({ mode: 'open' });
   const estilo = document.createElement('style');
   estilo.textContent = base + overlay;

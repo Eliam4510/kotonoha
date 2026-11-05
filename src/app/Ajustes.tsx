@@ -51,6 +51,7 @@ const PRELLENADO: { grupo: string; ayuda?: string; items: [keyof Prellenado, str
 ];
 
 const PESTANAS: [PestanaDiccionario, string][] = [
+  ['ninguna', 'Solo el diccionario'],
   ['explicar', 'Explicación de Claude'],
   ['desglose', 'Desglose de la frase'],
   ['traduccion', 'Traducción'],
@@ -197,14 +198,17 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
 
       <Subtitulo>Comportamiento</Subtitulo>
       <div class="ap-grupo">
-        <Opcion titulo="Revisar lecturas, sentidos y gramática" ayuda="Al abrir un video, Claude repasa todos los subtítulos.">
+        <Opcion titulo="Revisar lecturas, sentidos y gramática" ayuda="Claude repasa los subtítulos unos minutos por delante de donde vas, y sigue a medida que avanza. Es lo que más gasta por video.">
           <Interruptor etiqueta="Revisar automáticamente" on={a.analisisAutomatico} alCambiar={(v) => cambiar({ analisisAutomatico: v })} />
         </Opcion>
-        <Opcion titulo="Significado en la frase" ayuda="Lo muestra al consultar una palabra, antes de las definiciones.">
+        <Opcion titulo="Preguntar el significado al abrir una palabra" ayuda="Apagado, la ficha abre con el diccionario y solo se pregunta a Claude al pulsar el botón. Encendido, cada palabra nueva que abras es una petición.">
           <Interruptor etiqueta="Significado en la frase" on={a.sentidoAutomatico} alCambiar={(v) => cambiar({ sentidoAutomatico: v })} />
         </Opcion>
-        <Opcion titulo="Guion completo como contexto" ayuda="Claude lee todo el texto para entender mejor cada frase.">
+        <Opcion titulo="Guion completo como contexto" ayuda="Siempre recibe unas 40 líneas alrededor de la frase. Con esto, además lee todo el video: ayuda con nombres y referencias, y cuesta más, sobre todo en películas.">
           <Interruptor etiqueta="Guion como contexto" on={a.usarGuion} alCambiar={(v) => cambiar({ usarGuion: v })} />
+        </Opcion>
+        <Opcion titulo="Crédito mensual" ayuda="Para ver en Inicio cuánto llevas gastado de tu crédito de la API. No limita nada.">
+          <input class="campo ap-campo-corto" type="number" min="0" step="10" aria-label="Crédito mensual en dólares" value={a.creditoMensual} onInput={(ev) => cambiar({ creditoMensual: Math.max(0, Number(ev.currentTarget.value) || 0) })} />
         </Opcion>
         <Opcion titulo="Reintentar en otro modelo" ayuda="Si hay un rechazo de seguridad, prueba con el modelo de respaldo.">
           <Interruptor etiqueta="Respaldo de seguridad" on={a.respaldoSeguridad} alCambiar={(v) => cambiar({ respaldoSeguridad: v })} />

@@ -8,7 +8,7 @@ import { calcularEstadisticas, clasificarFrase, type FiltroNavegador } from '../
 import type { TipoPausa } from '../nucleo/modos';
 import type { PuntoGramatica } from '../nucleo/gramatica';
 import { type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA } from '../nucleo/sincronia';
-import { type Linea, lineaEn } from '../nucleo/subtitulos';
+import { type Linea, lineaConPuente, lineaEn } from '../nucleo/subtitulos';
 
 export const ajustes = signal<Ajustes>(AJUSTES_INICIALES);
 
@@ -26,7 +26,10 @@ export const pausado = signal(true);
 export const tipoPausa = signal<TipoPausa>(null);
 export const lineaPreparada = signal(-1);
 export const anuncio = signal(false);
+/** Rectángulo del video, medido desde el origen de los subtítulos: no cambia al hacer scroll en la página. */
 export const rectVideo = signal<{ left: number; top: number; width: number; height: number } | null>(null);
+/** Punto de referencia de los subtítulos, que viajan con la página para no ir a saltos al hacer scroll. */
+export const origenSubs: { el: HTMLElement | null } = { el: null };
 export const encimaSubtitulo = signal(false);
 
 export interface Consulta {
@@ -131,6 +134,26 @@ export const secundariaMostrada = computed<Linea | null>(() => {
   const j = indiceSecundario.value;
   return j >= 0 ? lineasSecundarias.value[j] : null;
 });
+
+/** La línea en pantalla: como la mostrada, pero sin parpadear en los huecos cortos entre líneas. */
+export const indiceVisual = computed(() => {
+  if (pausado.value && lineaPreparada.value >= 0) return lineaPreparada.value;
+  return lineaConPuente(lineasObjetivo.value, tiempoMs.value);
+});
+
+export const secundariaVisual = computed<Linea | null>(() => {
+  const preparada = secundariaPreparada();
+  if (preparada !== undefined) return preparada;
+  const j = lineaConPuente(lineasSecundarias.value, tiempoMs.value);
+  return j >= 0 ? lineasSecundarias.value[j] : null;
+});
+
+function secundariaPreparada(): Linea | null | undefined {
+  const i = lineaPreparada.value;
+  if (!pausado.value || i < 0) return undefined;
+  const l = lineasObjetivo.value[i];
+  return l ? (lineasSecundarias.value.find((s) => s.inicio < l.fin && s.fin > l.inicio) ?? null) : undefined;
+}
 
 /** Actualiza palabras sin rehacer las líneas que no cambian, para no repintar de más. */
 export function aplicarCambioPalabra(clave: string, cambio: { estado?: PalabraToken['estado']; rastreada?: boolean }) {

@@ -141,7 +141,11 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 
 ## Claude models
 
-Each task uses `claude-sonnet-5-5` by default, and the model and effort can be changed per task in Settings. The "Profundizar" button on the card repeats the query with `claude-opus-5-5` and high effort. Requests enable `fallbacks: "default"`, so a safety refusal is retried on another model. This can be disabled in Settings. Structured responses use `output_config.format` with JSON schemas, and the full script is sent in a cached system block.
+Each task uses `claude-sonnet-5-5` by default, and the model and effort can be changed per task in Settings. The "Profundizar" button on the card repeats the query with `claude-opus-5-5` and high effort. Requests enable `fallbacks: "default"`, so a safety refusal is retried on another model. This can be disabled in Settings. Structured responses use `output_config.format` with JSON schemas, and the full script, when sent, goes in a cached system block.
+
+**Avoiding paying twice.** Every query has its own identity, made of what is being asked: task, model, level, language, template, word, reading and sentence. It leaves out the surrounding text, which changes as subtitles load. A request in flight is not cancelled when whoever asked for it leaves, because it is already paid for and cancelling it would mean paying again: it finishes in the background and is stored, and a second identical query attaches to it. The reading review advances in stretches of 120 lines from the playback position, and each batch in flight finishes and is stored even if the tab closes.
+
+**Spending log.** After each request, `src/motor/ia.ts` writes to the `consumo` table the tokens reported by the API (`usage`), the model that answered and the task. The price is worked out in `src/nucleo/precios.ts`. Only what the API confirms is logged; an aborted request does not appear, even though the API may have billed part of it.
 
 ## Reference measurements
 

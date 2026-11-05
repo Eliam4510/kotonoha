@@ -1,5 +1,6 @@
 // Contratos de las llamadas entre contextos.
 
+import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type {
   BorradorTarjeta,
@@ -118,6 +119,10 @@ export interface ApiMotor {
   traducirBreve(texto: string): Promise<string>;
   glosaBreve(lema: string, frase?: string): Promise<string>;
   sentidoEnContexto(c: ContextoIA, definiciones: string[], recargar?: boolean): Promise<SentidoEnContexto>;
+  /** Lo ya preguntado sobre esta palabra en esta frase, sin gastar nada. */
+  sentidoGuardado(c: ContextoIA, definiciones: string[]): Promise<SentidoEnContexto | null>;
+  /** Lo gastado en Claude desde un instante, petición a petición. */
+  consumo(desde: number): Promise<FilaConsumo[]>;
   revisarLectura(c: ContextoIA, texto: string): Promise<{ lectura: string; lema: string; lectura_lema: string; motivo: string }>;
   corregirLectura(texto: string, c: { superficie: string; lectura: string; lema?: string; lectura_lema?: string }): Promise<void>;
 

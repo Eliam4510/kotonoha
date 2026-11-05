@@ -18,6 +18,7 @@ import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
+import { TarjetaGasto } from './Gasto';
 import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navegar, refrescarAnki } from './estadoApp';
 import { TextoInteractivo } from './Lectura';
 import { Cabecera, Mensaje, Vacio } from './Piezas';
@@ -284,6 +285,8 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
           </div>
           <button class="ap-enlace-tarjeta" onClick={() => navegar('lector')}><Icono n="portapapeles" t={16} /> O pega un texto en el lector <Icono n="flecha" t={14} /></button>
         </section>
+
+        <TarjetaGasto credito={ajustes.creditoMensual} />
 
         <section class="tarjeta ap-c7" aria-labelledby="ap-t-sabes">
           <div class="ap-tarjeta-cab">

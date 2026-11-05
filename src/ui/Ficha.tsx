@@ -1,7 +1,7 @@
 // Ficha de una palabra: significado en la frase, definiciones, estado, audio, imágenes, IA y enlaces.
 // Se usa en la ventana emergente sobre el video, en el lector y en el diccionario de la app.
 
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Ajustes, PestanaDiccionario } from '../compartido/ajustes';
 import { type FlujoCancelable, flujoMotor, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
@@ -118,9 +118,12 @@ export function PanelFlujo({
   const [cargando, fijarCargando] = useState(true);
   const flujo = useRef<FlujoCancelable | null>(null);
   const zona = useRef<HTMLDivElement>(null);
-  const [recarga, fijarRecarga] = useState(0);
   const clave = JSON.stringify([metodo, args]);
+  const [recarga, fijarRecarga] = useState(0);
+  // Volver a generar vale para una sola petición: no debe saltarse lo guardado en las siguientes.
+  const forzar = useRef(false);
   const [vista, fijarVista] = useState<string | null>(null);
+  const [guardada, fijarGuardada] = useState(false);
 
   // Una ficha abierta al pasar el ratón no debe pedirle a Claude algo que queda fuera de la vista.
   useEffect(() => {
@@ -143,13 +146,29 @@ export function PanelFlujo({
     fijarTexto('');
     fijarError('');
     fijarCargando(true);
+    fijarGuardada(false);
     if (vista !== clave) return;
-    const f = flujoMotor(metodo, [...args, recarga > 0], (t) => fijarTexto(t));
+    const inicio = performance.now();
+    let vivo = true;
+    const f = flujoMotor(metodo, [...args, forzar.current], (t) => fijarTexto(t));
+    forzar.current = false;
     flujo.current = f;
-    f.then((t) => fijarTexto(t))
-      .catch((e: Error) => fijarError(e.message))
-      .finally(() => fijarCargando(false));
-    return () => f.cancelar();
+    f.then((t) => {
+      if (!vivo) return;
+      fijarTexto(t);
+      // Claude no responde tan rápido: esto venía de lo guardado.
+      fijarGuardada(!!t && performance.now() - inicio < 350);
+    })
+      .catch((e: Error) => {
+        if (vivo) fijarError(e.message);
+      })
+      .finally(() => {
+        if (vivo) fijarCargando(false);
+      });
+    return () => {
+      vivo = false;
+      f.cancelar();
+    };
   }, [clave, recarga, vista]);
 
   return (
@@ -157,8 +176,12 @@ export function PanelFlujo({
       <div class="panel-ia-cab">
         <span class="panel-ia-titulo"><Icono n="ia" t={15} /> <span>{titulo}</span></span>
         <span class="panel-ia-acciones">
+          {guardada && <span class="panel-ia-guardada" title="Esta respuesta ya estaba guardada: no se ha vuelto a pedir a Claude.">Guardada, sin gasto</span>}
           {extra}
-          <button class="btn-icono chico ia" title="Volver a generar" aria-label="Volver a generar" onClick={() => fijarRecarga((r) => r + 1)} disabled={cargando}>
+          <button class="btn-icono chico ia" title="Volver a preguntar a Claude" aria-label="Volver a generar" onClick={() => {
+            forzar.current = true;
+            fijarRecarga((r) => r + 1);
+          }} disabled={cargando}>
             <Icono n="recargar" t={14} />
           </button>
         </span>
@@ -431,42 +454,65 @@ export interface PropsFicha {
   rastreada?: boolean;
 }
 
-/** El significado en esta frase, que es lo que el diccionario no puede darte. */
-function BloqueSentido({ contexto, definiciones, previo, activo, alElegir }: {
+/**
+ * El significado en esta frase, que es lo que el diccionario no puede darte. La ficha abre siempre con el
+ * diccionario, sin gastar nada: Claude solo se consulta si se pide, y lo ya consultado aparece solo.
+ */
+function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegir, children }: {
   contexto: ContextoIA;
   definiciones: string[];
   previo?: { significado: string; uso?: string };
-  activo: boolean;
+  automatico: boolean;
+  listo: boolean;
   alElegir: (i: number) => void;
+  children: (bloque: preact.ComponentChildren, boton: preact.ComponentChildren) => preact.ComponentChildren;
 }) {
-  const [s, fijarS] = useState<SentidoEnContexto | null>(null);
-  const [cargando, fijarCargando] = useState(false);
-  const clave = `${contexto.lema}|${contexto.frase}`;
-  useEffect(() => {
-    let vivo = true;
-    fijarS(null);
-    alElegir(-1);
-    if (!activo || !contexto.frase) return;
-    fijarCargando(true);
+  const clave = `${contexto.lema}|${contexto.lectura}|${contexto.frase}`;
+  // Todo va atado a la pregunta: al cambiar de palabra, lo de la anterior no llega a pintarse.
+  const [estado, fijarEstado] = useState<{ clave: string; s?: SentidoEnContexto; cargando?: boolean; error?: string }>({ clave });
+  const { s, cargando, error } = estado.clave === clave ? estado : ({ clave } as typeof estado);
+  const vigente = useRef(clave);
+  vigente.current = clave;
+
+  const pedir = () => {
+    fijarEstado({ clave, cargando: true });
     motor
       .sentidoEnContexto(contexto, definiciones)
       .then((r) => {
-        if (!vivo) return;
-        fijarS(r);
+        if (vigente.current !== clave) return;
+        fijarEstado({ clave, s: r });
         alElegir(r.definicion);
       })
-      // Sin clave o sin conexión la ficha sigue siendo útil: simplemente no se muestra el bloque.
-      .catch(() => {})
-      .finally(() => vivo && fijarCargando(false));
+      .catch((e: Error) => {
+        if (vigente.current === clave) fijarEstado({ clave, error: e.message });
+      });
+  };
+
+  useLayoutEffect(() => alElegir(-1), [clave]);
+
+  useEffect(() => {
+    if (!listo || !contexto.frase) return;
+    let vivo = true;
+    motor
+      .sentidoGuardado(contexto, definiciones)
+      .then((r) => {
+        if (!vivo) return;
+        if (r) {
+          fijarEstado({ clave, s: r });
+          alElegir(r.definicion);
+        } else if (automatico && !previo) {
+          pedir();
+        }
+      })
+      .catch(() => {});
     return () => {
       vivo = false;
     };
-  }, [clave]);
+  }, [clave, listo]);
 
   const significado = s?.significado ?? previo?.significado;
   const uso = s?.uso ?? previo?.uso;
-  if (!significado && !cargando) return null;
-  return (
+  const bloque = significado || cargando ? (
     <div class={`sentido ${significado ? '' : 'cargando'}`}>
       <div class="sentido-cab">
         <span class="sentido-et"><Icono n="ia" t={14} /> En esta frase</span>
@@ -475,7 +521,17 @@ function BloqueSentido({ contexto, definiciones, previo, activo, alElegir }: {
       {significado ? <b>{significado}</b> : <Esqueleto lineas={2} />}
       {s?.nota && <p>{s.nota}</p>}
     </div>
-  );
+  ) : null;
+  // Si la revisión del video ya dijo qué significa aquí, no hace falta pagar por volver a preguntarlo.
+  const boton = contexto.frase && !s && !previo && !cargando ? (
+    <div class="sentido-pedir">
+      <button class="btn chico ia" title="Pregunta a Claude qué significa esta palabra en esta frase. La respuesta se guarda y no se vuelve a pagar." onClick={pedir}>
+        <Icono n="ia" t={14} /> ¿Qué significa en esta frase?
+      </button>
+      {error && <span class="texto-error" role="alert">{error}</span>}
+    </div>
+  ) : null;
+  return <>{children(bloque, boton)}</>;
 }
 
 function CorregirLectura({ contexto, textoLinea, superficie, alHecho, alCerrar }: { contexto: ContextoIA; textoLinea: string; superficie: string; alHecho?: () => void; alCerrar: () => void }) {
@@ -549,7 +605,13 @@ const PESTANAS: { id: PestanaDiccionario; icono: NombreIcono; nombre: string; ti
 export function Ficha(p: PropsFicha) {
   const [r, fijarR] = useState<ResultadoBusqueda | null>(null);
   const [extras, fijarExtras] = useState<ResultadoBusqueda[]>([]);
-  const [pestana, fijarPestana] = useState<PestanaDiccionario | null>(p.pestanaInicial ?? p.ajustes.diccionarioPestana);
+  const pestanaGuardada = p.pestanaInicial ?? p.ajustes.diccionarioPestana;
+  const pestanaDeInicio = pestanaGuardada === 'ninguna' ? null : pestanaGuardada;
+  const [pestana, fijarPestana] = useState<PestanaDiccionario | null>(pestanaDeInicio);
+  // De qué palabra es el resultado de `r`. Mientras llega el de la nueva, la ficha aún enseña la anterior.
+  const [buscada, fijarBuscada] = useState('');
+  const claveBusqueda = `${p.lema}|${p.lectura}`;
+  const sincronizada = buscada === claveBusqueda;
   const [pregunta, fijarPregunta] = useState('');
   const [preguntaEnviada, fijarPreguntaEnviada] = useState('');
   const [cargando, fijarCargando] = useState(true);
@@ -577,6 +639,7 @@ export function Ficha(p: PropsFicha) {
     motor.buscar(p.lema, p.lectura).then((x) => {
       if (vivo) {
         fijarR(x);
+        fijarBuscada(claveBusqueda);
         fijarCargando(false);
       }
     });
@@ -592,6 +655,11 @@ export function Ficha(p: PropsFicha) {
       vivo = false;
     };
   }, [p.lema, p.lectura]);
+
+  // Haber preguntado a Claude por una palabra no significa querer preguntar por la siguiente.
+  useEffect(() => {
+    fijarPestana((actual) => (PESTANAS.find((x) => x.id === actual)?.ia ? pestanaDeInicio : actual));
+  }, [p.lema, p.lectura, p.contexto.frase]);
 
   useEffect(() => {
     if (p.estado === undefined && p.rastreada === undefined) return;
@@ -698,7 +766,7 @@ export function Ficha(p: PropsFicha) {
     definiciones: (
       <div key="def" class="ficha-bloque">
         <div class="subtitulo-def">Definiciones</div>
-        {definicionesUnicas.length === 0 && <div class="ayuda">Sin entrada en los diccionarios instalados. Prueba a preguntarle a Claude con «Explicar».</div>}
+        {definicionesUnicas.length === 0 && <div class="ayuda">Sin entrada en los diccionarios instalados. Puedes preguntarle a Claude con «Explicar».</div>}
         <ol class="lista-defs">
           {defsVisibles.map((g, i) => (
             <li key={g} class={i === 0 && elegida >= 0 ? 'elegida' : ''} title={i === 0 && elegida >= 0 ? 'Claude la señala como la más cercana en esta frase' : undefined}>
@@ -745,7 +813,7 @@ export function Ficha(p: PropsFicha) {
           {pestana === 'audio' && <PanelAudio lema={r.lema} lectura={r.lectura} frase={p.contexto.frase} ajustes={p.ajustes} enviar={enviar} />}
           {pestana === 'imagenes' && <PanelImagenes lema={r.lema} frase={p.contexto.frase} enviar={enviar} primeraGlosa={r.entradas.find((e) => e.dic === 'jmdict-en')?.glosas[0] ?? definicionesUnicas[0]} />}
           {pestana === 'ejemplos' && <PanelEjemplos lema={r.lema} enviar={enviar} />}
-          {pestana === 'explicar' && (
+          {sincronizada && pestana === 'explicar' && (
             <>
               <PanelFlujo
                 metodo="explicar"
@@ -770,8 +838,8 @@ export function Ficha(p: PropsFicha) {
               </form>
             </>
           )}
-          {pestana === 'desglose' && <PanelFlujo metodo="desglosar" args={[contexto]} titulo="Desglose de la frase" render={(t) => <Desglose texto={t} />} />}
-          {pestana === 'traduccion' && <PanelFlujo metodo="traducir" args={[contexto]} titulo="Traducción" />}
+          {sincronizada && pestana === 'desglose' && <PanelFlujo metodo="desglosar" args={[contexto]} titulo="Desglose de la frase" render={(t) => <Desglose texto={t} />} />}
+          {sincronizada && pestana === 'traduccion' && <PanelFlujo metodo="traducir" args={[contexto]} titulo="Traducción" />}
           {pestana === 'enlaces' && (
             <div class="enlaces">
               {ENLACES.map((e) => (
@@ -867,8 +935,14 @@ export function Ficha(p: PropsFicha) {
         {corrigiendo && p.contexto.frase && (
           <CorregirLectura contexto={contexto} textoLinea={p.contexto.frase} superficie={p.superficie ?? r.lema} alHecho={p.alCorregirLectura} alCerrar={() => fijarCorrigiendo(false)} />
         )}
-        <BloqueSentido contexto={contexto} definiciones={definicionesUnicas} previo={p.sentidoPrevio} activo={p.ajustes.sentidoAutomatico} alElegir={fijarElegida} />
-        {p.ajustes.ordenContenido.map((b) => bloques[b])}
+        <ConSentido contexto={contexto} definiciones={definicionesUnicas} previo={p.sentidoPrevio} automatico={p.ajustes.sentidoAutomatico} listo={sincronizada} alElegir={fijarElegida}>
+          {(bloque, boton) => (
+            <>
+              {bloque}
+              {p.ajustes.ordenContenido.map((b) => (b === 'definiciones' ? <>{bloques[b]}{boton}</> : bloques[b]))}
+            </>
+          )}
+        </ConSentido>
       </div>
 
       <div class="ficha-dock" role="tablist" aria-label="Más sobre esta palabra">

@@ -13,9 +13,9 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-3987e5?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-A9E45B?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/version-0.1.0-A9E45B?style=flat-square" alt="Version 0.1.0">
+  <img src="https://img.shields.io/badge/version-0.2.0-A9E45B?style=flat-square" alt="Version 0.2.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
-  <img src="https://img.shields.io/badge/unit%20tests-134-0ca30c?style=flat-square" alt="134 unit tests">
+  <img src="https://img.shields.io/badge/unit%20tests-171-0ca30c?style=flat-square" alt="171 unit tests">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 to N1">
 </p>
 
@@ -37,7 +37,7 @@
 
 ## Overview
 
-Kotonoha (言の葉, "leaves of words") overlays interactive subtitles on YouTube, Netflix and other players. Each word shows its furigana, its pitch accent and how well it is known, and hovering over it gives its meaning in that specific sentence. The extension adds a dictionary, flashcard creation for Anki or a built-in review, and explanations in context generated with the Claude API. It also works on web pages, texts, EPUB books and local video files.
+Kotonoha (言の葉, "leaves of words") overlays interactive subtitles on YouTube, Netflix and other players. Each word shows its furigana, its pitch accent and how well it is known, and hovering over it opens its dictionary entry at no cost. A button asks Claude what it means in that specific sentence. The extension adds a dictionary, flashcard creation for Anki or a built-in review, and explanations in context generated with the Claude API. It also works on web pages, texts, EPUB books and local video files.
 
 The name comes from the preface of the *Kokin Wakashū* (c. 905): the poetry of Japan has the human heart for its seed, and from it grow countless leaves of words.
 
@@ -53,7 +53,7 @@ The interface is currently in Spanish. Claude's explanations can be requested in
   </tr>
   <tr>
     <td valign="top"><b>Subtitles made for reading</b><br>Furigana, pitch accent colors, learning status underlines and JLPT grammar points, with an estimated comprehension percentage for each video.</td>
-    <td valign="top"><b>The meaning in that sentence</b><br>Claude receives the full script and gives the word's real meaning, including figurative and literary use. It also reviews furigana readings and stores the result.</td>
+    <td valign="top"><b>Dictionary first, Claude on request</b><br>The card opens with the dictionary. A button asks Claude for the word's real meaning in that sentence, including figurative and literary use. It also reviews furigana readings as the video plays.</td>
     <td valign="top"><b>Subtitle navigator</b><br>Every line in view, with filters, bookmarks, multiple selection and synchronization with one or two marks. Corrected lines keep their original text.</td>
   </tr>
   <tr>
@@ -65,6 +65,16 @@ The interface is currently in Spanish. Claude's explanations can be requested in
     <td valign="top"><b>Translation and correction with Claude</b><br>Translation into the support language, starting with the part being watched. Automatic correction of homophones in generated subtitles, using the title and the full text as context, without asking anything.</td>
     <td valign="top"><b>SRT both ways</b><br>Import and export on any site: SRT, VTT, ASS and TTML. Imported files stay saved for that title, and Japanese subtitles from Netflix are kept even if another region does not offer them.</td>
     <td valign="top"><b>Local transcription</b><br>Whisper on the graphics card through WebGPU, with audio staying on the computer: 30 minutes of video in about 5, without making the desktop stutter. It works in chunks with rest periods and recovers if the driver restarts.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/gasto.png" alt="This month's Claude spending, by day, model and task"></td>
+    <td width="33%" align="center"><img src="docs/img/guardada.png" alt="A Claude answer served from storage, at no cost"></td>
+    <td width="33%" align="center"><img src="docs/img/mover.png" alt="Subtitles dragged to another position on the video"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Spending in plain sight</b><br>The home screen shows what this month has cost in Claude, with a chart by day and model, the tasks it went to and a log of every request with its tokens.</td>
+    <td valign="top"><b>Nothing is paid for twice</b><br>Every answer is stored by word and sentence. Moving between words costs nothing, and an interrupted answer is finished and stored instead of being lost.</td>
+    <td valign="top"><b>Subtitles wherever you want them</b><br>Drag them from anywhere to the height and side you prefer, with magnets at the center and at their usual place. Lines change without flicker and stay with the video when the page scrolls.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/inicio.png" alt="Application home screen"></td>
@@ -203,7 +213,7 @@ Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist
 
 ## Project status
 
-Version 0.1.0 is the first published version. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure, and extended validation with real sessions is still pending.
+Version 0.2.0 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure, and extended validation with real sessions is still pending.
 
 ## Privacy
 

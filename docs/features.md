@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.1.0, along with how it has been verified.
+Status of each feature in version 0.2.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -16,10 +16,17 @@ Status of each feature in version 0.1.0, along with how it has been verified.
 | Feature | Verification |
 |---|---|
 | Floating bar with known words, comprehension and recommended sentences | Automated |
+| The bar appears when the pointer rests at the top, stays while it is near and ignores passing movements | Automated |
+| Subtitles that can be dragged anywhere on the video, with magnets and without leaving it | Automated |
+| Line changes without flicker, and slightly smaller text for long paragraphs | Automated |
+| Subtitles stay with the video when the page scrolls, without jitter | Imitation page |
+| A line appearing under a resting pointer neither opens a card nor pauses the video | Automated |
 | Subtitles with furigana, pitch accent colors and status underlines | Automated |
 | Furigana, gloss and color modes: always, on hover, unknown only, never | Automated |
 | Word card: definitions, status, frequency, audio, images, examples and links | Automated |
-| Explain, break down and translate with Claude | Simulator |
+| The card opens with the dictionary, with no request to Claude | Simulator |
+| Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator |
+| Every answer is stored: the same word in the same sentence is never requested again | Simulator |
 | Free questions about a word or sentence | Simulator |
 | JLPT grammar: about 100 rules confirmed by Claude, with a per-video summary | Simulator |
 | Priority words: the unknown words repeated most in the video | Automated |
@@ -79,6 +86,7 @@ Status of each feature in version 0.1.0, along with how it has been verified.
 | Feature | Verification |
 |---|---|
 | Home with vocabulary and review summary | Automated |
+| Claude spending: monthly total, chart by day and model, tasks and request log | Simulator |
 | Dictionary with free search and conjugated forms | Automated |
 | Reader for pasted text | Automated |
 | Library: EPUB, TXT and SRT | Automated |
@@ -105,8 +113,9 @@ Status of each feature in version 0.1.0, along with how it has been verified.
 |---|---|
 | Meaning depends on the sentence | The "En esta frase" block gives the meaning in context, flags figurative or poetic use, and comes first on the card |
 | Correct readings | Claude reviews the readings of each line, and any of them can be corrected by hand |
-| Broad context | Claude receives the full script, the eight neighboring lines and the translation |
-| Nothing is paid for twice | Reviewed results are stored by line text, so a chorus is only analyzed once |
+| Broad context | Claude receives 40 lines around the sentence and the translation. The full script is sent for correction, and is optional for queries |
+| Nothing is paid for twice | Every answer is stored by word and sentence, and reviewed results by line text. An interrupted answer is finished and stored, and two identical queries at once share one request |
+| Claude only when needed | The card opens with the dictionary, and the review covers the stretch about to be watched instead of the whole video |
 | Start with what is on screen | Translation, correction and review order their batches by the playback position |
 | The computer stays usable | Transcription rests, adapts to use and stops on repeated failures |
 | Pages are left untouched | Web underlining uses the CSS Custom Highlight API, without rewriting the DOM |
