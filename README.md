@@ -13,9 +13,9 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-A9E45B?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-3987e5?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.1.0-A9E45B?style=flat-square" alt="Versión 0.1.0">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.2.0-A9E45B?style=flat-square" alt="Versión 0.2.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
-  <img src="https://img.shields.io/badge/pruebas%20unitarias-134-0ca30c?style=flat-square" alt="134 pruebas unitarias">
+  <img src="https://img.shields.io/badge/pruebas%20unitarias-171-0ca30c?style=flat-square" alt="171 pruebas unitarias">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 a N1">
 </p>
 
@@ -37,7 +37,7 @@
 
 ## Descripción
 
-Kotonoha (言の葉, «hojas de palabras») superpone subtítulos interactivos sobre YouTube, Netflix y otros reproductores. Cada palabra muestra su furigana, su acento tonal y lo que se sabe de ella, y al pasar el ratón ofrece su significado en esa frase concreta. La extensión añade un diccionario, la creación de tarjetas para Anki o para un repaso integrado, y explicaciones en contexto generadas con la API de Claude. También funciona sobre páginas web, textos, libros EPUB y archivos de video propios.
+Kotonoha (言の葉, «hojas de palabras») superpone subtítulos interactivos sobre YouTube, Netflix y otros reproductores. Cada palabra muestra su furigana, su acento tonal y lo que se sabe de ella, y al pasar el ratón abre su entrada de diccionario, sin ningún coste. Un botón le pregunta a Claude qué significa en esa frase concreta. La extensión añade un diccionario, la creación de tarjetas para Anki o para un repaso integrado, y explicaciones en contexto generadas con la API de Claude. También funciona sobre páginas web, textos, libros EPUB y archivos de video propios.
 
 El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Japón tiene por semilla el corazón humano, y de él brotan miríadas de hojas de palabras.
 
@@ -51,7 +51,7 @@ El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Jap�
   </tr>
   <tr>
     <td valign="top"><b>Subtítulos para leer de verdad</b><br>Furigana, color por acento tonal, subrayado por estado de aprendizaje y puntos de gramática JLPT, con un porcentaje de comprensión estimado para cada video.</td>
-    <td valign="top"><b>El sentido en esa frase</b><br>Claude recibe el guion completo y señala el sentido real de la palabra, incluidos los usos figurados y literarios. También revisa las lecturas del furigana y guarda el resultado.</td>
+    <td valign="top"><b>Diccionario primero, Claude si se pide</b><br>La ficha abre con el diccionario. Un botón le pregunta a Claude el sentido real de la palabra en esa frase, incluidos los usos figurados y literarios. También revisa las lecturas del furigana a medida que avanza el video.</td>
     <td valign="top"><b>Navegador de subtítulos</b><br>Todas las líneas a la vista, con filtros, marcadores, selección múltiple y sincronización con una o dos marcas. Las líneas corregidas conservan su texto original.</td>
   </tr>
   <tr>
@@ -63,6 +63,16 @@ El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Jap�
     <td valign="top"><b>Traducir y corregir con Claude</b><br>Traducción al idioma de apoyo, empezando por el tramo que se está viendo. Corrección automática de los homófonos de los subtítulos generados, con el título y todo el texto como contexto, sin preguntar nada.</td>
     <td valign="top"><b>SRT de ida y vuelta</b><br>Importación y exportación en cualquier sitio: SRT, VTT, ASS y TTML. Lo importado queda guardado para ese título, y los subtítulos en japonés de Netflix se conservan aunque otra región no los ofrezca.</td>
     <td valign="top"><b>Transcripción local</b><br>Whisper en la tarjeta gráfica mediante WebGPU, sin que el audio salga del equipo: 30 minutos de video en unos 5, sin trabar el escritorio. Trabaja por tramos con descansos y se recupera si el controlador se reinicia.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/gasto.png" alt="Gasto del mes en Claude, por días, modelos y tareas"></td>
+    <td width="33%" align="center"><img src="docs/img/guardada.png" alt="Respuesta de Claude que sale de lo guardado, sin gasto"></td>
+    <td width="33%" align="center"><img src="docs/img/mover.png" alt="Subtítulos arrastrados a otra posición del video"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>El gasto a la vista</b><br>La pantalla de inicio muestra lo gastado este mes en Claude, con una gráfica por días y modelos, en qué tareas se fue y un registro de cada petición, con sus tokens.</td>
+    <td valign="top"><b>Nada se paga dos veces</b><br>Cada respuesta se guarda por palabra y frase. Ir y venir entre palabras no gasta nada, y una respuesta interrumpida se termina y se guarda en lugar de perderse.</td>
+    <td valign="top"><b>Subtítulos donde se quieran</b><br>Se arrastran desde cualquier punto a la altura y el lado que se prefiera, con imanes al centro y a su sitio. Cambian de línea sin parpadeos y acompañan al video al desplazar la página.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/inicio.png" alt="Pantalla de inicio de la aplicación"></td>
@@ -201,7 +211,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.1.0 es la primera publicada. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor, y queda pendiente la validación prolongada con sesiones reales. La interfaz está en español.
+La versión 0.2.0 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor, y queda pendiente la validación prolongada con sesiones reales. La interfaz está en español.
 
 ## Privacidad
 

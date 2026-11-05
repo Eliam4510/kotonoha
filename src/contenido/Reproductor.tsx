@@ -2,12 +2,14 @@
 
 import { signal, useComputed, useSignal, useSignalEffect } from '@preact/signals';
 import { memo } from 'preact/compat';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 import { type Ajustes, guardarAjustes, NOMBRES_MODO } from '../compartido/ajustes';
 import { fondo, motor } from '../compartido/rpc';
 import type { EstadoPalabra, LineaAnalizada, PalabraToken } from '../compartido/tipos';
 import { filtrarLineas, type FiltroNavegador, NOMBRES_NIVEL } from '../nucleo/frases';
 import { visibilidadVelo } from '../nucleo/modos';
+import { type CajaSubs, conImanes, enZonaActivacion, enZonaSegura, ESPERA_MOSTRAR_MS, ESPERA_OCULTAR_MS, factorLargo, pixelesDe, type PosicionSubs, posicionDesde, posicionInicial } from '../nucleo/presentacion';
+import type { Linea } from '../nucleo/subtitulos';
 import { pegarSignos } from '../nucleo/tokens';
 import { enviarAlCreador } from '../ui/borrador';
 import { colocarJunto, Ficha, PanelFlujo } from '../ui/Ficha';
@@ -27,6 +29,7 @@ import {
   irALinea,
   pausasEnLinea,
   refrescarAnalisis,
+  videoEnPantalla,
 } from './controlador';
 import {
   ajustes,
@@ -48,17 +51,18 @@ import {
   generacion,
   originales,
   indiceActivo,
-  indiceMostrado,
+  indiceVisual,
   infoVideo,
   lineasObjetivo,
   lineasSecundarias,
   marcadas,
   opcionesFrase,
+  origenSubs,
   panel,
   pausado,
   quitarAviso,
   rectVideo,
-  secundariaMostrada,
+  secundariaVisual,
   seleccionadas,
   tipoPausa,
   verTemporal,
@@ -90,6 +94,25 @@ function clasesRaiz(a: Ajustes) {
 
 let temporizadorCierre: ReturnType<typeof setTimeout> | null = null;
 let temporizadorApertura: ReturnType<typeof setTimeout> | null = null;
+/** Al soltar los subtítulos el puntero queda sobre una palabra: eso no es querer consultarla. */
+let sinFichaHasta = 0;
+/** La palabra sobre la que ya se resolvió qué hacer: no se reabre hasta salir de ella. */
+let palabraAtendida: PalabraToken | null = null;
+
+// Cuando una línea nueva aparece bajo un ratón quieto, el navegador avisa de que ha «entrado» en ella.
+// Ese aviso llega con las coordenadas de siempre, y eso lo distingue de un movimiento de verdad, que
+// trae coordenadas nuevas porque el navegador avisa de la entrada antes de avisar del movimiento.
+let ratonX = -1;
+let ratonY = -1;
+window.addEventListener(
+  'mousemove',
+  (e) => {
+    ratonX = e.clientX;
+    ratonY = e.clientY;
+  },
+  { capture: true, passive: true }
+);
+const ratonQuieto = (e: MouseEvent) => e.clientX === ratonX && e.clientY === ratonY;
 
 function programarCierre() {
   if (temporizadorCierre) clearTimeout(temporizadorCierre);
@@ -116,6 +139,15 @@ function abrirConsulta(p: PalabraToken, l: LineaAnalizada | null, el: Element, f
   if (!yaAbierta) alAbrirConsulta();
 }
 
+function alPasarPorPalabra(p: PalabraToken, l: LineaAnalizada | null, el: Element) {
+  const c = ajustes.value;
+  if (moviendoSubs.value || performance.now() < sinFichaHasta) return;
+  palabraAtendida = p;
+  if (!c.popupAlPasar || (c.popupSoloDesconocidas && p.estado !== 'desconocida')) return;
+  if (temporizadorApertura) clearTimeout(temporizadorApertura);
+  temporizadorApertura = setTimeout(() => abrirConsulta(p, l, el, false), 130);
+}
+
 export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraToken; l: LineaAnalizada | null }) {
   if (!p.esPalabra) return <span>{pegarSignos(p.superficie)}</span>;
   const a = ajustes.value;
@@ -130,13 +162,14 @@ export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraTok
       data-clave={p.clave}
       onMouseEnter={(e) => {
         cancelarCierre();
-        const el = e.currentTarget;
-        const c = ajustes.value;
-        if (!c.popupAlPasar || (c.popupSoloDesconocidas && p.estado !== 'desconocida')) return;
-        if (temporizadorApertura) clearTimeout(temporizadorApertura);
-        temporizadorApertura = setTimeout(() => abrirConsulta(p, l, el, false), 130);
+        if (!ratonQuieto(e)) alPasarPorPalabra(p, l, e.currentTarget);
+      }}
+      onMouseMove={(e) => {
+        // Si la línea apareció bajo el ratón, el primer movimiento de verdad es el que cuenta.
+        if (palabraAtendida !== p && (e.movementX || e.movementY)) alPasarPorPalabra(p, l, e.currentTarget);
       }}
       onMouseLeave={() => {
+        palabraAtendida = null;
         if (temporizadorApertura) clearTimeout(temporizadorApertura);
         programarCierre();
       }}
@@ -162,19 +195,118 @@ export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraTok
 
 // ---------- Subtítulos ----------
 
+const moviendoSubs = signal(false);
+const guiaSubs = signal({ centrado: false, enBase: false });
+
 function Subtitulos() {
   const oculto = useSignal(false);
   useEffect(() => {
     ocultarParaCaptura.oyente = (v) => (oculto.value = v);
   }, []);
 
+  const zona = useRef<HTMLDivElement>(null);
+  const bloque = useRef<HTMLDivElement>(null);
+  const fondoSub = useRef<HTMLDivElement>(null);
+  const contenido = useRef<HTMLDivElement>(null);
+  const enArrastre = useRef<PosicionSubs | null>(null);
+  const colocada = useRef({ left: 0, top: 0 });
+  const arriba = useRef(false);
+  const ultima = useRef<{ linea: LineaAnalizada | null; sec: Linea | null; visObjetivo: string; visSecundaria: string } | null>(null);
+
+  const caja = (): CajaSubs | null => {
+    const z = zona.current;
+    const c = contenido.current;
+    if (!z || !c) return null;
+    return { W: z.clientWidth, H: z.clientHeight, w: c.offsetWidth, h: c.offsetHeight };
+  };
+
+  const colocar = () => {
+    const c = caja();
+    const b = bloque.current;
+    if (!c || !b) return;
+    const p = enArrastre.current ?? ajustes.value.subsPosicion ?? (arriba.current ? { x: 0.5, y: 0.78 } : posicionInicial(c.H));
+    const { left, top } = pixelesDe(p, c);
+    colocada.current = { left, top };
+    b.style.transform = `translate(${left}px, ${top}px)`;
+    const f = fondoSub.current;
+    if (f) {
+      f.style.width = `${c.w}px`;
+      f.style.height = `${c.h}px`;
+    }
+  };
+
+  // Antes de pintar: el fondo y la posición siguen al texto en el mismo fotograma, sin saltos.
+  useEffect(() => {
+    const o = new ResizeObserver(colocar);
+    if (contenido.current) o.observe(contenido.current);
+    if (zona.current) o.observe(zona.current);
+    return () => o.disconnect();
+  });
+  useLayoutEffect(colocar);
+
+  const alPulsar = (e: PointerEvent) => {
+    if (e.button !== 0) return;
+    const destino = e.target as Element;
+    if (destino.closest('button, .chip-gram')) return;
+    e.stopPropagation();
+    const sobrePalabra = !!destino.closest('.pal');
+    // Pulsar una palabra es para consultarla: solo se mueve si de verdad hay arrastre.
+    if (!sobrePalabra) e.preventDefault();
+    const umbral = sobrePalabra ? 8 : 3;
+    const { clientX: x0, clientY: y0, pointerId } = e;
+    const inicio = { ...colocada.current };
+    let moviendo = false;
+    const mover = (m: PointerEvent) => {
+      const dx = m.clientX - x0;
+      const dy = m.clientY - y0;
+      if (!moviendo) {
+        if (Math.hypot(dx, dy) < umbral) return;
+        moviendo = true;
+        moviendoSubs.value = true;
+        bloque.current?.setPointerCapture(pointerId);
+        if (temporizadorApertura) clearTimeout(temporizadorApertura);
+        cerrarConsulta();
+        getSelection()?.removeAllRanges();
+      }
+      const c = caja();
+      if (!c) return;
+      const r = conImanes(inicio.left + dx, inicio.top + dy, c);
+      guiaSubs.value = { centrado: r.centrado, enBase: r.enBase };
+      enArrastre.current = posicionDesde(r.left, r.top, c);
+      colocar();
+    };
+    const fin = () => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', fin);
+      window.removeEventListener('pointercancel', fin);
+      if (!moviendo) return;
+      const { centrado, enBase } = guiaSubs.value;
+      const p = enArrastre.current;
+      enArrastre.current = null;
+      moviendoSubs.value = false;
+      sinFichaHasta = performance.now() + 500;
+      // En el sitio de siempre no hace falta recordar nada: así sigue bien si cambia el video.
+      cambiarAjuste({ subsPosicion: centrado && enBase ? null : p });
+      // El clic que sigue al soltar no debe abrir la palabra sobre la que terminó.
+      const tragar = (c: Event) => {
+        c.stopPropagation();
+        c.preventDefault();
+      };
+      window.addEventListener('click', tragar, { capture: true, once: true });
+      setTimeout(() => window.removeEventListener('click', tragar, { capture: true }), 0);
+    };
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', fin);
+    window.addEventListener('pointercancel', fin);
+  };
+
   const r = rectVideo.value;
   const a = ajustes.value;
-  const i = indiceMostrado.value;
+  const i = indiceVisual.value;
   const lineas = lineasObjetivo.value;
-  const linea = i >= 0 ? lineas[i] : null;
-  const sec = secundariaMostrada.value;
-  if (!r || anuncio.value || !a.activo) return null;
+  const lineaActual = i >= 0 ? lineas[i] : null;
+  const secActual = secundariaVisual.value;
+  if (!r || anuncio.value || !a.activo) return <div class="zona-subs" ref={zona} hidden />;
 
   const cfg = configModo.value;
   const clases = i >= 0 ? clasesLineas.value[i] : new Set<never>();
@@ -185,8 +317,21 @@ function Subtitulos() {
     clases,
     encima: encimaSubtitulo.value,
   };
-  const visObjetivo = a.ocultarObjetivo ? 'oculta' : visibilidadVelo(cfg.velarObjetivo, ctx);
-  const visSecundaria = a.ocultarSecundario ? 'oculta' : visibilidadVelo(cfg.velarSecundario, ctx);
+  const visObjetivoAhora = a.ocultarObjetivo ? 'oculta' : visibilidadVelo(cfg.velarObjetivo, ctx);
+  const visSecundariaAhora = a.ocultarSecundario ? 'oculta' : visibilidadVelo(cfg.velarSecundario, ctx);
+
+  const hayObjetivo = !!lineaActual && visObjetivoAhora !== 'oculta';
+  const haySecundaria = !!secActual && visSecundariaAhora !== 'oculta';
+  const hay = hayObjetivo || haySecundaria;
+  // Al quedarse sin línea, la última se desvanece en lugar de desaparecer de golpe.
+  if (hay) ultima.current = { linea: hayObjetivo ? lineaActual : null, sec: haySecundaria ? secActual : null, visObjetivo: visObjetivoAhora, visSecundaria: visSecundariaAhora };
+  else if (!lineas.length && !lineasSecundarias.value.length) ultima.current = null;
+  const v = ultima.current;
+  const linea = v?.linea ?? null;
+  const sec = v?.sec ?? null;
+  const visObjetivo = v?.visObjetivo ?? 'visible';
+  const visSecundaria = v?.visSecundaria ?? 'visible';
+  arriba.current = !!linea?.arriba;
 
   const base = Math.max(16, Math.min(r.height * 0.05, 52));
   const anchoLibre = a.navegadorAbierto ? Math.max(240, Math.min(r.width, innerWidth - ANCHO_NAVEGADOR - r.left)) : r.width;
@@ -195,55 +340,65 @@ function Subtitulos() {
     width: `${anchoLibre}px`,
     top: `${r.top}px`,
     height: `${r.height}px`,
-    paddingBottom: `${Math.max(36, r.height * 0.08)}px`,
     '--op-sombra': String(a.opacidadSombra),
     '--base': `${base}px`,
   };
 
-  const hayObjetivo = !!linea && visObjetivo !== 'oculta';
-  const haySecundaria = !!sec && visSecundaria !== 'oculta';
-
   return (
-    <div class={`zona-subs ${oculto.value ? 'oculta-captura' : ''}`} style={estiloZona}>
-      {(hayObjetivo || haySecundaria) && (
-        <div class={`subs-bloque ${a.sombra ? 'con-sombra' : ''}`} style={linea?.arriba ? { marginBottom: `${r.height * 0.7}px` } : undefined}>
-          {hayObjetivo && (
-            <div
-              class={`linea-sub objetivo ${visObjetivo === 'difuminada' ? 'difuminada' : ''} ${consulta.value ? 'consultando' : ''} ${clasesRaiz(a)}`}
-              lang="ja"
-              style={{ fontSize: `${(base * a.escalaObjetivo) / 100}px` }}
-              onMouseEnter={() => {
-                encimaSubtitulo.value = true;
-                alEntrarSubtitulo();
-              }}
-              onMouseLeave={() => {
-                encimaSubtitulo.value = false;
-                alSalirSubtitulo();
-              }}
-            >
-              {linea!.palabras.map((p, k) => <PalabraVista key={k} p={p} l={linea} />)}
-            </div>
-          )}
-          {linea && a.mostrarGramatica && visObjetivo === 'visible' && (linea.gramatica?.length ?? 0) > 0 && (
-            <div class="fila-gram">
-              {linea.gramatica!.slice(0, 4).map((g) => (
-                <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={g.significado} onClick={(e) => {
-                  e.stopPropagation();
-                  const c = e.currentTarget.getBoundingClientRect();
-                  const bloque = e.currentTarget.closest('.subs-bloque')?.getBoundingClientRect() ?? c;
-                  consulta.value = null;
-                  consultaGramatica.value = consultaGramatica.value?.punto.patron === g.patron ? null : { punto: g, linea, ancla: { left: c.left, top: bloque.top, width: c.width, height: bloque.height } };
-                }}>
-                  <span lang="ja">{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
-                </button>
-              ))}
-            </div>
-          )}
-          {haySecundaria && (
-            <div class={`linea-sub secundaria ${visSecundaria === 'difuminada' ? 'difuminada' : ''}`} style={{ fontSize: `${(base * 0.56 * a.escalaSecundario) / 100}px` }}>
-              {sec!.texto}
-            </div>
-          )}
+    <div class={`zona-subs ${oculto.value ? 'oculta-captura' : ''}`} ref={zona} style={estiloZona}>
+      {moviendoSubs.value && guiaSubs.value.centrado && <div class="subs-guia" aria-hidden="true" />}
+      {v && (
+        <div
+          class={`subs-bloque ${a.sombra ? 'con-sombra' : ''} ${hay ? '' : 'saliendo'} ${moviendoSubs.value ? 'arrastrando' : ''}`}
+          ref={bloque}
+          onPointerDown={alPulsar}
+          onClick={(e) => e.stopPropagation()}
+          onDblClick={(e) => {
+            e.stopPropagation();
+            if (!(e.target as Element).closest('.pal, button')) cambiarAjuste({ subsPosicion: null });
+          }}
+        >
+          <div class="subs-fondo" ref={fondoSub} aria-hidden="true" />
+          <div class="subs-asa" title="Arrastra para mover los subtítulos. Doble clic para volver a su sitio." aria-hidden="true" />
+          <div class="subs-contenido" ref={contenido}>
+            {linea && (
+              <div
+                class={`linea-sub objetivo ${visObjetivo === 'difuminada' ? 'difuminada' : ''} ${consulta.value ? 'consultando' : ''} ${clasesRaiz(a)}`}
+                lang="ja"
+                style={{ fontSize: `${(base * a.escalaObjetivo * factorLargo(linea.texto.length)) / 100}px` }}
+                onMouseEnter={(e) => {
+                  encimaSubtitulo.value = true;
+                  if (!ratonQuieto(e)) alEntrarSubtitulo();
+                }}
+                onMouseLeave={() => {
+                  encimaSubtitulo.value = false;
+                  alSalirSubtitulo();
+                }}
+              >
+                <div class="linea-texto" key={linea.id}>{linea.palabras.map((p, k) => <PalabraVista key={k} p={p} l={linea} />)}</div>
+              </div>
+            )}
+            {linea && a.mostrarGramatica && visObjetivo === 'visible' && (linea.gramatica?.length ?? 0) > 0 && (
+              <div class="fila-gram">
+                {linea.gramatica!.slice(0, 4).map((g) => (
+                  <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={g.significado} onClick={(e) => {
+                    e.stopPropagation();
+                    const c = e.currentTarget.getBoundingClientRect();
+                    const caja = e.currentTarget.closest('.subs-bloque')?.getBoundingClientRect() ?? c;
+                    consulta.value = null;
+                    consultaGramatica.value = consultaGramatica.value?.punto.patron === g.patron ? null : { punto: g, linea, ancla: { left: c.left, top: caja.top, width: c.width, height: caja.height } };
+                  }}>
+                    <span lang="ja">{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
+                  </button>
+                ))}
+              </div>
+            )}
+            {sec && (
+              <div class={`linea-sub secundaria ${visSecundaria === 'difuminada' ? 'difuminada' : ''}`} style={{ fontSize: `${(base * 0.56 * a.escalaSecundario * factorLargo(sec.texto.length, 90)) / 100}px` }}>
+                <div class="linea-texto" key={sec.id}>{sec.texto}</div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -356,18 +511,6 @@ function PopupGramatica() {
 
 // ---------- Isla ----------
 
-let temporizadorBarra: ReturnType<typeof setTimeout> | null = null;
-
-function mostrarIsla() {
-  if (temporizadorBarra) clearTimeout(temporizadorBarra);
-  barraVisible.value = true;
-}
-
-function ocultarIsla() {
-  if (temporizadorBarra) clearTimeout(temporizadorBarra);
-  temporizadorBarra = setTimeout(() => (barraVisible.value = false), 280);
-}
-
 const BOTONES_PANEL: { n: 'generar' | 'visual' | 'video' | 'atajos' | 'traductor'; icono: NombreIcono; nombre: string; tip: string }[] = [
   { n: 'generar', icono: 'varita', nombre: 'Generar subtítulos', tip: 'Generar y revisar subtítulos' },
   { n: 'traductor', icono: 'traducir', nombre: 'Traductor', tip: 'Traductor · Alt+T' },
@@ -382,6 +525,55 @@ function Barra() {
   const visible = barraVisible.value || a.desanclarBarra || verTemporal.value || panel.value !== null;
   const hayLineas = lineasObjetivo.value.length > 0;
   const conocidas = useSignal(0);
+  const refBarra = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let mostrando: ReturnType<typeof setTimeout> | null = null;
+    let ocultando: ReturnType<typeof setTimeout> | null = null;
+    const cancelarMostrar = () => {
+      if (mostrando) clearTimeout(mostrando);
+      mostrando = null;
+    };
+    const cancelarOcultar = () => {
+      if (ocultando) clearTimeout(ocultando);
+      ocultando = null;
+    };
+    const programarOcultar = () => {
+      ocultando ??= setTimeout(() => {
+        ocultando = null;
+        barraVisible.value = false;
+      }, ESPERA_OCULTAR_MS);
+    };
+    const alMover = (e: MouseEvent) => {
+      const el = refBarra.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const caja = { izq: r.left, der: r.right, abajo: 12 + r.height };
+      if (barraVisible.value) {
+        if (enZonaSegura(e.clientX, e.clientY, caja)) cancelarOcultar();
+        else programarOcultar();
+      } else if (enZonaActivacion(e.clientX, e.clientY, caja) && videoEnPantalla()) {
+        mostrando ??= setTimeout(() => {
+          mostrando = null;
+          barraVisible.value = true;
+        }, ESPERA_MOSTRAR_MS);
+      } else {
+        cancelarMostrar();
+      }
+    };
+    const alSalirDeLaVentana = (e: MouseEvent) => {
+      if (e.relatedTarget) return;
+      cancelarMostrar();
+      if (barraVisible.value) programarOcultar();
+    };
+    window.addEventListener('mousemove', alMover, { capture: true, passive: true });
+    document.addEventListener('mouseout', alSalirDeLaVentana, { passive: true });
+    return () => {
+      cancelarMostrar();
+      cancelarOcultar();
+      window.removeEventListener('mousemove', alMover, { capture: true });
+      document.removeEventListener('mouseout', alSalirDeLaVentana);
+    };
+  }, []);
   useEffect(() => {
     const cargar = () => motor.estadisticasPalabras().then((s) => (conocidas.value = s.conocidas)).catch(() => {});
     cargar();
@@ -404,8 +596,7 @@ function Barra() {
       : null;
   return (
     <>
-      <div class="barra-zona" onMouseEnter={mostrarIsla} onMouseLeave={ocultarIsla} />
-      <div class={`barra ${visible ? 'visible' : ''} ${a.navegadorAbierto ? 'con-nav' : ''}`} onMouseEnter={mostrarIsla} onMouseLeave={ocultarIsla} role="toolbar" aria-label="Barra de Kotonoha">
+      <div class={`barra ${visible ? 'visible' : ''} ${a.navegadorAbierto ? 'con-nav' : ''}`} ref={refBarra} role="toolbar" aria-label="Barra de Kotonoha">
         <button class="barra-logo" data-tip="Abrir Kotonoha · Alt+Shift+W" aria-label="Abrir la ventana de Kotonoha" onClick={() => fondo.abrirApp()}>
           <Logo t={26} />
         </button>
@@ -718,7 +909,9 @@ export function Reproductor({ sinBarra = false }: { sinBarra?: boolean }) {
   const raiz = useRef<HTMLDivElement>(null);
   useEffect(() => {
     fijarAbrirConsulta((p: PalabraToken, l: LineaAnalizada) => {
-      const el = raiz.current?.querySelector(`.linea-sub [data-clave="${CSS.escape(p.clave)}"]`);
+      // Los subtítulos viven fuera de la capa fija: se busca en todo el overlay.
+      const overlay = raiz.current?.getRootNode() as ParentNode | undefined;
+      const el = overlay?.querySelector(`.linea-sub [data-clave="${CSS.escape(p.clave)}"]`);
       if (el) abrirConsulta(p, l, el, true);
     });
     void abrirConsultaDe;
@@ -744,19 +937,25 @@ export function Reproductor({ sinBarra = false }: { sinBarra?: boolean }) {
 
   // kk-raiz aquí también: sobre el video la interfaz siempre es oscura, sea cual sea el tema de la página.
   return (
-    <div class="capa kk-raiz" ref={raiz} onClick={() => {
-      if (consulta.value?.fijada) cerrarConsulta();
-      consultaGramatica.value = null;
-    }}>
-      <Subtitulos />
-      {!sinBarra && <Barra />}
-      <Navegador />
-      <PanelesFlotantes />
-      <PopupPalabra />
-      <PopupGramatica />
-      <Avisos />
-      <ZonaSoltar />
-    </div>
+    <>
+      <div class="capa-subs kk-raiz" ref={(el) => {
+        origenSubs.el = el;
+      }}>
+        <Subtitulos />
+      </div>
+      <div class="capa kk-raiz" ref={raiz} onClick={() => {
+        if (consulta.value?.fijada) cerrarConsulta();
+        consultaGramatica.value = null;
+      }}>
+        {!sinBarra && <Barra />}
+        <Navegador />
+        <PanelesFlotantes />
+        <PopupPalabra />
+        <PopupGramatica />
+        <Avisos />
+        <ZonaSoltar />
+      </div>
+    </>
   );
 }
 

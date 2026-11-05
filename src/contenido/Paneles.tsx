@@ -376,6 +376,12 @@ function PanelVideo() {
               <Fila etq="Tamaño"><Paso etiqueta="tamaño de secundarios" valor={a.escalaSecundario} paso={10} min={40} max={250} unidad="%" alCambiar={(v) => cambiarAjuste({ escalaSecundario: v })} /></Fila>
             </div>
           </div>
+          <TituloGrupo>Posición</TituloGrupo>
+          <div class="grupo">
+            <Fila etq="Dónde van los subtítulos" ayuda="Arrástralos sobre el video para moverlos">
+              <button class="btn chico" disabled={!a.subsPosicion} onClick={() => cambiarAjuste({ subsPosicion: null })}>Volver a su sitio</button>
+            </Fila>
+          </div>
           <TituloGrupo>Fondo</TituloGrupo>
           <div class="grupo">
             <Fila etq="Fondo detrás del texto"><Interruptor on={a.sombra} etiqueta="Fondo sombreado" alCambiar={(v) => cambiarAjuste({ sombra: v })} /></Fila>
@@ -736,8 +742,8 @@ function PanelGenerar() {
             <div class="bloque-generar">
               <p>Corrige el furigana, detecta los usos figurados y marca la gramática de cada línea. Lo revisado se guarda, así que solo se hace una vez.</p>
             </div>
-            <Fila etq="Revisar automáticamente">
-              <Interruptor on={a.analisisAutomatico} etiqueta="Revisar automáticamente" alCambiar={(v) => cambiarAjuste({ analisisAutomatico: v })} />
+            <Fila etq="Revisar a medida que avanza">
+              <Interruptor on={a.analisisAutomatico} etiqueta="Revisar a medida que avanza" alCambiar={(v) => cambiarAjuste({ analisisAutomatico: v })} />
             </Fila>
             {r ? (
               <div class="progreso-linea">
@@ -746,7 +752,7 @@ function PanelGenerar() {
               </div>
             ) : (
               <div class="bloque-generar">
-                <button class="btn ia bloque" onClick={() => iniciarAnalisisProfundo(true)}><Icono n="ia" t={16} /> Revisar ahora</button>
+                <button class="btn ia bloque" onClick={() => iniciarAnalisisProfundo(true)}><Icono n="ia" t={16} /> Revisar todo el video</button>
               </div>
             )}
           </div>

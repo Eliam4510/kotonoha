@@ -13,6 +13,7 @@ This guide covers day-to-day use of Kotonoha. Installation is described in the [
 - [Flashcards](#flashcards)
 - [Audio, images and examples](#audio-images-and-examples)
 - [Web pages, reader and library](#web-pages-reader-and-library)
+- [Claude spending](#claude-spending)
 - [Data and backups](#data-and-backups)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Troubleshooting](#troubleshooting)
@@ -32,13 +33,15 @@ The extension works without a Claude key: subtitles, the dictionary, furigana, f
 
 ## On top of the video
 
-When a video with Japanese subtitles opens, a floating bar appears at the top. It shows the estimated comprehension, the recommended sentences, the known words and the playback mode. It hides by itself and comes back when the pointer nears the top edge.
+When a video with Japanese subtitles opens, a floating bar appears at the top. It shows the estimated comprehension, the recommended sentences, the known words and the playback mode. It hides by itself, comes back when the pointer rests near the top edge, and stays while the pointer is close.
 
 **Subtitles.** Each word has furigana, a color for its pitch accent and an underline for its status: unknown, tracked, known or ignored. Identified grammar points appear as tags.
 
-**Word card.** Hovering over a word opens its card, with definitions, frequency, audio, images, examples and links to Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo and Massif. The JapanDict link opens the exact JMdict entry, not a list of homographs.
+**Moving the subtitles.** Drag them from anywhere, even from a word, to the height and side you prefer. The position is kept for every video, in proportion to the video's size, including theater mode. A double click on the background, or **Volver a su sitio** (back to its place) in the display settings, puts them back.
 
-**In this sentence.** With a Claude key, the card gives the meaning of the word in that sentence and flags figurative or poetic use. Claude receives the full script, the neighboring lines and the translation. The "Profundizar" (go deeper) button repeats the query with Opus 5.5.
+**Word card.** Hovering over a word opens its card, with no request to Claude, showing definitions, frequency, audio, images, examples and links to Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo and Massif. The JapanDict link opens the exact JMdict entry, not a list of homographs.
+
+**In this sentence.** With a Claude key, the **¿Qué significa en esta frase?** (what does it mean in this sentence) button gives the meaning of the word in that context and flags figurative or poetic use. Claude receives 40 lines around the sentence and the translation. The **Explicar**, **Desglose** and **Traducir** tabs work the same way: they ask when pressed. Every answer is stored, so coming back to that word in that sentence costs nothing, and the card says so with **Guardada, sin gasto** (stored, no cost). The "Profundizar" (go deeper) button repeats the query with Opus 5.5.
 
 **Subtitle navigator.** `G` opens a side panel with every line, filters, bookmarks and multiple selection. It can also merge lines, create several cards and synchronize.
 
@@ -180,9 +183,23 @@ Cards can be sent to Anki through AnkiConnect, with a custom note type or the on
 
 **Words and assessment.** The explorer lists vocabulary by status, and the level assessment estimates the initial known words.
 
+## Claude spending
+
+The home screen has a **Gasto en Claude** card with this month's spending against the credit set in Settings, a chart by day and model, the split by task and a log of every request with its tokens. The cost is worked out from the tokens reported by the API and its public prices, and only counts what was requested from this extension in this browser.
+
+What costs the most per video is the review of readings, meanings and grammar, followed by translation. The review covers a few minutes ahead of the playback position and continues as the video advances, and reviewed lines stay stored. It can be turned off in **Generar subtítulos**, or requested for the whole video with **Revisar todo el video**.
+
+Three settings under **Comportamiento** (behavior) decide how much Claude is used:
+
+| Setting | Default | Effect |
+|---|---|---|
+| Ask for the meaning when opening a word | Off | Every new word opened would be a request |
+| Tab on open | Dictionary only | A Claude tab would ask on every word opened |
+| Full script as context | Off | More context for names and references, at a higher cost per query |
+
 ## Data and backups
 
-All data is stored in the browser, in IndexedDB. **Ajustes, Tus datos** exports and imports a backup with words, cards, library, settings, generated subtitles and corrections.
+All data is stored in the browser, in IndexedDB. **Ajustes, Tus datos** exports and imports a backup with words, cards, library, settings, generated subtitles, corrections and the spending log.
 
 ## Keyboard shortcuts
 

@@ -37,6 +37,7 @@ import {
   originales,
   pausado,
   pistas,
+  origenSubs,
   rectVideo,
   seleccionadas,
   sincronias,
@@ -76,6 +77,10 @@ export function iniciarControlador(c: Control) {
 
   setInterval(tick, 50);
   setInterval(actualizarRect, 250);
+  // Además de la comprobación periódica, responde al instante a lo que puede mover el video.
+  window.addEventListener('resize', actualizarRect, { passive: true });
+  document.addEventListener('scroll', actualizarRect, { capture: true, passive: true });
+  document.addEventListener('fullscreenchange', () => requestAnimationFrame(actualizarRect));
   alRecibirEvento((e) => {
     if (e.tipo === 'palabras') for (const ca of e.cambios) aplicarCambioPalabra(ca.clave, { estado: ca.estado ?? undefined, rastreada: ca.rastreada });
     if (e.tipo === 'palabrasRecargar' || e.tipo === 'diccionarios') reanalizar();
@@ -90,16 +95,29 @@ function actualizarRect() {
     if (rectVideo.value) rectVideo.value = null;
     return;
   }
+  // Se mide desde el origen de los subtítulos, y en el mismo instante: si la página se desplaza, los dos
+  // se mueven igual, la diferencia no cambia y nada se repinta. El navegador los lleva con el scroll.
   const r = v.getBoundingClientRect();
+  const o = origenSubs.el?.getBoundingClientRect();
+  const left = r.left - (o?.left ?? 0);
+  const top = r.top - (o?.top ?? 0);
   const p = rectVideo.value;
-  if (!p || p.left !== r.left || p.top !== r.top || p.width !== r.width || p.height !== r.height) {
-    rectVideo.value = { left: r.left, top: r.top, width: r.width, height: r.height };
+  if (!p || p.left !== left || p.top !== top || p.width !== r.width || p.height !== r.height) {
+    rectVideo.value = { left, top, width: r.width, height: r.height };
   }
+}
+
+/** Si el video se ha ido de la pantalla, por ejemplo al leer los comentarios, la barra no estorba. */
+export function videoEnPantalla(): boolean {
+  const r = control?.video()?.getBoundingClientRect();
+  return !!r && r.bottom > 80 && r.top < innerHeight;
 }
 
 function enlazarVideo(v: HTMLVideoElement) {
   if (v === videoActual) return;
   videoActual = v;
+  new ResizeObserver(actualizarRect).observe(v);
+  actualizarRect();
   v.addEventListener('pause', () => {
     if (!pausaPropia) tipoPausa.value = 'manual';
     pausaPropia = false;
@@ -184,6 +202,7 @@ function tick() {
   const ms = v.currentTime * 1000;
   tiempoMs.value = Math.round(ms);
   pausado.value = v.paused;
+  vigilarRevision();
   if (v.paused || anuncio.value) return;
 
   const a = ajustes.value;
@@ -356,21 +375,44 @@ const crudas = (lineas: LineaAnalizada[]): Linea[] => lineas.map(({ palabras: _p
 let flujoAnalisis: { cancelar(): void } | null = null;
 let temporizadorRefresco: ReturnType<typeof setTimeout> | null = null;
 
-/** Pide a Claude que revise lecturas, sentidos y gramática de las líneas que aún no conoce. */
-export async function iniciarAnalisisProfundo(forzarAviso = false) {
+/**
+ * Revisar con Claude es lo que más gasta por video, y no siempre se ve un video entero: se revisa lo que
+ * está por verse, con unos minutos de adelanto, y se sigue a medida que avanza. Lo revisado queda guardado,
+ * así que volver atrás o verlo otra vez no cuesta nada.
+ */
+const VENTANA_REVISION = 120;
+const ADELANTO_REVISION = 40;
+let ventanaRevision: { desde: number; hasta: number } | null = null;
+
+function vigilarRevision() {
+  const w = ventanaRevision;
+  if (!w || flujoAnalisis || correccion.value || !ajustes.value.analisisAutomatico) return;
+  const i = indiceActivo.value;
+  if (i >= 0 && (i < w.desde || i > w.hasta - ADELANTO_REVISION)) iniciarAnalisisProfundo().catch(() => {});
+}
+
+/**
+ * Pide a Claude que revise lecturas, sentidos y gramática de las líneas que aún no conoce.
+ * El botón de revisar (`todoElVideo`) cubre el video entero; lo automático, solo el tramo que viene.
+ */
+export async function iniciarAnalisisProfundo(todoElVideo = false) {
   flujoAnalisis?.cancelar();
   const a = ajustes.value;
   const lineas = baseObjetivo;
   if (!lineas.length) return;
   const lineasCrudas = crudas(lineas);
+  const indice = indiceActualEn(lineasCrudas);
+  const tope = todoElVideo ? 0 : VENTANA_REVISION;
+  const desde = Math.max(0, indice - 3);
+  ventanaRevision = todoElVideo ? { desde: 0, hasta: lineas.length } : { desde, hasta: desde + VENTANA_REVISION };
   const estado = await motor.estado();
   if (!estado.claveIA) {
-    if (forzarAviso) avisar('Añade tu clave de la API de Claude en Ajustes para revisar lecturas, sentidos y gramática.', 'error', { texto: 'Ajustes', fn: () => fondo.abrirApp('ajustes') }, 8000);
+    if (todoElVideo) avisar('Añade tu clave de la API de Claude en Ajustes para revisar lecturas, sentidos y gramática.', 'error', { texto: 'Ajustes', fn: () => fondo.abrirApp('ajustes') }, 8000);
     return;
   }
-  if (!a.analisisAutomatico && !forzarAviso) return;
+  if (!a.analisisAutomatico && !todoElVideo) return;
   const turno = turnoCarga;
-  const f = flujoMotor('analisisProfundo', [lineasCrudas, infoVideo.value?.titulo, indiceActualEn(lineasCrudas)], (acum) => {
+  const f = flujoMotor('analisisProfundo', [lineasCrudas, infoVideo.value?.titulo, indice, tope], (acum) => {
     const ultima = acum.trim().split('\n').pop() ?? '';
     const [h, t] = ultima.split('/').map(Number);
     if (!t) return;
@@ -385,7 +427,7 @@ export async function iniciarAnalisisProfundo(forzarAviso = false) {
   try {
     const n = await f;
     if (turno === turnoCarga && n !== '0' && n !== '') await refrescarAnalisis();
-    if (forzarAviso && n === '0') avisar('Estas líneas ya estaban revisadas.');
+    if (todoElVideo && n === '0') avisar('Estas líneas ya estaban revisadas.');
   } catch (e) {
     avisar(`No se pudo revisar con Claude: ${e instanceof Error ? e.message : e}`, 'error', undefined, 8000);
   } finally {
@@ -443,6 +485,7 @@ export async function seleccionarObjetivo(id: string | null) {
   const turno = ++turnoCarga;
   anclas.value = [];
   flujoAnalisis?.cancelar();
+  ventanaRevision = null;
   analisisEnCurso.value = null;
   flujoCorreccion?.cancelar();
   correccion.value = null;
@@ -696,6 +739,7 @@ export async function traducirAlJapones() {
   const video = infoVideo.value?.idVideo;
   const turno = ++turnoCarga;
   flujoAnalisis?.cancelar();
+  ventanaRevision = null;
   flujoCorreccion?.cancelar();
   pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: `${nombreIdioma(idioma)} (traducidos por Claude)`, origen: 'claude' }];
   idObjetivo.value = id;

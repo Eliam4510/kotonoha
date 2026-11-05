@@ -13,6 +13,7 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 - [Tarjetas](#tarjetas)
 - [Audio, imágenes y ejemplos](#audio-imágenes-y-ejemplos)
 - [Páginas web, lector y biblioteca](#páginas-web-lector-y-biblioteca)
+- [Gasto en Claude](#gasto-en-claude)
 - [Datos y copia de seguridad](#datos-y-copia-de-seguridad)
 - [Atajos de teclado](#atajos-de-teclado)
 - [Problemas frecuentes](#problemas-frecuentes)
@@ -32,13 +33,15 @@ La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el 
 
 ## Sobre el video
 
-Al abrir un video con subtítulos en japonés aparece una barra flotante en la parte superior. Muestra el porcentaje de comprensión estimado, las frases recomendadas, las palabras conocidas y el modo de reproducción. Se oculta sola y reaparece al acercar el ratón al borde superior.
+Al abrir un video con subtítulos en japonés aparece una barra flotante en la parte superior. Muestra el porcentaje de comprensión estimado, las frases recomendadas, las palabras conocidas y el modo de reproducción. Se oculta sola y reaparece al detener el ratón junto al borde superior, y se queda mientras el ratón siga cerca.
 
 **Subtítulos.** Cada palabra lleva furigana, un color según su acento tonal y un subrayado según su estado: desconocida, rastreada, conocida o ignorada. Los puntos de gramática identificados se muestran como etiquetas.
 
-**Ficha de palabra.** Al pasar el ratón sobre una palabra se abre su ficha, con definiciones, frecuencia, audio, imágenes, ejemplos y enlaces a Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo y Massif. El enlace a JapanDict abre la entrada exacta de JMdict, no la lista de homógrafos.
+**Mover los subtítulos.** Se arrastran desde cualquier punto, incluso desde una palabra, a la altura y el lado que se prefiera. La posición se guarda para todos los videos y se conserva en proporción al tamaño del video, también en modo teatro. Un doble clic sobre el fondo, o **Volver a su sitio** en los ajustes de visualización, los devuelve a su lugar.
 
-**En esta frase.** Si hay clave de Claude, la ficha indica el sentido de la palabra en esa frase y señala cuándo el uso es figurado o poético. Claude recibe el guion completo, las líneas vecinas y la traducción. El botón «Profundizar» repite la consulta con Opus 5.5.
+**Ficha de palabra.** Al pasar el ratón sobre una palabra se abre su ficha, sin ninguna petición a Claude, con definiciones, frecuencia, audio, imágenes, ejemplos y enlaces a Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo y Massif. El enlace a JapanDict abre la entrada exacta de JMdict, no la lista de homógrafos.
+
+**En esta frase.** Con clave de Claude, el botón **¿Qué significa en esta frase?** indica el sentido de la palabra en ese contexto y señala cuándo el uso es figurado o poético. Claude recibe 40 líneas alrededor de la frase y la traducción. Las pestañas **Explicar**, **Desglose** y **Traducir** funcionan igual: preguntan al pulsarlas. Toda respuesta se guarda, de modo que volver a esa palabra en esa frase no gasta nada y la ficha lo indica con **Guardada, sin gasto**. El botón **Profundizar** repite la consulta con Opus 5.5.
 
 **Navegador de subtítulos.** Con `G` se abre un panel lateral con todas las líneas, filtros, marcadores y selección múltiple. También permite unir líneas, crear varias tarjetas y sincronizar.
 
@@ -180,9 +183,23 @@ Las tarjetas pueden enviarse a Anki mediante AnkiConnect, con un tipo de nota pr
 
 **Palabras y evaluación.** El explorador lista el vocabulario por estado, y la evaluación de nivel estima las palabras conocidas de partida.
 
+## Gasto en Claude
+
+La pantalla de inicio incluye la tarjeta **Gasto en Claude**, con lo gastado en el mes frente al crédito indicado en Ajustes, una gráfica por días y modelos, el reparto por tareas y un registro de cada petición, con sus tokens. El coste se calcula con los tokens que informa la API y sus precios públicos, y solo cuenta lo pedido desde esta extensión en este navegador.
+
+Lo que más gasta por video es la revisión de lecturas, sentidos y gramática, seguida de la traducción. La revisión cubre unos minutos por delante del punto de reproducción y continúa a medida que avanza; lo revisado queda guardado. Se puede desactivar en **Generar subtítulos**, o pedir el video entero con **Revisar todo el video**.
+
+Tres ajustes de **Comportamiento** deciden cuánto se usa Claude:
+
+| Ajuste | Por omisión | Efecto |
+|---|---|---|
+| Preguntar el significado al abrir una palabra | Desactivado | Cada palabra nueva que se abra sería una petición |
+| Pestaña al abrir | Solo el diccionario | Una pestaña de Claude preguntaría al abrir cada palabra |
+| Guion completo como contexto | Desactivado | Más contexto para nombres y referencias, a mayor coste por consulta |
+
 ## Datos y copia de seguridad
 
-Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos** permite exportar e importar una copia con palabras, tarjetas, biblioteca, ajustes, subtítulos generados y correcciones.
+Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos** permite exportar e importar una copia con palabras, tarjetas, biblioteca, ajustes, subtítulos generados, correcciones y registro de gasto.
 
 ## Atajos de teclado
 

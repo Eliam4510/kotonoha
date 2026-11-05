@@ -141,7 +141,11 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 
 ## Modelos de Claude
 
-Cada tarea usa `claude-sonnet-5-5` por omisión, y el modelo y el esfuerzo se pueden cambiar por tarea en Ajustes. El botón «Profundizar» de la ficha repite la consulta con `claude-opus-5-5` y esfuerzo alto. Las peticiones activan `fallbacks: "default"`, de modo que un rechazo de seguridad se reintenta en otro modelo. Se puede desactivar en Ajustes. Las respuestas estructuradas usan `output_config.format` con esquemas JSON, y el guion completo se envía en un bloque de sistema con caché.
+Cada tarea usa `claude-sonnet-5-5` por omisión, y el modelo y el esfuerzo se pueden cambiar por tarea en Ajustes. El botón «Profundizar» de la ficha repite la consulta con `claude-opus-5-5` y esfuerzo alto. Las peticiones activan `fallbacks: "default"`, de modo que un rechazo de seguridad se reintenta en otro modelo. Se puede desactivar en Ajustes. Las respuestas estructuradas usan `output_config.format` con esquemas JSON, y el guion completo, cuando se envía, va en un bloque de sistema con caché.
+
+**Evitar pagar dos veces.** Cada consulta tiene una identidad propia, formada por lo que se pregunta: tarea, modelo, nivel, idioma, plantilla, palabra, lectura y frase. No incluye el texto de alrededor, que cambia a medida que se cargan los subtítulos. Una petición en marcha no se cancela aunque quien la pidió se vaya, porque ya está pagada y cancelarla obligaría a pagarla otra vez: termina en segundo plano, se guarda, y una segunda consulta igual se engancha a ella. La revisión de lecturas avanza por tramos de 120 líneas según el punto de reproducción, y cada lote en marcha termina y se guarda aunque se cierre la pestaña.
+
+**Registro de gasto.** Tras cada petición, `src/motor/ia.ts` anota en la tabla `consumo` los tokens que informa la API (`usage`), el modelo que respondió y la tarea. El precio se calcula en `src/nucleo/precios.ts`. Solo se registra lo que la API confirma; una petición abortada no aparece, aunque la API haya podido facturar parte de ella.
 
 ## Medidas de referencia
 

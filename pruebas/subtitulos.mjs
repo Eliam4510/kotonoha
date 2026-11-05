@@ -121,6 +121,13 @@ await contexto.route('https://www.youtube.com/**', (r) => {
 });
 
 const sw = await recargarExtension(contexto);
+// Estas pruebas cubren lo que ve quien no tiene el ayudante, aunque en este equipo sí esté instalado.
+await sw.evaluate(() => {
+  Object.defineProperty(chrome.runtime, 'connectNative', {
+    configurable: true,
+    value: () => ({ onMessage: { addListener() {} }, onDisconnect: { addListener(f) { setTimeout(f, 10); } }, postMessage() {}, disconnect() {} }),
+  });
+});
 const idExtension = new URL(sw.url()).host;
 const fijarAjustes = (cambios) =>
   sw.evaluate(
@@ -450,6 +457,30 @@ if (quiere('progresiva')) {
   await p.waitForTimeout(400);
   comprobar((await textoLinea(p, 'secundaria')).includes('traducción'), 'Y al final está todo');
   mock.control.retardoLineas = 0;
+
+  console.log('\n== La revisión de Claude va por donde vas ==');
+  await fijarAjustes({ analisisAutomatico: true });
+  const inicioRevision = mock.peticiones.length;
+  const pedidasRevision = () => mock.peticiones.slice(inicioRevision).filter(esAnalisis);
+  const numeros = () => [...new Set(pedidasRevision().flatMap((x) => [...textoPeticion(x).matchAll(/(?:\\n|")(\d+): /g)].map((m) => Number(m[1]))))];
+  await p.reload();
+  await hasta(p, (r) => r.querySelectorAll('.nav-linea').length > 0, undefined, 30000);
+  await irA(p, 1);
+  for (let i = 0; i < 60 && !pedidasRevision().length; i++) await p.waitForTimeout(200);
+  await p.waitForTimeout(1500);
+  const alEmpezar = pedidasRevision().reduce((n, x) => n + lineasPedidas(x), 0);
+  comprobar(alEmpezar > 0 && alEmpezar <= 120, 'Al abrir el video solo revisa el tramo que viene, no las 300 líneas', `${alEmpezar} líneas`);
+  await p.screenshot({ path: join(CAPTURAS, 'revision-tramo.png') });
+  // Saltar a otro punto revisa ese tramo, y lo ya revisado no se vuelve a pedir.
+  await irA(p, 40);
+  for (let i = 0; i < 40 && pedidasRevision().reduce((n, x) => n + lineasPedidas(x), 0) === alEmpezar; i++) await p.waitForTimeout(200);
+  await p.waitForTimeout(1500);
+  const trasSaltar = pedidasRevision().reduce((n, x) => n + lineasPedidas(x), 0);
+  comprobar(trasSaltar > alEmpezar && trasSaltar <= 240, 'Al saltar más adelante revisa ese tramo', `${trasSaltar} líneas en total`);
+  await irA(p, 1);
+  await p.waitForTimeout(1500);
+  comprobar(pedidasRevision().reduce((n, x) => n + lineasPedidas(x), 0) === trasSaltar, 'Volver atrás no pide nada', `${trasSaltar} líneas`);
+  await fijarAjustes({ analisisAutomatico: false });
   await fijarAjustes({ analisisAutomatico: true });
   await p.close();
 }

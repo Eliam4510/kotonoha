@@ -21,7 +21,7 @@ export function guionActual(): string | undefined {
   return lineas.map((l) => l.texto.replace(/\n/g, ' ')).join('\n');
 }
 
-const LINEAS_ALREDEDOR = 8;
+const LINEAS_ALREDEDOR = 20;
 
 /** Contexto amplio para Claude: guion completo en caché, líneas vecinas y traducción disponible. */
 export function contextoDe(frase?: string, l?: LineaAnalizada | null): ContextoIA {

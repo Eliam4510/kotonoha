@@ -7,6 +7,9 @@ function respuestaPara(cuerpo) {
   const formato = cuerpo.output_config?.format?.schema;
   const texto = JSON.stringify(cuerpo.messages ?? '');
   const sistema = JSON.stringify(cuerpo.system ?? '');
+  if (formato?.properties?.significado && texto.includes('Palabra: 赤い')) {
+    return JSON.stringify({ significado: 'rojas, del color del fuego', uso: 'literal', nota: 'Aquí describe el color de las estrellas del sueño: es el sentido habitual de la palabra.', definicion: 0 });
+  }
   if (formato?.properties?.significado) {
     return JSON.stringify({ significado: 'absorber, hacer suyo', uso: 'figurado', nota: 'En esta frase, «comer» las estrellas es una imagen de hacerlas parte de uno mismo, no de comer de verdad.', definicion: 0 });
   }
@@ -59,7 +62,7 @@ function respuestaPara(cuerpo) {
 export function iniciarMock() {
   const peticiones = [];
   // Para ver el avance: cada lote de traducción tarda esto.
-  const control = { retardoLineas: 0 };
+  const control = { retardoLineas: 0, retardoFlujo: 0 };
   const servidor = createServer((req, res) => {
     const cors = {
       'access-control-allow-origin': '*',
@@ -89,9 +92,10 @@ export function iniciarMock() {
         res.writeHead(200, { 'content-type': 'application/json', ...cors });
         return res.end(JSON.stringify({ id: 'msg_prueba', type: 'message', role: 'assistant', model: cuerpo.model, content: [{ type: 'text', text: texto }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 10, output_tokens: 10 } }));
       }
+      if (control.retardoFlujo) await new Promise((r) => setTimeout(r, control.retardoFlujo));
       res.writeHead(200, { 'content-type': 'text/event-stream', ...cors });
       const enviar = (tipo, d) => res.write(`event: ${tipo}\ndata: ${JSON.stringify({ type: tipo, ...d })}\n\n`);
-      enviar('message_start', { message: { id: 'msg_prueba', type: 'message', role: 'assistant', model: cuerpo.model, content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: 10, output_tokens: 1 } } });
+      enviar('message_start', { message: { id: 'msg_prueba', type: 'message', role: 'assistant', model: cuerpo.model, content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: 1000, output_tokens: 1, cache_read_input_tokens: cuerpo.system?.length > 1 ? 5000 : 0, cache_creation_input_tokens: 0 } } });
       enviar('content_block_start', { index: 0, content_block: { type: 'text', text: '' } });
       for (let i = 0; i < texto.length; i += 24) {
         enviar('content_block_delta', { index: 0, delta: { type: 'text_delta', text: texto.slice(i, i + 24) } });

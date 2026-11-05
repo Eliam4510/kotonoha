@@ -33,18 +33,43 @@ await sw.evaluate(
     await chrome.storage.local.set({
       urlBaseIA: url,
       claveAnthropic: 'clave-de-prueba',
-      ajustes: { ...(d.ajustes ?? {}), navegadorAbierto: false, modo: 'normal', salto: 'no', desanclarBarra: false, popupAlPasar: true },
+      ajustes: { ...(d.ajustes ?? {}), navegadorAbierto: false, modo: 'normal', salto: 'no', desanclarBarra: false, popupAlPasar: true, subsPosicion: null },
     });
   },
   `http://127.0.0.1:${mock.puerto}`
 );
+
+// Sin las respuestas guardadas de grabaciones anteriores.
+await sw.evaluate(async () => {
+  if (!(await indexedDB.databases()).some((d) => d.name === 'kikitori')) return;
+  await new Promise((ok) => {
+    const q = indexedDB.open('kikitori');
+    q.onsuccess = () => {
+      const d = q.result;
+      const tx = d.transaction('cacheIA', 'readwrite');
+      tx.objectStore('cacheIA').clear();
+      tx.oncomplete = () => {
+        d.close();
+        ok();
+      };
+    };
+  });
+});
 
 const p = await contexto.newPage();
 await p.goto(`http://127.0.0.1:${s.address().port}/`);
 await p.waitForTimeout(800);
 await sw.evaluate(async () => {
   const [t] = await chrome.tabs.query({ url: 'http://127.0.0.1/*' });
-  await chrome.tabs.sendMessage(t.id, { activarVideoAqui: true });
+  for (let intento = 0; ; intento++) {
+    try {
+      await chrome.tabs.sendMessage(t.id, { activarVideoAqui: true });
+      break;
+    } catch (e) {
+      if (intento > 40) throw e;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
 });
 
 const enOverlay = (fn, arg) =>
@@ -104,22 +129,50 @@ await p.waitForTimeout(1600);
 await buscar(10);
 await p.waitForTimeout(1300);
 
-// 2. La ficha da el sentido de la palabra en esta frase.
-await ir(await caja('食'));
-await esperar('.ficha');
-await p.waitForTimeout(3200);
+// 2. Al pasar el ratón, el diccionario. Un botón le pregunta a Claude qué significa en esta frase.
+await ir(await caja('赤'));
+await esperar('.sentido-pedir');
+await p.waitForTimeout(1500);
+await ir(await cajaBoton('¿Qué significa', '.sentido-pedir'), 18);
+await p.waitForTimeout(250);
+await p.mouse.down();
+await p.mouse.up();
+await esperar('.sentido b', 8000);
+await p.waitForTimeout(1600);
 
-// 3. Marcarla como conocida cambia su subrayado.
+// 3. La palabra con un uso figurado ya viene señalada por la revisión de Claude.
+await p.mouse.move(640, 300, { steps: 14 });
+await p.waitForTimeout(450);
+await ir(await caja('食'), 18);
+await esperar('.sentido b');
+await p.waitForTimeout(2400);
+
+// 4. Marcarla como conocida cambia su subrayado.
 await p.keyboard.press('3');
 await p.waitForTimeout(900);
-await p.mouse.move(640, 430, { steps: 20 });
-await p.waitForTimeout(900);
+await p.mouse.move(640, 300, { steps: 16 });
+await p.waitForTimeout(700);
 
-// 4. El navegador de subtítulos.
+// 5. Los subtítulos se arrastran a donde se quiera, y un doble clic los devuelve.
+const rectBloque = () => enOverlay((r) => { const c = r.querySelector('.subs-bloque:not(.saliendo)').getBoundingClientRect(); return { x: c.left, y: c.top, h: c.height }; });
+const b0 = await rectBloque();
+await ir({ x: b0.x + 8, y: b0.y + b0.h / 2 }, 14);
+await p.waitForTimeout(220);
+await p.mouse.down();
+await p.mouse.move(b0.x + 8, b0.y - 230, { steps: 26 });
+await p.waitForTimeout(450);
+await p.mouse.up();
+await p.waitForTimeout(800);
+const b1 = await rectBloque();
+await p.mouse.dblclick(b1.x + 8, b1.y + b1.h / 2);
+await p.waitForTimeout(800);
+await p.mouse.move(640, 300, { steps: 10 });
+
+// 6. El navegador de subtítulos.
 await p.keyboard.press('g');
 await p.waitForTimeout(1500);
 
-// 5. Claude corrige los homófonos de los subtítulos.
+// 7. Claude corrige los homófonos de los subtítulos.
 await p.mouse.move(300, 4, { steps: 16 });
 await p.waitForTimeout(350);
 await ir(await cajaBoton('Generar subtítulos', '.barra-acciones'), 16);

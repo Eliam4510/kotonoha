@@ -441,6 +441,28 @@ export function lineaEn(lineas: Linea[], ms: number): number {
   return -1;
 }
 
+/** Un hueco menor que esto entre dos líneas no se llega a leer como pausa: se mantiene la primera. */
+const PUENTE_MS = 800;
+/** Tras la última línea de un diálogo, lo que tarda en irse: da tiempo a terminar de leerla. */
+const COLA_MS = 240;
+
+/**
+ * La línea que conviene tener en pantalla. Los subtítulos suelen dejar unos milisegundos entre línea y
+ * línea, y si en ese instante no se muestra nada, todo el bloque parpadea. Solo la lectura la usa: las
+ * pausas y el navegador siguen los tiempos reales.
+ */
+export function lineaConPuente(lineas: Linea[], ms: number, puente = PUENTE_MS, cola = COLA_MS): number {
+  const i = lineaEn(lineas, ms);
+  if (i >= 0) return i;
+  const sig = siguienteLinea(lineas, ms);
+  const previa = sig < 0 ? lineas.length - 1 : sig - 1;
+  if (previa < 0) return -1;
+  const fin = lineas[previa].fin;
+  if (ms < fin) return -1;
+  if (sig >= 0 && lineas[sig].inicio - fin <= puente) return previa;
+  return ms - fin <= cola ? previa : -1;
+}
+
 /** Índice de la primera línea que empieza en o después de ms. */
 export function siguienteLinea(lineas: Linea[], ms: number): number {
   let bajo = 0;

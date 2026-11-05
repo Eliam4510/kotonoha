@@ -132,11 +132,41 @@ export async function capturarOverlay({ RAIZ, ANCHO, ALTO, contexto, sw, vigilar
   };
   const cajaDePalabra = (texto) => enOverlay(`const e = [...r.querySelectorAll('.linea-sub.objetivo .pal')].find((x) => x.textContent.includes('${texto}')); if (!e) return null; const c = e.getBoundingClientRect(); return { x: c.left + c.width / 2, y: c.top + c.height / 2 };`);
 
+  // Las respuestas guardadas de la vez anterior cambiarían lo que se ve en cada captura.
+  await sw.evaluate(async () => {
+    if (!(await indexedDB.databases()).some((d) => d.name === 'kikitori')) return;
+    await new Promise((ok) => {
+      const q = indexedDB.open('kikitori');
+      q.onsuccess = () => {
+        const d = q.result;
+        if (!d.objectStoreNames.contains('cacheIA')) {
+          d.close();
+          return ok();
+        }
+        const tx = d.transaction('cacheIA', 'readwrite');
+        tx.objectStore('cacheIA').clear();
+        tx.oncomplete = () => {
+          d.close();
+          ok();
+        };
+      };
+    });
+  });
+
   await p.goto(`${origen}/`);
   await p.waitForTimeout(700);
   await sw.evaluate(async () => {
     const [t] = await chrome.tabs.query({ url: 'http://127.0.0.1/*' });
-    await chrome.tabs.sendMessage(t.id, { activarVideoAqui: true });
+    // El script de la página puede tardar un poco más en estar listo si el equipo está ocupado.
+    for (let intento = 0; ; intento++) {
+      try {
+        await chrome.tabs.sendMessage(t.id, { activarVideoAqui: true });
+        break;
+      } catch (e) {
+        if (intento > 40) throw e;
+        await new Promise((r) => setTimeout(r, 250));
+      }
+    }
   });
   await esperar('.barra');
   await buscarSegundo(2);
@@ -175,6 +205,27 @@ export async function capturarOverlay({ RAIZ, ANCHO, ALTO, contexto, sw, vigilar
   });
   await p.waitForTimeout(300);
 
+  // Arrastrar los subtítulos: a media maniobra se ven las guías.
+  const bloque = await enOverlay(`const c = r.querySelector('.subs-bloque:not(.saliendo)').getBoundingClientRect(); return { x: c.left, y: c.top, w: c.width, h: c.height };`);
+  await p.mouse.move(bloque.x + 6, bloque.y + bloque.h / 2);
+  await p.waitForTimeout(150);
+  await foto(p, '01d-subtitulos-asa');
+  await p.mouse.down();
+  await p.mouse.move(bloque.x - 60, bloque.y - 150, { steps: 8 });
+  await p.waitForTimeout(120);
+  await p.mouse.move(bloque.x + 6, bloque.y - 200, { steps: 4 });
+  await p.waitForTimeout(150);
+  await foto(p, '01e-subtitulos-moviendo');
+  await p.mouse.up();
+  await p.waitForTimeout(200);
+  await foto(p, '01f-subtitulos-movidos');
+  await sw.evaluate(async () => {
+    const d = await chrome.storage.local.get('ajustes');
+    await chrome.storage.local.set({ ajustes: { ...d.ajustes, subsPosicion: null } });
+  });
+  await p.mouse.move(30, ALTO - 30);
+  await p.waitForTimeout(400);
+
   await buscarSegundo(10);
   await mostrarBarra();
   await foto(p, '02-barra');
@@ -198,11 +249,14 @@ export async function capturarOverlay({ RAIZ, ANCHO, ALTO, contexto, sw, vigilar
   }
   await buscarSegundo(10);
 
-  // Una palabra que Claude aún no ha visto: el bloque de sentido debe mostrar su estado de carga.
+  // Una palabra que Claude aún no ha visto: solo el diccionario, y un botón para preguntar.
   const cajaNueva = await cajaDePalabra('赤');
   await p.mouse.move(cajaNueva.x, cajaNueva.y);
+  await esperar('.sentido-pedir', 2500);
+  await foto(p, '03a-ficha-diccionario');
+  await enOverlay(`r.querySelector('.sentido-pedir button').click();`);
   await esperar('.sentido.cargando', 2500);
-  await foto(p, '03a-ficha-cargando');
+  await foto(p, '03a2-ficha-cargando');
   await p.mouse.move(30, ALTO - 30);
   await p.waitForTimeout(500);
 
@@ -213,6 +267,16 @@ export async function capturarOverlay({ RAIZ, ANCHO, ALTO, contexto, sw, vigilar
   await foto(p, '03-ficha');
   await p.mouse.click(caja.x, caja.y); // Fija la ficha para poder recorrer las pestañas.
   await p.waitForTimeout(200);
+  // La primera vez responde Claude; la segunda sale de lo guardado, y lo dice.
+  await pulsar('Explicar con Claude');
+  await p.waitForTimeout(1500);
+  await foto(p, '03b-ficha-explicacion');
+  await pulsar('Audio');
+  await p.waitForTimeout(300);
+  await pulsar('Explicar con Claude');
+  await esperar('.panel-ia-guardada', 3000);
+  await p.waitForTimeout(500);
+  await foto(p, '03g-ficha-guardada');
   for (const [titulo, nombre] of [
     ['Desglose de la frase', '04-ficha-desglose'],
     ['Traducir la frase', '05-ficha-traduccion'],

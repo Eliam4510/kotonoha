@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.1.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.2.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -16,10 +16,17 @@ Estado de cada función en la versión 0.1.0, con la forma en que se ha verifica
 | Función | Verificación |
 |---|---|
 | Barra flotante con palabras conocidas, comprensión y frases recomendadas | Automática |
+| La barra aparece al detener el ratón arriba, se queda mientras siga cerca y no se despierta al pasar de largo | Automática |
+| Subtítulos que se arrastran a cualquier punto del video, con imanes y sin salirse de él | Automática |
+| Cambio de línea sin parpadeos, y letra algo menor en los párrafos largos | Automática |
+| Los subtítulos acompañan al video al desplazar la página, sin temblar | Página imitada |
+| Una línea que aparece bajo un ratón quieto no abre fichas ni pausa el video | Automática |
 | Subtítulos con furigana, color por acento tonal y subrayado por estado | Automática |
 | Modos de furigana, glosas y color: siempre, al pasar, desconocidas, nunca | Automática |
 | Ficha de palabra: definiciones, estado, frecuencia, audio, imágenes, ejemplos y enlaces | Automática |
-| Explicar, desglosar y traducir con Claude | Simulador |
+| La ficha abre con el diccionario, sin ninguna petición a Claude | Simulador |
+| Qué significa en esta frase, explicar, desglosar y traducir con Claude, a petición | Simulador |
+| Cada respuesta se guarda: la misma palabra en la misma frase no se vuelve a pedir | Simulador |
 | Preguntas libres sobre una palabra o una frase | Simulador |
 | Gramática JLPT: unas 100 reglas confirmadas por Claude, con un resumen por video | Simulador |
 | Palabras prioritarias: las desconocidas que más se repiten en el video | Automática |
@@ -79,6 +86,7 @@ Estado de cada función en la versión 0.1.0, con la forma en que se ha verifica
 | Función | Verificación |
 |---|---|
 | Inicio con resumen de vocabulario y repaso | Automática |
+| Gasto en Claude: total del mes, gráfica por días y modelos, tareas y registro de peticiones | Simulador |
 | Diccionario con búsqueda libre y formas conjugadas | Automática |
 | Lector de texto pegado | Automática |
 | Biblioteca: EPUB, TXT y SRT | Automática |
@@ -105,8 +113,9 @@ Estado de cada función en la versión 0.1.0, con la forma en que se ha verifica
 |---|---|
 | El sentido depende de la frase | El bloque «En esta frase» da el sentido en contexto, señala los usos figurados o poéticos, y va primero en la tarjeta |
 | Lecturas correctas | Claude revisa las lecturas de cada línea, y se puede corregir una a mano |
-| Contexto amplio | Claude recibe el guion completo, las ocho líneas vecinas y la traducción |
-| Nada se paga dos veces | Lo revisado se guarda por texto de línea, y un estribillo solo se analiza una vez |
+| Contexto amplio | Claude recibe 40 líneas alrededor de la frase y la traducción. El guion completo se envía al corregir, y en las consultas es opcional |
+| Nada se paga dos veces | Cada respuesta se guarda por palabra y frase, y lo revisado por texto de línea. Una respuesta interrumpida se termina y se guarda, y dos consultas iguales a la vez comparten la misma petición |
+| Claude solo cuando hace falta | La ficha abre con el diccionario, y la revisión cubre el tramo que está por verse en lugar del video entero |
 | Empezar por lo que se ve | Traducción, corrección y revisión ordenan los tramos según el punto de reproducción |
 | El equipo sigue siendo usable | La transcripción descansa, se adapta al uso y se detiene ante fallos repetidos |
 | Las páginas no se tocan | El subrayado web usa la CSS Custom Highlight API, sin reescribir el DOM |

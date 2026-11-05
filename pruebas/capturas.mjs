@@ -48,7 +48,7 @@ await sw.evaluate(
     await chrome.storage.local.set({
       urlBaseIA: url,
       claveAnthropic: 'clave-de-prueba',
-      ajustes: { ...(d.ajustes ?? {}), tema, navegadorAbierto: false, modo: 'normal', salto: 'no', desanclarBarra: false },
+      ajustes: { ...(d.ajustes ?? {}), tema, navegadorAbierto: false, modo: 'normal', salto: 'no', desanclarBarra: false, subsPosicion: null },
     });
   },
   { url: `http://127.0.0.1:${mock.puerto}`, tema: TEMA }

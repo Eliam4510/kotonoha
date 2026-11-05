@@ -22,3 +22,31 @@ describe('ajustes guardados', () => {
     expect(a.nombre).toBe('');
   });
 });
+
+describe('la ficha abre con el diccionario', () => {
+  it('quien tenía los valores de antes deja de gastar al abrir una palabra', () => {
+    const a = completarAjustes({ diccionarioPestana: 'explicar', sentidoAutomatico: true, usarGuion: true } as never);
+    expect(a.diccionarioPestana).toBe('ninguna');
+    expect(a.sentidoAutomatico).toBe(false);
+    expect(a.usarGuion).toBe(false);
+    expect(a.migracion).toBe(1);
+  });
+
+  it('otra pestaña elegida a propósito se respeta', () => {
+    expect(completarAjustes({ diccionarioPestana: 'audio' } as never).diccionarioPestana).toBe('audio');
+  });
+
+  it('lo que se vuelva a activar después se respeta', () => {
+    const a = completarAjustes({ migracion: 1, diccionarioPestana: 'explicar', sentidoAutomatico: true, usarGuion: true } as never);
+    expect(a.diccionarioPestana).toBe('explicar');
+    expect(a.sentidoAutomatico).toBe(true);
+    expect(a.usarGuion).toBe(true);
+  });
+
+  it('una instalación nueva parte de solo el diccionario', () => {
+    const a = completarAjustes(undefined);
+    expect(a.diccionarioPestana).toBe('ninguna');
+    expect(a.sentidoAutomatico).toBe(false);
+    expect(a.creditoMensual).toBe(100);
+  });
+});
