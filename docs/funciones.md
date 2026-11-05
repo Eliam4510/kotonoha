@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.2.2, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.2.3, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -73,8 +73,9 @@ Estado de cada función en la versión 0.2.2, con la forma en que se ha verifica
 | Creación de un clic | Simulador |
 | Creador con todos los campos | Simulador |
 | Envío a Anki con AnkiConnect, con un tipo de nota propio o el de la extensión | Simulador |
-| Audio de la frase grabado del video, a MP3 | Automática, con audio simulado |
-| Captura del fotograma, también con DRM | Automática |
+| Audio de la frase grabado del video, a MP3, del tramo exacto y a velocidad normal | Automática, con la captura real de una pestaña |
+| La captura es por pestaña: desde otra no se graba silencio, y una grabación muda no se guarda | Automática, con la captura real de una pestaña |
+| Captura del fotograma, con el video como única cosa a la vista | Automática, con la captura real de una pestaña |
 | Audio de la palabra: JapanesePod101 y Lingua Libre | Automática |
 | Voces neuronales de Azure, con clave propia | Pendiente |
 | Imágenes de Openverse | Automática |
@@ -129,5 +130,6 @@ Estado de cada función en la versión 0.2.2, con la forma en que se ha verifica
 | Idioma de estudio | Solo japonés: la lógica de análisis es específica de este idioma |
 | Idioma de la interfaz | Solo español. Las explicaciones de Claude pueden pedirse en español, inglés o japonés sencillo |
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
+| Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta se crea sin captura |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |

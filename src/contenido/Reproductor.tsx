@@ -73,8 +73,13 @@ import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas
 
 export const ANCHO_NAVEGADOR = 380;
 
-export const ocultarParaCaptura = { valor: false, oyente: (_v: boolean) => {} };
-const fijarOculto = (v: boolean) => ocultarParaCaptura.oyente(v);
+/**
+ * Quita de la vista todo Kotonoha a la vez: subtítulos, ficha, barra y avisos. Va sobre el elemento que los
+ * contiene porque lo que importa es la captura de la pestaña, y nada de dentro puede escapar de su opacidad.
+ */
+const fijarOculto = (v: boolean) => {
+  document.querySelector<HTMLElement>('kotonoha-overlay')?.style.setProperty('opacity', v ? '0' : '1');
+};
 
 export const cambiarAjuste = (c: Partial<Ajustes>) => {
   ajustes.value = { ...ajustes.value, ...c };
@@ -202,11 +207,6 @@ const moviendoSubs = signal(false);
 const guiaSubs = signal({ centrado: false, enBase: false });
 
 function Subtitulos() {
-  const oculto = useSignal(false);
-  useEffect(() => {
-    ocultarParaCaptura.oyente = (v) => (oculto.value = v);
-  }, []);
-
   const zona = useRef<HTMLDivElement>(null);
   const bloque = useRef<HTMLDivElement>(null);
   const fondoSub = useRef<HTMLDivElement>(null);
@@ -348,7 +348,7 @@ function Subtitulos() {
   };
 
   return (
-    <div class={`zona-subs ${oculto.value ? 'oculta-captura' : ''}`} ref={zona} style={estiloZona}>
+    <div class="zona-subs" ref={zona} style={estiloZona}>
       {moviendoSubs.value && guiaSubs.value.centrado && <div class="subs-guia" aria-hidden="true" />}
       {v && (
         <div

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analizarInformeFfmpeg, formatoExtraccionAudio, idiomaCorto } from './medios';
+import { analizarInformeFfmpeg, formatoExtraccionAudio, idiomaCorto, imagenNegra, tramoConSonido } from './medios';
 
 const INFORME = `Input #0, matroska,webm, from '/m/pelicula.mkv':
   Metadata:
@@ -67,4 +67,54 @@ describe('extracción de audio', () => {
 it('normaliza los códigos de idioma', () => {
   expect(idiomaCorto('JPN')).toBe('ja');
   expect(idiomaCorto('xyz')).toBe('xyz');
+});
+
+describe('tramoConSonido', () => {
+  it('quita el silencio digital de los extremos', () => {
+    const c = new Float32Array(100);
+    c[30] = 0.2;
+    c[69] = -0.1;
+    expect(tramoConSonido([c])).toEqual({ inicio: 30, fin: 70 });
+  });
+
+  it('una grabación muda no tiene tramo', () => {
+    expect(tramoConSonido([new Float32Array(100)])).toBeNull();
+    expect(tramoConSonido([new Float32Array(100).fill(1e-4)])).toBeNull();
+  });
+
+  it('el ruido de fondo de una película no cuenta como silencio', () => {
+    expect(tramoConSonido([new Float32Array(10).fill(1e-3)])).toEqual({ inicio: 0, fin: 10 });
+  });
+
+  it('mira todos los canales', () => {
+    const izq = new Float32Array(50);
+    const der = new Float32Array(50);
+    izq[40] = 0.5;
+    der[10] = 0.5;
+    expect(tramoConSonido([izq, der])).toEqual({ inicio: 10, fin: 41 });
+  });
+});
+
+describe('imagenNegra', () => {
+  const imagen = (r: number, g: number, b: number, n = 100) => {
+    const d = new Uint8ClampedArray(n * 4);
+    for (let i = 0; i < n; i++) d.set([r, g, b, 255], i * 4);
+    return d;
+  };
+
+  it('reconoce un fotograma protegido', () => {
+    expect(imagenNegra(imagen(0, 0, 0))).toBe(true);
+    expect(imagenNegra(imagen(6, 8, 5))).toBe(true);
+  });
+
+  it('una imagen con contenido no es negra', () => {
+    expect(imagenNegra(imagen(40, 60, 90))).toBe(false);
+  });
+
+  it('una escena oscura con algo de luz tampoco', () => {
+    const d = imagen(0, 0, 0);
+    d.set([200, 200, 200, 255], 0);
+    d.set([200, 200, 200, 255], 4);
+    expect(imagenNegra(d)).toBe(false);
+  });
 });

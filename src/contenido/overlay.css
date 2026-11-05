@@ -5,7 +5,6 @@
 /* ---------- Subtítulos ---------- */
 .capa-subs { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 1; }
 .zona-subs { --base: 40px; position: absolute; pointer-events: none; }
-.zona-subs.oculta-captura { visibility: hidden; }
 .subs-bloque { position: absolute; left: 0; top: 0; width: max-content; max-width: 92%; pointer-events: auto; cursor: grab; touch-action: none; will-change: transform; transition: opacity 0.14s ease-out; }
 .subs-bloque.saliendo { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.2s ease-in, visibility 0s linear 0.2s; }
 .subs-bloque.arrastrando, .subs-bloque.arrastrando * { cursor: grabbing !important; user-select: none; }
