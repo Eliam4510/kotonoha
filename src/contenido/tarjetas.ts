@@ -79,12 +79,25 @@ let negrasSeguidas = { video: '', veces: 0 };
 const claveVideo = () => infoVideo.value?.idVideo ?? location.href;
 const videoProtegido = () => negrasSeguidas.video === claveVideo() && negrasSeguidas.veces >= NEGRAS_PARA_RENDIRSE;
 
+/** La imagen del episodio que ofrece el propio sitio. No lleva DRM, y es mejor que una tarjeta sin imagen. */
+async function imagenDelSitio(): Promise<MedioTarjeta | null> {
+  try {
+    const url = await control.imagenOficial();
+    if (!url) return null;
+    const { datos, tipo } = await motor.descargarMedio(url);
+    const nombre = `kotonoha_${Date.now()}.jpg`;
+    return { id: nombre, nombre, tipo, datos };
+  } catch {
+    return null;
+  }
+}
+
 /** Fotograma actual: del video si se puede, y si no de la pantalla, con el video como única cosa a la vista. */
 async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) => void): Promise<MedioTarjeta | null> {
   const nombre = `kotonoha_${Date.now()}.jpg`;
   const propio = fotogramaDeLienzo(v);
   if (propio) return { id: nombre, nombre, tipo: 'image/jpeg', datos: propio };
-  if (videoProtegido()) return null;
+  if (videoProtegido()) return imagenDelSitio();
   ocultarOverlay(true);
   try {
     // Sin los controles del reproductor ni nada más del sitio. Si no se pudiera, la captura sigue valiendo.
@@ -96,8 +109,11 @@ async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) 
     const clave = claveVideo();
     if (recorte.negra) {
       negrasSeguidas = { video: clave, veces: negrasSeguidas.video === clave ? negrasSeguidas.veces + 1 : 1 };
-      avisar('El fotograma salió negro: este sitio lo protege, así que la tarjeta va sin captura del video.', undefined, undefined, 7000);
-      return null;
+      const oficial = await imagenDelSitio();
+      if (negrasSeguidas.veces === 1) {
+        avisar(oficial ? 'Este sitio protege sus fotogramas: la tarjeta lleva la imagen oficial del episodio.' : 'El fotograma salió negro: este sitio lo protege, así que la tarjeta va sin captura del video.', undefined, undefined, 7000);
+      }
+      return oficial;
     }
     negrasSeguidas = { video: clave, veces: 0 };
     return { id: nombre, nombre, tipo: 'image/jpeg', datos: recorte.url.split(',')[1] };

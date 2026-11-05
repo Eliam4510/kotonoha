@@ -15,7 +15,7 @@ export const SITIOS_VIDEO = [
 export const manifiesto = {
   manifest_version: 3,
   name: 'Kotonoha',
-  version: '0.2.3',
+  version: '0.2.4',
   description: 'Subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés.',
   minimum_chrome_version: '120',
   icons: { 16: 'icono16.png', 32: 'icono32.png', 48: 'icono48.png', 128: 'icono128.png' },

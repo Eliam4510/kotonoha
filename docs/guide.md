@@ -159,7 +159,7 @@ If a video cannot be downloaded, for example because it is private or age-restri
 
 Cards can be sent to Anki through AnkiConnect, with a custom note type or the one the extension creates, or saved in **Memoria**, the built-in FSRS review. Fields include sentence, furigana, translation, definitions, audio, image and notes. Audio capture is enabled with `Alt+R`.
 
-**Audio and image from the video.** To record the sentence audio, capture must be enabled with `Alt+R` in the video's tab. Capture only covers that tab: if it is active in another one, the microphone icon appears off and the card is created without audio. When a card is created, the line plays again at normal speed while it records, and the video then stays where it was. The image includes nothing from the interface. On sites with DRM, such as Netflix, the browser delivers the frame in black, so the card is created without a capture.
+**Audio and image from the video.** To record the sentence audio, capture must be enabled with `Alt+R` in the video's tab. Capture only covers that tab: if it is active in another one, the microphone icon appears off and the card is created without audio. When a card is created, the line plays again at normal speed while it records, and the video then stays where it was. The image includes nothing from the interface. On sites with DRM, such as Netflix, the browser delivers the frame in black: the card then carries the episode's official image, or none if the site does not offer one.
 
 ## Audio, images and examples
 

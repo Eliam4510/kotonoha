@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.2.3, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.2.4, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -130,6 +130,6 @@ Estado de cada función en la versión 0.2.3, con la forma en que se ha verifica
 | Idioma de estudio | Solo japonés: la lógica de análisis es específica de este idioma |
 | Idioma de la interfaz | Solo español. Las explicaciones de Claude pueden pedirse en español, inglés o japonés sencillo |
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
-| Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta se crea sin captura |
+| Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |

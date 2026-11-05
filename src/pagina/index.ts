@@ -54,6 +54,7 @@ if (!window.__kotonohaPagina) {
     reproducir: () => adaptador.reproducir(),
     pausar: () => adaptador.pausar(),
     ocultarNativos: (v: boolean) => ocultarNativos(v),
+    imagenOficial: () => adaptador.imagenOficial?.() ?? null,
     prepararPanel: (ancho: number) => adaptador.prepararPanel?.(ancho),
   };
 

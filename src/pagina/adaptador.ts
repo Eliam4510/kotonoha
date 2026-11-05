@@ -15,6 +15,8 @@ export interface Adaptador {
   saltar(ms: number): void | Promise<void>;
   reproducir(): void | Promise<void>;
   pausar(): void | Promise<void>;
+  /** La imagen que el propio sitio ofrece de este video, para cuando su fotograma está protegido. */
+  imagenOficial?(): string | null;
   /** Reduce el reproductor para dejar sitio al navegador de subtítulos. 0 lo restaura. */
   prepararPanel?(ancho: number): void;
 }

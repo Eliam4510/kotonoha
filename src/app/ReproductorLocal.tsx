@@ -57,6 +57,7 @@ const control: Control = {
     elVideo?.pause();
   },
   ocultarNativos: async () => {},
+  imagenOficial: async () => null,
   prepararPanel: async () => {},
   video: () => elVideo,
 };

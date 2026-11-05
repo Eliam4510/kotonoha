@@ -18,7 +18,7 @@ interface ApiNetflix {
     getAllPlayerSessionIds?(): string[];
     getVideoPlayerBySessionId?(id: string): JugadorNetflix | undefined;
   };
-  getVideoMetadataByVideoId?(id: number): { getCurrentVideo?(): { getTitle?(): string } } | undefined;
+  getVideoMetadataByVideoId?(id: number): { getCurrentVideo?(): { getTitle?(): string; getLoadingImageUrl?(): string; getEpisodeThumbnail?(): { url?: string } | undefined } } | undefined;
 }
 
 interface PistaNetflix {
@@ -218,6 +218,13 @@ export const adaptadorNetflix: Adaptador = {
   },
   pausar() {
     jugador()?.pause?.();
+  },
+
+  // La de carga es una imagen del episodio a 1920×1080. La miniatura, de 350×197, solo por si no la hubiera.
+  imagenOficial() {
+    const id = jugador()?.getMovieId?.();
+    const video = id ? api()?.getVideoMetadataByVideoId?.(id)?.getCurrentVideo?.() : undefined;
+    return video?.getLoadingImageUrl?.() ?? video?.getEpisodeThumbnail?.()?.url ?? null;
   },
 
   prepararPanel(ancho) {

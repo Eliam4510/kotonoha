@@ -12,6 +12,7 @@ export interface Control {
   reproducir(): Promise<void>;
   pausar(): Promise<void>;
   ocultarNativos(v: boolean): Promise<void>;
+  imagenOficial(): Promise<string | null>;
   prepararPanel(ancho: number): Promise<void>;
   video(): HTMLVideoElement | null;
 }
@@ -81,6 +82,7 @@ export const controlSitio: Control = {
   reproducir: () => orden('reproducir'),
   pausar: () => orden('pausar'),
   ocultarNativos: (v) => orden('ocultarNativos', [v]),
+  imagenOficial: () => orden('imagenOficial'),
   prepararPanel: (a) => orden('prepararPanel', [a]),
   video: videoPrincipal,
 };

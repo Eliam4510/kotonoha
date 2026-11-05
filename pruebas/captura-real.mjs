@@ -6,6 +6,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
@@ -61,6 +62,28 @@ const pagina = (id, archivo) => `<!doctype html><meta charset="utf-8"><title>${i
   j.setOption = () => {};
 </script>`;
 
+// La imagen oficial se sirve de verdad: el motor la descarga desde su propio documento.
+const ESTILL = join(FIXTURES, 'still.jpg');
+if (!existsSync(ESTILL)) execFileSync(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=0xd07020:s=640x360:d=1', '-frames:v', '1', ESTILL]);
+const servidorImagen = createServer((_, res) => {
+  res.writeHead(200, { 'content-type': 'image/jpeg', 'access-control-allow-origin': '*' });
+  res.end(readFileSync(ESTILL));
+});
+await new Promise((ok) => servidorImagen.listen(0, '127.0.0.1', ok));
+const URL_ESTILL = `http://127.0.0.1:${servidorImagen.address().port}/still.jpg`;
+
+const paginaNetflix = () => `<!doctype html><meta charset="utf-8"><title>Episodio de prueba - Netflix</title>
+<body style="margin:0;background:#141414;overflow:hidden"><video id="v" src="https://media.test/tonos-negro.webm" style="display:block;width:100vw;height:100vh"></video>
+<script>
+  const pistas = [{ trackId: 't-ja', displayName: '日本語', bcp47: 'ja' }];
+  const v = document.getElementById('v');
+  const jugador = { getTimedTextTrackList: () => pistas, getTimedTextTrack: () => pistas[0], setTimedTextTrack: async () => {}, seek: (ms) => { v.currentTime = ms / 1000; }, play: () => v.play(), pause: () => v.pause(), getMovieId: () => 1 };
+  window.netflix = { appContext: { state: { playerApp: {
+    getAPI: () => ({ videoPlayer: { getAllPlayerSessionIds: () => ['watch1'], getVideoPlayerBySessionId: () => jugador }, getVideoMetadataByVideoId: () => ({ getCurrentVideo: () => ({ getTitle: () => 'Episodio de prueba', getLoadingImageUrl: () => '${URL_ESTILL}' }) }) }),
+    getState: () => ({ videoPlayer: { cadmiumPlayerRepository: { playersById: { watch1: { datos: [{ type: 'timedtext', trackId: 't-ja', urls: [{ url: 'https://subs.test/t-ja.vtt' }] }] } } } } }),
+  } } } };
+</script>`;
+
 const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: false,
@@ -85,6 +108,8 @@ await contexto.route('https://www.youtube.com/**', (r) => {
   }
   return r.fulfill({ status: 204 });
 });
+await contexto.route('https://www.netflix.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: paginaNetflix() }));
+await contexto.route('https://subs.test/**', (r) => r.fulfill({ status: 200, contentType: 'text/vtt', headers: { 'access-control-allow-origin': '*' }, body: `WEBVTT\n\n${CUES.map(([a, b, t]) => `${new Date(a).toISOString().slice(11, 23)} --> ${new Date(b).toISOString().slice(11, 23)}\n${t}\n`).join('\n')}` }));
 await contexto.route('https://otra.test/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>otra</title><h1>Otra pestaña, sin sonido</h1>' }));
 
 const sw = await recargarExtension(contexto);
@@ -227,8 +252,8 @@ function tonosDe(base64) {
 
 const cuenta = (lista, f) => lista.filter((x) => x === f).length;
 
-/** Qué parte de la imagen tiene el color del video: si hubiera interfaz encima, no sería casi toda. */
-const parteDelColor = (datos) =>
+/** Qué parte de la imagen tiene un color: si hubiera interfaz encima, no sería casi toda. */
+const parteDelColor = (datos, color = COLOR) =>
   p.evaluate(async ({ datos, color }) => {
     const b = await createImageBitmap(await (await fetch(`data:image/jpeg;base64,${datos}`)).blob());
     const c = new OffscreenCanvas(b.width, b.height);
@@ -238,7 +263,7 @@ const parteDelColor = (datos) =>
     let dentro = 0;
     for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - color[0]) < 40 && Math.abs(d[i + 1] - color[1]) < 40 && Math.abs(d[i + 2] - color[2]) < 40) dentro++;
     return { parte: dentro / (d.length / 4), ancho: b.width, alto: b.height };
-  }, { datos, color: COLOR });
+  }, { datos, color });
 
 // ---------- La captura está en otra pestaña ----------
 
@@ -350,7 +375,28 @@ const tercera = await p.evaluate(() => window.__cambios.filter((c) => c.op === '
 comprobar(tercera === 0, 'Comprobado dos veces, la interfaz ya no parpadea por nada', `${tercera} veces oculta`);
 comprobar(b.audioFrase.length === 1, 'Y el audio sigue saliendo');
 
+// ---------- Netflix: el fotograma protegido deja paso a la imagen oficial ----------
+
+console.log('\n== Con la forma de Netflix: fotograma protegido e imagen oficial ==');
+await p.goto('https://www.netflix.com/watch/1');
+await hasta((r) => r.querySelector('.barra') != null, undefined, 30000);
+await p.bringToFront();
+await p.evaluate(() => { const v = document.querySelector('#v'); v.pause(); v.currentTime = 3.5; });
+await hasta((r) => r.querySelector('.subs-bloque:not(.saliendo) .linea-sub.objetivo .pal') != null, undefined, 30000);
+await p.mouse.move(40, 700);
+await p.waitForTimeout(300);
+b = await crearConQ();
+comprobar(b.imagenes.length === 1, 'La tarjeta lleva la imagen oficial del episodio');
+if (b.imagenes[0]) {
+  writeFileSync(join(CAPTURAS, 'imagen-netflix.jpg'), Buffer.from(b.imagenes[0].datos, 'base64'));
+  await p.screenshot({ path: join(CAPTURAS, 'pantalla-netflix.png') });
+  const color = await parteDelColor(b.imagenes[0].datos, [0xd0, 0x70, 0x20]);
+  comprobar(color.parte > 0.97, 'Es esa imagen, y no el fotograma negro', `${Math.round(color.parte * 100)} % de su color`);
+}
+comprobar(/imagen oficial/.test(await avisos()), 'Y lo dice', await avisos());
+
 if (errores.length) console.log('\nErrores en la página:', [...new Set(errores)].slice(0, 6));
 console.log(`\n${fallos ? `${fallos} comprobaciones fallaron` : 'Todas las comprobaciones pasaron'}`);
 await contexto.close();
+servidorImagen.close();
 process.exit(fallos ? 1 : 0);
