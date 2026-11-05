@@ -88,8 +88,12 @@ export function tramoConSonido(canales: Float32Array[], umbral = UMBRAL_SILENCIO
   return inicio < 0 ? null : { inicio, fin };
 }
 
-/** Si una imagen RGBA es negra casi por completo: lo que entrega el navegador de un fotograma protegido con DRM. */
-export function imagenNegra(rgba: Uint8ClampedArray | Uint8Array, umbral = 12, proporcion = 0.995): boolean {
+/**
+ * Si una imagen RGBA es negra casi por completo: lo que entrega el navegador de un fotograma protegido con DRM.
+ * Tiene margen porque el video no siempre llena la ventana: en Netflix quedan franjas del fondo de la página, de
+ * un gris muy oscuro (20, 20, 20).
+ */
+export function imagenNegra(rgba: Uint8ClampedArray | Uint8Array, umbral = 24, proporcion = 0.98): boolean {
   const total = Math.floor(rgba.length / 4);
   if (!total) return false;
   let negros = 0;

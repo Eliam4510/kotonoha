@@ -108,6 +108,13 @@ const api: ApiFondo & { _: never } = {
       });
     });
   },
+  // Como estilo de usuario: gana a cualquiera del sitio, incluso a los !important en línea de sus avisos.
+  async soloVideo(this: ConRemitente, si: boolean) {
+    const tabId = this.remitente?.tab?.id;
+    if (tabId === undefined) return;
+    const opciones = { target: { tabId, allFrames: true }, origin: 'USER' as const, css: '*{visibility:hidden!important}video{visibility:visible!important}' };
+    await (si ? chrome.scripting.insertCSS(opciones) : chrome.scripting.removeCSS(opciones));
+  },
   alternarCaptura: () => alternarCaptura(),
   // Es por pestaña: con la captura en otra, lo que se grabaría aquí es el silencio de aquella.
   async capturaActiva(this: ConRemitente) {
