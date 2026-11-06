@@ -1,4 +1,5 @@
 // Empaqueta la extensión en dist/. Uso: node build.mjs [--watch]
+import { createHash } from 'node:crypto';
 import { build, context } from 'esbuild';
 import { copyFile, cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -93,6 +94,19 @@ generarIconos();
 await rm(SALIDA, { recursive: true, force: true });
 await mkdir(SALIDA, { recursive: true });
 
+async function huella(carpeta) {
+  const archivos = (await readdir(carpeta, { recursive: true, withFileTypes: true }))
+    .filter((e) => e.isFile() && e.name !== 'compilacion.txt')
+    .map((e) => join(e.parentPath, e.name))
+    .sort();
+  const suma = createHash('sha256');
+  for (const ruta of archivos) {
+    suma.update(ruta);
+    suma.update(await readFile(ruta));
+  }
+  return suma.digest('hex');
+}
+
 if (vigilar) {
   const ctx = await context(opciones);
   await ctx.watch();
@@ -105,6 +119,7 @@ if (vigilar) {
   await build(opcionesWhisper);
   await estaticos();
   // Lo último de todo: la extensión se recarga sola al ver que cambia, y para entonces ya está todo escrito.
-  await writeFile(join(SALIDA, 'compilacion.txt'), String(Date.now()));
+  // Sale del contenido: recargar sin motivo cortaría la captura de audio de la pestaña que se esté viendo.
+  await writeFile(join(SALIDA, 'compilacion.txt'), await huella(SALIDA));
   console.log(`Compilación lista en ${SALIDA}/`);
 }
