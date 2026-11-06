@@ -39,7 +39,12 @@ function generar(nombre, color) {
   execFileSync(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `color=c=${color}:s=640x360:r=25:d=16`, '-f', 'lavfi', '-i', "aevalsrc='0.03*sin(2*PI*(300+100*floor(t))*t)':s=48000:d=16", '-c:v', 'libvpx', '-b:v', '150k', '-c:a', 'libopus', '-b:a', '96k', '-shortest', destino]);
   return destino;
 }
-const ARCHIVOS = { 'tonos.webm': readFileSync(generar('tonos.webm', '0x2f6fb0')), 'tonos-negro.webm': readFileSync(generar('tonos-negro.webm', 'black')) };
+function generarSinSonido(nombre, color) {
+  const destino = join(FIXTURES, nombre);
+  if (!existsSync(destino)) execFileSync(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `color=c=${color}:s=640x360:r=25:d=16`, '-c:v', 'libvpx', '-b:v', '150k', '-an', destino]);
+  return destino;
+}
+const ARCHIVOS = { 'tonos.webm': readFileSync(generar('tonos.webm', '0x2f6fb0')), 'tonos-negro.webm': readFileSync(generar('tonos-negro.webm', 'black')), 'sin-sonido.webm': readFileSync(generarSinSonido('sin-sonido.webm', '0x2f6fb0')) };
 
 const CUES = [[3000, 4500, '授業の後は勉強します'], [7000, 8000, '明日もまた会いましょう'], [10000, 11500, '私はまだ立ち上がることができます']];
 const json3 = JSON.stringify({ events: CUES.map(([a, b, t]) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: t }] })) });
@@ -104,7 +109,7 @@ await contexto.route('https://www.youtube.com/**', (r) => {
   if (u.pathname.includes('/api/timedtext')) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: json3 });
   if (u.pathname === '/watch') {
     const id = u.searchParams.get('v');
-    return r.fulfill({ status: 200, contentType: 'text/html', body: pagina(id, id.startsWith('negro') ? 'tonos-negro.webm' : 'tonos.webm') });
+    return r.fulfill({ status: 200, contentType: 'text/html', body: pagina(id, id.startsWith('negro') ? 'tonos-negro.webm' : id.startsWith('mudo') ? 'sin-sonido.webm' : 'tonos.webm') });
   }
   return r.fulfill({ status: 204 });
 });
@@ -143,7 +148,7 @@ const motor = async (metodo, ...args) => {
   return r.valor;
 };
 
-/** Lo que hace Alt+R en el navegador, salvo por el permiso de pulsar el atajo. */
+/** Lo que hace el atajo de la captura en el navegador, salvo por el permiso de pulsarlo. */
 const capturar = (url) =>
   sw.evaluate(async (u) => {
     // Una pestaña con la captura ya abierta no admite otra.
@@ -276,7 +281,7 @@ await p.waitForTimeout(400);
 comprobar((await micro()) === false, 'El micrófono de esta pestaña no se muestra activo');
 let b = await crearConQ();
 comprobar(b.audioFrase.length === 0, 'La tarjeta no lleva una grabación muda');
-comprobar(/Alt\+R/.test(await avisos()), 'Y avisa de que hay que pulsar Alt+R aquí', await avisos());
+comprobar(/Alt\+Shift\+M/.test(await avisos()), 'Y avisa de que hay que pulsar su atajo aquí', await avisos());
 comprobar(b.imagenes.length === 1, 'La imagen sí sale');
 
 // ---------- La captura está en esta pestaña, con la ficha abierta ----------
@@ -354,6 +359,30 @@ comprobar(b.audioFrase.length === 0, 'Una grabación muda no se guarda');
 comprobar(/muda/.test(await avisos()), 'Y lo dice', await avisos());
 await p.evaluate(() => { document.querySelector('#v').muted = false; });
 await p.waitForTimeout(300);
+
+// ---------- Un sitio que no entrega su sonido ----------
+
+console.log('\n== Un sitio que no entrega su sonido ==');
+await abrir('mudo1');
+await capturar('https://www.youtube.com/*');
+await p.waitForTimeout(400);
+await p.evaluate(() => {
+  window.__saltos = 0;
+  document.querySelector('#v').addEventListener('seeking', () => window.__saltos++);
+});
+b = await crearConQ();
+comprobar(b.audioFrase.length === 0, 'La frase muda no se guarda');
+comprobar(/no entrega/.test(await avisos()), 'Y explica por qué', await avisos());
+await irA(3.5);
+await p.waitForTimeout(300);
+await crearConQ();
+await irA(3.5);
+await p.waitForTimeout(300);
+await p.evaluate(() => { window.__saltos = 0; });
+b = await crearConQ();
+const saltos = await p.evaluate(() => window.__saltos);
+comprobar(saltos === 0, 'Comprobado dos veces, ya no se repite la frase para nada', `${saltos} saltos`);
+comprobar(b.audioFrase.length === 0 && b.imagenes.length === 1, 'La tarjeta sale igual, con su imagen');
 
 // ---------- Fotograma protegido ----------
 

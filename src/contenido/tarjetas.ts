@@ -5,7 +5,7 @@ import type { BorradorTarjeta, ContextoIA, LineaAnalizada, MedioTarjeta, Palabra
 import { aFuriganaAnki, desconocidas, fraseConNegrita } from '../nucleo/frases';
 import { borradorVacio, enviarAlCreador } from '../ui/borrador';
 import { actualizarCaptura, empezarGrabacionLinea, pausar, reproducir, saltar, terminarGrabacionLinea } from './controlador';
-import { ajustes, avisar, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
+import { ajustes, avisar, comoActivarCaptura, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
 import type { Control } from './puente';
 
 let control: Control;
@@ -74,10 +74,15 @@ const pintado = () =>
 
 // Un sitio con DRM entrega siempre el fotograma en negro. Tras comprobarlo dos veces no se insiste en ese
 // video: la interfaz no parpadea por nada. Una sola vez podría ser una escena a oscuras.
-const NEGRAS_PARA_RENDIRSE = 2;
+const INTENTOS_PARA_RENDIRSE = 2;
 let negrasSeguidas = { video: '', veces: 0 };
 const claveVideo = () => infoVideo.value?.idVideo ?? location.href;
-const videoProtegido = () => negrasSeguidas.video === claveVideo() && negrasSeguidas.veces >= NEGRAS_PARA_RENDIRSE;
+const videoProtegido = () => negrasSeguidas.video === claveVideo() && negrasSeguidas.veces >= INTENTOS_PARA_RENDIRSE;
+
+// Igual con el sonido: dos frases seguidas mudas, con el video sonando y la captura en esta pestaña, es que el
+// sitio no lo entrega. Repetir cada frase para nada solo mueve el video.
+let mudasSeguidas = { video: '', veces: 0 };
+const audioProtegido = () => mudasSeguidas.video === claveVideo() && mudasSeguidas.veces >= INTENTOS_PARA_RENDIRSE;
 
 /** La imagen del episodio que ofrece el propio sitio. No lleva DRM, y es mejor que una tarjeta sin imagen. */
 async function imagenDelSitio(): Promise<MedioTarjeta | null> {
@@ -96,8 +101,14 @@ async function imagenDelSitio(): Promise<MedioTarjeta | null> {
 async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) => void): Promise<MedioTarjeta | null> {
   const nombre = `kotonoha_${Date.now()}.jpg`;
   const propio = fotogramaDeLienzo(v);
-  if (propio) return { id: nombre, nombre, tipo: 'image/jpeg', datos: propio };
-  if (videoProtegido()) return imagenDelSitio();
+  if (propio) {
+    console.info('Kotonoha: imagen del video');
+    return { id: nombre, nombre, tipo: 'image/jpeg', datos: propio };
+  }
+  if (videoProtegido()) {
+    console.info('Kotonoha: imagen oficial, fotograma protegido');
+    return imagenDelSitio();
+  }
   ocultarOverlay(true);
   try {
     // Sin los controles del reproductor ni nada más del sitio. Si no se pudiera, la captura sigue valiendo.
@@ -109,13 +120,16 @@ async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) 
     const clave = claveVideo();
     if (recorte.negra) {
       negrasSeguidas = { video: clave, veces: negrasSeguidas.video === clave ? negrasSeguidas.veces + 1 : 1 };
+      console.info(`Kotonoha: fotograma negro, ${negrasSeguidas.veces}.ª vez`);
       const oficial = await imagenDelSitio();
       if (negrasSeguidas.veces === 1) {
-        avisar(oficial ? 'Este sitio protege sus fotogramas: la tarjeta lleva la imagen oficial del episodio.' : 'El fotograma salió negro: este sitio lo protege, así que la tarjeta va sin captura del video.', undefined, undefined, 7000);
+        // Puede ser DRM o una escena a oscuras: lo cierto es solo que salió negro.
+        avisar(oficial ? 'El fotograma salió negro: la tarjeta lleva la imagen oficial del episodio.' : 'El fotograma salió negro: la tarjeta va sin captura del video.', undefined, undefined, 7000);
       }
       return oficial;
     }
     negrasSeguidas = { video: clave, veces: 0 };
+    console.info('Kotonoha: imagen de la pantalla');
     return { id: nombre, nombre, tipo: 'image/jpeg', datos: recorte.url.split(',')[1] };
   } catch {
     return null;
@@ -184,12 +198,20 @@ async function grabarLinea(l: LineaAnalizada, ocultarOverlay: (v: boolean) => vo
       }
     }
     const clip = await motor.terminarClip();
-    console.info('Kotonoha: grabación', { arranco, mudo: !!clip && 'mudo' in clip, clip: clip ? 'datos' in clip : false, videoMudo: v.muted, volumen: v.volume, desde: inicio, hasta: fin, llego: Math.round(v.currentTime * 1000) });
+    // En texto, para poder leerlo también al copiar la consola.
+    const resumen = !clip ? 'nada' : 'mudo' in clip ? 'mudo' : `${clip.segundos.toFixed(2)} s, pico ${clip.pico.toFixed(3)}`;
+    console.info(`Kotonoha: grabación ${JSON.stringify({ arranco, clip: resumen, videoMudo: v.muted, volumen: v.volume, desde: inicio, hasta: fin, llego: Math.round(v.currentTime * 1000) })}`);
     if (!arranco) {
       avisar('El video no arrancó para grabar la frase: la tarjeta va sin audio.', 'error', undefined, 7000);
     } else if (clip && 'mudo' in clip) {
-      avisar('La grabación salió muda: comprueba que el video tenga sonido y pulsa Alt+R en esta pestaña.', 'error', undefined, 9000);
+      const sonaba = !v.muted && v.volume > 0;
+      if (sonaba) {
+        const clave = claveVideo();
+        mudasSeguidas = { video: clave, veces: mudasSeguidas.video === clave ? mudasSeguidas.veces + 1 : 1 };
+      }
+      avisar(sonaba ? 'La grabación salió muda: este sitio no entrega su audio a la captura, o la frase no tiene sonido. La tarjeta va sin audio.' : 'La grabación salió muda porque el video está silenciado.', 'error', undefined, 9000);
     } else if (clip) {
+      mudasSeguidas = { video: '', veces: 0 };
       audio = { id: 'clip', nombre: `kotonoha_${Date.now()}.mp3`, tipo: clip.tipo, datos: clip.datos, etiqueta: 'Video' };
     }
     if (capturando) imagen = await capturando;
@@ -278,7 +300,7 @@ export async function construirBorrador(p: PalabraToken | null, l: LineaAnalizad
   const v = control.video();
   if (l && grabar && v) {
     // Se pregunta en este momento: la captura pudo cortarse o estar en otra pestaña.
-    const conCaptura = pre.audioFraseVideo && (await actualizarCaptura().catch(() => false));
+    const conCaptura = pre.audioFraseVideo && !audioProtegido() && (await actualizarCaptura().catch(() => false));
     if (conCaptura) {
       const { audio, imagen } = await grabarLinea(l, ocultarOverlay, pre.imagenCaptura);
       if (audio) b.audioFrase = [audio];
@@ -288,7 +310,7 @@ export async function construirBorrador(p: PalabraToken | null, l: LineaAnalizad
         const imagen = await capturarImagen(v, ocultarOverlay);
         if (imagen) b.imagenes = [imagen];
       }
-      if (pre.audioFraseVideo) avisar('Sin audio del video: pulsa Alt+R en esta pestaña para activar la captura.', undefined, undefined, 6000);
+      if (pre.audioFraseVideo && !audioProtegido()) avisar(`Sin audio del video: ${comoActivarCaptura()} en esta pestaña para activar la captura.`, undefined, undefined, 6000);
     }
   }
   if (!b.audioFrase.length && pre.audioFraseVoz && a.azureClave && b.frase) {

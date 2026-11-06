@@ -27,7 +27,7 @@ import {
   seleccionarObjetivo,
   seleccionarSecundaria,
 } from './controlador';
-import { ajustes, analisisEnCurso, anclas, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sincronias, transcribeArchivo, whisper } from './estado';
+import { ajustes, analisisEnCurso, anclas, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
 import { cambiarAjuste } from './Reproductor';
 
 /** Anillo de progreso: comprensión del video, avance de una tarea de Claude. */
@@ -64,6 +64,12 @@ function Teclas({ t }: { t: string[] }) {
       )}
     </span>
   );
+}
+
+/** La tecla real de la captura, o dónde activarla si Chrome no le ha dado ninguna. */
+function teclasCaptura(): string[] {
+  const t = atajosChrome.value['alternar-captura'];
+  return t ? t.split('+').flatMap((x, i) => (i ? ['+', x] : [x])) : ['Menú de la extensión'];
 }
 
 function Cabecera({ titulo, icono, detalle, ia }: { titulo: string; icono: NombreIcono; detalle?: string; ia?: boolean }) {
@@ -463,13 +469,15 @@ function PanelVideo() {
 
 // ---------- Atajos ----------
 
+const FILA_CAPTURA = 'Permitir captura de audio';
+
 const ATAJOS: { titulo: string; filas: [string, string[]][] }[][] = [
   [
     {
       titulo: 'Barra',
       filas: [
         ['Fijar o soltar la barra', ['Alt', '+', 'X']],
-        ['Mostrarla mientras se mantiene', ['Alt', '+', 'Z']],
+        ['Mostrarla mientras se mantiene', ['Alt', '+', 'V']],
         ['Abrir el traductor', ['Alt', '+', 'T']],
       ],
     },
@@ -497,7 +505,7 @@ const ATAJOS: { titulo: string; filas: [string, string[]][] }[][] = [
         ['Crear tarjeta', ['Q']],
         ['Enviar al creador', ['E']],
         ['Cancelar la creación', ['Ctrl', '+', 'X']],
-        ['Permitir captura de audio', ['Alt', '+', 'R']],
+        [FILA_CAPTURA, []],
       ],
     },
     {
@@ -557,7 +565,7 @@ function PanelAtajos() {
                   {g.filas.map(([n, t]) => (
                     <div class="atajo" key={n}>
                       <span>{n}</span>
-                      <Teclas t={t} />
+                      <Teclas t={n === FILA_CAPTURA ? teclasCaptura() : t} />
                     </div>
                   ))}
                 </div>
@@ -566,6 +574,7 @@ function PanelAtajos() {
           </div>
         ))}
       </div>
+      <p class="nota-grupo pie">Si un atajo de Chrome no responde, puede que otra extensión lo tenga reservado: <button class="enlace" onClick={() => fondo.abrirAtajos()}>revisar los atajos</button>.</p>
     </div>
   );
 }
@@ -640,6 +649,7 @@ function SeccionWhisper() {
       <div class="grupo">
         <div class="bloque-generar">
           <p>{enteroDeUnaVez ? 'Transcribe el audio entero sin esperar a reproducirlo: 30 minutos tardan unos 5. El audio no sale de tu equipo.' : 'Escucha el video mientras se reproduce, así que los subtítulos llegan con unos segundos de retraso.'}</p>
+          {sinAceleracion.value && <p class="nota-grupo">Con la aceleración por hardware apagada, el navegador no ofrece la GPU: Whisper correrá en el procesador y tardará mucho más.</p>}
         </div>
         <Fila etq="Modelo">
           <select class="selector" aria-label="Modelo de transcripción" title={MODELOS_WHISPER[a.whisperModelo]?.descripcion} value={a.whisperModelo} disabled={!!w} onChange={(e) => cambiarAjuste({ whisperModelo: e.currentTarget.value as ModeloWhisper })}>
@@ -664,7 +674,7 @@ function SeccionWhisper() {
           <div class="bloque-generar">
             <button class="btn bloque" onClick={() => iniciarWhisper()}><Icono n={enteroDeUnaVez ? 'ondas' : 'microfono'} t={16} /> {archivo ? 'Transcribir el archivo' : conAyudante ? 'Transcribir el video' : 'Empezar a transcribir'}</button>
             {conAyudante && <button class="btn chico fantasma bloque" onClick={() => iniciarWhisper(true)}><Icono n="microfono" t={14} /> Transcribir mientras se reproduce</button>}
-            {!enteroDeUnaVez && !capturaActiva.value && <p class="nota-grupo">Necesita oír el video: activa antes la captura de audio con <Teclas t={['Alt', '+', 'R']} /></p>}
+            {!enteroDeUnaVez && !capturaActiva.value && <p class="nota-grupo">Necesita oír el video: activa antes la captura de audio con <Teclas t={teclasCaptura()} /></p>}
             {!enteroDeUnaVez && <p class="nota-grupo">Con el ayudante local no hace falta reproducirlo: mira cómo instalarlo en <button class="enlace" onClick={() => fondo.abrirApp('ajustes')}>Ajustes</button>.</p>}
           </div>
         )}

@@ -4,6 +4,7 @@ import { type Ajustes, completarAjustes } from '../compartido/ajustes';
 import type { ApiMotor, CambioPalabra, FiltroPalabras } from '../compartido/api';
 import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
+import { renderizadoPorSoftware } from '../nucleo/medios';
 import type { Linea } from '../nucleo/subtitulos';
 import * as analisis from './analisis';
 import * as anki from './anki';
@@ -64,7 +65,19 @@ async function repararFrecuencias() {
   await fondo.difundir({ tipo: 'diccionarios' });
 }
 
+let sinGpu: boolean | null = null;
+
 const api: ApiMotor = {
+  // No cambia sin reiniciar el navegador: basta con mirarlo una vez.
+  async sinAceleracion() {
+    if (sinGpu === null) {
+      const gl = document.createElement('canvas').getContext('webgl');
+      const info = gl?.getExtension('WEBGL_debug_renderer_info');
+      sinGpu = !gl || renderizadoPorSoftware(String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER)));
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    }
+    return sinGpu;
+  },
   async estado() {
     return {
       tokenizadorListo: analisis.tokenizadorListo(),

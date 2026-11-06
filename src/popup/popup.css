@@ -14,6 +14,8 @@
 .ap-menu-texto span { font-size: 12px; line-height: 1.4; color: var(--texto-3); overflow: hidden; text-overflow: ellipsis; }
 .ap-menu .segmentado { display: flex; }
 .ap-menu .segmentado button { flex: 1; justify-content: center; }
+.ap-menu-texto .tecla + .tecla { margin-left: 3px; }
+.ap-menu-texto .enlace { padding: 0; border: 0; background: none; color: var(--acento); font: inherit; text-decoration: underline; cursor: pointer; }
 .ap-menu-error { padding: 0 14px 10px; font-size: 12px; font-weight: 600; color: var(--error); }
 
 .ap-menu-rutas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; padding: 6px; }

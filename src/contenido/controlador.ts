@@ -16,10 +16,12 @@ import {
   anclas,
   anuncio,
   aplicarCambioPalabra,
+  atajosChrome,
   avisar,
   capturaActiva,
   cargandoPista,
   clasesLineas,
+  comoActivarCaptura,
   configModo,
   consulta,
   correccion,
@@ -65,6 +67,9 @@ let videoActual: HTMLVideoElement | null = null;
 
 const MARCADORES = 'kotonohaMarcadores';
 
+/** Mientras se graba una frase para una tarjeta: el video se mueve solo, y nada de eso es cosa de quien mira. */
+export const grabandoLinea = () => grabacionEnCurso !== null;
+
 export function iniciarControlador(c: Control) {
   control = c;
   effect(() => {
@@ -85,9 +90,22 @@ export function iniciarControlador(c: Control) {
     if (e.tipo === 'palabras') for (const ca of e.cambios) aplicarCambioPalabra(ca.clave, { estado: ca.estado ?? undefined, rastreada: ca.rastreada });
     if (e.tipo === 'palabrasRecargar' || e.tipo === 'diccionarios') reanalizar();
     // Se pregunta en lugar de usar el dato del aviso: la captura de otra pestaña no sirve para esta.
-    if (e.tipo === 'captura') actualizarCaptura().catch(() => {});
+    if (e.tipo === 'captura') {
+      const antes = capturaActiva.value;
+      actualizarCaptura().then((ahora) => {
+        if (ahora !== antes) avisar(ahora ? 'Captura de audio activada en esta pestaña' : 'Captura de audio desactivada', undefined, undefined, 2500);
+      }).catch(() => {});
+    }
+    if (e.tipo === 'capturaFallida') avisar(`No se pudo activar la captura: ${e.motivo}`, 'error', undefined, 9000);
   });
   actualizarCaptura().catch(() => {});
+  actualizarAtajos();
+  // Se pueden cambiar en otra pestaña: al volver, hay que decir los nuevos.
+  window.addEventListener('focus', actualizarAtajos);
+}
+
+function actualizarAtajos() {
+  fondo.atajos().then((a) => (atajosChrome.value = a)).catch(() => {});
 }
 
 export async function actualizarCaptura(): Promise<boolean> {
@@ -1017,7 +1035,7 @@ export async function iniciarWhisper(enVivo = false) {
   // Netflix siempre tiene subtítulos y su audio no se puede bajar: ahí nunca se usa el ayudante.
   const conAyudante = !enVivo && !desdeArchivo && infoVideo.value?.sitio !== 'netflix' && !!(await actualizarAyudante());
   if (!desdeArchivo && !conAyudante && !capturaActiva.value) {
-    avisar('Para oír el video activa la captura de audio con Alt+R y vuelve a intentarlo.', 'error', undefined, 8000);
+    avisar(`Para oír el video hay que activar la captura de audio: ${comoActivarCaptura()} y vuelve a intentarlo.`, 'error', undefined, 8000);
     return;
   }
   whisper.value = { fase: conAyudante ? 'bajando' : desdeArchivo ? 'extrayendo' : 'preparando', lineas: 0, desdeArchivo: !!desdeArchivo || conAyudante };

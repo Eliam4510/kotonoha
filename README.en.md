@@ -13,9 +13,9 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-3987e5?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-A9E45B?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/version-0.2.4-A9E45B?style=flat-square" alt="Version 0.2.4">
+  <img src="https://img.shields.io/badge/version-0.2.5-A9E45B?style=flat-square" alt="Version 0.2.5">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
-  <img src="https://img.shields.io/badge/unit%20tests-179-0ca30c?style=flat-square" alt="179 unit tests">
+  <img src="https://img.shields.io/badge/unit%20tests-181-0ca30c?style=flat-square" alt="181 unit tests">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 to N1">
 </p>
 
@@ -131,7 +131,7 @@ Then load the `dist` folder as in the steps above. After rebuilding, the extensi
 
 ## Getting started
 
-Under **Ajustes** (Settings), in the extension window (`Alt+Shift+W`):
+Under **Ajustes** (Settings), in the extension window (`Alt+Shift+K`):
 
 1. Install the dictionaries: JMdict in Spanish and English, pitch accent and frequency.
 2. Add a Claude API key, which is stored only in the browser. This is optional: subtitles, the dictionary, flashcards and Whisper work without it.
@@ -153,14 +153,14 @@ With the compiled version it is downloaded separately, in `kotonoha-<version>-ay
 
 | Shortcut | Action |
 |---|---|
-| `Q` | Create a card in one click |
+| `Q`, `Alt+Q` | Create a card in one click |
 | `E` | Send to the card creator |
 | `N` | Go to the next unknown word |
 | `1` to `4` | Mark the word: unknown, tracked, known, ignored |
 | `A`, `D` | Previous and next sentence |
 | `S` | Repeat the sentence |
 | `G` | Subtitle navigator |
-| `Alt+R` | Allow audio capture |
+| `Alt+Shift+M` | Allow audio capture |
 | `Shift` + pointer | Look up a word on any page |
 
 ## Transcription performance
@@ -221,6 +221,7 @@ The last one builds and leaves the extension and helper ZIP files in `release/`,
 | `node pruebas/experiencia.mjs` | What is perceived on top of the video, frame by frame: flicker, jitter and dragging. It also counts requests to Claude and checks the spending log |
 | `node pruebas/capturas.mjs` | Goes through every screen and saves screenshots |
 | `node pruebas/tarjetas.mjs audio.wav` | Simulated Anki, memory and recording |
+| `node pruebas/sin-gpu.mjs` | What the interface costs without hardware acceleration: CPU and dropped frames |
 | `node pruebas/captura-real.mjs` | The card creator with real tab capture: which stretch the audio comes from and what the image shows. It needs a visible browser and plays very quietly |
 | `node pruebas/medios.mjs audio.wav` | ffmpeg.wasm with a multi-track MKV |
 | `node pruebas/ayudante.mjs video.mp4` | The local helper, downloading from the same computer |
@@ -234,7 +235,7 @@ Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist
 
 ## Project status
 
-Version 0.2.4 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while Netflix and extended validation are still pending.
+Version 0.2.5 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while Netflix and extended validation are still pending.
 
 ## Privacy
 

@@ -42,7 +42,7 @@ export async function detenerCaptura(): Promise<void> {
 
 /** Escucha la captura como audio mono a 16 kHz, el formato de Whisper. Devuelve la función para parar. */
 export function escucharPcm(alDatos: (pcm: Float32Array) => void): () => void {
-  if (!flujo) throw new Error('La captura de audio no está activa: pulsa Alt+R o actívala en el menú de la extensión.');
+  if (!flujo) throw new Error('La captura de audio no está activa: actívala con su atajo o en el menú de la extensión.');
   const ctx = new AudioContext({ sampleRate: 16000 });
   const origen = ctx.createMediaStreamSource(flujo);
   const procesador = ctx.createScriptProcessor(4096, 2, 1);
@@ -78,7 +78,7 @@ export async function iniciarCapturaPrueba(): Promise<void> {
 }
 
 export async function empezarClip(): Promise<void> {
-  if (!flujo) throw new Error('La captura no está activa: pulsa Alt+R o actívala en el menú de la extensión.');
+  if (!flujo) throw new Error('La captura no está activa: actívala con su atajo o en el menú de la extensión.');
   if (contexto?.state === 'suspended') await contexto.resume();
   trozos = [];
   // Se transcodifica después a MP3: conviene partir de más calidad de la que se va a guardar.
@@ -92,7 +92,7 @@ export async function empezarClip(): Promise<void> {
 /** Margen que se conserva antes y después del sonido, para no cortar en seco. */
 const MARGEN_CLIP_S = 0.04;
 
-export async function terminarClip(): Promise<{ datos: string; tipo: string } | { mudo: true } | null> {
+export async function terminarClip(): Promise<{ datos: string; tipo: string; segundos: number; pico: number } | { mudo: true } | null> {
   const r = grabador;
   if (!r) return null;
   grabador = null;
@@ -112,7 +112,9 @@ export async function terminarClip(): Promise<{ datos: string; tipo: string } | 
   const desde = Math.max(0, tramo.inicio - margen);
   const hasta = Math.min(audio.length, tramo.fin + margen);
   const mp3 = aMp3(canales.map((c) => c.subarray(desde, hasta)), audio.sampleRate);
-  return { datos: bytesABase64(mp3), tipo: 'audio/mpeg' };
+  let pico = 0;
+  for (const c of canales) for (let i = desde; i < hasta; i++) pico = Math.max(pico, Math.abs(c[i]));
+  return { datos: bytesABase64(mp3), tipo: 'audio/mpeg', segundos: (hasta - desde) / audio.sampleRate, pico };
 }
 
 function aMp3(canales: Float32Array[], frecuencia: number): Uint8Array {

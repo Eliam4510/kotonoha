@@ -2,12 +2,12 @@
 
 import { render } from 'preact';
 import { alCambiarAjustes, leerAjustes } from '../compartido/ajustes';
-import { alRecibirEvento, fondo } from '../compartido/rpc';
+import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
 import { ejecutarComando, instalarAtajos } from './atajos';
 import { cargarVideoActual, iniciarControlador, vigilarAnuncios } from './controlador';
-import { ajustes, avisar } from './estado';
+import { ajustes, avisar, sinAceleracion } from './estado';
 import { iniciarLectorWeb } from './lectorWeb';
 import overlay from './overlay.css';
 import { alNavegar, controlSitio, videoPrincipal } from './puente';
@@ -30,6 +30,10 @@ function montar(): HTMLElement {
   sombra.appendChild(raiz);
   document.documentElement.appendChild(anfitrion);
   render(<Reproductor />, raiz);
+  motor.sinAceleracion().then((si) => {
+    sinAceleracion.value = si;
+    raiz.classList.toggle('sin-gpu', si);
+  }).catch(() => {});
   // En pantalla completa solo se ve lo que hay dentro del elemento a pantalla completa.
   document.addEventListener('fullscreenchange', () => {
     (document.fullscreenElement ?? document.documentElement).appendChild(anfitrion);
