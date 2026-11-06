@@ -25,6 +25,7 @@ import {
   anclarLinea,
   combinarSeleccionadas,
   fijarAbrirConsulta,
+  grabandoLinea,
   importarArchivo,
   irALinea,
   pausasEnLinea,
@@ -35,6 +36,7 @@ import {
   ajustes,
   analisisEnCurso,
   anuncio,
+  atajosChrome,
   avisos,
   barraVisible,
   capturaActiva,
@@ -77,7 +79,9 @@ export const ANCHO_NAVEGADOR = 380;
  * Quita de la vista todo Kotonoha a la vez: subtítulos, ficha, barra y avisos. Va sobre el elemento que los
  * contiene porque lo que importa es la captura de la pestaña, y nada de dentro puede escapar de su opacidad.
  */
+let interfazOculta = false;
 const fijarOculto = (v: boolean) => {
+  interfazOculta = v;
   document.querySelector<HTMLElement>('kotonoha-overlay')?.style.setProperty('opacity', v ? '0' : '1');
 };
 
@@ -120,6 +124,8 @@ window.addEventListener(
 const ratonQuieto = (e: MouseEvent) => e.clientX === ratonX && e.clientY === ratonY;
 
 function programarCierre() {
+  // Al grabar se oculta todo lo que no es el video, y la línea puede acabarse: el ratón «sale» de la palabra sin moverse.
+  if (interfazOculta || grabandoLinea()) return;
   if (temporizadorCierre) clearTimeout(temporizadorCierre);
   temporizadorCierre = setTimeout(() => {
     if (consulta.value && !consulta.value.fijada) cerrarConsulta();
@@ -600,7 +606,7 @@ function Barra() {
   return (
     <>
       <div class={`barra ${visible ? 'visible' : ''} ${a.navegadorAbierto ? 'con-nav' : ''}`} ref={refBarra} role="toolbar" aria-label="Barra de Kotonoha">
-        <button class="barra-logo" data-tip="Abrir Kotonoha · Alt+Shift+W" aria-label="Abrir la ventana de Kotonoha" onClick={() => fondo.abrirApp()}>
+        <button class="barra-logo" data-tip={`Abrir Kotonoha${atajosChrome.value['abrir-app'] ? ` · ${atajosChrome.value['abrir-app']}` : ''}`} aria-label="Abrir la ventana de Kotonoha" onClick={() => fondo.abrirApp()}>
           <Logo t={26} />
         </button>
         <div class="barra-resumen">
@@ -654,7 +660,7 @@ function Barra() {
             <Icono n="panel" t={20} />
           </button>
           <span class="barra-sep" />
-          <button class={`btn-icono ${capturaActiva.value ? 'en-marcha' : ''}`} data-tip={capturaActiva.value ? 'Grabando audio para tus tarjetas · Alt+R' : 'Audio para tarjetas desactivado · Alt+R'} aria-label="Estado de la captura" disabled>
+          <button class={`btn-icono ${capturaActiva.value ? 'en-marcha' : ''}`} data-tip={`${capturaActiva.value ? 'Grabando audio para tus tarjetas' : 'Audio para tarjetas desactivado'}${atajosChrome.value['alternar-captura'] ? ` · ${atajosChrome.value['alternar-captura']}` : ''}`} aria-label="Estado de la captura" disabled>
             <Icono n="microfono" t={20} />
           </button>
           <button class={`btn-icono ${a.desanclarBarra ? 'activo' : ''}`} data-tip={a.desanclarBarra ? 'Soltar la barra · Alt+X' : 'Fijar la barra · Alt+X'} aria-label="Fijar la barra" aria-pressed={a.desanclarBarra} onClick={() => cambiarAjuste({ desanclarBarra: !a.desanclarBarra })}>

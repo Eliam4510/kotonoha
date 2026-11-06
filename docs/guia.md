@@ -20,7 +20,7 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 
 ## Puesta en marcha
 
-Todo se configura en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+W`.
+Todo se configura en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+K`.
 
 | Paso | Dónde | Para qué sirve |
 |---|---|---|
@@ -110,7 +110,7 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 |---|---|---|
 | Archivo propio, en el reproductor de la aplicación | Nada | Unos 5 minutos por cada 30 de video |
 | Video de internet, con el ayudante local | Instalar el ayudante | Unos 5 minutos por cada 30 de video, más la descarga |
-| Video de internet, sin el ayudante | Activar la captura de audio con `Alt+R` | Tiempo real, con unos segundos de retraso |
+| Video de internet, sin el ayudante | Activar la captura de audio con `Alt+Shift+M` o con el interruptor del menú de la extensión | Tiempo real, con unos segundos de retraso |
 
 **Modelos.**
 
@@ -154,12 +154,12 @@ Si un video no se puede descargar, por ejemplo por ser privado o tener restricci
 
 | Atajo | Acción |
 |---|---|
-| `Q` | Crea una tarjeta con la palabra y la frase actuales |
+| `Q`, `Alt+Q` | Crea una tarjeta con la palabra y la frase actuales |
 | `E` | Envía la palabra, la selección o la imagen bajo el ratón al creador de tarjetas |
 
-Las tarjetas pueden enviarse a Anki mediante AnkiConnect, con un tipo de nota propio o con el que crea la extensión, o guardarse en **Memoria**, el repaso integrado con FSRS. Los campos incluyen frase, furigana, traducción, definiciones, audio, imagen y notas. La captura de audio se activa con `Alt+R`.
+Las tarjetas pueden enviarse a Anki mediante AnkiConnect, con un tipo de nota propio o con el que crea la extensión, o guardarse en **Memoria**, el repaso integrado con FSRS. Los campos incluyen frase, furigana, traducción, definiciones, audio, imagen y notas. La captura de audio se activa con `Alt+Shift+M` o con el interruptor del menú de la extensión.
 
-**Audio e imagen del video.** Para grabar el audio de la frase hay que activar la captura con `Alt+R` en la pestaña del video. La captura es solo de esa pestaña: si está activa en otra, el icono del micrófono aparece apagado y la tarjeta se crea sin audio. Al crear la tarjeta, la línea vuelve a reproducirse a velocidad normal mientras se graba, y después el video queda donde estaba. La imagen no incluye nada de la interfaz. En sitios con DRM, como Netflix, el navegador entrega el fotograma en negro: la tarjeta lleva entonces la imagen oficial del episodio, o ninguna si el sitio no la ofrece.
+**Audio e imagen del video.** Para grabar el audio de la frase hay que activar la captura en la pestaña del video, con `Alt+Shift+M` o con el interruptor del menú de la extensión. La captura es solo de esa pestaña: si está activa en otra, el icono del micrófono aparece apagado y la tarjeta se crea sin audio. Al crear la tarjeta, la línea vuelve a reproducirse a velocidad normal mientras se graba, y después el video queda donde estaba. La imagen no incluye nada de la interfaz. En sitios con DRM, como Netflix, el navegador entrega el fotograma en negro: la tarjeta lleva entonces la imagen oficial del episodio, o ninguna si el sitio no la ofrece. Un sitio protegido también puede no entregar su sonido: la tarjeta se crea sin audio y, tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla.
 
 ## Audio, imágenes y ejemplos
 
@@ -210,7 +210,7 @@ La referencia completa está en el panel de atajos, sobre el video.
 | Grupo | Atajo | Acción |
 |---|---|---|
 | Barra | `Alt+X` | Fijar o soltar la barra |
-| | `Alt+Z` | Mostrarla mientras se mantiene |
+| | `Alt+V` | Mostrarla mientras se mantiene |
 | | `Alt+T` | Abrir el traductor |
 | Palabra | `1` o `U` | Marcar como desconocida |
 | | `2` o `T` | Rastrear |
@@ -218,9 +218,9 @@ La referencia completa está en el panel de atajos, sobre el video.
 | | `4` o `I` | Ignorar |
 | | `N` | Ir a la siguiente palabra desconocida |
 | | `Alt+S` | Consultar en el diccionario |
-| Tarjetas | `Q` | Crear tarjeta |
+| Tarjetas | `Q`, `Alt+Q` | Crear tarjeta |
 | | `E` | Enviar al creador |
-| | `Alt+R` | Permitir la captura de audio |
+| | `Alt+Shift+M` | Permitir la captura de audio |
 | Selección | `B` | Marcar el subtítulo |
 | | `L` | Seleccionar el subtítulo |
 | | `J` | Unir los seleccionados |
@@ -233,14 +233,17 @@ La referencia completa está en el panel de atajos, sobre el video.
 | | `G` | Navegador de subtítulos |
 | | `C` | Copiar el subtítulo |
 | | `Alt+Shift+G` | Generar secundarios |
-| Aplicación | `Alt+Shift+W` | Abrir la ventana de Kotonoha |
+| Aplicación | `Alt+Shift+K` | Abrir la ventana de Kotonoha |
 
 ## Problemas frecuentes
 
 | Síntoma | Causa y solución |
 |---|---|
 | Tras compilar, nada cambia | El navegador conserva el service worker anterior. Hay que pulsar **Recargar** en la página de extensiones |
-| «Para oír el video activa la captura de audio» | Chrome exige una acción del usuario para capturar una pestaña. Se resuelve con `Alt+R` en la pestaña del video |
+| «Para oír el video activa la captura de audio» | Chrome exige una acción del usuario para capturar una pestaña. Se resuelve con `Alt+Shift+M` o con el interruptor del menú de la extensión, en la pestaña del video |
+| Un atajo de `Alt+Shift+M`, `Alt+Shift+K` o `Alt+Q` no responde | Chrome no asigna a una extensión una tecla que ya tenga otra, aunque esté desactivada, y no avisa. El menú de la extensión y el panel de atajos muestran la tecla real, y se puede cambiar en `chrome://extensions/shortcuts` |
+| `Alt+R` o `Alt+Z` abren Radeon Software | Son atajos de esa aplicación en los equipos con gráfica AMD. Kotonoha usa `Alt+Shift+M` y `Alt+V` |
+| La interfaz aparece sin desenfoque | Con la aceleración por hardware apagada, el desenfoque sobre el video pierde fotogramas, de modo que la extensión lo sustituye por un fondo más denso |
 | Whisper va muy lento | El navegador no ofrece acceso a la GPU. Conviene revisar la aceleración por hardware en sus ajustes |
 | El ayudante no aparece como instalado | Tras ejecutar el instalador hay que recargar la extensión. Si la extensión se cargó desde otra carpeta, hay que indicar su identificador con `-Extension` |
 | No se puede descargar un video | Con restricción de edad, privado o de pago, yt-dlp no puede obtenerlo. Se puede transcribir mientras se reproduce |

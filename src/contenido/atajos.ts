@@ -18,7 +18,9 @@ import {
 } from './controlador';
 import {
   ajustes,
+  atajosChrome,
   avisar,
+  comoActivarCaptura,
   consulta,
   indiceVisual,
   lineasObjetivo,
@@ -70,6 +72,12 @@ export function ejecutarComando(comando: string) {
   if (comando === 'crear-tarjeta') crearUnClic(consulta.value?.palabra ?? null, consulta.value?.linea ?? lineaActual(), fijarOculto);
 }
 
+/** La captura solo la puede activar un atajo de Chrome. Si la tecla llega a la página, es que Chrome no se la dio a Kotonoha. */
+function explicarCaptura() {
+  const asignada = atajosChrome.value['alternar-captura'];
+  avisar(asignada ? `La captura de audio se activa con ${asignada}.` : `Chrome no le ha dado un atajo a la captura de audio: ${comoActivarCaptura()}, o asigna uno en chrome://extensions/shortcuts.`, undefined, undefined, 7000);
+}
+
 export function instalarAtajos(): void {
   window.addEventListener(
     'keydown',
@@ -117,8 +125,17 @@ export function instalarAtajos(): void {
           case 'x':
             cambiarAjuste({ desanclarBarra: !a.desanclarBarra });
             return hecho();
+          // Alt+Z es de la superposición de Radeon en los equipos con gráfica AMD.
+          case 'v':
           case 'z':
             verTemporal.value = true;
+            return hecho();
+          // Si Chrome no le dio esta tecla a la extensión, porque ya la tiene otra, llega hasta aquí.
+          case 'q':
+            if (consulta.value || lineaActual()) ejecutarComando('crear-tarjeta');
+            return hecho();
+          case 'r':
+            explicarCaptura();
             return hecho();
           case 't':
             panel.value = panel.value === 'traductor' ? null : 'traductor';
@@ -167,6 +184,12 @@ export function instalarAtajos(): void {
 
       if (alt && shift) {
         switch (k) {
+          case 'k':
+            fondo.abrirApp();
+            return hecho();
+          case 'm':
+            explicarCaptura();
+            return hecho();
           case 'g':
             generarSecundarios();
             return hecho();
@@ -298,6 +321,6 @@ export function instalarAtajos(): void {
   );
 
   window.addEventListener('keyup', (e) => {
-    if (e.key.toLowerCase() === 'z' || e.key === 'Alt') verTemporal.value = false;
+    if (/^[zv]$/i.test(e.key) || e.key === 'Alt') verTemporal.value = false;
   }, true);
 }

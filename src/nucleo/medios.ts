@@ -102,3 +102,8 @@ export function imagenNegra(rgba: Uint8ClampedArray | Uint8Array, umbral = 24, p
   }
   return negros / total >= proporcion;
 }
+
+/** Si el dispositivo gráfico es un emulador: sin aceleración por hardware, el navegador lo pinta todo con el procesador. */
+export function renderizadoPorSoftware(dispositivo: string): boolean {
+  return /swiftshader|basic render|llvmpipe|software/i.test(dispositivo);
+}

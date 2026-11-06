@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.2.4, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.2.5, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -76,6 +76,8 @@ Estado de cada función en la versión 0.2.4, con la forma en que se ha verifica
 | Audio de la frase grabado del video, a MP3, del tramo exacto y a velocidad normal | Automática, con la captura real de una pestaña |
 | La captura es por pestaña: desde otra no se graba silencio, y una grabación muda no se guarda | Automática, con la captura real de una pestaña |
 | Captura del fotograma, con el video como única cosa a la vista | Automática, con la captura real de una pestaña |
+| Todos los atajos de teclado, y la tecla real de la captura en avisos y menús | Automática |
+| Sin aceleración por hardware, la interfaz quita el desenfoque para no perder fotogramas | Automática |
 | Audio de la palabra: JapanesePod101 y Lingua Libre | Automática |
 | Voces neuronales de Azure, con clave propia | Pendiente |
 | Imágenes de Openverse | Automática |
@@ -131,5 +133,6 @@ Estado de cada función en la versión 0.2.4, con la forma en que se ha verifica
 | Idioma de la interfaz | Solo español. Las explicaciones de Claude pueden pedirse en español, inglés o japonés sencillo |
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
+| Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |

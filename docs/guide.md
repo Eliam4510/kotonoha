@@ -20,7 +20,7 @@ This guide covers day-to-day use of Kotonoha. Installation is described in the [
 
 ## Getting started
 
-Everything is configured under **Ajustes** (Settings), in the extension window, which opens with `Alt+Shift+W`.
+Everything is configured under **Ajustes** (Settings), in the extension window, which opens with `Alt+Shift+K`.
 
 | Step | Where | Purpose |
 |---|---|---|
@@ -110,7 +110,7 @@ Whisper generates Japanese subtitles when a video has none. It runs on the graph
 |---|---|---|
 | Local file, in the application's player | Nothing | About 5 minutes per 30 minutes of video |
 | Online video, with the local helper | Installing the helper | About 5 minutes per 30 minutes of video, plus the download |
-| Online video, without the helper | Enabling audio capture with `Alt+R` | Real time, a few seconds behind |
+| Online video, without the helper | Enabling audio capture with `Alt+Shift+M` or the switch in the extension menu | Real time, a few seconds behind |
 
 **Models.**
 
@@ -154,12 +154,12 @@ If a video cannot be downloaded, for example because it is private or age-restri
 
 | Shortcut | Action |
 |---|---|
-| `Q` | Creates a card with the current word and sentence |
+| `Q`, `Alt+Q` | Creates a card with the current word and sentence |
 | `E` | Sends the word, the selection or the image under the pointer to the card creator |
 
-Cards can be sent to Anki through AnkiConnect, with a custom note type or the one the extension creates, or saved in **Memoria**, the built-in FSRS review. Fields include sentence, furigana, translation, definitions, audio, image and notes. Audio capture is enabled with `Alt+R`.
+Cards can be sent to Anki through AnkiConnect, with a custom note type or the one the extension creates, or saved in **Memoria**, the built-in FSRS review. Fields include sentence, furigana, translation, definitions, audio, image and notes. Audio capture is enabled with `Alt+Shift+M` or the switch in the extension menu.
 
-**Audio and image from the video.** To record the sentence audio, capture must be enabled with `Alt+R` in the video's tab. Capture only covers that tab: if it is active in another one, the microphone icon appears off and the card is created without audio. When a card is created, the line plays again at normal speed while it records, and the video then stays where it was. The image includes nothing from the interface. On sites with DRM, such as Netflix, the browser delivers the frame in black: the card then carries the episode's official image, or none if the site does not offer one.
+**Audio and image from the video.** To record the sentence audio, capture must be enabled in the video's tab, with `Alt+Shift+M` or the switch in the extension menu. Capture only covers that tab: if it is active in another one, the microphone icon appears off and the card is created without audio. When a card is created, the line plays again at normal speed while it records, and the video then stays where it was. The image includes nothing from the interface. On sites with DRM, such as Netflix, the browser delivers the frame in black: the card then carries the episode's official image, or none if the site does not offer one. A protected site may also withhold its sound: the card is created without audio and, after two silent sentences in a row in a video, the line is no longer replayed to record it.
 
 ## Audio, images and examples
 
@@ -210,7 +210,7 @@ The full reference is in the shortcuts panel, on top of the video.
 | Group | Shortcut | Action |
 |---|---|---|
 | Bar | `Alt+X` | Pin or release the bar |
-| | `Alt+Z` | Show it while held |
+| | `Alt+V` | Show it while held |
 | | `Alt+T` | Open the translator |
 | Word | `1` or `U` | Mark as unknown |
 | | `2` or `T` | Track |
@@ -218,9 +218,9 @@ The full reference is in the shortcuts panel, on top of the video.
 | | `4` or `I` | Ignore |
 | | `N` | Go to the next unknown word |
 | | `Alt+S` | Look up in the dictionary |
-| Cards | `Q` | Create a card |
+| Cards | `Q`, `Alt+Q` | Create a card |
 | | `E` | Send to the creator |
-| | `Alt+R` | Allow audio capture |
+| | `Alt+Shift+M` | Allow audio capture |
 | Selection | `B` | Bookmark the subtitle |
 | | `L` | Select the subtitle |
 | | `J` | Merge the selected lines |
@@ -233,14 +233,17 @@ The full reference is in the shortcuts panel, on top of the video.
 | | `G` | Subtitle navigator |
 | | `C` | Copy the subtitle |
 | | `Alt+Shift+G` | Generate secondary subtitles |
-| Application | `Alt+Shift+W` | Open the Kotonoha window |
+| Application | `Alt+Shift+K` | Open the Kotonoha window |
 
 ## Troubleshooting
 
 | Symptom | Cause and solution |
 |---|---|
 | Nothing changes after building | The browser keeps the previous service worker. Press **Reload** on the extensions page |
-| "Para oír el video activa la captura de audio" (enable audio capture to hear the video) | Chrome requires a user action to capture a tab. Press `Alt+R` in the video's tab |
+| "Para oír el video activa la captura de audio" (enable audio capture to hear the video) | Chrome requires a user action to capture a tab. Use `Alt+Shift+M` or the switch in the extension menu, in the video's tab |
+| A shortcut among `Alt+Shift+M`, `Alt+Shift+K` or `Alt+Q` does not respond | Chrome does not assign an extension a key another one already holds, even a disabled one, and gives no warning. The extension menu and the shortcuts panel show the real key, which can be changed at `chrome://extensions/shortcuts` |
+| `Alt+R` or `Alt+Z` open Radeon Software | They are shortcuts of that application on machines with an AMD graphics card. Kotonoha uses `Alt+Shift+M` and `Alt+V` |
+| The interface appears without blur | With hardware acceleration off, blur over the video drops frames, so the extension replaces it with a denser background |
 | Whisper is very slow | The browser is not offering GPU access. Check the hardware acceleration option in its settings |
 | The helper does not show as installed | The extension must be reloaded after running the installer. If it was loaded from another folder, pass its identifier with `-Extension` |
 | A video cannot be downloaded | Age-restricted, private or paid videos are out of reach for yt-dlp. It can still be transcribed while it plays |

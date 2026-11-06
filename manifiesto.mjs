@@ -15,7 +15,7 @@ export const SITIOS_VIDEO = [
 export const manifiesto = {
   manifest_version: 3,
   name: 'Kotonoha',
-  version: '0.2.4',
+  version: '0.2.5',
   description: 'Subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés.',
   minimum_chrome_version: '120',
   icons: { 16: 'icono16.png', 32: 'icono32.png', 48: 'icono48.png', 128: 'icono128.png' },
@@ -60,11 +60,11 @@ export const manifiesto = {
     },
     'alternar-captura': {
       description: 'Permitir captura de imagen y audio en esta sesión',
-      suggested_key: { default: 'Alt+R' },
+      suggested_key: { default: 'Alt+Shift+M' },
     },
     'abrir-app': {
       description: 'Abrir la ventana de Kotonoha',
-      suggested_key: { default: 'Alt+Shift+W' },
+      suggested_key: { default: 'Alt+Shift+K' },
     },
   },
   content_security_policy: {

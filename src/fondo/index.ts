@@ -127,6 +127,14 @@ const api: ApiFondo & { _: never } = {
     if (!sigue) await chrome.storage.session.remove(CAPTURA);
     return sigue;
   },
+  // Una tecla que ya tenga otra extensión, aunque esté desactivada, Chrome no la asigna y tampoco avisa.
+  async atajos() {
+    const lista = await chrome.commands.getAll();
+    return Object.fromEntries(lista.flatMap((c) => (c.name ? [[c.name, c.shortcut ?? '']] : [])));
+  },
+  async abrirAtajos() {
+    await chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+  },
   abrirApp,
   difundir,
   async inyectarPagina(this: ConRemitente) {
@@ -144,7 +152,11 @@ atender('fondo', api);
 
 chrome.commands.onCommand.addListener((comando, pestana) => {
   if (comando === 'alternar-captura') {
-    alternarCaptura(pestana?.id).catch((e) => console.error('Captura:', e));
+    // Con la barra escondida no se vería nada: quien pulsa la tecla tiene que saber qué ha pasado.
+    alternarCaptura(pestana?.id).catch((e) => {
+      console.error('Captura:', e);
+      if (pestana?.id !== undefined) chrome.tabs.sendMessage(pestana.id, { evento: { tipo: 'capturaFallida', motivo: e instanceof Error ? e.message : String(e) } satisfies EventoDifundido }).catch(() => {});
+    });
     return;
   }
   if (comando === 'abrir-app') {

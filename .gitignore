@@ -16,4 +16,5 @@ herramientas/ayudante/com.kotonoha.ayudante.json
 
 # Lo crea pruebas/fixtures/generar-video.mjs
 pruebas/fixtures/*.webm
+pruebas/fixtures/*.mp4
 pruebas/fixtures/still.jpg

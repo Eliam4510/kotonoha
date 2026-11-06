@@ -84,7 +84,7 @@ await contexto.route('https://www.youtube.com/**', (r) => {
 const sw = await recargarExtension(contexto);
 await sw.evaluate(async (url) => {
   const d = await chrome.storage.local.get('ajustes');
-  await chrome.storage.local.set({ urlBaseIA: url, claveAnthropic: 'clave-de-prueba', ajustes: { ...(d.ajustes ?? {}), modo: 'normal', salto: 'no', navegadorAbierto: false, analisisAutomatico: false, idiomaObjetivo: 'ja', idiomaSecundario: 'es', subsPosicion: null } });
+  await chrome.storage.local.set({ urlBaseIA: url, claveAnthropic: 'clave-de-prueba', ajustes: { ...(d.ajustes ?? {}), modo: 'normal', salto: 'no', navegadorAbierto: false, analisisAutomatico: false, idiomaObjetivo: 'ja', idiomaSecundario: 'es', subsPosicion: null, destino: 'memoria', ankiPuerto: 1 } });
 }, `http://127.0.0.1:${mock.puerto}`);
 
 const leerAjustes = () => sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes);
@@ -639,6 +639,220 @@ if (quiere('gasto')) {
   comprobar(vista.barras > 0 && vista.dias >= 28, 'La gráfica muestra el mes', `${vista.dias} días`);
   await app.screenshot({ path: join(CAPTURAS, 'gasto.png'), fullPage: true });
   await app.close();
+}
+
+// ---------- Todos los atajos ----------
+
+if (quiere('atajos')) {
+  console.log('\n== Atajos de teclado ==');
+  const motor = async (metodo, ...args) => {
+    const r = await sw.evaluate(({ metodo, args }) => chrome.runtime.sendMessage({ canal: 'motor', metodo, args }), { metodo, args });
+    if (!r?.ok) throw new Error(`${metodo}: ${r?.error}`);
+    return r.valor;
+  };
+  const avisos = () => enOverlay((r) => [...r.querySelectorAll('.aviso')].map((a) => a.textContent).join(' | '));
+  const tiempo = () => p.evaluate(() => document.querySelector('#v').currentTime);
+  const pulsar = async (t, ms = 220) => {
+    await p.keyboard.press(t);
+    await p.waitForTimeout(ms);
+  };
+  const abreVentana = async (t) => {
+    const [nueva] = await Promise.all([contexto.waitForEvent('page', { timeout: 8000 }), p.keyboard.press(t)]);
+    await nueva.waitForLoadState('domcontentloaded').catch(() => {});
+    const url = nueva.url();
+    await nueva.close();
+    return url;
+  };
+  const cerca = (a, b, m = 0.45) => Math.abs(a - b) < m;
+
+  await p.mouse.move(100, 850);
+  await irA(1.5);
+  await hasta((r) => r.querySelector('.linea-sub.objetivo .pal') != null);
+
+  // Los de Chrome: en un perfil limpio deben quedar asignados.
+  const asignados = await sw.evaluate(async () => Object.fromEntries((await chrome.commands.getAll()).map((c) => [c.name, c.shortcut])));
+  comprobar(asignados['alternar-captura'] === 'Alt+Shift+M', 'Chrome asigna la tecla de la captura', asignados['alternar-captura']);
+  comprobar(asignados['abrir-app'] === 'Alt+Shift+K', 'Chrome asigna la de abrir la ventana', asignados['abrir-app']);
+  comprobar(asignados['crear-tarjeta'] === 'Alt+Q', 'Chrome asigna la de crear tarjeta', asignados['crear-tarjeta']);
+  const tip = await hasta((r) => { const t = r.querySelector('[aria-label="Estado de la captura"]')?.getAttribute('data-tip') ?? ''; return t.includes('·') ? t : null; });
+  comprobar(/Alt\+Shift\+M/.test(tip ?? ''), 'El micrófono dice la tecla real', tip);
+  await pulsar('Alt+KeyR');
+  comprobar(/Alt\+Shift\+M/.test(await avisos()), 'Alt+R, que no es de Kotonoha, explica cuál es', await avisos());
+
+  // Ajustes que se encienden y se apagan.
+  for (const [tecla, clave] of [['Alt+KeyX', 'desanclarBarra'], ['Alt+KeyL', 'mostrarEstado'], ['Alt+KeyC', 'colorAcento'], ['KeyW', 'ocultarObjetivo'], ['ArrowUp', 'ocultarObjetivo'], ['Shift+KeyW', 'ocultarSecundario'], ['Shift+ArrowUp', 'ocultarSecundario'], ['KeyG', 'navegadorAbierto']]) {
+    await pulsar(tecla);
+    const uno = (await leerAjustes())[clave];
+    await pulsar(tecla);
+    const dos = (await leerAjustes())[clave];
+    comprobar(uno !== undefined && uno !== dos, `${tecla} cambia ${clave} y vuelve`, `${uno} → ${dos}`);
+  }
+  await pulsar('KeyR');
+  let a = await leerAjustes();
+  comprobar(a.ocultarObjetivo && a.ocultarSecundario, 'R oculta todo');
+  await pulsar('KeyR');
+  a = await leerAjustes();
+  comprobar(!a.ocultarObjetivo && !a.ocultarSecundario, 'R lo vuelve a mostrar');
+
+  // Tamaños.
+  for (const [mas, menos, clave] of [['Alt+Equal', 'Alt+Minus', 'escalaObjetivo'], ['Alt+Shift+Equal', 'Alt+Shift+Minus', 'escalaSecundario']]) {
+    const antes = (await leerAjustes())[clave];
+    await pulsar(mas);
+    const subio = (await leerAjustes())[clave];
+    await pulsar(menos);
+    const bajo = (await leerAjustes())[clave];
+    comprobar(subio === antes + 10 && bajo === antes, `${mas} y ${menos} cambian ${clave}`, `${antes} → ${subio} → ${bajo}`);
+  }
+
+  // Lo que se mantiene pulsado.
+  for (const letra of ['KeyV', 'KeyZ']) {
+    await p.mouse.move(100, 850);
+    await p.waitForTimeout(1100);
+    await p.keyboard.down('Alt');
+    await p.keyboard.down(letra);
+    await p.waitForTimeout(120);
+    const durante = await barraVisible();
+    await p.keyboard.up(letra);
+    await p.keyboard.up('Alt');
+    await p.waitForTimeout(900);
+    comprobar(durante && !(await barraVisible()), `Alt+${letra.slice(3)} muestra la barra mientras se mantiene`);
+  }
+
+  // Paneles y desfases.
+  await pulsar('Alt+KeyT');
+  comprobar((await enOverlay((r) => r.querySelector('.panel-flotante')?.getAttribute('aria-label'))) === 'Traductor', 'Alt+T abre el traductor');
+  await pulsar('Escape');
+  comprobar(await enOverlay((r) => !r.querySelector('.panel-flotante')), 'Escape lo cierra');
+  for (const [tecla, texto] of [['Alt+KeyI', 'Japonés 0,1 s antes'], ['Alt+KeyO', 'Japonés 0,1 s después'], ['Alt+Shift+KeyI', 'Secundarios 0,1 s antes'], ['Alt+Shift+KeyO', 'Secundarios 0,1 s después']]) {
+    await pulsar(tecla);
+    comprobar((await avisos()).includes(texto), `${tecla}: ${texto}`);
+  }
+
+  // Moverse por el video.
+  for (const [tecla, salto] of [['Alt+ArrowRight', 5], ['Alt+ArrowLeft', -5], ['Alt+KeyD', 5], ['Alt+KeyA', -5]]) {
+    await irA(10);
+    await p.waitForTimeout(250);
+    await pulsar(tecla, 400);
+    const t = await tiempo();
+    comprobar(cerca(t, 10 + salto), `${tecla} salta ${salto} s`, t.toFixed(2));
+  }
+  await irA(2.5);
+  await p.waitForTimeout(250);
+  await pulsar('KeyD', 400);
+  comprobar(cerca(await tiempo(), 3), 'D va al subtítulo siguiente', (await tiempo()).toFixed(2));
+  await pulsar('ArrowRight', 400);
+  comprobar(cerca(await tiempo(), 7), 'Flecha derecha también', (await tiempo()).toFixed(2));
+  await pulsar('KeyA', 400);
+  comprobar(cerca(await tiempo(), 3), 'A va al anterior', (await tiempo()).toFixed(2));
+  await pulsar('ArrowLeft', 400);
+  comprobar(cerca(await tiempo(), 2.05), 'Flecha izquierda también', (await tiempo()).toFixed(2));
+  for (const tecla of ['KeyS', 'ArrowDown']) {
+    await irA(3.6);
+    await p.waitForTimeout(250);
+    await p.keyboard.press(tecla);
+    await p.waitForTimeout(120);
+    const e = await p.evaluate(() => { const v = document.querySelector('#v'); const r = { t: v.currentTime, pausado: v.paused }; v.pause(); return r; });
+    comprobar(e.t < 3.5 && !e.pausado, `${tecla} repite el subtítulo`, e.t.toFixed(2));
+  }
+
+  // Marcar y seleccionar, con el navegador abierto para verlo.
+  await pulsar('KeyG', 400);
+  await irA(1.5);
+  await p.waitForTimeout(300);
+  const marcado = () => enOverlay((r) => r.querySelector('.nav-linea.activa [aria-label="Marcar"]')?.getAttribute('aria-pressed'));
+  const seleccionados = () => enOverlay((r) => r.querySelectorAll('.nav-linea.seleccionada').length);
+  await pulsar('KeyB');
+  comprobar((await marcado()) === 'true', 'B marca el subtítulo');
+  await pulsar('KeyB');
+  comprobar((await marcado()) === 'false', 'B quita la marca');
+  await pulsar('KeyL');
+  await pulsar('KeyD', 400);
+  await pulsar('KeyL');
+  comprobar((await seleccionados()) === 2, 'L selecciona', await seleccionados());
+  await pulsar('Shift+ArrowLeft', 400);
+  comprobar(cerca(await tiempo(), 1), 'Shift+flecha izquierda va al seleccionado anterior', (await tiempo()).toFixed(2));
+  await pulsar('Shift+KeyD', 400);
+  comprobar(cerca(await tiempo(), 2.05), 'Shift+D va al siguiente', (await tiempo()).toFixed(2));
+  await pulsar('Shift+KeyA', 400);
+  await pulsar('Shift+ArrowRight', 400);
+  comprobar(cerca(await tiempo(), 2.05), 'Shift+A y Shift+flecha derecha también', (await tiempo()).toFixed(2));
+  await pulsar('KeyX');
+  comprobar((await seleccionados()) === 0, 'X limpia la selección');
+  const antesDeUnir = await enOverlay((r) => r.querySelectorAll('.nav-linea').length);
+  await irA(1.5);
+  await p.waitForTimeout(300);
+  await pulsar('KeyL');
+  await pulsar('KeyD', 400);
+  await pulsar('KeyL');
+  await pulsar('KeyJ', 500);
+  comprobar((await enOverlay((r) => r.querySelectorAll('.nav-linea').length)) === antesDeUnir - 1, 'J une los seleccionados', `${antesDeUnir} → ${await enOverlay((r) => r.querySelectorAll('.nav-linea').length)}`);
+  await pulsar('KeyG', 400);
+
+  // La pista quedó con dos líneas unidas: a partir de aquí, otra vez la original.
+  await p.reload();
+  await hasta((r) => r.querySelector('.barra') != null, undefined, 30000);
+  await irA(3.5);
+  await hasta((r) => r.querySelector('.linea-sub.objetivo .pal') != null, undefined, 30000);
+  await p.waitForTimeout(300);
+
+  // La palabra.
+  const clave = await enOverlay((r) => r.querySelector('.linea-sub.objetivo .pal.est-desconocida')?.dataset.clave);
+  comprobar(!!clave, 'Hay una palabra desconocida con la que probar', clave);
+  const clasePal = () => enOverlay((r, c) => r.querySelector(`.linea-sub.objetivo .pal[data-clave="${c}"]`)?.className ?? '', clave);
+  await pulsar('KeyN', 400);
+  const primera = await enOverlay((r) => r.querySelector('.ficha-palabra')?.textContent);
+  comprobar(!!primera, 'N abre la siguiente palabra desconocida', primera);
+  await pulsar('Alt+KeyN', 400);
+  const segunda = await enOverlay((r) => r.querySelector('.ficha-palabra')?.textContent);
+  comprobar(!!segunda && segunda !== primera, 'Alt+N pasa a la siguiente', segunda);
+  await pulsar('Escape', 300);
+  comprobar(await enOverlay((r) => !r.querySelector('.ficha-palabra')), 'Escape cierra la ficha');
+  await pulsar('KeyN', 400);
+  for (const [tecla, clase] of [['Digit3', 'est-conocida'], ['Digit1', 'est-desconocida'], ['KeyK', 'est-conocida'], ['KeyU', 'est-desconocida'], ['Digit4', 'est-ignorada'], ['Digit1', 'est-desconocida'], ['KeyI', 'est-ignorada'], ['Digit1', 'est-desconocida']]) {
+    await pulsar(tecla, 500);
+    comprobar((await clasePal()).includes(clase), `${tecla} deja la palabra en ${clase}`, await clasePal());
+  }
+  for (const tecla of ['Digit2', 'KeyT']) {
+    const antes = (await clasePal()).includes('rastreada');
+    await pulsar(tecla, 500);
+    comprobar((await clasePal()).includes('rastreada') !== antes, `${tecla} cambia el rastreo`);
+  }
+  const url = await abreVentana('Alt+KeyS');
+  comprobar(/diccionario\?q=/.test(url), 'Alt+S abre el diccionario con la palabra', url.split('#')[1]);
+  await p.bringToFront();
+  await pulsar('Escape', 300);
+  comprobar(/#\/inicio/.test(await abreVentana('Alt+Shift+KeyK')), 'Alt+Shift+K abre la ventana de Kotonoha');
+  await p.bringToFront();
+
+  // Las tarjetas, en la memoria de este perfil.
+  const total = async () => (await motor('memoriaResumen')).total;
+  const esperarTarjeta = async (antes) => {
+    const limite = Date.now() + 30000;
+    while ((await total()) === antes && Date.now() < limite) await p.waitForTimeout(100);
+    return (await total()) > antes;
+  };
+  let n = await total();
+  await p.keyboard.press('KeyQ');
+  comprobar(await esperarTarjeta(n), 'Q crea una tarjeta');
+  comprobar(/Alt\+Shift\+M/.test(await avisos()), 'Y, sin captura, dice la tecla real', await avisos());
+  n = await total();
+  await p.keyboard.press('Alt+KeyQ');
+  comprobar(await esperarTarjeta(n), 'Alt+Q también, aunque Chrome no le diera esa tecla');
+  n = await total();
+  await p.keyboard.press('KeyQ');
+  await p.keyboard.press('Control+KeyX');
+  await p.waitForTimeout(3000);
+  comprobar((await total()) === n, 'Ctrl+X cancela la tarjeta en curso');
+  comprobar(/app\.html/.test(await abreVentana('KeyE')), 'E la envía al creador');
+  await p.bringToFront();
+  await pulsar('KeyC');
+  comprobar((await avisos()).includes('Subtítulo copiado'), 'C copia el subtítulo');
+
+  const pedidas = mock.peticiones.length;
+  await pulsar('Alt+Shift+KeyG', 800);
+  const limite = Date.now() + 8000;
+  while (mock.peticiones.length === pedidas && Date.now() < limite) await p.waitForTimeout(100);
+  comprobar(mock.peticiones.length > pedidas, 'Alt+Shift+G pide los secundarios');
 }
 
 if (errores.length) console.log('\nErrores en la página:', [...new Set(errores)].slice(0, 6));

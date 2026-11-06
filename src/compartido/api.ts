@@ -60,6 +60,8 @@ export interface CambioPalabra {
 
 export interface ApiMotor {
   estado(): Promise<EstadoMotor>;
+  /** Si el navegador lo pinta todo con el procesador, porque tiene apagada la aceleración por hardware. */
+  sinAceleracion(): Promise<boolean>;
   fijarClaveIA(clave: string, urlBase?: string): Promise<void>;
   probarIA(): Promise<string>;
 
@@ -98,7 +100,7 @@ export interface ApiMotor {
   detenerCaptura(): Promise<void>;
   empezarClip(): Promise<void>;
   /** `mudo` si la grabación no tiene ningún sonido: lo que pasa si se captura otra pestaña o el video está silenciado. */
-  terminarClip(): Promise<{ datos: string; tipo: string } | { mudo: true } | null>;
+  terminarClip(): Promise<{ datos: string; tipo: string; segundos: number; pico: number } | { mudo: true } | null>;
   whisperMarca(ms: number, reproduciendo: boolean, velocidad: number, salto: boolean): Promise<void>;
   /** Trabajos largos en marcha: mientras haya alguno, la extensión no se recarga sola. */
   flujosActivos(): Promise<number>;
@@ -156,6 +158,10 @@ export interface ApiFondo {
   alternarCaptura(): Promise<boolean>;
   /** Si se está capturando el audio de la pestaña que pregunta, o de la que está a la vista si no pregunta ninguna. */
   capturaActiva(): Promise<boolean>;
+  /** Los atajos que Chrome ha asignado de verdad, por comando. Sin asignar, la cadena está vacía. */
+  atajos(): Promise<Record<string, string>>;
+  /** Abre la página de Chrome donde se asignan los atajos. */
+  abrirAtajos(): Promise<void>;
   abrirApp(ruta?: string): Promise<void>;
   difundir(evento: EventoDifundido): Promise<void>;
   inyectarPagina(): Promise<void>;
@@ -169,5 +175,6 @@ export type EventoDifundido =
   | { tipo: 'instalacion'; progreso: ProgresoInstalacion }
   | { tipo: 'diccionarios' }
   | { tipo: 'captura'; activa: boolean }
+  | { tipo: 'capturaFallida'; motivo: string }
   | { tipo: 'comando'; comando: string }
   | { tipo: 'borrador'; borrador: Partial<BorradorTarjeta> };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analizarInformeFfmpeg, formatoExtraccionAudio, idiomaCorto, imagenNegra, tramoConSonido } from './medios';
+import { analizarInformeFfmpeg, formatoExtraccionAudio, idiomaCorto, imagenNegra, renderizadoPorSoftware, tramoConSonido } from './medios';
 
 const INFORME = `Input #0, matroska,webm, from '/m/pelicula.mkv':
   Metadata:
@@ -122,5 +122,16 @@ describe('imagenNegra', () => {
     const d = imagen(0, 0, 0);
     for (let i = 0; i < 5; i++) d.set([200, 200, 200, 255], i * 4);
     expect(imagenNegra(d)).toBe(false);
+  });
+});
+
+describe('renderizadoPorSoftware', () => {
+  it('reconoce el pintado por procesador', () => {
+    expect(renderizadoPorSoftware('ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)')).toBe(true);
+    expect(renderizadoPorSoftware('ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)')).toBe(true);
+  });
+
+  it('no confunde una gráfica de verdad', () => {
+    expect(renderizadoPorSoftware('ANGLE (AMD, AMD Radeon RX 9060 XT (0x00007590) Direct3D11 vs_5_0 ps_5_0, D3D11)')).toBe(false);
   });
 });

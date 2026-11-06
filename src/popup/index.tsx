@@ -28,6 +28,7 @@ function Popup() {
   const [captura, fijarCaptura] = useState(false);
   const [pestana, fijarPestana] = useState<number | undefined>();
   const [error, fijarError] = useState('');
+  const [atajoCaptura, fijarAtajoCaptura] = useState('');
   const tema = useTema(a?.tema ?? 'auto');
 
   useEffect(() => {
@@ -46,6 +47,7 @@ function Popup() {
     });
     motor.estadisticasPalabras().then((s) => fijarConocidas(s.conocidas)).catch(() => {});
     fondo.capturaActiva().then(fijarCaptura).catch(() => {});
+    fondo.atajos().then((t) => fijarAtajoCaptura(t['alternar-captura'] ?? '')).catch(() => {});
   }, []);
 
   if (!a) return null;
@@ -103,7 +105,10 @@ function Popup() {
         <div class="ap-menu-fila">
           <div class="ap-menu-texto">
             <b>Capturar imagen y audio</b>
-            <span>Durante esta sesión <kbd class="tecla">Alt</kbd> <kbd class="tecla">R</kbd></span>
+            <span>
+              Durante esta sesión{' '}
+              {atajoCaptura ? atajoCaptura.split('+').map((x) => <kbd class="tecla" key={x}>{x}</kbd>) : <button class="enlace" onClick={() => fondo.abrirAtajos()}>Asignar un atajo</button>}
+            </span>
           </div>
           <button class={`interruptor ${captura ? 'on' : ''}`} role="switch" aria-checked={captura} aria-label="Capturar imagen y audio" onClick={async () => {
             try {

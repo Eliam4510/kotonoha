@@ -70,6 +70,14 @@ export function quitarAviso(id: number) {
 }
 
 export const capturaActiva = signal(false);
+export const sinAceleracion = signal(false);
+/** Los atajos que Chrome le ha dado a la extensión, que no siempre son los que pide. */
+export const atajosChrome = signal<Record<string, string>>({});
+/** Cómo se activa la captura en este navegador, para decirlo en los avisos. */
+export const comoActivarCaptura = () => {
+  const tecla = atajosChrome.value['alternar-captura'];
+  return tecla ? `pulsa ${tecla}` : 'usa el interruptor del menú de la extensión';
+};
 export const generacion = signal<{ tipo: 'secundarios' | 'objetivo'; hechas: number; total: number } | null>(null);
 export const analisisEnCurso = signal<{ hechas: number; total: number } | null>(null);
 /** Corrección con Claude de unos subtítulos automáticos. */

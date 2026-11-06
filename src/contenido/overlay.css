@@ -353,3 +353,10 @@
 .nav-corregida { display: inline-flex; align-items: center; gap: 3px; color: var(--fuji); }
 .enlace { padding: 0; border: 0; background: none; color: var(--acento); font: inherit; text-decoration: underline; cursor: pointer; }
 .bloque-generar .btn.chico.bloque { margin-top: 6px; }
+
+/* Sin aceleración por hardware, el desenfoque sobre el video se recalcula en el procesador con cada fotograma y
+   se pierden cuadros. Lo mide pruebas/sin-gpu.mjs. Un fondo más denso compensa para que el texto se siga leyendo. */
+/* Sin desenfoque, lo que hay detrás de un panel se leería a través de él. */
+.kk-raiz.sin-gpu { --vidrio: var(--superficie); --vidrio-denso: var(--superficie); }
+.kk-raiz.sin-gpu * { backdrop-filter: none !important; }
+.kk-raiz.sin-gpu .subs-bloque.con-sombra .subs-fondo { background: rgba(9, 12, 10, calc(var(--op-sombra, 0.65) + 0.12)); }
