@@ -130,7 +130,7 @@ const japonesAntes = await motor('estadisticasPalabras');
 
 const selector = app.locator('select[aria-label="Idioma que estudias"]');
 comprobar((await selector.inputValue()) === 'ja', 'Se empieza estudiando japonés');
-comprobar((await selector.locator('option').allTextContents()).join('|') === 'Japonés · 日本語|Inglés · English', 'Se puede elegir entre las dos', (await selector.locator('option').allTextContents()).join(' | '));
+comprobar((await selector.locator('option').allTextContents()).join('|').startsWith('Japonés · 日本語|Inglés · English'), 'Se puede elegir el inglés', (await selector.locator('option').allTextContents()).join(' | '));
 await selector.selectOption('en');
 await app.waitForTimeout(600);
 const a = await leerAjustes();
@@ -168,7 +168,7 @@ const muestra = await motor('muestraEvaluacion');
 comprobar(muestra.length >= 8 && muestra.every((p) => /^[a-z'-]+$/i.test(p.lema)), 'La evaluación de nivel pregunta palabras inglesas', muestra.map((p) => p.lema).join(', '));
 comprobar(estado.tokenizadorListo, 'El analizador se ha cargado');
 const bases = await app.evaluate(async () => (await indexedDB.databases()).map((d) => `${d.name}:${d.version}`));
-comprobar(bases.includes('kikitori:50') && bases.includes('kikitori-en:50'), 'Cada lengua tiene su base', bases.join(', '));
+comprobar(bases.includes('kikitori:60') && bases.includes('kikitori-en:60'), 'Cada lengua tiene su base', bases.join(', '));
 
 // ---------- Análisis y diccionario ----------
 
@@ -535,7 +535,7 @@ await pv.waitForTimeout(300);
 await enPanel((r) => [...r.querySelectorAll('.panel-flotante [role="tab"]')].find((b) => b.textContent.trim() === 'Subtítulos')?.click());
 await pv.waitForTimeout(300);
 const botonesPanel = await enPanel((r) => [...r.querySelectorAll('.panel-flotante .segmentado[aria-label="Idioma que estudias"] button')].map((b) => `${b.textContent}:${b.getAttribute('aria-checked')}`));
-comprobar(botonesPanel?.join('|') === 'Japonés:true|Inglés:false', 'El panel del video también deja elegir el idioma', botonesPanel?.join('|'));
+comprobar(botonesPanel?.join('|').startsWith('Japonés:true|Inglés:false'), 'El panel del video también deja elegir el idioma', botonesPanel?.join('|'));
 await enPanel((r) => [...r.querySelectorAll('.panel-flotante .segmentado[aria-label="Idioma que estudias"] button')].find((b) => b.textContent === 'Inglés')?.click());
 await pv.waitForTimeout(900);
 comprobar((await leerAjustes()).idiomaObjetivo === 'en', 'Un clic ahí pasa al inglés');

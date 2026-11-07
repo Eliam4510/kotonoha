@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.4.3, along with how it has been verified.
+Status of each feature in version 0.5.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -145,7 +145,7 @@ Status of each feature in version 0.4.3, along with how it has been verified.
 
 | Feature | Verification |
 |---|---|
-| English subtitles, with each word analyzed and the secondary track in the support language | Imitation page. A real session is pending |
+| English subtitles, with each word analyzed and the secondary track in the support language | Imitation page, and a real session on YouTube |
 | Correction of automatic subtitles and creation of English from another language | Imitation page |
 | American and British pronunciation in IPA, in the word panel and, on request, over each word | Automated, with real Wiktionary data |
 | Color by stressed syllable: the first, a middle one or the last | Automated |
@@ -155,11 +155,27 @@ Status of each feature in version 0.4.3, along with how it has been verified.
 | Phrasal verbs and set phrases, even when split: *picked it up* finds *pick up* | Automated |
 | Grammar from A1 to C2: 51 rules, confirmed by Claude | Simulator |
 | Page reader, off at the start, that leaves pages in other languages alone | Automated, and on 16 real public sites |
-| Whisper in English, with lines split for reading | Automated, with a synthetic voice |
+| Parakeet and Whisper in English, with lines split for reading | Automated, with a synthetic voice, and in a real session |
 | Instructions to Claude specific to English | Simulator |
 | Word audio from Wikimedia Commons and Lingua Libre | Automated |
 | Azure neural voices in English | Pending |
 | Level assessment and path from A1 to C2 | Automated |
+
+## German
+
+| Feature | Verification |
+|---|---|
+| German subtitles, with each word analyzed and the secondary track in the support language | Imitation page. A real session is pending |
+| Correction of automatic subtitles with the German instructions | Imitation page |
+| Which word each form comes from, using Wiktionary's forms: *ging* is *gehen*, *Häuser* is *Haus*. Between two candidates, the more frequent one | Automated, with real data |
+| Separable verbs with the particle at the end: *fängt morgen an* finds *anfangen* | Automated, with real data |
+| Pronunciation in IPA, without regional variants, and color by stressed syllable | Automated, with real Wiktionary data |
+| Wiktionary definitions and translations in Spanish, English, Chinese, Korean and Japanese, and definitions in German | Automated, with real data |
+| Frequency from film and series subtitles | Automated, with real data |
+| Grammar from A1 to C2: 24 rules, confirmed by Claude | Automated |
+| Page reader, off at the start | Automated |
+| Parakeet for speech and Whisper Turbo for songs | Automated, with a real recording |
+| Word audio from Wikimedia Commons and Lingua Libre | Automated |
 
 ## Design principles
 
@@ -179,8 +195,10 @@ Status of each feature in version 0.4.3, along with how it has been verified.
 
 | Limitation | Detail |
 |---|---|
-| Study language | Japanese and English. Each new language needs its own package, in `src/lenguas` |
+| Study language | Japanese, English and German. Each new language needs its own package, in `src/lenguas` |
 | English analysis | It is done by a small model that fits in the extension. In ambiguous sentences it can pick the wrong category, and with it the wrong translation under the word. The word panel still shows every definition |
+| German analysis | It comes from the dictionaries' forms: without German–English, each word is its own form. Between two possible words, frequency decides, without looking at the sentence; Claude fixes what goes wrong when it reviews the line |
+| German compounds | A compound noun that is not in the dictionaries is not split into its parts |
 | English-English dictionary | It is large: about 110 MB to download and about 220 MB on disk. Installing and removing it takes a few minutes. It is only suggested with the interface in English |
 | Interface translations | Written with AI assistance, with no native review yet. Mistakes are fixed in `idiomas/` |
 | Page reader | Acts only on the main frame: it does not reach text inside an iframe. What a page draws on a canvas or in an image is not text |

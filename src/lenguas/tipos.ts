@@ -19,6 +19,23 @@ export interface SegmentoLectura {
   lectura?: string;
 }
 
+/** De qué palabra del diccionario sale una forma, según el diccionario: ging, de gehen en pretérito. */
+export interface FormaFlexionada {
+  lema: string;
+  /** Qué forma es, tal como la describe el diccionario: «first/third-person singular preterite». */
+  flexion: string;
+  /** La categoría de la palabra en el diccionario: v, n, adj. */
+  pos: string;
+}
+
+/** Lo que el motor sabe de los diccionarios instalados y puede servir para analizar, en las lenguas que lo usan. */
+export interface ConsultasAnalisis {
+  /** De qué palabras puede salir una forma flexionada. */
+  formas?(palabra: string): readonly FormaFlexionada[] | undefined;
+  /** El puesto de una palabra en la lista de frecuencia: cuanto menor, más común. */
+  rango?(termino: string): number | undefined;
+}
+
 /** Una palabra tal como la entrega el analizador, antes de mirar diccionarios y progreso. */
 export interface TokenUnido {
   superficie: string;
@@ -290,9 +307,10 @@ export interface Analizador {
   cargar(): Promise<void>;
   /**
    * Parte un texto en palabras. Sus superficies juntas deben dar el texto, también con los espacios.
-   * `existe` dice si un término está en los diccionarios, para unir compuestos.
+   * `existe` dice si un término está en los diccionarios, para unir compuestos, y `consultas`, lo demás que se sabe de
+   * ellos: de qué palabra sale cada forma y cuánto se usa.
    */
-  analizar(texto: string, existe?: (termino: string) => boolean): TokenUnido[];
+  analizar(texto: string, existe?: (termino: string) => boolean, consultas?: ConsultasAnalisis): TokenUnido[];
   /** La lectura de una forma de diccionario: una palabra flexionada no trae la de su lema. */
   lecturaDeLema(lema: string): string;
   /** Si sin la lista de términos solo se pierde algo menor: entonces se analiza sin esperar a que se cargue. */
@@ -353,7 +371,12 @@ export interface MotorLengua {
   /** Los diccionarios que una versión anterior dejó mal: se reinstalan solos, en segundo plano. */
   diccionariosPorReparar?(datos: DatosDiccionarios): Promise<string[]>;
   /** Qué términos buscar a partir de la palabra consultada y las que la siguen. Sin esto, se unen sin espacios. */
-  candidatosCompuestos?(superficies: string[]): string[];
+  candidatosCompuestos?(superficies: string[], existe?: (termino: string) => boolean, consultas?: ConsultasAnalisis): string[];
+  /**
+   * Si las formas flexionadas que traen los diccionarios se guardan para analizar: así se sabe que ging es de gehen sin
+   * un analizador propio. Con ellas se carga también la lista de frecuencia, que decide entre dos lemas posibles.
+   */
+  formasDeDiccionario?: boolean;
   /** Cómo se le enseña a Claude una palabra analizada. Sin esto, con su lectura entre paréntesis. */
   describirPalabra?(token: TokenUnido): string;
   /** La parte de una definición que cabe bajo una palabra. Sin esto, hasta el primer punto y coma. */

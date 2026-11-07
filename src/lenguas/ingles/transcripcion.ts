@@ -26,4 +26,5 @@ export const REGLAS_TRANSCRIPCION: ReglasTranscripcion = {
   partirClausulas: true,
   maximoCaracteres: 42,
   msPorCaracter: 70,
+  espacios: true,
 };

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.png" alt="Kotonoha: subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés e inglés" width="100%">
+  <img src="docs/img/banner.png" alt="Kotonoha: subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés, inglés y alemán" width="100%">
 </p>
 
 <p align="center">
@@ -20,16 +20,16 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.4.3-A9E45B?style=flat-square" alt="Versión 0.4.3">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.5.0-A9E45B?style=flat-square" alt="Versión 0.5.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
-  <img src="https://img.shields.io/badge/pruebas%20unitarias-463-0ca30c?style=flat-square" alt="463 pruebas unitarias">
+  <img src="https://img.shields.io/badge/pruebas%20unitarias-508-0ca30c?style=flat-square" alt="508 pruebas unitarias">
   <img src="https://img.shields.io/badge/interfaz-6%20idiomas-8FCBFF?style=flat-square" alt="Interfaz en 6 idiomas">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 a N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 a C2">
 </p>
 
 <p align="center">
-  <b>Extensión de navegador para aprender japonés e inglés con video y texto real.</b>
+  <b>Extensión de navegador para aprender japonés, inglés y alemán con video y texto real.</b>
 </p>
 
 <p align="center">
@@ -50,6 +50,8 @@
 Kotonoha (言の葉, «hojas de palabras») superpone subtítulos interactivos sobre YouTube, Netflix y otros reproductores. Cada palabra muestra su furigana, su acento tonal y lo que se sabe de ella, y al pasar el ratón abre su entrada de diccionario, sin ningún coste. Un botón le pregunta a Claude qué significa en esa frase concreta. La extensión añade un diccionario, la creación de tarjetas para Anki o para un repaso integrado, y explicaciones en contexto generadas con la API de Claude. En cualquier página web colorea el texto japonés, le añade furigana y consulta palabras con un clic, también en un chat como el de Claude, sin romper la página. También funciona con textos, libros EPUB y archivos de video propios. La interfaz está en español, inglés, alemán, chino, coreano y japonés.
 
 Desde la versión 0.4.0 también se puede estudiar inglés: la ficha da la pronunciación americana y británica en IPA, encuentra los verbos con partícula aunque vayan separados y dice de qué palabra viene cada forma irregular. Los diccionarios salen de Wiktionary, en el idioma de la interfaz. Cada idioma guarda sus propias palabras, diccionarios, tarjetas y ajustes, y se cambia de uno a otro con un clic.
+
+Desde la 0.5.0, también alemán: la ficha dice de qué palabra sale cada forma conjugada o declinada, como *ging* de *gehen* o *Häuser* de *Haus*, encuentra los verbos separables aunque la partícula vaya al final de la frase y da la pronunciación en IPA. Sus diccionarios también salen de Wiktionary, y la voz en alemán la transcribe Parakeet.
 
 El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Japón tiene por semilla el corazón humano, y de él brotan miríadas de hojas de palabras.
 
@@ -74,7 +76,7 @@ El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Jap�
   <tr>
     <td valign="top"><b>Traducir y corregir con Claude</b><br>Traducción al idioma de apoyo, empezando por el tramo que se está viendo. Corrección automática de los homófonos de los subtítulos generados, con el título y todo el texto como contexto, sin preguntar nada.</td>
     <td valign="top"><b>SRT de ida y vuelta</b><br>Importación y exportación en cualquier sitio: SRT, VTT, ASS y TTML. Lo importado queda guardado para ese título, y los subtítulos en japonés de Netflix se conservan aunque otra región no los ofrezca.</td>
-    <td valign="top"><b>Transcripción local</b><br>Haas-ja para la voz en japonés, Parakeet para la del inglés y Whisper para las canciones, en la tarjeta gráfica mediante WebGPU y sin que el audio salga del equipo: 30 minutos de video en alrededor de un minuto con Haas-ja o Parakeet, y en unos 5 con Whisper, sin trabar el escritorio. Trabaja por tramos con descansos y se recupera si el controlador se reinicia. Si se pega la letra de una canción, Claude la coloca sobre los tiempos de Whisper.</td>
+    <td valign="top"><b>Transcripción local</b><br>Haas-ja para la voz en japonés, Parakeet para la del inglés y el alemán y Whisper para las canciones, en la tarjeta gráfica mediante WebGPU y sin que el audio salga del equipo: 30 minutos de video en alrededor de un minuto con Haas-ja o Parakeet, y en unos 5 con Whisper, sin trabar el escritorio. Trabaja por tramos con descansos y se recupera si el controlador se reinicia. Si se pega la letra de una canción, Claude la coloca sobre los tiempos de Whisper.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="Gasto del mes en Claude, por días, modelos y tareas"></td>
@@ -172,13 +174,13 @@ Después se carga la carpeta `dist` igual que en los pasos anteriores. Al volver
 
 La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, y propone:
 
-1. Instalar los diccionarios. Para japonés, JMdict en el idioma propio, o en inglés si aún no existe, con acento tonal y frecuencia. Para inglés, Wiktionary en el idioma propio, con pronunciación y frecuencia.
+1. Instalar los diccionarios. Para japonés, JMdict en el idioma propio, o en inglés si aún no existe, con acento tonal y frecuencia. Para inglés y alemán, Wiktionary en el idioma propio, con pronunciación y frecuencia; el alemán añade el alemán–inglés, que dice de qué palabra sale cada forma.
 2. Añadir una clave de la API de Claude, que se guarda solo en el navegador. Es opcional: sin ella funcionan los subtítulos, el diccionario, los colores, las tarjetas y Whisper.
 3. Elegir dónde van las tarjetas: el repaso integrado, o Anki mediante el complemento AnkiConnect.
 
 Todo se puede saltar y cambiar después en **Ajustes**, dentro de la ventana de la extensión (`Alt+Shift+K`).
 
-Con eso, al abrir un video con subtítulos en el idioma que se estudia aparece la barra de Kotonoha. En cualquier página con texto japonés aparecen los colores y el furigana; para el inglés, antes hay que encender el lector desde el menú de la extensión. La [guía de uso](docs/guia.md) explica el resto.
+Con eso, al abrir un video con subtítulos en el idioma que se estudia aparece la barra de Kotonoha. En cualquier página con texto japonés aparecen los colores y el furigana; para el inglés y el alemán, antes hay que encender el lector desde el menú de la extensión. La [guía de uso](docs/guia.md) explica el resto.
 
 ### Ayudante para transcribir videos de internet
 
@@ -263,6 +265,7 @@ El último compila y deja en `release/` los ZIP de la extensión y del ayudante,
 | `node pruebas/trazos-web.mjs` | El orden de los trazos con datos reales, el lector en su pestaña, el portapapeles y la vista dividida |
 | `node pruebas/ingles.mjs` | Estudiar inglés de principio a fin: elegir el idioma, instalar los diccionarios, un video, una página, y volver al japonés sin que se mezcle nada |
 | `node pruebas/ingles-whisper.mjs voz.wav` | Whisper en inglés en la GPU, con la corrección de Claude simulada |
+| `node pruebas/aleman.mjs` | Estudiar alemán de principio a fin con los diccionarios reales: elegir el idioma, instalarlos, analizar, un video, una página, y volver al japonés |
 | `node pruebas/letra.mjs voz.wav` | Colocar una letra sobre los tiempos de una transcripción: con una pista automática, y con Whisper en la GPU si se da una muestra de voz |
 | `node pruebas/modelos-guardados.mjs` | La lista de modelos guardados: lo que ocupa cada uno, y que borrar uno no rompa otro que comparte sus archivos |
 | `node pruebas/modelos-voz.mjs voz.wav` | Qué modelo transcribe cada cosa: Haas-ja para la voz en japonés, Whisper Turbo para las canciones, y lo elegido a mano |
@@ -286,7 +289,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.4.3 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, con el lector de páginas en 16 sitios públicos reales, y a mano con una sesión real en YouTube: subtítulos automáticos corregidos por Claude, explicaciones y la letra de una canción.
+La versión 0.5.0 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, con el lector de páginas en 16 sitios públicos reales, y a mano con una sesión real en YouTube: subtítulos automáticos corregidos por Claude, explicaciones y la letra de una canción. El alemán se ha probado con los diccionarios reales de Wiktionary, sobre páginas que imitan a YouTube y con el lector de páginas, y su transcripción con una grabación real; aún no con una sesión real en un sitio de video.
 
 ## Privacidad
 
@@ -294,7 +297,7 @@ La versión 0.4.3 es la vigente. Las pruebas automáticas cubren los flujos prin
 - El audio que transcribe Whisper no sale del equipo. Tampoco el audio de las tarjetas ni el fotograma, salvo que se envíen a Anki.
 - A la API de Claude solo se envían los textos necesarios para cada tarea: la frase, el guion de los subtítulos y el título del video. Si se pega la letra de una canción, también esa letra.
 - Las búsquedas de audio e imágenes de palabras van directamente a JapanesePod101, Wikimedia Commons y Openverse, y los trazos de cada kanji se piden a jsDelivr.
-- Los diccionarios se descargan una sola vez: los de japonés y la frecuencia del inglés, de GitHub; los de inglés, de Hugging Face. Para el inglés, el audio de las palabras sale de Wikimedia Commons y Lingua Libre.
+- Los diccionarios se descargan una sola vez: los de japonés y las frecuencias del inglés y del alemán, de GitHub; los de inglés y alemán, de Hugging Face. Para el inglés y el alemán, el audio de las palabras sale de Wikimedia Commons y Lingua Libre.
 - **Seguir el portapapeles** solo lee con la opción encendida y la pestaña a la vista, y lo leído no sale del equipo.
 - La extensión no tiene servidor propio ni recoge estadísticas de uso.
 
@@ -303,7 +306,7 @@ La versión 0.4.3 es la vigente. Las pruebas automáticas cubren los flujos prin
 El código se publica bajo la [licencia MIT](LICENSE). Los componentes de terceros, los datos que se descargan al usarla y las condiciones de uso responsable se detallan en [AVISOS.md](AVISOS.md).
 
 - Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io), en formato Yomitan.
-- Inglés: definiciones y pronunciación de [Wiktionary](https://www.wiktionary.org), preparadas por [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org); frecuencia de [FrequencyWords](https://github.com/hermitdave/FrequencyWords); análisis con [wink-nlp](https://github.com/winkjs/wink-nlp).
+- Inglés y alemán: definiciones y pronunciación de [Wiktionary](https://www.wiktionary.org), preparadas por [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org); frecuencia de [FrequencyWords](https://github.com/hermitdave/FrequencyWords); análisis del inglés con [wink-nlp](https://github.com/winkjs/wink-nlp).
 - Transcripción: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) con [Transformers.js](https://github.com/huggingface/transformers.js).
 - Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0.
 - Iconos: [Phosphor](https://phosphoricons.com). Tipografía: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) y [Nunito](https://fonts.google.com/specimen/Nunito).

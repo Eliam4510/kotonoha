@@ -14,6 +14,7 @@ Diese Anleitung beschreibt die tägliche Nutzung von Kotonoha. Die Installation 
 - [Audio, Bilder und Beispiele](#audio-bilder-und-beispiele)
 - [Webseiten, Reader und Bibliothek](#webseiten-reader-und-bibliothek)
 - [Englisch lernen](#englisch-lernen)
+- [Deutsch lernen](#deutsch-lernen)
 - [Kosten für Claude](#kosten-für-claude)
 - [Daten und Sicherung](#daten-und-sicherung)
 - [Tastenkürzel](#tastenkürzel)
@@ -28,7 +29,7 @@ Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und
 | Wörterbücher | Einstellungen, Wörterbücher | JMdict auf Spanisch, Englisch oder Deutsch, Tonhöhenakzent von Kanjium und Häufigkeit von JPDB. Sie werden einmal heruntergeladen und bleiben im Browser |
 | Claude-API-Schlüssel | Einstellungen, Claude | Erklärungen, Prüfung der Lesungen, Übersetzung und Korrektur. Er wird nur im Browser gespeichert |
 | Sprache und Niveau | Einstellungen, Sprache und Niveau | Sprache der Oberfläche und, getrennt davon, die der Erklärungen und Übersetzungen. Das Niveau passt die Erklärungen an und bestimmt, wie viele Furigana anfangs sichtbar sind |
-| Sprache, die du lernst | Einstellungen, Sprache und Niveau, das Menü der Erweiterung oder **Videoeinstellungen, Untertitel** direkt im Video | Japanisch oder Englisch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
+| Sprache, die du lernst | Einstellungen, Sprache und Niveau, das Menü der Erweiterung oder **Videoeinstellungen, Untertitel** direkt im Video | Japanisch, Englisch oder Deutsch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
 | Anki | Einstellungen, Karten und Anki | Optional. Erfordert ein geöffnetes Anki mit dem Add-on AnkiConnect |
 
 Die Erweiterung funktioniert ohne Claude-Schlüssel: Untertitel, Wörterbuch, Furigana, Farben, Karten und Whisper benötigen ihn nicht.
@@ -130,9 +131,9 @@ Whisper erzeugt japanische Untertitel, wenn ein Video keine mitbringt. Es läuft
 
 | Modell | Download | Einsatz |
 |---|---|---|
-| Automatisch | | Standard. Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder |
+| Automatisch | | Standard. Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Deutsch und Whisper Turbo für Lieder |
 | Haas-ja | 1,3 GB | Nur Japanisch. Am genauesten und schnellsten bei gesprochener Sprache, auch mit Hintergrundmusik, und mit Satzzeichen |
-| Parakeet | 1,3 GB | Nur Englisch. Am genauesten und schnellsten bei gesprochener Sprache, auch mit Hintergrundmusik, mit Satzzeichen und den genauesten Zeiten |
+| Parakeet | 1,3 GB | Englisch und Deutsch. Am genauesten und schnellsten bei gesprochener Sprache, auch mit Hintergrundmusik, mit Satzzeichen und den genauesten Zeiten |
 | Whisper Turbo | 1,5 GB | Am besten für Lieder |
 | Whisper Turbo leicht | 564 MB | Etwas ungenauer, mit weniger Grafikspeicher |
 | Whisper Base | 165 MB | Für Computer ohne leistungsstarke GPU |
@@ -243,6 +244,21 @@ Alles, was diese Anleitung erklärt, funktioniert genauso, mit diesen Unterschie
 | Grammatik | Punkte von A1 bis C2, mit derselben Bestätigung durch Claude |
 | Seiten-Reader | Anfangs ausgeschaltet, weil Englisch auf fast jeder Seite vorkommt. Er wird im Menü der Erweiterung oder unter **Einstellungen, Seiten-Reader** eingeschaltet |
 | Striche und Korrektur der Lesungen | Nicht verfügbar |
+
+## Deutsch lernen
+
+Es wird wie Englisch gewählt, und alles funktioniert gleich, mit diesen Unterschieden:
+
+| Element | Auf Deutsch |
+|---|---|
+| Wörterbücher | Wiktionary in der Sprache der Oberfläche, mit Definitionen und kurzen Übersetzungen, dazu Deutsch–Englisch, das immer vorgeschlagen wird, weil es die konjugierten und deklinierten Formen jedes Wortes enthält: etwa 17 MB Download. Mit deutscher Oberfläche wird auch Deutsch–Deutsch vorgeschlagen, etwa 55 MB |
+| Formen | Das Wortfenster öffnet das Wort, von dem jede Form stammt, und nennt die Form: *ging* öffnet *gehen*, im Präteritum, und *Häuser* *Haus*, im Plural. Kann eine Form von zwei Wörtern stammen, wie *schönen*, gewinnt das häufigere. Artikel gehen zu *der* und *ein*, die Formen von *sein* zu *sein* |
+| Trennbare Verben | Das Wortfenster sucht sie auch dann, wenn die Partikel am Satzende steht: Bei *fängt morgen an* erscheint *anfangen*. Ebenso feste Wendungen |
+| Aussprache | IPA im Wortfenster, ohne regionale Varianten. Über den Wörtern ist sie anfangs aus, ebenso die Akzentfarbe, die die betonte Silbe zeigt |
+| Grammatik | Punkte von A1 bis C2, etwa Perfekt, Konjunktiv, Passiv oder Nebensätze mit dem Verb am Ende, mit derselben Bestätigung durch Claude |
+| Transkription | Parakeet für Sprache und Whisper Turbo für Lieder. Bei einer echten Aufnahme schrieb Parakeet mit Großschreibung und Satzzeichen, in weniger als der Hälfte der Zeit von Whisper |
+| Seiten-Reader | Er ist anfangs aus. Er wird im Menü der Erweiterung oder unter **Einstellungen, Seiten-Reader** eingeschaltet |
+| Strichfolge und Lesungskorrektur | Nicht verfügbar |
 
 ## Kosten für Claude
 

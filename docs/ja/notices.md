@@ -18,6 +18,8 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Claude API のクライアント | Apache-2.0 |
 | [Transformers.js](https://github.com/huggingface/transformers.js) と [ONNX Runtime](https://onnxruntime.ai) | Whisper の実行 | Apache-2.0 と MIT |
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | 文字起こしのモデル、使用時にダウンロード | MIT |
+| [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0)、Third Intelligence 作、[Sanami による ONNX 変換](https://huggingface.co/Sanami/haas-ja-onnx) | 日本語の文字起こしモデル、使用時にダウンロード | Apache-2.0 |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)、NVIDIA 作、[istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) と [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) による ONNX 変換 | 英語とドイツ語の文字起こしモデル、使用時にダウンロード | CC-BY-4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/ffmpeg` | 手元のファイルの読み取り | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/core` | FFmpeg のコア、コンパイル時にコピー | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs)、`@breezystack/lamejs` | MP3 のエンコード | LGPL-3.0 |
@@ -44,9 +46,9 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | 書き順 | [KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、jsDelivr が配信する元のファイル | CC BY-SA 3.0 |
 | 単語の音声 | JapanesePod101 と [Lingua Libre](https://lingualibre.org) | 各出所の条件 |
 | 画像 | [Openverse](https://openverse.org) | 各画像のライセンス |
-| 英語の辞書と発音 | [Wiktionary](https://www.wiktionary.org)。[kaikki.org](https://kaikki.org) をもとに [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) が整形し、Hugging Face から配信 | CC BY-SA 4.0 |
-| 英語の頻度 | Hermit Dave の [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、OpenSubtitles に基づく | CC BY-SA 4.0 |
-| 英単語の音声 | Wikimedia Commons、[Lingua Libre](https://lingualibre.org) | 各録音の条件 |
+| 英語とドイツ語の辞書と発音 | [Wiktionary](https://www.wiktionary.org)。[kaikki.org](https://kaikki.org) をもとに [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) が整形し、Hugging Face から配信 | CC BY-SA 4.0 |
+| 英語とドイツ語の頻度 | Hermit Dave の [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、OpenSubtitles に基づく | CC BY-SA 4.0 |
+| 英語とドイツ語の単語の音声 | Wikimedia Commons、[Lingua Libre](https://lingualibre.org) | 各録音の条件 |
 
 ## 外部プログラム
 

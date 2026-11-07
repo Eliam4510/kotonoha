@@ -6,11 +6,13 @@ import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const SRC = join(import.meta.dirname, '..');
+/** Las carpetas de los paquetes de lengua: dentro, cada uno nombra lo suyo y las demás lenguas. */
+const PAQUETES = new Set(['japones', 'ingles', 'aleman']);
 
 function archivos(carpeta: string): string[] {
   return readdirSync(carpeta, { withFileTypes: true }).flatMap((e) => {
     const ruta = join(carpeta, e.name);
-    if (e.isDirectory()) return e.name === 'japones' || e.name === 'ingles' ? [] : archivos(ruta);
+    if (e.isDirectory()) return PAQUETES.has(e.name) ? [] : archivos(ruta);
     return /\.tsx?$/.test(e.name) && !/\.test\.|\.d\.ts$|-datos\.ts$/.test(e.name) ? [ruta] : [];
   });
 }
@@ -57,6 +59,6 @@ describe('lo japonés está en su paquete', () => {
   });
 
   it('los módulos del japonés solo se importan desde su registro', () => {
-    expect(buscar(/from '[^']*lenguas\/(japones|ingles)/, {})).toEqual([]);
+    expect(buscar(/from '[^']*lenguas\/(japones|ingles|aleman)/, {})).toEqual([]);
   });
 });

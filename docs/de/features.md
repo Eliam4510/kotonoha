@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.4.3 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.5.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -145,7 +145,7 @@ Stand jeder Funktion in Version 0.4.3 und die Art ihrer Überprüfung.
 
 | Funktion | Überprüfung |
 |---|---|
-| Englische Untertitel, mit jedem analysierten Wort und der Zweitspur in der Hilfssprache | Nachgeahmte Seite. Eine echte Sitzung steht noch aus |
+| Englische Untertitel, mit jedem analysierten Wort und der Zweitspur in der Hilfssprache | Nachgeahmte Seite und echte Sitzung auf YouTube |
 | Korrektur automatischer Untertitel und Erstellen von Englisch aus einer anderen Sprache | Nachgeahmte Seite |
 | Amerikanische und britische Aussprache in IPA, im Wortfenster und auf Wunsch über jedem Wort | Automatisch, mit echten Daten aus Wiktionary |
 | Farbe nach betonter Silbe: die erste, eine mittlere oder die letzte | Automatisch |
@@ -155,11 +155,27 @@ Stand jeder Funktion in Version 0.4.3 und die Art ihrer Überprüfung.
 | Partikelverben und feste Wendungen, auch getrennt: *picked it up* findet *pick up* | Automatisch |
 | Grammatik von A1 bis C2: 51 Regeln, von Claude bestätigt | Simulator |
 | Seiten-Reader, anfangs ausgeschaltet, der Seiten in anderen Sprachen in Ruhe lässt | Automatisch und auf 16 echten öffentlichen Websites |
-| Whisper auf Englisch, mit lesbar getrennten Zeilen | Automatisch, mit einer synthetischen Stimme |
+| Parakeet und Whisper auf Englisch, mit lesbar getrennten Zeilen | Automatisch, mit einer synthetischen Stimme, und in einer echten Sitzung |
 | Eigene Anweisungen an Claude für Englisch | Simulator |
 | Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
 | Neuronale Azure-Stimmen auf Englisch | Ausstehend |
 | Niveautest und Weg von A1 bis C2 | Automatisch |
+
+## Deutsch
+
+| Funktion | Überprüfung |
+|---|---|
+| Deutsche Untertitel, mit jedem analysierten Wort und der Zweitspur in der Hilfssprache | Nachgeahmte Seite. Eine echte Sitzung steht noch aus |
+| Korrektur automatischer Untertitel mit den Anweisungen für Deutsch | Nachgeahmte Seite |
+| Von welchem Wort jede Form stammt, mit den Formen aus Wiktionary: *ging* ist *gehen*, *Häuser* ist *Haus*. Bei zwei Möglichkeiten das häufigere | Automatisch, mit echten Daten |
+| Trennbare Verben mit der Partikel am Ende: *fängt morgen an* findet *anfangen* | Automatisch, mit echten Daten |
+| Aussprache in IPA, ohne regionale Varianten, und Farbe nach betonter Silbe | Automatisch, mit echten Daten aus Wiktionary |
+| Definitionen und Übersetzungen aus Wiktionary auf Spanisch, Englisch, Chinesisch, Koreanisch und Japanisch, und Definitionen auf Deutsch | Automatisch, mit echten Daten |
+| Häufigkeit nach Film- und Serienuntertiteln | Automatisch, mit echten Daten |
+| Grammatik von A1 bis C2: 24 Regeln, von Claude bestätigt | Automatisch |
+| Seiten-Reader, anfangs ausgeschaltet | Automatisch |
+| Parakeet für Sprache und Whisper Turbo für Lieder | Automatisch, mit einer echten Aufnahme |
+| Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
 
 ## Gestaltungsgrundsätze
 
@@ -179,8 +195,10 @@ Stand jeder Funktion in Version 0.4.3 und die Art ihrer Überprüfung.
 
 | Einschränkung | Einzelheit |
 |---|---|
-| Lernsprache | Japanisch und Englisch. Jede neue Sprache braucht ihr eigenes Paket in `src/lenguas` |
+| Lernsprache | Japanisch, Englisch und Deutsch. Jede neue Sprache braucht ihr eigenes Paket in `src/lenguas` |
 | Analyse des Englischen | Sie erfolgt mit einem kleinen Modell, das in die Erweiterung passt. In mehrdeutigen Sätzen kann es die Wortart falsch bestimmen und damit auch die Übersetzung unter dem Wort. Das Wortfenster zeigt weiterhin alle Definitionen |
+| Analyse des Deutschen | Sie stammt aus den Formen der Wörterbücher: Ohne Deutsch–Englisch ist jedes Wort seine eigene Form. Zwischen zwei möglichen Wörtern entscheidet die Häufigkeit, ohne auf den Satz zu achten; Claude korrigiert Fehler, wenn es die Zeile prüft |
+| Deutsche Komposita | Ein zusammengesetztes Nomen, das nicht in den Wörterbüchern steht, wird nicht in seine Teile zerlegt |
 | Englisch-Englisch-Wörterbuch | Es ist groß: etwa 110 MB Download und etwa 220 MB Speicherplatz. Installieren und Entfernen dauern einige Minuten. Es wird nur bei englischer Oberfläche vorgeschlagen |
 | Übersetzungen der Oberfläche | Mit KI-Unterstützung geschrieben, noch ohne Prüfung durch Muttersprachler. Fehler werden in `idiomas/` korrigiert |
 | Seiten-Reader | Wirkt nur im Hauptframe: Text in einem iframe erreicht er nicht. Was eine Seite auf eine Leinwand oder in ein Bild zeichnet, ist kein Text |

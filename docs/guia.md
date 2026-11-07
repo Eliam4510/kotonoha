@@ -14,6 +14,7 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 - [Audio, imágenes y ejemplos](#audio-imágenes-y-ejemplos)
 - [Páginas web, lector y biblioteca](#páginas-web-lector-y-biblioteca)
 - [Estudiar inglés](#estudiar-inglés)
+- [Estudiar alemán](#estudiar-alemán)
 - [Gasto en Claude](#gasto-en-claude)
 - [Datos y copia de seguridad](#datos-y-copia-de-seguridad)
 - [Atajos de teclado](#atajos-de-teclado)
@@ -28,7 +29,7 @@ La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere e
 | Diccionarios | Ajustes, Diccionarios | JMdict en español, inglés o alemán, acento tonal de Kanjium y frecuencia de JPDB. Se descargan una vez y quedan en el navegador |
 | Clave de la API de Claude | Ajustes, Claude | Explicaciones, revisión de lecturas, traducción y corrección. Se guarda solo en el navegador |
 | Idioma y nivel | Ajustes, Idioma y nivel | Idioma de la interfaz, y por separado el de las explicaciones y las traducciones. El nivel adapta las explicaciones y decide cuánto furigana se ve al principio |
-| Idioma que estudias | Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés o inglés. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
+| Idioma que estudias | Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés, inglés o alemán. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
 La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
@@ -130,9 +131,9 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 
 | Modelo | Descarga | Uso |
 |---|---|---|
-| Automático | | Por omisión. Haas-ja para la voz en japonés, Parakeet para la voz en inglés y Whisper Turbo para las canciones |
+| Automático | | Por omisión. Haas-ja para la voz en japonés, Parakeet para la voz en inglés y en alemán, y Whisper Turbo para las canciones |
 | Haas-ja | 1,3 GB | Solo japonés. El más preciso y rápido con voz hablada, también con música de fondo, y con puntuación |
-| Parakeet | 1,3 GB | Solo inglés. El más preciso y rápido con voz hablada, también con música de fondo, con puntuación y los tiempos más exactos |
+| Parakeet | 1,3 GB | Inglés y alemán. El más preciso y rápido con voz hablada, también con música de fondo, con puntuación y los tiempos más exactos |
 | Whisper Turbo | 1,5 GB | El mejor con canciones |
 | Whisper Turbo ligero | 564 MB | Algo menos preciso, con menos memoria de video |
 | Whisper Base | 165 MB | Para equipos sin una GPU potente |
@@ -242,6 +243,21 @@ Todo lo que explica esta guía funciona igual, con estas diferencias:
 | Verbos con partícula | La ficha los busca aunque vayan separados: en *picked it up* aparece *pick up*. Lo mismo con las frases hechas |
 | Gramática | Puntos de A1 a C2, con la misma confirmación de Claude |
 | Lector de páginas | Empieza apagado, porque hay inglés en casi todas las páginas. Se enciende en el menú de la extensión o en **Ajustes, Lector de páginas** |
+| Trazos y corrección de lecturas | No se ofrecen |
+
+## Estudiar alemán
+
+Se elige como el inglés, y todo funciona igual, con estas diferencias:
+
+| Elemento | En alemán |
+|---|---|
+| Diccionarios | Wiktionary en el idioma de la interfaz, con definiciones y traducciones breves, y además el alemán–inglés, que se propone siempre porque trae las formas conjugadas y declinadas de cada palabra: descarga unos 17 MB. Con la interfaz en alemán se propone también el alemán–alemán, de unos 55 MB |
+| Formas | La ficha abre la palabra de la que sale cada forma y dice cuál es: *ging* abre *gehen*, en pretérito, y *Häuser*, *Haus*, en plural. Si una forma puede salir de dos palabras, como *schönen*, gana la más frecuente. Los artículos van a *der* y *ein*, y las formas de *sein*, a *sein* |
+| Verbos separables | La ficha los busca aunque la partícula vaya al final de la oración: en *fängt morgen an* aparece *anfangen*. Lo mismo con las frases hechas |
+| Pronunciación | IPA en la ficha, sin las variantes regionales. Sobre las palabras empieza apagada, igual que el color de acento, que indica la sílaba tónica |
+| Gramática | Puntos de A1 a C2, como el Perfekt, el Konjunktiv, la pasiva o las subordinadas con el verbo al final, con la misma confirmación de Claude |
+| Transcripción | Parakeet para la voz y Whisper Turbo para las canciones. Con una grabación real, Parakeet escribió con mayúsculas y puntuación en menos de la mitad del tiempo de Whisper |
+| Lector de páginas | Empieza apagado. Se enciende en el menú de la extensión o en **Ajustes, Lector de páginas** |
 | Trazos y corrección de lecturas | No se ofrecen |
 
 ## Gasto en Claude

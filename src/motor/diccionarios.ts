@@ -4,7 +4,7 @@ import type { Table } from 'dexie';
 import { strFromU8, unzipSync } from 'fflate';
 import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../compartido/tipos';
 import { fondo } from '../compartido/rpc';
-import { type FrecuenciaImportada, leerBancoMeta, leerBancoTerminos, leerKanjium, leerListaFrecuencia } from '../nucleo/yomitan';
+import { type FormaImportada, type FrecuenciaImportada, leerBancoFormas, leerBancoMeta, leerBancoTerminos, leerKanjium, leerListaFrecuencia } from '../nucleo/yomitan';
 import { db } from './db';
 import { tr } from '../compartido/i18n';
 import { motorLengua } from './lengua';
@@ -57,7 +57,10 @@ async function borrarPorTandas<T extends { dic: string }, K>(tabla: Table<T, K>,
 }
 
 async function borrarFilas(id: string, tipo?: InfoDiccionario['tipo']) {
-  if (tipo === 'terminos' || !tipo) await borrarPorTandas(db.terminos, id);
+  if (tipo === 'terminos' || !tipo) {
+    await borrarPorTandas(db.terminos, id);
+    await borrarPorTandas(db.formas, id);
+  }
   if (tipo === 'frecuencia' || !tipo) await borrarPorTandas(db.frecuencias, id);
   if (tipo === 'acento' || !tipo) await db.acentos.clear();
 }
@@ -92,6 +95,8 @@ async function importarZip(
 
   // Una misma palabra puede traer varios rangos (escrita en kanji o en kana): vale el mejor.
   const mejoresRangos = new Map<string, FrecuenciaImportada>();
+  // Las formas de una misma palabra pueden venir en bancos distintos: se juntan antes de guardarlas.
+  const formas = motorLengua().formasDeDiccionario ? new Map<string, FormaImportada>() : null;
 
   for (let i = 0; i < bancos.length; i++) {
     const n = bancos[i];
@@ -100,6 +105,7 @@ async function importarZip(
       const filas = leerBancoTerminos(crudo, motorLengua().seccionesOmitidas).map((f) => ({ ...f, dic: id }));
       for (let j = 0; j < filas.length; j += LOTE) await db.terminos.bulkAdd(filas.slice(j, j + LOTE));
       filasTerminos += filas.length;
+      if (formas) leerBancoFormas(crudo, formas);
     } else {
       const { frecuencias, acentos: tonos, pronunciaciones } = leerBancoMeta(crudo);
       const fila = motorLengua().filaPronunciacion;
@@ -113,6 +119,11 @@ async function importarZip(
       filasAcento += acentos.length;
     }
     alAvance((i + 1) / bancos.length);
+  }
+
+  if (formas?.size) {
+    const conDic = [...formas.values()].map((f) => ({ ...f, dic: id }));
+    for (let j = 0; j < conDic.length; j += LOTE) await db.formas.bulkPut(conDic.slice(j, j + LOTE));
   }
 
   if (mejoresRangos.size) {
