@@ -64,7 +64,7 @@ export interface PromptPersonalizado {
 
 export type Tema = 'auto' | 'oscuro' | 'claro';
 
-export type ModeloWhisper = 'turbo' | 'turbo-ligero' | 'base' | 'haas';
+export type ModeloWhisper = 'turbo' | 'turbo-ligero' | 'base' | 'haas' | 'parakeet';
 /** Lo que se elige en los ajustes: un modelo concreto, o que se decida según el video. */
 export type OpcionModelo = ModeloWhisper | 'auto';
 
@@ -107,6 +107,7 @@ export interface DefinicionModeloVoz {
  * a Kotoba Whisper en todas las pruebas, y sin comprimir el codificador comete un 10 % menos de errores.
  * Con voz hablada en japonés gana Haas-ja, también con música de fondo: 3,1 % de error frente a 8,8 %, y siete veces más
  * rápido. Con canto se queda corto, porque escribe solo una parte de lo que se canta, y ahí sigue ganando Whisper.
+ * En inglés pasa lo mismo con Parakeet: 6,8 % frente a 9,6 %, con tiempos tres veces más exactos, pero peor en canciones.
  */
 export const MODELOS_WHISPER: Record<ModeloWhisper, DefinicionModeloVoz> = {
   haas: {
@@ -128,6 +129,26 @@ export const MODELOS_WHISPER: Record<ModeloWhisper, DefinicionModeloVoz> = {
       bf16: true,
       capasEstado: 2,
       anchoEstado: 20480,
+    },
+  },
+  parakeet: {
+    id: 'ysdede/parakeet-tdt-0.6b-v3-onnx',
+    nombre: tm('Parakeet'),
+    descripcion: tm('El más preciso con voz hablada en inglés, también con música de fondo, con puntuación y los tiempos más exactos. Usa unos 2,5 GB de memoria de video. Para canciones, mejor Whisper Turbo.'),
+    dtype: {},
+    mb: 1280,
+    lenguas: ['en'],
+    voz: true,
+    tdt: {
+      revision: 'e5356bf6e24bdb7a269536b0e9e7869bc034b893',
+      codificador: 'encoder-model.fp16.onnx',
+      decodificador: 'decoder_joint-model.fp16.onnx',
+      vocabulario: 'vocab.txt',
+      formatoVocabulario: 'lista',
+      nMels: 128,
+      bf16: false,
+      capasEstado: 2,
+      anchoEstado: 640,
     },
   },
   turbo: {

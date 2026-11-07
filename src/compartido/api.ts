@@ -151,10 +151,12 @@ export interface ApiMotor {
   exportarDatos(ajustes: Ajustes): Promise<string>;
   /** Devuelve los ajustes que traía la copia, para que los guarde quien la restaura. */
   importarDatos(json: string): Promise<Partial<Ajustes> | null>;
-  guardarSubtitulosGenerados(idVideo: string, idioma: string, lineas: Linea[], origen?: string): Promise<void>;
-  subtitulosGenerados(idVideo: string): Promise<{ idioma: string; lineas: Linea[]; origen?: string; creado: number }[]>;
-  correccionesPista(clave: string): Promise<{ cambios: Record<number, string>; completa: boolean } | undefined>;
-  guardarCorreccionesPista(clave: string, cambios: Record<number, string>, completa: boolean): Promise<void>;
+  // Lo generado para un video se guarda en la base de la lengua que se estudia, `estudio`, que dice quien lo pide: al
+  // cambiar de lengua, el motor puede no haberse enterado aún, y leería o escribiría en la base de la anterior.
+  guardarSubtitulosGenerados(idVideo: string, idioma: string, lineas: Linea[], origen: string | undefined, estudio: string): Promise<void>;
+  subtitulosGenerados(idVideo: string, estudio: string): Promise<{ idioma: string; lineas: Linea[]; origen?: string; creado: number }[]>;
+  correccionesPista(clave: string, estudio: string): Promise<{ cambios: Record<number, string>; completa: boolean } | undefined>;
+  guardarCorreccionesPista(clave: string, cambios: Record<number, string>, completa: boolean, estudio: string): Promise<void>;
 }
 
 export interface ApiFondo {

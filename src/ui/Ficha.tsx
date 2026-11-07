@@ -3,7 +3,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Ajustes, PestanaDiccionario } from '../compartido/ajustes';
-import { type FlujoCancelable, flujoMotor, motor } from '../compartido/rpc';
+import { type FlujoCancelable, flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
 import type { PuntoGramatica } from '../lenguas/tipos';
@@ -197,9 +197,26 @@ export function PanelFlujo({
       ) : !texto && cargando ? (
         <Esqueleto />
       ) : (
-        <div class={`panel-ia-texto ${cargando ? 'cursor-ia' : ''}`}>{render ? render(texto) : texto}</div>
+        <div class={`panel-ia-texto ${cargando ? 'cursor-ia' : ''}`}>{render ? render(texto) : <ConEnfasis texto={texto} />}</div>
       )}
     </div>
+  );
+}
+
+/**
+ * Claude escribe a veces la palabra estudiada en cursiva, con asteriscos, sobre todo en inglés. Se muestran como cursiva y
+ * negrita, y todo lo demás queda como texto: nada se interpreta como HTML.
+ */
+export function ConEnfasis({ texto }: { texto: string }) {
+  const partes = texto.split(/(\*\*[^*\n]+\*\*|\*[^*\s][^*\n]*?\*)/g);
+  return (
+    <>
+      {partes.map((p, i) => {
+        if (p.startsWith('**') && p.endsWith('**') && p.length > 4) return <b key={i}>{p.slice(2, -2)}</b>;
+        if (p.startsWith('*') && p.endsWith('*') && p.length > 2) return <i key={i}>{p.slice(1, -1)}</i>;
+        return p;
+      })}
+    </>
   );
 }
 
@@ -752,11 +769,22 @@ export function Ficha(p: PropsFicha) {
     </div>
   ) : null;
 
+  const [sinDiccionarios, fijarSinDiccionarios] = useState(false);
+  useEffect(() => {
+    if (definicionesUnicas.length) return;
+    motor.estado().then((e) => fijarSinDiccionarios(!e.diccionarios.some((d) => d.tipo === 'terminos'))).catch(() => {});
+  }, [definicionesUnicas.length, lengua.value.id]);
+
   const bloques = {
     definiciones: (
       <div key="def" class="ficha-bloque">
         <div class="subtitulo-def">{tr('Definiciones')}</div>
-        {definicionesUnicas.length === 0 && <div class="ayuda">{tr('Sin entrada en los diccionarios instalados. Puedes preguntarle a Claude con «Explicar».')}</div>}
+        {definicionesUnicas.length === 0 && (sinDiccionarios ? (
+          <div class="ayuda">
+            {tr('Aún no hay diccionarios de este idioma. Se instalan en Ajustes, Diccionarios, y mientras tanto Claude puede explicarla con «Explicar».')}{' '}
+            <button class="enlace" onClick={() => fondo.abrirApp('ajustes')}>{tr('Abrir Ajustes')}</button>
+          </div>
+        ) : <div class="ayuda">{tr('Sin entrada en los diccionarios instalados. Puedes preguntarle a Claude con «Explicar».')}</div>)}
         <ol class="lista-defs">
           {defsVisibles.map((g, i) => (
             <li key={g} class={i === 0 && elegida >= 0 ? 'elegida' : ''} title={i === 0 && elegida >= 0 ? tr('Claude la señala como la más cercana en esta frase') : undefined}>

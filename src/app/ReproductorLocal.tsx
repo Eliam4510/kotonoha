@@ -1,7 +1,7 @@
 // Reproductor de archivos locales: video propio con subtítulos propios y las mismas herramientas.
 
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { cargarVideoActual, fijarFuenteArchivo, iniciarControlador, importarArchivo, nombreIdioma } from '../contenido/controlador';
+import { cargarVideoActual, cortarWhisper, fijarFuenteArchivo, iniciarControlador, importarArchivo, nombreIdioma } from '../contenido/controlador';
 import { ajustes, infoVideo } from '../contenido/estado';
 import type { Control } from '../contenido/puente';
 import { Reproductor } from '../contenido/Reproductor';
@@ -81,6 +81,14 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
     ajustes.value = a;
   }, [a]);
 
+  // Con otra lengua el video sigue abierto y donde estaba: se vuelven a elegir las pistas, como en cualquier sitio de video.
+  const lenguaVista = useRef(a.idiomaObjetivo);
+  useEffect(() => {
+    if (lenguaVista.current === a.idiomaObjetivo) return;
+    lenguaVista.current = a.idiomaObjetivo;
+    if (archivoActual && elVideo?.src) cargarVideoActual().catch(console.error);
+  }, [a.idiomaObjetivo]);
+
   /** El navegador no deja elegir la pista de audio: la elegida suena aparte, sincronizada con el video. */
   const cambiarAudio = async (indice: number, medio = datosMedio) => {
     const v = video.current;
@@ -123,6 +131,8 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
     });
     return () => {
       alInforme = () => {};
+      // Al salir del reproductor, el video deja de estar abierto: lo que siguiera transcribiéndose no tendría dónde ir.
+      cortarWhisper();
       fijarFuenteArchivo(null);
       quitarAudio.current?.();
       quitarAudio.current = null;

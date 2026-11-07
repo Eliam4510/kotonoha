@@ -85,7 +85,8 @@ await sw.evaluate(
     await chrome.storage.local.set({
       urlBaseIA: url,
       claveAnthropic: 'clave-de-prueba',
-      ajustes: { ...(d.ajustes ?? {}), ankiPuerto: puerto, ankiModelo: 'Kotonoha', ankiMazo: 'Pruebas Kotonoha', ankiEtiquetas: 'kotonoha prueba', destino: 'anki' },
+      // Las palabras de la prueba son japonesas: el perfil se comparte con otras pruebas, que pueden dejar otra lengua.
+      ajustes: { ...(d.ajustes ?? {}), idiomaObjetivo: 'ja', ankiPuerto: puerto, ankiModelo: 'Kotonoha', ankiMazo: 'Pruebas Kotonoha', ankiEtiquetas: 'kotonoha prueba', destino: 'anki' },
     });
   },
   { puerto: puertoAnki, url: `http://127.0.0.1:${mock.puerto}` }

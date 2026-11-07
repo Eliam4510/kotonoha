@@ -194,7 +194,8 @@ function App() {
     <div class="kk-raiz ap-app" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
       <style>{base + overlay + appCss}</style>
       <Lateral ruta={ruta} />
-      <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={`${ruta}:${a.idiomaObjetivo}`}>
+      {/* Cada pantalla empieza de nuevo con otra lengua, salvo el reproductor: el video sigue abierto y solo cambian sus pistas. */}
+      <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={ruta === 'reproductor' ? ruta : `${ruta}:${a.idiomaObjetivo}`}>
         {ruta === 'inicio' && <Inicio ajustes={a} />}
         {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} />}
         {ruta === 'lector' && <Lector ajustes={a} inicial={params.get('t') ?? ''} />}

@@ -491,7 +491,15 @@ export async function iniciarAnalisisProfundo(todoElVideo = false) {
 /** Vuelve a pedir las líneas al motor, que aplica lo que Claude ya ha revisado. */
 export async function refrescarAnalisis() {
   if (!baseObjetivo.length) return;
-  publicarObjetivo(await motor.analizarLineas(crudas(baseObjetivo)));
+  const turno = turnoCarga;
+  const analizadas = await motor.analizarLineas(crudas(baseObjetivo));
+  // Entretanto pudo cambiar la pista, o llegar líneas nuevas de Whisper: esas se conservan tal cual.
+  if (turno !== turnoCarga) return;
+  const porId = new Map(analizadas.map((l) => [l.id, l]));
+  publicarObjetivo(baseObjetivo.map((l) => {
+    const nueva = porId.get(l.id);
+    return nueva && nueva.texto === l.texto ? nueva : l;
+  }));
 }
 
 async function textoAPista(p: PistaInfo): Promise<Linea[]> {
@@ -526,7 +534,7 @@ function recordarPista(p: PistaInfo, lineas: Linea[]) {
   if (p.idioma.split('-')[0] !== ajustes.value.idiomaObjetivo.split('-')[0]) return;
   // Un SRT que importaste a mano vale más que lo recordado.
   if (pistas.value.some((x) => x.origen === 'importada' && x.idioma.split('-')[0] === p.idioma.split('-')[0])) return;
-  motor.guardarSubtitulosGenerados(info.idVideo, ajustes.value.idiomaObjetivo, lineas, 'recordada').catch(() => {});
+  motor.guardarSubtitulosGenerados(info.idVideo, ajustes.value.idiomaObjetivo, lineas, 'recordada', ajustes.value.idiomaObjetivo).catch(() => {});
 }
 
 export async function seleccionarObjetivo(id: string | null) {
@@ -554,7 +562,7 @@ export async function seleccionarObjetivo(id: string | null) {
     const sinCorregir = await textoAPista(p);
     if (turno !== turnoCarga) return;
     // Lo que Claude ya corrigió de esta pista se aplica sin volver a pagarlo.
-    const previa = await motor.correccionesPista(clavePista(id)).catch(() => undefined);
+    const previa = await motor.correccionesPista(clavePista(id), ajustes.value.idiomaObjetivo).catch(() => undefined);
     const lineas = previa ? aplicarCorreccionesGuardadas(sinCorregir, previa.cambios) : sinCorregir;
     const info = infoVideo.value;
     const analizadas = await motor.analizarLineas(lineas, { titulo: info?.titulo, url: location.href, idVideo: info?.idVideo ?? undefined });
@@ -600,6 +608,14 @@ export async function seleccionarSecundaria(id: string | null) {
 const reanalizar = () => refrescarAnalisis();
 
 export async function cargarVideoActual() {
+  // Lo que siguiera llegando de una transcripción en marcha sería del video o de la lengua de antes.
+  if (cortarWhisper()) avisar(tr('La transcripción se detuvo al cambiar de video o de idioma. Lo ya transcrito queda guardado.'), undefined, undefined, 8000);
+  // Y lo mismo con lo que Claude estuviera traduciendo, corrigiendo o revisando: lo hecho ya está guardado, y lo que
+  // falte se pide la próxima vez sin pagar dos veces lo anterior.
+  turnoCarga++;
+  cancelarGeneracion();
+  cancelarCorreccion();
+  flujoAnalisis?.cancelar();
   const info = await control.info();
   infoVideo.value = { sitio: info.sitio, idVideo: info.idVideo, titulo: info.titulo, categoria: info.categoria };
   pistas.value = [];
@@ -624,7 +640,7 @@ export async function cargarVideoActual() {
 
   // Pistas que ya generaste para este video con Claude o Whisper.
   if (info.idVideo) {
-    const generadas = await motor.subtitulosGenerados(info.idVideo).catch(() => []);
+    const generadas = await motor.subtitulosGenerados(info.idVideo, ajustes.value.idiomaObjetivo).catch(() => []);
     for (const g of generadas) {
       // Si esta región ya trae esa pista, lo recordado de otra no aporta nada.
       if (g.origen === 'recordada' && lista.some((p) => p.idioma.split('-')[0] === g.idioma.split('-')[0] && !p.automatica)) continue;
@@ -639,7 +655,9 @@ export async function cargarVideoActual() {
 
   const a = ajustes.value;
   const objetivo = elegirPista(propias, a.idiomaObjetivo);
-  const secundaria = elegirPista(propias, a.idiomaSecundario) ?? elegirPista(propias, 'en');
+  // El inglés como apoyo sirve para otra lengua, no para el propio inglés: serían dos veces los mismos subtítulos.
+  const conIngles = a.idiomaObjetivo.split('-')[0] !== 'en' ? elegirPista(propias, 'en') : undefined;
+  const secundaria = elegirPista(propias, a.idiomaSecundario) ?? conIngles;
   await seleccionarObjetivo(objetivo?.id ?? null);
   if (secundaria) await seleccionarSecundaria(secundaria.id);
   else if (objetivo && a.generarSecundariosAuto) generarSecundarios().catch(() => {});
@@ -682,10 +700,11 @@ export async function importarArchivo(archivo: File, destino: 'objetivo' | 'secu
     importadas.set(id, lineas);
     pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (importados)', nombreIdioma(idioma)), origen: 'importada' }];
     const video = infoVideo.value?.idVideo;
-    if (video) await motor.guardarSubtitulosGenerados(video, idioma, lineas, 'importada').catch(() => {});
+    const estudio = ajustes.value.idiomaObjetivo;
+    if (video) await motor.guardarSubtitulosGenerados(video, idioma, lineas, 'importada', estudio).catch(() => {});
     // Un archivo nuevo empieza sin el ajuste de sincronía del anterior, y sin sus correcciones.
     await chrome.storage.local.remove(claveSincronia(id)).catch(() => {});
-    await motor.guardarCorreccionesPista(clavePista(id), {}, false).catch(() => {});
+    await motor.guardarCorreccionesPista(clavePista(id), {}, false, estudio).catch(() => {});
     if (destino === 'objetivo') await seleccionarObjetivo(id);
     else await seleccionarSecundaria(id);
     avisar(tr('Importado: {0} ({1} líneas)', archivo.name, lineas.length), 'exito');
@@ -739,6 +758,7 @@ export async function generarSecundarios() {
   const idioma = ajustes.value.idiomaSecundario;
   const id = `generada:${idioma}`;
   const video = infoVideo.value?.idVideo;
+  const estudio = ajustes.value.idiomaObjetivo;
   // Si una traducción anterior quedó a medias se sigue por lo que falta, sin pagarlo dos veces.
   const delaFuente = new Set(fuente.map((l) => l.id));
   const hechas = new Map((importadas.get(id) ?? []).filter((l) => delaFuente.has(l.id)).map((l) => [l.id, l]));
@@ -763,7 +783,7 @@ export async function generarSecundarios() {
       for (const { i, t } of e.parte) if (porTraducir[i]) hechas.set(porTraducir[i].id, { ...porTraducir[i], texto: t });
       generacion.value = { tipo: 'secundarios', hechas: yaHechas + e.hechas, total: fuente.length };
       const lista = publicar();
-      if (video) motor.guardarSubtitulosGenerados(video, idioma, lista, 'claude').catch(() => {});
+      if (video) motor.guardarSubtitulosGenerados(video, idioma, lista, 'claude', estudio).catch(() => {});
     })
   );
   flujoGeneracion = f;
@@ -818,7 +838,7 @@ export async function traducirALengua() {
           publicarObjetivo([...baseObjetivo, ...analizadas].sort((a, b) => a.inicio - b.inicio));
           const crudasActuales = crudas(baseObjetivo);
           importadas.set(id, crudasActuales);
-          if (video) await motor.guardarSubtitulosGenerados(video, idioma, crudasActuales, 'claude');
+          if (video) await motor.guardarSubtitulosGenerados(video, idioma, crudasActuales, 'claude', idioma);
         })
         .catch(console.error);
     })
@@ -890,7 +910,8 @@ export async function corregirSubtitulos(manual = false) {
   if (turno !== turnoCarga) return;
   const id = idObjetivo.value;
   const clave = clavePista(id);
-  const acumulado: Record<number, string> = { ...((await motor.correccionesPista(clave).catch(() => undefined))?.cambios ?? {}) };
+  const estudio = ajustes.value.idiomaObjetivo;
+  const acumulado: Record<number, string> = { ...((await motor.correccionesPista(clave, estudio).catch(() => undefined))?.cambios ?? {}) };
   let cambiadas = 0;
   let cola: Promise<void> = Promise.resolve();
   correccion.value = { hechas: 0, total: lineas.length, cambiadas: 0 };
@@ -903,7 +924,7 @@ export async function corregirSubtitulos(manual = false) {
           cambiadas += await aplicarCorrecciones(e.cambios, lineas, turno, acumulado);
           if (turno !== turnoCarga) return;
           correccion.value = { hechas: e.hechas, total: e.total, cambiadas };
-          await motor.guardarCorreccionesPista(clave, acumulado, false);
+          await motor.guardarCorreccionesPista(clave, acumulado, false, estudio);
         })
         .catch(console.error);
     })
@@ -913,7 +934,7 @@ export async function corregirSubtitulos(manual = false) {
     await f;
     await cola;
     if (turno !== turnoCarga || !correccion.value) return;
-    await motor.guardarCorreccionesPista(clave, acumulado, true);
+    await motor.guardarCorreccionesPista(clave, acumulado, true, estudio);
     if (id?.startsWith('generada:') || id?.startsWith('letra:')) {
       importadas.set(id, crudas(baseObjetivo));
       await guardarGenerada();
@@ -940,6 +961,25 @@ export function cancelarCorreccion() {
 
 let flujoWhisper: { cancelar(): void } | null = null;
 let intervaloMarcas: ReturnType<typeof setInterval> | null = null;
+/** Cada transcripción tiene su número: lo que llegue de una que ya se cortó no se mezcla con lo que se ve ahora. */
+let sesionWhisper = 0;
+
+/**
+ * Corta la transcripción en marcha sin esperar a lo que falte. Al cambiar de video o de lengua, lo que siguiera llegando
+ * se guardaría en el video o la lengua equivocados. Lo recibido hasta ahora ya está guardado: el archivo y la descarga
+ * siguen desde ahí la próxima vez.
+ */
+export function cortarWhisper(): boolean {
+  if (!whisper.value) return false;
+  sesionWhisper++;
+  flujoWhisper?.cancelar();
+  flujoWhisper = null;
+  if (intervaloMarcas) clearInterval(intervaloMarcas);
+  intervaloMarcas = null;
+  sinCorregir = [];
+  whisper.value = null;
+  return true;
+}
 let colaWhisper: Promise<void> = Promise.resolve();
 let sinCorregir: Linea[] = [];
 let colaCorreccion: Promise<void> = Promise.resolve();
@@ -967,7 +1007,8 @@ function enviarMarcaVideo() {
 async function guardarGenerada() {
   const video = infoVideo.value?.idVideo;
   const origen = pistas.value.find((p) => p.id === idObjetivo.value)?.origen;
-  if (video) await motor.guardarSubtitulosGenerados(video, ajustes.value.idiomaObjetivo, crudas(baseObjetivo), origen).catch(() => {});
+  const estudio = ajustes.value.idiomaObjetivo;
+  if (video) await motor.guardarSubtitulosGenerados(video, estudio, crudas(baseObjetivo), origen, estudio).catch(() => {});
 }
 
 /** Corrección en tiempo real: un lote pequeño con todo lo transcrito hasta ahora como contexto. */
@@ -986,12 +1027,13 @@ async function corregirLote(lote: Linea[]) {
   }
 }
 
-async function recibirLineasWhisper(nuevas: Linea[], fuente: { titulo?: string; url?: string; idVideo?: string }) {
+async function recibirLineasWhisper(nuevas: Linea[], fuente: { titulo?: string; url?: string; idVideo?: string }, vigente: () => boolean) {
   const analizadas = await motor.analizarLineas(nuevas, fuente);
+  if (!vigente()) return;
   publicarObjetivo(fusionarLineas(baseObjetivo, analizadas));
   await guardarGenerada();
   // Un archivo se corrige entero al final; en tiempo real se va corrigiendo sin frenar las líneas nuevas.
-  if (whisper.value?.desdeArchivo) return;
+  if (!vigente() || whisper.value?.desdeArchivo) return;
   sinCorregir.push(...nuevas);
   if (sinCorregir.length >= LOTE_CORRECCION) {
     const lote = sinCorregir;
@@ -1045,6 +1087,9 @@ function esCancion(): boolean {
   return info?.categoria === 'Music' || TITULO_DE_CANCION.test(titulo) || !!lengua.value.tituloDeCancion?.test(titulo);
 }
 
+/** El modelo que se usaría ahora mismo para transcribir este video. */
+export const modeloQueTranscribiria = () => modeloParaTranscribir(ajustes.value.whisperModelo, ajustes.value.idiomaObjetivo, esCancion());
+
 const TITULO_DE_CANCION = /\b(mv|m\/v|music video|lyric video|lyrics?|official video|official audio|karaoke)\b/i;
 
 /** La dirección limpia del video: sin la lista de reproducción ni la marca de tiempo. */
@@ -1067,17 +1112,33 @@ export async function iniciarWhisper(enVivo = false) {
     avisar(tr('Para oír el video hay que activar la captura de audio: {0} y vuelve a intentarlo.', comoActivarCaptura()), 'error', undefined, 8000);
     return;
   }
+  if (whisper.value) return;
   const modelo = modeloParaTranscribir(ajustes.value.whisperModelo, ajustes.value.idiomaObjetivo, esCancion());
+  const sesion = ++sesionWhisper;
+  const vigente = () => sesion === sesionWhisper;
   whisper.value = { fase: conAyudante ? 'bajando' : desdeArchivo ? 'extrayendo' : 'preparando', lineas: 0, desdeArchivo: !!desdeArchivo || conAyudante, modelo: MODELOS_WHISPER[modelo].nombre };
   let audio: { url: string; pcmCrudo: boolean } | null = null;
   try {
-    audio = desdeArchivo ? await desdeArchivo((porcentaje) => (whisper.value = whisper.value && { ...whisper.value, fase: 'extrayendo', porcentaje })) : null;
+    audio = desdeArchivo ? await desdeArchivo((porcentaje) => vigente() && (whisper.value = whisper.value && { ...whisper.value, fase: 'extrayendo', porcentaje })) : null;
   } catch (e) {
+    if (!vigente()) return;
     avisar(tr('No se pudo leer el audio: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
     whisper.value = null;
     return;
   }
+  if (!vigente()) {
+    if (audio) URL.revokeObjectURL(audio.url);
+    return;
+  }
   await activarPistaWhisper();
+  // Mientras la pista se analiza aún no está en pantalla lo ya transcrito: tras cambiar de lengua, el analizador tarda
+  // unos segundos en cargarse. Sin esperar, se empezaría desde el principio, y al terminar de cargarse la pista
+  // sustituiría a las líneas nuevas.
+  for (const limite = Date.now() + 30000; cargandoPista.value && Date.now() < limite; ) await new Promise((r) => setTimeout(r, 100));
+  if (!vigente()) {
+    if (audio) URL.revokeObjectURL(audio.url);
+    return;
+  }
   // Si una transcripción anterior de este archivo quedó a medias, se sigue desde ahí.
   let desdeMs = 0;
   if (audio || conAyudante) {
@@ -1095,14 +1156,17 @@ export async function iniciarWhisper(enVivo = false) {
   let avisoRetraso = false;
   const info = infoVideo.value;
   const fuente = { titulo: info?.titulo, url: location.href, idVideo: info?.idVideo ?? undefined };
+  let marcas: ReturnType<typeof setInterval> | null = null;
   if (!audio && !conAyudante) {
     const marcar = enviarMarcaVideo();
     marcar();
-    intervaloMarcas = setInterval(marcar, 250);
+    marcas = setInterval(marcar, 250);
+    intervaloMarcas = marcas;
   }
   let vistos = 0;
   const metodo = conAyudante ? 'transcribirDescarga' : audio ? 'transcribirArchivo' : 'transcribirEnVivo';
   const f = flujoMotor(metodo, conAyudante ? [urlDelVideo(), desdeMs, modelo] : audio ? [audio.url, audio.pcmCrudo, desdeMs, modelo] : [modelo], (acumulado) => {
+    if (!vigente()) return;
     const texto = acumulado.slice(vistos);
     const fin = texto.lastIndexOf('\n');
     if (fin < 0) return;
@@ -1112,7 +1176,7 @@ export async function iniciarWhisper(enVivo = false) {
       const actual = whisper.value ?? { fase: 'preparando' as const, lineas: 0 };
       if (e.tipo === 'lineas') {
         whisper.value = { ...actual, lineas: actual.lineas + e.lineas.length };
-        colaWhisper = colaWhisper.then(() => recibirLineasWhisper(e.lineas, fuente)).catch(console.error);
+        colaWhisper = colaWhisper.then(() => recibirLineasWhisper(e.lineas, fuente, vigente)).catch(console.error);
       } else if (e.tipo === 'bajandoAudio') {
         whisper.value = { ...actual, fase: 'bajando', porcentaje: e.porcentaje };
       } else if (e.tipo === 'descarga') {
@@ -1146,6 +1210,7 @@ export async function iniciarWhisper(enVivo = false) {
   try {
     await f;
     await colaWhisper;
+    if (!vigente()) return;
     const lote = sinCorregir;
     sinCorregir = [];
     await colaCorreccion;
@@ -1160,15 +1225,19 @@ export async function iniciarWhisper(enVivo = false) {
       if (n) iniciarAnalisisProfundo().catch(() => {});
     }
   } catch (e) {
+    if (!vigente()) return;
     const mensaje = e instanceof Error ? e.message : String(e);
     // Si el video no se puede bajar, aún queda oírlo mientras se reproduce. Un fallo después de bajarlo es de la transcripción.
     if (conAyudante && whisper.value?.fase === 'bajando') avisar(tr('No se pudo bajar el audio: {0}', mensaje), 'error', { texto: tr('Transcribir al reproducir'), fn: () => iniciarWhisper(true) }, 12000);
     else avisar(tr('No se pudo transcribir: {0}', mensaje), 'error', undefined, 8000);
   } finally {
-    if (intervaloMarcas) clearInterval(intervaloMarcas);
-    intervaloMarcas = null;
-    flujoWhisper = null;
-    whisper.value = null;
+    if (marcas) clearInterval(marcas);
+    // Si se cortó, lo que hay ahora es de otra transcripción, o de ninguna: no se toca.
+    if (vigente()) {
+      intervaloMarcas = null;
+      flujoWhisper = null;
+      whisper.value = null;
+    }
     if (audio) URL.revokeObjectURL(audio.url);
   }
 }
@@ -1198,23 +1267,29 @@ export async function ajustarLetra() {
     return;
   }
   ajustandoLetra.value = true;
+  // Claude tarda unos segundos: si entretanto se cambia de video o de lengua, la letra es del video y la lengua de ahora.
+  const idioma = ajustes.value.idiomaObjetivo;
+  const id = `letra:${idioma}`;
+  const video = infoVideo.value?.idVideo;
+  const claveSinc = claveSincronia(id);
+  const claveCorrecciones = clavePista(id);
+  const sigueAqui = () => infoVideo.value?.idVideo === video && ajustes.value.idiomaObjetivo === idioma;
   try {
     const respuesta = await flujoMotor('ajustarLetra', [lineas, versos, infoVideo.value?.titulo], () => {});
     const ajuste = JSON.parse(respuesta) as EntradaAjuste[];
     const { lineas: finales, conTiempo, estimadas } = aplicarAjuste(versos, lineas, ajuste);
     if (!conTiempo) {
-      avisar(tr('Claude no encontró esta letra en lo que se oye. ¿Es la de esta canción?'), 'error', undefined, 8000);
+      if (sigueAqui()) avisar(tr('Claude no encontró esta letra en lo que se oye. ¿Es la de esta canción?'), 'error', undefined, 8000);
       return;
     }
-    const idioma = ajustes.value.idiomaObjetivo;
-    const id = `letra:${idioma}`;
+    if (video) await motor.guardarSubtitulosGenerados(video, idioma, finales, 'letra', idioma).catch(() => {});
+    // Una letra nueva empieza sin la sincronía ni las correcciones de la anterior.
+    await chrome.storage.local.remove(claveSinc).catch(() => {});
+    await motor.guardarCorreccionesPista(claveCorrecciones, {}, false, idioma).catch(() => {});
+    // Si ya se está en otro video, la letra queda guardada para cuando se vuelva al suyo.
+    if (!sigueAqui()) return;
     importadas.set(id, finales);
     pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: `${nombreIdioma(idioma)} (${tr('letra')})`, origen: 'letra' }];
-    const video = infoVideo.value?.idVideo;
-    if (video) await motor.guardarSubtitulosGenerados(video, idioma, finales, 'letra').catch(() => {});
-    // Una letra nueva empieza sin la sincronía ni las correcciones de la anterior.
-    await chrome.storage.local.remove(claveSincronia(id)).catch(() => {});
-    await motor.guardarCorreccionesPista(clavePista(id), {}, false).catch(() => {});
     letraPegada.value = '';
     await seleccionarObjetivo(id);
     retraducirTrasLetra();
@@ -1306,7 +1381,10 @@ export async function combinarSeleccionadas() {
   const ids = [...seleccionadas.value].sort((a, b) => a - b);
   if (ids.length < 2) return;
   const grupo = baseObjetivo.filter((l) => ids.includes(l.id));
-  const unida: Linea = { id: grupo[0].id, inicio: grupo[0].inicio, fin: grupo[grupo.length - 1].fin, texto: grupo.map((l) => l.texto).join('') };
+  // En una lengua que separa las palabras con espacios, dos líneas pegadas sin más juntarían la última palabra de una con la primera de la otra.
+  const union = lengua.value.escritura.palabrasSeparadas ? ' ' : '';
+  const texto = grupo.map((l) => l.texto.trim()).filter(Boolean).join(union);
+  const unida: Linea = { id: grupo[0].id, inicio: grupo[0].inicio, fin: grupo[grupo.length - 1].fin, texto };
   const [analizada] = await motor.analizarLineas([unida]);
   publicarObjetivo(baseObjetivo.filter((l) => !ids.slice(1).includes(l.id)).map((l) => (l.id === unida.id ? analizada : l)));
   seleccionadas.value = new Set([unida.id]);

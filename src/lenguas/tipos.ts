@@ -75,9 +75,9 @@ export interface EscrituraLengua {
   comillar(texto: string): string;
   /** Evita que un signo quede solo al principio de una línea. */
   pegarSignos(signos: string): string;
-  /** Si los títulos de las portadas de la biblioteca se escriben en vertical. */
   /** Si las palabras se separan con espacios: entonces dos elementos pegados nunca forman una palabra. */
   palabrasSeparadas?: boolean;
+  /** Si los títulos de las portadas de la biblioteca se escriben en vertical. */
   portadaVertical: boolean;
 }
 

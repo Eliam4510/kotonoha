@@ -384,9 +384,9 @@ function textoTamano(mb: number): string {
 }
 
 const INTENSIDADES: { id: Ajustes['whisperIntensidad']; nombre: string; ayuda: string }[] = [
-  { id: 'auto', nombre: tm('Automática'), ayuda: tm('Equilibra velocidad y fluidez, y acelera cuando te alejas. Un video de 30 minutos tarda unos 5.') },
-  { id: 'suave', nombre: tm('Suave'), ayuda: tm('La mínima carga, por si estás jugando o editando video. Un video de 30 minutos tarda unos 12.') },
-  { id: 'rapida', nombre: tm('Rápida'), ayuda: tm('Siempre a la máxima velocidad segura. Un video de 30 minutos tarda unos 4.') },
+  { id: 'auto', nombre: tm('Automática'), ayuda: tm('Equilibra velocidad y fluidez, y acelera cuando te alejas. Un video de 30 minutos tarda alrededor de uno con Haas-ja o Parakeet, y unos 5 con Whisper.') },
+  { id: 'suave', nombre: tm('Suave'), ayuda: tm('La mínima carga, por si estás jugando o editando video. Un video de 30 minutos tarda unos 3 con Haas-ja o Parakeet, y unos 12 con Whisper.') },
+  { id: 'rapida', nombre: tm('Rápida'), ayuda: tm('Siempre a la máxima velocidad segura. Un video de 30 minutos tarda menos de uno con Haas-ja o Parakeet, y unos 4 con Whisper.') },
 ];
 
 const ORDEN_INSTALAR = 'powershell -ExecutionPolicy Bypass -File herramientas\\ayudante\\instalar.ps1';
