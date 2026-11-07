@@ -146,7 +146,7 @@ Estado de cada función en la versión 0.5.1, con la forma en que se ha verifica
 | Función | Verificación |
 |---|---|
 | Subtítulos en inglés, con cada palabra analizada y los secundarios en el idioma de apoyo | Página imitada, y sesión real en YouTube |
-| Corrección de subtítulos automáticos y creación de inglés desde otro idioma | Página imitada |
+| Corrección de subtítulos automáticos, con las mayúsculas y la puntuación que faltan, y creación de inglés desde otro idioma | Página imitada, y sesión real en YouTube |
 | Pronunciación americana y británica en IPA, en la ficha y, si se pide, sobre cada palabra | Automática, con datos reales de Wiktionary |
 | Color por sílaba tónica: la primera, una del medio o la última | Automática |
 | Definiciones y traducciones de Wiktionary en español, alemán, chino, coreano y japonés, y definiciones en inglés | Automática, con datos reales |

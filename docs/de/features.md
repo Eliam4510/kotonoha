@@ -146,7 +146,7 @@ Stand jeder Funktion in Version 0.5.1 und die Art ihrer Überprüfung.
 | Funktion | Überprüfung |
 |---|---|
 | Englische Untertitel, mit jedem analysierten Wort und der Zweitspur in der Hilfssprache | Nachgeahmte Seite und echte Sitzung auf YouTube |
-| Korrektur automatischer Untertitel und Erstellen von Englisch aus einer anderen Sprache | Nachgeahmte Seite |
+| Korrektur automatischer Untertitel mit den fehlenden Großbuchstaben und Satzzeichen, und Erstellen von Englisch aus einer anderen Sprache | Nachgeahmte Seite und echte Sitzung auf YouTube |
 | Amerikanische und britische Aussprache in IPA, im Wortfenster und auf Wunsch über jedem Wort | Automatisch, mit echten Daten aus Wiktionary |
 | Farbe nach betonter Silbe: die erste, eine mittlere oder die letzte | Automatisch |
 | Definitionen und Übersetzungen aus Wiktionary auf Spanisch, Deutsch, Chinesisch, Koreanisch und Japanisch, dazu Definitionen auf Englisch | Automatisch, mit echten Daten |

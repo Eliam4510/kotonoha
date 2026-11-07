@@ -146,7 +146,7 @@ Status of each feature in version 0.5.1, along with how it has been verified.
 | Feature | Verification |
 |---|---|
 | English subtitles, with each word analyzed and the secondary track in the support language | Imitation page, and a real session on YouTube |
-| Correction of automatic subtitles and creation of English from another language | Imitation page |
+| Correction of automatic subtitles, with the missing capitals and punctuation, and creation of English from another language | Imitation page, and a real session on YouTube |
 | American and British pronunciation in IPA, in the word panel and, on request, over each word | Automated, with real Wiktionary data |
 | Color by stressed syllable: the first, a middle one or the last | Automated |
 | Wiktionary definitions and translations in Spanish, German, Chinese, Korean and Japanese, and definitions in English | Automated, with real data |
