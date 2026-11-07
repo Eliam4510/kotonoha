@@ -40,7 +40,7 @@ ruby { ruby-position: over; ruby-align: center; }
 .chip-gram {
   --c: var(--info);
   display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: var(--r-pill);
-  font-family: var(--letra-ja); font-weight: 700; font-size: 12.5px; line-height: 1; white-space: nowrap;
+  font-family: var(--letra-lengua); font-weight: 700; font-size: 12.5px; line-height: 1; white-space: nowrap;
   color: color-mix(in srgb, var(--c) 86%, var(--texto));
   background: color-mix(in srgb, var(--c) 14%, transparent);
   transition: transform 0.16s var(--resorte), background 0.15s;
@@ -90,11 +90,11 @@ button.chip-gram:active { transform: scale(0.96); }
 .esq-estados { width: 100%; height: 30px; }
 .ficha-titulo { display: flex; align-items: flex-start; gap: 10px; min-height: 52px; }
 .ficha-izq { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 14px; }
-.ficha-palabra { font-family: var(--letra-ja); font-size: 36px; font-weight: 900; line-height: 1.2; letter-spacing: 0.01em; min-width: 0; }
+.ficha-palabra { font-family: var(--letra-lengua); font-size: 36px; font-weight: 900; line-height: 1.2; letter-spacing: 0.01em; min-width: 0; }
 .ficha-palabra rt { font-size: 0.38em; font-weight: 700; letter-spacing: 0; color: var(--texto-2); }
 .ficha-tono { display: flex; gap: 10px; flex: none; margin-bottom: 1px; }
 .curva-acento { display: block; overflow: visible; }
-.curva-mora { font: 700 10.5px var(--letra-ja); fill: var(--texto-3); }
+.curva-mora { font: 700 10.5px var(--letra-lengua); fill: var(--texto-3); }
 .ficha-herr { display: flex; align-items: center; gap: 3px; flex: none; margin-right: -2px; }
 
 .etiqueta-frec { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; margin-right: 4px; border-radius: var(--r-pill); background: var(--superficie-3); font-size: 12px; font-weight: 700; color: var(--texto-2); white-space: nowrap; }
@@ -164,7 +164,7 @@ button.chip-gram:active { transform: scale(0.96); }
 .def-enviar:hover { background: var(--superficie-3); color: var(--hoja); }
 .ver-mas { margin: 2px 0 0 -6px; }
 .lista-compuestos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.lista-compuestos b { font-family: var(--letra-ja); font-weight: 700; font-size: 14.5px; }
+.lista-compuestos b { font-family: var(--letra-lengua); font-weight: 700; font-size: 14.5px; }
 .compuesto-def { font-size: 13px; color: var(--texto-2); line-height: 1.4; }
 .flexiones { display: flex; flex-wrap: wrap; gap: 5px; }
 .flexiones .chip { height: 26px; padding: 0 10px; cursor: default; font-weight: 600; }
@@ -174,12 +174,12 @@ button.chip-gram:active { transform: scale(0.96); }
 .trazos { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
 .trazos-lienzos { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .trazo-kanji { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11.5px; color: var(--texto-3); }
-.trazo-kanji b { font-size: 13px; color: var(--texto-2); font-family: var(--letra-ja); }
+.trazo-kanji b { font-size: 13px; color: var(--texto-2); font-family: var(--letra-lengua); }
 .trazo-kanji svg, .trazo-vacio, .trazo-esqueleto { width: 104px; height: 104px; border-radius: 14px; }
 .trazos-lienzos.grandes svg, .trazos-lienzos.grandes .trazo-vacio { width: 148px; height: 148px; }
 .trazo-kanji svg { background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); transition: box-shadow 0.2s; }
 .trazo-kanji.activo svg { box-shadow: inset 0 0 0 1.5px var(--hoja); }
-.trazo-vacio { display: grid; place-items: center; font-family: var(--letra-ja); font-size: 52px; color: var(--texto-3); background: var(--superficie-2); }
+.trazo-vacio { display: grid; place-items: center; font-family: var(--letra-lengua); font-size: 52px; color: var(--texto-3); background: var(--superficie-2); }
 .trazo-guia { fill: none; stroke: var(--borde-2); stroke-width: 0.6; stroke-dasharray: 2 2.5; }
 .trazo-fondo, .trazo-hecho, .trazo-dibujando { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
 .trazo-fondo { stroke: var(--texto-3); opacity: 0.2; }

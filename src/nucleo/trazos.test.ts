@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { archivoTrazos, caracteresConTrazos, hechosPorCaracter, leerTrazos } from './trazos';
+import { hechosPorCaracter, leerTrazos } from './trazos';
 
 const SVG = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="109" height="109" viewBox="0 0 109 109" xmlns:kvg="https://kanjivg.tagaini.net/">
@@ -14,39 +14,6 @@ const SVG = `<?xml version="1.0" encoding="UTF-8"?>
   <text transform="matrix(1 0 0 1 57.75 48.50)">2</text>
 </g>
 </svg>`;
-
-describe('archivoTrazos', () => {
-  it('usa el punto de código con cinco cifras', () => {
-    expect(archivoTrazos('漢')).toBe('06f22.svg');
-    expect(archivoTrazos('一')).toBe('04e00.svg');
-    expect(archivoTrazos('あ')).toBe('03042.svg');
-  });
-
-  it('también con los caracteres fuera del plano básico', () => {
-    expect(archivoTrazos('𠮟')).toBe('20b9f.svg');
-  });
-});
-
-describe('caracteresConTrazos', () => {
-  it('enseña los kanji de la palabra, sin repetir', () => {
-    expect(caracteresConTrazos('食べ物')).toEqual(['食', '物']);
-    expect(caracteresConTrazos('人人')).toEqual(['人']);
-  });
-
-  it('una palabra sin kanji enseña su kana', () => {
-    expect(caracteresConTrazos('ねこ')).toEqual(['ね', 'こ']);
-    expect(caracteresConTrazos('テスト')).toEqual(['テ', 'ス', 'ト']);
-  });
-
-  it('el alargamiento y la marca de repetición no tienen trazos propios', () => {
-    expect(caracteresConTrazos('コーヒー')).toEqual(['コ', 'ヒ']);
-    expect(caracteresConTrazos('時々')).toEqual(['時']);
-  });
-
-  it('sin japonés no hay nada que enseñar', () => {
-    expect(caracteresConTrazos('abc')).toEqual([]);
-  });
-});
 
 describe('leerTrazos', () => {
   it('ordena los trazos por su número, no por su posición en el archivo', () => {

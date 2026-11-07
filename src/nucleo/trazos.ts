@@ -1,23 +1,10 @@
-// Orden de los trazos: qué archivo de KanjiVG corresponde a cada carácter y qué hay dentro de él.
+// Orden de los trazos: qué hay dentro de un archivo de trazos. De dónde sale cada carácter lo dice su lengua.
 
 export interface DatosTrazos {
   /** Un trazado SVG por trazo, en el orden en que se escriben, sobre un lienzo de 109 × 109. */
   trazos: string[];
   /** Dónde va el número de cada trazo. */
   numeros: { x: number; y: number }[];
-}
-
-const ES_KANJI = /[㐀-鿿豈-﫿\u{20000}-\u{2ffff}]/u;
-const ES_KANA = /[ぁ-ゖァ-ヺ]/;
-
-/** El nombre del archivo: el punto de código en hexadecimal, con cinco cifras. */
-export const archivoTrazos = (caracter: string) => `${caracter.codePointAt(0)!.toString(16).padStart(5, '0')}.svg`;
-
-/** Qué caracteres de una palabra se enseñan: sus kanji, sin repetir. Una palabra solo en kana enseña su kana. */
-export function caracteresConTrazos(palabra: string): string[] {
-  const unicos = [...new Set(palabra)];
-  const kanji = unicos.filter((c) => ES_KANJI.test(c));
-  return kanji.length ? kanji : unicos.filter((c) => ES_KANA.test(c));
 }
 
 /** Solo órdenes de trazado y números: lo que viene de fuera nunca entra en la página tal cual. */

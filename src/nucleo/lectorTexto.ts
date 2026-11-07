@@ -1,49 +1,6 @@
 // Lo que el lector de páginas necesita saber del texto, sin tocar el DOM: así se puede probar sin navegador.
 
-import type { SegmentoFurigana } from './tokens';
-
-const KANA = /[぀-ヿｦ-ﾟ]/;
-const KANA_GLOBAL = /[぀-ヿｦ-ﾟ]/g;
-const KANJI = /[㐀-鿿豈-﫿]/;
-
-/** Lenguas que también se escriben con ideogramas: ahí, unos ideogramas sueltos no son japonés. */
-const LENGUAS_CON_IDEOGRAMAS = /^(zh|cmn|yue|wuu|hak|nan|lzh|ko|vi)\b/i;
-
-/**
- * Si merece la pena analizar un texto. Los ideogramas solos también podrían ser chino o coreano, y entonces decide
- * el idioma que declare la página. Un artículo en español sobre Japón sí trae japonés: lo delata el resto de su kana.
- */
-export function esTextoJapones(texto: string, idiomaDeclarado: string | undefined, paginaConKana: boolean): boolean {
-  const otraLengua = !!idiomaDeclarado && LENGUAS_CON_IDEOGRAMAS.test(idiomaDeclarado);
-  if (KANA.test(texto)) {
-    // En chino se usa mucho の como adorno: una sola no convierte el texto en japonés.
-    return !otraLengua || (texto.replace(/の/g, '').match(KANA_GLOBAL)?.length ?? 0) >= 2;
-  }
-  if (!KANJI.test(texto)) return false;
-  if (idiomaDeclarado && /^ja\b/i.test(idiomaDeclarado)) return true;
-  if (otraLengua) return false;
-  return paginaConKana;
-}
-
-/**
- * Si una página tiene japonés de verdad, según cuánto kana lleva frente a sus ideogramas. Un の o una katakana sueltos
- * en una página en chino sin idioma declarado no bastan para tratar como japoneses todos sus ideogramas.
- */
-export function proporcionDeKana(kana: number, kanji: number): boolean {
-  return kana >= 8 && kana / (kana + kanji) >= 0.1;
-}
-
-/** Cuenta kana e ideogramas de un texto. */
-export function contarEscrituras(texto: string): { kana: number; kanji: number } {
-  let kana = 0;
-  let kanji = 0;
-  for (let i = 0; i < texto.length; i++) {
-    const c = texto.charCodeAt(i);
-    if ((c >= 0x3040 && c <= 0x30ff) || (c >= 0xff66 && c <= 0xff9f)) kana++;
-    else if ((c >= 0x3400 && c <= 0x9fff) || (c >= 0xf900 && c <= 0xfaff)) kanji++;
-  }
-  return { kana, kanji };
-}
+import type { SegmentoLectura, SignosFrase } from '../lenguas/tipos';
 
 export interface TramoTexto {
   inicio: number;
@@ -71,17 +28,14 @@ export function alinearSuperficies(texto: string, superficies: string[]): (Tramo
   });
 }
 
-const FIN_DE_FRASE = /[。！？!?．\n]/;
-const CIERRES = /[」』）)】〉》"'’”]/;
-
 /** La frase que contiene un tramo: de un final de frase al siguiente, con sus comillas de cierre. */
-export function fraseAlrededor(texto: string, inicio: number, fin: number): TramoTexto & { frase: string } {
+export function fraseAlrededor(texto: string, inicio: number, fin: number, signos: SignosFrase): TramoTexto & { frase: string } {
   let a = inicio;
-  while (a > 0 && !FIN_DE_FRASE.test(texto[a - 1])) a--;
+  while (a > 0 && !signos.fin.test(texto[a - 1])) a--;
   let b = fin;
-  while (b < texto.length && !FIN_DE_FRASE.test(texto[b])) b++;
+  while (b < texto.length && !signos.fin.test(texto[b])) b++;
   if (b < texto.length && texto[b] !== '\n') b++;
-  while (b < texto.length && CIERRES.test(texto[b])) b++;
+  while (b < texto.length && signos.cierres.test(texto[b])) b++;
   const crudo = texto.slice(a, b);
   const izquierda = crudo.length - crudo.trimStart().length;
   const frase = crudo.trim();
@@ -89,11 +43,11 @@ export function fraseAlrededor(texto: string, inicio: number, fin: number): Tram
 }
 
 /** Divide un texto en frases, para dar a Claude las que rodean a la consultada. */
-export function partirEnFrases(texto: string): string[] {
+export function partirEnFrases(texto: string, signos: SignosFrase): string[] {
   const salida: string[] = [];
   let a = 0;
   while (a < texto.length) {
-    const t = fraseAlrededor(texto, a, a);
+    const t = fraseAlrededor(texto, a, a, signos);
     if (t.frase) salida.push(t.frase);
     let b = Math.max(t.fin, a + 1);
     while (b < texto.length && /\s/.test(texto[b])) b++;
@@ -103,7 +57,7 @@ export function partirEnFrases(texto: string): string[] {
 }
 
 /** Dónde va cada lectura dentro de una palabra: solo sobre los kanji. Los desplazamientos son respecto a la palabra. */
-export function tramosConLectura(segmentos: SegmentoFurigana[]): (TramoTexto & { lectura: string })[] {
+export function tramosConLectura(segmentos: SegmentoLectura[]): (TramoTexto & { lectura: string })[] {
   const salida: (TramoTexto & { lectura: string })[] = [];
   let pos = 0;
   for (const s of segmentos) {

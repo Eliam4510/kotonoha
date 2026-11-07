@@ -22,7 +22,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Version-0.3.0-A9E45B?style=flat-square" alt="Version 0.3.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Kontinuierliche Integration"></a>
-  <img src="https://img.shields.io/badge/Unit--Tests-274-0ca30c?style=flat-square" alt="274 Unit-Tests">
+  <img src="https://img.shields.io/badge/Unit--Tests-306-0ca30c?style=flat-square" alt="306 Unit-Tests">
   <img src="https://img.shields.io/badge/Oberfl%C3%A4che-6%20Sprachen-8FCBFF?style=flat-square" alt="Oberfläche in 6 Sprachen">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 bis N1">
 </p>

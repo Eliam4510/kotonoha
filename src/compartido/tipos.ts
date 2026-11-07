@@ -1,7 +1,6 @@
 // Tipos compartidos entre el motor, el content script y la ventana de la app.
 
-import type { PatronAcento, SegmentoFurigana } from '../nucleo/tokens';
-import type { PuntoGramatica } from '../nucleo/gramatica';
+import type { PuntoGramatica, SegmentoLectura } from '../lenguas/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 
 export type EstadoPalabra = 'desconocida' | 'aprendiendo' | 'conocida' | 'ignorada';
@@ -18,10 +17,10 @@ export interface PalabraToken {
   esPalabra: boolean;
   esGramatica: boolean;
   flexion: string[];
-  furigana: SegmentoFurigana[];
+  furigana: SegmentoLectura[];
   estado: EstadoPalabra;
   rastreada: boolean;
-  patron?: PatronAcento;
+  patron?: string;
   acentos?: number[];
   rango?: number; // Posición en la lista de frecuencia
   glosa?: string; // Traducción corta para mostrar debajo de la palabra
@@ -72,7 +71,7 @@ export interface ResultadoBusqueda {
   estado: EstadoPalabra;
   rastreada: boolean;
   acentos: number[];
-  patron?: PatronAcento;
+  patron?: string;
   frecuencias: EtiquetaFrecuencia[];
   entradas: EntradaDiccionario[];
 }

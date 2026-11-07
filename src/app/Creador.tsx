@@ -10,6 +10,7 @@ import { Icono, type NombreIcono } from '../ui/iconos';
 import { creadorAbierto, creadorFijado, estadoAnki, guardarPreferencia, refrescarAnki, useMedia } from './estadoApp';
 import { Mensaje } from './Piezas';
 import { tr } from '../compartido/i18n';
+import { lengua } from '../ui/lengua';
 
 /** Acción de un campo. En glicina solo si la hace Claude. */
 function AccionCampo({ texto, icono, alPulsar, ocupado, ia }: { texto: string; icono: NombreIcono; alPulsar: () => void; ocupado: boolean; ia?: boolean }) {
@@ -43,7 +44,7 @@ function Audios({ lista, alQuitar, vacio }: { lista: MedioTarjeta[]; alQuitar: (
  * saltos de línea de las definiciones. Así se ven como quedarán en la tarjeta, no como etiquetas.
  * El DOM solo se reescribe si el valor cambia desde fuera, para no mover el cursor mientras se escribe.
  */
-function CampoRico({ id, valor, alCambiar, placeholder, ja, etiqueta }: { id: string; valor: string; alCambiar: (v: string) => void; placeholder: string; ja?: boolean; etiqueta: string }) {
+function CampoRico({ id, valor, alCambiar, placeholder, enLengua, etiqueta }: { id: string; valor: string; alCambiar: (v: string) => void; placeholder: string; enLengua?: boolean; etiqueta: string }) {
   const caja = useRef<HTMLDivElement>(null);
   const propio = useRef(valor);
   const ultimaEscritura = useRef(0);
@@ -61,8 +62,8 @@ function CampoRico({ id, valor, alCambiar, placeholder, ja, etiqueta }: { id: st
     <div
       id={id}
       ref={caja}
-      class={`campo ap-campo-rico ${ja ? 'ap-campo-ja' : ''}`}
-      lang={ja ? 'ja' : undefined}
+      class={`campo ap-campo-rico ${enLengua ? 'ap-campo-lengua' : ''}`}
+      lang={enLengua ? lengua.value.id : undefined}
       contentEditable={'plaintext-only' as unknown as boolean}
       role="textbox"
       aria-multiline="true"
@@ -254,11 +255,11 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
             <div class="ap-dos-campos">
               <div class="ap-campo">
                 <label for="k-palabra">{tr('Palabra')}</label>
-                <input id="k-palabra" class="campo ap-campo-ja" lang="ja" value={b.palabra} placeholder="食べる" onInput={(e) => set({ palabra: e.currentTarget.value })} />
+                <input id="k-palabra" class="campo ap-campo-lengua" lang={lengua.value.id} value={b.palabra} placeholder={lengua.value.ejemplos.palabra} onInput={(e) => set({ palabra: e.currentTarget.value })} />
               </div>
               <div class="ap-campo">
                 <label for="k-lectura">{tr('Lectura')}</label>
-                <input id="k-lectura" class="campo ap-campo-ja" lang="ja" value={b.lectura} placeholder="たべる" onInput={(e) => set({ lectura: e.currentTarget.value })} />
+                <input id="k-lectura" class="campo ap-campo-lengua" lang={lengua.value.id} value={b.lectura} placeholder={lengua.value.ejemplos.lectura} onInput={(e) => set({ lectura: e.currentTarget.value })} />
               </div>
             </div>
             <div class="ap-campo">
@@ -276,7 +277,7 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
                 <label for="k-frase">{tr('Frase')}</label>
                 <AccionCampo ia texto={tr('Crear con Claude')} icono="ia" ocupado={!!ocupado.frase} alPulsar={crearFrase} />
               </div>
-              <CampoRico id="k-frase" etiqueta={tr('Frase')} ja valor={b.frase} placeholder={tr('La frase donde aparece')} alCambiar={(v) => set({ frase: v })} />
+              <CampoRico id="k-frase" etiqueta={tr('Frase')} enLengua valor={b.frase} placeholder={tr('La frase donde aparece')} alCambiar={(v) => set({ frase: v })} />
             </div>
             <div class="ap-campo">
               <div class="ap-campo-etq">
@@ -336,7 +337,7 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
                 <label for="k-ej">{tr('Frases de ejemplo')}</label>
                 <AccionCampo texto={tr('De lo que has visto')} icono="frases" ocupado={!!ocupado.ejemplos} alPulsar={buscarEjemplos} />
               </div>
-              <CampoRico id="k-ej" etiqueta={tr('Frases de ejemplo')} ja valor={b.ejemplos} placeholder={tr('Ejemplos adicionales')} alCambiar={(v) => set({ ejemplos: v })} />
+              <CampoRico id="k-ej" etiqueta={tr('Frases de ejemplo')} enLengua valor={b.ejemplos} placeholder={tr('Ejemplos adicionales')} alCambiar={(v) => set({ ejemplos: v })} />
             </div>
             <div class="ap-campo">
               <div class="ap-campo-etq">

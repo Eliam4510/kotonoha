@@ -14,11 +14,10 @@ import { bcp47Actual, fijarIdioma, idiomaActual, tr } from '../compartido/i18n';
 import { fondo, motor } from '../compartido/rpc';
 import { guardarTextoLector, leerTextoLector } from '../compartido/textoLector';
 import overlay from '../contenido/overlay.css';
-import { esTextoJapones } from '../nucleo/lectorTexto';
 import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
 import { Icono, Marca } from '../ui/iconos';
-import { formatoLectura } from '../ui/lecturas';
+import { aplicarLengua, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { useTema } from '../ui/tema';
 
@@ -44,7 +43,7 @@ function useSeguirPortapapeles(activo: boolean) {
       }
       ultimo = copiado;
       const nuevo = copiado.trim();
-      if (!nuevo || !esTextoJapones(nuevo, undefined, true)) return;
+      if (!nuevo || !lengua.value.escritura.esDeLaLengua(nuevo, undefined, true)) return;
       const actual = await leerTextoLector();
       await guardarTextoLector(actual.trim() ? `${actual.trimEnd()}\n\n${nuevo}` : nuevo);
     };
@@ -62,7 +61,7 @@ function LectorWeb() {
   const [cargados, fijarCargados] = useState(false);
   const [seguir, fijarSeguir] = useState(() => leerPreferencia('seguirPortapapeles', false));
   const tema = useTema(a.tema);
-  formatoLectura.value = a.formatoLectura;
+  aplicarLengua(a);
   useSeguirPortapapeles(seguir);
 
   useEffect(() => {
@@ -92,7 +91,7 @@ function LectorWeb() {
       <header class="ap-web-cab">
         <Marca t={24} />
         <div class="ap-web-acciones">
-          <label class="ap-web-seguir" data-tip={tr('Añade aquí el japonés que copies en cualquier sitio, mientras esta pestaña esté a la vista.')}>
+          <label class="ap-web-seguir" data-tip={tr(lengua.value.textos.seguirPortapapeles)}>
             <span>{tr('Seguir el portapapeles')}</span>
             <Interruptor etiqueta={tr('Seguir el portapapeles')} on={seguir} alCambiar={(v) => {
               fijarSeguir(v);

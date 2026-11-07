@@ -1,5 +1,5 @@
 import type { IdPaleta } from '../ui/paletas';
-import type { FormatoLectura } from '../nucleo/tokens';
+import { PAQUETE_INICIAL } from '../lenguas';
 import { type PreferenciaIdioma, tm } from './i18n';
 // Ajustes del usuario, guardados en chrome.storage.local.
 
@@ -105,7 +105,7 @@ export interface Ajustes {
   /** Ya vio o saltó el asistente de la primera vez. */
   bienvenidaVista: boolean;
   /** Cómo se escriben las lecturas: kana, o rōmaji para quien aún no lo lee. */
-  formatoLectura: FormatoLectura;
+  formatoLectura: string;
   /** Colores de los estados de una palabra. */
   paleta: IdPaleta;
   // Lector de páginas
@@ -249,7 +249,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   creditoMensual: 0,
   limiteGasto: 0,
   bienvenidaVista: false,
-  formatoLectura: 'hiragana',
+  formatoLectura: PAQUETE_INICIAL.lectura.formatoInicial,
   paleta: 'predeterminada',
   lectorActivo: true,
   lectorColor: true,
@@ -288,7 +288,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   quitarAcotaciones: false,
   desfasePausaMs: 0,
 
-  idiomaObjetivo: 'ja',
+  idiomaObjetivo: PAQUETE_INICIAL.id,
   idiomaSecundario: 'es',
   ocultarObjetivo: false,
   ocultarSecundario: false,
@@ -370,7 +370,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   },
   respaldoSeguridad: true,
   usarGuion: false,
-  nivel: 'JLPT N3',
+  nivel: PAQUETE_INICIAL.nivelInicial,
   idiomaExplicaciones: tm('español'),
   idiomaTraduccion: tm('español'),
   prompts: {},
@@ -380,7 +380,7 @@ export const AJUSTES_INICIALES: Ajustes = {
 
   azureClave: '',
   azureRegion: '',
-  vocesFrase: ['ja-JP-MasaruMultilingualNeural', 'ja-JP-NanamiNeural'],
+  vocesFrase: PAQUETE_INICIAL.vocesIniciales,
 
   idiomaInterfaz: 'auto',
   estiloFrecuencia: 'numero',

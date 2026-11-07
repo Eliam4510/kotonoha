@@ -1,23 +1,35 @@
-import { describe, expect, it } from 'vitest';
+import { REGLAS_TRANSCRIPCION } from '../lenguas/japones/transcripcion';
+import {
+  describe,
+  expect,
+  it } from 'vitest';
 import {
   AcumuladorAudio,
   colapsarRepeticiones,
   elegirCorte,
-  esAlucinacion,
+  esAlucinacion as esAlucinacionCon,
   esBucle,
   esSilencio,
-  esTextoRecuperable,
+  esTextoRecuperable as esTextoRecuperableCon,
   FRECUENCIA,
   fusionarLineas,
-  huecosSinTexto,
+  huecosSinTexto as huecosSinTextoCon,
   ocupacionObjetivo,
-  partirTexto,
+  partirTexto as partirTextoCon,
   pausaTrasTrozo,
   segundosRestantes,
-  segmentosALineas,
+  segmentosALineas as segmentosALineasCon,
   ventanasDeHueco,
   videoEn,
+  type SegmentoWhisper,
+  type TramoTiempo,
 } from './transcripcion';
+
+const esAlucinacion = (t: string) => esAlucinacionCon(t, REGLAS_TRANSCRIPCION);
+const partirTexto = (t: string) => partirTextoCon(t, REGLAS_TRANSCRIPCION);
+const esTextoRecuperable = (t: string) => esTextoRecuperableCon(t, REGLAS_TRANSCRIPCION);
+const huecosSinTexto = (s: SegmentoWhisper[], a: number, b: number) => huecosSinTextoCon(s, a, b, REGLAS_TRANSCRIPCION);
+const segmentosALineas = (s: SegmentoWhisper[], m: TramoTiempo[], d: number, i: number) => segmentosALineasCon(s, m, d, i, REGLAS_TRANSCRIPCION);
 
 const tono = (segundos: number, amplitud = 0.2) => {
   const a = new Float32Array(Math.floor(segundos * FRECUENCIA));

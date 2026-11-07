@@ -9,11 +9,13 @@ import type { Linea } from '../nucleo/subtitulos';
 import * as analisis from './analisis';
 import * as anki from './anki';
 import { consultarAyudante } from './ayudante';
-import { db } from './db';
+import { baseDe, baseGeneral, db } from './db';
 import * as dics from './diccionarios';
 import * as grabacion from './grabacion';
 import * as ia from './ia';
-import { PROMPT_A_JAPONES, PROMPT_SUBTITULOS, rellenar } from './prompts';
+import { fijarLengua, lengua, motorLengua } from './lengua';
+import { rellenar } from './prompts';
+import { paqueteDe } from '../lenguas';
 import * as medios from './medios';
 import * as memoria from './memoria';
 import * as whisper from './whisper';
@@ -26,6 +28,7 @@ async function refrescarAjustes(): Promise<Ajustes> {
   ajustes = completarAjustes((await fondo.ajustesCompletos()) as Partial<Ajustes>);
   anki.fijarPuerto(ajustes.ankiPuerto);
   await fijarIdioma(ajustes.idiomaInterfaz);
+  if (fijarLengua(ajustes.idiomaObjetivo)) analisis.olvidarLengua();
   return ajustes;
 }
 
@@ -43,27 +46,21 @@ async function arrancar() {
   const urlBase = await fondo.urlBaseIA().catch(() => undefined);
   if (clave) ia.fijarClave(clave, urlBase ?? undefined);
   await aj();
-  analisis.cargarTokenizador().catch((e) => console.error('Tokenizador:', e));
+  analisis.cargarAnalizador().catch((e) => console.error('Analizador:', e));
   analisis.recargarTerminos().catch((e) => console.error('Términos:', e));
-  repararFrecuencias().catch((e) => console.warn('Frecuencias:', e));
+  repararDiccionarios().catch((e) => console.warn('Diccionarios:', e));
   ia.limpiarCache().catch(() => {});
 }
 
 const ESPERA_REPARACION_MS = 120000;
 
-/**
- * Las primeras versiones guardaban a veces el rango de la forma en kana, mucho peor que el real:
- * 食べる salía con 13390 en vez de 184, y eso falseaba comprensión y frases recomendadas.
- * Si se detecta esa copia antigua, se vuelve a instalar sola en segundo plano.
- */
-async function repararFrecuencias() {
-  if (!(await db.diccionarios.get('jpdb-frecuencia'))) return;
-  const muestra = await db.frecuencias.get(['jpdb-frecuencia', '食べる', 'たべる']);
-  // Si falta, es que una reparación anterior se cortó a medias: hay que terminarla.
-  if (muestra && muestra.rango < 5000) return;
+/** Si una versión anterior dejó mal un diccionario, se vuelve a instalar solo en segundo plano. */
+async function repararDiccionarios() {
+  const danados = (await motorLengua().diccionariosPorReparar?.(db)) ?? [];
+  if (!danados.length) return;
   // Reinstalar ocupa al motor un buen rato: primero se atiende lo que estés viendo.
   await new Promise((r) => setTimeout(r, ESPERA_REPARACION_MS));
-  await dics.instalarDesdeBiblioteca('jpdb-frecuencia');
+  for (const id of danados) await dics.instalarDesdeBiblioteca(id);
   await analisis.recargarTerminos();
   await fondo.difundir({ tipo: 'diccionarios' });
 }
@@ -83,7 +80,7 @@ const api: ApiMotor = {
   },
   async estado() {
     return {
-      tokenizadorListo: analisis.tokenizadorListo(),
+      tokenizadorListo: analisis.analizadorListo(),
       diccionarios: await dics.listaDiccionarios(),
       terminosCargados: analisis.totalTerminos(),
       claveIA: ia.hayClave(),
@@ -177,7 +174,7 @@ const api: ApiMotor = {
     const lista = await dics.listaDiccionarios();
     const dicFrec = lista.find((d) => d.tipo === 'frecuencia')?.id;
     const conRango: FilaPalabra[] = filas.map((x) => ({ clave: x.clave, lema: x.lema, lectura: x.lectura, estado: x.estado, rastreada: x.rastreada === 1, actualizada: x.actualizada }));
-    if (f.orden === 'alfabetico') conRango.sort((a, b) => a.lectura.localeCompare(b.lectura, 'ja'));
+    if (f.orden === 'alfabetico') conRango.sort((a, b) => a.lectura.localeCompare(b.lectura, lengua().id));
     else if (f.orden !== 'frecuencia') conRango.sort((a, b) => b.actualizada - a.actualizada);
     const total = conRango.length;
     const pagina = f.orden === 'frecuencia' ? conRango : conRango.slice(f.desde ?? 0, (f.desde ?? 0) + (f.limite ?? 200));
@@ -253,7 +250,7 @@ const api: ApiMotor = {
     return n;
   },
 
-  fuentesDiccionario: async () => dics.FUENTES,
+  fuentesDiccionario: async () => motorLengua().diccionarios,
   async instalarDiccionario(id) {
     await dics.instalarDesdeBiblioteca(id);
     await analisis.recargarTerminos();
@@ -311,7 +308,7 @@ const api: ApiMotor = {
   terminarClip: () => grabacion.terminarClip(),
   recortarImagen: (u, r) => grabacion.recortarImagen(u, r),
 
-  audiosPalabra: (l, r) => medios.audiosPalabra(l, r),
+  audiosPalabra: (l, r) => motorLengua().audios(l, r),
   async vozFrase(t, v) {
     return medios.vozAzure(await aj(), t, v);
   },
@@ -333,7 +330,7 @@ const api: ApiMotor = {
     return ia.sentidoGuardado(await aj(), c, definiciones);
   },
   async consumo(desde) {
-    return db.consumo.where('t').aboveOrEqual(desde).toArray();
+    return baseGeneral.consumo.where('t').aboveOrEqual(desde).toArray();
   },
   async sentidoEnContexto(c, definiciones, recargar) {
     return ia.sentidoEnContexto(await aj(), c, definiciones, recargar);
@@ -390,23 +387,26 @@ const api: ApiMotor = {
   async exportarDatos() {
     return JSON.stringify({
       version: 1,
+      lengua: lengua().id,
       palabras: await db.palabras.toArray(),
       biblioteca: await db.biblioteca.toArray(),
       memoria: await db.memoria.toArray(),
       // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
       generados: await db.generados.toArray(),
       correcciones: await db.correcciones.toArray(),
-      consumo: await db.consumo.toArray(),
+      consumo: await baseGeneral.consumo.toArray(),
     });
   },
   async importarDatos(json) {
-    const d = JSON.parse(json) as { palabras?: never[]; biblioteca?: never[]; memoria?: never[]; generados?: never[]; correcciones?: never[]; consumo?: never[] };
-    if (d.palabras) await db.palabras.bulkPut(d.palabras);
-    if (d.biblioteca) await db.biblioteca.bulkPut(d.biblioteca);
-    if (d.memoria) await db.memoria.bulkPut(d.memoria);
-    if (d.generados) await db.generados.bulkPut(d.generados);
-    if (d.correcciones) await db.correcciones.bulkPut(d.correcciones);
-    if (d.consumo) await db.consumo.bulkPut(d.consumo);
+    const d = JSON.parse(json) as { lengua?: string; palabras?: never[]; biblioteca?: never[]; memoria?: never[]; generados?: never[]; correcciones?: never[]; consumo?: never[] };
+    // Las copias de antes de haber más lenguas no dicen de cuál son: todas eran de japonés.
+    const base = baseDe(paqueteDe(d.lengua ?? 'ja').id);
+    if (d.palabras) await base.palabras.bulkPut(d.palabras);
+    if (d.biblioteca) await base.biblioteca.bulkPut(d.biblioteca);
+    if (d.memoria) await base.memoria.bulkPut(d.memoria);
+    if (d.generados) await base.generados.bulkPut(d.generados);
+    if (d.correcciones) await base.correcciones.bulkPut(d.correcciones);
+    if (d.consumo) await baseGeneral.consumo.bulkPut(d.consumo);
     await fondo.difundir({ tipo: 'palabrasRecargar' });
   },
   async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen) {
@@ -445,9 +445,10 @@ atenderFlujos({
   historia: async (emitir, senal, tema: string, palabras: string) => ia.flujos.historia(await aj(), tema, palabras, emitir, senal),
   // Los subtítulos emiten el avance como texto y devuelven el resultado final en JSON.
   // Traducción en cualquier dirección: cada lote llega como una línea de JSON, empezando por lo que estás viendo.
-  traducirSubtitulos: async (emitir, senal, lineas: Linea[], titulo?: string, indice = -1, destino?: 'japones') => {
+  traducirSubtitulos: async (emitir, senal, lineas: Linea[], titulo?: string, indice = -1, destino?: 'lengua') => {
     const a = await aj();
-    const sistema = destino === 'japones' ? PROMPT_A_JAPONES : rellenar(PROMPT_SUBTITULOS, a, { idioma: a.idiomaTraduccion });
+    const { aLengua, subtitulos } = motorLengua().prompts;
+    const sistema = destino === 'lengua' ? aLengua : rellenar(subtitulos, a, { idioma: a.idiomaTraduccion });
     await ia.traducirSubtitulos(a, lineas, titulo, sistema, indice, (parte, hechas, total) => emitir(`${JSON.stringify({ hechas, total, parte })}\n`), senal);
     return 'ok';
   },

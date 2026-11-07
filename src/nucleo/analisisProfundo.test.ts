@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { aplicarLecturas } from './analisisProfundo';
+import { JAPONES } from '../lenguas/japones';
+import { alinearFurigana } from '../lenguas/japones/tokens';
+import type { LecturaCorregida } from './analisisProfundo';
+import { aplicarLecturas as aplicarCon } from './analisisProfundo';
+import type { TokenUnido } from '../lenguas/tipos';
 import { aplicarSincronia, sincroniaDesdePuntos } from './sincronia';
-import { alinearFurigana, type TokenUnido } from './tokens';
+
+const aplicarLecturas = (tokens: TokenUnido[], correcciones: LecturaCorregida[]) => aplicarCon(tokens, correcciones, JAPONES.lectura);
 
 const tk = (superficie: string, lema = superficie, lectura = superficie, extra: Partial<TokenUnido> = {}): TokenUnido => ({
   superficie,

@@ -29,6 +29,7 @@ import {
 } from '../nucleo/transcripcion';
 import { abrirDescarga } from './ayudante';
 import { escucharPcm } from './grabacion';
+import { motorLengua } from './lengua';
 
 export type EventoWhisper =
   | { tipo: 'descarga'; porcentaje: number; cargadoMb: number; totalMb: number }
@@ -42,6 +43,8 @@ export type EventoWhisper =
   | { tipo: 'lineas'; lineas: Linea[] };
 
 type Emitir = (e: EventoWhisper) => void;
+
+const reglas = () => motorLengua().transcripcion.reglas;
 
 // ---------- Trabajador ----------
 
@@ -151,7 +154,7 @@ function transcribirTrozo(pcm: Float32Array): Promise<SegmentoWhisper[]> {
         mal(e);
       },
     });
-    t.postMessage({ tipo: 'transcribir', id, pcm, idioma: 'japanese' }, [pcm.buffer]);
+    t.postMessage({ tipo: 'transcribir', id, pcm, idioma: motorLengua().transcripcion.idioma }, [pcm.buffer]);
   });
 }
 
@@ -221,29 +224,29 @@ async function procesarTrozo(trozo: TrozoAudio, idModelo: ModeloWhisper, emitir:
   /** El decodificador se atasca con este audio: con ventanas más cortas suele salir adelante. */
   const porVentanas = async (h: Hueco) => {
     const salida: SegmentoWhisper[] = [];
-    for (const v of ventanasDeHueco(h)) salida.push(...(await pasada(v)).filter((s) => esTextoRecuperable(s.texto)));
+    for (const v of ventanasDeHueco(h)) salida.push(...(await pasada(v)).filter((s) => esTextoRecuperable(s.texto, reglas())));
     return salida;
   };
 
   const recuperar = async (h: Hueco, intento = 0): Promise<SegmentoWhisper[]> => {
     const crudos = await pasada(h);
     if (crudos.some((s) => esBucle(s.texto))) return porVentanas(h);
-    const validos = crudos.filter((s) => esTextoRecuperable(s.texto));
+    const validos = crudos.filter((s) => esTextoRecuperable(s.texto, reglas()));
     // Si no sale nada, es música: insistir solo traería invenciones.
     if (!validos.length || intento > 0) return validos;
-    for (const resto of huecosSinTexto(validos, h.desde, h.hasta)) validos.push(...(await recuperar(resto, intento + 1)));
+    for (const resto of huecosSinTexto(validos, h.desde, h.hasta, reglas())) validos.push(...(await recuperar(resto, intento + 1)));
     return validos;
   };
 
-  const segmentos = (await pasada({ desde: 0, hasta: duracion })).filter((s) => !esBucle(s.texto) && !esAlucinacion(s.texto));
-  for (const h of huecosSinTexto(segmentos, 0, duracion)) {
+  const segmentos = (await pasada({ desde: 0, hasta: duracion })).filter((s) => !esBucle(s.texto) && !esAlucinacion(s.texto, reglas()));
+  for (const h of huecosSinTexto(segmentos, 0, duracion, reglas())) {
     if (senal.aborted) break;
     // Si faltó todo el trozo, repetir la misma ventana daría lo mismo: se prueba con otras más cortas.
     const todo = h.hasta - h.desde >= duracion - 1;
     segmentos.push(...(await (todo ? porVentanas(h) : recuperar(h))));
   }
   segmentos.sort((a, b) => a.inicio - b.inicio);
-  const lineas = segmentosALineas(segmentos, trozo.mapa, duracion, siguienteId);
+  const lineas = segmentosALineas(segmentos, trozo.mapa, duracion, siguienteId, reglas());
   siguienteId += lineas.length;
   return lineas;
 }

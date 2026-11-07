@@ -1,7 +1,7 @@
-// Índice del texto de la página: qué bloques tienen japonés y dónde está cada carácter. Solo lee el DOM, nunca lo cambia.
+// Índice del texto de la página: qué bloques están en la lengua que se estudia y dónde está cada carácter. Solo lee el DOM, nunca lo cambia.
 
 import type { PalabraToken } from '../../compartido/tipos';
-import { contarEscrituras, esTextoJapones, proporcionDeKana } from '../../nucleo/lectorTexto';
+import { lengua } from '../../ui/lengua';
 
 /** Trozo de un nodo de texto dentro del texto del bloque. */
 export interface TramoNodo {
@@ -80,9 +80,9 @@ export class IndicePagina {
   porContenedor = new Map<Element, Bloque[]>();
   private porNodo = new WeakMap<Text, Bloque[]>();
   private sinOrdenar = new Set<Element>();
-  paginaConKana = false;
-  private kana = 0;
-  private kanji = 0;
+  paginaEnLengua = false;
+  private propios = 0;
+  private compartidos = 0;
   /** Árboles de sombra abiertos con texto: hacen falta para saber qué palabra hay bajo el ratón. */
   raicesSombra = new Set<ShadowRoot>();
 
@@ -137,15 +137,16 @@ export class IndicePagina {
     }
     cortar();
 
-    if (!this.paginaConKana) {
+    const { escritura } = lengua.value;
+    if (!this.paginaEnLengua) {
       for (const e of encontrados) {
         for (const n of e.nodos) {
-          const c = contarEscrituras(n.data);
-          this.kana += c.kana;
-          this.kanji += c.kanji;
+          const c = escritura.contar(n.data);
+          this.propios += c.propios;
+          this.compartidos += c.compartidos;
         }
       }
-      this.paginaConKana = proporcionDeKana(this.kana, this.kanji);
+      this.paginaEnLengua = escritura.paginaEnLengua({ propios: this.propios, compartidos: this.compartidos });
     }
 
     // Los que ya había bajo esta raíz: los que siguen igual se conservan con su análisis.
@@ -161,7 +162,7 @@ export class IndicePagina {
 
     for (const { nodos, contenedor } of encontrados) {
       for (const { texto, tramos } of partir(nodos)) {
-        if (!esTextoJapones(texto, tramos.map((t) => idiomaDe(t.nodo)).find(Boolean) ?? document.documentElement.lang ?? undefined, this.paginaConKana)) continue;
+        if (!escritura.esDeLaLengua(texto, tramos.map((t) => idiomaDe(t.nodo)).find(Boolean) ?? document.documentElement.lang ?? undefined, this.paginaEnLengua)) continue;
         // Con los mismos nodos, el mismo texto y el mismo contenedor, sigue siendo el mismo bloque.
         const previo = porPrimerNodo.get(tramos[0].nodo)?.find((b) => b.contenedor === contenedor && b.texto === texto && b.tramos[0].base === tramos[0].base && b.tramos.length === tramos.length && b.tramos.every((t, i) => t.nodo === tramos[i].nodo));
         if (previo) {
@@ -265,7 +266,7 @@ function partir(nodos: Text[]): { texto: string; tramos: TramoNodo[] }[] {
       if (dato.length - base > hueco) {
         // Se corta tras un final de frase, y si no lo hay, donde toque.
         const trozo = dato.slice(base, base + hueco);
-        const corte = Math.max(trozo.lastIndexOf('。'), trozo.lastIndexOf('！'), trozo.lastIndexOf('？'), trozo.lastIndexOf('\n'));
+        const corte = Math.max(...lengua.value.escritura.frase.cortes.map((c) => trozo.lastIndexOf(c)));
         fin = base + (corte > 0 ? corte + 1 : hueco);
       }
       // Los saltos del código fuente se ven como un espacio, y un salto partiría la línea al analizar.

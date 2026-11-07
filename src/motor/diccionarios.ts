@@ -5,74 +5,8 @@ import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../
 import { fondo } from '../compartido/rpc';
 import { type FrecuenciaImportada, leerBancoMeta, leerBancoTerminos, leerKanjium } from '../nucleo/yomitan';
 import { db } from './db';
-import { tm, tr } from '../compartido/i18n';
-
-export const FUENTES: FuenteBiblioteca[] = [
-  {
-    id: 'jmdict-es',
-    titulo: tm('JMdict en español'),
-    descripcion: tm('Definiciones en español del proyecto JMdict (EDRDG). Cobertura parcial.'),
-    tipo: 'terminos',
-    idioma: 'es',
-    url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_spanish.zip',
-    formato: 'yomitan',
-    recomendado: true,
-    licencia: 'CC BY-SA 4.0 (EDRDG)',
-  },
-  {
-    id: 'jmdict-en',
-    titulo: tm('JMdict en inglés'),
-    descripcion: tm('El diccionario abierto más completo de japonés.'),
-    tipo: 'terminos',
-    idioma: 'en',
-    url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_english.zip',
-    formato: 'yomitan',
-    recomendado: true,
-    licencia: 'CC BY-SA 4.0 (EDRDG)',
-  },
-  {
-    id: 'jmdict-de',
-    titulo: tm('JMdict en alemán'),
-    descripcion: tm('Definiciones en alemán del proyecto JMdict (EDRDG). Cobertura parcial.'),
-    tipo: 'terminos',
-    idioma: 'de',
-    url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_german.zip',
-    formato: 'yomitan',
-    recomendado: false,
-    licencia: 'CC BY-SA 4.0 (EDRDG)',
-  },
-  {
-    id: 'kanjium-acento',
-    titulo: tm('Acento tonal (Kanjium)'),
-    descripcion: tm('Patrones de acento para colorear palabras y dibujar su curva tonal.'),
-    tipo: 'acento',
-    url: 'https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/source_files/raw/accents.txt',
-    formato: 'kanjium',
-    recomendado: true,
-    licencia: 'CC BY-SA 4.0',
-  },
-  {
-    id: 'jpdb-frecuencia',
-    titulo: tm('Frecuencia JPDB'),
-    descripcion: tm('Posición de cada palabra según anime, series, novelas y juegos.'),
-    tipo: 'frecuencia',
-    url: 'https://github.com/Kuuuube/yomitan-dictionaries/raw/main/dictionaries/JPDB_v2.2_Frequency_Kana_2024-10-13.zip',
-    formato: 'yomitan',
-    recomendado: true,
-    licencia: 'Uso libre (Kuuuube/yomitan-dictionaries)',
-  },
-  {
-    id: 'jmnedict',
-    titulo: tm('Nombres propios (JMnedict)'),
-    descripcion: tm('Nombres de personas y lugares con sus lecturas.'),
-    tipo: 'terminos',
-    idioma: 'en',
-    url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMnedict.zip',
-    formato: 'yomitan',
-    recomendado: false,
-    licencia: 'CC BY-SA 4.0 (EDRDG)',
-  },
-];
+import { tr } from '../compartido/i18n';
+import { motorLengua } from './lengua';
 
 const LOTE = 4000;
 
@@ -178,7 +112,7 @@ async function importarZip(
 }
 
 export async function instalarDesdeBiblioteca(idFuente: string): Promise<void> {
-  const f = FUENTES.find((x) => x.id === idFuente);
+  const f = motorLengua().diccionarios.find((x) => x.id === idFuente);
   if (!f) throw new Error(tr('Fuente de diccionario desconocida'));
   const progreso = (fase: ProgresoInstalacion['fase'], avance: number, error?: string) =>
     emitir({ id: f.id, titulo: f.titulo, fase, avance, error });

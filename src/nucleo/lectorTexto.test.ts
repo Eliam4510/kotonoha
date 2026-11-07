@@ -1,57 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { kanaARomaji, lecturaVisible } from './tokens';
-import { alinearSuperficies, compresionLectura, esFondoVisible, interlineadoAbierto, interlineadoNecesario, contarEscrituras, esFondoOscuro, esTextoJapones, fraseAlrededor, partirEnFrases, proporcionDeKana, tamanoLectura, tramosConLectura } from './lectorTexto';
+import { SIGNOS_FRASE } from '../lenguas/japones/escritura';
+import { alinearSuperficies, compresionLectura, esFondoVisible, interlineadoAbierto, interlineadoNecesario, esFondoOscuro, tamanoLectura, tramosConLectura, fraseAlrededor as fraseCon, partirEnFrases as partirCon } from './lectorTexto';
 
-describe('esTextoJapones', () => {
-  it('el kana no deja dudas, diga lo que diga la página', () => {
-    expect(esTextoJapones('これは本です', 'es', false)).toBe(true);
-    expect(esTextoJapones('これは本です', undefined, false)).toBe(true);
-  });
-
-  it('no toca el chino ni el coreano', () => {
-    expect(esTextoJapones('今天天气很好', 'zh-CN', false)).toBe(false);
-    expect(esTextoJapones('한국어 문장입니다', 'ko', false)).toBe(false);
-  });
-
-  it('los ideogramas solos dependen del idioma de la página', () => {
-    expect(esTextoJapones('東京都知事選', 'ja', false)).toBe(true);
-    expect(esTextoJapones('東京都知事選', undefined, true)).toBe(true);
-    expect(esTextoJapones('東京都知事選', undefined, false)).toBe(false);
-  });
-
-  it('el latín no se analiza', () => {
-    expect(esTextoJapones('Hello world', 'ja', true)).toBe(false);
-  });
-
-  it('en un artículo en otro idioma, los ideogramas sueltos son japoneses si la página tiene kana', () => {
-    expect(esTextoJapones('日本語', 'es', true)).toBe(true);
-    expect(esTextoJapones('日本語', 'es', false)).toBe(false);
-    expect(esTextoJapones('日本語', 'en-US', true)).toBe(true);
-  });
-
-  it('en chino o coreano, los ideogramas siguen sin serlo aunque la página tenga algo de kana', () => {
-    expect(esTextoJapones('今天天气很好', 'zh-TW', true)).toBe(false);
-    expect(esTextoJapones('大韓民國', 'ko', true)).toBe(false);
-  });
-
-  it('un の de adorno en una página china no es japonés, pero una frase de verdad sí', () => {
-    expect(esTextoJapones('我の最愛', 'zh-TW', false)).toBe(false);
-    expect(esTextoJapones('これは本です', 'zh-CN', false)).toBe(true);
-  });
-});
-
-describe('proporcionDeKana', () => {
-  it('distingue una página japonesa de una china con algún kana suelto', () => {
-    expect(proporcionDeKana(400, 300)).toBe(true);
-    expect(proporcionDeKana(12, 40)).toBe(true);
-    expect(proporcionDeKana(3, 5000)).toBe(false);
-    expect(proporcionDeKana(20, 5000)).toBe(false);
-  });
-
-  it('cuenta hiragana, katakana e ideogramas', () => {
-    expect(contarEscrituras('これはカタカナと漢字 abc')).toEqual({ kana: 8, kanji: 2 });
-  });
-});
+const fraseAlrededor = (t: string, a: number, b: number) => fraseCon(t, a, b, SIGNOS_FRASE);
+const partirEnFrases = (t: string) => partirCon(t, SIGNOS_FRASE);
 
 describe('alinearSuperficies', () => {
   it('sitúa las palabras cuando coinciden con el texto', () => {
@@ -162,25 +114,6 @@ describe('esFondoOscuro', () => {
   it('un fondo transparente no dice nada', () => {
     expect(esFondoOscuro('rgba(0, 0, 0, 0)')).toBeNull();
     expect(esFondoOscuro('transparent')).toBeNull();
-  });
-});
-
-describe('rōmaji', () => {
-  it('convierte con Hepburn', () => {
-    expect(kanaARomaji('たべる')).toBe('taberu');
-    expect(kanaARomaji('しゃしん')).toBe('shashin');
-    expect(kanaARomaji('がっこう')).toBe('gakkou');
-    expect(kanaARomaji('まっちゃ')).toBe('matcha');
-    expect(kanaARomaji('コーヒー')).toBe('kōhī');
-    expect(kanaARomaji('ほんや')).toBe("hon'ya");
-    expect(kanaARomaji('ふじさん')).toBe('fujisan');
-  });
-
-  it('muestra la lectura en el formato elegido', () => {
-    expect(lecturaVisible('たべる', 'hiragana')).toBe('たべる');
-    expect(lecturaVisible('たべる', 'katakana')).toBe('タベル');
-    expect(lecturaVisible('たべる', 'romaji')).toBe('taberu');
-    expect(lecturaVisible('たべる', undefined)).toBe('たべる');
   });
 });
 

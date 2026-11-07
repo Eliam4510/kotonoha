@@ -60,7 +60,8 @@ flowchart TB
 | **Trabajador de Whisper** | Cargar el modelo y transcribir en la GPU | Es muy pesado y bloquearía el motor. Se empaqueta aparte y solo se carga si se usa |
 | **Ayudante local** | Descargar el audio de un video de internet | Una extensión no puede hacerlo sola. Solo la extensión puede llamarlo, y solo acepta direcciones http o https |
 | **Ventana de la aplicación** | Pantallas de gestión y reproductor local | Es una página normal de la extensión, que usa el mismo motor por RPC |
-| **Núcleo (`src/nucleo`)** | Lógica pura: analizadores, tokens, modos, estadísticas, gramática, sincronía, transcripción y lotes | Sin dependencias del navegador, se prueba con Vitest |
+| **Núcleo (`src/nucleo`)** | Lógica pura: analizadores, modos, estadísticas, sincronía, transcripción y lotes | Sin dependencias del navegador, se prueba con Vitest |
+| **Paquetes de lengua (`src/lenguas`)** | Todo lo que depende de la lengua que se estudia | El resto del programa solo conoce su interfaz |
 
 ## Flujo de un subtítulo
 
@@ -220,11 +221,23 @@ Lo caro es medir y cambiar el DOM. Chromium reconstruye todos los marcadores de 
 - Lo que aún necesita `elementFromPoint` se hace por líneas, en ratos libres y con la página quieta.
 - Lo que se aleja se retira en grupo, y si vuelve antes no se toca.
 
+## Paquetes de lengua
+
+Todo lo que depende de la lengua que se estudia vive en `src/lenguas/<lengua>`, y el resto del programa solo conoce las interfaces de `src/lenguas/tipos.ts`. Por ahora el único paquete es el del japonés. Cada paquete tiene dos partes:
+
+- **`PaqueteLengua`** es ligero y lo usan todas las pantallas, incluido el content script: cómo se reconoce la lengua en un texto, cómo se escriben sus lecturas, sus niveles, voces y enlaces, y las frases de la interfaz que la nombran.
+- **`MotorLengua`** solo se carga en el motor y en la ventana de la aplicación: el analizador, las reglas de gramática, los prompts, las reglas de transcripción, los diccionarios y el audio.
+
+Cada lengua tiene su propia base de datos. La del japonés conserva el nombre original, `kikitori`, y las demás se llaman `kikitori-<lengua>`. Así, una palabra que se escribe igual en dos lenguas nunca se mezcla, y los datos existentes no necesitan migración. El gasto en Claude no depende de la lengua y se guarda siempre en la base original.
+
+Los prompts de cada paquete tienen sus huellas fijadas en las pruebas, porque cambiar uno invalida las respuestas guardadas y obligaría a pagarlas otra vez.
+
 ## Estructura de carpetas
 
 ```
 src/
-  nucleo/       Lógica pura y probada: subtítulos, tokens, modos, gramática, sincronía, transcripción, lotes
+  nucleo/       Lógica pura y probada: subtítulos, modos, sincronía, transcripción, lotes
+  lenguas/      Lo que depende de la lengua que se estudia: un paquete por lengua
   compartido/   Tipos, ajustes y RPC entre contextos
   pagina/       Adaptadores del mundo MAIN
   contenido/    Interfaz sobre el video y lector de páginas web (lector/)

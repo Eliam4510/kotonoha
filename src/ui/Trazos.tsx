@@ -4,8 +4,9 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { tr } from '../compartido/i18n';
 import { motor } from '../compartido/rpc';
-import { caracteresConTrazos, type DatosTrazos, hechosPorCaracter } from '../nucleo/trazos';
+import { type DatosTrazos, hechosPorCaracter } from '../nucleo/trazos';
 import { Icono } from './iconos';
+import { lengua } from './lengua';
 
 /** Lo que tarda un trazo a velocidad normal, en milisegundos. */
 const DURACION = 520;
@@ -24,7 +25,7 @@ function Lienzo({ k, hechos, dibujando, duracion, ultimo }: { k: Cargado; hechos
   if (!k.datos) {
     return (
       <figure class="trazo-kanji sin-datos">
-        <div class="trazo-vacio" lang="ja">{k.caracter}</div>
+        <div class="trazo-vacio" lang={lengua.value.id}>{k.caracter}</div>
         <figcaption>{tr('Sin datos de trazos')}</figcaption>
       </figure>
     );
@@ -40,14 +41,15 @@ function Lienzo({ k, hechos, dibujando, duracion, ultimo }: { k: Cargado; hechos
         {numeros.slice(0, hechos + (dibujando ? 1 : 0)).map((n, i) => <text key={i} class="trazo-numero" x={n.x} y={n.y}>{i + 1}</text>)}
       </svg>
       <figcaption>
-        <b lang="ja">{k.caracter}</b> · {total === 1 ? tr('1 trazo') : tr('{0} trazos', total)}
+        <b lang={lengua.value.id}>{k.caracter}</b> · {total === 1 ? tr('1 trazo') : tr('{0} trazos', total)}
       </figcaption>
     </figure>
   );
 }
 
 export function PanelTrazos({ palabra }: { palabra: string }) {
-  const caracteres = useMemo(() => caracteresConTrazos(palabra), [palabra]);
+  const fuente = lengua.value.trazos;
+  const caracteres = useMemo(() => fuente?.caracteres(palabra) ?? [], [palabra, fuente]);
   const [cargados, fijarCargados] = useState<Cargado[] | null>(null);
   const [fallo, fijarFallo] = useState(false);
   const [intento, fijarIntento] = useState(0);
@@ -135,7 +137,7 @@ export function PanelTrazos({ palabra }: { palabra: string }) {
           </div>
         </div>
       )}
-      <p class="trazos-credito"><a href="https://kanjivg.tagaini.net" target="_blank" rel="noreferrer noopener">KanjiVG</a> · CC BY-SA 3.0</p>
+      {fuente && <p class="trazos-credito"><a href={fuente.credito.url} target="_blank" rel="noreferrer noopener">{fuente.credito.nombre}</a>{` · ${fuente.credito.licencia}`}</p>}
     </div>
   );
 }

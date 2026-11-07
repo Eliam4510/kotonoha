@@ -12,6 +12,7 @@ import type { Ajustes } from '../compartido/ajustes';
 import { extraerAudioParaWhisper, extraerPistaAudio, extraerSubtitulos, type InformeMedio, inspeccionarArchivo, sincronizarAudio } from './medios';
 import { Mensaje } from './Piezas';
 import { tr } from '../compartido/i18n';
+import { lengua } from '../ui/lengua';
 
 const RE_VIDEO = /\.(mp4|webm|mkv|mov|m4v|ogv)$/i;
 const RE_SUB = /\.(srt|vtt|ass|ssa|ttml|dfxp|xml)$/i;
@@ -111,9 +112,9 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
       const nativa = i?.audio.find((p) => p.predeterminada) ?? i?.audio[0];
       indiceAudio = nativa?.indice;
       fijarAudioElegido(nativa?.indice ?? 0);
-      // Si el archivo trae doblaje por defecto y también japonés, se empieza por el japonés.
-      const japones = i?.audio.find((p) => p.idioma === ajustes.value.idiomaObjetivo);
-      if (i && japones && nativa && japones.indice !== nativa.indice) cambiarAudio(japones.indice, i);
+      // Si el archivo trae doblaje por defecto y también la lengua que se estudia, se empieza por ella.
+      const original = i?.audio.find((p) => p.idioma === ajustes.value.idiomaObjetivo);
+      if (i && original && nativa && original.indice !== nativa.indice) cambiarAudio(original.indice, i);
     };
     fijarFuenteArchivo(async (alProgreso) => {
       if (!archivoActual) throw new Error(tr('No hay ningún archivo abierto'));
@@ -200,7 +201,7 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
         <div class={`ap-local-vacio ${arrastrando ? 'activo' : ''}`}>
           <span class="hoja-icono ap-local-icono"><Icono n="pelicula" t={32} /></span>
           <h1>{tr('Tus videos, con todo Kotonoha')}</h1>
-          <p>{tr('Arrastra aquí un video y sus subtítulos. Tendrás furigana, diccionario, tarjetas y Claude, y el video no sale de tu ordenador.')}</p>
+          <p>{tr(lengua.value.textos.localArrastrar)}</p>
           <button class="btn primario grande" onClick={() => entrada.current?.click()}><Icono n="subir" t={18} /> {tr('Elegir archivos')}</button>
           <div class="ap-local-formatos">
             <span class="ap-formatos"><b>{tr('Video')}</b>{['MP4', 'WebM', 'MKV', 'MOV'].map((f) => <i key={f}>{f}</i>)}</span>

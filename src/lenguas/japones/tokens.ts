@@ -1,6 +1,8 @@
 // Unión de tokens de Kuromoji en palabras y cálculo de furigana. Lógica pura.
 
-import { tm, tr } from '../compartido/i18n';
+import { tm, tr } from '../../compartido/i18n';
+import type { SegmentoLectura, TokenUnido } from '../tipos';
+
 /** Token tal como lo entrega Kuromoji (diccionario IPADIC). */
 export interface TokenCrudo {
   surface_form: string;
@@ -14,23 +16,6 @@ export interface TokenCrudo {
   reading?: string;
   pronunciation?: string;
   word_type?: string;
-}
-
-export interface SegmentoFurigana {
-  texto: string;
-  lectura?: string;
-}
-
-export interface TokenUnido {
-  superficie: string;
-  lema: string;
-  lectura: string; // Lectura de la superficie, en hiragana
-  categoria: string; // Categoría de la cabeza en IPADIC
-  esPalabra: boolean;
-  esGramatica: boolean; // Partículas y auxiliares sueltos
-  flexion: string[]; // Colas unidas: た, ない, ている...
-  furigana: SegmentoFurigana[];
-  inflexionado: boolean; // La superficie no coincide con el lema
 }
 
 const KANJI = /[々-〇㐀-䶿一-鿿豈-﫿\u{20000}-\u{2ffff}ヶ〆]/u;
@@ -96,10 +81,8 @@ export function kanaARomaji(kana: string): string {
   return salida;
 }
 
-export type FormatoLectura = 'hiragana' | 'katakana' | 'romaji';
-
 /** La lectura como la quiere ver cada cual. */
-export function lecturaVisible(kana: string, formato: FormatoLectura | undefined): string {
+export function lecturaVisible(kana: string, formato: string | undefined): string {
   if (formato === 'katakana') return hiraAKata(kana);
   if (formato === 'romaji') return kanaARomaji(kana);
   return kana;
@@ -109,7 +92,7 @@ export function lecturaVisible(kana: string, formato: FormatoLectura | undefined
  * Reparte la lectura sobre los kanji: 立ち上がる + たちあがる -> 立(た)ち上(あ)がる.
  * Si la lectura no encaja devuelve un solo segmento con toda la lectura.
  */
-export function alinearFurigana(superficie: string, lectura: string): SegmentoFurigana[] {
+export function alinearFurigana(superficie: string, lectura: string): SegmentoLectura[] {
   if (!tieneKanji(superficie)) return [{ texto: superficie }];
   const trozos: { texto: string; kanji: boolean }[] = [];
   for (const c of superficie) {

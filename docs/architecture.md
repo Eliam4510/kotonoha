@@ -60,7 +60,8 @@ flowchart TB
 | **Whisper worker** | Loading the model and transcribing on the GPU | Very heavy, and it would block the engine. It is bundled separately and loaded only when used |
 | **Local helper** | Downloading the audio of an online video | An extension cannot do this alone. Only the extension can call it, and it only accepts http or https addresses |
 | **Application window** | Management screens and local player | A regular extension page that uses the same engine over RPC |
-| **Core (`src/nucleo`)** | Pure logic: parsers, tokens, modes, statistics, grammar, synchronization, transcription and batches | No browser dependencies, tested with Vitest |
+| **Core (`src/nucleo`)** | Pure logic: parsers, modes, statistics, synchronization, transcription and batches | No browser dependencies, tested with Vitest |
+| **Language packages (`src/lenguas`)** | Everything that depends on the language being studied | The rest of the program only knows their interface |
 
 ## Flow of a subtitle
 
@@ -220,11 +221,23 @@ What costs is measuring and changing the DOM. Chromium rebuilds every highlight 
 - What still needs `elementFromPoint` is done by lines, in idle time and with the page still.
 - What moves away is removed in groups, and left alone if it comes back first.
 
+## Language packages
+
+Everything that depends on the language being studied lives in `src/lenguas/<language>`, and the rest of the program only knows the interfaces in `src/lenguas/tipos.ts`. For now the only package is Japanese. Each package has two parts:
+
+- **`PaqueteLengua`** is lightweight and used by every screen, including the content script: how the language is recognized in a text, how its readings are written, its levels, voices and links, and the interface sentences that name it.
+- **`MotorLengua`** is only loaded in the engine and in the application window: the analyzer, grammar rules, prompts, transcription rules, dictionaries and audio.
+
+Each language has its own database. The Japanese one keeps the original name, `kikitori`, and the others are called `kikitori-<language>`. This way, a word spelled the same in two languages is never mixed up, and existing data needs no migration. Claude spending does not depend on the language and is always stored in the original database.
+
+The prompts of each package have their fingerprints pinned in the tests, because changing one invalidates the saved answers and would mean paying for them again.
+
 ## Folder structure
 
 ```
 src/
-  nucleo/       Pure, tested logic: subtitles, tokens, modes, grammar, synchronization, transcription, batches
+  nucleo/       Pure, tested logic: subtitles, modes, synchronization, transcription, batches
+  lenguas/      What depends on the language being studied: one package per language
   compartido/   Types, settings and RPC between contexts
   pagina/       MAIN world adapters
   contenido/    Interface on top of the video and web page reader (lector/)

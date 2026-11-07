@@ -8,6 +8,7 @@ import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
 import { Icono, Marca, type NombreIcono } from '../ui/iconos';
 import { Interruptor, Mensaje } from './Piezas';
+import { lengua } from '../ui/lengua';
 
 type Paso = 'idioma' | 'nivel' | 'diccionarios' | 'claude' | 'tarjetas' | 'listo';
 const PASOS: Paso[] = ['idioma', 'nivel', 'diccionarios', 'claude', 'tarjetas', 'listo'];
@@ -38,32 +39,27 @@ function PasoIdioma({ a }: { a: Ajustes }) {
   );
 }
 
-const NIVELES: { valor: string; nombre: string; ayuda: string; lectura: Ajustes['furigana'] }[] = [
-  { valor: 'principiante absoluto', nombre: tm('Empiezo desde cero'), ayuda: tm('Aún no leo kana'), lectura: 'todas' },
-  { valor: 'JLPT N5', nombre: tm('N5'), ayuda: tm('Leo kana y frases muy sencillas'), lectura: 'todas' },
-  { valor: 'JLPT N4', nombre: tm('N4'), ayuda: tm('Conversaciones cotidianas sencillas'), lectura: 'todas' },
-  { valor: 'JLPT N3', nombre: tm('N3'), ayuda: tm('Entiendo textos cotidianos con ayuda'), lectura: 'desconocidas' },
-  { valor: 'JLPT N2', nombre: tm('N2'), ayuda: tm('Noticias y series, con alguna dificultad'), lectura: 'desconocidas' },
-  { valor: 'JLPT N1', nombre: tm('N1'), ayuda: tm('Leo casi de todo'), lectura: 'desconocidas' },
-];
-
 function PasoNivel({ a }: { a: Ajustes }) {
+  const { principiante, niveles, lectura, textos } = lengua.value;
+  const sencillo = lectura.formatoSencillo;
   return (
     <>
-      <h1>{tr('¿Qué nivel de japonés tienes?')}</h1>
-      <p>{tr('Las explicaciones se adaptan a tu nivel, y de él depende cuánto furigana ves al principio.')}</p>
+      <h1>{tr(textos.nivelPregunta)}</h1>
+      <p>{tr(textos.nivelAyuda)}</p>
       <div class="ap-bv-opciones" role="radiogroup" aria-label={tr('Nivel')}>
-        {NIVELES.map((n) => (
+        {[principiante, ...niveles].map((n) => (
           <button key={n.valor} role="radio" aria-checked={a.nivel === n.valor} class={`ap-bv-opcion ${a.nivel === n.valor ? 'activa' : ''}`} onClick={() => guardar({ nivel: n.valor, furigana: n.lectura, lectorFurigana: n.lectura, formatoLectura: n.valor === 'principiante absoluto' ? 'romaji' : 'hiragana' })}>
             <b>{tr(n.nombre)}</b>
             <span>{tr(n.ayuda)}</span>
           </button>
         ))}
       </div>
-      <div class="ap-bv-interruptor">
-        <span>{tr('Ver las lecturas en rōmaji, en lugar de kana')}</span>
-        <Interruptor etiqueta={tr('Lecturas en rōmaji')} on={a.formatoLectura === 'romaji'} alCambiar={(v) => guardar({ formatoLectura: v ? 'romaji' : 'hiragana' })} />
-      </div>
+      {sencillo && (
+        <div class="ap-bv-interruptor">
+          <span>{tr(sencillo.pregunta)}</span>
+          <Interruptor etiqueta={tr(sencillo.etiqueta)} on={a.formatoLectura === sencillo.id} alCambiar={(v) => guardar({ formatoLectura: v ? sencillo.id : lectura.formatoInicial })} />
+        </div>
+      )}
     </>
   );
 }
@@ -195,7 +191,7 @@ function PasoListo() {
         </div>
         <div class="ap-bv-fila">
           <span class="ap-paso-marca"><Icono n="lector" t={14} /></span>
-          <div><b>{tr('En una página')}</b><span>{tr('En cualquier texto japonés, haz clic en una palabra. El botón del borde derecho ajusta los colores y el furigana.')}</span></div>
+          <div><b>{tr('En una página')}</b><span>{tr(lengua.value.textos.bienvenidaPagina)}</span></div>
         </div>
         <div class="ap-bv-fila">
           <span class="ap-paso-marca"><Icono n="microfono" t={14} /></span>

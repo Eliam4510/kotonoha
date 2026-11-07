@@ -50,6 +50,7 @@ import {
 } from './estado';
 import type { Control } from './puente';
 import { tm, tr } from '../compartido/i18n';
+import { lengua } from '../ui/lengua';
 
 let control: Control;
 
@@ -726,7 +727,7 @@ interface EventoTraduccion {
 export async function generarSecundarios() {
   const fuente = crudas(baseObjetivo);
   if (!fuente.length) {
-    avisar(tr('Primero elige los subtítulos en japonés.'), 'error');
+    avisar(tr(lengua.value.textos.primeroElige), 'error');
     return;
   }
   const idioma = ajustes.value.idiomaSecundario;
@@ -774,7 +775,7 @@ export async function generarSecundarios() {
  * Crea los subtítulos en japonés a partir de los del otro idioma, para cuando no hay otra opción.
  * Es la traducción de una traducción: un SRT japonés de verdad siempre será mejor.
  */
-export async function traducirAlJapones() {
+export async function traducirALengua() {
   const fuente = baseSecundaria;
   if (!fuente.length) {
     avisar(tr('Elige primero unos subtítulos secundarios: de ellos sale la traducción.'), 'error');
@@ -799,7 +800,7 @@ export async function traducirAlJapones() {
   let cola: Promise<void> = Promise.resolve();
   const f = flujoMotor(
     'traducirSubtitulos',
-    [fuente, info?.titulo, indiceActualEn(fuente), 'japones'],
+    [fuente, info?.titulo, indiceActualEn(fuente), 'lengua'],
     lectorJson<EventoTraduccion>((e) => {
       generacion.value = { tipo: 'objetivo', hechas: e.hechas, total: fuente.length };
       const nuevas = e.parte.filter(({ i, t }) => fuente[i] && t.trim()).map(({ i, t }) => ({ ...fuente[i], texto: t }));
@@ -820,7 +821,7 @@ export async function traducirAlJapones() {
     await f;
     await cola;
     if (turno === turnoCarga && generacion.value) {
-      avisar(tr('Subtítulos en japonés listos. Al ser una traducción, pueden diferir de lo que se oye.'), 'exito', undefined, 7000);
+      avisar(tr(lengua.value.textos.traduccionLista), 'exito', undefined, 7000);
       iniciarAnalisisProfundo().catch(() => {});
     }
   } catch (e) {

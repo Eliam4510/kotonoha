@@ -79,7 +79,7 @@
 .ap-vacio { padding: 56px 24px; animation: kk-aparecer 0.3s var(--salida); }
 .ap-anillo .pista { stroke: var(--superficie-4); }
 .ap-anillo .valor { stroke: var(--hoja); transition: stroke-dashoffset 0.5s var(--salida); }
-.ap-campo-ja { font-family: var(--letra-ja); }
+.ap-campo-lengua { font-family: var(--letra-lengua); }
 .ap-formatos { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; }
 .ap-formatos b { margin-right: 4px; font-size: 12px; font-weight: 700; color: var(--texto-3); }
 .ap-formatos i { font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; padding: 1px 7px; border-radius: 6px; color: var(--texto-2); background: var(--superficie-3); }
@@ -272,7 +272,7 @@ section .ap-botones { margin-top: 10px; }
 .ap-lector-entrada { max-width: 860px; }
 .ap-hoja-escritura { display: flex; flex-direction: column; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-2); transition: border-color 0.16s, box-shadow 0.16s; }
 .ap-hoja-escritura:focus-within { border-color: var(--hoja); box-shadow: 0 0 0 4px var(--hoja-suave), var(--sombra-2); }
-.ap-hoja-escritura textarea { width: 100%; min-height: 340px; padding: 30px 36px; border: none; outline: none; resize: vertical; background: none; font-family: var(--letra-ja); font-size: 19px; line-height: 2; }
+.ap-hoja-escritura textarea { width: 100%; min-height: 340px; padding: 30px 36px; border: none; outline: none; resize: vertical; background: none; font-family: var(--letra-lengua); font-size: 19px; line-height: 2; }
 .ap-hoja-escritura textarea::placeholder { color: var(--texto-3); }
 .ap-hoja-pie { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 14px 12px 18px; border-top: 1px solid var(--borde); }
 .ap-hoja-pie .ap-botones { margin: 0; }
@@ -288,9 +288,9 @@ section .ap-botones { margin-top: 10px; }
 .ap-comprension { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--texto-2); }
 .ap-comprension b { font-weight: 800; color: var(--texto); }
 .ap-tamano { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border-radius: var(--r-pill); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); }
-.ap-tamano span { width: 22px; text-align: center; font-family: var(--letra-ja); font-size: 14px; font-weight: 700; color: var(--texto-2); }
+.ap-tamano span { width: 22px; text-align: center; font-family: var(--letra-lengua); font-size: 14px; font-weight: 700; color: var(--texto-2); }
 .ap-tamano .btn-icono { width: 26px; height: 26px; }
-.ap-papel { position: relative; padding: 44px 56px 52px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-1); font-family: var(--letra-ja); font-weight: 500; line-height: 2.25; }
+.ap-papel { position: relative; padding: 44px 56px 52px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-1); font-family: var(--letra-lengua); font-weight: 500; line-height: 2.25; }
 /* En un texto largo el subrayado de estado debe acompañar, no gritar. */
 .ap-papel .pal::before { height: 2px; opacity: 0.6; }
 .ap-papel .pal:hover::before { opacity: 1; }
@@ -364,7 +364,7 @@ section .ap-botones { margin-top: 10px; }
 .ap-tapa.mini:hover { transform: none; }
 .ap-tapa.mini .ap-obi { padding: 0; box-shadow: none; }
 .ap-tapa-titulo { position: absolute; font-weight: 700; line-height: 1.3; }
-.ap-tapa.vertical .ap-tapa-titulo { top: 12%; right: 16%; max-height: 58%; writing-mode: vertical-rl; font-family: var(--letra-ja); font-size: 19px; letter-spacing: 0.12em; overflow: hidden; }
+.ap-tapa.vertical .ap-tapa-titulo { top: 12%; right: 16%; max-height: 58%; writing-mode: vertical-rl; font-family: var(--letra-lengua); font-size: 19px; letter-spacing: 0.12em; overflow: hidden; }
 .ap-tapa.horizontal .ap-tapa-titulo { top: 12%; left: 10%; right: 14%; max-height: 56%; font-size: 15px; overflow: hidden; word-break: break-word; }
 .ap-obi { position: absolute; left: 0; right: 0; bottom: 0; height: 21%; display: flex; align-items: center; gap: 5px; padding: 0 10%; font-size: 11px; font-weight: 700; color: var(--obi-tinta); background: var(--obi); box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.14); --ico-opacidad: 0.45; }
 .ap-obi-avance { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--obi-tinta); opacity: 0.8; border-radius: 0 2px 2px 0; }
