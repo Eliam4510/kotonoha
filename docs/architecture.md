@@ -121,6 +121,8 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 | GPU loss | Waits 20 s, reloads the model and continues in gentle mode. On a second failure it stops, with the transcribed text saved |
 | Resuming | A new transcription of the same file continues where it left off |
 
+**Song lyrics.** `src/nucleo/letra.ts` places pasted lyrics on the timing of a track. Claude is asked, through a JSON schema, for a list of entries `{verse, first line, last line}` in the order the song is sung. Neither the words nor the timing come from it: the text is that of the lyrics and the timing that of the transcription, so it cannot alter either. The answer does not reproduce the lyrics, and it is small. Entries out of order lose their timing without affecting the rest (longest increasing subsequence), verses with no timing are estimated from their length, and verses that share a line split its duration.
+
 ## Technical decisions
 
 | Decision | Choice | Reason |

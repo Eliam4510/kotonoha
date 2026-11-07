@@ -134,6 +134,8 @@ Whisper erzeugt japanische Untertitel, wenn ein Video keine mitbringt. Es läuft
 | Whisper Turbo leicht | 564 MB | Etwas ungenauer, mit weniger Grafikspeicher |
 | Whisper Base | 165 MB | Für Computer ohne leistungsstarke GPU |
 
+Die Modelle werden im Browser gespeichert und nicht erneut heruntergeladen: Sie werden jedes Mal von der Festplatte gelesen, was einige Sekunden dauern kann. Unter **Einstellungen, Transkription mit Whisper, Gespeicherte Modelle** ist zu sehen, wie viel Platz jedes belegt, und es lässt sich dort löschen. Beim Deinstallieren der Erweiterung werden sie ebenfalls gelöscht.
+
 **Intensität.** Sie bestimmt, welchen Anteil der Zeit die Grafikkarte arbeitet. In der restlichen Zeit ruht sie, und die Ruhezeit wächst von selbst, wenn eine andere Anwendung die Karte belegt.
 
 | Intensität | Auslastung | 30 Minuten Video |
@@ -143,6 +145,17 @@ Whisper erzeugt japanische Untertitel, wenn ein Video keine mitbringt. Es läuft
 | Schnell | 90 % | Etwa 4 Minuten |
 
 Während der Transkription lässt sich anhalten, um die Karte sofort freizugeben, und an derselben Stelle fortsetzen. Startet der Grafiktreiber neu, wartet Whisper 20 Sekunden, lädt das Modell neu und arbeitet mit der niedrigsten Intensität weiter. Beim zweiten Ausfall hält es an, und das bereits Transkribierte bleibt gespeichert.
+
+### Liedtexte
+
+Whisper trifft die Zeiten, verfehlt in einem Lied aber viele Wörter. Wenn jemand den Text veröffentlicht hat, zum Beispiel in einem Kommentar zum Video, lässt er sich im Fenster **KI-Untertitel** unter **Liedtext** einfügen, und Claude legt ihn auf diese Zeiten.
+
+- Claude gibt nur an, welcher Vers über welchen Zeilen der Transkription erklingt. Die Wörter stammen genau aus dem Liedtext, die Zeiten von Whisper.
+- Wird der Text vor oder während der Transkription eingefügt, wird er am Ende automatisch abgeglichen, und es fallen keine Kosten für das Korrigieren oder Prüfen des von Whisper Gehörten an. Hat das Video bereits eine Spur, kann auch sie mit **Liedtext an diese Zeiten anpassen** als Zeitreferenz dienen.
+- Ein nur einmal geschriebener Refrain wird überall dort platziert, wo er erklingt. Was nicht gesungen wird, etwa Abschnittsmarken, Rōmaji oder Übersetzungen, wird ignoriert.
+- Ein Vers, den Whisper nicht erfasst hat, erhält eine geschätzte Zeit, und der abschließende Hinweis nennt deren Anzahl. Mit **Synchronisieren: Diese Zeile ist gerade zu hören** im Navigator lässt sich dann nachjustieren.
+- Das Ergebnis ist eine weitere Spur, „Japanisch (Liedtext)“, die für dieses Video gespeichert wird. Die ursprüngliche Transkription bleibt verfügbar. Pro Lied fällt eine einzige Anfrage an Claude an, und ein erneuter Abgleich mit demselben Text kostet nichts.
+- Bei einem Internetvideo ohne lokalen Helfer muss Whisper das ganze Lied hören: Wenn das Video endet, stoppt die Transkription von selbst, und der Text wird abgeglichen.
 
 ### Lokaler Helfer
 

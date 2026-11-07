@@ -4,6 +4,7 @@
 
 import type { PromptPersonalizado } from '../../compartido/ajustes';
 import { ESQUEMA_ANALISIS, ESQUEMA_CORRECCIONES, ESQUEMA_SENTIDO } from '../esquemasClaude';
+import { ESQUEMA_LETRA, promptLetra } from '../promptLetra';
 import type { PromptsLengua, TareaPrompt } from '../tipos';
 
 const CRITERIO_LITERARIO = `El primer significado del diccionario suele ser el literal y a menudo no es el correcto aquí.
@@ -154,6 +155,13 @@ export const PROMPTS_JAPONES: PromptsLengua = {
   subtitulos: PROMPT_SUBTITULOS,
   correccion: PROMPT_CORRECCION,
   esquemaCorrecciones: ESQUEMA_CORRECCIONES,
+  letra: promptLetra({
+    cancion: 'japonesa',
+    marcas: '[サビ] o [Coro]',
+    sonidos: 'da igual con qué kanji esté escrito, y 会いたい, 逢いたい y あいたい son lo mismo',
+    escritura: 'Si LETRA trae la misma letra en varias escrituras o idiomas, usa solo las líneas en japonés, con sus kanji: ni rōmaji ni traducciones.',
+  }),
+  esquemaLetra: ESQUEMA_LETRA,
   aLengua: PROMPT_A_JAPONES,
   imagen: PROMPT_IMAGEN,
   glosa: promptGlosa,

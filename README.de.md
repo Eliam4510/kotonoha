@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.4.0-A9E45B?style=flat-square" alt="Version 0.4.0">
+  <img src="https://img.shields.io/badge/Version-0.4.1-A9E45B?style=flat-square" alt="Version 0.4.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Kontinuierliche Integration"></a>
-  <img src="https://img.shields.io/badge/Unit--Tests-386-0ca30c?style=flat-square" alt="386 Unit-Tests">
+  <img src="https://img.shields.io/badge/Unit--Tests-419-0ca30c?style=flat-square" alt="419 Unit-Tests">
   <img src="https://img.shields.io/badge/Oberfl%C3%A4che-6%20Sprachen-8FCBFF?style=flat-square" alt="Oberfläche in 6 Sprachen">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 bis N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 bis C2">
@@ -74,7 +74,7 @@ Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japa
   <tr>
     <td valign="top"><b>Übersetzen und korrigieren mit Claude</b><br>Übersetzung in die Hilfssprache, beginnend bei dem Abschnitt, der gerade läuft. Automatische Korrektur der Homophone in generierten Untertiteln, mit Titel und Gesamttext als Kontext und ohne Rückfragen.</td>
     <td valign="top"><b>SRT hin und zurück</b><br>Import und Export auf jeder Website: SRT, VTT, ASS und TTML. Importiertes bleibt für diesen Titel gespeichert, und japanische Netflix-Untertitel bleiben erhalten, auch wenn eine andere Region sie nicht anbietet.</td>
-    <td valign="top"><b>Lokale Transkription</b><br>Whisper auf der Grafikkarte über WebGPU, ohne dass das Audio den Computer verlässt: 30 Minuten Video in etwa 5, ohne den Desktop auszubremsen. Es arbeitet in Abschnitten mit Pausen und erholt sich, wenn der Treiber neu startet.</td>
+    <td valign="top"><b>Lokale Transkription</b><br>Whisper auf der Grafikkarte über WebGPU, ohne dass das Audio den Computer verlässt: 30 Minuten Video in etwa 5, ohne den Desktop auszubremsen. Es arbeitet in Abschnitten mit Pausen und erholt sich, wenn der Treiber neu startet. Wird der Text eines Liedes eingefügt, legt Claude ihn auf die Zeiten von Whisper.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="Kosten für Claude im Monat, nach Tagen, Modellen und Aufgaben"></td>
@@ -263,6 +263,8 @@ Der letzte Befehl kompiliert und legt in `release/` die ZIP-Dateien der Erweiter
 | `node pruebas/trazos-web.mjs` | Die Strichfolge mit echten Daten, der Reader im Tab, die Zwischenablage und die geteilte Ansicht |
 | `node pruebas/ingles.mjs` | Englisch von Anfang bis Ende: die Sprache wählen, die Wörterbücher installieren, ein Video, eine Seite und zurück zum Japanischen, ohne dass sich etwas vermischt |
 | `node pruebas/ingles-whisper.mjs stimme.wav` | Whisper auf Englisch auf der GPU, mit simulierter Korrektur durch Claude |
+| `node pruebas/letra.mjs stimme.wav` | Einen Liedtext auf die Zeiten einer Transkription legen: mit einer automatischen Spur und, mit einer Stimmprobe, mit Whisper auf der GPU |
+| `node pruebas/modelos-guardados.mjs` | Die Liste der gespeicherten Modelle: der Platzbedarf jedes Modells und dass das Löschen eines Modells kein anderes beschädigt, das Dateien mit ihm teilt |
 | `node pruebas/ingles-grande.mjs` | Das größte Wörterbuch mit einem leeren Profil: installieren, damit starten, nachschlagen und entfernen. Lädt etwa 110 MB herunter |
 | `node pruebas/e2e.mjs` | Die Erweiterung von Anfang bis Ende in Edge |
 | `node pruebas/subtitulos.mjs` | Übersetzen, korrigieren, exportieren und importieren, auf Seiten, die Netflix und YouTube nachahmen, mit einer simulierten Claude-API |
@@ -283,13 +285,13 @@ Die Browsertests verwenden eine Kompilierung mit fester Kennung, die mit `KK_SAL
 
 ## Projektstand
 
-Version 0.4.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader auf 16 echten öffentlichen Websites, aber noch nicht in einer echten Sitzung auf einer Videoseite.
+Version 0.4.1 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader auf 16 echten öffentlichen Websites, aber noch nicht in einer echten Sitzung auf einer Videoseite.
 
 ## Datenschutz
 
 - Der Claude-API-Schlüssel und alle Daten werden nur im Browser gespeichert.
 - Das von Whisper transkribierte Audio verlässt den Computer nicht. Ebenso wenig das Audio der Karten und das Einzelbild, außer sie werden an Anki gesendet.
-- An die Claude-API werden nur die für jede Aufgabe nötigen Texte gesendet: der Satz, das Skript der Untertitel und der Titel des Videos.
+- An die Claude-API werden nur die für jede Aufgabe nötigen Texte gesendet: der Satz, das Skript der Untertitel und der Titel des Videos. Wird ein Liedtext eingefügt, auch dieser.
 - Suchen nach Audio und Bildern von Wörtern gehen direkt an JapanesePod101, Wikimedia Commons und Openverse, und die Striche jedes Kanji werden bei jsDelivr angefragt.
 - Wörterbücher werden nur einmal heruntergeladen: die japanischen und die englische Häufigkeitsliste von GitHub, die englischen von Hugging Face. Für Englisch kommt das Wort-Audio von Wikimedia Commons und Lingua Libre.
 - **Zwischenablage folgen** liest nur bei eingeschalteter Option und sichtbarem Tab, und das Gelesene verlässt den Computer nicht.

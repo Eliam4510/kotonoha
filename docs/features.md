@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.4.0, along with how it has been verified.
+Status of each feature in version 0.4.1, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -66,6 +66,8 @@ Status of each feature in version 0.4.0, along with how it has been verified.
 | Recovery from GPU loss | Automated, by destroying the WebGPU device |
 | Local helper with yt-dlp and FFmpeg | Automated, with a local download. The real browser registration and a real YouTube download are still pending |
 | Correction of the result with Claude | Simulator |
+| Song lyrics placed on the transcription timing: the text comes from the lyrics and the timing from Whisper | Simulator, with real Whisper, and real session with a song |
+| Saved models list, with the space each one takes and per-model deletion. Loading from disk is no longer announced as a download | Automated, and with real Whisper |
 
 ## Flashcards
 
@@ -187,3 +189,4 @@ Status of each feature in version 0.4.0, along with how it has been verified.
 | Audio with DRM | A protected site may withhold its sound from capture. After two silent sentences in a row in a video, the line is no longer replayed to record it |
 | Synchronization | No server: moving between computers is done with a backup |
 | Background music | Whisper can miss quiet conversation under loud music |
+| Song lyrics | Timing is per Whisper line, not per word. With very loud music Whisper may hear little, and then more verses get an estimated time |

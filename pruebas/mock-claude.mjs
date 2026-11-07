@@ -33,6 +33,37 @@ function respuestaPara(cuerpo) {
       })),
     });
   }
+  if (formato?.properties?.ajuste) {
+    // Empareja cada verso con la línea que más se le parece, sin volver atrás. Es lo que se le pide a Claude, en tosco.
+    const contenido = cuerpo.messages?.[0]?.content ?? '';
+    const [, transcripcion = '', letra = ''] = /TRANSCRIPCIÓN:\n([\s\S]*?)\n\nLETRA:\n([\s\S]*)$/.exec(contenido) ?? [];
+    const piezas = (t) => new Set(t.toLowerCase().match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]|[\p{L}\p{N}']+/gu) ?? []);
+    const lineas = transcripcion.split('\n').map((l) => piezas(l.replace(/^\d+ \[[^\]]*\] /, '')));
+    const ajuste = [];
+    let cursor = 0;
+    letra.split('\n').map((l) => l.replace(/^\d+: /, '')).forEach((verso, v) => {
+      if (/^\[.*\]$/.test(verso)) return;
+      const p = piezas(verso);
+      const comunes = (i) => [...p].filter((x) => lineas[i].has(x)).length;
+      let de = -1;
+      let mejor = 0;
+      for (let i = cursor; i < lineas.length; i++) {
+        if (comunes(i) > mejor) {
+          mejor = comunes(i);
+          de = i;
+        }
+      }
+      if (de < 0) return ajuste.push({ v, de: -1, a: -1 });
+      // Un verso largo puede ocupar varias líneas: las de al lado que estén casi enteras en él son suyas.
+      const suya = (i) => comunes(i) >= Math.ceil(lineas[i].size * 0.6);
+      let a = de;
+      while (a + 1 < lineas.length && suya(a + 1)) a++;
+      while (de - 1 >= cursor && suya(de - 1)) de--;
+      ajuste.push({ v, de, a });
+      cursor = de;
+    });
+    return JSON.stringify({ ajuste });
+  }
   if (formato?.properties?.correcciones) {
     // Corrige lo que una transcripción real falla, y deja el resto tal cual: solo devuelve lo que cambia.
     const correcciones = [...texto.matchAll(/(\d+): ([^\\]+)/g)]

@@ -99,6 +99,9 @@ export interface EstadoWhisper {
   dispositivo?: string;
 }
 export const whisper = signal<EstadoWhisper | null>(null);
+/** La letra pegada en el panel. Se queda mientras se transcribe: al terminar, se ajusta sola. */
+export const letraPegada = signal('');
+export const ajustandoLetra = signal(false);
 /** En el reproductor local se transcribe el archivo entero, sin captura de audio. */
 export const transcribeArchivo = signal(false);
 /** Con el ayudante local instalado, un video de internet se transcribe como si fuera un archivo. */

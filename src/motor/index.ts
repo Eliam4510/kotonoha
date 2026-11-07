@@ -446,7 +446,9 @@ const api: ApiMotor = {
     return d.ajustes ?? null;
   },
   async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen) {
-    await db.generados.put({ clave: `${idVideo}|${idioma}`, idVideo, idioma, lineas, origen, creado: Date.now() });
+    // La letra no sustituye a la transcripción de la que salieron sus tiempos: con otra letra se volverá a necesitar.
+    const clave = origen === 'letra' ? `${idVideo}|${idioma}|letra` : `${idVideo}|${idioma}`;
+    await db.generados.put({ clave, idVideo, idioma, lineas, origen, creado: Date.now() });
   },
   correccionesPista: (clave) => db.correcciones.get(clave),
   async guardarCorreccionesPista(clave, cambios, completa) {
@@ -493,6 +495,8 @@ atenderFlujos({
     await ia.corregirSubtitulos(a, lineas, titulo, indice, guion, (cambios, hechas, total) => emitir(`${JSON.stringify({ hechas, total, cambios })}\n`), senal);
     return 'ok';
   },
+  // Claude solo dice qué verso suena dónde: las líneas las arma quien lo pide, con la letra y los tiempos que ya tiene.
+  ajustarLetra: async (_emitir, _senal, lineas: Linea[], versos: string[], titulo?: string) => JSON.stringify(await ia.ajustarLetra(await aj(), lineas, versos, titulo)),
   // Revisa las líneas que aún no se han analizado y guarda lo encontrado por cada trozo terminado.
   analisisProfundo: async (emitir, senal, lineas: Linea[], titulo?: string, indiceLinea = -1, tope = 0) => {
     const a = await aj();

@@ -6,6 +6,7 @@
 // colgado se aborta, y si la GPU se pierde se reintenta con calma y al segundo fallo se para.
 
 import { MODELOS_WHISPER, type ModeloWhisper } from '../compartido/ajustes';
+import { modeloGuardado } from '../compartido/modelosGuardados';
 import { tr } from '../compartido/i18n';
 import { fondo } from '../compartido/rpc';
 import type { Linea } from '../nucleo/subtitulos';
@@ -106,6 +107,9 @@ async function cargarModelo(idModelo: ModeloWhisper, emitir: Emitir): Promise<st
   const t = obtenerTrabajador();
   const archivos = new Map<string, { cargado: number; total: number }>();
   let ultimo = 0;
+  // Transformers.js avisa del avance igual si baja el modelo que si lo lee del disco. Con 1,4 GB, leerlo tarda lo bastante
+  // como para que pareciera que se descarga otra vez cada vez que se usa.
+  const yaGuardado = await modeloGuardado(modelo).catch(() => false);
   return new Promise<string>((ok, mal) => {
     alMensajeCarga = (m) => {
       if (m.tipo === 'descarga') {
@@ -114,8 +118,7 @@ async function cargarModelo(idModelo: ModeloWhisper, emitir: Emitir): Promise<st
         const cargado = [...archivos.values()].reduce((n, a) => n + a.cargado, 0);
         const total = [...archivos.values()].reduce((n, a) => n + a.total, 0);
         const ahora = Date.now();
-        // Los archivos en caché se leen casi al instante y no merecen un aviso de descarga.
-        if (total > 20e6 && ahora - ultimo > 400) {
+        if (!yaGuardado && total > 20e6 && ahora - ultimo > 400) {
           ultimo = ahora;
           emitir({ tipo: 'descarga', porcentaje: Math.round((cargado / total) * 100), cargadoMb: Math.round(cargado / 1e6), totalMb: Math.round(total / 1e6) });
         }

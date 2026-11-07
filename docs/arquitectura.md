@@ -121,6 +121,8 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 | Pérdida de la GPU | Espera 20 s, recarga el modelo y sigue en modo Suave. Al segundo fallo se detiene, con lo transcrito guardado |
 | Reanudación | Una nueva transcripción del mismo archivo continúa por donde quedó |
 
+**Letras de canciones.** `src/nucleo/letra.ts` coloca una letra pegada sobre los tiempos de una pista. A Claude se le pide, con un esquema JSON, una lista de entradas `{verso, línea inicial, línea final}` en el orden en que suena la canción. Ni las palabras ni los tiempos salen de él: el texto es el de la letra y los tiempos son los de la transcripción, de modo que no puede alterar ninguna de las dos cosas. La respuesta, además, no reproduce la letra y ocupa poco. Las entradas fuera de orden pierden su tiempo sin afectar a las demás (subsecuencia creciente más larga), los versos sin tiempo se estiman según su longitud, y los que comparten una línea se reparten su duración.
+
 ## Decisiones técnicas
 
 | Decisión | Elección | Razón |

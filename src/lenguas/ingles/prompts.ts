@@ -4,6 +4,7 @@
 
 import type { PromptPersonalizado } from '../../compartido/ajustes';
 import { ESQUEMA_ANALISIS, ESQUEMA_CORRECCIONES, ESQUEMA_SENTIDO } from '../esquemasClaude';
+import { ESQUEMA_LETRA, promptLetra } from '../promptLetra';
 import type { PromptsLengua, TareaPrompt } from '../tipos';
 
 const CRITERIO_LITERARIO = `El primer significado del diccionario suele ser el literal y a menudo no es el correcto aquí.
@@ -150,6 +151,13 @@ export const PROMPTS_INGLES: PromptsLengua = {
   subtitulos: SUBTITULOS,
   correccion: CORRECCION,
   esquemaCorrecciones: ESQUEMA_CORRECCIONES,
+  letra: promptLetra({
+    cancion: 'en inglés',
+    marcas: '[Chorus] o [Verse 1]',
+    sonidos: '«gonna» y «going to», «your» y «you\'re», o «night» y «knight», son lo mismo',
+    escritura: 'Si LETRA trae la misma letra traducida a otro idioma, usa solo las líneas en inglés.',
+  }),
+  esquemaLetra: ESQUEMA_LETRA,
   aLengua: A_LENGUA,
   imagen: 'Devuelve solo dos o tres palabras en inglés útiles para buscar una imagen que ilustre el término dado, según su sentido en la frase. Sin comillas.',
   glosa: (idioma) => `Traduce el término inglés a ${idioma} con una o dos palabras, en forma de diccionario. Responde solo con la traducción.`,

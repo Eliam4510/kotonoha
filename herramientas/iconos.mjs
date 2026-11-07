@@ -37,6 +37,7 @@ export const CATALOGO = {
   flor: 'flower-lotus',
   pergamino: 'scroll',
   periodico: 'newspaper',
+  musica: 'music-notes',
   // Claude
   ia: 'sparkle',
   robot: 'sparkle',

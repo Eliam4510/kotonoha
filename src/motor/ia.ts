@@ -6,6 +6,7 @@ import type { ContextoIA, SentidoEnContexto } from '../compartido/tipos';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import { type Lote, ordenarPorCercania, partirEnLotes } from '../nucleo/lotes';
 import { claveDia, claveMes, costeDe, type UsoTokens } from '../nucleo/precios';
+import { type EntradaAjuste, mensajeAjuste } from '../nucleo/letra';
 import type { Linea } from '../nucleo/subtitulos';
 import type { TareaPrompt } from '../lenguas/tipos';
 import { baseGeneral, db } from './db';
@@ -481,6 +482,17 @@ export async function corregirSubtitulos(
     hechas += l.hasta - l.desde;
     alLote(datos.correcciones, hechas, lineas.length);
   });
+}
+
+/**
+ * Coloca una letra sobre los tiempos de una transcripción. Claude solo dice qué verso suena sobre qué líneas, y la
+ * respuesta se guarda: ajustar la misma letra sobre la misma transcripción no se paga dos veces.
+ */
+export async function ajustarLetra(a: Ajustes, lineas: Linea[], versos: string[], titulo: string | undefined): Promise<EntradaAjuste[]> {
+  const { letra, esquemaLetra } = motorLengua().prompts;
+  const usuario = mensajeAjuste(lineas, versos, titulo);
+  const texto = await conCache({ a, tarea: 'letra', sistema: letra, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: esquemaLetra } }, false);
+  return texto ? (JSON.parse(texto) as { ajuste: EntradaAjuste[] }).ajuste : [];
 }
 
 export interface EntradaAnalisis {
