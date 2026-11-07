@@ -218,11 +218,11 @@ None of this adds anything to the page's content. Colors use the CSS Custom High
 
 `Alt+K`, `Alt+U` and `Alt+I` mark the selected text in bulk as known, unknown or ignored.
 
-**Reader.** Displays any pasted text with the same aids as subtitles.
+**Clipboard.** Displays any pasted or copied text with the same aids as subtitles, and keeps its structure: paragraphs, line breaks, headings, lists, quotes, code, tables and bold. Text copied from a page leaves out that page's furigana, and Markdown copied from the Claude chat keeps its formatting.
 
-**Web mode.** The application window has no tabs, so it cannot join the browser's split view. The reader's **Web mode** button opens it in a regular tab, without the sidebar, and **Open the reader next to this tab**, in the extension menu, places it right beside the page you are viewing (Chrome 155 or later). In that tab, **Follow the clipboard** appends the Japanese you copy anywhere, while the tab is in view. It is a page of the extension itself: it needs no server, works offline, and the text stays on your computer.
+**Web mode.** The application window has no tabs, so it cannot join the browser's split view. The Clipboard's **Web mode** button opens it in a regular tab, without the sidebar, and **Open the Clipboard next to this tab**, in the extension menu, places it right beside the page you are viewing (Chrome 155 or later). In that tab, **Follow the clipboard** appends the Japanese you copy anywhere, while the tab is in view. It is a page of the extension itself: it needs no server, works offline, and the text stays on your computer.
 
-**Library.** Stores EPUB books, texts and SRT subtitles, with the reading position. It can also generate stories with Claude, matched to the configured level.
+**Reading assistant.** Stores EPUB books, texts and SRT subtitles, with the reading position and the structure of each chapter. It can also generate stories with Claude, matched to the configured level.
 
 **Local player.** Plays local files, with the embedded subtitles of an MKV and a choice of audio track, through ffmpeg.wasm.
 

@@ -1,10 +1,11 @@
 // Texto interactivo para el lector y la biblioteca, con consulta de palabras y lectura en voz alta.
 
-import type { ComponentChildren } from 'preact';
+import { type ComponentChildren, Fragment, type JSX } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Ajustes } from '../compartido/ajustes';
 import { alRecibirEvento, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
+import { type Bloque, type ElementoLista, type FraseDeLinea, frasesDeBloques, type Linea, leerEstructura, textoPlano } from '../nucleo/estructura';
 import { fraseConNegrita } from '../nucleo/frases';
 import { motorDe } from '../lenguas/motor';
 import type { PuntoGramatica } from '../lenguas/tipos';
@@ -29,9 +30,33 @@ interface Abierta {
 const TAMANO_MIN = 16;
 const TAMANO_MAX = 34;
 
-/** Parte el texto en párrafos y estos en frases, que es la unidad de la lectura en voz alta. */
-export function partirFrases(texto: string): string[] {
-  return texto.split(/\r?\n/).flatMap((p) => (p.trim() ? p.split(lengua.value.escritura.frase.partir) : [''])).filter((f, i, l) => f || (l[i - 1] && l[i - 1] !== ''));
+interface NodoLista {
+  e: ElementoLista;
+  hijos: NodoLista[];
+}
+
+/** Los elementos de una lista, que llegan en orden con su nivel, como árbol: cada uno con los que cuelgan de él. */
+function arbolDeLista(elementos: ElementoLista[]): NodoLista[] {
+  const raices: NodoLista[] = [];
+  const pila: NodoLista[] = [];
+  for (const e of elementos) {
+    const nodo = { e, hijos: [] };
+    while (pila.length && pila[pila.length - 1].e.nivel >= e.nivel) pila.pop();
+    (pila.length ? pila[pila.length - 1].hijos : raices).push(nodo);
+    pila.push(nodo);
+  }
+  return raices;
+}
+
+/** Los hermanos seguidos del mismo tipo van en la misma lista. */
+function tramosDeLista(nodos: NodoLista[]): NodoLista[][] {
+  const tramos: NodoLista[][] = [];
+  for (const n of nodos) {
+    const ultimo = tramos[tramos.length - 1];
+    if (ultimo && ultimo[0].e.ordenada === n.e.ordenada) ultimo.push(n);
+    else tramos.push([n]);
+  }
+  return tramos;
 }
 
 export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBarra, pie }: {
@@ -44,7 +69,8 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
   /** Lo que va debajo del texto: paginación. */
   pie?: ComponentChildren;
 }) {
-  const frases = useMemo(() => partirFrases(texto), [texto]);
+  const bloques = useMemo(() => leerEstructura(texto), [texto]);
+  const { frases, deLinea } = useMemo(() => frasesDeBloques(bloques, lengua.value.escritura.frase.partir), [bloques, lengua.value.id]);
   const [tokens, fijarTokens] = useState<PalabraToken[][]>([]);
   const [abierta, fijarAbierta] = useState<Abierta | null>(null);
   const [actual, fijarActual] = useState(-1);
@@ -131,6 +157,100 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
     guardarPreferencia('tamanoLectura', n);
   };
 
+  const pintarPalabra = (p: PalabraToken, i: number, k: number) => (
+    <span
+      key={k}
+      class={['pal', `est-${p.estado}`, p.rastreada ? 'rastreada' : '', p.patron && ajustes.colorAcento !== 'ninguno' ? `ac-${p.patron}` : '', abierta?.sitio === `${i}-${k}` ? 'ap-elegida' : ''].join(' ')}
+      onClick={(e) => {
+        e.stopPropagation();
+        const f = frases[i];
+        fijarAbierta({
+          palabra: p,
+          frase: f,
+          antes: frases.slice(Math.max(0, i - 6), i),
+          despues: frases.slice(i + 1, i + 7),
+          gramatica: motorDe(lengua.value.id).detectarGramatica(f),
+          sitio: `${i}-${k}`,
+        });
+      }}
+    >
+      {p.furigana.map((s, j) =>
+        s.lectura && ajustes.furigana !== 'ninguna' ? (
+          <ruby key={j}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
+        ) : (
+          <span key={j}>{s.texto}</span>
+        )
+      )}
+    </span>
+  );
+
+  /**
+   * Una frase con sus palabras. Lo que el análisis no cubre (espacios, sangría) se pinta tal cual entre ellas; si algún
+   * trozo no aparece en el texto, se pintan solo las piezas, como antes. Las negritas se miden sobre el texto de la línea.
+   */
+  const pintarFrase = ({ indice, inicio }: FraseDeLinea, negritas: [number, number][]) => {
+    const texto = frases[indice];
+    const piezas = tokens[indice] ?? [];
+    const salida: JSX.Element[] = [];
+    let cursor = 0;
+    let alineado = true;
+    piezas.forEach((p, k) => {
+      const pos = alineado ? texto.indexOf(p.superficie, cursor) : -1;
+      if (pos < 0) alineado = false;
+      else {
+        if (pos > cursor) salida.push(<span key={`h${k}`}>{texto.slice(cursor, pos)}</span>);
+        cursor = pos + p.superficie.length;
+      }
+      const pieza = p.esPalabra ? pintarPalabra(p, indice, k) : <span key={k}>{lengua.value.escritura.pegarSignos(p.superficie)}</span>;
+      const negrita = pos >= 0 && negritas.some(([a, b]) => a < inicio + cursor && b > inicio + pos);
+      salida.push(negrita ? <b key={`b${k}`}>{pieza}</b> : pieza);
+    });
+    if (alineado && cursor < texto.length) salida.push(<span key="fin">{texto.slice(cursor)}</span>);
+    return <span key={indice} class={indice === actual ? 'oracion-activa' : ''}>{salida}</span>;
+  };
+
+  const pintarLinea = (l: Linea) => (deLinea.get(l) ?? []).map((f) => pintarFrase(f, l.negritas));
+  const conSaltos = (lineas: Linea[], salto: () => ComponentChildren) => lineas.map((l, j) => <Fragment key={j}>{j > 0 && salto()}{pintarLinea(l)}</Fragment>);
+
+  const pintarLista = (nodos: NodoLista[]): JSX.Element[] =>
+    tramosDeLista(nodos).map((tramo, t) => {
+      const elementos = tramo.map((n, j) => (
+        <li key={j}>
+          {conSaltos(n.e.lineas, () => <br />)}
+          {n.hijos.length > 0 && pintarLista(n.hijos)}
+        </li>
+      ));
+      return tramo[0].e.ordenada ? <ol key={t} start={tramo[0].e.numero || 1}>{elementos}</ol> : <ul key={t}>{elementos}</ul>;
+    });
+
+  const pintarBloque = (b: Bloque, i: number) => {
+    switch (b.tipo) {
+      case 'parrafo':
+        return <p key={i} class="ap-p">{conSaltos(b.lineas, () => <br />)}</p>;
+      case 'titulo': {
+        const Titulo = (['h2', 'h3', 'h4'] as const)[b.nivel - 1];
+        return <Titulo key={i} class="ap-t">{pintarLinea(b.linea)}</Titulo>;
+      }
+      case 'lista':
+        return <Fragment key={i}>{pintarLista(arbolDeLista(b.elementos))}</Fragment>;
+      case 'cita':
+        return <blockquote key={i} class="ap-cita">{conSaltos(b.lineas, () => <br />)}</blockquote>;
+      case 'codigo':
+        return <pre key={i} class="ap-codigo">{conSaltos(b.lineas, () => '\n')}</pre>;
+      case 'tabla':
+        return (
+          <div key={i} class="ap-tabla">
+            <table>
+              {b.cabecera && <thead><tr>{b.cabecera.map((c, j) => <th key={j}>{pintarLinea(c)}</th>)}</tr></thead>}
+              <tbody>{b.filas.map((f, r) => <tr key={r}>{f.map((c, j) => <td key={j}>{pintarLinea(c)}</td>)}</tr>)}</tbody>
+            </table>
+          </div>
+        );
+      case 'separador':
+        return <hr key={i} class="ap-sep" />;
+    }
+  };
+
   return (
     <div class={`ap-lectura ${abierta ? 'con-ficha' : ''}`}>
       <div class="ap-lectura-principal">
@@ -160,40 +280,7 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
               <span class="esqueleto" style={{ width: '60%' }} />
             </div>
           )}
-          {frases.map((f, i) => (
-            <span key={i} class={i === actual ? 'oracion-activa' : ''}>
-              {!f.trim() && <br />}
-              {(tokens[i] ?? []).map((p, k) =>
-                p.esPalabra ? (
-                  <span
-                    key={k}
-                    class={['pal', `est-${p.estado}`, p.rastreada ? 'rastreada' : '', p.patron && ajustes.colorAcento !== 'ninguno' ? `ac-${p.patron}` : '', abierta?.sitio === `${i}-${k}` ? 'ap-elegida' : ''].join(' ')}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fijarAbierta({
-                        palabra: p,
-                        frase: f,
-                        antes: frases.slice(Math.max(0, i - 6), i),
-                        despues: frases.slice(i + 1, i + 7),
-                        gramatica: motorDe(lengua.value.id).detectarGramatica(f),
-                        sitio: `${i}-${k}`,
-                      });
-                    }}
-                  >
-                    {p.furigana.map((s, j) =>
-                      s.lectura && ajustes.furigana !== 'ninguna' ? (
-                        <ruby key={j}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
-                      ) : (
-                        <span key={j}>{s.texto}</span>
-                      )
-                    )}
-                  </span>
-                ) : (
-                  <span key={k}>{lengua.value.escritura.pegarSignos(p.superficie)}</span>
-                )
-              )}
-            </span>
-          ))}
+          {tokens.length > 0 && bloques.map(pintarBloque)}
         </article>
 
         {pie}
@@ -226,7 +313,7 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
             ajustes={ajustes}
             gramatica={abierta.gramatica}
             // Contexto amplio: las frases alrededor y el texto entero para documentos no muy largos.
-            contexto={{ frase: abierta.frase, antes: abierta.antes, despues: abierta.despues, titulo, guion: texto.length < 60000 ? texto : undefined }}
+            contexto={{ frase: abierta.frase, antes: abierta.antes, despues: abierta.despues, titulo, guion: texto.length < 60000 ? textoPlano(bloques) : undefined }}
             alCorregirLectura={analizar}
             alEnviar={(r) =>
               enviarAlCreador(

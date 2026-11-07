@@ -222,7 +222,7 @@ async function crearMenus() {
   await fijarIdioma((await leerAjustes()).idiomaInterfaz);
   await chrome.contextMenus.removeAll();
   chrome.contextMenus.create({ id: 'kotonoha-buscar', title: tr('Buscar «%s» en Kotonoha'), contexts: ['selection'] }, () => void chrome.runtime.lastError);
-  chrome.contextMenus.create({ id: 'kotonoha-leer', title: tr('Abrir selección en el lector'), contexts: ['selection'] }, () => void chrome.runtime.lastError);
+  chrome.contextMenus.create({ id: 'kotonoha-leer', title: tr('Abrir selección en el Portapapeles'), contexts: ['selection'] }, () => void chrome.runtime.lastError);
 }
 
 let idiomaMenus: string | undefined;

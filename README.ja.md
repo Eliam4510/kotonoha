@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.5.1-A9E45B?style=flat-square" alt="バージョン 0.5.1">
+  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.6.0-A9E45B?style=flat-square" alt="バージョン 0.6.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="継続的インテグレーション"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-508-0ca30c?style=flat-square" alt="単体テスト 508 件">
+  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-712-0ca30c?style=flat-square" alt="単体テスト 712 件">
   <img src="https://img.shields.io/badge/%E8%A1%A8%E7%A4%BA-6%20%E8%A8%80%E8%AA%9E-8FCBFF?style=flat-square" alt="表示は 6 言語">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5〜N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1〜C2">
@@ -91,22 +91,22 @@ Kotonoha（言の葉）は、YouTube、Netflix などのプレーヤーにイン
   <tr>
     <td width="33%" align="center"><img src="docs/img/inicio.png" alt="アプリのホーム画面"></td>
     <td width="33%" align="center"><img src="docs/img/memoria.png" alt="内蔵のカード復習"></td>
-    <td width="33%" align="center"><img src="docs/img/lector.png" alt="ふりがなとピッチアクセント付きのテキストリーダー"></td>
+    <td width="33%" align="center"><img src="docs/img/lector.png" alt="ふりがなとピッチアクセント付きのクリップボード"></td>
   </tr>
   <tr>
     <td valign="top"><b>完全なアプリ</b><br>ホーム、活用形がわかる辞書、状態別の単語一覧、レベル評価、作業ごとの設定、編集できるプロンプト。明るいテーマと暗いテーマ。</td>
     <td valign="top"><b>ワンクリックでカード</b><br>動画の音声と画面を付けて、AnkiConnect で Anki へ、または FSRS を使う内蔵の復習へ直接送ります。</td>
-    <td valign="top"><b>動画だけでなく</b><br>テキストリーダー、EPUB ライブラリ、レベルに合わせた物語、MKV の字幕に対応した手元のファイルのプレーヤー。</td>
+    <td valign="top"><b>動画だけでなく</b><br>コピーした内容の構成を保つクリップボード、EPUB の本のための読書アシスト、レベルに合わせた物語、MKV の字幕に対応した手元のファイルのプレーヤー。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/paginas.ja.png" alt="日本語の記事の上のリーダー、色分けとふりがな"></td>
     <td width="33%" align="center"><img src="docs/img/trazos.ja.png" alt="単語パネルの書き順"></td>
-    <td width="33%" align="center"><img src="docs/img/lector-web.ja.png" alt="通常のブラウザタブのリーダー"></td>
+    <td width="33%" align="center"><img src="docs/img/lector-web.ja.png" alt="通常のブラウザタブのクリップボード"></td>
   </tr>
   <tr>
     <td valign="top"><b>どのページも、壊さずに</b><br>ニュース、記事、ブログの日本語に色分けとふりがなを表示します。単語をクリックすると単語パネルが開き、リンクやボタンではマウスを合わせるだけです。ページの内容には何も加えません。触れるのはふりがなが収まらない箇所の行間だけで、それもオフにできます。</td>
     <td valign="top"><b>書き方</b><br>単語パネルが、単語の各漢字の画を番号付きで 1 画ずつ繰り返し見せます。一時停止して 1 画ずつ進められます。各漢字は一度ダウンロードすると保存されます。</td>
-    <td valign="top"><b>タブで使えるリーダー</b><br>リーダーは通常のタブでも開けるので、ブラウザの分割表示に使え、今見ているページのすぐ横にも開けます。クリップボードを追うこともでき、コピーした内容がそこに現れます。</td>
+    <td valign="top"><b>タブで使えるクリップボード</b><br>クリップボードは通常のタブでも開けるので、ブラウザの分割表示に使え、今見ているページのすぐ横にも開けます。システムのクリップボードを追うこともでき、コピーした内容が段落、見出し、リスト、表とともにそこに現れます。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/bienvenida.ja.png" alt="言語を選ぶようこそ画面"></td>
@@ -262,7 +262,7 @@ npm run paquete
 | `node herramientas/idiomas.mjs` | 言語ごとの不足と余分 |
 | `node pruebas/lector.mjs` | ページリーダーの難しい場合：何も動かないこと、クリック、リンク、カルーセル、アコーディオン、届き続けるテキスト、シャドウツリー、チャットのようなスクロールするボックス |
 | `node pruebas/lector-real.mjs` | 約 30 の公開サイトでのリーダー、各サイトのスクリーンショット付き。`KK_LENGUA=en` を付けると英語のサイトで実行します |
-| `node pruebas/trazos-web.mjs` | 実データの書き順、タブのリーダー、クリップボード、分割表示 |
+| `node pruebas/trazos-web.mjs` | 実データの書き順、タブのクリップボード、コピーや貼り付けをしたテキストと取り込んだ EPUB の構成、分割表示 |
 | `node pruebas/ingles.mjs` | 英語の学習を最初から最後まで：言語の選択、辞書のインストール、動画、ページ、そして何も混ざらずに日本語に戻ること |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU での英語の Whisper と、シミュレートした Claude の修正 |
 | `node pruebas/aleman.mjs` | 実際の辞書でドイツ語を最初から最後まで：言語の選択、辞書のインストール、解析、動画、ページ、日本語へ戻る |
@@ -289,7 +289,7 @@ npm run paquete
 
 ## プロジェクトの状況
 
-現在のバージョンは 0.5.1 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストし、YouTube の実際のセッションでも手作業で確認しました。Claude が直した自動字幕、解説、歌の歌詞です。ドイツ語は Wiktionary の実際の辞書を使い、YouTube を模したページとページリーダーでテストし、文字起こしは実際の録音でテストし、YouTube でも手作業で確認しました。動画からの言語の切り替え、動画の字幕と自動字幕、Claude による修正です。
+現在のバージョンは 0.6.0 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストし、YouTube の実際のセッションでも手作業で確認しました。Claude が直した自動字幕、解説、歌の歌詞です。ドイツ語は Wiktionary の実際の辞書を使い、YouTube を模したページとページリーダーでテストし、文字起こしは実際の録音でテストし、YouTube でも手作業で確認しました。動画からの言語の切り替え、動画の字幕と自動字幕、Claude による修正です。
 
 ## プライバシー
 

@@ -15,6 +15,7 @@ import type {
   ResultadoBusqueda,
   TarjetaMemoria,
 } from '../compartido/tipos';
+import { estructuraDeHtml, estructuraDeNodo, type NodoHtml, normalizarTextoPlano, textoConEstructura } from '../nucleo/estructura';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
@@ -269,7 +270,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
               </div>
             ))}
           </div>
-          <button class="ap-enlace-tarjeta" onClick={() => navegar('lector')}><Icono n="portapapeles" t={16} /> {tr('O pega un texto en el lector')} <Icono n="flecha" t={14} /></button>
+          <button class="ap-enlace-tarjeta" onClick={() => navegar('lector')}><Icono n="portapapeles" t={16} /> {tr('O pega un texto en el Portapapeles')} <Icono n="flecha" t={14} /></button>
         </section>
 
         <TarjetaGasto credito={ajustes.creditoMensual} />
@@ -416,6 +417,21 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
 
 // ---------- Lector ----------
 
+/** Lo copiado, con su estructura cuando trae HTML; si el navegador no deja leer el HTML, el texto como siempre. */
+async function pegadoConEstructura(): Promise<string> {
+  try {
+    for (const item of await navigator.clipboard.read()) {
+      const leer = async (tipo: string) => (item.types.includes(tipo) ? (await item.getType(tipo)).text() : '');
+      const html = await leer('text/html');
+      const texto = await leer('text/plain');
+      if (html || texto) return textoConEstructura(html, texto);
+    }
+  } catch {
+    // Sigue abajo con el texto plano.
+  }
+  return normalizarTextoPlano(await navigator.clipboard.readText());
+}
+
 export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; inicial: string; web?: boolean }) {
   const [texto, fijarTexto] = useState(inicial);
   const [leyendo, fijarLeyendo] = useState(!!inicial);
@@ -447,7 +463,7 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
   }, [web]);
 
   const botonWeb = !web && (
-    <button class="btn chico fantasma" data-tip={tr('Abre el lector en una pestaña normal del navegador, para ponerlo en vista dividida junto a otra página.')} onClick={async () => {
+    <button class="btn chico fantasma" data-tip={tr('Abre el Portapapeles en una pestaña normal del navegador, para ponerlo en vista dividida junto a otra página.')} onClick={async () => {
       await guardarTextoLector(texto);
       await fondo.abrirLectorWeb();
     }}><Icono n="dividir" t={15} /> {tr('Modo web')}</button>
@@ -459,7 +475,7 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
         <TextoInteractivo
           texto={texto}
           ajustes={ajustes}
-          titulo={tr('Texto del lector')}
+          titulo={tr('Portapapeles')}
           inicioBarra={<><button class="btn chico fantasma" onClick={() => fijarLeyendo(false)}><Icono n="flecha-izq" t={15} /> {tr('Editar el texto')}</button>{botonWeb}</>}
         />
       </div>
@@ -468,12 +484,37 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
 
   return (
     <div class="ap-lienzo ap-lector-entrada">
-      <Cabecera titulo={tr('Lector')} sub={tr(lengua.value.textos.lectorPegar)}>{botonWeb}</Cabecera>
+      <Cabecera titulo={tr('Portapapeles')} sub={tr(lengua.value.textos.lectorPegar)}>{botonWeb}</Cabecera>
       <div class="ap-hoja-escritura">
-        <textarea lang={lengua.value.id} aria-label={tr('Texto a leer')} value={texto} placeholder={lengua.value.ejemplos.pegarTexto} onInput={(e) => fijarTexto(e.currentTarget.value)} />
+        <textarea
+          lang={lengua.value.id}
+          aria-label={tr('Texto a leer')}
+          value={texto}
+          placeholder={lengua.value.ejemplos.pegarTexto}
+          onInput={(e) => fijarTexto(e.currentTarget.value)}
+          onPaste={(e) => {
+            // Lo copiado de una página trae su HTML, y se pega con su estructura. El texto plano entra como siempre.
+            const html = e.clipboardData?.getData('text/html');
+            if (!html) return;
+            const md = textoConEstructura(html, e.clipboardData?.getData('text/plain'));
+            if (!md) return;
+            e.preventDefault();
+            const area = e.currentTarget;
+            const antes = area.value.slice(0, area.selectionStart);
+            const despues = area.value.slice(area.selectionEnd);
+            // Lo que trae bloques (títulos, listas, varios párrafos) va en su propio párrafo; un trozo de frase, donde esté el cursor.
+            const enBloque = md.includes('\n') || /^(#|>|[-*+] |\d+[.)] |\||```|~~~)/.test(md);
+            const separar = (lado: string, alFinal: boolean) => {
+              if (!enBloque || !lado) return '';
+              const borde = alFinal ? lado.slice(-2) : lado.slice(0, 2);
+              return borde === '\n\n' ? '' : borde.includes('\n') ? '\n' : '\n\n';
+            };
+            fijarTexto(antes + separar(antes, true) + md + separar(despues, false) + despues);
+          }}
+        />
         <div class="ap-hoja-pie">
           <div class="ap-botones">
-            <button class="btn fantasma chico" onClick={async () => fijarTexto(await navigator.clipboard.readText())}><Icono n="portapapeles" t={15} /> {tr('Pegar')}</button>
+            <button class="btn fantasma chico" onClick={async () => fijarTexto(await pegadoConEstructura())}><Icono n="portapapeles" t={15} /> {tr('Pegar')}</button>
             {texto ? (
               <button class="btn fantasma chico" onClick={() => {
                 fijarTexto('');
@@ -495,7 +536,7 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
           </div>
         </div>
       </div>
-      <p class="ayuda ap-nota-lector">{tr('También puedes seleccionar texto en cualquier página y elegir «Abrir selección en el lector» en el menú contextual.')}</p>
+      <p class="ayuda ap-nota-lector">{tr('También puedes seleccionar texto en cualquier página y elegir «Abrir selección en el Portapapeles» en el menú contextual.')}</p>
     </div>
   );
 }
@@ -504,14 +545,17 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
 
 const TAM_PAGINA = 2500;
 
+/** Parte el texto en páginas: entre párrafos si se puede, y si no, al final de una línea. */
 function paginas(texto: string): string[] {
   const salida: string[] = [];
   let i = 0;
   while (i < texto.length) {
     let fin = Math.min(i + TAM_PAGINA, texto.length);
     if (fin < texto.length) {
-      const corte = texto.lastIndexOf('\n', fin);
-      if (corte > i + TAM_PAGINA / 2) fin = corte + 1;
+      const parrafo = texto.lastIndexOf('\n\n', fin);
+      const linea = texto.lastIndexOf('\n', fin);
+      if (parrafo > i + TAM_PAGINA / 2) fin = parrafo + 2;
+      else if (linea > i + TAM_PAGINA / 2) fin = linea + 1;
     }
     salida.push(texto.slice(i, fin));
     i = fin;
@@ -522,7 +566,7 @@ function paginas(texto: string): string[] {
 async function textoDeArchivo(f: File): Promise<string> {
   const crudo = await f.text();
   if (/\.(srt|vtt|ass|ssa)$/i.test(f.name)) return analizarSubtitulos(crudo).map((l) => l.texto).join('\n');
-  if (/\.html?$/i.test(f.name)) return new DOMParser().parseFromString(crudo, 'text/html').body.innerText;
+  if (/\.html?$/i.test(f.name)) return estructuraDeHtml(crudo);
   if (/\.epub$/i.test(f.name)) return textoDeEpub(await f.arrayBuffer());
   return crudo;
 }
@@ -540,9 +584,9 @@ async function textoDeEpub(datos: ArrayBuffer): Promise<string> {
     const href = items.get(r.getAttribute('idref'));
     const a = href ? archivos[base + decodeURI(href)] : undefined;
     if (!a) continue;
+    // Cada capítulo con su estructura: títulos, párrafos y listas, sin el furigana del libro.
     const html = new DOMParser().parseFromString(strFromU8(a), 'text/html');
-    html.querySelectorAll('rt, rp').forEach((e) => e.remove());
-    const t = (html.body?.textContent ?? '').replace(/\n{3,}/g, '\n\n').trim();
+    const t = html.body ? estructuraDeNodo(html.body as unknown as NodoHtml).trim() : '';
     if (t) partes.push(t);
   }
   return partes.join('\n\n');
@@ -665,7 +709,7 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
           titulo={abierto.titulo}
           inicioBarra={
             <>
-              <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Biblioteca')}</button>
+              <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Ayuda de lectura')}</button>
               <b class="ap-lectura-titulo" lang={lengua.value.id}>{abierto.titulo}</b>
             </>
           }
@@ -693,7 +737,7 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
       onDragLeave={(e) => { if (e.currentTarget === e.target) fijarArrastrando(false); }}
       onDrop={(e) => { e.preventDefault(); fijarArrastrando(false); importar(e.dataTransfer?.files); }}
     >
-      <Cabecera titulo={tr('Biblioteca')} sub={tr('Tus libros, textos y subtítulos, listos para leer con diccionario y Claude.')} />
+      <Cabecera titulo={tr('Ayuda de lectura')} sub={tr('Tus libros, textos y subtítulos, listos para leer con diccionario y Claude.')} />
 
       <div class="ap-biblioteca-entrada">
         <button class={`ap-soltar ${arrastrando ? 'activo' : ''}`} onClick={() => entrada.current?.click()}>

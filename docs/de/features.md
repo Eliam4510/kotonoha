@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.5.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.6.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -96,10 +96,10 @@ Stand jeder Funktion in Version 0.5.1 und die Art ihrer Überprüfung.
 | Startseite mit Übersicht über Wortschatz und Wiederholung | Automatisch |
 | Kosten für Claude: Monatssumme, Diagramm nach Tagen und Modellen, Aufgaben und Anfrageprotokoll | Simulator |
 | Wörterbuch mit freier Suche und konjugierten Formen | Automatisch |
-| Reader für eingefügten Text | Automatisch |
-| Reader in einem normalen Tab, auch in geteilter Ansicht neben der angezeigten Seite | Automatisch, in Edge und Chrome |
+| Zwischenablage: Eingefügter oder kopierter Text behält Absätze, Zeilenumbrüche, Überschriften, Listen, Zitate, Code, Tabellen und Fettdruck, ohne die Furigana der Ursprungsseite | Automatisch |
+| Zwischenablage in einem normalen Tab, auch in geteilter Ansicht neben der angezeigten Seite | Automatisch, in Edge und Chrome |
 | Zwischenablage folgen, ohne dass der Tab den Fokus hat | Automatisch |
-| Bibliothek: EPUB, TXT und SRT | Automatisch |
+| Lesehilfe: EPUB, TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
 | Nach Niveau erzeugte Geschichten | Simulator |
 | Player für eigene Dateien | Automatisch |
 | In MKV eingebettete Untertitel und Wahl der Audiospur, mit ffmpeg.wasm | Automatisch |

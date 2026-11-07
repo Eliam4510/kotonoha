@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.5.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.6.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -96,10 +96,10 @@ Estado de cada función en la versión 0.5.1, con la forma en que se ha verifica
 | Inicio con resumen de vocabulario y repaso | Automática |
 | Gasto en Claude: total del mes, gráfica por días y modelos, tareas y registro de peticiones | Simulador |
 | Diccionario con búsqueda libre y formas conjugadas | Automática |
-| Lector de texto pegado | Automática |
-| Lector en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
+| Portapapeles: lo pegado o copiado conserva sus párrafos, saltos de línea, títulos, listas, citas, código, tablas y negritas, sin el furigana de la página de origen | Automática |
+| Portapapeles en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
 | Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
-| Biblioteca: EPUB, TXT y SRT | Automática |
+| Ayuda de lectura: EPUB, TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Relatos generados según el nivel | Simulador |
 | Reproductor de archivos propios | Automática |
 | Subtítulos incrustados en MKV y elección de pista de audio, con ffmpeg.wasm | Automática |

@@ -218,11 +218,11 @@ Nada de esto añade nada al contenido de la página. Los colores usan la CSS Cus
 
 `Alt+K`, `Alt+U` y `Alt+I` marcan en bloque el texto seleccionado como conocido, desconocido o ignorado.
 
-**Lector.** Muestra cualquier texto pegado con las mismas ayudas que los subtítulos.
+**Portapapeles.** Muestra cualquier texto pegado o copiado con las mismas ayudas que los subtítulos, y conserva su estructura: párrafos, saltos de línea, títulos, listas, citas, código, tablas y negritas. Lo copiado de una página deja fuera el furigana de esa página, y el Markdown que se copia del chat de Claude se ve con su formato.
 
-**Modo web.** La ventana de la aplicación no tiene pestañas, así que no puede entrar en la vista dividida del navegador. El botón **Modo web** del lector lo abre en una pestaña normal, sin la barra lateral, y **Abrir el lector junto a esta pestaña**, en el menú de la extensión, lo pone directamente al lado de la página que se esté viendo (Chrome 155 o posterior). En esa pestaña, **Seguir el portapapeles** añade debajo el japonés que se copie en cualquier sitio, mientras la pestaña esté a la vista. Es una página de la propia extensión: no necesita servidor, funciona sin conexión y el texto no sale del equipo.
+**Modo web.** La ventana de la aplicación no tiene pestañas, así que no puede entrar en la vista dividida del navegador. El botón **Modo web** del Portapapeles lo abre en una pestaña normal, sin la barra lateral, y **Abrir el Portapapeles junto a esta pestaña**, en el menú de la extensión, lo pone directamente al lado de la página que se esté viendo (Chrome 155 o posterior). En esa pestaña, **Seguir el portapapeles** añade debajo el japonés que se copie en cualquier sitio, mientras la pestaña esté a la vista. Es una página de la propia extensión: no necesita servidor, funciona sin conexión y el texto no sale del equipo.
 
-**Biblioteca.** Guarda libros EPUB, textos y subtítulos SRT, con el punto de lectura. También puede generar relatos con Claude ajustados al nivel configurado.
+**Ayuda de lectura.** Guarda libros EPUB, textos y subtítulos SRT, con el punto de lectura y la estructura de cada capítulo. También puede generar relatos con Claude ajustados al nivel configurado.
 
 **Reproductor local.** Reproduce archivos propios, con los subtítulos incrustados de un MKV y la elección de pista de audio, mediante ffmpeg.wasm.
 

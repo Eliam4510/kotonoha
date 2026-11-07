@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.5.1, along with how it has been verified.
+Status of each feature in version 0.6.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -96,10 +96,10 @@ Status of each feature in version 0.5.1, along with how it has been verified.
 | Home with vocabulary and review summary | Automated |
 | Claude spending: monthly total, chart by day and model, tasks and request log | Simulator |
 | Dictionary with free search and conjugated forms | Automated |
-| Reader for pasted text | Automated |
-| Reader in a regular tab, also in split view next to the page being viewed | Automated, on Edge and Chrome |
+| Clipboard: pasted or copied text keeps its paragraphs, line breaks, headings, lists, quotes, code, tables and bold, without the source page's furigana | Automated |
+| Clipboard in a regular tab, also in split view next to the page being viewed | Automated, on Edge and Chrome |
 | Following the clipboard, without the tab having focus | Automated |
-| Library: EPUB, TXT and SRT | Automated |
+| Reading assistant: EPUB, TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
 | Stories generated for the user's level | Simulator |
 | Player for local files | Automated |
 | Embedded MKV subtitles and audio track selection, with ffmpeg.wasm | Automated |

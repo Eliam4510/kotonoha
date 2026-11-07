@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.5.1-A9E45B?style=flat-square" alt="Version 0.5.1">
+  <img src="https://img.shields.io/badge/Version-0.6.0-A9E45B?style=flat-square" alt="Version 0.6.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Kontinuierliche Integration"></a>
-  <img src="https://img.shields.io/badge/Unit--Tests-508-0ca30c?style=flat-square" alt="508 Unit-Tests">
+  <img src="https://img.shields.io/badge/Unit--Tests-712-0ca30c?style=flat-square" alt="712 Unit-Tests">
   <img src="https://img.shields.io/badge/Oberfl%C3%A4che-6%20Sprachen-8FCBFF?style=flat-square" alt="Oberfläche in 6 Sprachen">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 bis N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 bis C2">
@@ -91,22 +91,22 @@ Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japa
   <tr>
     <td width="33%" align="center"><img src="docs/img/inicio.png" alt="Startseite der Anwendung"></td>
     <td width="33%" align="center"><img src="docs/img/memoria.png" alt="Eingebaute Kartenwiederholung"></td>
-    <td width="33%" align="center"><img src="docs/img/lector.png" alt="Textleser mit Furigana und Tonhöhenakzent"></td>
+    <td width="33%" align="center"><img src="docs/img/lector.png" alt="Zwischenablage mit Furigana und Tonhöhenakzent"></td>
   </tr>
   <tr>
     <td valign="top"><b>Eine vollständige Anwendung</b><br>Startseite, Wörterbuch mit konjugierten Formen, Wortübersicht nach Status, Niveaubewertung, Einstellungen pro Aufgabe und bearbeitbare Prompts. Helles und dunkles Design.</td>
     <td valign="top"><b>Karten mit einem Klick</b><br>Mit Audio und Einzelbild des Videos, direkt an Anki über AnkiConnect oder an die eingebaute Wiederholung mit FSRS.</td>
-    <td valign="top"><b>Mehr als Video</b><br>Textleser, EPUB-Bibliothek, Geschichten passend zum Niveau und ein Player für eigene Dateien mit MKV-Untertiteln.</td>
+    <td valign="top"><b>Mehr als Video</b><br>Eine Zwischenablage, die die Struktur des Kopierten bewahrt, eine Lesehilfe für EPUB-Bücher, Geschichten passend zum Niveau und ein Player für eigene Dateien mit MKV-Untertiteln.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/paginas.de.png" alt="Reader auf einem japanischen Artikel, mit Farben und Furigana"></td>
     <td width="33%" align="center"><img src="docs/img/trazos.de.png" alt="Strichfolge eines Wortes im Wortfenster"></td>
-    <td width="33%" align="center"><img src="docs/img/lector-web.de.png" alt="Reader in einem normalen Browser-Tab"></td>
+    <td width="33%" align="center"><img src="docs/img/lector-web.de.png" alt="Zwischenablage in einem normalen Browser-Tab"></td>
   </tr>
   <tr>
     <td valign="top"><b>Jede Seite, ohne sie zu zerstören</b><br>Farben und Furigana auf dem Japanisch von Nachrichten, Artikeln und Blogs. Ein Klick auf ein Wort öffnet sein Wortfenster; bei Links und Schaltflächen genügt es, die Maus darauf ruhen zu lassen. Dem Inhalt der Seite wird nichts hinzugefügt: Berührt wird höchstens der Zeilenabstand, wo Furigana nicht passt, und das lässt sich abschalten.</td>
     <td valign="top"><b>Wie es geschrieben wird</b><br>Das Wortfenster zeigt die Striche jedes Kanji des Wortes, einzeln und in einer Schleife, mit ihren Nummern. Es lässt sich anhalten und Schritt für Schritt durchgehen. Jedes Kanji wird einmal heruntergeladen und bleibt gespeichert.</td>
-    <td valign="top"><b>Reader in einem Tab</b><br>Der Reader öffnet sich auch in einem normalen Tab, für die geteilte Ansicht des Browsers, sogar direkt neben der gerade angezeigten Seite. Er kann der Zwischenablage folgen: Was man kopiert, erscheint dort.</td>
+    <td valign="top"><b>Zwischenablage in einem Tab</b><br>Die Zwischenablage öffnet sich auch in einem normalen Tab, für die geteilte Ansicht des Browsers, sogar direkt neben der gerade angezeigten Seite. Sie kann der Zwischenablage des Systems folgen: Was man kopiert, erscheint dort, mit Absätzen, Überschriften, Listen und Tabellen.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/bienvenida.de.png" alt="Begrüßung mit der Sprachauswahl"></td>
@@ -262,7 +262,7 @@ Der letzte Befehl kompiliert und legt in `release/` die ZIP-Dateien der Erweiter
 | `node herramientas/idiomas.mjs` | Was in jeder Sprache fehlt oder übrig ist |
 | `node pruebas/lector.mjs` | Der Seiten-Reader in den schwierigen Fällen: Nichts bewegt sich, Klick, Links, Karussells, Akkordeons, live eintreffender Text, Shadow Trees und eine scrollende Box wie in einem Chat |
 | `node pruebas/lector-real.mjs` | Der Reader auf rund dreißig öffentlichen Websites, mit einem Screenshot von jeder. Mit `KK_LENGUA=en` auf englischen Websites |
-| `node pruebas/trazos-web.mjs` | Die Strichfolge mit echten Daten, der Reader im Tab, die Zwischenablage und die geteilte Ansicht |
+| `node pruebas/trazos-web.mjs` | Die Strichfolge mit echten Daten, die Zwischenablage im Tab, die Struktur von kopiertem und eingefügtem Text und eines importierten EPUB sowie die geteilte Ansicht |
 | `node pruebas/ingles.mjs` | Englisch von Anfang bis Ende: die Sprache wählen, die Wörterbücher installieren, ein Video, eine Seite und zurück zum Japanischen, ohne dass sich etwas vermischt |
 | `node pruebas/ingles-whisper.mjs stimme.wav` | Whisper auf Englisch auf der GPU, mit simulierter Korrektur durch Claude |
 | `node pruebas/aleman.mjs` | Deutsch von Anfang bis Ende mit den echten Wörterbüchern: die Sprache wählen, sie installieren, Analyse, ein Video, eine Seite und zurück zum Japanischen |
@@ -289,7 +289,7 @@ Die Browsertests verwenden eine Kompilierung mit fester Kennung, die mit `KK_SAL
 
 ## Projektstand
 
-Version 0.5.1 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, mit dem Seiten-Reader auf 16 echten öffentlichen Websites und von Hand in einer echten Sitzung auf YouTube: automatische Untertitel mit Korrekturen von Claude, Erklärungen und der Liedtext eines Songs. Deutsch wurde mit den echten Wörterbüchern aus Wiktionary getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader, seine Transkription mit einer echten Aufnahme und von Hand auf YouTube: der Sprachwechsel im Video, eigene und automatische Untertitel und ihre Korrektur durch Claude.
+Version 0.6.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, mit dem Seiten-Reader auf 16 echten öffentlichen Websites und von Hand in einer echten Sitzung auf YouTube: automatische Untertitel mit Korrekturen von Claude, Erklärungen und der Liedtext eines Songs. Deutsch wurde mit den echten Wörterbüchern aus Wiktionary getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader, seine Transkription mit einer echten Aufnahme und von Hand auf YouTube: der Sprachwechsel im Video, eigene und automatische Untertitel und ihre Korrektur durch Claude.
 
 ## Datenschutz
 
