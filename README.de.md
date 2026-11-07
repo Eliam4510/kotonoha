@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.5.0-A9E45B?style=flat-square" alt="Version 0.5.0">
+  <img src="https://img.shields.io/badge/Version-0.5.1-A9E45B?style=flat-square" alt="Version 0.5.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Kontinuierliche Integration"></a>
   <img src="https://img.shields.io/badge/Unit--Tests-508-0ca30c?style=flat-square" alt="508 Unit-Tests">
   <img src="https://img.shields.io/badge/Oberfl%C3%A4che-6%20Sprachen-8FCBFF?style=flat-square" alt="Oberfläche in 6 Sprachen">
@@ -289,7 +289,7 @@ Die Browsertests verwenden eine Kompilierung mit fester Kennung, die mit `KK_SAL
 
 ## Projektstand
 
-Version 0.5.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, mit dem Seiten-Reader auf 16 echten öffentlichen Websites und von Hand in einer echten Sitzung auf YouTube: automatische Untertitel mit Korrekturen von Claude, Erklärungen und der Liedtext eines Songs. Deutsch wurde mit den echten Wörterbüchern aus Wiktionary getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader, seine Transkription mit einer echten Aufnahme; eine echte Sitzung auf einer Videoseite steht noch aus.
+Version 0.5.1 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, mit dem Seiten-Reader auf 16 echten öffentlichen Websites und von Hand in einer echten Sitzung auf YouTube: automatische Untertitel mit Korrekturen von Claude, Erklärungen und der Liedtext eines Songs. Deutsch wurde mit den echten Wörterbüchern aus Wiktionary getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader, seine Transkription mit einer echten Aufnahme und von Hand auf YouTube: der Sprachwechsel im Video, eigene und automatische Untertitel und ihre Korrektur durch Claude.
 
 ## Datenschutz
 

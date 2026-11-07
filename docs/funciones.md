@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.5.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.5.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -165,8 +165,8 @@ Estado de cada función en la versión 0.5.0, con la forma en que se ha verifica
 
 | Función | Verificación |
 |---|---|
-| Subtítulos en alemán, con cada palabra analizada y los secundarios en el idioma de apoyo | Página imitada. Pendiente de una sesión real |
-| Corrección de subtítulos automáticos con las instrucciones del alemán | Página imitada |
+| Subtítulos en alemán, con cada palabra analizada y los secundarios en el idioma de apoyo | Página imitada, y sesión real en YouTube |
+| Corrección de subtítulos automáticos con las instrucciones del alemán, que también ponen la puntuación que falta | Página imitada, y sesión real en YouTube |
 | De qué palabra sale cada forma, con las formas de Wiktionary: *ging* es *gehen*, *Häuser* es *Haus*. Entre dos posibles, la más frecuente | Automática, con datos reales |
 | Verbos separables con la partícula al final: *fängt morgen an* encuentra *anfangen* | Automática, con datos reales |
 | Pronunciación en IPA, sin variantes regionales, y color por sílaba tónica | Automática, con datos reales de Wiktionary |

@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.5.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.5.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -165,8 +165,8 @@ Stand jeder Funktion in Version 0.5.0 und die Art ihrer Überprüfung.
 
 | Funktion | Überprüfung |
 |---|---|
-| Deutsche Untertitel, mit jedem analysierten Wort und der Zweitspur in der Hilfssprache | Nachgeahmte Seite. Eine echte Sitzung steht noch aus |
-| Korrektur automatischer Untertitel mit den Anweisungen für Deutsch | Nachgeahmte Seite |
+| Deutsche Untertitel, mit jedem analysierten Wort und der Zweitspur in der Hilfssprache | Nachgeahmte Seite und echte Sitzung auf YouTube |
+| Korrektur automatischer Untertitel mit den Anweisungen für Deutsch, die auch fehlende Satzzeichen ergänzen | Nachgeahmte Seite und echte Sitzung auf YouTube |
 | Von welchem Wort jede Form stammt, mit den Formen aus Wiktionary: *ging* ist *gehen*, *Häuser* ist *Haus*. Bei zwei Möglichkeiten das häufigere | Automatisch, mit echten Daten |
 | Trennbare Verben mit der Partikel am Ende: *fängt morgen an* findet *anfangen* | Automatisch, mit echten Daten |
 | Aussprache in IPA, ohne regionale Varianten, und Farbe nach betonter Silbe | Automatisch, mit echten Daten aus Wiktionary |

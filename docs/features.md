@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.5.0, along with how it has been verified.
+Status of each feature in version 0.5.1, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -165,8 +165,8 @@ Status of each feature in version 0.5.0, along with how it has been verified.
 
 | Feature | Verification |
 |---|---|
-| German subtitles, with each word analyzed and the secondary track in the support language | Imitation page. A real session is pending |
-| Correction of automatic subtitles with the German instructions | Imitation page |
+| German subtitles, with each word analyzed and the secondary track in the support language | Imitation page, and a real session on YouTube |
+| Correction of automatic subtitles with the German instructions, which also add missing punctuation | Imitation page, and a real session on YouTube |
 | Which word each form comes from, using Wiktionary's forms: *ging* is *gehen*, *Häuser* is *Haus*. Between two candidates, the more frequent one | Automated, with real data |
 | Separable verbs with the particle at the end: *fängt morgen an* finds *anfangen* | Automated, with real data |
 | Pronunciation in IPA, without regional variants, and color by stressed syllable | Automated, with real Wiktionary data |

@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.5.0-A9E45B?style=flat-square" alt="버전 0.5.0">
+  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.5.1-A9E45B?style=flat-square" alt="버전 0.5.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="지속적 통합"></a>
   <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-508-0ca30c?style=flat-square" alt="단위 테스트 508개">
   <img src="https://img.shields.io/badge/%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4-6%EA%B0%9C%20%EC%96%B8%EC%96%B4-8FCBFF?style=flat-square" alt="인터페이스 6개 언어">
@@ -289,7 +289,7 @@ npm run paquete
 
 ## 프로젝트 상태
 
-현재 버전은 0.5.0입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, YouTube 실제 세션에서도 직접 확인했습니다. Claude가 고친 자동 자막, 설명, 노래 가사입니다. 독일어는 Wiktionary의 실제 사전으로, YouTube를 흉내 낸 페이지와 페이지 리더에서 테스트했고, 전사는 실제 녹음으로 테스트했습니다. 동영상 사이트의 실제 세션에서는 아직 테스트하지 않았습니다.
+현재 버전은 0.5.1입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, YouTube 실제 세션에서도 직접 확인했습니다. Claude가 고친 자동 자막, 설명, 노래 가사입니다. 독일어는 Wiktionary의 실제 사전으로, YouTube를 흉내 낸 페이지와 페이지 리더에서 테스트했고, 전사는 실제 녹음으로 테스트했으며, YouTube에서도 직접 확인했습니다. 영상에서 언어 바꾸기, 영상 자체 자막과 자동 자막, Claude의 수정입니다.
 
 ## 개인정보
 

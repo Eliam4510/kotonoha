@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.5.0-A9E45B?style=flat-square" alt="Version 0.5.0">
+  <img src="https://img.shields.io/badge/version-0.5.1-A9E45B?style=flat-square" alt="Version 0.5.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
   <img src="https://img.shields.io/badge/unit%20tests-508-0ca30c?style=flat-square" alt="508 unit tests">
   <img src="https://img.shields.io/badge/interface-6%20languages-8FCBFF?style=flat-square" alt="Interface in 6 languages">
@@ -291,7 +291,7 @@ Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist
 
 ## Project status
 
-Version 0.5.0 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while extended validation is still pending. The page reader has been tried on about thirty real public sites with an automated browser, without signing in. The interface translations were written with AI assistance and have not yet had a native review. English has been tested with real dictionaries and a synthetic voice on the GPU, on pages that imitate YouTube, with the page reader on 16 real public sites, and by hand with a real session on YouTube: automatic captions corrected by Claude, explanations and the lyrics of a song. German has been tested with the real Wiktionary dictionaries, on pages that imitate YouTube and with the page reader, and its transcription with a real recording; not yet with a real session on a video site.
+Version 0.5.1 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while extended validation is still pending. The page reader has been tried on about thirty real public sites with an automated browser, without signing in. The interface translations were written with AI assistance and have not yet had a native review. English has been tested with real dictionaries and a synthetic voice on the GPU, on pages that imitate YouTube, with the page reader on 16 real public sites, and by hand with a real session on YouTube: automatic captions corrected by Claude, explanations and the lyrics of a song. German has been tested with the real Wiktionary dictionaries, on pages that imitate YouTube and with the page reader, its transcription with a real recording, and by hand on YouTube: switching language from the video, the video's own and automatic subtitles, and their correction by Claude.
 
 ## Privacy
 

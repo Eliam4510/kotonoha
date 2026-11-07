@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.5.0-A9E45B?style=flat-square" alt="バージョン 0.5.0">
+  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.5.1-A9E45B?style=flat-square" alt="バージョン 0.5.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="継続的インテグレーション"></a>
   <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-508-0ca30c?style=flat-square" alt="単体テスト 508 件">
   <img src="https://img.shields.io/badge/%E8%A1%A8%E7%A4%BA-6%20%E8%A8%80%E8%AA%9E-8FCBFF?style=flat-square" alt="表示は 6 言語">
@@ -289,7 +289,7 @@ npm run paquete
 
 ## プロジェクトの状況
 
-現在のバージョンは 0.5.0 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストし、YouTube の実際のセッションでも手作業で確認しました。Claude が直した自動字幕、解説、歌の歌詞です。ドイツ語は Wiktionary の実際の辞書を使い、YouTube を模したページとページリーダーでテストし、文字起こしは実際の録音でテストしました。動画サイトの実際のセッションではまだテストしていません。
+現在のバージョンは 0.5.1 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストし、YouTube の実際のセッションでも手作業で確認しました。Claude が直した自動字幕、解説、歌の歌詞です。ドイツ語は Wiktionary の実際の辞書を使い、YouTube を模したページとページリーダーでテストし、文字起こしは実際の録音でテストし、YouTube でも手作業で確認しました。動画からの言語の切り替え、動画の字幕と自動字幕、Claude による修正です。
 
 ## プライバシー
 
