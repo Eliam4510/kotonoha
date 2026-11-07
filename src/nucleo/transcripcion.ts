@@ -192,22 +192,25 @@ export function esTextoRecuperable(texto: string, reglas: ReglasTranscripcion): 
   return new Set(t.replace(/[\s\p{P}\p{S}]/gu, '')).size >= 4;
 }
 
-/** Sin puntuación, corta donde la lengua lo permite, lo más cerca posible del centro. */
-function partirSinPuntuacion(texto: string, reglas: ReglasTranscripcion): string[] {
-  if (texto.length <= reglas.maximoCaracteres) return [texto];
-  const centro = Math.floor(texto.length / 2);
-  const mejorCorte = (re: RegExp | undefined) => {
-    let mejor = -1;
-    for (const m of re ? texto.matchAll(re) : []) {
-      const corte = m.index + 1;
-      if (mejor < 0 || Math.abs(corte - centro) < Math.abs(mejor - centro)) mejor = corte;
-    }
-    return mejor;
-  };
-  let mejor = mejorCorte(reglas.corteSinPuntuacion);
-  if (mejor <= 0) mejor = mejorCorte(reglas.corteDeReserva);
-  if (mejor <= 0) mejor = centro;
-  return [...partirSinPuntuacion(texto.slice(0, mejor), reglas), ...partirSinPuntuacion(texto.slice(mejor), reglas)];
+/**
+ * Sin puntuación, corta donde la lengua lo permite. Se reparte en tantas líneas como hagan falta, y cada corte se busca cerca
+ * de donde tocaría para que salgan parecidas: si no, una frase larga podía quedar en un trozo de dos palabras y otro enorme.
+ */
+function partirSinPuntuacion(texto: string, reglas: ReglasTranscripcion, lineas = Math.ceil(texto.length / reglas.maximoCaracteres)): string[] {
+  const maximo = reglas.maximoCaracteres;
+  if (texto.length <= maximo) return [texto];
+  const piezas = Math.max(lineas, Math.ceil(texto.length / maximo));
+  const objetivo = texto.length / piezas;
+  // Lo que quede tiene que caber en las líneas que faltan.
+  const minimo = texto.length - maximo * (piezas - 1);
+  const cortes = (re: RegExp | undefined) => (re ? [...texto.matchAll(re)].map((m) => m.index + 1) : []);
+  const masCercano = (lista: number[]) => lista.reduce((mejor, c) => (mejor < 0 || Math.abs(c - objetivo) < Math.abs(mejor - objetivo) ? c : mejor), -1);
+  const dentro = (desde: number) => (c: number) => c >= Math.max(objetivo * desde, minimo) && c <= maximo;
+  let corte = masCercano(cortes(reglas.corteSinPuntuacion).filter(dentro(0.65)));
+  if (corte <= 0) corte = masCercano(cortes(reglas.corteDeReserva).filter(dentro(0.5)));
+  if (corte <= 0) corte = masCercano(cortes(reglas.corteSinPuntuacion).filter((c) => c <= maximo));
+  if (corte <= 0) corte = Math.round(objetivo);
+  return [texto.slice(0, corte), ...partirSinPuntuacion(texto.slice(corte), reglas, piezas - 1)];
 }
 
 /** Parte un segmento largo en líneas de subtítulo por la puntuación, sin cortar a mitad de palabra si se puede. */

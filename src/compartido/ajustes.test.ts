@@ -47,6 +47,12 @@ describe('modeloParaTranscribir', () => {
     expect(modeloParaTranscribir('auto', 'ja', true)).toBe('turbo');
   });
 
+  it('en inglés, Parakeet', () => {
+    expect(modeloParaTranscribir('auto', 'en', false)).toBe('parakeet');
+    expect(modeloParaTranscribir('auto', 'en', true)).toBe('turbo');
+    expect(modeloParaTranscribir('parakeet', 'ja', false)).toBe('turbo');
+  });
+
   it('una lengua sin modelo propio usa Whisper Turbo', () => {
     expect(modeloParaTranscribir('auto', 'xx', false)).toBe('turbo');
   });

@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.4.2-A9E45B?style=flat-square" alt="版本 0.4.2">
+  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.4.3-A9E45B?style=flat-square" alt="版本 0.4.3">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="持续集成"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-459-0ca30c?style=flat-square" alt="459 个单元测试">
+  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-463-0ca30c?style=flat-square" alt="463 个单元测试">
   <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-6%20%E7%A7%8D%E8%AF%AD%E8%A8%80-8FCBFF?style=flat-square" alt="界面支持 6 种语言">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 至 N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 至 C2">
@@ -74,7 +74,7 @@ Kotonoha（言の葉，意为“言语之叶”）在 YouTube、Netflix 和其�
   <tr>
     <td valign="top"><b>用 Claude 翻译和更正</b><br>翻译成辅助语言，从正在观看的部分开始。以标题和全文作为上下文，自动更正生成字幕中的同音词，无需询问。</td>
     <td valign="top"><b>SRT 导入导出</b><br>在任何网站都能导入和导出 SRT、VTT、ASS 和 TTML。导入的内容按标题保存；即使其他地区不提供，Netflix 的日语字幕也会保留。</td>
-    <td valign="top"><b>本地转录</b><br>日语口语用 Haas-ja，歌曲和其他语言用 Whisper，通过 WebGPU 在显卡上运行，音频不会离开电脑：30 分钟的视频用 Haas-ja 约需 1 分钟，用 Whisper 约需 5 分钟，桌面不卡顿。它分段工作并适当休息，驱动程序重启后也能恢复。粘贴歌词后，Claude 会把它放到 Whisper 的时间上。</td>
+    <td valign="top"><b>本地转录</b><br>日语口语用 Haas-ja，英语口语用 Parakeet，歌曲用 Whisper，通过 WebGPU 在显卡上运行，音频不会离开电脑：30 分钟的视频用 Haas-ja 或 Parakeet 约需 1 分钟，用 Whisper 约需 5 分钟，桌面不卡顿。它分段工作并适当休息，驱动程序重启后也能恢复。粘贴歌词后，Claude 会把它放到 Whisper 的时间上。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="本月 Claude 费用，按天、模型和任务显示"></td>
@@ -210,7 +210,7 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 
 | 指标 | 结果 |
 |---|---|
-| 自动模式下的速度 | 30 分钟视频用 Haas-ja 约需 1 分钟，用 Whisper Turbo 约需 5 分钟，为实时的 6.1 至 6.4 倍 |
+| 自动模式下的速度 | 30 分钟视频用 Haas-ja 或 Parakeet 约需 1 分钟，用 Whisper Turbo 约需 5 分钟，为实时的 6.1 至 6.4 倍 |
 | 126 个真实句子的字符错误率 | 8.8% |
 | 连续两小时音频 | 19.7 分钟，驱动程序未重启，内存未增长 |
 | 转录时桌面的流畅度 | 第 99 百分位为 17.5 毫秒，没有超过 33 毫秒的帧 |
@@ -286,7 +286,7 @@ npm run paquete
 
 ## 项目状态
 
-当前版本是 0.4.2。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，但尚未在视频网站的真实会话中测试。
+当前版本是 0.4.3。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。
 
 ## 隐私
 

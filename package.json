@@ -1,6 +1,6 @@
 {
   "name": "kotonoha",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "type": "module",
   "description": "Extensión de navegador para aprender japonés con video y texto real: subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude.",

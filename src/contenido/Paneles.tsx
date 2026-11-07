@@ -11,6 +11,7 @@ import { Icono, type NombreIcono } from '../ui/iconos';
 import {
   ajustarDesfase,
   ajustarLetra,
+  modeloQueTranscribiria,
   pistaObjetivoEsLetra,
   cancelarGeneracion,
   detenerWhisper,
@@ -652,6 +653,8 @@ function SeccionWhisper() {
   const archivo = transcribeArchivo.value;
   const conAyudante = !archivo && !!ayudante.value;
   const enteroDeUnaVez = archivo || conAyudante;
+  // Haas-ja y Parakeet hacen en un minuto lo que Whisper en cinco: el aviso dice lo que tardará este video.
+  const modeloRapido = !!MODELOS_WHISPER[modeloQueTranscribiria()].tdt;
   useEffect(() => {
     if (!archivo) actualizarAyudante();
   }, [archivo]);
@@ -660,7 +663,7 @@ function SeccionWhisper() {
       <TituloGrupo icono="ondas">{tr('Transcribir en tu equipo')}</TituloGrupo>
       <div class="grupo">
         <div class="bloque-generar">
-          <p>{enteroDeUnaVez ? tr('Transcribe el audio entero sin esperar a reproducirlo: 30 minutos tardan unos 5. El audio no sale de tu equipo.') : tr('Escucha el video mientras se reproduce, así que los subtítulos llegan con unos segundos de retraso.')}</p>
+          <p>{enteroDeUnaVez ? (modeloRapido ? tr('Transcribe el audio entero sin esperar a reproducirlo: 30 minutos tardan alrededor de uno. El audio no sale de tu equipo.') : tr('Transcribe el audio entero sin esperar a reproducirlo: 30 minutos tardan unos 5. El audio no sale de tu equipo.')) : tr('Escucha el video mientras se reproduce, así que los subtítulos llegan con unos segundos de retraso.')}</p>
           {sinAceleracion.value && <p class="nota-grupo">{tr('Con la aceleración por hardware apagada, el navegador no ofrece la GPU: Whisper correrá en el procesador y tardará mucho más.')}</p>}
         </div>
         <Fila etq={tr('Modelo')}>

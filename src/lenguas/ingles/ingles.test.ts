@@ -471,6 +471,21 @@ describe('líneas de subtítulo de Whisper', () => {
     expect(lineas.slice(1).some((l) => /^(and|because|for|to)\b/.test(l))).toBe(true);
   });
 
+  it('una frase larga queda en líneas parecidas, sin trozos de dos palabras', () => {
+    const t = 'The old library in our town has finally reopened after two years of work.';
+    const lineas = partirTexto(t, R);
+    expect(lineas).toEqual(['The old library in our town has finally', 'reopened after two years of work.']);
+  });
+
+  it('y si hacen falta tres, las tres de un largo parecido', () => {
+    const t = 'the reading room is open every single day from nine in the morning until six in the evening without any reservation needed';
+    const lineas = partirTexto(t, R);
+    expect(lineas.join(' ')).toBe(t);
+    expect(lineas.length).toBe(3);
+    const largos = lineas.map((l) => l.length);
+    expect(Math.max(...largos) - Math.min(...largos)).toBeLessThan(18);
+  });
+
   it('un texto sin ninguno de esos sitios se corta en un espacio', () => {
     const t = 'supercalifragilistic expialidocious supercalifragilistic expialidocious supercalifragilistic';
     expect(partirTexto(t, R).join(' ')).toBe(t);

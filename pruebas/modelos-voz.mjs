@@ -1,6 +1,6 @@
-// Qué modelo transcribe cada cosa, en la tarjeta gráfica y con un archivo propio: en automático, Haas-ja para la voz en japonés
-// y Whisper Turbo para las canciones y los demás idiomas. La primera vez descarga el modelo, de unos 1,3 GB.
-// Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/modelos-voz.mjs ruta/voz-en-japones.wav
+// Qué modelo transcribe cada cosa, en la tarjeta gráfica y con un archivo propio: en automático, Haas-ja para la voz en japonés,
+// Parakeet para la voz en inglés y Whisper Turbo para las canciones. La primera vez descarga cada modelo, de unos 1,3 GB.
+// Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/modelos-voz.mjs voz-en-japones.wav [voz-en-ingles.wav]
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
@@ -14,7 +14,8 @@ const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-local'));
 const CAPTURAS = join(RAIZ, 'capturas-e2e', 'modelos');
 const FFMPEG = existsSync('C:/ffmpeg/bin/ffmpeg.exe') ? 'C:/ffmpeg/bin/ffmpeg.exe' : 'ffmpeg';
-const audio = process.argv[2];
+const [audioJapones, audioIngles] = process.argv.slice(2);
+let audio = audioJapones;
 if (!audio) {
   console.error('Falta la muestra de voz: node pruebas/modelos-voz.mjs voz.wav');
   process.exit(2);
@@ -150,18 +151,41 @@ const aManoHaas = await transcribir('una MV en la que se habla');
 comprobar(/Haas-ja/.test(aManoHaas.modelo), 'También si no es el que tocaría', aManoHaas.modelo);
 await ponerAjustes({ whisperModelo: 'auto' });
 
+if (audioIngles) {
+  console.log('\n== En inglés ==');
+  audio = audioIngles;
+  await selector.selectOption('en');
+  await app.waitForTimeout(800);
+  await ponerAjustes({ whisperModelo: 'auto' });
+  const yaEstabaEn = await app.evaluate(async () => (await (await caches.open('transformers-cache')).keys()).some((k) => k.url.includes('parakeet-tdt-0.6b-v3-onnx') && k.url.endsWith('encoder-model.fp16.onnx')));
+  const charla = await transcribir('a talk');
+  console.log(`  ${charla.segundos} s, ${charla.modelo}${yaEstabaEn ? '' : ' (la primera vez, con descarga)'}`);
+  for (const l of charla.vistas) console.log(`    ${l}`);
+  comprobar(/Parakeet/.test(charla.modelo), 'La voz en inglés la transcribe Parakeet', charla.modelo);
+  comprobar(/library/i.test(charla.vistas.join(' ')) && /reopened/i.test(charla.vistas.join(' ')), 'Y oye lo que se dice', charla.vistas[0]);
+  comprobar(charla.vistas.some((l) => /[.,]/.test(l)), 'Con puntuación');
+  comprobar(/[a-z] [a-z]/i.test(charla.vistas[0] ?? ''), 'Las palabras llevan sus espacios');
+  comprobar(charla.vistas.every((l) => l.length <= 90), 'En líneas que se pueden leer', `la más larga tiene ${Math.max(...charla.vistas.map((l) => l.length))} caracteres`);
+  const cancionEn = await transcribir('My song (Official Video)');
+  comprobar(/Whisper Turbo/.test(cancionEn.modelo), 'Una canción en inglés, con Whisper Turbo', cancionEn.modelo);
+  await selector.selectOption('ja');
+  await app.waitForTimeout(800);
+  audio = audioJapones;
+}
+
 console.log('\n== En Ajustes ==');
 await app.goto(`chrome-extension://${id}/app.html#/ajustes`);
 await app.reload();
 await app.waitForTimeout(1000);
 const tarjetas = () => app.locator('.ap-whisper-modelo b').allTextContents();
-comprobar((await tarjetas()).join('|') === 'Automático|Haas-ja|Whisper Turbo|Whisper Turbo ligero|Whisper Base', 'En japonés se ofrecen todos', (await tarjetas()).join(', '));
+comprobar((await tarjetas()).join('|') === 'Automático|Haas-ja|Whisper Turbo|Whisper Turbo ligero|Whisper Base', 'En japonés se ofrecen los suyos y los de Whisper', (await tarjetas()).join(', '));
 await app.locator('#transcripcion').scrollIntoViewIfNeeded();
 await app.screenshot({ path: join(CAPTURAS, 'ajustes.png') });
 comprobar((await app.locator('#transcripcion').innerText()).includes('Haas-ja'), 'Y aparece entre los guardados');
 await selector.selectOption('en');
 await app.waitForTimeout(800);
 comprobar(!(await tarjetas()).includes('Haas-ja'), 'En inglés no se ofrece un modelo de japonés', (await tarjetas()).join(', '));
+comprobar((await tarjetas()).includes('Parakeet'), 'Y sí el suyo', (await tarjetas()).join(', '));
 await selector.selectOption('ja');
 await app.waitForTimeout(500);
 if (lenguaInicial !== 'ja') {

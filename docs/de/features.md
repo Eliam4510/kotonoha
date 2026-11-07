@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.4.2 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.4.3 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -67,7 +67,7 @@ Stand jeder Funktion in Version 0.4.2 und die Art ihrer Überprüfung.
 | Lokaler Helfer mit yt-dlp und FFmpeg | Automatisch, mit lokalem Download. Es fehlen die echte Registrierung im Browser und ein echter YouTube-Download |
 | Korrektur des Ergebnisses mit Claude | Simulator |
 | Liedtext auf die Zeiten der Transkription gelegt: der Text aus dem Liedtext, die Zeiten von Whisper | Simulator, mit echtem Whisper, und echte Sitzung mit einem Lied |
-| Haas-ja für gesprochenes Japanisch und Whisper Turbo für Lieder, je nach Video gewählt | Automatisch, mit echtem Haas-ja und Whisper auf der GPU |
+| Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder, je nach Video gewählt | Automatisch, mit den drei echten Modellen auf der GPU, und echte Sitzung auf YouTube |
 | Liste der gespeicherten Modelle mit dem Platzbedarf jedes Modells und Löschen pro Modell. Das Laden von der Festplatte wird nicht mehr als Download angezeigt | Automatisch und mit echtem Whisper |
 
 ## Karten

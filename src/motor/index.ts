@@ -61,6 +61,12 @@ async function arrancar() {
   ia.limpiarCache().catch(() => {});
 }
 
+/**
+ * La base de la lengua que dice quien pide algo de un video. Al cambiar de lengua, la página se entera por los ajustes y
+ * el motor por un aviso aparte: si la página pregunta antes de que llegue, el motor aún tiene la base de la anterior.
+ */
+const baseDeEstudio = (estudio: string | undefined) => (estudio ? baseDe(paqueteDe(estudio).id) : db);
+
 const ESPERA_REPARACION_MS = 120000;
 
 /** Si una versión anterior dejó mal un diccionario, se vuelve a instalar solo en segundo plano. */
@@ -445,17 +451,17 @@ const api: ApiMotor = {
     await fondo.difundir({ tipo: 'palabrasRecargar' });
     return d.ajustes ?? null;
   },
-  async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen) {
+  async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen, estudio) {
     // La letra no sustituye a la transcripción de la que salieron sus tiempos: con otra letra se volverá a necesitar.
     const clave = origen === 'letra' ? `${idVideo}|${idioma}|letra` : `${idVideo}|${idioma}`;
-    await db.generados.put({ clave, idVideo, idioma, lineas, origen, creado: Date.now() });
+    await baseDeEstudio(estudio).generados.put({ clave, idVideo, idioma, lineas, origen, creado: Date.now() });
   },
-  correccionesPista: (clave) => db.correcciones.get(clave),
-  async guardarCorreccionesPista(clave, cambios, completa) {
-    await db.correcciones.put({ clave, cambios, completa, creado: Date.now() });
+  correccionesPista: (clave, estudio) => baseDeEstudio(estudio).correcciones.get(clave),
+  async guardarCorreccionesPista(clave, cambios, completa, estudio) {
+    await baseDeEstudio(estudio).correcciones.put({ clave, cambios, completa, creado: Date.now() });
   },
-  async subtitulosGenerados(idVideo) {
-    return db.generados.where('idVideo').equals(idVideo).toArray();
+  async subtitulosGenerados(idVideo, estudio) {
+    return baseDeEstudio(estudio).generados.where('idVideo').equals(idVideo).toArray();
   },
 };
 

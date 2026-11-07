@@ -19,6 +19,7 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [Transformers.js](https://github.com/huggingface/transformers.js) y [ONNX Runtime](https://onnxruntime.ai) | Ejecución de Whisper | Apache-2.0 y MIT |
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | Modelo de transcripción, descargado al usarlo | MIT |
 | [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0), de Third Intelligence, en la [conversión a ONNX de Sanami](https://huggingface.co/Sanami/haas-ja-onnx) | Modelo de transcripción del japonés, descargado al usarlo | Apache-2.0 |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), de NVIDIA, en la conversión a ONNX de [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) y [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) | Modelo de transcripción del inglés, descargado al usarlo | CC-BY-4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lectura de archivos propios | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | Núcleo de FFmpeg, copiado al compilar | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
@@ -83,6 +84,7 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [Transformers.js](https://github.com/huggingface/transformers.js) and [ONNX Runtime](https://onnxruntime.ai) | Running Whisper | Apache-2.0 and MIT |
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | Transcription model, downloaded on use | MIT |
 | [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0), by Third Intelligence, in [Sanami's ONNX conversion](https://huggingface.co/Sanami/haas-ja-onnx) | Japanese transcription model, downloaded on use | Apache-2.0 |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), by NVIDIA, in the ONNX conversion by [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) and [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) | English transcription model, downloaded on use | CC-BY-4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Reading local files | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg core, copied at build time | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |

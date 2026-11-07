@@ -130,13 +130,14 @@ Whisper erzeugt japanische Untertitel, wenn ein Video keine mitbringt. Es läuft
 
 | Modell | Download | Einsatz |
 |---|---|---|
-| Automatisch | | Standard. Haas-ja für gesprochenes Japanisch, Whisper Turbo für Lieder und andere Sprachen |
+| Automatisch | | Standard. Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder |
 | Haas-ja | 1,3 GB | Nur Japanisch. Am genauesten und schnellsten bei gesprochener Sprache, auch mit Hintergrundmusik, und mit Satzzeichen |
+| Parakeet | 1,3 GB | Nur Englisch. Am genauesten und schnellsten bei gesprochener Sprache, auch mit Hintergrundmusik, mit Satzzeichen und den genauesten Zeiten |
 | Whisper Turbo | 1,5 GB | Am besten für Lieder |
 | Whisper Turbo leicht | 564 MB | Etwas ungenauer, mit weniger Grafikspeicher |
 | Whisper Base | 165 MB | Für Computer ohne leistungsstarke GPU |
 
-Im automatischen Modus gilt ein Video als Lied, wenn sein Liedtext eingefügt wurde, wenn die Website es als Musik einstuft oder wenn der Titel es sagt, etwa „MV“ oder „歌ってみた“. Bei gesprochenem Japanisch macht Haas-ja 3 % Fehler gegenüber 9 % bei Whisper Turbo und transkribiert 30 Minuten in etwa einer Minute statt in etwa 5. Bei Liedern schreibt es nur einen Teil des Gesungenen, und dort ist Whisper Turbo besser. Während der Transkription zeigt das Panel, welches Modell arbeitet.
+Im automatischen Modus gilt ein Video als Lied, wenn sein Liedtext eingefügt wurde, wenn die Website es als Musik einstuft oder wenn der Titel es sagt, etwa „MV“ oder „歌ってみた“. Bei gesprochenem Japanisch macht Haas-ja 3 % Fehler gegenüber 9 % bei Whisper Turbo und transkribiert 30 Minuten in etwa einer Minute statt in etwa 5. Bei Liedern schreibt es nur einen Teil des Gesungenen, und dort ist Whisper Turbo besser. Im Englischen gilt dasselbe für Parakeet: 6,8 % Fehler gegenüber 9,6 % bei Whisper Turbo und dreimal genauere Zeiten. Während der Transkription zeigt das Panel, welches Modell arbeitet.
 
 Die Modelle werden im Browser gespeichert und nicht erneut heruntergeladen: Sie werden jedes Mal von der Festplatte gelesen, was einige Sekunden dauern kann. Unter **Einstellungen, Sprachtranskription, Gespeicherte Modelle** ist zu sehen, wie viel Platz jedes belegt, und es lässt sich dort löschen. Beim Deinstallieren der Erweiterung werden sie ebenfalls gelöscht.
 

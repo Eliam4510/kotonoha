@@ -130,13 +130,14 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 
 | Modelo | Descarga | Uso |
 |---|---|---|
-| Automático | | Por omisión. Haas-ja para la voz en japonés, y Whisper Turbo para las canciones y los demás idiomas |
+| Automático | | Por omisión. Haas-ja para la voz en japonés, Parakeet para la voz en inglés y Whisper Turbo para las canciones |
 | Haas-ja | 1,3 GB | Solo japonés. El más preciso y rápido con voz hablada, también con música de fondo, y con puntuación |
+| Parakeet | 1,3 GB | Solo inglés. El más preciso y rápido con voz hablada, también con música de fondo, con puntuación y los tiempos más exactos |
 | Whisper Turbo | 1,5 GB | El mejor con canciones |
 | Whisper Turbo ligero | 564 MB | Algo menos preciso, con menos memoria de video |
 | Whisper Base | 165 MB | Para equipos sin una GPU potente |
 
-En automático, un video es una canción si se ha pegado su letra, si el sitio lo clasifica como música o si el título lo dice, como «MV» o «歌ってみた». Con voz hablada en japonés, Haas-ja comete un 3 % de errores frente al 9 % de Whisper Turbo, y transcribe 30 minutos en alrededor de un minuto, frente a unos 5. Con canciones escribe solo una parte de lo que se canta, y ahí Whisper Turbo es mejor. Mientras transcribe, el panel indica qué modelo está trabajando.
+En automático, un video es una canción si se ha pegado su letra, si el sitio lo clasifica como música o si el título lo dice, como «MV» o «歌ってみた». Con voz hablada en japonés, Haas-ja comete un 3 % de errores frente al 9 % de Whisper Turbo, y transcribe 30 minutos en alrededor de un minuto, frente a unos 5. Con canciones escribe solo una parte de lo que se canta, y ahí Whisper Turbo es mejor. En inglés pasa lo mismo con Parakeet: un 6,8 % de errores frente al 9,6 % de Whisper Turbo, y tiempos tres veces más exactos. Mientras transcribe, el panel indica qué modelo está trabajando.
 
 Los modelos se guardan en el navegador y no se vuelven a descargar: cada vez se leen del disco, lo que puede tardar unos segundos. En **Ajustes, Transcripción de voz, Modelos guardados** se ve lo que ocupa cada uno y se puede borrar. Desinstalar la extensión también los borra.
 

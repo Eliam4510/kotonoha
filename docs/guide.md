@@ -130,13 +130,14 @@ Whisper generates Japanese subtitles when a video has none. It runs on the graph
 
 | Model | Download | Use |
 |---|---|---|
-| Automatic | | Default. Haas-ja for Japanese speech, and Whisper Turbo for songs and other languages |
+| Automatic | | Default. Haas-ja for Japanese speech, Parakeet for English speech and Whisper Turbo for songs |
 | Haas-ja | 1.3 GB | Japanese only. The most accurate and fastest with spoken voice, even with background music, and it adds punctuation |
+| Parakeet | 1.3 GB | English only. The most accurate and fastest with spoken voice, even with background music, with punctuation and the most precise timing |
 | Whisper Turbo | 1.5 GB | The best for songs |
 | Whisper Turbo ligero (light) | 564 MB | Slightly less accurate, with less video memory |
 | Whisper Base | 165 MB | For computers without a powerful GPU |
 
-In automatic mode, a video counts as a song if its lyrics have been pasted, if the site classifies it as music, or if the title says so, such as "MV" or "歌ってみた". With Japanese speech, Haas-ja makes 3 % errors against 9 % for Whisper Turbo, and transcribes 30 minutes in about a minute, against about 5. With songs it writes only part of what is sung, and there Whisper Turbo is better. While transcribing, the panel shows which model is working.
+In automatic mode, a video counts as a song if its lyrics have been pasted, if the site classifies it as music, or if the title says so, such as "MV" or "歌ってみた". With Japanese speech, Haas-ja makes 3 % errors against 9 % for Whisper Turbo, and transcribes 30 minutes in about a minute, against about 5. With songs it writes only part of what is sung, and there Whisper Turbo is better. The same happens in English with Parakeet: 6.8 % errors against 9.6 % for Whisper Turbo, and timing three times more precise. While transcribing, the panel shows which model is working.
 
 Models are stored in the browser and are not downloaded again: each time they load from disk, which can take a few seconds. **Settings, Speech transcription, Saved models** shows the space each one takes and allows it to be deleted. Uninstalling the extension also deletes them.
 

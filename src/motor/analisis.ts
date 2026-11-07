@@ -18,6 +18,13 @@ import { listaDiccionarios } from './diccionarios';
 import { lengua, motorLengua } from './lengua';
 
 let terminos: Set<string> | null = null;
+/** De qué lengua son los términos en memoria. */
+let lenguaTerminos = '';
+/**
+ * Los de la lengua anterior. Quien estudia dos alterna entre ellas, y leer de nuevo los términos tarda unos segundos
+ * con diccionarios grandes: sin ellos, al volver los subtítulos tardaban en aparecer.
+ */
+let terminosAnteriores: { lengua: string; terminos: Set<string> } | null = null;
 
 export const analizadorListo = () => motorLengua().analizador.listo();
 export const totalTerminos = () => terminos?.size ?? 0;
@@ -30,11 +37,13 @@ let ultimaCarga = 0;
 /** Conjunto de todos los términos, para unir compuestos sin consultar la base por cada token. */
 export function recargarTerminos(): Promise<void> {
   const esta = ++ultimaCarga;
+  const id = lengua().id;
   cargaTerminos = (async () => {
     const claves = (await db.terminos.orderBy('termino').uniqueKeys()) as string[];
     // Una carga larga puede acabar después de cambiar de lengua: lo que traiga ya no sirve.
     if (esta !== ultimaCarga) return;
     terminos = new Set(claves);
+    lenguaTerminos = id;
     cacheTokens.clear();
   })();
   return cargaTerminos;
@@ -49,6 +58,8 @@ export async function listaTerminos(): Promise<Set<string>> {
 /** Espera a tener analizador y términos, salvo que la lengua pueda seguir sin ellos. */
 async function preparar(): Promise<void> {
   await cargarAnalizador();
+  // Con los de esta lengua ya en memoria no se espera: si se están releyendo, se usarán los nuevos al terminar.
+  if (terminos && lenguaTerminos === lengua().id) return;
   const carga = (cargaTerminos ?? recargarTerminos()).catch(() => {});
   if (!motorLengua().analizador.terminosOpcionales) await carga;
 }
@@ -56,7 +67,16 @@ async function preparar(): Promise<void> {
 /** Al cambiar de lengua, lo que había en memoria era de la anterior. */
 export function olvidarLengua() {
   ultimaCarga++;
-  terminos = null;
+  const id = lengua().id;
+  const salientes = terminos && lenguaTerminos && lenguaTerminos !== id ? { lengua: lenguaTerminos, terminos } : null;
+  if (terminosAnteriores?.lengua === id) {
+    terminos = terminosAnteriores.terminos;
+    lenguaTerminos = id;
+  } else {
+    terminos = null;
+    lenguaTerminos = '';
+  }
+  terminosAnteriores = salientes ?? terminosAnteriores;
   cargaTerminos = null;
   cacheTokens.clear();
   cacheLecturaLema.clear();

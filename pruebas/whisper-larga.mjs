@@ -95,11 +95,12 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
 const sw = await recargarExtension(contexto);
 const id = new URL(sw.url()).host;
 await sw.evaluate(
-  async ({ m, url }) => {
+  async ({ m, url, lengua }) => {
     const d = await chrome.storage.local.get('ajustes');
-    await chrome.storage.local.set({ urlBaseIA: url, claveAnthropic: 'clave-de-prueba', ajustes: { ...(d.ajustes ?? {}), whisperModelo: m, whisperIntensidad: 'auto' } });
+    // Con KK_LENGUA se transcribe en otra lengua: un modelo como Parakeet solo sirve para la suya.
+    await chrome.storage.local.set({ urlBaseIA: url, claveAnthropic: 'clave-de-prueba', ajustes: { ...(d.ajustes ?? {}), whisperModelo: m, whisperIntensidad: 'auto', idiomaObjetivo: lengua } });
   },
-  { m: modelo, url: `http://127.0.0.1:${mock.puerto}` }
+  { m: modelo, url: `http://127.0.0.1:${mock.puerto}`, lengua: process.env.KK_LENGUA ?? 'ja' }
 );
 const p = await contexto.newPage();
 await p.goto(`chrome-extension://${id}/popup.html`);
