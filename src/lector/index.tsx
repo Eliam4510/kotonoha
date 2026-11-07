@@ -81,7 +81,7 @@ function LectorWeb() {
   }, [cargados, a.idiomaInterfaz]);
 
   useEffect(() => {
-    document.title = tr('{0} · Kotonoha', tr('Lector'));
+    document.title = tr('{0} · Kotonoha', tr('Portapapeles'));
     guardarPreferencia('tema', a.tema);
   }, [a.tema, idiomaActual()]);
 

@@ -4,6 +4,7 @@ import { type Ajustes, completarAjustes, modeloParaTranscribir, type ModeloWhisp
 import type { ApiMotor, CambioPalabra, FiltroPalabras } from '../compartido/api';
 import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
+import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
 import type { Linea } from '../nucleo/subtitulos';
 import * as analisis from './analisis';
@@ -131,13 +132,31 @@ const api: ApiMotor = {
   buscar: (lema, lectura) => analisis.buscar(lema, lectura),
   trazos: (caracter) => trazosDe(caracter),
   async leerPortapapeles() {
-    const area = document.createElement('textarea');
-    document.body.appendChild(area);
-    area.focus();
+    // El evento de pegar trae todas las versiones de lo copiado, y la de HTML conserva títulos, listas y tablas. Se lee
+    // del evento sin pegar nada: así ninguna imagen de la página de origen llega a cargarse aquí.
+    let html = '';
+    let texto: string | null = null;
+    const zona = document.createElement('div');
+    zona.contentEditable = 'true';
+    zona.addEventListener('paste', (e) => {
+      e.preventDefault();
+      html = e.clipboardData?.getData('text/html') ?? '';
+      texto = e.clipboardData?.getData('text/plain') ?? '';
+    });
+    document.body.appendChild(zona);
+    zona.focus();
     document.execCommand('paste');
-    const texto = area.value;
-    area.remove();
-    return texto;
+    zona.remove();
+    if (texto === null) {
+      // Sin evento, el camino de siempre: solo el texto.
+      const area = document.createElement('textarea');
+      document.body.appendChild(area);
+      area.focus();
+      document.execCommand('paste');
+      texto = area.value;
+      area.remove();
+    }
+    return textoConEstructura(html, texto);
   },
   async buscarLibre(texto) {
     return analisis.buscarLibre(texto, await aj());

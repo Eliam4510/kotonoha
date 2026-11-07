@@ -218,11 +218,11 @@ Nichts davon fügt dem Inhalt der Seite etwas hinzu. Die Farben verwenden die CS
 
 `Alt+K`, `Alt+U` und `Alt+I` markieren den ausgewählten Text gesammelt als bekannt, unbekannt oder ignoriert.
 
-**Reader.** Zeigt beliebigen eingefügten Text mit denselben Hilfen wie die Untertitel.
+**Zwischenablage.** Zeigt beliebigen eingefügten oder kopierten Text mit denselben Hilfen wie die Untertitel und bewahrt seine Struktur: Absätze, Zeilenumbrüche, Überschriften, Listen, Zitate, Code, Tabellen und Fettdruck. Von einer Seite Kopiertes kommt ohne die Furigana dieser Seite, und aus dem Claude-Chat kopiertes Markdown behält seine Formatierung.
 
-**Web-Modus.** Das Anwendungsfenster hat keine Tabs und kann daher nicht in die geteilte Ansicht des Browsers. Die Schaltfläche **Web-Modus** des Readers öffnet ihn in einem normalen Tab ohne Seitenleiste, und **Reader neben diesem Tab öffnen** im Erweiterungsmenü setzt ihn direkt neben die gerade angezeigte Seite (Chrome 155 oder neuer). In diesem Tab fügt **Zwischenablage folgen** unten das Japanische an, das irgendwo kopiert wird, solange der Tab sichtbar ist. Es ist eine Seite der Erweiterung selbst: Sie braucht keinen Server, funktioniert ohne Verbindung, und der Text verlässt den Computer nicht.
+**Web-Modus.** Das Anwendungsfenster hat keine Tabs und kann daher nicht in die geteilte Ansicht des Browsers. Die Schaltfläche **Web-Modus** der Zwischenablage öffnet sie in einem normalen Tab ohne Seitenleiste, und **Zwischenablage neben diesem Tab öffnen** im Erweiterungsmenü setzt sie direkt neben die gerade angezeigte Seite (Chrome 155 oder neuer). In diesem Tab fügt **Zwischenablage folgen** unten das Japanische an, das irgendwo kopiert wird, solange der Tab sichtbar ist. Es ist eine Seite der Erweiterung selbst: Sie braucht keinen Server, funktioniert ohne Verbindung, und der Text verlässt den Computer nicht.
 
-**Bibliothek.** Speichert EPUB-Bücher, Texte und SRT-Untertitel samt Leseposition. Sie kann auch mit Claude Geschichten erzeugen, die zum eingestellten Niveau passen.
+**Lesehilfe.** Speichert EPUB-Bücher, Texte und SRT-Untertitel samt Leseposition und der Struktur jedes Kapitels. Sie kann auch mit Claude Geschichten erzeugen, die zum eingestellten Niveau passen.
 
 **Lokaler Player.** Spielt eigene Dateien ab, mit den eingebetteten Untertiteln einer MKV-Datei und der Wahl der Audiospur, über ffmpeg.wasm.
 

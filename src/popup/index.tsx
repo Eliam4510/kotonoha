@@ -16,8 +16,8 @@ import { aplicarLengua, estudiarLengua, lengua } from '../ui/lengua';
 const RUTAS: [string, NombreIcono, string][] = [
   ['inicio', 'inicio', tm('Inicio')],
   ['diccionario', 'diccionario', tm('Diccionario')],
-  ['lector', 'lector', tm('Lector')],
-  ['biblioteca', 'biblioteca', tm('Biblioteca')],
+  ['lector', 'portapapeles', tm('Portapapeles')],
+  ['biblioteca', 'biblioteca', tm('Ayuda de lectura')],
   ['reproductor', 'video', tm('Reproductor')],
   ['memoria', 'tarjetas', tm('Memoria')],
   ['palabras', 'palabras', tm('Palabras')],
@@ -173,7 +173,7 @@ function Popup() {
         fondo.abrirLectorWeb(esWeb).catch(console.error);
         window.close();
       }}>
-        <Icono n="dividir" t={15} /> {esWeb ? tr('Abrir el lector junto a esta pestaña') : tr('Abrir el lector en una pestaña')}
+        <Icono n="dividir" t={15} /> {esWeb ? tr('Abrir el Portapapeles junto a esta pestaña') : tr('Abrir el Portapapeles en una pestaña')}
       </button>
 
       {pestana !== undefined && !/youtube|netflix|disneyplus|viki|iq\.com|bilibili|crunchyroll|primevideo/.test(host) && esWeb && (

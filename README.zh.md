@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.5.1-A9E45B?style=flat-square" alt="版本 0.5.1">
+  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.6.0-A9E45B?style=flat-square" alt="版本 0.6.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="持续集成"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-508-0ca30c?style=flat-square" alt="508 个单元测试">
+  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-712-0ca30c?style=flat-square" alt="712 个单元测试">
   <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-6%20%E7%A7%8D%E8%AF%AD%E8%A8%80-8FCBFF?style=flat-square" alt="界面支持 6 种语言">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 至 N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 至 C2">
@@ -91,22 +91,22 @@ Kotonoha（言の葉，意为“言语之叶”）在 YouTube、Netflix 和其�
   <tr>
     <td width="33%" align="center"><img src="docs/img/inicio.png" alt="应用首页"></td>
     <td width="33%" align="center"><img src="docs/img/memoria.png" alt="内置卡片复习"></td>
-    <td width="33%" align="center"><img src="docs/img/lector.png" alt="带注音和音调重音的文本阅读器"></td>
+    <td width="33%" align="center"><img src="docs/img/lector.png" alt="带注音和音调重音的剪贴板"></td>
   </tr>
   <tr>
     <td valign="top"><b>完整的应用</b><br>首页、支持活用形的词典、按状态浏览单词、水平评估、按任务设置和可编辑的提示词。明暗主题。</td>
     <td valign="top"><b>一键制卡</b><br>带视频的音频和画面，直接通过 AnkiConnect 发送到 Anki，或保存到使用 FSRS 的内置复习。</td>
-    <td valign="top"><b>不止于视频</b><br>文本阅读器、EPUB 书库、按水平生成的故事，以及支持 MKV 字幕的本地文件播放器。</td>
+    <td valign="top"><b>不止于视频</b><br>保留复制内容结构的剪贴板、用于 EPUB 书籍的阅读助手、按水平生成的故事，以及支持 MKV 字幕的本地文件播放器。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/paginas.zh.png" alt="日语文章上的阅读器，带颜色和注音"></td>
     <td width="33%" align="center"><img src="docs/img/trazos.zh.png" alt="单词面板中单词的笔顺"></td>
-    <td width="33%" align="center"><img src="docs/img/lector-web.zh.png" alt="普通浏览器标签页中的阅读器"></td>
+    <td width="33%" align="center"><img src="docs/img/lector-web.zh.png" alt="普通浏览器标签页中的剪贴板"></td>
   </tr>
   <tr>
     <td valign="top"><b>任何页面，不破坏布局</b><br>在新闻、文章和博客的日语上显示颜色和注音。单击单词打开单词面板；在链接和按钮上，鼠标停留即可。不向页面内容添加任何东西：唯一可能改动的是注音放不下处的行距，而且可以关闭。</td>
     <td valign="top"><b>怎么写</b><br>单词面板展示单词中每个汉字的笔画，逐笔循环播放并标有序号。可以暂停和逐笔查看。每个汉字只下载一次，然后保存在本地。</td>
-    <td valign="top"><b>标签页中的阅读器</b><br>阅读器也可以在普通标签页中打开，用于浏览器的分屏视图，甚至可以直接放在正在查看的页面旁边。它可以跟随剪贴板：复制的内容会显示在那里。</td>
+    <td valign="top"><b>标签页中的剪贴板</b><br>剪贴板也可以在普通标签页中打开，用于浏览器的分屏视图，甚至可以直接放在正在查看的页面旁边。它可以跟随系统剪贴板：复制的内容会连同段落、标题、列表和表格一起显示在那里。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/bienvenida.zh.png" alt="带语言选择的欢迎页"></td>
@@ -262,7 +262,7 @@ npm run paquete
 | `node herramientas/idiomas.mjs` | 每种语言缺少或多余的内容 |
 | `node pruebas/lector.mjs` | 网页阅读器的疑难情况：没有任何移动、单击、链接、轮播、折叠面板、实时到达的文本、Shadow DOM 以及聊天那样的滚动框 |
 | `node pruebas/lector-real.mjs` | 阅读器在约三十个公开网站上的表现，每个都有截图。使用 `KK_LENGUA=en` 时，在英语网站上运行 |
-| `node pruebas/trazos-web.mjs` | 真实数据的笔顺、标签页中的阅读器、剪贴板和分屏视图 |
+| `node pruebas/trazos-web.mjs` | 真实数据的笔顺、标签页中的剪贴板、复制和粘贴的文本以及导入的 EPUB 的结构，以及分屏视图 |
 | `node pruebas/ingles.mjs` | 从头到尾学习英语：选择语言、安装词典、一个视频、一个网页，再回到日语，互不混淆 |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU 上的英语 Whisper，并模拟 Claude 的更正 |
 | `node pruebas/aleman.mjs` | 用真实词典从头到尾学习德语：选择语言、安装词典、分析、一个视频、一个网页，再回到日语 |
@@ -289,7 +289,7 @@ npm run paquete
 
 ## 项目状态
 
-当前版本是 0.5.1。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。德语已使用 Wiktionary 的真实词典，在模仿 YouTube 的页面上和网页阅读器中测试过，转录用一段真实录音测试过，并在 YouTube 上手动测试过：在视频中切换语言、视频自带字幕和自动字幕，以及 Claude 的更正。
+当前版本是 0.6.0。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。德语已使用 Wiktionary 的真实词典，在模仿 YouTube 的页面上和网页阅读器中测试过，转录用一段真实录音测试过，并在 YouTube 上手动测试过：在视频中切换语言、视频自带字幕和自动字幕，以及 Claude 的更正。
 
 ## 隐私
 

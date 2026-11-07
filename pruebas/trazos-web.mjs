@@ -1,9 +1,11 @@
-// Prueba el orden de los trazos en la ficha y el lector en su pestaña propia, también en vista dividida.
+// Prueba el orden de los trazos en la ficha, el Portapapeles en su pestaña propia (también en vista dividida) y que el
+// texto conserve su estructura: lo copiado de una página, el Markdown, lo pegado y un EPUB importado.
 // Los trazos se piden de verdad a KanjiVG: necesita conexión la primera vez.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/trazos-web.mjs
 
 import { mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
 
@@ -200,7 +202,7 @@ comprobar(!!conTexto, 'Llega con el texto ya analizado');
 const textoWeb = await web.evaluate(() => document.querySelector('.ap-papel')?.textContent ?? '');
 comprobar(textoWeb.includes('図書館'), 'Es el mismo texto', textoWeb.slice(0, 30));
 const titulo = await web.title();
-comprobar(/Lector/.test(titulo), 'La pestaña se llama como debe', titulo);
+comprobar(/Portapapeles/.test(titulo), 'La pestaña se llama como debe', titulo);
 comprobar(await web.evaluate(() => !document.querySelector('.ap-lateral')), 'No lleva la barra lateral de la app');
 await web.screenshot({ path: join(CAPTURAS, 'lector-web.png') });
 
@@ -272,6 +274,102 @@ await web.waitForTimeout(300);
 await copiar('雨が降っています。');
 await web.waitForTimeout(1800);
 comprobar(!(await web.evaluate(() => document.querySelector('.ap-papel')?.textContent?.includes('雨が'))), 'Al apagarlo deja de seguirlo');
+
+// ---------- Portapapeles con estructura ----------
+
+console.log('\n== Portapapeles con estructura ==');
+// Una página con título, negrita, un salto de línea, su propio furigana, una lista y una tabla. El furigana de la página
+// es una lectura en katakana que el análisis nunca pondría: si aparece, se coló el de la página.
+const HTML_COPIADO = [
+  '<h2>旅の準備</h2>',
+  '<p>明日は<strong>早く</strong>出発します。<br>駅で会いましょう。</p>',
+  '<p><ruby>本気<rt>マジ</rt></ruby>で楽しみです。</p>',
+  '<ul><li>切符を買う</li><li>弁当を作る</li></ul>',
+  '<table><tr><th>時間</th><th>場所</th></tr><tr><td>八時</td><td>東京駅</td></tr></table>',
+].join('');
+const copiarConFormato = async (html, plano) => {
+  const hoja = await contexto.newPage();
+  await hoja.goto('https://paginas.test/articulo');
+  await hoja.evaluate(([h, t]) => navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([h], { type: 'text/html' }), 'text/plain': new Blob([t], { type: 'text/plain' }) })]), [html, plano]);
+  await hoja.close();
+};
+const leerPapel = () => {
+  // Sin el furigana de Kotonoha y sin el carácter invisible que impide cortar la línea antes de un signo.
+  const sinLecturas = (x) => {
+    const c = x.cloneNode(true);
+    c.querySelectorAll('rt').forEach((r) => r.remove());
+    return c.textContent.replaceAll('⁠', '');
+  };
+  const papel = document.querySelector('.ap-papel');
+  if (!papel) return null;
+  return {
+    titulos: [...papel.querySelectorAll('.ap-t')].map(sinLecturas),
+    negritas: [...papel.querySelectorAll('b')].map(sinLecturas),
+    saltos: papel.querySelectorAll('.ap-p br').length,
+    elementos: [...papel.querySelectorAll('li')].map(sinLecturas),
+    celdas: [...papel.querySelectorAll('.ap-tabla th, .ap-tabla td')].map(sinLecturas),
+    texto: sinLecturas(papel),
+  };
+};
+await web.bringToFront();
+await web.locator('.ap-web-seguir button, .ap-web-seguir [role="switch"]').first().click();
+await web.waitForTimeout(1300);
+await copiarConFormato(HTML_COPIADO, '旅の準備 明日は早く出発します。駅で会いましょう。本気マジで楽しみです。切符を買う 弁当を作る 時間 場所 八時 東京駅');
+const conFormato = await esperar(web, `(${leerPapel})()?.celdas.length ? (${leerPapel})() : null`, undefined, 8000);
+comprobar(!!conFormato, 'Lo copiado de una página llega con su estructura');
+if (conFormato) {
+  comprobar(conFormato.titulos.includes('旅の準備'), 'Con su título', JSON.stringify(conFormato.titulos));
+  comprobar(conFormato.negritas.includes('早く'), 'Con su negrita', JSON.stringify(conFormato.negritas));
+  comprobar(conFormato.saltos >= 1, 'Con el salto de línea dentro del párrafo', String(conFormato.saltos));
+  comprobar(JSON.stringify(conFormato.elementos.slice(-2)) === JSON.stringify(['切符を買う', '弁当を作る']), 'Con su lista', JSON.stringify(conFormato.elementos));
+  comprobar(['時間', '場所', '八時', '東京駅'].every((c) => conFormato.celdas.includes(c)), 'Con su tabla', JSON.stringify(conFormato.celdas));
+  comprobar(!conFormato.texto.includes('マジ') && conFormato.texto.includes('本気で楽しみ'), 'Sin el furigana de la página de origen', conFormato.texto.slice(0, 80));
+}
+await web.screenshot({ path: join(CAPTURAS, 'portapapeles-estructura.png') });
+
+// Lo que se copia del chat de Claude llega como Markdown en texto plano.
+await copiar('## 持ち物\n\n- 傘\n- 水筒');
+const enMarkdown = await esperar(web, `(${leerPapel})()?.titulos.includes('持ち物') ? (${leerPapel})() : null`, undefined, 8000);
+comprobar(!!enMarkdown && enMarkdown.elementos.includes('傘') && enMarkdown.elementos.includes('水筒'), 'El Markdown copiado se ve con su título y su lista', JSON.stringify(enMarkdown?.elementos));
+await web.locator('.ap-web-seguir button, .ap-web-seguir [role="switch"]').first().click();
+await web.waitForTimeout(300);
+
+// Pegar con Ctrl+V en el cuadro de texto también conserva la estructura.
+await app.bringToFront();
+const pegado = await app.evaluate((html) => {
+  const area = document.querySelector('.ap-hoja-escritura textarea');
+  area.focus();
+  area.setSelectionRange(area.value.length, area.value.length);
+  const datos = new DataTransfer();
+  datos.setData('text/html', html);
+  datos.setData('text/plain', '見出し 一つ目 二つ目');
+  area.dispatchEvent(new ClipboardEvent('paste', { clipboardData: datos, bubbles: true, cancelable: true }));
+  return new Promise((r) => setTimeout(() => r(document.querySelector('.ap-hoja-escritura textarea').value), 300));
+}, '<h2>見出し</h2><ul><li>一つ目</li><li>二つ目</li></ul>');
+comprobar(pegado.includes('## 見出し') && pegado.includes('- 一つ目\n- 二つ目'), 'Pegar en el cuadro de texto conserva la estructura', JSON.stringify(pegado.slice(-40)));
+comprobar(/。\n\n## 見出し/.test(pegado), 'Y lo que trae bloques empieza en su propio párrafo', JSON.stringify(pegado.slice(-40)));
+
+// Un EPUB de texto con un título, dos párrafos y su propio furigana, importado en la Ayuda de lectura.
+console.log('\n== Libro EPUB con su estructura ==');
+const EPUB = zipSync({
+  mimetype: [strToU8('application/epub+zip'), { level: 0 }],
+  'META-INF/container.xml': strToU8('<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>'),
+  'OEBPS/content.opf': strToU8('<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>prueba</dc:title><dc:language>ja</dc:language></metadata><manifest><item id="c1" href="c1.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="c1"/></spine></package>'),
+  'OEBPS/c1.xhtml': strToU8('<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>c1</title></head><body><h1>第一章</h1><p>春が来ました。\n    花が咲きました。</p><p><ruby>本気<rt>マジ</rt></ruby>で嬉しいです。</p></body></html>'),
+});
+await app.goto(`chrome-extension://${id}/app.html#/biblioteca`);
+await app.reload();
+const archivoLibro = 'input[type=file][aria-label="Importar archivos"]';
+await app.waitForSelector(archivoLibro, { state: 'attached', timeout: 10000 });
+await app.setInputFiles(archivoLibro, { name: 'prueba-estructura.epub', mimeType: 'application/epub+zip', buffer: Buffer.from(EPUB) });
+await app.locator('button.ap-tapa[aria-label*="prueba-estructura"]').first().click({ timeout: 10000 });
+const libro = await esperar(app, `(${leerPapel})()?.titulos.length ? (${leerPapel})() : null`, undefined, 15000);
+comprobar(!!libro && libro.titulos.includes('第一章'), 'Un EPUB importado conserva sus títulos', JSON.stringify(libro?.titulos));
+comprobar(!!libro && libro.texto.includes('春が来ました。花が咲きました。'), 'Un salto de línea del código del libro no parte la frase japonesa', libro?.texto.slice(0, 40));
+comprobar(!!libro && libro.texto.includes('本気で嬉しい') && !libro.texto.includes('マジ'), 'Y sus párrafos, sin el furigana del libro', libro?.texto.slice(0, 60));
+const parrafosLibro = await app.evaluate(() => document.querySelectorAll('.ap-papel .ap-p').length);
+comprobar(parrafosLibro >= 2, 'Cada párrafo del libro va en el suyo', String(parrafosLibro));
+await app.screenshot({ path: join(CAPTURAS, 'libro-estructura.png') });
 
 // ---------- Vista dividida ----------
 
