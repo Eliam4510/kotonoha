@@ -13,9 +13,17 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-A9E45B?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-3987e5?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.2.5-A9E45B?style=flat-square" alt="Versión 0.2.5">
+  <a href="README.de.md"><img src="https://img.shields.io/badge/Deutsch-3987e5?style=flat-square" alt="Deutsch"></a>
+  <a href="README.zh.md"><img src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-3987e5?style=flat-square" alt="简体中文"></a>
+  <a href="README.ko.md"><img src="https://img.shields.io/badge/%ED%95%9C%EA%B5%AD%EC%96%B4-3987e5?style=flat-square" alt="한국어"></a>
+  <a href="README.ja.md"><img src="https://img.shields.io/badge/%E6%97%A5%E6%9C%AC%E8%AA%9E-3987e5?style=flat-square" alt="日本語"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.3.0-A9E45B?style=flat-square" alt="Versión 0.3.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
-  <img src="https://img.shields.io/badge/pruebas%20unitarias-181-0ca30c?style=flat-square" alt="181 pruebas unitarias">
+  <img src="https://img.shields.io/badge/pruebas%20unitarias-274-0ca30c?style=flat-square" alt="274 pruebas unitarias">
+  <img src="https://img.shields.io/badge/interfaz-6%20idiomas-8FCBFF?style=flat-square" alt="Interfaz en 6 idiomas">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 a N1">
 </p>
 
@@ -38,7 +46,7 @@
 
 ## Descripción
 
-Kotonoha (言の葉, «hojas de palabras») superpone subtítulos interactivos sobre YouTube, Netflix y otros reproductores. Cada palabra muestra su furigana, su acento tonal y lo que se sabe de ella, y al pasar el ratón abre su entrada de diccionario, sin ningún coste. Un botón le pregunta a Claude qué significa en esa frase concreta. La extensión añade un diccionario, la creación de tarjetas para Anki o para un repaso integrado, y explicaciones en contexto generadas con la API de Claude. También funciona sobre páginas web, textos, libros EPUB y archivos de video propios.
+Kotonoha (言の葉, «hojas de palabras») superpone subtítulos interactivos sobre YouTube, Netflix y otros reproductores. Cada palabra muestra su furigana, su acento tonal y lo que se sabe de ella, y al pasar el ratón abre su entrada de diccionario, sin ningún coste. Un botón le pregunta a Claude qué significa en esa frase concreta. La extensión añade un diccionario, la creación de tarjetas para Anki o para un repaso integrado, y explicaciones en contexto generadas con la API de Claude. En cualquier página web colorea el texto japonés, le añade furigana y consulta palabras con un clic, también en un chat como el de Claude, sin romper la página. También funciona con textos, libros EPUB y archivos de video propios. La interfaz está en español, inglés, alemán, chino, coreano y japonés.
 
 El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Japón tiene por semilla el corazón humano, y de él brotan miríadas de hojas de palabras.
 
@@ -83,7 +91,27 @@ El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Jap�
   <tr>
     <td valign="top"><b>Aplicación completa</b><br>Inicio, diccionario con formas conjugadas, explorador de palabras por estado, evaluación de nivel, ajustes por tarea y prompts editables. Tema claro y oscuro.</td>
     <td valign="top"><b>Tarjetas de un clic</b><br>Con el audio y el fotograma del video, directas a Anki mediante AnkiConnect o al repaso integrado con FSRS.</td>
-    <td valign="top"><b>Más allá del video</b><br>Consulta con <code>Shift</code> en cualquier página sin modificar su contenido, lector de texto, biblioteca EPUB, relatos a medida del nivel y reproductor de archivos propios con subtítulos de MKV.</td>
+    <td valign="top"><b>Más allá del video</b><br>Lector de texto, biblioteca EPUB, relatos a medida del nivel y reproductor de archivos propios con subtítulos de MKV.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/paginas.png" alt="Lector sobre un artículo japonés, con colores y furigana"></td>
+    <td width="33%" align="center"><img src="docs/img/trazos.png" alt="Orden de los trazos de una palabra en la ficha"></td>
+    <td width="33%" align="center"><img src="docs/img/lector-web.png" alt="Lector en una pestaña normal del navegador"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Cualquier página, sin romperla</b><br>Colores y furigana sobre el japonés de noticias, artículos y blogs. Un clic en una palabra abre su ficha; en enlaces y botones, basta con dejar el ratón encima. No añade nada al contenido de la página: lo único que puede tocar es el interlineado donde el furigana no cabe, y eso se puede desactivar.</td>
+    <td valign="top"><b>Cómo se escribe</b><br>La ficha enseña los trazos de cada kanji de la palabra, uno a uno y en bucle, con sus números. Se puede pausar y avanzar de uno en uno. Cada kanji se descarga una vez y queda guardado.</td>
+    <td valign="top"><b>Lector en una pestaña</b><br>El lector también se abre en una pestaña normal, para la vista dividida del navegador, incluso directamente junto a la página que se esté viendo. Puede seguir el portapapeles: lo que se copie aparece ahí.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/bienvenida.png" alt="Bienvenida con la elección de idioma"></td>
+    <td width="33%" align="center"><img src="docs/img/personalizar.png" alt="Ajustes de apariencia, colores y lector"></td>
+    <td width="33%" align="center"><img src="docs/img/atajos.png" alt="Ajustes de atajos de teclado"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>En seis idiomas</b><br>Interfaz en español, inglés, alemán, chino, coreano y japonés. Una bienvenida pregunta el idioma y el nivel, y propone lo que corresponde. Las explicaciones de Claude también pueden pedirse en portugués y francés.</td>
+    <td valign="top"><b>A medida</b><br>Colores para daltonismo y de alto contraste, lecturas en kana o rōmaji, tope de gasto mensual y sitios donde no actuar. Desde cero hasta N1.</td>
+    <td valign="top"><b>Atajos a elegir</b><br>Los de sobre el video se pueden cambiar todos, y funcionan con cualquier distribución de teclado, también con el japonés activado.</td>
   </tr>
 </table>
 
@@ -129,13 +157,15 @@ Después se carga la carpeta `dist` igual que en los pasos anteriores. Al volver
 
 ## Primeros pasos
 
-En **Ajustes**, dentro de la ventana de la extensión (`Alt+Shift+K`):
+La primera vez se abre una bienvenida que pregunta el idioma y el nivel, y propone:
 
-1. Instalar los diccionarios: JMdict en español e inglés, acento tonal y frecuencia.
-2. Añadir una clave de la API de Claude, que se guarda solo en el navegador. Es opcional: sin ella funcionan los subtítulos, el diccionario, las tarjetas y Whisper.
-3. Conectar con Anki, si se usa, mediante el complemento AnkiConnect.
+1. Instalar los diccionarios: JMdict en el idioma propio, o en inglés si aún no existe, con acento tonal y frecuencia.
+2. Añadir una clave de la API de Claude, que se guarda solo en el navegador. Es opcional: sin ella funcionan los subtítulos, el diccionario, los colores, las tarjetas y Whisper.
+3. Elegir dónde van las tarjetas: el repaso integrado, o Anki mediante el complemento AnkiConnect.
 
-Con eso, al abrir un video con subtítulos en japonés aparece la barra de Kotonoha. La [guía de uso](docs/guia.md) explica el resto.
+Todo se puede saltar y cambiar después en **Ajustes**, dentro de la ventana de la extensión (`Alt+Shift+K`).
+
+Con eso, al abrir un video con subtítulos en japonés aparece la barra de Kotonoha, y en cualquier página con texto japonés aparecen los colores y el furigana. La [guía de uso](docs/guia.md) explica el resto.
 
 ### Ayudante para transcribir videos de internet
 
@@ -159,7 +189,7 @@ Con la versión compilada se descarga aparte, en `kotonoha-<versión>-ayudante.z
 | `S` | Repetir la frase |
 | `G` | Navegador de subtítulos |
 | `Alt+Shift+M` | Permitir la captura de audio |
-| `Shift` + ratón | Consultar una palabra en cualquier página |
+| Clic en una palabra | Consultarla, en cualquier página con texto japonés |
 
 ## Rendimiento de la transcripción
 
@@ -213,7 +243,11 @@ El último compila y deja en `release/` los ZIP de la extensión y del ayudante,
 
 | Prueba | Qué comprueba |
 |---|---|
-| `npm test` | La lógica pura de `src/nucleo` |
+| `npm test` | La lógica pura de `src/nucleo` y que las tablas de traducción estén completas |
+| `node herramientas/idiomas.mjs` | Lo que falta o sobra en cada idioma |
+| `node pruebas/lector.mjs` | El lector de páginas con los casos difíciles: que nada se mueva, clic, enlaces, carruseles, acordeones, texto que llega en directo, árboles de sombra y una caja con scroll como la de un chat |
+| `node pruebas/lector-real.mjs` | El lector en una treintena de sitios públicos, con una captura de cada uno |
+| `node pruebas/trazos-web.mjs` | El orden de los trazos con datos reales, el lector en su pestaña, el portapapeles y la vista dividida |
 | `node pruebas/e2e.mjs` | La extensión de extremo a extremo en Edge |
 | `node pruebas/subtitulos.mjs` | Traducir, corregir, exportar e importar, en páginas que imitan a Netflix y YouTube y con una API de Claude simulada |
 | `node pruebas/experiencia.mjs` | Lo que se percibe sobre el video, fotograma a fotograma: parpadeos, temblores y arrastre. También cuenta las peticiones a Claude y comprueba el registro de gasto |
@@ -233,14 +267,15 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.2.5 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente hacerlo con Netflix y una validación prolongada. La interfaz está en español.
+La versión 0.3.0 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa.
 
 ## Privacidad
 
 - La clave de la API de Claude y todos los datos se guardan solo en el navegador.
 - El audio que transcribe Whisper no sale del equipo. Tampoco el audio de las tarjetas ni el fotograma, salvo que se envíen a Anki.
 - A la API de Claude solo se envían los textos necesarios para cada tarea: la frase, el guion de los subtítulos y el título del video.
-- Las búsquedas de audio e imágenes de palabras van directamente a JapanesePod101, Wikimedia Commons y Openverse.
+- Las búsquedas de audio e imágenes de palabras van directamente a JapanesePod101, Wikimedia Commons y Openverse, y los trazos de cada kanji se piden a jsDelivr.
+- **Seguir el portapapeles** solo lee con la opción encendida y la pestaña a la vista, y lo leído no sale del equipo.
 - La extensión no tiene servidor propio ni recoge estadísticas de uso.
 
 ## Licencia y créditos
@@ -249,6 +284,7 @@ El código se publica bajo la [licencia MIT](LICENSE). Los componentes de tercer
 
 - Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io), en formato Yomitan.
 - Transcripción: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) con [Transformers.js](https://github.com/huggingface/transformers.js).
+- Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0.
 - Iconos: [Phosphor](https://phosphoricons.com). Tipografía: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) y [Nunito](https://fonts.google.com/specimen/Nunito).
 
 Proyecto independiente, sin afiliación con los servicios mencionados.

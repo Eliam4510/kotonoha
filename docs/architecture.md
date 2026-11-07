@@ -1,4 +1,4 @@
-<p align="right"><a href="arquitectura.md">Español</a> · <b>English</b></p>
+<p align="right"><a href="arquitectura.md">Español</a> · <b>English</b> · <a href="de/architecture.md">Deutsch</a> · <a href="zh/architecture.md">简体中文</a> · <a href="ko/architecture.md">한국어</a> · <a href="ja/architecture.md">日本語</a></p>
 
 # Architecture
 
@@ -12,7 +12,7 @@ flowchart TB
     AD["Adapters<br/>YouTube, Netflix, generic"]
   end
   subgraph Contenido["Content script (isolated world, Shadow DOM)"]
-    UI["Bar, subtitles, navigator,<br/>word card, panels, shortcuts"]
+    UI["Bar, subtitles, navigator,<br/>word panel, panels, shortcuts"]
     MODO["Playback modes<br/>and scene skipping"]
     WEB["Web page reader"]
   end
@@ -135,13 +135,20 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 | Local files | ffmpeg.wasm | Embedded subtitles and MKV audio tracks, without external programs |
 | Flashcards | AnkiConnect and a built-in FSRS review | Integration with Anki, or review inside the application |
 | Card audio | `tabCapture` and `MediaRecorder`, exported to MP3 | Works on any site without downloading the video |
-| Web pages | CSS Custom Highlight API | Does not modify the DOM, so it does not interfere with React applications and the like |
+| Web pages | CSS Custom Highlight API for colors, and a layer of its own, outside `<body>`, for readings | Adds nothing to the page's content and does not interfere with React applications and the like |
+| Furigana in a scrolling box | One sheet per box, moved by `ScrollTimeline` and clipped by a frame | The browser scrolls those boxes without going through the main thread: repositioning readings from code would always leave them a frame behind the text, showing a trail. Linked to the scroll, they move together with the text, even when the page is busy |
+| Line spacing | Inline, unitless `line-height`, only on multi-line text or rows packed together | With 15 px type and 21 px lines, 6 px remain for a 9 px reading and an underline. It is the only thing the reader touches on the page: it is reverted if the text would overflow a fixed-height box, and it can be turned off |
+| Which word is under the pointer | `caretPositionFromPoint` with an index of text nodes | Resolves the click without wrapping each word in an element |
+| Interface languages | One JSON table per language, with the Spanish text as the key, loaded separately | The content script runs on every page and must not carry six languages. Whole sentences, because word order changes in Korean, Japanese and German |
+| Stroke order | [KanjiVG](https://kanjivg.tagaini.net), requested character by character from jsDelivr at a pinned version, and drawn as animated SVG | There are over 10,000 files: each kanji is downloaded when used and stays stored. SVG is sharp at any size and follows the theme, and only paths and their numbers are accepted from each file |
+| Reader in a tab | An extension page, `lector.html`, opened in a regular tab | The application window is of type `popup`, with no tabs, and cannot join split view. An extension page can, and needs no server. `chrome.tabs.create({ splitWithTabId })` places it next to the current tab from Chrome 155 |
+| Following the clipboard | `execCommand('paste')` in the offscreen document | Without focus, `navigator.clipboard` refuses to read, and in split view the focus is on the other page. It only reads with the option on and the tab in view |
 | Icons | Phosphor, duotone version | A consistent set, of which only what the code uses is bundled |
 | Typography | Nunito for Latin and Zen Maru Gothic for Japanese | Both rounded. Loaded as data so that each site's security policy does not block them |
 
 ## Claude models
 
-Each task uses `claude-sonnet-5-5` by default, and the model and effort can be changed per task in Settings. The "Profundizar" button on the card repeats the query with `claude-opus-5-5` and high effort. Requests enable `fallbacks: "default"`, so a safety refusal is retried on another model. This can be disabled in Settings. Structured responses use `output_config.format` with JSON schemas, and the full script, when sent, goes in a cached system block.
+Each task uses `claude-sonnet-5-5` by default, and the model and effort can be changed per task in Settings. The "Go deeper" button on the word panel repeats the query with `claude-opus-5-5` and high effort. Requests enable `fallbacks: "default"`, so a safety refusal is retried on another model. This can be disabled in Settings. Structured responses use `output_config.format` with JSON schemas, and the full script, when sent, goes in a cached system block.
 
 **Avoiding paying twice.** Every query has its own identity, made of what is being asked: task, model, level, language, template, word, reading and sentence. It leaves out the surrounding text, which changes as subtitles load. A request in flight is not cancelled when whoever asked for it leaves, because it is already paid for and cancelling it would mean paying again: it finishes in the background and is stored, and a second identical query attaches to it. The reading review advances in stretches of 120 lines from the playback position, and each batch in flight finishes and is stored even if the tab closes.
 
@@ -196,6 +203,23 @@ Memory does not grow over time, and the pace holds. Video memory includes the wh
 
 **Recovery.** Destroying the WebGPU device produces the same event as a driver restart. Whisper resumes work after 27 s, without losing or reordering what was transcribed, and on a second failure it stops with a notice.
 
+### Cost of the page reader
+
+Main thread time, with every word unknown and furigana on all of them: the worst case. Measured in Edge at 1366×860 with `Performance.getMetrics`, with the reader already loaded.
+
+| Page | Turn on | 6 s idle | Scroll 3.5 s, without reader | Scroll 3.5 s, with reader |
+|---|---|---|---|---|
+| Wikipedia, long article (16,000 elements) | 500 ms | 300 ms the first time, then 0 | 30 ms | 850 ms |
+| Front page of a newspaper with ads | 340 ms | 160 ms (120 ms without reader) | 70-560 ms | 640-790 ms |
+
+What costs is measuring and changing the DOM. Chromium rebuilds every highlight marker after any change to the document, so the reader groups what it writes. Therefore:
+
+- The reading layer moves with the document, and a scrolling box's layer with that box: scrolling them leaves nothing to calculate.
+- Each reading carries the effective `z-index` of its text, and the browser resolves what covers what without hit testing. Clipping is decided by comparing rectangles.
+- If a block's box has not moved, neither have its readings: one box is checked instead of each word.
+- What still needs `elementFromPoint` is done by lines, in idle time and with the page still.
+- What moves away is removed in groups, and left alone if it comes back first.
+
 ## Folder structure
 
 ```
@@ -203,13 +227,15 @@ src/
   nucleo/       Pure, tested logic: subtitles, tokens, modes, grammar, synchronization, transcription, batches
   compartido/   Types, settings and RPC between contexts
   pagina/       MAIN world adapters
-  contenido/    Interface on top of the video and web page reader
+  contenido/    Interface on top of the video and web page reader (lector/)
   fondo/        Service worker
   motor/        Offscreen document: database, tokenizer, Claude, Anki, recording, Whisper
   app/          Application window
+  lector/       The reader in a regular tab
   popup/        Extension icon menu
-  ui/           Design system, word card, icons and brand
-herramientas/   Icon, brand and banner generators; local helper in ayudante/
+  ui/           Design system, word panel, icons and brand
+idiomas/        Interface translation tables
+herramientas/   Icon, brand and banner generators; texts to translate; local helper in ayudante/
 pruebas/        Screenshot bench, end-to-end tests and simulated servers
-docs/           Documentation in Spanish and English
+docs/           Documentation: Spanish and English here, and German, Chinese, Korean and Japanese in subfolders
 ```

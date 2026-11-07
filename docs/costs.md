@@ -1,8 +1,8 @@
-<p align="right"><a href="costos.md">Español</a> · <b>English</b></p>
+<p align="right"><a href="costos.md">Español</a> · <b>English</b> · <a href="de/costs.md">Deutsch</a> · <a href="zh/costs.md">简体中文</a> · <a href="ko/costs.md">한국어</a> · <a href="ja/costs.md">日本語</a></p>
 
 # Claude API costs
 
-What it costs to use Kotonoha with your own Claude API key, measured with real videos on November 5, 2026. The **Gasto en Claude** (Claude spending) card on the home screen shows the exact usage of each installation, with the tokens reported by the API.
+What it costs to use Kotonoha with a personal Claude API key, measured with real videos on November 5, 2026. The **Claude spending** card on the home screen shows the exact usage of each installation, with the tokens reported by the API.
 
 Subtitles, the dictionary, furigana, flashcards, review and Whisper transcription do not use the API and cost nothing.
 
@@ -92,7 +92,7 @@ Prices per million tokens, in dollars. The model's reasoning is billed as output
 
 | Measure | Effect |
 |---|---|
-| The card opens with the dictionary | Hovering over a word no longer makes any request |
+| The word panel opens with the dictionary | Hovering over a word no longer makes any request |
 | Every answer is stored for 90 days, by word and sentence | Moving between words, or coming back to the same video, costs nothing |
 | A request in flight is not cancelled | Changing word does not throw away what is already paid for: it finishes, is stored and stays available |
 | Two identical queries at once share one request | Impatience is not paid for twice |
@@ -103,9 +103,9 @@ Prices per million tokens, in dollars. The model's reasoning is billed as output
 
 | Setting | Where | Saving per hour of video |
 |---|---|---|
-| Translate only when needed | Generar subtítulos | USD 0.39 |
-| Do not review as the video advances | Generar subtítulos | USD 0.36 |
-| Do not correct automatic subtitles on opening | Generar subtítulos | USD 0.64 |
+| Translate only when needed | Generate subtitles | USD 0.39 |
+| Do not review as the video advances | Generate subtitles | USD 0.36 |
+| Do not correct automatic subtitles on opening | Generate subtitles | USD 0.64 |
 | A smaller model or effort per task | Settings, Claude | Depends on the task, and may affect quality |
 
 The first three can still be requested with their button on any video of interest.

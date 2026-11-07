@@ -13,9 +13,17 @@
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-3987e5?style=flat-square" alt="Español"></a>
   <a href="README.en.md"><img src="https://img.shields.io/badge/English-A9E45B?style=flat-square" alt="English"></a>
-  <img src="https://img.shields.io/badge/version-0.2.5-A9E45B?style=flat-square" alt="Version 0.2.5">
+  <a href="README.de.md"><img src="https://img.shields.io/badge/Deutsch-3987e5?style=flat-square" alt="Deutsch"></a>
+  <a href="README.zh.md"><img src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-3987e5?style=flat-square" alt="简体中文"></a>
+  <a href="README.ko.md"><img src="https://img.shields.io/badge/%ED%95%9C%EA%B5%AD%EC%96%B4-3987e5?style=flat-square" alt="한국어"></a>
+  <a href="README.ja.md"><img src="https://img.shields.io/badge/%E6%97%A5%E6%9C%AC%E8%AA%9E-3987e5?style=flat-square" alt="日本語"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.3.0-A9E45B?style=flat-square" alt="Version 0.3.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
-  <img src="https://img.shields.io/badge/unit%20tests-181-0ca30c?style=flat-square" alt="181 unit tests">
+  <img src="https://img.shields.io/badge/unit%20tests-274-0ca30c?style=flat-square" alt="274 unit tests">
+  <img src="https://img.shields.io/badge/interface-6%20languages-8FCBFF?style=flat-square" alt="Interface in 6 languages">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 to N1">
 </p>
 
@@ -33,28 +41,28 @@
 </p>
 
 <p align="center">
-  <img src="docs/img/demo.gif" alt="A tour of Kotonoha's interactive subtitles and word card" width="760">
+  <img src="docs/img/demo.gif" alt="A tour of Kotonoha's interactive subtitles and word panel" width="760">
 </p>
 
 ## Overview
 
-Kotonoha (言の葉, "leaves of words") overlays interactive subtitles on YouTube, Netflix and other players. Each word shows its furigana, its pitch accent and how well it is known, and hovering over it opens its dictionary entry at no cost. A button asks Claude what it means in that specific sentence. The extension adds a dictionary, flashcard creation for Anki or a built-in review, and explanations in context generated with the Claude API. It also works on web pages, texts, EPUB books and local video files.
+Kotonoha (言の葉, "leaves of words") overlays interactive subtitles on YouTube, Netflix and other players. Each word shows its furigana, its pitch accent and how well it is known, and hovering over it opens its dictionary entry at no cost. A button asks Claude what it means in that specific sentence. The extension adds a dictionary, flashcard creation for Anki or a built-in review, and explanations in context generated with the Claude API. On any web page it colors Japanese text, adds furigana and looks up words with a click, in chats like Claude's too, without breaking the page. It also works with texts, EPUB books and local video files.
 
 The name comes from the preface of the *Kokin Wakashū* (c. 905): the poetry of Japan has the human heart for its seed, and from it grow countless leaves of words.
 
-The interface is currently in Spanish. Claude's explanations can be requested in Spanish, English or simple Japanese, and subtitles can be translated into Spanish, English, Portuguese, French or German.
+The interface is available in Spanish, English, German, Chinese, Korean and Japanese. Claude's explanations can also be requested in Portuguese, French or simple Japanese, and subtitles can be translated into any of them except Japanese.
 
 ## Features
 
 <table>
   <tr>
     <td width="33%" align="center"><img src="docs/img/subtitulos.png" alt="Interactive subtitles over a video"></td>
-    <td width="33%" align="center"><img src="docs/img/ficha.png" alt="Word card with the meaning in the sentence"></td>
+    <td width="33%" align="center"><img src="docs/img/ficha.png" alt="Word panel with the meaning in the sentence"></td>
     <td width="33%" align="center"><img src="docs/img/navegador.png" alt="Subtitle navigator with corrected lines"></td>
   </tr>
   <tr>
     <td valign="top"><b>Subtitles made for reading</b><br>Furigana, pitch accent colors, learning status underlines and JLPT grammar points, with an estimated comprehension percentage for each video.</td>
-    <td valign="top"><b>Dictionary first, Claude on request</b><br>The card opens with the dictionary. A button asks Claude for the word's real meaning in that sentence, including figurative and literary use. It also reviews furigana readings as the video plays.</td>
+    <td valign="top"><b>Dictionary first, Claude on request</b><br>The word panel opens with the dictionary. A button asks Claude for the word's real meaning in that sentence, including figurative and literary use. It also reviews furigana readings as the video plays.</td>
     <td valign="top"><b>Subtitle navigator</b><br>Every line in view, with filters, bookmarks, multiple selection and synchronization with one or two marks. Corrected lines keep their original text.</td>
   </tr>
   <tr>
@@ -85,7 +93,27 @@ The interface is currently in Spanish. Claude's explanations can be requested in
   <tr>
     <td valign="top"><b>A complete application</b><br>Home, a dictionary that understands conjugated forms, a word explorer by status, level assessment, per-task settings and editable prompts. Light and dark themes.</td>
     <td valign="top"><b>One-click flashcards</b><br>With the audio and frame from the video, straight to Anki through AnkiConnect or to the built-in FSRS review.</td>
-    <td valign="top"><b>Beyond video</b><br>Lookup with <code>Shift</code> on any page without modifying its content, a text reader, an EPUB library, stories matched to the user's level and a local file player with MKV subtitles.</td>
+    <td valign="top"><b>Beyond video</b><br>A text reader, an EPUB library, stories matched to the user's level and a local file player with MKV subtitles.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/paginas.en.png" alt="Reader on a Japanese article, with colors and furigana"></td>
+    <td width="33%" align="center"><img src="docs/img/trazos.en.png" alt="Stroke order of a word in the word panel"></td>
+    <td width="33%" align="center"><img src="docs/img/lector-web.en.png" alt="Reader in a regular browser tab"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Any page, without breaking it</b><br>Colors and furigana on the Japanese of news sites, articles and blogs. Clicking a word opens its word panel; on links and buttons, resting the pointer on it is enough. Nothing is added to the page's content: the only thing it may touch is line spacing where furigana does not fit, and that can be turned off.</td>
+    <td valign="top"><b>How it is written</b><br>The card shows the strokes of each kanji in the word, one by one and in a loop, with their numbers. It can be paused and stepped through. Each kanji is downloaded once and stays stored.</td>
+    <td valign="top"><b>Reader in a tab</b><br>The reader also opens in a regular tab, for the browser's split view, even right next to the page being viewed. It can follow the clipboard: what you copy appears there.</td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/bienvenida.en.png" alt="Welcome screen with the language choice"></td>
+    <td width="33%" align="center"><img src="docs/img/personalizar.en.png" alt="Appearance, color and reader settings"></td>
+    <td width="33%" align="center"><img src="docs/img/atajos.en.png" alt="Keyboard shortcut settings"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>In six languages</b><br>An interface in Spanish, English, German, Chinese, Korean and Japanese. A welcome screen asks for the language and level, and suggests what fits. Claude's explanations can also be requested in Portuguese and French.</td>
+    <td valign="top"><b>Made to fit</b><br>Colors for color blindness and high contrast, readings in kana or rōmaji, a monthly spending limit and sites to leave alone. From absolute beginner to N1.</td>
+    <td valign="top"><b>Shortcuts of choice</b><br>Those over the video can all be changed, and work with any keyboard layout, even with Japanese input on.</td>
   </tr>
 </table>
 
@@ -131,13 +159,15 @@ Then load the `dist` folder as in the steps above. After rebuilding, the extensi
 
 ## Getting started
 
-Under **Ajustes** (Settings), in the extension window (`Alt+Shift+K`):
+The first time, a welcome screen asks for the language and level, and suggests:
 
-1. Install the dictionaries: JMdict in Spanish and English, pitch accent and frequency.
-2. Add a Claude API key, which is stored only in the browser. This is optional: subtitles, the dictionary, flashcards and Whisper work without it.
-3. Connect to Anki, if used, through the AnkiConnect add-on.
+1. Installing the dictionaries: JMdict in the chosen language, or in English if there is none yet, with pitch accent and frequency.
+2. Adding a Claude API key, which is stored only in the browser. This is optional: subtitles, the dictionary, colors, flashcards and Whisper work without it.
+3. Choosing where cards go: the built-in review, or Anki through the AnkiConnect add-on.
 
-With that, opening a video with Japanese subtitles brings up the Kotonoha bar. The [user guide](docs/guide.md) explains the rest.
+All of this can be skipped and changed later under **Settings**, in the extension window (`Alt+Shift+K`).
+
+With that, opening a video with Japanese subtitles brings up the Kotonoha bar, and any page with Japanese text shows colors and furigana. The [user guide](docs/guide.md) explains the rest.
 
 ### Helper for transcribing online videos
 
@@ -161,7 +191,7 @@ With the compiled version it is downloaded separately, in `kotonoha-<version>-ay
 | `S` | Repeat the sentence |
 | `G` | Subtitle navigator |
 | `Alt+Shift+M` | Allow audio capture |
-| `Shift` + pointer | Look up a word on any page |
+| Click on a word | Look it up, on any page with Japanese text |
 
 ## Transcription performance
 
@@ -215,7 +245,11 @@ The last one builds and leaves the extension and helper ZIP files in `release/`,
 
 | Test | What it checks |
 |---|---|
-| `npm test` | The pure logic in `src/nucleo` |
+| `npm test` | The pure logic in `src/nucleo`, and that the translation tables are complete |
+| `node herramientas/idiomas.mjs` | What is missing or left over in each language |
+| `node pruebas/lector.mjs` | The page reader with the hard cases: nothing moves, clicks, links, carousels, accordions, live text, shadow trees and a scrolling box like a chat's |
+| `node pruebas/lector-real.mjs` | The reader on about thirty public sites, with a screenshot of each |
+| `node pruebas/trazos-web.mjs` | Stroke order with real data, the reader in its tab, the clipboard and split view |
 | `node pruebas/e2e.mjs` | The extension end to end in Edge |
 | `node pruebas/subtitulos.mjs` | Translating, correcting, exporting and importing, on pages imitating Netflix and YouTube with a simulated Claude API |
 | `node pruebas/experiencia.mjs` | What is perceived on top of the video, frame by frame: flicker, jitter and dragging. It also counts requests to Claude and checks the spending log |
@@ -235,14 +269,15 @@ Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist
 
 ## Project status
 
-Version 0.2.5 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while Netflix and extended validation are still pending.
+Version 0.3.0 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while extended validation is still pending. The page reader has been tried on about thirty real public sites with an automated browser, without signing in. The interface translations were written with AI assistance and have not yet had a native review.
 
 ## Privacy
 
 - The Claude API key and all data are stored only in the browser.
 - The audio Whisper transcribes never leaves the computer. Neither does card audio or the video frame, unless sent to Anki.
 - Only the text each task needs is sent to the Claude API: the sentence, the subtitle script and the video title.
-- Word audio and image lookups go directly to JapanesePod101, Wikimedia Commons and Openverse.
+- Word audio and image lookups go directly to JapanesePod101, Wikimedia Commons and Openverse, and the strokes of each kanji are requested from jsDelivr.
+- **Follow the clipboard** only reads with the option on and the tab in view, and what it reads stays on the computer.
 - The extension has no server of its own and collects no usage statistics.
 
 ## License and credits
@@ -251,6 +286,7 @@ The code is released under the [MIT license](LICENSE). Third-party components, t
 
 - Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io), in Yomitan format.
 - Transcription: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) with [Transformers.js](https://github.com/huggingface/transformers.js).
+- Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0.
 - Icons: [Phosphor](https://phosphoricons.com). Typography: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) and [Nunito](https://fonts.google.com/specimen/Nunito).
 
 An independent project, not affiliated with the services mentioned.

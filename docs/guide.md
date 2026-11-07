@@ -1,4 +1,4 @@
-<p align="right"><a href="guia.md">Español</a> · <b>English</b></p>
+<p align="right"><a href="guia.md">Español</a> · <b>English</b> · <a href="de/guide.md">Deutsch</a> · <a href="zh/guide.md">简体中文</a> · <a href="ko/guide.md">한국어</a> · <a href="ja/guide.md">日本語</a></p>
 
 # User guide
 
@@ -20,16 +20,26 @@ This guide covers day-to-day use of Kotonoha. Installation is described in the [
 
 ## Getting started
 
-Everything is configured under **Ajustes** (Settings), in the extension window, which opens with `Alt+Shift+K`.
+The first time, a welcome screen asks for the language and level, and suggests installing the dictionaries, adding a Claude key and choosing where cards go. It can be skipped, and seen again from **Settings, Appearance**. Everything is configured afterwards under **Settings**, in the extension window, which opens with `Alt+Shift+K`.
 
 | Step | Where | Purpose |
 |---|---|---|
-| Dictionaries | Ajustes, Diccionarios | JMdict in Spanish and English, Kanjium pitch accent and JPDB frequency. They are downloaded once and stay in the browser |
-| Claude API key | Ajustes, Claude | Explanations, reading review, translation and correction. It is stored only in the browser |
-| Level and language | Ajustes, Tu nivel e idioma | Adapts the explanations, which can be requested in Spanish, English or simple Japanese |
-| Anki | Ajustes, Tarjetas y Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
+| Dictionaries | Settings, Dictionaries | JMdict in Spanish, English or German, Kanjium pitch accent and JPDB frequency. They are downloaded once and stay in the browser |
+| Claude API key | Settings, Claude | Explanations, reading review, translation and correction. It is stored only in the browser |
+| Language and level | Settings, Language and level | The interface language and, separately, that of explanations and translations. The level adapts the explanations and decides how much furigana is shown at first |
+| Anki | Settings, Cards and Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
 
-The extension works without a Claude key: subtitles, the dictionary, furigana, flashcards and Whisper do not need one.
+The extension works without a Claude key: subtitles, the dictionary, furigana, colors, flashcards and Whisper do not need one.
+
+### Making it yours
+
+| Option | Where | Purpose |
+|---|---|---|
+| Readings in rōmaji | Settings, Language and level | For those who cannot read kana yet. It applies to subtitles, word panels and pages |
+| Word colors | Settings, Appearance | Three palettes: the usual one, one for color blindness that does not rely on red or green, and a high-contrast one |
+| Shortcuts | Settings, Keyboard shortcuts | Those over the video are changed there. Those used by the browser, such as audio capture, on its shortcuts page |
+| Spending limit | Settings, Claude | When it is reached, Claude is not used again until the next month |
+| Sites without the reader | Settings, Page reader, or the button at the edge of the page | Turns it off only where it gets in the way |
 
 ## On top of the video
 
@@ -37,11 +47,13 @@ When a video with Japanese subtitles opens, a floating bar appears at the top. I
 
 **Subtitles.** Each word has furigana, a color for its pitch accent and an underline for its status: unknown, tracked, known or ignored. Identified grammar points appear as tags.
 
-**Moving the subtitles.** Drag them from anywhere, even from a word, to the height and side you prefer. The position is kept for every video, in proportion to the video's size, including theater mode. A double click on the background, or **Volver a su sitio** (back to its place) in the display settings, puts them back.
+**Moving the subtitles.** Drag them from anywhere, even from a word, to the height and side you prefer. The position is kept for every video, in proportion to the video's size, including theater mode. A double click on the background, or **Put back in place** in the display settings, puts them back.
 
-**Word card.** Hovering over a word opens its card, with no request to Claude, showing definitions, frequency, audio, images, examples and links to Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo and Massif. The JapanDict link opens the exact JMdict entry, not a list of homographs.
+**Word panel.** Hovering over a word opens its panel, with no request to Claude, showing definitions, frequency, audio, images, examples, stroke order and links to Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo and Massif. The JapanDict link opens the exact JMdict entry, not a list of homographs.
 
-**In this sentence.** With a Claude key, the **¿Qué significa en esta frase?** (what does it mean in this sentence) button gives the meaning of the word in that context and flags figurative or poetic use. Claude receives 40 lines around the sentence and the translation. The **Explicar**, **Desglose** and **Traducir** tabs work the same way: they ask when pressed. Every answer is stored, so coming back to that word in that sentence costs nothing, and the card says so with **Guardada, sin gasto** (stored, no cost). The "Profundizar" (go deeper) button repeats the query with Opus 5.5.
+**In this sentence.** With a Claude key, the **What does it mean in this sentence?** button gives the meaning of the word in that context and flags figurative or poetic use. Claude receives 40 lines around the sentence and the translation. The **Explain**, **Breakdown** and **Translate** tabs work the same way: they ask when pressed. Every answer is stored, so coming back to that word in that sentence costs nothing, and the panel says so with **Saved, no cost**. The **Go deeper** button repeats the query with Opus 5.5.
+
+**Strokes.** The **Strokes** tab on the word panel shows how each kanji in the word is written: strokes are drawn one by one, in a loop, with their numbers. It can be paused, stepped through and sped up or slowed down. The data comes from [KanjiVG](https://kanjivg.tagaini.net): each kanji is downloaded the first time and stays in the browser.
 
 **Subtitle navigator.** `G` opens a side panel with every line, filters, bookmarks and multiple selection. It can also merge lines, create several cards and synchronize.
 
@@ -64,11 +76,11 @@ Scenes without dialogue can be sped up or skipped from the video panel.
 
 ### Choosing tracks
 
-The **Video y subtítulos** panel, **Subtítulos** tab, selects the Japanese track and the secondary one. By default, hand-made subtitles are preferred over automatic ones, and imported files over everything else.
+The **Video and subtitles** panel, **Subtitles** tab, selects the Japanese track and the secondary one. By default, hand-made subtitles are preferred over automatic ones, and imported files over everything else.
 
 ### Translating with Claude
 
-The **Traducir al español** button in the **Subtítulos con IA** panel, or **Traducir con Claude** next to the secondary track, translates the Japanese subtitles into the support language: Spanish, English, Portuguese, French or German.
+The translate button in the **AI subtitles** panel, or **Translate with Claude** next to the secondary track, translates the Japanese subtitles into the support language: Spanish, English, Portuguese, French or German.
 
 - Work starts with the part being watched, so that part is ready within seconds.
 - Results appear as they arrive.
@@ -89,18 +101,18 @@ When subtitles exist only in another language, Claude can adapt them to Japanese
 
 ### Importing and exporting
 
-Each track has **Importar** (import) and **Exportar SRT** (export) buttons. A file can also be dragged onto the video. SRT, VTT, ASS, SSA, TTML and DFXP are supported.
+Each track has **Import** and **Export SRT** buttons. A file can also be dragged onto the video. SRT, VTT, ASS, SSA, TTML and DFXP are supported.
 
 - Imported files are saved for that title and take priority over the site's tracks.
 - Exports include the synchronization adjustments.
 
 ### Netflix regions
 
-Japanese subtitles from a Netflix title are saved when watched, along with its identifier. If the catalog of another region offers the same title without that track, Kotonoha presents it as "Japonés (guardados)" (Japanese, saved), with that region's own subtitles as secondary. Exporting to SRT and importing the file covers the same case manually.
+Japanese subtitles from a Netflix title are saved when watched, along with its identifier. If the catalog of another region offers the same title without that track, Kotonoha presents it as "Japanese (saved)", with that region's own subtitles as secondary. Exporting to SRT and importing the file covers the same case manually.
 
 ### Synchronizing
 
-The **Sincronizar** tab adjusts the offset of each track. **Esta línea suena ahora** (this line is playing now) in the navigator also works: one mark corrects the offset, and two also correct the speed. The offset is adjusted with `Alt+I` and `Alt+O`.
+The **Sync** tab adjusts the offset of each track. **Sync: this line is playing now** in the navigator also works: one mark corrects the offset, and two also correct the speed. The offset is adjusted with `Alt+I` and `Alt+O`.
 
 ## Whisper transcription
 
@@ -138,7 +150,7 @@ An extension cannot download the audio of a video by itself. The helper is a sma
 powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 ```
 
-The extension must then be reloaded at `edge://extensions` or `chrome://extensions`. Its status can be checked under **Ajustes, Transcripción**.
+The extension must then be reloaded at `edge://extensions` or `chrome://extensions`. Its status can be checked under **Settings, Transcription**.
 
 | Aspect | Behavior |
 |---|---|
@@ -157,7 +169,7 @@ If a video cannot be downloaded, for example because it is private or age-restri
 | `Q`, `Alt+Q` | Creates a card with the current word and sentence |
 | `E` | Sends the word, the selection or the image under the pointer to the card creator |
 
-Cards can be sent to Anki through AnkiConnect, with a custom note type or the one the extension creates, or saved in **Memoria**, the built-in FSRS review. Fields include sentence, furigana, translation, definitions, audio, image and notes. Audio capture is enabled with `Alt+Shift+M` or the switch in the extension menu.
+Cards can be sent to Anki through AnkiConnect, with a custom note type or the one the extension creates, or saved in **Memory**, the built-in FSRS review. Fields include sentence, furigana, translation, definitions, audio, image and notes. Audio capture is enabled with `Alt+Shift+M` or the switch in the extension menu.
 
 **Audio and image from the video.** To record the sentence audio, capture must be enabled in the video's tab, with `Alt+Shift+M` or the switch in the extension menu. Capture only covers that tab: if it is active in another one, the microphone icon appears off and the card is created without audio. When a card is created, the line plays again at normal speed while it records, and the video then stays where it was. The image includes nothing from the interface. On sites with DRM, such as Netflix, the browser delivers the frame in black: the card then carries the episode's official image, or none if the site does not offer one. A protected site may also withhold its sound: the card is created without audio and, after two silent sentences in a row in a video, the line is no longer replayed to record it.
 
@@ -175,9 +187,19 @@ Cards can be sent to Anki through AnkiConnect, with a custom note type or the on
 
 ## Web pages, reader and library
 
-**Web pages.** Holding `Shift` and hovering over a Japanese word opens its card on any page. Status underlining does not modify the document: it uses the CSS Custom Highlight API, so it does not interfere with applications such as those built with React. `Alt+K`, `Alt+U` and `Alt+I` mark the selected text in bulk as known, unknown or ignored.
+**Web pages.** On any page with Japanese text, the reader underlines words according to how well they are known and adds furigana. Clicking a word opens its panel. On links and buttons the click still belongs to the site, and the panel opens when the pointer rests on them, or at once with `Shift`. Dragging still selects text, and with the panel open `1` to `4` and `Q` work.
+
+The button on the right edge adjusts colors and furigana without leaving the page, and the extension menu turns the reader on and off. Furigana has four modes: on all words, only on new ones, on hover or never. **Settings, Page reader** can make the panel always open on hover, or make clicks on links look words up too.
+
+None of this adds anything to the page's content. Colors use the CSS Custom Highlight API and readings live in a separate layer, so selecting, copying and searching work as usual, and it does not interfere with applications such as those built with React. It also works on what scrolls inside a box, like a chat conversation: furigana moves with the text and passes under the message box. It leaves text fields and Chinese or Korean text alone.
+
+**Space out lines.** Many pages leave little room between lines, and furigana would collide with the line above. There, the line spacing of that text is opened just enough, and that is the only thing the reader may move on a page. It is not done on buttons or menus, nor where the text would overflow a fixed-height box: in those cases, if there is no room at all, furigana is left for hovering. The **Space out lines** switch, on the edge button, turns it off, and then the layout does not move at all.
+
+`Alt+K`, `Alt+U` and `Alt+I` mark the selected text in bulk as known, unknown or ignored.
 
 **Reader.** Displays any pasted text with the same aids as subtitles.
+
+**Web mode.** The application window has no tabs, so it cannot join the browser's split view. The reader's **Web mode** button opens it in a regular tab, without the sidebar, and **Open the reader next to this tab**, in the extension menu, places it right beside the page you are viewing (Chrome 155 or later). In that tab, **Follow the clipboard** appends the Japanese you copy anywhere, while the tab is in view. It is a page of the extension itself: it needs no server, works offline, and the text stays on your computer.
 
 **Library.** Stores EPUB books, texts and SRT subtitles, with the reading position. It can also generate stories with Claude, matched to the configured level.
 
@@ -187,9 +209,9 @@ Cards can be sent to Anki through AnkiConnect, with a custom note type or the on
 
 ## Claude spending
 
-The home screen has a **Gasto en Claude** card with this month's spending against the credit set in Settings, a chart by day and model, the split by task and a log of every request with its tokens. The cost is worked out from the tokens reported by the API and its public prices, and only counts what was requested from this extension in this browser.
+The home screen has a **Claude spending** card with this month's spending against the credit set in Settings, a chart by day and model, the split by task and a log of every request with its tokens. The cost is worked out from the tokens reported by the API and its public prices, and only counts what was requested from this extension in this browser.
 
-What costs the most per video is the correction of automatic subtitles, followed by translation and by the review of readings, meanings and grammar. The review covers a few minutes ahead of the playback position and continues as the video advances, and reviewed lines stay stored. It can be turned off in **Generar subtítulos**, or requested for the whole video with **Revisar todo el video**. The [cost study](costs.md) gives measured figures, per video and per month.
+What costs the most per video is the correction of automatic subtitles, followed by translation and by the review of readings, meanings and grammar. The review covers a few minutes ahead of the playback position and continues as the video advances, and reviewed lines stay stored. It can be turned off in **Generate subtitles**, or requested for the whole video with **Review the whole video**. The [cost study](costs.md) gives measured figures, per video and per month.
 
 Three settings decide how much word queries are used:
 
@@ -201,11 +223,11 @@ Three settings decide how much word queries are used:
 
 ## Data and backups
 
-All data is stored in the browser, in IndexedDB. **Ajustes, Tus datos** exports and imports a backup with words, cards, library, settings, generated subtitles, corrections and the spending log.
+All data is stored in the browser, in IndexedDB. **Settings, Your data** exports and imports a backup with words, cards, library, settings, generated subtitles, corrections and the spending log.
 
 ## Keyboard shortcuts
 
-The full reference is in the shortcuts panel, on top of the video.
+The full reference is in the shortcuts panel, on top of the video. They can be changed under **Settings, Keyboard shortcuts**, and also work with Korean or Russian keyboards or with Japanese input on, because they follow the physical key.
 
 | Group | Shortcut | Action |
 |---|---|---|
@@ -240,7 +262,7 @@ The full reference is in the shortcuts panel, on top of the video.
 | Symptom | Cause and solution |
 |---|---|
 | Nothing changes after building | The browser keeps the previous service worker. Press **Reload** on the extensions page |
-| "Para oír el video activa la captura de audio" (enable audio capture to hear the video) | Chrome requires a user action to capture a tab. Use `Alt+Shift+M` or the switch in the extension menu, in the video's tab |
+| "To hear the video you need to turn on audio capture" | Chrome requires a user action to capture a tab. Use `Alt+Shift+M` or the switch in the extension menu, in the video's tab |
 | A shortcut among `Alt+Shift+M`, `Alt+Shift+K` or `Alt+Q` does not respond | Chrome does not assign an extension a key another one already holds, even a disabled one, and gives no warning. The extension menu and the shortcuts panel show the real key, which can be changed at `chrome://extensions/shortcuts` |
 | `Alt+R` or `Alt+Z` open Radeon Software | They are shortcuts of that application on machines with an AMD graphics card. Kotonoha uses `Alt+Shift+M` and `Alt+V` |
 | The interface appears without blur | With hardware acceleration off, blur over the video drops frames, so the extension replaces it with a denser background |

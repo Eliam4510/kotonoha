@@ -1,4 +1,4 @@
-<p align="right"><b>Español</b> · <a href="costs.md">English</a></p>
+<p align="right"><b>Español</b> · <a href="costs.md">English</a> · <a href="de/costs.md">Deutsch</a> · <a href="zh/costs.md">简体中文</a> · <a href="ko/costs.md">한국어</a> · <a href="ja/costs.md">日本語</a></p>
 
 # Costos de la API de Claude
 
