@@ -5,8 +5,10 @@
 
 import { motor } from '../compartido/rpc';
 import type { EstadoPalabra } from '../compartido/tipos';
+import { teclaLatina } from '../nucleo/teclas';
 import { tieneJapones } from '../nucleo/tokens';
 import { enviarAlCreador } from '../ui/borrador';
+import { tr } from '../compartido/i18n';
 
 type Notificar = (texto: string, tipo?: 'error' | 'exito') => void;
 
@@ -26,7 +28,7 @@ async function enviarSeleccion(texto: string, notificar: Notificar) {
     definicion: r ? [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>') : '',
     ...comun,
   });
-  notificar(`Enviado al creador: ${r?.lema ?? texto}`, 'exito');
+  notificar(tr('Enviado al creador: {0}', r?.lema ?? texto), 'exito');
 }
 
 async function enviarImagen(img: HTMLImageElement, notificar: Notificar) {
@@ -36,9 +38,9 @@ async function enviarImagen(img: HTMLImageElement, notificar: Notificar) {
     const m = await motor.descargarMedio(url);
     const extension = /png/.test(m.tipo) ? 'png' : /webp/.test(m.tipo) ? 'webp' : /gif/.test(m.tipo) ? 'gif' : 'jpg';
     await enviarAlCreador({ imagenes: [{ id: url, nombre: `kotonoha_${Date.now()}.${extension}`, tipo: m.tipo, datos: m.datos }], fuente: document.title, url: location.href });
-    notificar('Imagen enviada al creador', 'exito');
+    notificar(tr('Imagen enviada al creador'), 'exito');
   } catch (e) {
-    notificar(`No se pudo descargar la imagen: ${e instanceof Error ? e.message : e}`, 'error');
+    notificar(tr('No se pudo descargar la imagen: {0}', e instanceof Error ? e.message : e), 'error');
   }
 }
 
@@ -52,8 +54,14 @@ async function marcarSeleccion(texto: string, estado: EstadoPalabra, notificar: 
   }
   if (!cambios.size) return;
   await motor.cambiarPalabras([...cambios.values()]);
-  const nombre = { conocida: 'conocidas', desconocida: 'desconocidas', aprendiendo: 'en aprendizaje', ignorada: 'ignoradas' }[estado];
-  notificar(`${cambios.size} ${cambios.size === 1 ? 'palabra marcada' : 'palabras marcadas'} como ${nombre}`, 'exito');
+  const n = cambios.size;
+  const mensajes = {
+    conocida: n === 1 ? tr('1 palabra marcada como conocida') : tr('{0} palabras marcadas como conocidas', n),
+    desconocida: n === 1 ? tr('1 palabra marcada como desconocida') : tr('{0} palabras marcadas como desconocidas', n),
+    aprendiendo: n === 1 ? tr('1 palabra marcada en aprendizaje') : tr('{0} palabras marcadas en aprendizaje', n),
+    ignorada: n === 1 ? tr('1 palabra marcada como ignorada') : tr('{0} palabras marcadas como ignoradas', n),
+  };
+  notificar(mensajes[estado], 'exito');
 }
 
 const ESTADO_POR_TECLA: Record<string, EstadoPalabra> = { k: 'conocida', u: 'desconocida', i: 'ignorada' };
@@ -72,7 +80,7 @@ export function instalarAtajosWeb(activo: () => boolean, notificar: Notificar) {
     if (!activo() || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
     const objetivo = e.composedPath()[0] as HTMLElement | undefined;
     if (objetivo && (objetivo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(objetivo.tagName))) return;
-    const k = e.key.toLowerCase();
+    const k = teclaLatina(e);
     const seleccion = window.getSelection()?.toString().trim() ?? '';
     const conJapones = seleccion && tieneJapones(seleccion);
 

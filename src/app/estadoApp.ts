@@ -3,10 +3,15 @@
 
 import { signal } from '@preact/signals';
 import { useEffect, useState } from 'preact/hooks';
-import { motor } from '../compartido/rpc';
+import { fondo, motor } from '../compartido/rpc';
 import type { EstadoAnki } from '../compartido/tipos';
 
 export function navegar(ruta: string) {
+  // El lector en su pestaña no tiene pantallas a las que ir: se va a la ventana de la app.
+  if (!location.pathname.endsWith('/app.html')) {
+    fondo.abrirApp(ruta).catch(console.error);
+    return;
+  }
   location.hash = `#/${ruta}`;
 }
 

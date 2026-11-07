@@ -23,6 +23,21 @@ describe('ajustes guardados', () => {
   });
 });
 
+describe('idioma de la interfaz', () => {
+  it('una instalación nueva sigue al navegador', () => {
+    expect(completarAjustes(undefined).idiomaInterfaz).toBe('auto');
+  });
+
+  it('quien ya usaba la extensión sigue en español, aunque su navegador esté en otro idioma', () => {
+    expect(completarAjustes({ nivel: 'JLPT N2' }).idiomaInterfaz).toBe('es');
+  });
+
+  it('lo elegido se respeta', () => {
+    expect(completarAjustes({ idiomaInterfaz: 'ko' }).idiomaInterfaz).toBe('ko');
+    expect(completarAjustes({ idiomaInterfaz: 'auto' }).idiomaInterfaz).toBe('auto');
+  });
+});
+
 describe('la ficha abre con el diccionario', () => {
   it('quien tenía los valores de antes deja de gastar al abrir una palabra', () => {
     const a = completarAjustes({ diccionarioPestana: 'explicar', sentidoAutomatico: true, usarGuion: true } as never);
@@ -47,6 +62,6 @@ describe('la ficha abre con el diccionario', () => {
     const a = completarAjustes(undefined);
     expect(a.diccionarioPestana).toBe('ninguna');
     expect(a.sentidoAutomatico).toBe(false);
-    expect(a.creditoMensual).toBe(100);
+    expect(a.creditoMensual).toBe(0);
   });
 });

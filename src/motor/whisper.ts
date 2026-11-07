@@ -6,6 +6,7 @@
 // colgado se aborta, y si la GPU se pierde se reintenta con calma y al segundo fallo se para.
 
 import { MODELOS_WHISPER, type ModeloWhisper } from '../compartido/ajustes';
+import { tr } from '../compartido/i18n';
 import { fondo } from '../compartido/rpc';
 import type { Linea } from '../nucleo/subtitulos';
 import {
@@ -70,7 +71,7 @@ function obtenerTrabajador(): Worker {
     const m = e.data as Record<string, unknown>;
     if (m.tipo === 'gpuPerdida') {
       terminarTrabajador();
-      fallarPendientes(new Error(`Se perdió la GPU: ${m.motivo ?? 'el controlador se reinició'}`));
+      fallarPendientes(new Error(tr('Se perdió la GPU: {0}', m.motivo ?? tr('el controlador se reinició'))));
       return;
     }
     if (m.tipo === 'resultado' || (m.tipo === 'error' && m.id !== undefined)) {
@@ -85,7 +86,7 @@ function obtenerTrabajador(): Worker {
   };
   t.onerror = (e) => {
     trabajador = null;
-    fallarPendientes(new Error(e.message || 'El trabajador de Whisper falló'));
+    fallarPendientes(new Error(e.message || tr('El trabajador de Whisper falló')));
   };
   trabajador = t;
   return t;
@@ -138,7 +139,7 @@ function transcribirTrozo(pcm: Float32Array): Promise<SegmentoWhisper[]> {
     const vigilante = setTimeout(() => {
       pendientes.delete(id);
       terminarTrabajador();
-      mal(new Error('La GPU dejó de responder'));
+      mal(new Error(tr('La GPU dejó de responder')));
     }, LIMITE_TROZO_MS);
     pendientes.set(id, {
       ok: (r) => {
@@ -183,7 +184,7 @@ async function transcribirConRecuperacion(pcm: Float32Array, idModelo: ModeloWhi
       console.warn('Kotonoha: fallo de Whisper en la GPU', fallosGpu, e);
       terminarTrabajador();
       if (fallosGpu >= MAXIMO_FALLOS_GPU) {
-        throw new Error('La tarjeta gráfica falló dos veces, así que paré para no forzar tu equipo. Lo transcrito hasta ahora está guardado.');
+        throw new Error(tr('La tarjeta gráfica falló dos veces, así que paré para no forzar tu equipo. Lo transcrito hasta ahora está guardado.'));
       }
       emitir({ tipo: 'recuperando', segundos: ESPERA_RECUPERACION_S });
       await esperaCancelable(ESPERA_RECUPERACION_S * 1000, senal);
@@ -423,7 +424,7 @@ export async function transcribirArchivo(
 ): Promise<number> {
   emitir({ tipo: 'preparando' });
   const audio = await abrirAudio(url, pcmCrudo);
-  if (!audio) throw new Error('El navegador no puede leer el audio de este archivo. Reprodúcelo y usa la transcripción en tiempo real.');
+  if (!audio) throw new Error(tr('El navegador no puede leer el audio de este archivo. Reprodúcelo y usa la transcripción en tiempo real.'));
   return transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs);
 }
 

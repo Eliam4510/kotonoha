@@ -150,7 +150,8 @@ async function esperarEn(p, fn, arg, tiempo = 20000) {
   return p.waitForFunction(fn, arg, { timeout: tiempo }).catch(() => null);
 }
 
-const dentroDelOverlay = (selector) => (s) => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector(s ?? selector);
+// En una página con japonés también está el del lector de páginas, que lleva el atributo popover: aquí interesa el del video.
+const dentroDelOverlay = (selector) => (s) => document.querySelector('kotonoha-overlay:not([popover])')?.shadowRoot?.querySelector(s ?? selector);
 
 // ---------- Diccionarios ----------
 
@@ -228,7 +229,7 @@ if (quiere('local')) {
     await p.waitForTimeout(250);
   }
 
-  const hayLineas = await esperarEn(p, () => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.barra') != null, undefined, 15000);
+  const hayLineas = await esperarEn(p, () => document.querySelector('kotonoha-overlay:not([popover])')?.shadowRoot?.querySelector('.barra') != null, undefined, 15000);
   comprobar(!!hayLineas, 'Se monta el overlay');
 
   await p.evaluate(() => {
@@ -236,7 +237,7 @@ if (quiere('local')) {
     v.currentTime = 2;
     v.play();
   });
-  const conSub = await esperarEn(p, () => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.linea-sub.objetivo .pal') != null, undefined, 30000);
+  const conSub = await esperarEn(p, () => document.querySelector('kotonoha-overlay:not([popover])')?.shadowRoot?.querySelector('.linea-sub.objetivo .pal') != null, undefined, 30000);
   comprobar(!!conSub, 'Aparece el subtítulo en japonés con palabras');
 
   // El análisis puede tardar más que la primera línea: se vuelve a ella ya en pausa.
@@ -245,9 +246,9 @@ if (quiere('local')) {
     v.pause();
     v.currentTime = 2;
   });
-  await esperarEn(p, () => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.linea-sub.secundaria')?.textContent.includes('Incluso'), undefined, 8000);
+  await esperarEn(p, () => document.querySelector('kotonoha-overlay:not([popover])')?.shadowRoot?.querySelector('.linea-sub.secundaria')?.textContent.includes('Incluso'), undefined, 8000);
   const datos = await p.evaluate(() => {
-    const r = document.querySelector('kotonoha-overlay').shadowRoot;
+    const r = document.querySelector('kotonoha-overlay:not([popover])').shadowRoot;
     return {
       palabras: [...r.querySelectorAll('.linea-sub.objetivo .pal')].map((e) => ({ t: e.textContent, c: e.className })),
       secundaria: r.querySelector('.linea-sub.secundaria')?.textContent,
@@ -265,29 +266,29 @@ if (quiere('local')) {
   await p.mouse.move(700, 2);
   await p.waitForTimeout(400);
   const barra = await p.evaluate(() => {
-    const r = document.querySelector('kotonoha-overlay').shadowRoot;
+    const r = document.querySelector('kotonoha-overlay:not([popover])').shadowRoot;
     return { visible: r.querySelector('.barra')?.classList.contains('visible'), texto: r.querySelector('.barra-resumen')?.textContent };
   });
   comprobar(barra.visible, 'La barra aparece al acercar el ratón arriba', barra.texto);
 
   await p.keyboard.press('g');
   await p.waitForTimeout(400);
-  const nav = await p.evaluate(() => document.querySelector('kotonoha-overlay').shadowRoot.querySelectorAll('.nav-linea').length);
+  const nav = await p.evaluate(() => document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelectorAll('.nav-linea').length);
   comprobar(nav === 4, 'El navegador lista las 4 líneas', String(nav));
   await p.screenshot({ path: join(CAPTURAS, 'video-navegador.png') });
 
   // Consulta de una palabra: pasar el ratón por encima
   const caja = await p.evaluate(() => {
-    const e = [...document.querySelector('kotonoha-overlay').shadowRoot.querySelectorAll('.linea-sub.objetivo .pal')].find((x) => x.textContent.includes('花'));
+    const e = [...document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelectorAll('.linea-sub.objetivo .pal')].find((x) => x.textContent.includes('花'));
     const r = e.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   });
   await p.mouse.move(caja.x, caja.y);
-  const popup = await esperarEn(p, () => document.querySelector('kotonoha-overlay').shadowRoot.querySelector('.ficha-palabra') != null, undefined, 8000);
+  const popup = await esperarEn(p, () => document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelector('.ficha-palabra') != null, undefined, 8000);
   comprobar(!!popup, 'Se abre la ventana de la palabra al pasar el ratón');
   await p.waitForTimeout(700);
   const ficha = await p.evaluate(() => {
-    const r = document.querySelector('kotonoha-overlay').shadowRoot;
+    const r = document.querySelector('kotonoha-overlay:not([popover])').shadowRoot;
     return { titulo: r.querySelector('.ficha-palabra')?.textContent, defs: [...r.querySelectorAll('.lista-defs li')].map((l) => l.textContent), estado: r.querySelector('.estado.activo')?.textContent };
   });
   console.log('  ficha:', JSON.stringify(ficha).slice(0, 240));
@@ -299,7 +300,7 @@ if (quiere('local')) {
   await p.keyboard.press('3');
   await p.waitForTimeout(700);
   const est = await p.evaluate(() => {
-    const e = [...document.querySelector('kotonoha-overlay').shadowRoot.querySelectorAll('.linea-sub.objetivo .pal')].find((x) => x.textContent.includes('花'));
+    const e = [...document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelectorAll('.linea-sub.objetivo .pal')].find((x) => x.textContent.includes('花'));
     return e?.className;
   });
   comprobar(/est-conocida/.test(est ?? ''), 'La tecla 3 marca la palabra como conocida', est);
@@ -312,9 +313,9 @@ if (quiere('local')) {
   for (const [t, n] of [['Ajustes de visualización', 'visual'], ['Ajustes de video', 'video'], ['Atajos de teclado', 'atajos'], ['Generar subtítulos', 'generar']]) {
     await p.mouse.move(700, 2);
     await p.waitForTimeout(250);
-    await p.evaluate((titulo) => document.querySelector('kotonoha-overlay').shadowRoot.querySelector(`.barra-acciones button[aria-label="${titulo}"]`).click(), t);
+    await p.evaluate((titulo) => document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelector(`.barra-acciones button[aria-label="${titulo}"]`).click(), t);
     await p.waitForTimeout(250);
-    const abierto = await p.evaluate(() => !!document.querySelector('kotonoha-overlay').shadowRoot.querySelector('.panel-flotante'));
+    const abierto = await p.evaluate(() => !!document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelector('.panel-flotante'));
     comprobar(abierto, `Abre el panel «${t}»`);
     await p.screenshot({ path: join(CAPTURAS, `panel-${n}.png`) });
     await p.keyboard.press('Escape');
@@ -328,15 +329,15 @@ if (quiere('local')) {
   });
   await p.mouse.move(700, 450);
   await p.waitForTimeout(700);
-  const tituloFicha = () => p.evaluate(() => document.querySelector('kotonoha-overlay').shadowRoot.querySelector('.ficha-palabra')?.textContent ?? '');
+  const tituloFicha = () => p.evaluate(() => document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelector('.ficha-palabra')?.textContent ?? '');
   await p.keyboard.press('n');
-  await esperarEn(p, () => document.querySelector('kotonoha-overlay').shadowRoot.querySelector('.ficha-palabra') != null, undefined, 5000);
+  await esperarEn(p, () => document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelector('.ficha-palabra') != null, undefined, 5000);
   const primeraConN = await tituloFicha();
   comprobar(!!primeraConN, 'N abre la ficha de la primera palabra desconocida', primeraConN);
   await p.keyboard.press('n');
   await p.waitForTimeout(800);
   const segundaConN = await tituloFicha();
-  const estadoLinea = await p.evaluate(() => [...document.querySelector('kotonoha-overlay').shadowRoot.querySelectorAll('.linea-sub.objetivo .pal')].map((e) => `${e.textContent}:${/est-(\w+)/.exec(e.className)?.[1] ?? '?'}`).join(' '));
+  const estadoLinea = await p.evaluate(() => [...document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelectorAll('.linea-sub.objetivo .pal')].map((e) => `${e.textContent}:${/est-(\w+)/.exec(e.className)?.[1] ?? '?'}`).join(' '));
   comprobar(segundaConN && segundaConN !== primeraConN, 'N avanza a la siguiente palabra desconocida', `${segundaConN} · ${estadoLinea}`);
   await p.keyboard.press('Escape');
   await p.waitForTimeout(200);
@@ -460,17 +461,17 @@ if (quiere('youtube') && (await youtubeReproduce())) {
     m?.playVideo?.();
   });
   const listas = await esperarEn(p, () => {
-    const b = document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.barra-resumen')?.textContent ?? '';
+    const b = document.querySelector('kotonoha-overlay:not([popover])')?.shadowRoot?.querySelector('.barra-resumen')?.textContent ?? '';
     return /comprensión|Error|Sin subtítulos/i.test(b) ? b : null;
   }, undefined, 100000);
   const resumen = listas ? await listas.jsonValue() : null;
   console.log('  barra:', resumen);
   comprobar(/comprensión/i.test(resumen ?? ''), 'Carga los subtítulos reales de YouTube y calcula la comprensión', resumen);
 
-  const conSub = await esperarEn(p, () => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.linea-sub.objetivo .pal') != null, undefined, 45000);
+  const conSub = await esperarEn(p, () => document.querySelector('kotonoha-overlay:not([popover])')?.shadowRoot?.querySelector('.linea-sub.objetivo .pal') != null, undefined, 45000);
   comprobar(!!conSub, 'Muestra la línea activa sobre el video');
   const d = await p.evaluate(() => {
-    const r = document.querySelector('kotonoha-overlay').shadowRoot;
+    const r = document.querySelector('kotonoha-overlay:not([popover])').shadowRoot;
     return {
       obj: r.querySelector('.linea-sub.objetivo')?.textContent?.slice(0, 40),
       sec: r.querySelector('.linea-sub.secundaria')?.textContent?.slice(0, 40),
@@ -483,11 +484,11 @@ if (quiere('youtube') && (await youtubeReproduce())) {
 
   await p.keyboard.press('g');
   await p.waitForTimeout(1500);
-  const n = await p.evaluate(() => document.querySelector('kotonoha-overlay').shadowRoot.querySelectorAll('.nav-linea').length);
+  const n = await p.evaluate(() => document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelectorAll('.nav-linea').length);
   comprobar(n > 20, 'El navegador lista las líneas del video', String(n));
   const rects = await p.evaluate(() => {
     const v = document.querySelector('video').getBoundingClientRect();
-    const a = document.querySelector('kotonoha-overlay').shadowRoot.querySelector('.navegador').getBoundingClientRect();
+    const a = document.querySelector('kotonoha-overlay:not([popover])').shadowRoot.querySelector('.navegador').getBoundingClientRect();
     return { videoDer: v.right, navIzq: a.left };
   });
   comprobar(rects.videoDer <= rects.navIzq + 2, 'El video deja sitio al navegador', JSON.stringify(rects));

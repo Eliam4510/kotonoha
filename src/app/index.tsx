@@ -8,13 +8,17 @@ import overlay from '../contenido/overlay.css';
 import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
 import { Icono, Logo, Marca, type NombreIcono } from '../ui/iconos';
+import { variablesPaleta } from '../ui/paletas';
+import { formatoLectura } from '../ui/lecturas';
 import { useTema } from '../ui/tema';
 import appCss from './app.css';
 import { PantallaAjustes } from './Ajustes';
+import { Bienvenida } from './Bienvenida';
 import { Creador } from './Creador';
 import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navegar, refrescarAnki, useMedia } from './estadoApp';
 import { Biblioteca, Diccionario, Inicio, Lector, Memoria, Palabras } from './Pantallas';
 import { ReproductorLocal } from './ReproductorLocal';
+import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
 
 interface Ruta {
   id: string;
@@ -23,21 +27,21 @@ interface Ruta {
 }
 
 const GRUPOS: { titulo?: string; rutas: Ruta[] }[] = [
-  { rutas: [{ id: 'inicio', icono: 'inicio', nombre: 'Inicio' }] },
+  { rutas: [{ id: 'inicio', icono: 'inicio', nombre: tm('Inicio') }] },
   {
-    titulo: 'Aprender',
+    titulo: tm('Aprender'),
     rutas: [
-      { id: 'diccionario', icono: 'diccionario', nombre: 'Diccionario' },
-      { id: 'lector', icono: 'lector', nombre: 'Lector' },
-      { id: 'biblioteca', icono: 'biblioteca', nombre: 'Biblioteca' },
-      { id: 'reproductor', icono: 'video', nombre: 'Reproductor' },
+      { id: 'diccionario', icono: 'diccionario', nombre: tm('Diccionario') },
+      { id: 'lector', icono: 'lector', nombre: tm('Lector') },
+      { id: 'biblioteca', icono: 'biblioteca', nombre: tm('Biblioteca') },
+      { id: 'reproductor', icono: 'video', nombre: tm('Reproductor') },
     ],
   },
   {
-    titulo: 'Repasar',
+    titulo: tm('Repasar'),
     rutas: [
-      { id: 'memoria', icono: 'tarjetas', nombre: 'Memoria' },
-      { id: 'palabras', icono: 'palabras', nombre: 'Palabras' },
+      { id: 'memoria', icono: 'tarjetas', nombre: tm('Memoria') },
+      { id: 'palabras', icono: 'palabras', nombre: tm('Palabras') },
     ],
   },
 ];
@@ -54,13 +58,13 @@ function BotonRuta({ r, ruta, compacta, cuenta }: { r: Ruta; ruta: string; compa
     <button
       class="ap-nav"
       aria-current={activa ? 'page' : undefined}
-      aria-label={compacta ? (cuenta ? `${r.nombre}, ${cuenta} pendientes` : r.nombre) : undefined}
-      data-tip={compacta ? r.nombre : undefined}
+      aria-label={compacta ? (cuenta ? tr('{0}, {1} pendientes', tr(r.nombre), cuenta) : tr(r.nombre)) : undefined}
+      data-tip={compacta ? tr(r.nombre) : undefined}
       data-tip-lado={compacta ? 'der' : undefined}
       onClick={() => navegar(r.id)}
     >
       <Icono n={r.icono} t={20} />
-      {!compacta && <span>{r.nombre}</span>}
+      {!compacta && <span>{tr(r.nombre)}</span>}
       {!!cuenta && <span class="ap-nav-cuenta num">{cuenta > 99 ? '99+' : cuenta}</span>}
     </button>
   );
@@ -85,31 +89,31 @@ function Lateral({ ruta }: { ruta: string }) {
     return () => clearInterval(t);
   }, [ruta]);
 
-  const textoClaude = claude === null ? 'Comprobando Claude' : claude ? 'Claude listo' : 'Falta la clave de Claude';
-  const textoAnki = anki === null ? 'Comprobando Anki' : anki ? 'Anki conectado' : 'Anki sin conectar';
+  const textoClaude = claude === null ? tr('Comprobando Claude') : claude ? tr('Claude listo') : tr('Falta la clave de Claude');
+  const textoAnki = anki === null ? tr('Comprobando Anki') : anki ? tr('Anki conectado') : tr('Anki sin conectar');
 
   return (
-    <nav class={`ap-lateral ${compacta ? 'compacta' : ''}`} aria-label="Secciones">
-      <button class="ap-lateral-marca" aria-label="Kotonoha, ir a Inicio" onClick={() => navegar('inicio')}>
+    <nav class={`ap-lateral ${compacta ? 'compacta' : ''}`} aria-label={tr('Secciones')}>
+      <button class="ap-lateral-marca" aria-label={tr('Kotonoha, ir a Inicio')} onClick={() => navegar('inicio')}>
         {compacta ? <Logo t={34} /> : <Marca t={32} />}
       </button>
 
       <button
         class={`ap-lateral-crear ${creadorAbierto.value ? 'abierto' : ''}`}
-        aria-label="Crear tarjeta"
+        aria-label={tr('Crear tarjeta')}
         aria-expanded={creadorAbierto.value}
-        data-tip={compacta ? 'Crear tarjeta' : undefined}
+        data-tip={compacta ? tr('Crear tarjeta') : undefined}
         data-tip-lado={compacta ? 'der' : undefined}
         onClick={() => (creadorAbierto.value = !creadorAbierto.value)}
       >
         <span class="ap-lateral-mas"><Icono n="mas" t={13} /></span>
-        {!compacta && 'Crear tarjeta'}
+        {!compacta && tr('Crear tarjeta')}
       </button>
 
       <div class="ap-lateral-rutas">
         {GRUPOS.map((g, i) => (
           <div class="ap-nav-grupo" key={i}>
-            {g.titulo && !compacta && <div class="ap-nav-titulo">{g.titulo}</div>}
+            {g.titulo && !compacta && <div class="ap-nav-titulo">{tr(g.titulo)}</div>}
             {g.rutas.map((r) => (
               <BotonRuta key={r.id} r={r} ruta={ruta} compacta={compacta} cuenta={r.id === 'memoria' ? pendientes : undefined} />
             ))}
@@ -118,7 +122,7 @@ function Lateral({ ruta }: { ruta: string }) {
       </div>
 
       <div class="ap-lateral-pie">
-        <BotonRuta r={{ id: 'ajustes', icono: 'ajustes', nombre: 'Ajustes' }} ruta={ruta} compacta={compacta} />
+        <BotonRuta r={{ id: 'ajustes', icono: 'ajustes', nombre: tr('Ajustes') }} ruta={ruta} compacta={compacta} />
         <div class="ap-conexiones">
           <button class="ap-conexion" aria-label={textoClaude} data-tip={compacta ? textoClaude : undefined} data-tip-lado={compacta ? 'der' : undefined} onClick={() => navegar('ajustes')}>
             <span class={`ap-punto ${claude ? 'ia' : ''}`} />
@@ -132,8 +136,8 @@ function Lateral({ ruta }: { ruta: string }) {
         {!estrecha && (
           <button
             class="btn-icono chico ap-lateral-plegar"
-            aria-label={compacta ? 'Mostrar los nombres' : 'Ocultar los nombres'}
-            data-tip={compacta ? 'Mostrar los nombres' : 'Ocultar los nombres'}
+            aria-label={compacta ? tr('Mostrar los nombres') : tr('Ocultar los nombres')}
+            data-tip={compacta ? tr('Mostrar los nombres') : tr('Ocultar los nombres')}
             data-tip-lado={compacta ? 'der' : 'arriba'}
             onClick={() => {
               guardarPreferencia('lateralCompacta', !preferida);
@@ -152,9 +156,14 @@ function App() {
   const [a, fijarA] = useState<Ajustes>(() => ({ ...AJUSTES_INICIALES, tema: leerPreferencia('tema', AJUSTES_INICIALES.tema) }));
   const [{ ruta, params }, fijarRuta] = useState(leerRuta());
   const tema = useTema(a.tema);
+  const [cargados, fijarCargados] = useState(false);
+  formatoLectura.value = a.formatoLectura;
 
   useEffect(() => {
-    leerAjustes().then(fijarA);
+    leerAjustes().then((x) => {
+      fijarA(x);
+      fijarCargados(true);
+    });
     cargarFuentes().catch(() => {});
     const quitar = alCambiarAjustes(fijarA);
     const alCambiarHash = () => fijarRuta(leerRuta());
@@ -165,16 +174,24 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    // Antes de leer los ajustes, `a` trae los valores por omisión: pedir ese idioma solo haría parpadear la ventana.
+    if (!cargados) return;
+    fijarIdioma(a.idiomaInterfaz).then(() => {
+      document.documentElement.lang = bcp47Actual();
+    });
+  }, [cargados, a.idiomaInterfaz]);
+
   // Se recuerda para que la ventana no destelle en el otro tema al abrirse.
   useEffect(() => guardarPreferencia('tema', a.tema), [a.tema]);
 
   useEffect(() => {
-    const nombre = [...GRUPOS.flatMap((g) => g.rutas), { id: 'ajustes', nombre: 'Ajustes' }].find((r) => r.id === ruta)?.nombre;
-    document.title = nombre ? `${nombre} · Kotonoha` : 'Kotonoha';
-  }, [ruta]);
+    const nombre = [...GRUPOS.flatMap((g) => g.rutas), { id: 'ajustes', nombre: tr('Ajustes') }].find((r) => r.id === ruta)?.nombre;
+    document.title = nombre ? tr('{0} · Kotonoha', tr(nombre)) : 'Kotonoha';
+  }, [ruta, a.idiomaInterfaz, idiomaActual()]);
 
   return (
-    <div class="kk-raiz ap-app" data-tema={tema}>
+    <div class="kk-raiz ap-app" data-tema={tema} lang={bcp47Actual()} style={variablesPaleta(a.paleta, tema === 'oscuro')}>
       <style>{base + overlay + appCss}</style>
       <Lateral ruta={ruta} />
       <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={ruta}>
@@ -188,8 +205,13 @@ function App() {
         {ruta === 'ajustes' && <PantallaAjustes a={a} />}
       </main>
       <Creador ajustes={a} />
+      {cargados && !a.bienvenidaVista && <Bienvenida a={a} />}
     </div>
   );
 }
 
-render(<App />, document.getElementById('raiz')!);
+// Antes de pintar: si no, la ventana se vería un instante en español.
+leerAjustes()
+  .then((a) => fijarIdioma(a.idiomaInterfaz))
+  .catch(() => {})
+  .finally(() => render(<App />, document.getElementById('raiz')!));

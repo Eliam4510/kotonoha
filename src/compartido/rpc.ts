@@ -5,6 +5,7 @@
 // las respuestas largas (Claude) usan un puerto para ir recibiendo el texto poco a poco.
 
 import type { ApiMotor, ApiFondo, EventoDifundido } from './api';
+import { tr } from './i18n';
 
 export interface MensajeRpc {
   canal: 'motor' | 'fondo';
@@ -131,7 +132,7 @@ export function flujoMotor(metodo: string, args: unknown[], alParte: (acumulado:
         void chrome.runtime.lastError;
         if (!terminado) {
           if (cancelado) ok(acumulado);
-          else mal(new Error('Se perdió la conexión con el motor'));
+          else mal(new Error(tr('Se perdió la conexión con el motor')));
         }
       });
       puerto.postMessage({ metodo, args } satisfies PeticionFlujo);

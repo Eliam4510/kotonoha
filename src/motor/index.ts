@@ -17,12 +17,15 @@ import { PROMPT_A_JAPONES, PROMPT_SUBTITULOS, rellenar } from './prompts';
 import * as medios from './medios';
 import * as memoria from './memoria';
 import * as whisper from './whisper';
+import { fijarIdioma, tr } from '../compartido/i18n';
+import { trazosDe } from './trazos';
 
 let ajustes: Ajustes = completarAjustes(undefined);
 
 async function refrescarAjustes(): Promise<Ajustes> {
   ajustes = completarAjustes((await fondo.ajustesCompletos()) as Partial<Ajustes>);
   anki.fijarPuerto(ajustes.ankiPuerto);
+  await fijarIdioma(ajustes.idiomaInterfaz);
   return ajustes;
 }
 
@@ -102,6 +105,16 @@ const api: ApiMotor = {
   },
 
   buscar: (lema, lectura) => analisis.buscar(lema, lectura),
+  trazos: (caracter) => trazosDe(caracter),
+  async leerPortapapeles() {
+    const area = document.createElement('textarea');
+    document.body.appendChild(area);
+    area.focus();
+    document.execCommand('paste');
+    const texto = area.value;
+    area.remove();
+    return texto;
+  },
   async buscarLibre(texto) {
     return analisis.buscarLibre(texto, await aj());
   },
@@ -181,7 +194,7 @@ const api: ApiMotor = {
 
   async muestraEvaluacion() {
     const dicFrec = (await dics.listaDiccionarios()).find((d) => d.tipo === 'frecuencia')?.id;
-    if (!dicFrec) throw new Error('Instala primero la lista de frecuencia.');
+    if (!dicFrec) throw new Error(tr('Instala primero la lista de frecuencia.'));
     const salida: { lema: string; lectura: string; rango: number }[] = [];
     // Muestra por bandas de frecuencia, para estimar hasta dónde llega tu vocabulario.
     for (const rango of [200, 500, 1000, 2000, 3000, 5000, 7500, 10000, 15000, 20000, 30000, 40000]) {

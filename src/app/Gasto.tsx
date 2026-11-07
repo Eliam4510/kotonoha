@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { motor } from '../compartido/rpc';
 import { agruparRegistro, claveDia, claveMes, dolares, type DiaConsumo, type FilaConsumo, NOMBRE_TAREA, resumirConsumo, tokensLegibles } from '../nucleo/precios';
 import { Icono } from '../ui/iconos';
+import { bcp47Actual, numero, tr } from '../compartido/i18n';
 
 /** El color sigue al modelo, no a su posición: filtrar o cambiar de mes no repinta nada. */
 const CLASE_MODELO: Record<string, string> = { 'Sonnet 5.5': 'm-sonnet', 'Opus 5.5': 'm-opus', 'Haiku 5.5': 'm-haiku' };
@@ -37,7 +38,7 @@ function Columnas({ dias, modelos, hoy }: { dias: DiaConsumo[]; modelos: string[
   // El globo va al lado de la columna, sin taparla, y hacia donde hay sitio.
   const ladoGlobo = iActivo > dias.length / 2 ? 'der' : '';
   return (
-    <div class="ap-gasto-grafica" role="img" aria-label={`Gasto por día: ${dias.filter((d) => d.coste > 0).map((d) => `día ${Number(d.dia.slice(8))}, ${dolares(d.coste)}`).join('; ') || 'sin gasto'}`}>
+    <div class="ap-gasto-grafica" role="img" aria-label={tr('Gasto por día: {0}', dias.filter((d) => d.coste > 0).map((d) => tr('día {0}, {1}', Number(d.dia.slice(8)), dolares(d.coste))).join('; ') || tr('sin gasto'))}>
       <div class="ap-gasto-eje" aria-hidden="true">
         <span class="num">{dolares(tope)}</span>
         <span class="num">{dolares(tope / 2)}</span>
@@ -60,7 +61,7 @@ function Columnas({ dias, modelos, hoy }: { dias: DiaConsumo[]; modelos: string[
         </div>
         {activo && activo.coste > 0 && (
           <div class={`ap-gasto-globo ${ladoGlobo}`} style={{ left: `${((iActivo + 0.5) / dias.length) * 100}%` }}>
-            <b>Día {Number(activo.dia.slice(8))}: {dolares(activo.coste)}</b>
+            <b>{tr('Día')} {Number(activo.dia.slice(8))}: {dolares(activo.coste)}</b>
             {modelos.filter((m) => activo.porModelo[m]).map((m) => (
               <span key={m}><i class={claseModelo(m)} />{m}: {dolares(activo.porModelo[m])}</span>
             ))}
@@ -115,46 +116,46 @@ export function TarjetaGasto({ credito }: { credito: number }) {
     <section class="tarjeta ap-c12 ap-gasto" aria-labelledby="ap-t-gasto">
       <div class="ap-tarjeta-cab ap-gasto-cab">
         <span class="hoja-icono chica"><Icono n="ia" t={18} /></span>
-        <h2 id="ap-t-gasto">Gasto en Claude</h2>
+        <h2 id="ap-t-gasto">{tr('Gasto en Claude')}</h2>
         <div class="ap-gasto-mes">
-          <button class="btn-icono chico" aria-label="Mes anterior" onClick={() => fijarMes(mesVecino(mes, -1))}><Icono n="flecha-izq" t={15} /></button>
+          <button class="btn-icono chico" aria-label={tr('Mes anterior')} onClick={() => fijarMes(mesVecino(mes, -1))}><Icono n="flecha-izq" t={15} /></button>
           <span>{nombreMes(mes)}</span>
-          <button class="btn-icono chico" aria-label="Mes siguiente" disabled={mes >= mesActual} onClick={() => fijarMes(mesVecino(mes, 1))}><Icono n="flecha" t={15} /></button>
+          <button class="btn-icono chico" aria-label={tr('Mes siguiente')} disabled={mes >= mesActual} onClick={() => fijarMes(mesVecino(mes, 1))}><Icono n="flecha" t={15} /></button>
         </div>
       </div>
 
       {filas === null ? (
         <div class="esqueleto ap-gasto-cargando" aria-hidden="true" />
       ) : !delMes.length ? (
-        <p class="ayuda">Aún no hay gasto registrado este mes. Cuando le preguntes algo a Claude, aparecerá aquí, con los tokens y el modelo de cada petición.</p>
+        <p class="ayuda">{tr('Aún no hay gasto registrado este mes. Cuando le preguntes algo a Claude, aparecerá aquí, con los tokens y el modelo de cada petición.')}</p>
       ) : (
         <>
           <div class="ap-gasto-cuerpo">
             <div class="ap-gasto-resumen">
               <div class="ap-cifra-grande">
                 <b class="num">{dolares(r.coste)}</b>
-                <span>{credito > 0 ? `de USD ${credito} de crédito` : 'este mes'}</span>
+                <span>{credito > 0 ? tr('de USD {0} de crédito', credito) : tr('este mes')}</span>
               </div>
-              {credito > 0 && <div class="barra-progreso ap-gasto-credito" role="progressbar" aria-valuenow={Math.round(parte)} aria-valuemin={0} aria-valuemax={100} aria-label="Crédito gastado"><div style={{ width: `${Math.max(parte, 0.5)}%` }} /></div>}
+              {credito > 0 && <div class="barra-progreso ap-gasto-credito" role="progressbar" aria-valuenow={Math.round(parte)} aria-valuemin={0} aria-valuemax={100} aria-label={tr('Crédito gastado')}><div style={{ width: `${Math.max(parte, 0.5)}%` }} /></div>}
               <dl class="ap-cifras-menores ap-gasto-tokens">
-                <div><dt>Entrada</dt><dd class="num">{tokensLegibles(r.entrada)}</dd></div>
-                <div><dt>Salida</dt><dd class="num">{tokensLegibles(r.salida)}</dd></div>
-                <div><dt>Caché</dt><dd class="num">{tokensLegibles(cache)}</dd></div>
-                <div><dt>Peticiones</dt><dd class="num">{r.peticiones.toLocaleString('es')}</dd></div>
+                <div><dt>{tr('Entrada')}</dt><dd class="num">{tokensLegibles(r.entrada)}</dd></div>
+                <div><dt>{tr('Salida')}</dt><dd class="num">{tokensLegibles(r.salida)}</dd></div>
+                <div><dt>{tr('Caché')}</dt><dd class="num">{tokensLegibles(cache)}</dd></div>
+                <div><dt>{tr('Peticiones')}</dt><dd class="num">{numero(r.peticiones)}</dd></div>
               </dl>
             </div>
             <div class="ap-gasto-columna-grafica">
               <Columnas dias={r.porDia} modelos={modelos} hoy={hoy} />
               <ul class="ap-gasto-leyenda">
                 {r.porModelo.map((g) => (
-                  <li key={g.clave}><i class={claseModelo(g.nombre)} aria-hidden="true" /><span>{g.nombre}</span><b class="num">{dolares(g.coste)}</b><small class="num">{tokensLegibles(g.entrada + g.salida + g.cacheEscritura5m + g.cacheEscritura1h + g.cacheLectura)} tokens</small></li>
+                  <li key={g.clave}><i class={claseModelo(g.nombre)} aria-hidden="true" /><span>{tr(g.nombre)}</span><b class="num">{dolares(g.coste)}</b><small class="num">{tokensLegibles(g.entrada + g.salida + g.cacheEscritura5m + g.cacheEscritura1h + g.cacheLectura)} {tr('tokens')}</small></li>
                 ))}
               </ul>
               <details class="ap-gasto-tabla">
-                <summary>Ver como tabla</summary>
+                <summary>{tr('Ver como tabla')}</summary>
                 <table>
                   <thead>
-                    <tr><th scope="col">Día</th>{modelos.map((m) => <th key={m} scope="col" class="num">{m}</th>)}<th scope="col" class="num">Total</th></tr>
+                    <tr><th scope="col">{tr('Día')}</th>{modelos.map((m) => <th key={m} scope="col" class="num">{m}</th>)}<th scope="col" class="num">{tr('Total')}</th></tr>
                   </thead>
                   <tbody>
                     {r.porDia.filter((d) => d.coste > 0).map((d) => (
@@ -168,12 +169,12 @@ export function TarjetaGasto({ credito }: { credito: number }) {
 
           <div class="ap-gasto-detalle">
             <div>
-              <h3>En qué se va</h3>
+              <h3>{tr('En qué se va')}</h3>
               <ul class="ap-gasto-tareas">
                 {r.porTarea.map((g) => (
                   <li key={g.clave}>
                     <span>{g.nombre}</span>
-                    <small class="num">{g.peticiones.toLocaleString('es')} {g.peticiones === 1 ? 'petición' : 'peticiones'}</small>
+                    <small class="num">{g.peticiones === 1 ? tr('1 petición') : tr('{0} peticiones', numero(g.peticiones))}</small>
                     <b class="num">{dolares(g.coste)}</b>
                     <i class="ap-gasto-parte" aria-hidden="true"><i style={{ width: `${(g.coste / Math.max(r.coste, 1e-9)) * 100}%` }} /></i>
                   </li>
@@ -181,24 +182,24 @@ export function TarjetaGasto({ credito }: { credito: number }) {
               </ul>
             </div>
             <div>
-              <h3>Registro</h3>
+              <h3>{tr('Registro')}</h3>
               <ul class="ap-gasto-registro">
                 {visibles.map((e) => (
                   <li key={e.inicio}>
-                    <time class="num">{new Date(e.inicio).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time>
+                    <time class="num">{new Date(e.inicio).toLocaleString(bcp47Actual(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time>
                     <span class="ap-gasto-que">
-                      <b>{NOMBRE_TAREA[e.tarea] ?? e.tarea}</b>
+                      <b>{tr(NOMBRE_TAREA[e.tarea] ?? e.tarea)}</b>
                       {e.titulo && <small title={e.titulo}>{e.titulo}</small>}
                     </span>
-                    <small class="num ap-gasto-uso">{e.modelos.join(', ')} · {tokensLegibles(e.tokens)}{e.peticiones > 1 ? ` · ${e.peticiones} peticiones` : ''}</small>
+                    <small class="num ap-gasto-uso">{e.modelos.join(', ')} · {tokensLegibles(e.tokens)}{e.peticiones > 1 ? tr(' · {0} peticiones', e.peticiones) : ''}</small>
                     <b class="num">{dolares(e.coste)}</b>
                   </li>
                 ))}
               </ul>
-              {registro.length > 6 && <button class="btn fantasma chico" onClick={() => fijarTodo(!todo)}>{todo ? 'Ver menos' : `Ver los ${registro.length}`}</button>}
+              {registro.length > 6 && <button class="btn fantasma chico" onClick={() => fijarTodo(!todo)}>{todo ? tr('Ver menos') : tr('Ver los {0}', registro.length)}</button>}
             </div>
           </div>
-          <p class="ayuda ap-gasto-nota">Calculado con los tokens que informa la API y sus precios públicos. Incluye solo lo pedido desde esta extensión en este navegador.</p>
+          <p class="ayuda ap-gasto-nota">{tr('Calculado con los tokens que informa la API y sus precios públicos. Incluye solo lo pedido desde esta extensión en este navegador.')}</p>
         </>
       )}
     </section>

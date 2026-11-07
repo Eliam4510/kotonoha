@@ -45,6 +45,10 @@ const palabrasHtml = PALABRAS.map(({ t, r, c, s, u }) => `<span class="pal${s ? 
 const TEXTOS = {
   'banner.png': { lema: 'Subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés con video y texto real', traduccion: 'Recoger hojas de palabras' },
   'banner.en.png': { lema: 'Interactive subtitles, a dictionary, flashcards and explanations from Claude for learning Japanese from real video and text', traduccion: 'Gathering leaves of words' },
+  'banner.de.png': { lema: 'Interaktive Untertitel, ein Wörterbuch, Karten und Erklärungen von Claude, um Japanisch mit echten Videos und Texten zu lernen', traduccion: 'Blätter aus Worten sammeln' },
+  'banner.zh.png': { lema: '交互式字幕、词典、卡片和 Claude 讲解，通过真实的视频和文章学日语', traduccion: '拾取言语之叶' },
+  'banner.ko.png': { lema: '대화형 자막, 사전, 카드, Claude 설명으로 실제 영상과 글에서 일본어를 배웁니다', traduccion: '말의 잎을 모으다' },
+  'banner.ja.png': { lema: 'インタラクティブな字幕、辞書、カード、Claude の解説で、本物の動画や文章から日本語を学ぶ', traduccion: '人の心を種として' },
 };
 
 const contexto = await chromium.launch({ channel: process.env.KK_CANAL ?? 'msedge', headless: true });
@@ -61,6 +65,7 @@ for (const [archivo, { lema, traduccion }] of Object.entries(TEXTOS)) {
     h1 { font-size: 74px; font-weight: 800; letter-spacing: -0.01em; line-height: 1; }
     .kanji { margin-top: 6px; font-family: Zen, sans-serif; font-size: 25px; font-weight: 700; letter-spacing: 0.32em; color: #CDF372; }
     .lema { position: absolute; left: 80px; top: 226px; width: 590px; font-size: 22px; line-height: 1.42; font-weight: 600; color: #E2E6EF; text-shadow: 0 1px 10px rgba(16, 12, 40, 0.6); }
+    .lema:lang(ko) { word-break: keep-all; } .lema:lang(ja) { word-break: auto-phrase; }
     .subtitulo { position: absolute; right: 72px; top: 138px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
     .linea { display: flex; align-items: flex-end; padding: 26px 30px 16px; border-radius: 26px; background: rgba(14, 12, 32, 0.66); font-family: Zen, sans-serif; font-size: 58px; font-weight: 700; line-height: 1.1; box-shadow: 0 18px 50px rgba(8, 6, 24, 0.45); }
     .pal { position: relative; padding-bottom: 12px; }
@@ -72,7 +77,7 @@ for (const [archivo, { lema, traduccion }] of Object.entries(TEXTOS)) {
   </style></head><body>
     <svg class="fondo" viewBox="0 0 1280 420" preserveAspectRatio="none"><defs><radialGradient id="g"><stop offset="0" stop-color="#FFF3CF" stop-opacity=".5"/><stop offset="1" stop-color="#FFF3CF" stop-opacity="0"/></radialGradient></defs>${estrellas}<circle cx="1120" cy="70" r="140" fill="url(#g)"/><circle cx="1120" cy="70" r="40" fill="#FFF3CF"/>${montana(330, 80, '#46305F', 1.2)}${montana(372, 62, '#2F2449', 3.1)}${montana(404, 42, '#1C1833', 5.3)}</svg>
     <div class="marca">${hoja.replace(/id="kk-/g, 'id="b-').replace(/url\(#kk-/g, 'url(#b-')}<div><h1>Kotonoha</h1><div class="kanji">言の葉</div></div></div>
-    <p class="lema">${lema}</p>
+    <p class="lema" lang="${archivo.split('.').length > 2 ? archivo.split('.')[1] : 'es'}">${lema}</p>
     <div class="subtitulo"><div class="linea">${palabrasHtml}</div><div class="trad">${traduccion}</div></div>
   </body></html>`);
   await p.evaluate(() => document.fonts.ready);

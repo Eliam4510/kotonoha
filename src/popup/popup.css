@@ -13,7 +13,7 @@
 .ap-menu-texto b { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ap-menu-texto span { font-size: 12px; line-height: 1.4; color: var(--texto-3); overflow: hidden; text-overflow: ellipsis; }
 .ap-menu .segmentado { display: flex; }
-.ap-menu .segmentado button { flex: 1; justify-content: center; }
+.ap-menu .segmentado button { flex: 1; min-width: 0; padding-inline: 6px; justify-content: center; overflow: hidden; text-overflow: ellipsis; }
 .ap-menu-texto .tecla + .tecla { margin-left: 3px; }
 .ap-menu-texto .enlace { padding: 0; border: 0; background: none; color: var(--acento); font: inherit; text-decoration: underline; cursor: pointer; }
 .ap-menu-error { padding: 0 14px 10px; font-size: 12px; font-weight: 600; color: var(--error); }

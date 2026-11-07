@@ -4,7 +4,8 @@ import Dexie, { type Table } from 'dexie';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
-import type { ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
+import type { ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
+import type { DatosTrazos } from '../nucleo/trazos';
 
 export interface FilaTermino {
   id?: number;
@@ -87,6 +88,12 @@ export interface FilaGlosa {
   glosa: string;
 }
 
+/** Trazos de un carácter ya descargados. Sin datos: KanjiVG no lo tiene, y no hace falta volver a preguntar. */
+export interface FilaTrazos {
+  caracter: string;
+  datos: DatosTrazos | null;
+}
+
 class BaseKotonoha extends Dexie {
   diccionarios!: Table<InfoDiccionario, string>;
   terminos!: Table<FilaTermino, number>;
@@ -102,6 +109,7 @@ class BaseKotonoha extends Dexie {
   analisis!: Table<FilaAnalisis, string>;
   correcciones!: Table<FilaCorrecciones, string>;
   consumo!: Table<FilaConsumo, number>;
+  trazos!: Table<FilaTrazos, string>;
 
   constructor() {
     // Nombre de la primera versión. Cambiarlo dejaría atrás los diccionarios y palabras ya guardados.
@@ -122,6 +130,7 @@ class BaseKotonoha extends Dexie {
     this.version(2).stores({ analisis: 'clave' });
     this.version(3).stores({ correcciones: 'clave' });
     this.version(4).stores({ consumo: '++id, mes, t' });
+    this.version(5).stores({ trazos: 'caracter' });
   }
 }
 

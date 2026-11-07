@@ -4,6 +4,8 @@ import { render } from 'preact';
 import { alCambiarAjustes, leerAjustes } from '../compartido/ajustes';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import base from '../ui/estilos';
+import { formatoLectura } from '../ui/lecturas';
+import { variablesPaleta } from '../ui/paletas';
 import { cargarFuentes } from '../ui/fuentes';
 import { ejecutarComando, instalarAtajos } from './atajos';
 import { cargarVideoActual, iniciarControlador, vigilarAnuncios } from './controlador';
@@ -14,6 +16,7 @@ import { alNavegar, controlSitio, videoPrincipal } from './puente';
 import { ANCHO_NAVEGADOR, Reproductor } from './Reproductor';
 import { iniciarTarjetas } from './tarjetas';
 import { instalarAtajosWeb } from './webAtajos';
+import { bcp47Actual, fijarIdioma, tr } from '../compartido/i18n';
 
 const SITIOS_VIDEO = /(^|\.)(youtube\.com|netflix\.com|disneyplus\.com|viki\.com|iq\.com|bilibili\.com|crunchyroll\.com|primevideo\.com)$/;
 
@@ -27,6 +30,8 @@ function montar(): HTMLElement {
   sombra.appendChild(estilo);
   const raiz = document.createElement('div');
   raiz.className = 'kk-raiz';
+  raiz.lang = bcp47Actual();
+  Object.entries(variablesPaleta(ajustes.value.paleta, true)).forEach(([k, v]) => raiz.style.setProperty(k, v));
   sombra.appendChild(raiz);
   document.documentElement.appendChild(anfitrion);
   render(<Reproductor />, raiz);
@@ -44,8 +49,12 @@ function montar(): HTMLElement {
 async function iniciarReproductor() {
   const a = await leerAjustes();
   ajustes.value = a;
+  await fijarIdioma(a.idiomaInterfaz);
+  formatoLectura.value = a.formatoLectura;
   alCambiarAjustes((n) => {
     ajustes.value = n;
+    formatoLectura.value = n.formatoLectura;
+    fijarIdioma(n.idiomaInterfaz).catch(() => {});
   });
   if (!a.activo || a.sitiosDesactivados.includes(location.hostname)) return;
 
@@ -68,7 +77,7 @@ async function iniciarReproductor() {
   }, 300);
 
   const cargar = () =>
-    cargarVideoActual().catch((e) => avisar(`Error al cargar el video: ${e instanceof Error ? e.message : e}`, 'error'));
+    cargarVideoActual().catch((e) => avisar(tr('Error al cargar el video: {0}', e instanceof Error ? e.message : e), 'error'));
 
   await esperarAdaptador();
   cargar();

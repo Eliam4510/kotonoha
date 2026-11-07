@@ -9,13 +9,14 @@ import { alRecibirBorrador, borradorVacio, type ParcialBorrador } from '../ui/bo
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { creadorAbierto, creadorFijado, estadoAnki, guardarPreferencia, refrescarAnki, useMedia } from './estadoApp';
 import { Mensaje } from './Piezas';
+import { tr } from '../compartido/i18n';
 
 /** Acción de un campo. En glicina solo si la hace Claude. */
 function AccionCampo({ texto, icono, alPulsar, ocupado, ia }: { texto: string; icono: NombreIcono; alPulsar: () => void; ocupado: boolean; ia?: boolean }) {
   return (
     <button class={`ap-accion-campo ${ia ? 'ia' : ''}`} disabled={ocupado} onClick={alPulsar}>
       <Icono n={ocupado ? 'espera' : ia ? 'ia' : icono} t={14} />
-      {ocupado ? 'Un momento…' : texto}
+      {ocupado ? tr('Un momento…') : texto}
     </button>
   );
 }
@@ -28,9 +29,9 @@ function Audios({ lista, alQuitar, vacio }: { lista: MedioTarjeta[]; alQuitar: (
     <div class="ap-audios">
       {lista.map((m) => (
         <div class="ap-audio" key={m.id}>
-          <button class="btn-icono chico relleno" aria-label={`Reproducir ${m.etiqueta ?? m.nombre}`} onClick={() => reproducirMedio(m)}><Icono n="reproducir" t={14} /></button>
-          <span>{m.etiqueta ?? 'Audio'}</span>
-          <button class="btn-icono chico" aria-label={`Quitar ${m.etiqueta ?? m.nombre}`} onClick={() => alQuitar(m.id)}><Icono n="cerrar" t={13} /></button>
+          <button class="btn-icono chico relleno" aria-label={tr('Reproducir {0}', m.etiqueta ?? m.nombre)} onClick={() => reproducirMedio(m)}><Icono n="reproducir" t={14} /></button>
+          <span>{m.etiqueta ?? tr('Audio')}</span>
+          <button class="btn-icono chico" aria-label={tr('Quitar {0}', m.etiqueta ?? m.nombre)} onClick={() => alQuitar(m.id)}><Icono n="cerrar" t={13} /></button>
         </div>
       ))}
     </div>
@@ -140,45 +141,45 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
   const contexto = () => ({ lema: b.palabra, lectura: b.lectura, frase: fraseLimpia() });
 
   const crearFrase = () => conOcupado('frase', async () => {
-    if (!b.palabra) throw new Error('Escribe primero la palabra.');
+    if (!b.palabra) throw new Error(tr('Escribe primero la palabra.'));
     set({ frase: await motor.generarFraseEjemplo(b.palabra) });
   });
   const crearTraduccion = () => conOcupado('traduccion', async () => {
-    if (!b.frase) throw new Error('Escribe primero la frase.');
+    if (!b.frase) throw new Error(tr('Escribe primero la frase.'));
     set({ traduccion: await flujoMotor('traducir', [contexto(), false], (t) => set({ traduccion: t })) });
   });
   const buscarDefinicion = () => conOcupado('definicion', async () => {
-    if (!b.palabra) throw new Error('Escribe primero la palabra.');
+    if (!b.palabra) throw new Error(tr('Escribe primero la palabra.'));
     const r = await motor.buscar(b.palabra, b.lectura || undefined);
     set({ definicion: [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>'), lectura: b.lectura || r.lectura });
   });
   const crearAudioFrase = () => conOcupado('audioFrase', async () => {
-    if (!b.frase) throw new Error('Escribe primero la frase.');
+    if (!b.frase) throw new Error(tr('Escribe primero la frase.'));
     const datos = await motor.vozFrase(fraseLimpia(), ajustes.vocesFrase[0]);
-    set({ audioFrase: [{ id: `voz${Date.now()}`, nombre: `kotonoha_voz_${Date.now()}.mp3`, tipo: 'audio/mpeg', datos, etiqueta: 'Voz' }] });
+    set({ audioFrase: [{ id: `voz${Date.now()}`, nombre: `kotonoha_voz_${Date.now()}.mp3`, tipo: 'audio/mpeg', datos, etiqueta: tr('Voz') }] });
   });
   const buscarAudioPalabra = () => conOcupado('audioPalabra', async () => {
-    if (!b.palabra) throw new Error('Escribe primero la palabra.');
+    if (!b.palabra) throw new Error(tr('Escribe primero la palabra.'));
     const r = await motor.audiosPalabra(b.palabra, b.lectura || b.palabra);
-    if (!r.length) throw new Error('No hay grabaciones de esta palabra.');
+    if (!r.length) throw new Error(tr('No hay grabaciones de esta palabra.'));
     const m = await motor.descargarMedio(r[0].url);
     set({ audioPalabra: [{ id: r[0].url, nombre: `kotonoha_${b.palabra}.mp3`, tipo: m.tipo, datos: m.datos, etiqueta: r[0].etiqueta }] });
   });
   const buscarImagen = () => conOcupado('imagenes', async () => {
     const consulta = await motor.consultaImagen(b.palabra || fraseLimpia(), fraseLimpia());
     const r = await motor.imagenes(consulta);
-    if (!r.length) throw new Error('Sin imágenes para esta búsqueda.');
+    if (!r.length) throw new Error(tr('Sin imágenes para esta búsqueda.'));
     const elegida = r[Math.floor(Math.random() * Math.min(r.length, 6))];
     const m = await motor.descargarMedio(elegida.miniatura);
     set({ imagenes: [{ id: elegida.url, nombre: `kotonoha_${Date.now()}.jpg`, tipo: m.tipo, datos: m.datos }] });
   });
   const buscarEjemplos = () => conOcupado('ejemplos', async () => {
-    if (!b.palabra) throw new Error('Escribe primero la palabra.');
+    if (!b.palabra) throw new Error(tr('Escribe primero la palabra.'));
     const e = await motor.ejemplos(b.palabra);
     set({ ejemplos: e.slice(0, 3).map((x) => x.texto).join('<br>') });
   });
   const crearNotas = () => conOcupado('notas', async () => {
-    if (!b.palabra || !b.frase) throw new Error('Hacen falta la palabra y la frase.');
+    if (!b.palabra || !b.frase) throw new Error(tr('Hacen falta la palabra y la frase.'));
     set({ notas: await flujoMotor('explicar', [contexto(), false, false], (t) => set({ notas: t })) });
   });
   const generarTodo = () => {
@@ -190,9 +191,9 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
   };
 
   const crearTarjeta = () => conOcupado('crear', async () => {
-    if (!b.frase && !b.palabra) throw new Error('La tarjeta está vacía.');
+    if (!b.frase && !b.palabra) throw new Error(tr('La tarjeta está vacía.'));
     await motor.crearTarjeta(b, destino);
-    fijarMensaje({ texto: destino === 'anki' ? 'Tarjeta añadida a Anki.' : 'Tarjeta añadida a Memoria.' });
+    fijarMensaje({ texto: destino === 'anki' ? tr('Tarjeta añadida a Anki.') : tr('Tarjeta añadida a Memoria.') });
     fijarB(borradorVacio());
   });
 
@@ -200,16 +201,16 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
 
   return (
     <div class={`ap-creador-marco ${abierto ? 'abierto' : ''} ${flotante ? 'flotante' : ''}`} inert={!abierto}>
-      <aside class="ap-creador" aria-label="Creador de tarjetas">
+      <aside class="ap-creador" aria-label={tr('Creador de tarjetas')}>
         <header class="ap-creador-cab">
-          <h2>Nueva tarjeta</h2>
+          <h2>{tr('Nueva tarjeta')}</h2>
           <div class="ap-creador-botones">
             {!estrecha && (
               <button
                 class={`btn-icono chico ${creadorFijado.value ? 'activo' : ''}`}
                 aria-pressed={creadorFijado.value}
-                aria-label={creadorFijado.value ? 'Dejar de fijar el panel' : 'Fijar el panel'}
-                data-tip={creadorFijado.value ? 'Dejar de fijar' : 'Fijar el panel'}
+                aria-label={creadorFijado.value ? tr('Dejar de fijar el panel') : tr('Fijar el panel')}
+                data-tip={creadorFijado.value ? tr('Dejar de fijar') : tr('Fijar el panel')}
                 data-tip-lado="izq"
                 onClick={() => {
                   creadorFijado.value = !creadorFijado.value;
@@ -219,7 +220,7 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
                 <Icono n="fijar" t={16} />
               </button>
             )}
-            <button class="btn-icono chico" aria-label="Cerrar el creador" data-tip="Cerrar" data-tip-lado="izq" onClick={() => (creadorAbierto.value = false)}>
+            <button class="btn-icono chico" aria-label={tr('Cerrar el creador')} data-tip={tr('Cerrar')} data-tip-lado="izq" onClick={() => (creadorAbierto.value = false)}>
               <Icono n="cerrar" t={15} />
             </button>
           </div>
@@ -227,102 +228,102 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
 
         <div class="ap-creador-cuerpo">
           <div class="ap-creador-modo">
-            <div class="segmentado" role="radiogroup" aria-label="Tipo de tarjeta">
+            <div class="segmentado" role="radiogroup" aria-label={tr('Tipo de tarjeta')}>
               {(['frase', 'palabra'] as const).map((t) => (
-                <button key={t} role="radio" aria-checked={b.tipo === t} class={b.tipo === t ? 'activo' : ''} onClick={() => set({ tipo: t })}>{t === 'frase' ? 'Frase' : 'Palabra'}</button>
+                <button key={t} role="radio" aria-checked={b.tipo === t} class={b.tipo === t ? 'activo' : ''} onClick={() => set({ tipo: t })}>{t === 'frase' ? tr('Frase') : tr('Palabra')}</button>
               ))}
             </div>
-            <select class="selector" aria-label="Destino" value={destino} onChange={(e) => fijarDestino(e.currentTarget.value as Ajustes['destino'])}>
-              <option value="anki">Anki{mazos.length ? ` · ${ajustes.ankiMazo}` : ''}</option>
-              <option value="memoria">Memoria</option>
+            <select class="selector" aria-label={tr('Destino')} value={destino} onChange={(e) => fijarDestino(e.currentTarget.value as Ajustes['destino'])}>
+              <option value="anki">{tr('Anki')}{mazos.length ? ` · ${ajustes.ankiMazo}` : ''}</option>
+              <option value="memoria">{tr('Memoria')}</option>
             </select>
           </div>
           {destino === 'anki' && ankiListo === false && (
             <p class="ap-creador-aviso">
               <Icono n="aviso" t={15} />
-              <span>Anki no está abierto.</span>
-              <button onClick={() => fijarDestino('memoria')}>Guardar en Memoria</button>
+              <span>{tr('Anki no está abierto.')}</span>
+              <button onClick={() => fijarDestino('memoria')}>{tr('Guardar en Memoria')}</button>
             </p>
           )}
 
           <button class="btn ia bloque" onClick={generarTodo} disabled={!b.palabra && !b.frase}>
-            <Icono n="ia" t={16} /> Completar lo que falta con Claude
+            <Icono n="ia" t={16} /> {tr('Completar lo que falta con Claude')}
           </button>
 
           <section class="ap-campos">
             <div class="ap-dos-campos">
               <div class="ap-campo">
-                <label for="k-palabra">Palabra</label>
+                <label for="k-palabra">{tr('Palabra')}</label>
                 <input id="k-palabra" class="campo ap-campo-ja" lang="ja" value={b.palabra} placeholder="食べる" onInput={(e) => set({ palabra: e.currentTarget.value })} />
               </div>
               <div class="ap-campo">
-                <label for="k-lectura">Lectura</label>
+                <label for="k-lectura">{tr('Lectura')}</label>
                 <input id="k-lectura" class="campo ap-campo-ja" lang="ja" value={b.lectura} placeholder="たべる" onInput={(e) => set({ lectura: e.currentTarget.value })} />
               </div>
             </div>
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <label for="k-def">Definición</label>
-                <AccionCampo texto="Buscar en el diccionario" icono="diccionario" ocupado={!!ocupado.definicion} alPulsar={buscarDefinicion} />
+                <label for="k-def">{tr('Definición')}</label>
+                <AccionCampo texto={tr('Buscar en el diccionario')} icono="diccionario" ocupado={!!ocupado.definicion} alPulsar={buscarDefinicion} />
               </div>
-              <CampoRico id="k-def" etiqueta="Definición" valor={b.definicion} placeholder="Significado de la palabra" alCambiar={(v) => set({ definicion: v })} />
+              <CampoRico id="k-def" etiqueta={tr('Definición')} valor={b.definicion} placeholder={tr('Significado de la palabra')} alCambiar={(v) => set({ definicion: v })} />
             </div>
           </section>
 
           <section class="ap-campos">
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <label for="k-frase">Frase</label>
-                <AccionCampo ia texto="Crear con Claude" icono="ia" ocupado={!!ocupado.frase} alPulsar={crearFrase} />
+                <label for="k-frase">{tr('Frase')}</label>
+                <AccionCampo ia texto={tr('Crear con Claude')} icono="ia" ocupado={!!ocupado.frase} alPulsar={crearFrase} />
               </div>
-              <CampoRico id="k-frase" etiqueta="Frase" ja valor={b.frase} placeholder="La frase donde aparece" alCambiar={(v) => set({ frase: v })} />
+              <CampoRico id="k-frase" etiqueta={tr('Frase')} ja valor={b.frase} placeholder={tr('La frase donde aparece')} alCambiar={(v) => set({ frase: v })} />
             </div>
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <label for="k-trad">Traducción</label>
-                <AccionCampo ia texto="Traducir con Claude" icono="ia" ocupado={!!ocupado.traduccion} alPulsar={crearTraduccion} />
+                <label for="k-trad">{tr('Traducción')}</label>
+                <AccionCampo ia texto={tr('Traducir con Claude')} icono="ia" ocupado={!!ocupado.traduccion} alPulsar={crearTraduccion} />
               </div>
-              <textarea id="k-trad" class="campo" value={b.traduccion} placeholder="Traducción de la frase" onInput={(e) => set({ traduccion: e.currentTarget.value })} />
+              <textarea id="k-trad" class="campo" value={b.traduccion} placeholder={tr('Traducción de la frase')} onInput={(e) => set({ traduccion: e.currentTarget.value })} />
             </div>
           </section>
 
           <section class="ap-campos">
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <span class="etq">Audio de la frase</span>
+                <span class="etq">{tr('Audio de la frase')}</span>
                 <span class="ap-campo-acciones">
-                  <AccionCampo texto="Voz" icono="voz" ocupado={!!ocupado.audioFrase} alPulsar={crearAudioFrase} />
-                  <button class="ap-accion-campo" onClick={() => entradaAudioFrase.current?.click()}><Icono n="mas" t={14} />Archivo</button>
+                  <AccionCampo texto={tr('Voz')} icono="voz" ocupado={!!ocupado.audioFrase} alPulsar={crearAudioFrase} />
+                  <button class="ap-accion-campo" onClick={() => entradaAudioFrase.current?.click()}><Icono n="mas" t={14} />{tr('Archivo')}</button>
                 </span>
               </div>
-              <Audios vacio="Se añade solo si la tarjeta sale de un video." lista={b.audioFrase} alQuitar={(id) => set({ audioFrase: b.audioFrase.filter((m) => m.id !== id) })} />
-              <input ref={entradaAudioFrase} type="file" accept="audio/*" hidden aria-label="Añadir audio" onChange={async (e) => {
+              <Audios vacio={tr('Se añade solo si la tarjeta sale de un video.')} lista={b.audioFrase} alQuitar={(id) => set({ audioFrase: b.audioFrase.filter((m) => m.id !== id) })} />
+              <input ref={entradaAudioFrase} type="file" accept="audio/*" hidden aria-label={tr('Añadir audio')} onChange={async (e) => {
                 const f = e.currentTarget.files?.[0];
                 if (f) set({ audioFrase: [...b.audioFrase, { id: f.name, nombre: f.name, tipo: f.type, datos: await aBase64(f), etiqueta: f.name }] });
               }} />
             </div>
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <span class="etq">Audio de la palabra</span>
-                <AccionCampo texto="Buscar grabación" icono="ondas" ocupado={!!ocupado.audioPalabra} alPulsar={buscarAudioPalabra} />
+                <span class="etq">{tr('Audio de la palabra')}</span>
+                <AccionCampo texto={tr('Buscar grabación')} icono="ondas" ocupado={!!ocupado.audioPalabra} alPulsar={buscarAudioPalabra} />
               </div>
-              <Audios vacio="Grabaciones de nativos, cuando existen." lista={b.audioPalabra} alQuitar={(id) => set({ audioPalabra: b.audioPalabra.filter((m) => m.id !== id) })} />
+              <Audios vacio={tr('Grabaciones de nativos, cuando existen.')} lista={b.audioPalabra} alQuitar={(id) => set({ audioPalabra: b.audioPalabra.filter((m) => m.id !== id) })} />
             </div>
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <span class="etq">Imágenes</span>
-                <AccionCampo ia texto="Buscar con Claude" icono="imagen" ocupado={!!ocupado.imagenes} alPulsar={buscarImagen} />
+                <span class="etq">{tr('Imágenes')}</span>
+                <AccionCampo ia texto={tr('Buscar con Claude')} icono="imagen" ocupado={!!ocupado.imagenes} alPulsar={buscarImagen} />
               </div>
               <div class="ap-imagenes">
                 {b.imagenes.map((m) => (
                   <div class="ap-imagen" key={m.id}>
                     <img src={m.datos ? `data:${m.tipo};base64,${m.datos}` : m.url} alt="" />
-                    <button class="btn-icono chico relleno" aria-label="Quitar la imagen" onClick={() => set({ imagenes: b.imagenes.filter((x) => x.id !== m.id) })}><Icono n="cerrar" t={12} /></button>
+                    <button class="btn-icono chico relleno" aria-label={tr('Quitar la imagen')} onClick={() => set({ imagenes: b.imagenes.filter((x) => x.id !== m.id) })}><Icono n="cerrar" t={12} /></button>
                   </div>
                 ))}
-                <button class="ap-imagen-anadir" aria-label="Añadir una imagen desde un archivo" onClick={() => entradaImagen.current?.click()}><Icono n="imagen" t={20} /><span>Añadir</span></button>
+                <button class="ap-imagen-anadir" aria-label={tr('Añadir una imagen desde un archivo')} onClick={() => entradaImagen.current?.click()}><Icono n="imagen" t={20} /><span>{tr('Añadir')}</span></button>
               </div>
-              <input ref={entradaImagen} type="file" accept="image/*" hidden aria-label="Añadir imagen" onChange={async (e) => {
+              <input ref={entradaImagen} type="file" accept="image/*" hidden aria-label={tr('Añadir imagen')} onChange={async (e) => {
                 const f = e.currentTarget.files?.[0];
                 if (f) set({ imagenes: [...b.imagenes, { id: f.name, nombre: f.name, tipo: f.type, datos: await aBase64(f) }] });
               }} />
@@ -332,17 +333,17 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
           <section class="ap-campos">
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <label for="k-ej">Frases de ejemplo</label>
-                <AccionCampo texto="De lo que has visto" icono="frases" ocupado={!!ocupado.ejemplos} alPulsar={buscarEjemplos} />
+                <label for="k-ej">{tr('Frases de ejemplo')}</label>
+                <AccionCampo texto={tr('De lo que has visto')} icono="frases" ocupado={!!ocupado.ejemplos} alPulsar={buscarEjemplos} />
               </div>
-              <CampoRico id="k-ej" etiqueta="Frases de ejemplo" ja valor={b.ejemplos} placeholder="Ejemplos adicionales" alCambiar={(v) => set({ ejemplos: v })} />
+              <CampoRico id="k-ej" etiqueta={tr('Frases de ejemplo')} ja valor={b.ejemplos} placeholder={tr('Ejemplos adicionales')} alCambiar={(v) => set({ ejemplos: v })} />
             </div>
             <div class="ap-campo">
               <div class="ap-campo-etq">
-                <label for="k-notas">Notas</label>
-                <AccionCampo ia texto="Explicar con Claude" icono="ia" ocupado={!!ocupado.notas} alPulsar={crearNotas} />
+                <label for="k-notas">{tr('Notas')}</label>
+                <AccionCampo ia texto={tr('Explicar con Claude')} icono="ia" ocupado={!!ocupado.notas} alPulsar={crearNotas} />
               </div>
-              <textarea id="k-notas" class="campo" value={b.notas} placeholder="Algún truco para recordarla" onInput={(e) => set({ notas: e.currentTarget.value })} />
+              <textarea id="k-notas" class="campo" value={b.notas} placeholder={tr('Algún truco para recordarla')} onInput={(e) => set({ notas: e.currentTarget.value })} />
             </div>
           </section>
         </div>
@@ -350,9 +351,9 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
         <footer class="ap-creador-pie">
           {mensaje && <Mensaje error={mensaje.error}>{mensaje.texto}</Mensaje>}
           <div class="ap-creador-botones-pie">
-            <button class="btn fantasma" onClick={() => { fijarB(borradorVacio()); fijarMensaje(null); }}>Limpiar</button>
+            <button class="btn fantasma" onClick={() => { fijarB(borradorVacio()); fijarMensaje(null); }}>{tr('Limpiar')}</button>
             <button class="btn primario ap-creador-crear" disabled={!!ocupado.crear} onClick={crearTarjeta}>
-              <Icono n="tarjetas" t={16} /> {ocupado.crear ? 'Creando…' : 'Crear tarjeta'}
+              <Icono n="tarjetas" t={16} /> {ocupado.crear ? tr('Creando…') : tr('Crear tarjeta')}
             </button>
           </div>
         </footer>

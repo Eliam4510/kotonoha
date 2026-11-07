@@ -1,6 +1,8 @@
 // Atajos de teclado sobre el video. Se capturan antes que los del sitio solo si hay algo que hacer.
 
+import { ACCIONES_TECLADO } from '../compartido/accionesTeclado';
 import { motor, fondo } from '../compartido/rpc';
+import { type Combinacion, leerCombinacion, teclaLatina, textoCombinacion } from '../nucleo/teclas';
 import type { EstadoPalabra, LineaAnalizada } from '../compartido/tipos';
 import { desconocidas } from '../nucleo/frases';
 import { tieneJapones } from '../nucleo/tokens';
@@ -32,6 +34,7 @@ import {
 } from './estado';
 import { cambiarAjuste, cerrarConsulta, fijarOculto } from './Reproductor';
 import { cancelarUnClic, crearUnClic, enviarACreador } from './tarjetas';
+import { tr } from '../compartido/i18n';
 
 // La que se ve en pantalla, también en el instante en que aguanta entre dos líneas.
 const lineaActual = (): LineaAnalizada | null => {
@@ -72,10 +75,26 @@ export function ejecutarComando(comando: string) {
   if (comando === 'crear-tarjeta') crearUnClic(consulta.value?.palabra ?? null, consulta.value?.linea ?? lineaActual(), fijarOculto);
 }
 
+/** Qué combinación de siempre corresponde a la pulsada. Una tecla que se reasignó a otra acción deja de valer. */
+function aplicarPersonales(c: Combinacion, personales: Record<string, string>): Combinacion | null {
+  if (!Object.keys(personales).length) return c;
+  const texto = textoCombinacion(c);
+  for (const [id, nueva] of Object.entries(personales)) {
+    if (nueva === texto) {
+      const accion = ACCIONES_TECLADO.find((x) => x.id === id);
+      if (accion) return leerCombinacion(accion.defecto);
+    }
+  }
+  for (const id of Object.keys(personales)) {
+    if (ACCIONES_TECLADO.find((x) => x.id === id)?.defecto === texto) return null;
+  }
+  return c;
+}
+
 /** La captura solo la puede activar un atajo de Chrome. Si la tecla llega a la página, es que Chrome no se la dio a Kotonoha. */
 function explicarCaptura() {
   const asignada = atajosChrome.value['alternar-captura'];
-  avisar(asignada ? `La captura de audio se activa con ${asignada}.` : `Chrome no le ha dado un atajo a la captura de audio: ${comoActivarCaptura()}, o asigna uno en chrome://extensions/shortcuts.`, undefined, undefined, 7000);
+  avisar(asignada ? tr('La captura de audio se activa con {0}.', asignada) : tr('Chrome no le ha dado un atajo a la captura de audio: {0}, o asigna uno en chrome://extensions/shortcuts.', comoActivarCaptura()), undefined, undefined, 7000);
 }
 
 export function instalarAtajos(): void {
@@ -87,8 +106,12 @@ export function instalarAtajos(): void {
       if (!ajustes.value.activo) return;
 
       const a = ajustes.value;
-      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-      const { altKey: alt, shiftKey: shift, ctrlKey: ctrl, metaKey: meta } = e;
+      // Lo que el usuario haya reasignado se traduce a la tecla de siempre, y el resto del código no se entera.
+      const pulsada = { k: teclaLatina(e), alt: e.altKey, shift: e.shiftKey, ctrl: e.ctrlKey };
+      const efectiva = aplicarPersonales(pulsada, ajustes.value.atajosPersonales);
+      if (!efectiva) return;
+      const { k, alt, shift, ctrl } = efectiva;
+      const meta = e.metaKey;
       if (meta || (ctrl && k !== 'x')) return;
 
       // Con texto japonés seleccionado en la página, E y Alt+K/U/I actúan sobre la selección (webAtajos).
@@ -156,11 +179,11 @@ export function instalarAtajos(): void {
             return hecho();
           case 'i':
             ajustarDesfase('objetivo', -100);
-            avisar('Japonés 0,1 s antes', undefined, undefined, 1200);
+            avisar(tr('Japonés 0,1 s antes'), undefined, undefined, 1200);
             return hecho();
           case 'o':
             ajustarDesfase('objetivo', 100);
-            avisar('Japonés 0,1 s después', undefined, undefined, 1200);
+            avisar(tr('Japonés 0,1 s después'), undefined, undefined, 1200);
             return hecho();
           case 'n':
             siguientePalabra(false);
@@ -195,11 +218,11 @@ export function instalarAtajos(): void {
             return hecho();
           case 'i':
             ajustarDesfase('secundaria', -100);
-            avisar('Secundarios 0,1 s antes', undefined, undefined, 1200);
+            avisar(tr('Secundarios 0,1 s antes'), undefined, undefined, 1200);
             return hecho();
           case 'o':
             ajustarDesfase('secundaria', 100);
-            avisar('Secundarios 0,1 s después', undefined, undefined, 1200);
+            avisar(tr('Secundarios 0,1 s después'), undefined, undefined, 1200);
             return hecho();
           case '+':
           case '=':
@@ -275,7 +298,7 @@ export function instalarAtajos(): void {
         case 'c':
           if (linea) {
             navigator.clipboard.writeText(linea.texto).catch(() => {});
-            avisar('Subtítulo copiado', 'exito', undefined, 1500);
+            avisar(tr('Subtítulo copiado'), 'exito', undefined, 1500);
           }
           return hecho();
         case 'b':

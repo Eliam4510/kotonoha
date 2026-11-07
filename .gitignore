@@ -18,3 +18,7 @@ herramientas/ayudante/com.kotonoha.ayudante.json
 pruebas/fixtures/*.webm
 pruebas/fixtures/*.mp4
 pruebas/fixtures/still.jpg
+
+# Archivos de trabajo de las traducciones: los genera herramientas/idiomas.mjs
+idiomas/fuente.tsv
+idiomas/trabajo/

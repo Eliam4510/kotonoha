@@ -10,7 +10,7 @@ import { filtrarLineas, type FiltroNavegador, NOMBRES_NIVEL } from '../nucleo/fr
 import { visibilidadVelo } from '../nucleo/modos';
 import { type CajaSubs, conImanes, enZonaActivacion, enZonaSegura, ESPERA_MOSTRAR_MS, ESPERA_OCULTAR_MS, factorLargo, pixelesDe, type PosicionSubs, posicionDesde, posicionInicial } from '../nucleo/presentacion';
 import type { Linea } from '../nucleo/subtitulos';
-import { pegarSignos } from '../nucleo/tokens';
+import { pegarSignos, lecturaVisible } from '../nucleo/tokens';
 import { enviarAlCreador } from '../ui/borrador';
 import { colocarJunto, Ficha, PanelFlujo } from '../ui/Ficha';
 import { Icono, Logo, type NombreIcono } from '../ui/iconos';
@@ -72,6 +72,7 @@ import {
 } from './estado';
 import { Anillo, PanelesFlotantes, pestanaVideo } from './Paneles';
 import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas';
+import { numero, tm, tr } from '../compartido/i18n';
 
 export const ANCHO_NAVEGADOR = 380;
 
@@ -196,7 +197,7 @@ export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraTok
         s.lectura ? (
           <ruby key={i}>
             {s.texto}
-            <rt>{s.lectura}</rt>
+            <rt>{lecturaVisible(s.lectura, a.formatoLectura)}</rt>
           </ruby>
         ) : (
           <span key={i}>{s.texto}</span>
@@ -368,7 +369,7 @@ function Subtitulos() {
           }}
         >
           <div class="subs-fondo" ref={fondoSub} aria-hidden="true" />
-          <div class="subs-asa" title="Arrastra para mover los subtítulos. Doble clic para volver a su sitio." aria-hidden="true" />
+          <div class="subs-asa" title={tr('Arrastra para mover los subtítulos. Doble clic para volver a su sitio.')} aria-hidden="true" />
           <div class="subs-contenido" ref={contenido}>
             {linea && (
               <div
@@ -390,7 +391,7 @@ function Subtitulos() {
             {linea && a.mostrarGramatica && visObjetivo === 'visible' && (linea.gramatica?.length ?? 0) > 0 && (
               <div class="fila-gram">
                 {linea.gramatica!.slice(0, 4).map((g) => (
-                  <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={g.significado} onClick={(e) => {
+                  <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={tr(g.significado)} onClick={(e) => {
                     e.stopPropagation();
                     const c = e.currentTarget.getBoundingClientRect();
                     const caja = e.currentTarget.closest('.subs-bloque')?.getBoundingClientRect() ?? c;
@@ -465,7 +466,7 @@ function PopupPalabra() {
       class={`popup-palabra ${clase}`}
       style={{ ...estilo, width: `${ancho}px`, ...(t ? { height: `${t.alto}px` } : {}) }}
       role="dialog"
-      aria-label={`Consulta de ${p.lema}`}
+      aria-label={tr('Consulta de {0}', p.lema)}
       onMouseEnter={cancelarCierre}
       onMouseLeave={programarCierre}
       onClick={(e) => e.stopPropagation()}
@@ -501,18 +502,18 @@ function PopupGramatica() {
   const { estilo, clase } = colocarJunto(c.ancla, ancho, limite);
   const { punto, linea } = c;
   return (
-    <div class={`popup-palabra popup-gramatica ${clase}`} style={{ ...estilo, width: `${ancho}px` }} role="dialog" aria-label={`Gramática: ${punto.patron}`} onClick={(e) => e.stopPropagation()}>
+    <div class={`popup-palabra popup-gramatica ${clase}`} style={{ ...estilo, width: `${ancho}px` }} role="dialog" aria-label={tr('Gramática: {0}', punto.patron)} onClick={(e) => e.stopPropagation()}>
       <div class="gram-cab">
         <div class="gram-titulo">
           <h3 lang="ja">{punto.patron} {punto.nivel && <span class={`chip-gram n-${punto.nivel}`}>{punto.nivel}</span>}</h3>
-          <p class="gram-significado">{punto.significado}</p>
-          <p class="gram-frase">En esta frase: <span lang="ja">「{punto.fragmento}」</span>{punto.fuente === 'regla' ? ' · detectado por reglas' : ' · detectado por Claude'}</p>
+          <p class="gram-significado">{tr(punto.significado)}</p>
+          <p class="gram-frase">{tr('En esta frase:')} <span lang="ja">「{punto.fragmento}」</span>{punto.fuente === 'regla' ? tr(' · detectado por reglas') : tr(' · detectado por Claude')}</p>
         </div>
-        <button class="btn-icono chico relleno" data-tip="Enviar al creador" aria-label="Enviar al creador de tarjetas" onClick={() => enviarAlCreador({ tipo: 'frase', palabra: punto.patron, frase: linea.texto.replace(punto.fragmento, `<b>${punto.fragmento}</b>`), definicion: punto.significado, fuente: infoVideo.value?.titulo, url: location.href, etiquetas: ['gramatica', ...(punto.nivel ? [punto.nivel] : [])] })}><Icono n="enviar" t={15} /></button>
-        <button class="btn-icono chico" aria-label="Cerrar" onClick={() => (consultaGramatica.value = null)}><Icono n="cerrar" t={15} /></button>
+        <button class="btn-icono chico relleno" data-tip={tr('Enviar al creador')} aria-label={tr('Enviar al creador de tarjetas')} onClick={() => enviarAlCreador({ tipo: 'frase', palabra: punto.patron, frase: linea.texto.replace(punto.fragmento, `<b>${punto.fragmento}</b>`), definicion: punto.significado, fuente: infoVideo.value?.titulo, url: location.href, etiquetas: ['gramatica', ...(punto.nivel ? [punto.nivel] : [])] })}><Icono n="enviar" t={15} /></button>
+        <button class="btn-icono chico" aria-label={tr('Cerrar')} onClick={() => (consultaGramatica.value = null)}><Icono n="cerrar" t={15} /></button>
       </div>
       <div class="gram-cuerpo">
-        <PanelFlujo metodo="gramatica" args={[{ ...contextoDe(linea.texto, linea), lema: punto.patron, superficie: punto.fragmento }]} titulo="Explicación" />
+        <PanelFlujo metodo="gramatica" args={[{ ...contextoDe(linea.texto, linea), lema: punto.patron, superficie: punto.fragmento }]} titulo={tr('Explicación')} />
       </div>
     </div>
   );
@@ -521,11 +522,11 @@ function PopupGramatica() {
 // ---------- Isla ----------
 
 const BOTONES_PANEL: { n: 'generar' | 'visual' | 'video' | 'atajos' | 'traductor'; icono: NombreIcono; nombre: string; tip: string }[] = [
-  { n: 'generar', icono: 'varita', nombre: 'Generar subtítulos', tip: 'Generar y revisar subtítulos' },
-  { n: 'traductor', icono: 'traducir', nombre: 'Traductor', tip: 'Traductor · Alt+T' },
-  { n: 'video', icono: 'cc', nombre: 'Ajustes de video', tip: 'Subtítulos y reproducción' },
-  { n: 'visual', icono: 'ojo', nombre: 'Ajustes de visualización', tip: 'Visualización' },
-  { n: 'atajos', icono: 'teclado', nombre: 'Atajos de teclado', tip: 'Atajos de teclado' },
+  { n: 'generar', icono: 'varita', nombre: tm('Generar subtítulos'), tip: tm('Generar y revisar subtítulos') },
+  { n: 'traductor', icono: 'traducir', nombre: tm('Traductor'), tip: tm('Traductor · Alt+T') },
+  { n: 'video', icono: 'cc', nombre: tm('Ajustes de video'), tip: tm('Subtítulos y reproducción') },
+  { n: 'visual', icono: 'ojo', nombre: tm('Ajustes de visualización'), tip: tm('Visualización') },
+  { n: 'atajos', icono: 'teclado', nombre: tm('Atajos de teclado'), tip: tm('Atajos de teclado') },
 ];
 
 function Barra() {
@@ -597,42 +598,42 @@ function Barra() {
   };
   const c = correccion.value;
   const proceso = g
-    ? { texto: `Traduciendo ${g.hechas}/${g.total}`, tip: 'Claude está traduciendo los subtítulos', hechas: g.hechas, total: g.total }
+    ? { texto: tr('Traduciendo {0}/{1}', g.hechas, g.total), tip: tr('Claude está traduciendo los subtítulos'), hechas: g.hechas, total: g.total }
     : c
-      ? { texto: `Corrigiendo ${c.hechas}/${c.total}`, tip: 'Claude está corrigiendo los subtítulos automáticos', hechas: c.hechas, total: c.total }
+      ? { texto: tr('Corrigiendo {0}/{1}', c.hechas, c.total), tip: tr('Claude está corrigiendo los subtítulos automáticos'), hechas: c.hechas, total: c.total }
     : r
-      ? { texto: `Revisando ${r.hechas}/${r.total}`, tip: 'Claude está revisando lecturas, sentidos y gramática', hechas: r.hechas, total: r.total }
+      ? { texto: tr('Revisando {0}/{1}', r.hechas, r.total), tip: tr('Claude está revisando lecturas, sentidos y gramática'), hechas: r.hechas, total: r.total }
       : null;
   return (
     <>
-      <div class={`barra ${visible ? 'visible' : ''} ${a.navegadorAbierto ? 'con-nav' : ''}`} ref={refBarra} role="toolbar" aria-label="Barra de Kotonoha">
-        <button class="barra-logo" data-tip={`Abrir Kotonoha${atajosChrome.value['abrir-app'] ? ` · ${atajosChrome.value['abrir-app']}` : ''}`} aria-label="Abrir la ventana de Kotonoha" onClick={() => fondo.abrirApp()}>
+      <div class={`barra ${visible ? 'visible' : ''} ${a.navegadorAbierto ? 'con-nav' : ''}`} ref={refBarra} role="toolbar" aria-label={tr('Barra de Kotonoha')}>
+        <button class="barra-logo" data-tip={tr('Abrir Kotonoha{0}', atajosChrome.value['abrir-app'] ? ` · ${atajosChrome.value['abrir-app']}` : '')} aria-label={tr('Abrir la ventana de Kotonoha')} onClick={() => fondo.abrirApp()}>
           <Logo t={26} />
         </button>
         <div class="barra-resumen">
           {cargandoPista.value ? (
-            <span class="barra-estado"><span class="giro" /> Analizando subtítulos…</span>
+            <span class="barra-estado"><span class="giro" /> {tr('Analizando subtítulos…')}</span>
           ) : errorPista.value ? (
             <>
-              <span class="barra-estado error" title={errorPista.value}><Icono n="aviso" t={16} /> Error con los subtítulos</span>
-              <button class="btn chico" onClick={() => abrirVideo('subtitulos')}>Elegir otros</button>
+              <span class="barra-estado error" title={errorPista.value}><Icono n="aviso" t={16} /> {tr('Error con los subtítulos')}</span>
+              <button class="btn chico" onClick={() => abrirVideo('subtitulos')}>{tr('Elegir otros')}</button>
             </>
           ) : hayLineas ? (
-            <button class={`resumen-boton ${panel.value === 'comprension' ? 'activo' : ''}`} aria-label="Comprensión" data-tip="Ver el detalle de comprensión" onClick={() => (panel.value = panel.value === 'comprension' ? null : 'comprension')}>
+            <button class={`resumen-boton ${panel.value === 'comprension' ? 'activo' : ''}`} aria-label={tr('Comprensión')} data-tip={tr('Ver el detalle de comprensión')} onClick={() => (panel.value = panel.value === 'comprension' ? null : 'comprension')}>
               <Anillo valor={e.comprension} t={36} grosor={3.5}>{e.comprension}</Anillo>
               <span class="resumen-texto">
                 <b>{NOMBRES_NIVEL[e.nivel]}</b>
-                <small>Comprensión · {e.recomendadas.toLocaleString('es')} {e.recomendadas === 1 ? 'recomendada' : 'recomendadas'}</small>
+                <small>{e.recomendadas === 1 ? tr('Comprensión · 1 recomendada') : tr('Comprensión · {0} recomendadas', numero(e.recomendadas))}</small>
               </span>
             </button>
           ) : (
             <>
-              <span class="barra-estado">Sin subtítulos en japonés</span>
-              <button class="btn chico" onClick={() => abrirVideo('subtitulos')}><Icono n="archivo-subir" t={14} /> Importar</button>
+              <span class="barra-estado">{tr('Sin subtítulos en japonés')}</span>
+              <button class="btn chico" onClick={() => abrirVideo('subtitulos')}><Icono n="archivo-subir" t={14} /> {tr('Importar')}</button>
             </>
           )}
         </div>
-        <span class="barra-conocidas barra-opcional" data-tip="Palabras conocidas"><Icono n="hoja" t={15} /> <span class="num">{conocidas.value.toLocaleString('es')}</span></span>
+        <span class="barra-conocidas barra-opcional" data-tip={tr('Palabras conocidas')}><Icono n="hoja" t={15} /> <span class="num">{numero(conocidas.value)}</span></span>
         {proceso && (
           <span class="barra-proceso barra-opcional" data-tip={proceso.tip}>
             <Anillo valor={(proceso.hechas / Math.max(proceso.total, 1)) * 100} t={18} grosor={3} clase="ia" />
@@ -640,30 +641,30 @@ function Barra() {
           </span>
         )}
         {whisper.value && (
-          <span class="barra-proceso local barra-opcional" data-tip="Whisper está transcribiendo el video en tu equipo">
+          <span class="barra-proceso local barra-opcional" data-tip={tr('Whisper está transcribiendo el video en tu equipo')}>
             <Icono n="ondas" t={15} />
-            {whisper.value.pausado ? 'En pausa' : whisper.value.fase === 'descargando' ? `Descargando ${Math.round(whisper.value.porcentaje ?? 0)} %` : whisper.value.fase === 'bajando' ? `Bajando audio ${Math.round(whisper.value.porcentaje ?? 0)} %` : whisper.value.fase === 'extrayendo' ? `Extrayendo ${Math.round(whisper.value.porcentaje ?? 0)} %` : whisper.value.desdeArchivo && whisper.value.porcentaje !== undefined ? `${Math.round(whisper.value.porcentaje)} %` : `${whisper.value.lineas} ${whisper.value.lineas === 1 ? 'línea' : 'líneas'}`}
+            {whisper.value.pausado ? tr('En pausa') : whisper.value.fase === 'descargando' ? tr('Descargando {0} %', Math.round(whisper.value.porcentaje ?? 0)) : whisper.value.fase === 'bajando' ? tr('Bajando audio {0} %', Math.round(whisper.value.porcentaje ?? 0)) : whisper.value.fase === 'extrayendo' ? tr('Extrayendo {0} %', Math.round(whisper.value.porcentaje ?? 0)) : whisper.value.desdeArchivo && whisper.value.porcentaje !== undefined ? `${Math.round(whisper.value.porcentaje)} %` : (whisper.value.lineas === 1 ? tr('1 línea') : tr('{0} líneas', whisper.value.lineas))}
           </span>
         )}
         <span class="barra-sep" />
-        <button class="barra-modo barra-opcional" data-tip="Cambiar el modo de reproducción" aria-label={`Modo de reproducción: ${NOMBRES_MODO[a.modo].titulo}`} aria-expanded={panel.value === 'video' && pestanaVideo.value === 'reproduccion'} onClick={() => (panel.value === 'video' && pestanaVideo.value === 'reproduccion' ? (panel.value = null) : abrirVideo('reproduccion'))}>
-          {NOMBRES_MODO[a.modo].titulo}
+        <button class="barra-modo barra-opcional" data-tip={tr('Cambiar el modo de reproducción')} aria-label={tr('Modo de reproducción: {0}', tr(NOMBRES_MODO[a.modo].titulo))} aria-expanded={panel.value === 'video' && pestanaVideo.value === 'reproduccion'} onClick={() => (panel.value === 'video' && pestanaVideo.value === 'reproduccion' ? (panel.value = null) : abrirVideo('reproduccion'))}>
+          {tr(NOMBRES_MODO[a.modo].titulo)}
           <Icono n="abajo" t={12} />
         </button>
         <div class="barra-acciones">
           {BOTONES_PANEL.map((b) => (
-            <button key={b.n} class={`btn-icono ${panel.value === b.n ? 'activo' : ''}`} data-tip={b.tip} aria-label={b.nombre} aria-pressed={panel.value === b.n} onClick={() => (panel.value = panel.value === b.n ? null : b.n)}>
+            <button key={b.n} class={`btn-icono ${panel.value === b.n ? 'activo' : ''}`} data-tip={tr(b.tip)} aria-label={tr(b.nombre)} aria-pressed={panel.value === b.n} onClick={() => (panel.value = panel.value === b.n ? null : b.n)}>
               <Icono n={b.icono} t={20} />
             </button>
           ))}
-          <button class={`btn-icono ${a.navegadorAbierto ? 'activo' : ''}`} data-tip="Navegador de subtítulos · G" aria-label="Navegador de subtítulos" aria-pressed={a.navegadorAbierto} onClick={() => cambiarAjuste({ navegadorAbierto: !a.navegadorAbierto })}>
+          <button class={`btn-icono ${a.navegadorAbierto ? 'activo' : ''}`} data-tip={tr('Navegador de subtítulos · G')} aria-label={tr('Navegador de subtítulos')} aria-pressed={a.navegadorAbierto} onClick={() => cambiarAjuste({ navegadorAbierto: !a.navegadorAbierto })}>
             <Icono n="panel" t={20} />
           </button>
           <span class="barra-sep" />
-          <button class={`btn-icono ${capturaActiva.value ? 'en-marcha' : ''}`} data-tip={`${capturaActiva.value ? 'Grabando audio para tus tarjetas' : 'Audio para tarjetas desactivado'}${atajosChrome.value['alternar-captura'] ? ` · ${atajosChrome.value['alternar-captura']}` : ''}`} aria-label="Estado de la captura" disabled>
+          <button class={`btn-icono ${capturaActiva.value ? 'en-marcha' : ''}`} data-tip={`${capturaActiva.value ? tr('Grabando audio para tus tarjetas') : tr('Audio para tarjetas desactivado')}${atajosChrome.value['alternar-captura'] ? ` · ${atajosChrome.value['alternar-captura']}` : ''}`} aria-label={tr('Estado de la captura')} disabled>
             <Icono n="microfono" t={20} />
           </button>
-          <button class={`btn-icono ${a.desanclarBarra ? 'activo' : ''}`} data-tip={a.desanclarBarra ? 'Soltar la barra · Alt+X' : 'Fijar la barra · Alt+X'} aria-label="Fijar la barra" aria-pressed={a.desanclarBarra} onClick={() => cambiarAjuste({ desanclarBarra: !a.desanclarBarra })}>
+          <button class={`btn-icono ${a.desanclarBarra ? 'activo' : ''}`} data-tip={a.desanclarBarra ? tr('Soltar la barra · Alt+X') : tr('Fijar la barra · Alt+X')} aria-label={tr('Fijar la barra')} aria-pressed={a.desanclarBarra} onClick={() => cambiarAjuste({ desanclarBarra: !a.desanclarBarra })}>
             <Icono n="fijar" t={20} />
           </button>
         </div>
@@ -683,17 +684,17 @@ const hora = (ms: number) => {
 };
 
 const FILTROS: { id: FiltroNavegador; nombre: string }[] = [
-  { id: 'todas', nombre: 'Todas las líneas' },
-  { id: 'recomendadas', nombre: 'Frases recomendadas' },
-  { id: '1d', nombre: '1 palabra desconocida' },
-  { id: '1dUnicas', nombre: '1 desconocida, sin repetir' },
-  { id: '1mas', nombre: '1 o más desconocidas' },
-  { id: '2mas', nombre: '2 o más desconocidas' },
-  { id: 'rastreadas', nombre: 'Con palabras rastreadas' },
-  { id: 'aprendiendo', nombre: 'Con palabras en aprendizaje' },
-  { id: 'conocidas', nombre: 'Todas conocidas' },
-  { id: 'marcadas', nombre: 'Marcadas' },
-  { id: 'seleccionadas', nombre: 'Seleccionadas' },
+  { id: 'todas', nombre: tm('Todas las líneas') },
+  { id: 'recomendadas', nombre: tm('Frases recomendadas') },
+  { id: '1d', nombre: tm('1 palabra desconocida') },
+  { id: '1dUnicas', nombre: tm('1 desconocida, sin repetir') },
+  { id: '1mas', nombre: tm('1 o más desconocidas') },
+  { id: '2mas', nombre: tm('2 o más desconocidas') },
+  { id: 'rastreadas', nombre: tm('Con palabras rastreadas') },
+  { id: 'aprendiendo', nombre: tm('Con palabras en aprendizaje') },
+  { id: 'conocidas', nombre: tm('Todas conocidas') },
+  { id: 'marcadas', nombre: tm('Marcadas') },
+  { id: 'seleccionadas', nombre: tm('Seleccionadas') },
 ];
 
 const LineaNavegador = memo(function LineaNavegador({
@@ -713,15 +714,15 @@ const LineaNavegador = memo(function LineaNavegador({
   const reales = l.palabras.filter((p) => p.esPalabra);
   const nuevas = reales.filter((p) => p.estado === 'desconocida').length;
   const punto = !reales.length ? 'ninguna' : nuevas === 0 ? 'n0' : nuevas === 1 ? 'n1' : 'n2';
-  const textoPunto = !reales.length ? '' : nuevas === 0 ? 'Todas conocidas' : nuevas === 1 ? 'Una palabra desconocida' : `${nuevas} palabras desconocidas`;
+  const textoPunto = !reales.length ? '' : nuevas === 0 ? tr('Todas conocidas') : nuevas === 1 ? tr('Una palabra desconocida') : `${nuevas} palabras desconocidas`;
   return (
     <div class={`nav-linea ${activa ? 'activa' : ''} ${seleccionada ? 'seleccionada' : ''}`} data-id={l.id} onClick={() => irALinea(l)}>
       <span class={`nav-punto ${punto}`} title={textoPunto} />
       <div class="nav-botones">
-        <button class={`btn-icono chico ${marcada ? 'activo' : ''}`} title="Marcar (B)" aria-label="Marcar" aria-pressed={marcada} onClick={(e) => { e.stopPropagation(); alternarMarcador(l.id); }}><Icono n="marcador" t={15} /></button>
-        <button class={`btn-icono chico ${seleccionada ? 'activo' : ''}`} title="Seleccionar (L)" aria-label="Seleccionar" aria-pressed={seleccionada} onClick={(e) => { e.stopPropagation(); alternarSeleccion(l.id); }}><Icono n="check" t={15} /></button>
-        <button class="btn-icono chico" title="Sincronizar: esta línea suena ahora" aria-label="Sincronizar: esta línea suena ahora" onClick={(e) => { e.stopPropagation(); anclarLinea(l); }}><Icono n="reloj" t={15} /></button>
-        <button class="btn-icono chico" title="Crear tarjeta" aria-label="Crear tarjeta" onClick={(e) => { e.stopPropagation(); crearUnClic(null, l, fijarOculto); }}><Icono n="rayo" t={15} /></button>
+        <button class={`btn-icono chico ${marcada ? 'activo' : ''}`} title={tr('Marcar (B)')} aria-label={tr('Marcar')} aria-pressed={marcada} onClick={(e) => { e.stopPropagation(); alternarMarcador(l.id); }}><Icono n="marcador" t={15} /></button>
+        <button class={`btn-icono chico ${seleccionada ? 'activo' : ''}`} title={tr('Seleccionar (L)')} aria-label={tr('Seleccionar')} aria-pressed={seleccionada} onClick={(e) => { e.stopPropagation(); alternarSeleccion(l.id); }}><Icono n="check" t={15} /></button>
+        <button class="btn-icono chico" title={tr('Sincronizar: esta línea suena ahora')} aria-label={tr('Sincronizar: esta línea suena ahora')} onClick={(e) => { e.stopPropagation(); anclarLinea(l); }}><Icono n="reloj" t={15} /></button>
+        <button class="btn-icono chico" title={tr('Crear tarjeta')} aria-label={tr('Crear tarjeta')} onClick={(e) => { e.stopPropagation(); crearUnClic(null, l, fijarOculto); }}><Icono n="rayo" t={15} /></button>
       </div>
       <div class={`nav-texto ${raiz}`} lang="ja">{l.palabras.map((p, k) => <PalabraVista key={k} p={p} l={l} />)}</div>
       {sec && <div class="nav-sec">{sec}</div>}
@@ -733,7 +734,7 @@ const LineaNavegador = memo(function LineaNavegador({
       <div class="nav-tiempo">
         {hora(l.inicio)} – {hora(l.fin)}
         {marcada && <Icono n="marcador" t={12} />}
-        {originales.value.has(l.id) && <span class="nav-corregida" title={`Antes: ${originales.value.get(l.id)}`} lang="ja"><Icono n="ia" t={12} /> Corregida</span>}
+        {originales.value.has(l.id) && <span class="nav-corregida" title={`Antes: ${originales.value.get(l.id)}`} lang="ja"><Icono n="ia" t={12} /> {tr('Corregida')}</span>}
       </div>
     </div>
   );
@@ -761,29 +762,29 @@ function Navegador() {
   const raiz = clasesRaiz(a);
   const lineasSel = () => lineasObjetivo.value.filter((l) => sel.has(l.id));
   const total = lineasObjetivo.value.length;
-  const nombreFiltro = FILTROS.find((x) => x.id === f)?.nombre ?? 'Todas las líneas';
+  const nombreFiltro = FILTROS.find((x) => x.id === f)?.nombre ?? tr('Todas las líneas');
 
   return (
-    <aside class="navegador" style={{ '--ancho-nav': `${ANCHO_NAVEGADOR}px` }} aria-label="Navegador de subtítulos">
+    <aside class="navegador" style={{ '--ancho-nav': `${ANCHO_NAVEGADOR}px` }} aria-label={tr('Navegador de subtítulos')}>
       <div class="nav-cab">
         <div class="nav-titulo">
-          <b title={infoVideo.value?.titulo}>{infoVideo.value?.titulo || 'Subtítulos'}</b>
-          <small>{f === 'todas' ? `${total.toLocaleString('es')} líneas` : `${visibles.value.length.toLocaleString('es')} de ${total.toLocaleString('es')} líneas`}{encima.value && total > 0 ? ' · desplazamiento en pausa' : ''}</small>
+          <b title={infoVideo.value?.titulo}>{infoVideo.value?.titulo || tr('Subtítulos')}</b>
+          <small>{f === 'todas' ? tr('{0} líneas', numero(total)) : tr('{0} de {1} líneas', numero(visibles.value.length), numero(total))}{encima.value && total > 0 ? tr(' · desplazamiento en pausa') : ''}</small>
         </div>
-        <button class="btn-icono chico" data-tip="Cerrar · G" data-tip-lado="izq" aria-label="Cerrar navegador" onClick={() => cambiarAjuste({ navegadorAbierto: false })}><Icono n="cerrar" t={16} /></button>
+        <button class="btn-icono chico" data-tip={tr('Cerrar · G')} data-tip-lado="izq" aria-label={tr('Cerrar navegador')} onClick={() => cambiarAjuste({ navegadorAbierto: false })}><Icono n="cerrar" t={16} /></button>
       </div>
       <div class="nav-filtros">
-        <button class={`nav-filtro-btn ${f !== 'todas' ? 'activo' : ''}`} aria-label="Filtros" aria-haspopup="menu" aria-expanded={menu.value} onClick={() => (menu.value = !menu.value)}>
+        <button class={`nav-filtro-btn ${f !== 'todas' ? 'activo' : ''}`} aria-label={tr('Filtros')} aria-haspopup="menu" aria-expanded={menu.value} onClick={() => (menu.value = !menu.value)}>
           <Icono n="filtro" t={15} />
           <span>{nombreFiltro}</span>
           <Icono n={menu.value ? 'arriba' : 'abajo'} t={12} />
         </button>
-        {f !== 'todas' && <button class="btn-icono chico" aria-label="Quitar filtro" title="Quitar filtro" onClick={() => (filtro.value = 'todas')}><Icono n="cerrar" t={14} /></button>}
+        {f !== 'todas' && <button class="btn-icono chico" aria-label={tr('Quitar filtro')} title={tr('Quitar filtro')} onClick={() => (filtro.value = 'todas')}><Icono n="cerrar" t={14} /></button>}
         {menu.value && (
           <div class="nav-menu" role="menu">
             {FILTROS.map((x) => (
               <button key={x.id} role="menuitem" class={f === x.id ? 'activo' : ''} onClick={() => { filtro.value = x.id; menu.value = false; }}>
-                <span>{x.nombre}</span>
+                <span>{tr(x.nombre)}</span>
                 {x.id === 'marcadas' && marcadas.value.size > 0 && <small>{marcadas.value.size}</small>}
                 {x.id === 'seleccionadas' && sel.size > 0 && <small>{sel.size}</small>}
                 {f === x.id && <Icono n="ok" t={14} />}
@@ -796,7 +797,7 @@ function Navegador() {
         {anuncio.value && (
           <div class="vacio nav-vacio">
             <span class="hoja-icono"><Icono n="espera" t={22} /></span>
-            <p>Esperando a que termine el anuncio…</p>
+            <p>{tr('Esperando a que termine el anuncio…')}</p>
           </div>
         )}
         {!anuncio.value && !total && (
@@ -804,14 +805,14 @@ function Navegador() {
             {cargandoPista.value ? (
               <>
                 <span class="giro" />
-                <p>Analizando los subtítulos…</p>
+                <p>{tr('Analizando los subtítulos…')}</p>
               </>
             ) : (
               <>
                 <span class="hoja-icono"><Icono n="subtitulos" t={22} /></span>
-                <h3>Sin subtítulos en japonés</h3>
-                <p>Arrastra un archivo SRT sobre el video o genera unos.</p>
-                <button class="btn chico" onClick={() => { pestanaVideo.value = 'subtitulos'; panel.value = 'video'; }}><Icono n="archivo-subir" t={14} /> Importar</button>
+                <h3>{tr('Sin subtítulos en japonés')}</h3>
+                <p>{tr('Arrastra un archivo SRT sobre el video o genera unos.')}</p>
+                <button class="btn chico" onClick={() => { pestanaVideo.value = 'subtitulos'; panel.value = 'video'; }}><Icono n="archivo-subir" t={14} /> {tr('Importar')}</button>
               </>
             )}
           </div>
@@ -819,8 +820,8 @@ function Navegador() {
         {total > 0 && !visibles.value.length && (
           <div class="vacio nav-vacio">
             <span class="hoja-icono"><Icono n="filtro" t={22} /></span>
-            <h3>Ninguna línea cumple este filtro</h3>
-            <button class="btn chico" onClick={() => (filtro.value = 'todas')}>Quitar filtro</button>
+            <h3>{tr('Ninguna línea cumple este filtro')}</h3>
+            <button class="btn chico" onClick={() => (filtro.value = 'todas')}>{tr('Quitar filtro')}</button>
           </div>
         )}
         {visibles.value.map((l) => (
@@ -830,14 +831,14 @@ function Navegador() {
       {sel.size > 0 && (
         <div class="nav-pie">
           <div class="nav-pie-cab">
-            <b>{sel.size === 1 ? '1 línea seleccionada' : `${sel.size} líneas seleccionadas`}</b>
-            <button class="btn chico fantasma" onClick={() => (seleccionadas.value = new Set())}>Limpiar</button>
+            <b>{sel.size === 1 ? tr('1 línea seleccionada') : tr('{0} líneas seleccionadas', sel.size)}</b>
+            <button class="btn chico fantasma" onClick={() => (seleccionadas.value = new Set())}>{tr('Limpiar')}</button>
           </div>
           <div class="nav-pie-acciones">
-            {sel.size > 1 && <button class="btn chico" onClick={() => combinarSeleccionadas()}>Unir</button>}
-            <button class="btn chico" onClick={() => (filtro.value = filtro.value === 'seleccionadas' ? 'todas' : 'seleccionadas')}>{filtro.value === 'seleccionadas' ? 'Ver todas' : 'Ver solo estas'}</button>
-            {sel.size === 1 && <button class="btn chico" onClick={() => enviarACreador(null, lineasSel()[0], fijarOculto)}>Enviar</button>}
-            <button class="btn chico primario" onClick={() => crearVarias(lineasSel(), fijarOculto)}><Icono n="rayo" t={14} /> Crear {sel.size} {sel.size === 1 ? 'tarjeta' : 'tarjetas'}</button>
+            {sel.size > 1 && <button class="btn chico" onClick={() => combinarSeleccionadas()}>{tr('Unir')}</button>}
+            <button class="btn chico" onClick={() => (filtro.value = filtro.value === 'seleccionadas' ? 'todas' : 'seleccionadas')}>{filtro.value === 'seleccionadas' ? tr('Ver todas') : tr('Ver solo estas')}</button>
+            {sel.size === 1 && <button class="btn chico" onClick={() => enviarACreador(null, lineasSel()[0], fijarOculto)}>{tr('Enviar')}</button>}
+            <button class="btn chico primario" onClick={() => crearVarias(lineasSel(), fijarOculto)}><Icono n="rayo" t={14} /> {sel.size === 1 ? tr('Crear 1 tarjeta') : tr('Crear {0} tarjetas', sel.size)}</button>
           </div>
         </div>
       )}
@@ -861,7 +862,7 @@ export function Avisos() {
           <span class="aviso-icono"><Icono n={ICONO_AVISO[x.tipo ?? ''] ?? 'info'} t={20} /></span>
           <span class="aviso-texto">{x.texto}</span>
           {x.accion && <button class="btn chico" onClick={x.accion.fn}>{x.accion.texto}</button>}
-          <button class="btn-icono chico" aria-label="Cerrar aviso" onClick={() => quitarAviso(x.id)}><Icono n="cerrar" t={14} /></button>
+          <button class="btn-icono chico" aria-label={tr('Cerrar aviso')} onClick={() => quitarAviso(x.id)}><Icono n="cerrar" t={14} /></button>
         </div>
       ))}
     </div>
@@ -902,13 +903,12 @@ function ZonaSoltar() {
     };
   }, []);
   if (!arrastrando.value) return null;
-  const destino = lineasObjetivo.value.length ? 'como subtítulos secundarios' : 'como subtítulos en japonés';
   return (
     <div class="zona-soltar">
       <div class="zona-soltar-marco">
         <span class="hoja-icono"><Icono n="archivo-subir" t={38} /></span>
-        <h3>Suelta aquí tus subtítulos</h3>
-        <p>SRT, VTT, ASS o TTML · se añadirán {destino}</p>
+        <h3>{tr('Suelta aquí tus subtítulos')}</h3>
+        <p>{lineasObjetivo.value.length ? tr('SRT, VTT, ASS o TTML · se añadirán como subtítulos secundarios') : tr('SRT, VTT, ASS o TTML · se añadirán como subtítulos en japonés')}</p>
       </div>
     </div>
   );

@@ -5,12 +5,13 @@ import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../
 import { fondo } from '../compartido/rpc';
 import { type FrecuenciaImportada, leerBancoMeta, leerBancoTerminos, leerKanjium } from '../nucleo/yomitan';
 import { db } from './db';
+import { tm, tr } from '../compartido/i18n';
 
 export const FUENTES: FuenteBiblioteca[] = [
   {
     id: 'jmdict-es',
-    titulo: 'JMdict en español',
-    descripcion: 'Definiciones en español del proyecto JMdict (EDRDG). Cobertura parcial.',
+    titulo: tm('JMdict en español'),
+    descripcion: tm('Definiciones en español del proyecto JMdict (EDRDG). Cobertura parcial.'),
     tipo: 'terminos',
     idioma: 'es',
     url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_spanish.zip',
@@ -20,8 +21,8 @@ export const FUENTES: FuenteBiblioteca[] = [
   },
   {
     id: 'jmdict-en',
-    titulo: 'JMdict en inglés',
-    descripcion: 'El diccionario abierto más completo de japonés.',
+    titulo: tm('JMdict en inglés'),
+    descripcion: tm('El diccionario abierto más completo de japonés.'),
     tipo: 'terminos',
     idioma: 'en',
     url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_english.zip',
@@ -30,9 +31,20 @@ export const FUENTES: FuenteBiblioteca[] = [
     licencia: 'CC BY-SA 4.0 (EDRDG)',
   },
   {
+    id: 'jmdict-de',
+    titulo: tm('JMdict en alemán'),
+    descripcion: tm('Definiciones en alemán del proyecto JMdict (EDRDG). Cobertura parcial.'),
+    tipo: 'terminos',
+    idioma: 'de',
+    url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_german.zip',
+    formato: 'yomitan',
+    recomendado: false,
+    licencia: 'CC BY-SA 4.0 (EDRDG)',
+  },
+  {
     id: 'kanjium-acento',
-    titulo: 'Acento tonal (Kanjium)',
-    descripcion: 'Patrones de acento para colorear palabras y dibujar su curva tonal.',
+    titulo: tm('Acento tonal (Kanjium)'),
+    descripcion: tm('Patrones de acento para colorear palabras y dibujar su curva tonal.'),
     tipo: 'acento',
     url: 'https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/source_files/raw/accents.txt',
     formato: 'kanjium',
@@ -41,8 +53,8 @@ export const FUENTES: FuenteBiblioteca[] = [
   },
   {
     id: 'jpdb-frecuencia',
-    titulo: 'Frecuencia JPDB',
-    descripcion: 'Posición de cada palabra según anime, series, novelas y juegos.',
+    titulo: tm('Frecuencia JPDB'),
+    descripcion: tm('Posición de cada palabra según anime, series, novelas y juegos.'),
     tipo: 'frecuencia',
     url: 'https://github.com/Kuuuube/yomitan-dictionaries/raw/main/dictionaries/JPDB_v2.2_Frequency_Kana_2024-10-13.zip',
     formato: 'yomitan',
@@ -51,8 +63,8 @@ export const FUENTES: FuenteBiblioteca[] = [
   },
   {
     id: 'jmnedict',
-    titulo: 'Nombres propios (JMnedict)',
-    descripcion: 'Nombres de personas y lugares con sus lecturas.',
+    titulo: tm('Nombres propios (JMnedict)'),
+    descripcion: tm('Nombres de personas y lugares con sus lecturas.'),
     tipo: 'terminos',
     idioma: 'en',
     url: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMnedict.zip',
@@ -70,7 +82,7 @@ function emitir(p: ProgresoInstalacion) {
 
 async function descargar(url: string, alAvance: (f: number) => void): Promise<Uint8Array> {
   const r = await fetch(url);
-  if (!r.ok || !r.body) throw new Error(`Error ${r.status} al descargar`);
+  if (!r.ok || !r.body) throw new Error(tr('Error {0} al descargar', r.status));
   const total = Number(r.headers.get('content-length')) || 0;
   const lector = r.body.getReader();
   const trozos: Uint8Array[] = [];
@@ -114,7 +126,7 @@ async function importarZip(
   const nombres = Object.keys(archivos);
   const indice = archivos['index.json'] ? (JSON.parse(strFromU8(archivos['index.json'])) as { title?: string; attribution?: string }) : {};
   const bancos = nombres.filter((n) => /^term(_meta)?_bank_\d+\.json$/.test(n));
-  if (!bancos.length) throw new Error('El archivo no contiene un diccionario de términos reconocible');
+  if (!bancos.length) throw new Error(tr('El archivo no contiene un diccionario de términos reconocible'));
 
   let filasTerminos = 0;
   let filasFrecuencia = 0;
@@ -167,7 +179,7 @@ async function importarZip(
 
 export async function instalarDesdeBiblioteca(idFuente: string): Promise<void> {
   const f = FUENTES.find((x) => x.id === idFuente);
-  if (!f) throw new Error('Fuente de diccionario desconocida');
+  if (!f) throw new Error(tr('Fuente de diccionario desconocida'));
   const progreso = (fase: ProgresoInstalacion['fase'], avance: number, error?: string) =>
     emitir({ id: f.id, titulo: f.titulo, fase, avance, error });
   try {

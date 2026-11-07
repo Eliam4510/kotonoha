@@ -1,5 +1,6 @@
 // Analizadores de subtítulos y limpieza. Lógica pura, sin dependencias del navegador.
 
+import { tr } from '../compartido/i18n';
 export interface Linea {
   id: number;
   inicio: number; // ms
@@ -40,7 +41,7 @@ export function analizarSubtitulos(texto: string, formato?: FormatoSubtitulo | n
     case 'srv3':
       return normalizar(analizarSrv3(texto));
     default:
-      throw new Error('Formato de subtítulos no reconocido');
+      throw new Error(tr('Formato de subtítulos no reconocido'));
   }
 }
 
@@ -328,7 +329,7 @@ function tiempoTtml(t: string | undefined, tickRate: number, frameRate: number):
 export function analizarTtml(texto: string): LineaCruda[] {
   const raiz = analizarXml(texto);
   const tt = [...recorrer(raiz)].find((n) => sinPrefijo(n.nombre) === 'tt');
-  if (!tt) throw new Error('TTML sin elemento <tt>');
+  if (!tt) throw new Error(tr('TTML sin elemento <tt>'));
 
   const tickRate = parseFloat(attr(tt, 'tickRate') ?? '') || 10000000;
   const multiplicador = (attr(tt, 'frameRateMultiplier') ?? '1 1').split(/\s+/).map(Number);

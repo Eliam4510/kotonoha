@@ -2,6 +2,7 @@
 // sentidos que no son el primero del diccionario. Lógica pura.
 
 import { alinearFurigana, kataAHira, type TokenUnido } from './tokens';
+import { tm } from '../compartido/i18n';
 
 export interface LecturaCorregida {
   superficie: string;
@@ -80,12 +81,12 @@ export function aplicarLecturas(tokens: TokenUnido[], correcciones: LecturaCorre
 
 /** Nombre legible del tipo de uso. */
 export const NOMBRES_USO: Record<string, string> = {
-  literal: 'Uso literal',
-  figurado: 'Uso figurado',
-  poetico: 'Uso poético',
-  coloquial: 'Coloquial',
-  formal: 'Formal',
-  arcaico: 'Arcaico',
-  expresion: 'Expresión hecha',
-  jerga: 'Jerga',
+  literal: tm('Uso literal'),
+  figurado: tm('Uso figurado'),
+  poetico: tm('Uso poético'),
+  coloquial: tm('Coloquial'),
+  formal: tm('Formal'),
+  arcaico: tm('Arcaico'),
+  expresion: tm('Expresión hecha'),
+  jerga: tm('Jerga'),
 };

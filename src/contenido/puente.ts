@@ -1,6 +1,16 @@
 // Comunicación con el adaptador del mundo MAIN.
 
 import type { PistaInfo } from '../compartido/tipos';
+import { tm, tr } from '../compartido/i18n';
+
+// Los adaptadores corren en la página, sin acceso a las traducciones: sus mensajes se traducen al llegar aquí.
+void [
+  tm('Pista no encontrada'),
+  tm('Pista de Netflix no encontrada'),
+  tm('No se pudieron obtener los subtítulos de Netflix'),
+  tm('El reproductor de YouTube no está listo'),
+  tm('YouTube devolvió subtítulos vacíos. Reproduce el video unos segundos y vuelve a intentarlo.'),
+];
 
 /** Control del video, igual para un sitio web que para el reproductor local. */
 export interface Control {
@@ -38,7 +48,7 @@ function escuchar() {
     if (!p) return;
     pendientes.delete(d.id);
     if (d.ok) p.ok(d.valor);
-    else p.mal(new Error(d.error ?? 'Error del adaptador'));
+    else p.mal(new Error(d.error ? tr(d.error) : tr('Error del adaptador')));
   });
 }
 
@@ -49,7 +59,7 @@ function orden<T>(nombre: string, args: unknown[] = [], tiempo = 120000): Promis
     pendientes.set(id, { ok: ok as (v: unknown) => void, mal });
     window.postMessage({ fuente: 'kotonoha-contenido', id, orden: nombre, args }, '*');
     setTimeout(() => {
-      if (pendientes.delete(id)) mal(new Error(`El adaptador no respondió a «${nombre}»`));
+      if (pendientes.delete(id)) mal(new Error(tr('El adaptador no respondió a «{0}»', nombre)));
     }, tiempo);
   });
 }

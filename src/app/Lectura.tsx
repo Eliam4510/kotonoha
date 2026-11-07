@@ -7,12 +7,13 @@ import { alRecibirEvento, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
 import { fraseConNegrita } from '../nucleo/frases';
 import { detectarGramatica, type PuntoGramatica } from '../nucleo/gramatica';
-import { pegarSignos } from '../nucleo/tokens';
+import { lecturaVisible, pegarSignos } from '../nucleo/tokens';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { guardarPreferencia, leerPreferencia } from './estadoApp';
 import { Anillo } from './Piezas';
+import { numero, tr } from '../compartido/i18n';
 
 interface Abierta {
   palabra: PalabraToken;
@@ -137,15 +138,15 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
           <div class="ap-lectura-inicio">{inicioBarra}</div>
           <div class="ap-lectura-datos">
             {tokens.length > 0 && (
-              <span class="ap-comprension" data-tip={`${comprension.total.toLocaleString('es')} palabras en este texto`}>
+              <span class="ap-comprension" data-tip={tr('{0} palabras en este texto', numero(comprension.total))}>
                 <Anillo valor={comprension.porcentaje} t={26} grosor={3.5} />
-                <b class="num">{comprension.porcentaje} %</b> de comprensión
+                <b class="num">{comprension.porcentaje} %</b> {tr('de comprensión')}
               </span>
             )}
-            <div class="ap-tamano" role="group" aria-label="Tamaño del texto">
-              <button class="btn-icono chico" aria-label="Reducir el texto" disabled={tam <= TAMANO_MIN} onClick={() => cambiarTam(-2)}><Icono n="menos" t={14} /></button>
+            <div class="ap-tamano" role="group" aria-label={tr('Tamaño del texto')}>
+              <button class="btn-icono chico" aria-label={tr('Reducir el texto')} disabled={tam <= TAMANO_MIN} onClick={() => cambiarTam(-2)}><Icono n="menos" t={14} /></button>
               <span aria-hidden="true">あ</span>
-              <button class="btn-icono chico" aria-label="Aumentar el texto" disabled={tam >= TAMANO_MAX} onClick={() => cambiarTam(2)}><Icono n="mas" t={14} /></button>
+              <button class="btn-icono chico" aria-label={tr('Aumentar el texto')} disabled={tam >= TAMANO_MAX} onClick={() => cambiarTam(2)}><Icono n="mas" t={14} /></button>
             </div>
           </div>
         </div>
@@ -181,7 +182,7 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
                   >
                     {p.furigana.map((s, j) =>
                       s.lectura && ajustes.furigana !== 'ninguna' ? (
-                        <ruby key={j}>{s.texto}<rt>{s.lectura}</rt></ruby>
+                        <ruby key={j}>{s.texto}<rt>{lecturaVisible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
                       ) : (
                         <span key={j}>{s.texto}</span>
                       )
@@ -199,20 +200,20 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
 
         <div class="ap-dock">
           <div>
-            <button class="btn-icono" aria-label="Frase anterior" data-tip="Frase anterior" data-tip-lado="arriba" onClick={() => { detener(); fijarActual((a) => Math.max(a - 1, 0)); }}><Icono n="anterior" /></button>
+            <button class="btn-icono" aria-label={tr('Frase anterior')} data-tip={tr('Frase anterior')} data-tip-lado="arriba" onClick={() => { detener(); fijarActual((a) => Math.max(a - 1, 0)); }}><Icono n="anterior" /></button>
             {sonando ? (
-              <button class="btn primario" onClick={detener}><Icono n="detener" t={15} /> Detener</button>
+              <button class="btn primario" onClick={detener}><Icono n="detener" t={15} /> {tr('Detener')}</button>
             ) : (
-              <button class="btn primario" onClick={() => reproducirDesde(actual)}><Icono n="altavoz" t={16} /> Leer en voz alta</button>
+              <button class="btn primario" onClick={() => reproducirDesde(actual)}><Icono n="altavoz" t={16} /> {tr('Leer en voz alta')}</button>
             )}
-            <button class="btn-icono" aria-label="Frase siguiente" data-tip="Frase siguiente" data-tip-lado="arriba" onClick={() => { detener(); fijarActual((a) => Math.min(a + 1, frases.length - 1)); }}><Icono n="siguiente" /></button>
+            <button class="btn-icono" aria-label={tr('Frase siguiente')} data-tip={tr('Frase siguiente')} data-tip-lado="arriba" onClick={() => { detener(); fijarActual((a) => Math.min(a + 1, frases.length - 1)); }}><Icono n="siguiente" /></button>
           </div>
         </div>
       </div>
 
       {abierta && (
-        <div class="ap-lectura-ficha" role="dialog" aria-label={`Consulta de ${abierta.palabra.lema}`} key={abierta.sitio}>
-          <button class="btn-icono chico ap-lectura-cerrar" aria-label="Cerrar la consulta" onClick={() => fijarAbierta(null)}><Icono n="cerrar" t={15} /></button>
+        <div class="ap-lectura-ficha" role="dialog" aria-label={tr('Consulta de {0}', abierta.palabra.lema)} key={abierta.sitio}>
+          <button class="btn-icono chico ap-lectura-cerrar" aria-label={tr('Cerrar la consulta')} onClick={() => fijarAbierta(null)}><Icono n="cerrar" t={15} /></button>
           <Ficha
             lema={abierta.palabra.lema}
             lectura={abierta.palabra.lecturaLema}

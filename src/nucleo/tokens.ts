@@ -1,5 +1,6 @@
 // Unión de tokens de Kuromoji en palabras y cálculo de furigana. Lógica pura.
 
+import { tm, tr } from '../compartido/i18n';
 /** Token tal como lo entrega Kuromoji (diccionario IPADIC). */
 export interface TokenCrudo {
   surface_form: string;
@@ -44,6 +45,64 @@ export function kataAHira(texto: string): string {
 
 export function hiraAKata(texto: string): string {
   return texto.replace(/[ぁ-ゖ]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0x60));
+}
+
+const SILABAS: Record<string, string> = {
+  あ: 'a', い: 'i', う: 'u', え: 'e', お: 'o', か: 'ka', き: 'ki', く: 'ku', け: 'ke', こ: 'ko', さ: 'sa', し: 'shi', す: 'su', せ: 'se', そ: 'so',
+  た: 'ta', ち: 'chi', つ: 'tsu', て: 'te', と: 'to', な: 'na', に: 'ni', ぬ: 'nu', ね: 'ne', の: 'no', は: 'ha', ひ: 'hi', ふ: 'fu', へ: 'he', ほ: 'ho',
+  ま: 'ma', み: 'mi', む: 'mu', め: 'me', も: 'mo', や: 'ya', ゆ: 'yu', よ: 'yo', ら: 'ra', り: 'ri', る: 'ru', れ: 're', ろ: 'ro', わ: 'wa', ゐ: 'i', ゑ: 'e', を: 'o', ん: 'n',
+  が: 'ga', ぎ: 'gi', ぐ: 'gu', げ: 'ge', ご: 'go', ざ: 'za', じ: 'ji', ず: 'zu', ぜ: 'ze', ぞ: 'zo', だ: 'da', ぢ: 'ji', づ: 'zu', で: 'de', ど: 'do',
+  ば: 'ba', び: 'bi', ぶ: 'bu', べ: 'be', ぼ: 'bo', ぱ: 'pa', ぴ: 'pi', ぷ: 'pu', ぺ: 'pe', ぽ: 'po', ゔ: 'vu',
+  ぁ: 'a', ぃ: 'i', ぅ: 'u', ぇ: 'e', ぉ: 'o', ゃ: 'ya', ゅ: 'yu', ょ: 'yo',
+  きゃ: 'kya', きゅ: 'kyu', きょ: 'kyo', しゃ: 'sha', しゅ: 'shu', しょ: 'sho', ちゃ: 'cha', ちゅ: 'chu', ちょ: 'cho', にゃ: 'nya', にゅ: 'nyu', にょ: 'nyo',
+  ひゃ: 'hya', ひゅ: 'hyu', ひょ: 'hyo', みゃ: 'mya', みゅ: 'myu', みょ: 'myo', りゃ: 'rya', りゅ: 'ryu', りょ: 'ryo', ぎゃ: 'gya', ぎゅ: 'gyu', ぎょ: 'gyo',
+  じゃ: 'ja', じゅ: 'ju', じょ: 'jo', ぢゃ: 'ja', ぢゅ: 'ju', ぢょ: 'jo', びゃ: 'bya', びゅ: 'byu', びょ: 'byo', ぴゃ: 'pya', ぴゅ: 'pyu', ぴょ: 'pyo',
+  ふぁ: 'fa', ふぃ: 'fi', ふぇ: 'fe', ふぉ: 'fo', うぃ: 'wi', うぇ: 'we', うぉ: 'wo', てぃ: 'ti', でぃ: 'di', とぅ: 'tu', どぅ: 'du', しぇ: 'she', じぇ: 'je', ちぇ: 'che', ゔぁ: 'va', ゔぃ: 'vi', ゔぇ: 've', ゔぉ: 'vo',
+};
+const VOCALES_LARGAS: Record<string, string> = { a: 'ā', i: 'ī', u: 'ū', e: 'ē', o: 'ō' };
+
+/** Rōmaji Hepburn con vocales largas marcadas, para quien aún no lee kana. */
+export function kanaARomaji(kana: string): string {
+  const t = kataAHira(kana);
+  let salida = '';
+  let duplicar = false;
+  for (let i = 0; i < t.length; i++) {
+    const doble = SILABAS[t.slice(i, i + 2)];
+    const silaba = doble ?? SILABAS[t[i]];
+    if (doble) i++;
+    const c = doble ? '' : t[doble ? i - 1 : i];
+    if (c === 'っ') {
+      duplicar = true;
+      continue;
+    }
+    if (c === 'ー') {
+      const ultima = salida[salida.length - 1];
+      if (ultima && VOCALES_LARGAS[ultima]) salida = salida.slice(0, -1) + VOCALES_LARGAS[ultima];
+      continue;
+    }
+    if (!silaba) {
+      salida += t[i];
+      duplicar = false;
+      continue;
+    }
+    if (duplicar) {
+      salida += silaba.startsWith('ch') ? 't' : silaba[0];
+      duplicar = false;
+    }
+    // ん ante vocal o y se separa para que se lea bien: ほんや → hon'ya.
+    if (salida.endsWith('n') && t[i - (doble ? 2 : 1)] === 'ん' && /^[aiueoy]/.test(silaba)) salida += "'";
+    salida += silaba;
+  }
+  return salida;
+}
+
+export type FormatoLectura = 'hiragana' | 'katakana' | 'romaji';
+
+/** La lectura como la quiere ver cada cual. */
+export function lecturaVisible(kana: string, formato: FormatoLectura | undefined): string {
+  if (formato === 'katakana') return hiraAKata(kana);
+  if (formato === 'romaji') return kanaARomaji(kana);
+  return kana;
 }
 
 /**
@@ -202,62 +261,63 @@ export function separarMoras(lectura: string): string[] {
 // ---------- Nombres de las colas de conjugación ----------
 
 const NOMBRES_FLEXION: Record<string, string> = {
-  た: 'pasado',
-  だ: 'pasado',
-  ない: 'negativo',
-  ぬ: 'negativo',
-  ん: 'negativo',
-  ます: 'cortés',
-  まし: 'cortés',
-  ませ: 'cortés',
-  て: 'forma て',
-  で: 'forma て',
-  いる: 'continuo o estado',
-  い: 'continuo o estado',
-  てる: 'continuo o estado',
-  れる: 'pasiva o potencial',
-  られる: 'pasiva o potencial',
-  れ: 'pasiva o potencial',
-  られ: 'pasiva o potencial',
-  せる: 'causativa',
-  させる: 'causativa',
-  せ: 'causativa',
-  させ: 'causativa',
-  たい: 'deseo',
-  たく: 'deseo',
-  ば: 'condicional',
-  う: 'volitiva',
-  よう: 'volitiva',
-  そう: 'apariencia',
-  しまう: 'acción completada',
-  しまっ: 'acción completada',
-  ちゃう: 'acción completada',
-  じゃう: 'acción completada',
-  ちゃっ: 'acción completada',
-  じゃっ: 'acción completada',
-  おく: 'preparación',
-  おい: 'preparación',
-  くる: 'acción hacia aquí',
-  き: 'acción hacia aquí',
-  いく: 'acción que se aleja',
-  いっ: 'acción que se aleja',
-  みる: 'intentar',
-  み: 'intentar',
-  くれる: 'favor recibido',
-  くれ: 'favor recibido',
-  もらう: 'favor pedido',
-  もらっ: 'favor pedido',
-  ある: 'estado resultante',
-  あっ: 'estado resultante',
-  たり: 'enumeración',
-  だり: 'enumeración',
-  する: 'verbo する',
-  し: 'verbo する',
-  さ: 'verbo する',
+  た: tm('pasado'),
+  だ: tm('pasado'),
+  ない: tm('negativo'),
+  ぬ: tm('negativo'),
+  ん: tm('negativo'),
+  ます: tm('cortés'),
+  まし: tm('cortés'),
+  ませ: tm('cortés'),
+  て: tm('forma て'),
+  で: tm('forma て'),
+  いる: tm('continuo o estado'),
+  い: tm('continuo o estado'),
+  てる: tm('continuo o estado'),
+  れる: tm('pasiva o potencial'),
+  られる: tm('pasiva o potencial'),
+  れ: tm('pasiva o potencial'),
+  られ: tm('pasiva o potencial'),
+  せる: tm('causativa'),
+  させる: tm('causativa'),
+  せ: tm('causativa'),
+  させ: tm('causativa'),
+  たい: tm('deseo'),
+  たく: tm('deseo'),
+  ば: tm('condicional'),
+  う: tm('volitiva'),
+  よう: tm('volitiva'),
+  そう: tm('apariencia'),
+  しまう: tm('acción completada'),
+  しまっ: tm('acción completada'),
+  ちゃう: tm('acción completada'),
+  じゃう: tm('acción completada'),
+  ちゃっ: tm('acción completada'),
+  じゃっ: tm('acción completada'),
+  おく: tm('preparación'),
+  おい: tm('preparación'),
+  くる: tm('acción hacia aquí'),
+  き: tm('acción hacia aquí'),
+  いく: tm('acción que se aleja'),
+  いっ: tm('acción que se aleja'),
+  みる: tm('intentar'),
+  み: tm('intentar'),
+  くれる: tm('favor recibido'),
+  くれ: tm('favor recibido'),
+  もらう: tm('favor pedido'),
+  もらっ: tm('favor pedido'),
+  ある: tm('estado resultante'),
+  あっ: tm('estado resultante'),
+  たり: tm('enumeración'),
+  だり: tm('enumeración'),
+  する: tm('verbo する'),
+  し: tm('verbo する'),
+  さ: tm('verbo する'),
 };
 
 export function nombreFlexion(cola: string): string | undefined {
-  return NOMBRES_FLEXION[cola];
+  const nombre = NOMBRES_FLEXION[cola];
+  return nombre && tr(nombre);
 }
 
 const SIGNOS_DE_CIERRE = /^[、。，．,.!?！？」』）)】〉》…]/u;
