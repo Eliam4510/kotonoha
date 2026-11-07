@@ -13,6 +13,7 @@ This guide covers day-to-day use of Kotonoha. Installation is described in the [
 - [Flashcards](#flashcards)
 - [Audio, images and examples](#audio-images-and-examples)
 - [Web pages, reader and library](#web-pages-reader-and-library)
+- [Studying English](#studying-english)
 - [Claude spending](#claude-spending)
 - [Data and backups](#data-and-backups)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -20,13 +21,14 @@ This guide covers day-to-day use of Kotonoha. Installation is described in the [
 
 ## Getting started
 
-The first time, a welcome screen asks for the language and level, and suggests installing the dictionaries, adding a Claude key and choosing where cards go. It can be skipped, and seen again from **Settings, Appearance**. Everything is configured afterwards under **Settings**, in the extension window, which opens with `Alt+Shift+K`.
+The first time, a welcome screen asks for the language, the one to study and the level, and suggests installing the dictionaries, adding a Claude key and choosing where cards go. It can be skipped, and seen again from **Settings, Appearance**. Everything is configured afterwards under **Settings**, in the extension window, which opens with `Alt+Shift+K`.
 
 | Step | Where | Purpose |
 |---|---|---|
 | Dictionaries | Settings, Dictionaries | JMdict in Spanish, English or German, Kanjium pitch accent and JPDB frequency. They are downloaded once and stay in the browser |
 | Claude API key | Settings, Claude | Explanations, reading review, translation and correction. It is stored only in the browser |
 | Language and level | Settings, Language and level | The interface language and, separately, that of explanations and translations. The level adapts the explanations and decides how much furigana is shown at first |
+| Language you're studying | Settings, Language and level, or the extension menu | Japanese or English. Each keeps its own words, dictionaries, cards and settings |
 | Anki | Settings, Cards and Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
 
 The extension works without a Claude key: subtitles, the dictionary, furigana, colors, flashcards and Whisper do not need one.
@@ -207,6 +209,23 @@ None of this adds anything to the page's content. Colors use the CSS Custom High
 
 **Words and assessment.** The explorer lists vocabulary by status, and the level assessment estimates the initial known words.
 
+## Studying English
+
+The language is chosen in the welcome screen, under **Settings, Language and level** or in the extension menu. Each one has its own words, dictionaries, cards, library and reading settings, and going back to another finds everything where it was. The interface, the Claude key and the spending are shared.
+
+Everything this guide explains works the same way, with these differences:
+
+| Element | In English |
+|---|---|
+| Dictionaries | Wiktionary in the interface language, in two parts: definitions and short translations. With the interface in English, the English-English one is suggested, which takes about 110 MB to download and about 220 MB on disk |
+| Pronunciation | American and British IPA in the word panel. Over the words it starts off, and is turned on in the **Display** panel. Which of the two is written is chosen under **Settings, Language and level** |
+| Accent color | Shows the stressed syllable: the first, a middle one or the last. It also starts off |
+| Forms | The panel says which word each one comes from: *went* opens *go*, and *didn't*, *do* |
+| Phrasal verbs | The panel looks for them even when they are split: *picked it up* brings up *pick up*. The same goes for set phrases |
+| Grammar | Points from A1 to C2, with the same confirmation by Claude |
+| Page reader | It starts off, because English is on almost every page. It is turned on in the extension menu or under **Settings, Page reader** |
+| Strokes and reading correction | Not offered |
+
 ## Claude spending
 
 The home screen has a **Claude spending** card with this month's spending against the credit set in Settings, a chart by day and model, the split by task and a log of every request with its tokens. The cost is worked out from the tokens reported by the API and its public prices, and only counts what was requested from this extension in this browser.
@@ -223,7 +242,7 @@ Three settings decide how much word queries are used:
 
 ## Data and backups
 
-All data is stored in the browser, in IndexedDB. **Settings, Your data** exports and imports a backup with words, cards, library, settings, generated subtitles, corrections and the spending log.
+All data is stored in the browser, in IndexedDB. **Settings, Your data** exports and imports a single file with the words, cards, library, generated subtitles and corrections of every language that has been used, along with the settings and the spending log. The Claude key and the dictionaries are not included. A backup from before version 0.4.0 is restored as Japanese.
 
 ## Keyboard shortcuts
 

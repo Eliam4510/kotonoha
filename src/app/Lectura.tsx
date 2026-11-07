@@ -14,7 +14,7 @@ import { Icono } from '../ui/iconos';
 import { guardarPreferencia, leerPreferencia } from './estadoApp';
 import { Anillo } from './Piezas';
 import { numero, tr } from '../compartido/i18n';
-import { lengua } from '../ui/lengua';
+import { lecturaDeTarjeta, lengua } from '../ui/lengua';
 
 interface Abierta {
   palabra: PalabraToken;
@@ -219,6 +219,10 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
             lectura={abierta.palabra.lecturaLema}
             superficie={abierta.palabra.superficie}
             flexion={abierta.palabra.flexion}
+            compuestos={lengua.value.frasesEnLector ? (() => {
+              const linea = tokens[frases.indexOf(abierta.frase)] ?? [];
+              return linea.slice(Math.max(0, linea.indexOf(abierta.palabra))).map((x) => x.superficie);
+            })() : undefined}
             ajustes={ajustes}
             gramatica={abierta.gramatica}
             // Contexto amplio: las frases alrededor y el texto entero para documentos no muy largos.
@@ -228,7 +232,7 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
               enviarAlCreador(
                 {
                   palabra: r.lema,
-                  lectura: r.lectura,
+                  lectura: lecturaDeTarjeta(r),
                   frase: fraseConNegrita(tokens[frases.indexOf(abierta.frase)] ?? [], abierta.palabra.clave) || abierta.frase,
                   definicion: [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>'),
                   fuente: titulo,

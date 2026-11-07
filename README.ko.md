@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.ko.png" alt="Kotonoha: 일본어 학습을 위한 대화형 자막, 사전, 카드, Claude 설명" width="100%">
+  <img src="docs/img/banner.ko.png" alt="Kotonoha: 일본어와 영어 학습을 위한 대화형 자막, 사전, 카드, Claude 설명" width="100%">
 </p>
 
 <p align="center">
@@ -20,15 +20,16 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.3.0-A9E45B?style=flat-square" alt="버전 0.3.0">
+  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.4.0-A9E45B?style=flat-square" alt="버전 0.4.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="지속적 통합"></a>
-  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-306-0ca30c?style=flat-square" alt="단위 테스트 274개">
+  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-386-0ca30c?style=flat-square" alt="단위 테스트 386개">
   <img src="https://img.shields.io/badge/%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4-6%EA%B0%9C%20%EC%96%B8%EC%96%B4-8FCBFF?style=flat-square" alt="인터페이스 6개 언어">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5~N1">
+  <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1~C2">
 </p>
 
 <p align="center">
-  <b>실제 영상과 글로 일본어를 배우는 브라우저 확장 프로그램입니다.</b>
+  <b>실제 영상과 글로 일본어와 영어를 배우는 브라우저 확장 프로그램입니다.</b>
 </p>
 
 <p align="center">
@@ -47,6 +48,8 @@
 ## 소개
 
 Kotonoha(言の葉, ‘말의 잎’)는 YouTube, Netflix 및 다른 플레이어 위에 대화형 자막을 겹쳐 표시합니다. 각 단어에는 후리가나, 고저 악센트, 아는 정도가 표시되고, 마우스를 올리면 비용 없이 사전 항목이 열립니다. 버튼 하나로 그 문장에서 어떤 뜻인지 Claude에게 물어볼 수 있습니다. 사전, Anki 또는 내장 복습용 카드 제작, Claude API로 생성하는 맥락별 설명도 제공합니다. 어떤 웹 페이지에서든, Claude 같은 채팅에서도, 페이지를 망가뜨리지 않고 일본어 글에 색을 입히고 후리가나를 달며 클릭 한 번으로 단어를 찾아봅니다. 글, EPUB 책, 내 영상 파일에서도 작동합니다. 인터페이스는 스페인어, 영어, 독일어, 중국어, 한국어, 일본어로 제공됩니다.
+
+버전 0.4.0부터 영어도 공부할 수 있습니다. 단어 패널은 미국식과 영국식 발음을 IPA로 보여 주고, 구동사가 떨어져 있어도 찾아내며, 불규칙형이 어떤 단어에서 왔는지 알려 줍니다. 사전은 Wiktionary에서 가져오며 인터페이스 언어로 제공됩니다. 언어마다 단어, 사전, 카드, 설정을 따로 저장하고, 클릭 한 번으로 바꿀 수 있습니다.
 
 이름은 『고킨와카슈』 서문(905년경)에서 왔습니다. 일본의 시가는 사람의 마음을 씨앗으로 삼아, 거기서 수많은 말의 잎이 돋아난다는 구절입니다.
 
@@ -113,6 +116,16 @@ Kotonoha(言の葉, ‘말의 잎’)는 YouTube, Netflix 및 다른 플레이�
     <td valign="top"><b>필요에 맞게</b><br>색각 이상용·고대비 색상, 가나 또는 로마자 읽는 법, 월 비용 한도, 작동하지 않을 사이트. 입문부터 N1까지.</td>
     <td valign="top"><b>원하는 단축키</b><br>영상 위 단축키는 모두 바꿀 수 있고, 어떤 키보드 배열에서도, 일본어 입력을 켠 상태에서도 작동합니다.</td>
   </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/ingles-subtitulos.ko.png" alt="영상 위에 표시된 영어 단어의 단어 패널"></td>
+    <td width="33%" align="center"><img src="docs/img/ingles-pagina.ko.png" alt="영어 기사 위의 리더와 단어 패널의 구동사"></td>
+    <td width="33%" align="center"><img src="docs/img/ingles-idioma.ko.png" alt="공부할 언어를 고르는 환영 화면"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>영어도</b><br>미국식과 영국식 IPA 발음, A1부터 C2까지의 문법, 인터페이스 언어로 된 Wiktionary 사전을 제공합니다. Whisper, Claude, 카드는 일본어와 똑같이 작동합니다.</td>
+    <td valign="top"><b>구동사</b><br>문장에 <i>picked it up</i>이라고 쓰여 있어도 패널이 <i>pick up</i>을 찾아내고, <i>went</i>가 어디에서 왔는지 설명합니다. 영어는 거의 어디에나 있으므로 페이지 리더는 처음에 꺼져 있으며, 확장 프로그램 메뉴에서 켭니다.</td>
+    <td valign="top"><b>언어마다 따로</b><br>환영 화면, 설정, 확장 프로그램 메뉴에서 고릅니다. 언어마다 단어, 사전, 카드, 설정을 따로 저장하며, 다른 언어로 돌아가도 모든 것이 그대로 있습니다.</td>
+  </tr>
 </table>
 
 전체 목록과 각 기능의 검증 방법은 [docs/ko/features.md](docs/ko/features.md)에 있습니다.
@@ -157,15 +170,15 @@ npm run build
 
 ## 시작하기
 
-처음에는 환영 화면이 열려 언어와 수준을 묻고 다음을 제안합니다.
+처음에는 환영 화면이 열려 언어, 공부할 언어, 수준을 묻고 다음을 제안합니다.
 
-1. 사전 설치: 내 언어의 JMdict(아직 없으면 영어판), 고저 악센트, 빈도.
+1. 사전 설치. 일본어는 내 언어의 JMdict(아직 없으면 영어판), 고저 악센트, 빈도. 영어는 내 언어의 Wiktionary, 발음, 빈도.
 2. Claude API 키 추가. 브라우저에만 저장됩니다. 선택 사항이며, 키가 없어도 자막, 사전, 색상, 카드, Whisper는 작동합니다.
 3. 카드 저장 위치 선택: 내장 복습 또는 AnkiConnect 부가 기능을 통한 Anki.
 
 모두 건너뛸 수 있고 나중에 확장 프로그램 창(`Alt+Shift+K`)의 **설정**에서 바꿀 수 있습니다.
 
-이후 일본어 자막이 있는 영상을 열면 Kotonoha 바가 나타나고, 일본어 글이 있는 페이지에는 색상과 후리가나가 나타납니다. 나머지는 [사용 안내](docs/ko/guide.md)를 참고하세요.
+이후 공부하는 언어의 자막이 있는 영상을 열면 Kotonoha 바가 나타납니다. 일본어 글이 있는 페이지에는 색상과 후리가나가 나타나고, 영어는 먼저 확장 프로그램 메뉴에서 리더를 켜야 합니다. 나머지는 [사용 안내](docs/ko/guide.md)를 참고하세요.
 
 ### 인터넷 영상 전사용 도우미
 
@@ -189,7 +202,7 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 | `S` | 문장 반복 |
 | `G` | 자막 탐색기 |
 | `Alt+Shift+M` | 오디오 캡처 허용 |
-| 단어 클릭 | 일본어 글이 있는 페이지에서 찾아보기 |
+| 단어 클릭 | 공부하는 언어의 글이 있는 페이지에서 찾아보기 |
 
 ## 전사 성능
 
@@ -246,8 +259,11 @@ npm run paquete
 | `npm test` | `src/nucleo`의 순수 로직과 번역 표의 완전성 |
 | `node herramientas/idiomas.mjs` | 언어별로 빠졌거나 남는 내용 |
 | `node pruebas/lector.mjs` | 페이지 리더의 어려운 경우: 움직임 없음, 클릭, 링크, 캐러셀, 아코디언, 실시간 텍스트, 섀도 트리, 채팅 같은 스크롤 상자 |
-| `node pruebas/lector-real.mjs` | 약 30개 공개 사이트에서의 리더, 사이트별 스크린샷 |
+| `node pruebas/lector-real.mjs` | 약 30개 공개 사이트에서의 리더, 사이트별 스크린샷. `KK_LENGUA=en`이면 영어 사이트에서 실행합니다 |
 | `node pruebas/trazos-web.mjs` | 실제 데이터의 획순, 탭의 리더, 클립보드, 분할 화면 |
+| `node pruebas/ingles.mjs` | 영어 공부의 처음부터 끝까지: 언어 선택, 사전 설치, 영상, 페이지, 그리고 아무것도 섞이지 않은 채 일본어로 돌아오기 |
+| `node pruebas/ingles-whisper.mjs voice.wav` | GPU에서 실행하는 영어 Whisper와 모의 Claude 수정 |
+| `node pruebas/ingles-grande.mjs` | 깨끗한 프로필에서 가장 큰 사전을 설치하고, 사전을 넣은 채 시작하고, 조회하고, 삭제합니다. 약 110MB를 내려받습니다 |
 | `node pruebas/e2e.mjs` | Edge에서 확장 프로그램 전체 흐름 |
 | `node pruebas/subtitulos.mjs` | Netflix와 YouTube를 흉내 낸 페이지와 모의 Claude API로 번역, 수정, 내보내기, 가져오기 |
 | `node pruebas/experiencia.mjs` | 영상 위에서 느껴지는 것을 프레임별로: 깜박임, 떨림, 끌림. Claude 요청 수와 비용 기록도 확인 |
@@ -267,7 +283,7 @@ npm run paquete
 
 ## 프로젝트 상태
 
-현재 버전은 0.3.0입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다.
+현재 버전은 0.4.0입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, 동영상 사이트의 실제 세션에서는 아직 테스트하지 않았습니다.
 
 ## 개인정보
 
@@ -275,6 +291,7 @@ npm run paquete
 - Whisper가 전사하는 오디오는 컴퓨터 밖으로 나가지 않습니다. 카드의 오디오와 화면도 Anki로 보내지 않는 한 마찬가지입니다.
 - Claude API에는 작업에 필요한 텍스트만 보냅니다: 문장, 자막 대본, 영상 제목.
 - 단어의 오디오와 이미지 검색은 JapanesePod101, Wikimedia Commons, Openverse로 직접 전달되고, 한자별 획은 jsDelivr에 요청합니다.
+- 사전은 한 번만 내려받습니다. 일본어 사전과 영어 빈도표는 GitHub에서, 영어 사전은 Hugging Face에서 받습니다. 영어 단어 오디오는 Wikimedia Commons와 Lingua Libre에서 가져옵니다.
 - **클립보드 따라가기**는 옵션이 켜져 있고 탭이 보일 때만 읽으며, 읽은 내용은 컴퓨터 밖으로 나가지 않습니다.
 - 확장 프로그램에는 자체 서버가 없고 사용 통계를 수집하지 않습니다.
 
@@ -283,6 +300,7 @@ npm run paquete
 코드는 [MIT 라이선스](LICENSE)로 공개됩니다. 서드파티 구성 요소, 사용 중 내려받는 데이터, 책임 있는 사용 조건은 [docs/ko/notices.md](docs/ko/notices.md)에 있습니다.
 
 - 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io), Yomitan 형식.
+- 영어: 정의와 발음은 [Wiktionary](https://www.wiktionary.org), 정리는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org), 빈도는 [FrequencyWords](https://github.com/hermitdave/FrequencyWords), 분석은 [wink-nlp](https://github.com/winkjs/wink-nlp).
 - 전사: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)와 [Transformers.js](https://github.com/huggingface/transformers.js).
 - 획순: [KanjiVG](https://kanjivg.tagaini.net), Ulrich Apel, CC BY-SA 3.0.
 - 아이콘: [Phosphor](https://phosphoricons.com). 글꼴: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic), [Nunito](https://fonts.google.com/specimen/Nunito).

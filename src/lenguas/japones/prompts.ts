@@ -3,6 +3,7 @@
 // [PALABRA] [SUPERFICIE] [LECTURA] [FRASE] [ENTORNO] [TRADUCCION] [TITULO] [NIVEL] [IDIOMA] [PREGUNTA]
 
 import type { PromptPersonalizado } from '../../compartido/ajustes';
+import { ESQUEMA_ANALISIS, ESQUEMA_CORRECCIONES, ESQUEMA_SENTIDO } from '../esquemasClaude';
 import type { PromptsLengua, TareaPrompt } from '../tipos';
 
 const CRITERIO_LITERARIO = `El primer significado del diccionario suele ser el literal y a menudo no es el correcto aquí.
@@ -97,18 +98,6 @@ Recibes la frase, su entorno y una lista numerada de definiciones de diccionario
 - nota: una frase en [IDIOMA] si el uso no es literal o tiene un matiz importante; vacía si es literal y obvio.
 - definicion: el número de la definición más cercana, o -1 si ninguna sirve.`;
 
-export const ESQUEMA_SENTIDO = {
-  type: 'object',
-  properties: {
-    significado: { type: 'string' },
-    uso: { type: 'string', enum: ['literal', 'figurado', 'poetico', 'coloquial', 'formal', 'arcaico', 'expresion', 'jerga'] },
-    nota: { type: 'string' },
-    definicion: { type: 'integer' },
-  },
-  required: ['significado', 'uso', 'nota', 'definicion'],
-  additionalProperties: false,
-} as const;
-
 export const PROMPT_ANALISIS = `Eres un experto en lengua japonesa que revisa subtítulos para un estudiante hispanohablante de nivel [NIVEL].
 
 Recibes líneas numeradas. Cada una trae su texto y las palabras que calculó un analizador automático, con su lectura entre paréntesis. El analizador comete errores que tú debes corregir. Para cada línea devuelve solo lo que aporte algo; si no hay nada, omite la línea.
@@ -122,57 +111,6 @@ Recibes líneas numeradas. Cada una trae su texto y las palabras que calculó un
 3. gramatica: patrones gramaticales que un estudiante de nivel [NIVEL] o superior debería notar. Incluye patrones compuestos, formas coloquiales (〜ちゃう, 〜なきゃ, 〜っていう) y literarias (〜ぬ, 〜ゆえ, 〜ごとく). Omite lo elemental como です o las partículas sueltas. Da fragmento (idéntico al texto), patron con la forma de diccionario precedida de 〜, nivel JLPT (N5 a N1) y significado breve en [IDIOMA].
 
 Ten en cuenta el género: si es una canción o un poema, piensa como un lector de poesía. Sé preciso: una corrección errónea es peor que ninguna.`;
-
-export const ESQUEMA_ANALISIS = {
-  type: 'object',
-  properties: {
-    lineas: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          i: { type: 'integer' },
-          lecturas: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                superficie: { type: 'string' },
-                lectura: { type: 'string' },
-                lema: { type: 'string' },
-                lectura_lema: { type: 'string' },
-              },
-              required: ['superficie', 'lectura', 'lema', 'lectura_lema'],
-              additionalProperties: false,
-            },
-          },
-          sentidos: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: { superficie: { type: 'string' }, significado: { type: 'string' }, uso: { type: 'string' } },
-              required: ['superficie', 'significado', 'uso'],
-              additionalProperties: false,
-            },
-          },
-          gramatica: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: { fragmento: { type: 'string' }, patron: { type: 'string' }, nivel: { type: 'string' }, significado: { type: 'string' } },
-              required: ['fragmento', 'patron', 'nivel', 'significado'],
-              additionalProperties: false,
-            },
-          },
-        },
-        required: ['i', 'lecturas', 'sentidos', 'gramatica'],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ['lineas'],
-  additionalProperties: false,
-} as const;
 
 export const PROMPT_SUBTITULOS = `Eres un traductor profesional de subtítulos de japonés a [IDIOMA].
 Recibes líneas numeradas de un mismo video y las traduces una por una.
@@ -195,23 +133,6 @@ Qué no tocar:
 - Lo que solo sea mejorable. No reescribas el estilo ni añadas lo que no se dijo.
 
 Ante la duda, deja la línea como está: una corrección errónea es peor que ninguna. Decide tú, nadie va a revisar tus dudas.`;
-
-export const ESQUEMA_CORRECCIONES = {
-  type: 'object',
-  properties: {
-    correcciones: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: { i: { type: 'integer' }, t: { type: 'string' } },
-        required: ['i', 't'],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ['correcciones'],
-  additionalProperties: false,
-} as const;
 
 export const PROMPT_A_JAPONES = `Eres un traductor profesional de subtítulos al japonés. Recibes líneas numeradas de un mismo video en otro idioma y las adaptas a un japonés natural, como el de los subtítulos japoneses de una película o una serie.
 Devuelve exactamente una línea por cada número, sin unir ni partir, aunque una frase ocupe varias.

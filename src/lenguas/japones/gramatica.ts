@@ -3,22 +3,16 @@
 // sustituye cuando está disponible, porque entiende el contexto y conoce muchas más formas.
 
 import { tm } from '../../compartido/i18n';
+import { aplicarReglas, type ReglaGramatica } from '../reglasGramatica';
 import type { PuntoGramatica } from '../tipos';
 
 export type NivelJlpt = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
-
-interface Regla {
-  patron: string;
-  nivel: NivelJlpt;
-  significado: string;
-  re: RegExp;
-}
 
 // Las formas en て/た se escriben con y sin sonorizar: 食べて, 読んで, 待って.
 const TE = '[てで]';
 const TA = '[ただ]';
 
-export const REGLAS: Regla[] = [
+export const REGLAS: ReglaGramatica[] = [
   // N5
   { patron: '〜ている', nivel: 'N5', significado: tm('Acción en curso o estado resultante'), re: new RegExp(`${TE}(?:い(?:る|ます|た|ました|ない|ません|て)|る(?![ぁ-ん])|た(?![ぁ-ん])|ます)`) },
   { patron: '〜てください', nivel: 'N5', significado: tm('Por favor, haz…'), re: new RegExp(`${TE}(?:ください|下さい)`) },
@@ -125,26 +119,4 @@ export const REGLAS: Regla[] = [
 ];
 
 /** Encuentra los puntos de gramática de una línea. Si dos se pisan se queda con el más largo. */
-export function detectarGramatica(texto: string): PuntoGramatica[] {
-  const halladas: (PuntoGramatica & { desde: number; hasta: number })[] = [];
-  for (const r of REGLAS) {
-    const m = r.re.exec(texto);
-    if (!m) continue;
-    halladas.push({
-      patron: r.patron,
-      nivel: r.nivel,
-      fragmento: m[0],
-      significado: r.significado,
-      fuente: 'regla',
-      desde: m.index,
-      hasta: m.index + m[0].length,
-    });
-  }
-  halladas.sort((a, b) => b.hasta - b.desde - (a.hasta - a.desde));
-  const salida: typeof halladas = [];
-  for (const h of halladas) {
-    const contenida = salida.some((s) => h.desde >= s.desde && h.hasta <= s.hasta && s.patron !== h.patron);
-    if (!contenida && !salida.some((s) => s.patron === h.patron)) salida.push(h);
-  }
-  return salida.sort((a, b) => a.desde - b.desde).map(({ desde: _d, hasta: _h, ...p }) => p);
-}
+export const detectarGramatica = (texto: string): PuntoGramatica[] => aplicarReglas(REGLAS, texto);

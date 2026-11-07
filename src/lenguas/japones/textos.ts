@@ -43,10 +43,17 @@ export const TEXTOS: TextosLengua = {
   separarLineasAyuda: tm('Si el furigana no cabe entre dos líneas, abre un poco ese texto. Apagado, el diseño de la página no se mueve nada, pero el furigana puede chocar con la línea de arriba.'),
 
   // Lecturas y palabras
+  formatoTitulo: tm('Lecturas'),
   formatoAyuda: tm('Cómo se escribe el furigana, en todas partes.'),
   lecturaCampo: tm('en hiragana'),
   fraseConLectura: tm('Frase con furigana'),
   gramaticaConocida: tm('Partículas como conocidas'),
+  compuestos: tm('Compuestos'),
+  compuestosActivar: tm('Buscar compuestos'),
+  compuestosAyuda: tm('Palabras formadas con la siguiente'),
+  flexionDe: tm('Conjugación de'),
+  flexiones: tm('Conjugación'),
+  frecuenciaYAcento: tm('Frecuencia y acento'),
 
   // Nivel y primeros pasos
   nivelPregunta: tm('¿Qué nivel de japonés tienes?'),

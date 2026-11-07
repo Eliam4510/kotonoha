@@ -13,6 +13,7 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 - [Tarjetas](#tarjetas)
 - [Audio, imágenes y ejemplos](#audio-imágenes-y-ejemplos)
 - [Páginas web, lector y biblioteca](#páginas-web-lector-y-biblioteca)
+- [Estudiar inglés](#estudiar-inglés)
 - [Gasto en Claude](#gasto-en-claude)
 - [Datos y copia de seguridad](#datos-y-copia-de-seguridad)
 - [Atajos de teclado](#atajos-de-teclado)
@@ -20,13 +21,14 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 
 ## Puesta en marcha
 
-La primera vez se abre una bienvenida que pregunta el idioma y el nivel, y propone instalar los diccionarios, añadir la clave de Claude y elegir dónde van las tarjetas. Se puede saltar, y volver a verla desde **Ajustes, Apariencia**. Todo se configura después en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+K`.
+La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, y propone instalar los diccionarios, añadir la clave de Claude y elegir dónde van las tarjetas. Se puede saltar, y volver a verla desde **Ajustes, Apariencia**. Todo se configura después en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+K`.
 
 | Paso | Dónde | Para qué sirve |
 |---|---|---|
 | Diccionarios | Ajustes, Diccionarios | JMdict en español, inglés o alemán, acento tonal de Kanjium y frecuencia de JPDB. Se descargan una vez y quedan en el navegador |
 | Clave de la API de Claude | Ajustes, Claude | Explicaciones, revisión de lecturas, traducción y corrección. Se guarda solo en el navegador |
 | Idioma y nivel | Ajustes, Idioma y nivel | Idioma de la interfaz, y por separado el de las explicaciones y las traducciones. El nivel adapta las explicaciones y decide cuánto furigana se ve al principio |
+| Idioma que estudias | Ajustes, Idioma y nivel, o el menú de la extensión | Japonés o inglés. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
 La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
@@ -207,6 +209,23 @@ Nada de esto añade nada al contenido de la página. Los colores usan la CSS Cus
 
 **Palabras y evaluación.** El explorador lista el vocabulario por estado, y la evaluación de nivel estima las palabras conocidas de partida.
 
+## Estudiar inglés
+
+El idioma se elige en la bienvenida, en **Ajustes, Idioma y nivel** o en el menú de la extensión. Cada uno tiene sus propias palabras, diccionarios, tarjetas, biblioteca y ajustes de lectura, y al volver a otro todo sigue donde estaba. La interfaz, la clave de Claude y el gasto son comunes.
+
+Todo lo que explica esta guía funciona igual, con estas diferencias:
+
+| Elemento | En inglés |
+|---|---|
+| Diccionarios | Wiktionary en el idioma de la interfaz, en dos partes: definiciones y traducciones breves. Con la interfaz en inglés se propone el inglés-inglés, que descarga unos 110 MB y ocupa unos 220 MB |
+| Pronunciación | IPA americana y británica en la ficha. Sobre las palabras empieza apagada, y se enciende en el panel **Visualización**. Cuál de las dos se escribe se elige en **Ajustes, Idioma y nivel** |
+| Color de acento | Indica la sílaba tónica: la primera, una del medio o la última. También empieza apagado |
+| Formas | La ficha dice de qué palabra viene cada una: *went* abre *go*, y *didn't*, *do* |
+| Verbos con partícula | La ficha los busca aunque vayan separados: en *picked it up* aparece *pick up*. Lo mismo con las frases hechas |
+| Gramática | Puntos de A1 a C2, con la misma confirmación de Claude |
+| Lector de páginas | Empieza apagado, porque hay inglés en casi todas las páginas. Se enciende en el menú de la extensión o en **Ajustes, Lector de páginas** |
+| Trazos y corrección de lecturas | No se ofrecen |
+
 ## Gasto en Claude
 
 La pantalla de inicio incluye la tarjeta **Gasto en Claude**, con lo gastado en el mes frente al crédito indicado en Ajustes, una gráfica por días y modelos, el reparto por tareas y un registro de cada petición, con sus tokens. El coste se calcula con los tokens que informa la API y sus precios públicos, y solo cuenta lo pedido desde esta extensión en este navegador.
@@ -223,7 +242,7 @@ Tres ajustes deciden cuánto se usan las consultas de palabras:
 
 ## Datos y copia de seguridad
 
-Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos** permite exportar e importar una copia con palabras, tarjetas, biblioteca, ajustes, subtítulos generados, correcciones y registro de gasto.
+Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos** permite exportar e importar un solo archivo con las palabras, tarjetas, biblioteca, subtítulos generados y correcciones de cada idioma que se haya usado, junto con los ajustes y el registro de gasto. La clave de Claude y los diccionarios no se incluyen. Una copia anterior a la versión 0.4.0 se restaura como japonés.
 
 ## Atajos de teclado
 

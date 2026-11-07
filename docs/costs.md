@@ -6,6 +6,8 @@ What it costs to use Kotonoha with a personal Claude API key, measured with real
 
 Subtitles, the dictionary, furigana, flashcards, review and Whisper transcription do not use the API and cost nothing.
 
+These figures are for Japanese. The mechanism is the same in English, but it has not been measured yet.
+
 ## Summary
 
 With a reference credit of USD 100 a month:

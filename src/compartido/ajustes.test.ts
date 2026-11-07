@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AJUSTES_INICIALES, type Ajustes, completarAjustes } from './ajustes';
+import { AJUSTES_INICIALES, type Ajustes, ajustesParaLengua, completarAjustes } from './ajustes';
 
 describe('ajustes guardados', () => {
   it('sin datos usa los valores iniciales', () => {
@@ -63,5 +63,76 @@ describe('la ficha abre con el diccionario', () => {
     expect(a.diccionarioPestana).toBe('ninguna');
     expect(a.sentidoAutomatico).toBe(false);
     expect(a.creditoMensual).toBe(0);
+  });
+});
+
+describe('ajustes por lengua', () => {
+  const con = (cambios: Partial<Ajustes>): Ajustes => ({ ...completarAjustes(undefined), idiomaInterfaz: 'es', ...cambios });
+  const pasar = (a: Ajustes, id: string): Ajustes => ({ ...a, ...ajustesParaLengua(a, id) });
+
+  it('la primera vez, cada lengua empieza con sus valores', () => {
+    const a = pasar(con({}), 'en');
+    expect(a.idiomaObjetivo).toBe('en');
+    expect(a.nivel).toBe('CEFR B1');
+    expect(a.formatoLectura).toBe('us');
+    expect(a.furigana).toBe('ninguna');
+    expect(a.lectorActivo).toBe(false);
+    expect(a.ankiMazo).toBe('Kotonoha English');
+  });
+
+  it('al volver, cada lengua recupera lo que tenía', () => {
+    const inicio = con({ nivel: 'JLPT N1', furigana: 'desconocidas', formatoLectura: 'romaji', vocesFrase: ['ja-JP-AoiNeural'], ankiMazo: 'Mío', prompts: { explicar: { sistema: 's', usuario: 'u' } } });
+    let a = pasar(inicio, 'en');
+    a = { ...a, nivel: 'CEFR C1', lectorActivo: true, formatoLectura: 'uk' };
+    a = pasar(a, 'ja');
+    expect(a.idiomaObjetivo).toBe('ja');
+    expect(a.nivel).toBe('JLPT N1');
+    expect(a.furigana).toBe('desconocidas');
+    expect(a.formatoLectura).toBe('romaji');
+    expect(a.vocesFrase).toEqual(['ja-JP-AoiNeural']);
+    expect(a.ankiMazo).toBe('Mío');
+    expect(a.prompts.explicar?.sistema).toBe('s');
+    a = pasar(a, 'en');
+    expect(a.nivel).toBe('CEFR C1');
+    expect(a.lectorActivo).toBe(true);
+    expect(a.formatoLectura).toBe('uk');
+    expect(a.prompts).toEqual({});
+  });
+
+  it('lo que no depende de la lengua no se toca', () => {
+    const a = pasar(con({ paleta: 'predeterminada', ankiPuerto: 1234, nombre: 'Ana', modo: 'enfoque1d' }), 'en');
+    expect(a.ankiPuerto).toBe(1234);
+    expect(a.nombre).toBe('Ana');
+    expect(a.modo).toBe('enfoque1d');
+  });
+
+  it('elegir la que ya se estudia no cambia nada', () => {
+    expect(ajustesParaLengua(con({}), 'ja')).toEqual({});
+  });
+
+  it('una lengua desconocida vale la inicial', () => {
+    expect(ajustesParaLengua(con({}), 'xx')).toEqual({});
+  });
+
+  it('nadie estudia una lengua con traducciones a esa misma lengua', () => {
+    const a = pasar(con({ idiomaInterfaz: 'en', idiomaExplicaciones: 'inglés', idiomaTraduccion: 'inglés', idiomaSecundario: 'en' }), 'en');
+    expect(a.idiomaExplicaciones).toBe('inglés sencillo');
+    expect(a.idiomaTraduccion).toBe('español');
+    expect(a.idiomaSecundario).toBe('es');
+  });
+
+  it('quien habla japonés y estudia inglés tiene sus explicaciones y traducciones en japonés', () => {
+    const a = pasar(con({ idiomaInterfaz: 'ja', idiomaExplicaciones: 'japonés sencillo', idiomaTraduccion: 'inglés', idiomaSecundario: 'en' }), 'en');
+    expect(a.idiomaExplicaciones).toBe('japonés');
+    expect(a.idiomaTraduccion).toBe('japonés');
+    expect(a.idiomaSecundario).toBe('ja');
+  });
+
+  it('quien habla español no nota nada en sus idiomas', () => {
+    const a = con({ idiomaExplicaciones: 'español', idiomaTraduccion: 'español', idiomaSecundario: 'es' });
+    const cambios = ajustesParaLengua(a, 'en');
+    expect(cambios.idiomaExplicaciones).toBeUndefined();
+    expect(cambios.idiomaTraduccion).toBeUndefined();
+    expect(cambios.idiomaSecundario).toBeUndefined();
   });
 });

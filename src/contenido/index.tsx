@@ -4,7 +4,7 @@ import { render } from 'preact';
 import { alCambiarAjustes, leerAjustes } from '../compartido/ajustes';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import base from '../ui/estilos';
-import { aplicarLengua } from '../ui/lengua';
+import { aplicarLengua, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { cargarFuentes } from '../ui/fuentes';
 import { ejecutarComando, instalarAtajos } from './atajos';
@@ -16,7 +16,7 @@ import { alNavegar, controlSitio, videoPrincipal } from './puente';
 import { ANCHO_NAVEGADOR, Reproductor } from './Reproductor';
 import { iniciarTarjetas } from './tarjetas';
 import { instalarAtajosWeb } from './webAtajos';
-import { bcp47Actual, fijarIdioma, tr } from '../compartido/i18n';
+import { bcp47Actual, fijarIdioma, tr, idiomaActual } from '../compartido/i18n';
 
 const SITIOS_VIDEO = /(^|\.)(youtube\.com|netflix\.com|disneyplus\.com|viki\.com|iq\.com|bilibili\.com|crunchyroll\.com|primevideo\.com)$/;
 
@@ -32,6 +32,7 @@ function montar(): HTMLElement {
   raiz.className = 'kk-raiz';
   raiz.lang = bcp47Actual();
   Object.entries(variablesPaleta(ajustes.value.paleta, true)).forEach(([k, v]) => raiz.style.setProperty(k, v));
+  lengua.subscribe((l) => raiz.style.setProperty('--letra-lengua', l.letra));
   sombra.appendChild(raiz);
   document.documentElement.appendChild(anfitrion);
   render(<Reproductor />, raiz);
@@ -51,10 +52,13 @@ async function iniciarReproductor() {
   ajustes.value = a;
   await fijarIdioma(a.idiomaInterfaz);
   aplicarLengua(a);
+  let alCambiarDeLengua = () => {};
   alCambiarAjustes((n) => {
+    const otraLengua = n.idiomaObjetivo !== ajustes.value.idiomaObjetivo;
     ajustes.value = n;
     aplicarLengua(n);
     fijarIdioma(n.idiomaInterfaz).catch(() => {});
+    if (otraLengua) alCambiarDeLengua();
   });
   if (!a.activo || a.sitiosDesactivados.includes(location.hostname)) return;
 
@@ -64,7 +68,7 @@ async function iniciarReproductor() {
   instalarAtajos();
   instalarAtajosWeb(() => ajustes.value.activo, avisar);
   montar();
-  cargarFuentes().catch(() => {});
+  cargarFuentes({ soloLatin: lengua.value.id !== 'ja' && idiomaActual() !== 'ja' }).catch(() => {});
 
   // Efecto: reserva espacio para el navegador de subtítulos.
   let anchoPrevio = -1;
@@ -79,6 +83,11 @@ async function iniciarReproductor() {
   const cargar = () =>
     cargarVideoActual().catch((e) => avisar(tr('Error al cargar el video: {0}', e instanceof Error ? e.message : e), 'error'));
 
+  // Los subtítulos en pantalla eran de la otra lengua: se vuelven a elegir.
+  alCambiarDeLengua = () => {
+    cargarFuentes({ soloLatin: lengua.value.id !== 'ja' && idiomaActual() !== 'ja' }).catch(() => {});
+    cargar();
+  };
   await esperarAdaptador();
   cargar();
   vigilarAnuncios();

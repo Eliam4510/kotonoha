@@ -15,6 +15,14 @@ function saludo(hora: number, nombre: string): string {
 export const JAPONES: PaqueteLengua = {
   id: 'ja',
   bcp47: 'ja-JP',
+  nombrePropio: '日本語',
+  presentacion: tm('Subtítulos con furigana, kanji y acento tonal'),
+  letra: 'var(--letra-japones)',
+  // Sus valores iniciales son los de los ajustes: es la lengua con la que se empieza.
+  ajustes: {},
+  frasesEnLector: false,
+  // Con una glosa en inglés se encuentran más imágenes.
+  consultaImagen: (_lema, entradas, definiciones) => entradas.find((e) => e.dic === 'jmdict-en')?.glosas[0] ?? definiciones[0],
   escritura: {
     tieneTexto: tieneJapones,
     esDeLaLengua: esTextoJapones,
@@ -28,6 +36,7 @@ export const JAPONES: PaqueteLengua = {
     portadaVertical: true,
   },
   lectura: {
+    distingue: true,
     formatos: [
       { id: 'hiragana', muestra: 'あ' },
       { id: 'katakana', muestra: 'ア' },
@@ -42,7 +51,16 @@ export const JAPONES: PaqueteLengua = {
     // El rōmaji es más estrecho que el kana.
     anchoCaracter: (formato) => (formato === 'romaji' ? 0.55 : 1),
   },
-  acento: { patron: patronAcento, moras: separarMoras },
+  acento: {
+    patron: patronAcento,
+    moras: separarMoras,
+    leyenda: [
+      { clase: 'heiban', nombre: tm('Heiban') },
+      { clase: 'atamadaka', nombre: tm('Atamadaka') },
+      { clase: 'nakadaka', nombre: tm('Nakadaka') },
+      { clase: 'odaka', nombre: tm('Odaka') },
+    ],
+  },
   nombreFlexion,
   trazos: {
     caracteres: caracteresConTrazos,
@@ -108,4 +126,5 @@ export const JAPONES: PaqueteLengua = {
   },
   saludo,
   textos: TEXTOS,
+  ideasRelato: [tm('Un gato que pasea por Kioto'), tm('Una tarde de lluvia en el tren'), tm('El festival de verano del barrio')],
 };

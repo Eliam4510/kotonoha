@@ -23,6 +23,8 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [lamejs](https://github.com/gideonstele/lamejs)，`@breezystack/lamejs` | MP3 编码 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 复习计划 | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | 读取 ZIP 文件 | MIT |
+| [wink-nlp](https://github.com/winkjs/wink-nlp) | 英语形态分析 | MIT |
+| [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | wink-nlp 的英语模型 | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | 图标 | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) 和 [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | 字体 | OFL-1.1 |
 
@@ -42,6 +44,9 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | 笔顺 | [KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，原始文件由 jsDelivr 提供 | CC BY-SA 3.0 |
 | 单词音频 | JapanesePod101 和 [Lingua Libre](https://lingualibre.org) | 以各来源为准 |
 | 图片 | [Openverse](https://openverse.org) | 以每张图片的许可证为准 |
+| 英语词典和发音 | [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 根据 [kaikki.org](https://kaikki.org) 整理，从 Hugging Face 提供 | CC BY-SA 4.0 |
+| 英语频率 | Hermit Dave 的 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)，基于 OpenSubtitles | CC BY-SA 4.0 |
+| 英语单词音频 | Wikimedia Commons 和 [Lingua Libre](https://lingualibre.org) | 各录音的条款 |
 
 ## 外部程序
 

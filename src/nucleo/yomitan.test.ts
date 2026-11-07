@@ -51,6 +51,20 @@ describe('contenido estructurado', () => {
     expect(g).toEqual(['to eat', 'to live on (e.g. a salary)']);
   });
 
+  it('los antónimos de JMdict siguen siendo una glosa, salvo que la lengua pida omitirlos', () => {
+    const glosario = [
+      {
+        type: 'structured-content',
+        content: [
+          { tag: 'ul', data: { content: 'glossary' }, content: { tag: 'li', content: 'heterodont' } },
+          { tag: 'ul', data: { content: 'antonyms' }, content: { tag: 'li', content: ['antonym: ', { tag: 'a', content: '同歯性' }, { tag: 'span', data: { content: 'refGlosses' }, content: ' homodont' }] } },
+        ],
+      },
+    ];
+    expect(extraerGlosas(glosario)).toEqual(['heterodont', 'antonym: 同歯性 homodont']);
+    expect(extraerGlosas(glosario, new Set(['antonyms']))).toEqual(['heterodont']);
+  });
+
   it('admite texto plano dentro del contenido', () => {
     expect(extraerGlosas([{ type: 'structured-content', content: 'hola' }])).toEqual(['hola']);
     expect(extraerGlosas([{ type: 'text', text: 'adiós' }, 'cadena'])).toEqual(['adiós', 'cadena']);

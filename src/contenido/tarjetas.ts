@@ -3,6 +3,7 @@
 import { flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, LineaAnalizada, MedioTarjeta, PalabraToken } from '../compartido/tipos';
 import { aFuriganaAnki, desconocidas, fraseConNegrita } from '../nucleo/frases';
+import { lengua } from '../ui/lengua';
 import { borradorVacio, enviarAlCreador } from '../ui/borrador';
 import { actualizarCaptura, empezarGrabacionLinea, pausar, reproducir, saltar, terminarGrabacionLinea } from './controlador';
 import { ajustes, avisar, comoActivarCaptura, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
@@ -247,11 +248,11 @@ export async function construirBorrador(p: PalabraToken | null, l: LineaAnalizad
 
   if (palabra) {
     b.palabra = palabra.lema;
-    b.lectura = palabra.lecturaLema;
+    b.lectura = lengua.value.lectura.distingue ? palabra.lecturaLema : palabra.pronunciacion ? lengua.value.lectura.visible(palabra.pronunciacion, a.formatoLectura) : '';
   }
   if (l) {
     b.frase = a.negritaPalabra && palabra ? fraseConNegrita(l.palabras, palabra.clave) : l.texto;
-    b.fraseFurigana = aFuriganaAnki(l.palabras, a.negritaPalabra ? palabra?.clave : undefined);
+    if (lengua.value.lectura.distingue) b.fraseFurigana = aFuriganaAnki(l.palabras, a.negritaPalabra ? palabra?.clave : undefined);
     b.fuente = infoVideo.value?.titulo;
     b.url = location.href;
   }

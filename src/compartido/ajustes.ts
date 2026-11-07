@@ -1,6 +1,6 @@
 import type { IdPaleta } from '../ui/paletas';
-import { PAQUETE_INICIAL } from '../lenguas';
-import { type PreferenciaIdioma, tm } from './i18n';
+import { PAQUETE_INICIAL, paqueteDe } from '../lenguas';
+import { lenguaDe, lenguasExplicacion, lenguasTraduccion, type PreferenciaIdioma, resolverIdioma, tm } from './i18n';
 // Ajustes del usuario, guardados en chrome.storage.local.
 
 export type ModoLectura = 'ninguna' | 'todas' | 'desconocidas' | 'alPasar';
@@ -156,6 +156,8 @@ export interface Ajustes {
 
   // Subtítulos
   idiomaObjetivo: string;
+  /** Los ajustes de las lenguas que no se están estudiando ahora. Los de la actual están en su sitio de siempre. */
+  porLengua: Partial<Record<string, Partial<AjustesLengua>>>;
   idiomaSecundario: string;
   ocultarObjetivo: boolean;
   ocultarSecundario: boolean;
@@ -224,6 +226,11 @@ export interface Ajustes {
   guardarHistorial: boolean;
 }
 
+/** Lo que cada lengua recuerda por su cuenta: el nivel en japonés no es el nivel en inglés. */
+export const CLAVES_POR_LENGUA = ['nivel', 'diccionarioPestana', 'formatoLectura', 'furigana', 'lectorFurigana', 'lectorActivo', 'colorAcento', 'particulasConocidas', 'vocesFrase', 'prompts', 'ankiMazo'] as const;
+
+export type AjustesLengua = Pick<Ajustes, (typeof CLAVES_POR_LENGUA)[number]>;
+
 export type PestanaDiccionario = 'ninguna' | 'audio' | 'imagenes' | 'explicar' | 'desglose' | 'traduccion' | 'trazos' | 'enlaces' | 'ejemplos';
 
 export interface Prellenado {
@@ -289,6 +296,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   desfasePausaMs: 0,
 
   idiomaObjetivo: PAQUETE_INICIAL.id,
+  porLengua: {},
   idiomaSecundario: 'es',
   ocultarObjetivo: false,
   ocultarSecundario: false,
@@ -390,6 +398,35 @@ export const AJUSTES_INICIALES: Ajustes = {
 
 const CLAVE = 'ajustes';
 export const CLAVE_API = 'claveAnthropic';
+
+function clavesDeLengua(a: Partial<Ajustes>): Partial<AjustesLengua> {
+  const salida: Record<string, unknown> = {};
+  for (const k of CLAVES_POR_LENGUA) if (a[k] !== undefined) salida[k] = a[k];
+  return salida as Partial<AjustesLengua>;
+}
+
+/**
+ * Lo que cambia al pasar a estudiar otra lengua. Lo de la actual se guarda para cuando se vuelva a ella, y la nueva
+ * recupera lo que tenía, o empieza con sus valores iniciales. Quien lee los ajustes sigue viendo la lengua actual en
+ * su sitio de siempre: no tiene que saber que hay más.
+ */
+export function ajustesParaLengua(a: Ajustes, id: string): Partial<Ajustes> {
+  const nueva = paqueteDe(id);
+  if (nueva.id === a.idiomaObjetivo) return {};
+  const salida: Partial<Ajustes> = {
+    idiomaObjetivo: nueva.id,
+    porLengua: { ...a.porLengua, [a.idiomaObjetivo]: clavesDeLengua(a) },
+    ...clavesDeLengua(AJUSTES_INICIALES),
+    ...nueva.ajustes,
+    ...a.porLengua[nueva.id],
+  };
+  // Nadie estudia una lengua con traducciones a esa misma lengua.
+  const propia = lenguaDe(resolverIdioma(a.idiomaInterfaz), nueva.id);
+  if (!lenguasExplicacion(nueva.id).some((l) => l.valor === a.idiomaExplicaciones)) salida.idiomaExplicaciones = propia.explicaciones;
+  if (!lenguasTraduccion(nueva.id).some((l) => l.valor === a.idiomaTraduccion)) salida.idiomaTraduccion = propia.traducciones;
+  if (a.idiomaSecundario.split('-')[0] === nueva.id) salida.idiomaSecundario = propia.secundaria;
+  return salida;
+}
 
 /** Mezcla profunda de un nivel para que los ajustes nuevos reciban su valor inicial. */
 export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajustes {

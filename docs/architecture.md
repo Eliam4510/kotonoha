@@ -223,7 +223,7 @@ What costs is measuring and changing the DOM. Chromium rebuilds every highlight 
 
 ## Language packages
 
-Everything that depends on the language being studied lives in `src/lenguas/<language>`, and the rest of the program only knows the interfaces in `src/lenguas/tipos.ts`. For now the only package is Japanese. Each package has two parts:
+Everything that depends on the language being studied lives in `src/lenguas/<language>`, and the rest of the program only knows the interfaces in `src/lenguas/tipos.ts`. There are two packages: Japanese and English. Each package has two parts:
 
 - **`PaqueteLengua`** is lightweight and used by every screen, including the content script: how the language is recognized in a text, how its readings are written, its levels, voices and links, and the interface sentences that name it.
 - **`MotorLengua`** is only loaded in the engine and in the application window: the analyzer, grammar rules, prompts, transcription rules, dictionaries and audio.
@@ -231,6 +231,20 @@ Everything that depends on the language being studied lives in `src/lenguas/<lan
 Each language has its own database. The Japanese one keeps the original name, `kikitori`, and the others are called `kikitori-<language>`. This way, a word spelled the same in two languages is never mixed up, and existing data needs no migration. Claude spending does not depend on the language and is always stored in the original database.
 
 The prompts of each package have their fingerprints pinned in the tests, because changing one invalidates the saved answers and would mean paying for them again.
+
+The English package shows where languages differ:
+
+| Aspect | Japanese | English |
+|---|---|---|
+| Analyzer | Kuromoji with IPADIC | wink-nlp with its small model, built separately (`ingles.js`) and loaded only when studying English |
+| Reading | Part of the word: it tells homographs apart and goes into the key | It tells nothing apart: the key is the dictionary form, and the IPA is stored separately, per region |
+| Accent | Pitch pattern by mora, from Kanjium | Stressed syllable, worked out from the IPA |
+| Dictionaries | JMdict, Kanjium and JPDB | Wiktionary, through wiktionary-to-yomitan, and FrequencyWords |
+| List of terms in memory | Analysis waits for it: without it, compounds would come out split | Analysis does not wait: it only serves to join hyphenated words |
+
+Settings that depend on the language are stored in `porLengua` and restored when switching (`ajustesParaLengua`). The rest of the program keeps reading them in their usual place.
+
+Dictionaries are decompressed one bank at a time, so memory does not depend on the size of the file, and are deleted in batches, because a single transaction with hundreds of thousands of rows does not finish. Measured with Wiktionary's English-English dictionary, 847,853 rows: 1.5 to 3 minutes to install including the download, about 220 MB on disk and lookups under 10 ms. Removing it takes about 3 minutes, during which lookups take 2 to 5 seconds.
 
 ## Folder structure
 

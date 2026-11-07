@@ -8,16 +8,17 @@ import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
 import { Icono, Marca, type NombreIcono } from '../ui/iconos';
 import { Interruptor, Mensaje } from './Piezas';
-import { lengua } from '../ui/lengua';
+import { PAQUETES } from '../lenguas';
+import { estudiarLengua, lengua } from '../ui/lengua';
 
-type Paso = 'idioma' | 'nivel' | 'diccionarios' | 'claude' | 'tarjetas' | 'listo';
-const PASOS: Paso[] = ['idioma', 'nivel', 'diccionarios', 'claude', 'tarjetas', 'listo'];
+type Paso = 'idioma' | 'lengua' | 'nivel' | 'diccionarios' | 'claude' | 'tarjetas' | 'listo';
+const PASOS: Paso[] = ['idioma', 'lengua', 'nivel', 'diccionarios', 'claude', 'tarjetas', 'listo'];
 
 const guardar = (c: Partial<Ajustes>) => guardarAjustes(c).catch(console.error);
 
 /** El idioma de la interfaz arrastra el de las explicaciones y las traducciones. */
-function elegirIdioma(id: CodigoIdioma) {
-  const l = lenguaDe(id);
+function elegirIdioma(id: CodigoIdioma, objetivo: string) {
+  const l = lenguaDe(id, objetivo);
   guardar({ idiomaInterfaz: id, idiomaExplicaciones: l.explicaciones, idiomaTraduccion: l.traducciones, idiomaSecundario: l.secundaria });
 }
 
@@ -29,9 +30,26 @@ function PasoIdioma({ a }: { a: Ajustes }) {
       <p>{tr('Lo usaremos en la interfaz, en las explicaciones y en las traducciones.')}</p>
       <div class="ap-bv-opciones ap-bv-idiomas" role="radiogroup" aria-label={tr('Idioma')}>
         {IDIOMAS_INTERFAZ.map((i) => (
-          <button key={i.id} lang={i.bcp47} role="radio" aria-checked={actual === i.id} class={`ap-bv-opcion ${actual === i.id ? 'activa' : ''}`} onClick={() => elegirIdioma(i.id)}>
+          <button key={i.id} lang={i.bcp47} role="radio" aria-checked={actual === i.id} class={`ap-bv-opcion ${actual === i.id ? 'activa' : ''}`} onClick={() => elegirIdioma(i.id, a.idiomaObjetivo)}>
             <b>{i.nombre}</b>
             <span>{i.pregunta}</span>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function PasoLengua({ a }: { a: Ajustes }) {
+  return (
+    <>
+      <h1>{tr('¿Qué idioma quieres estudiar?')}</h1>
+      <p>{tr('Podrás cambiarlo cuando quieras: cada idioma guarda sus propias palabras, diccionarios y tarjetas.')}</p>
+      <div class="ap-bv-opciones" role="radiogroup" aria-label={tr('Idioma que estudias')}>
+        {PAQUETES.map((p) => (
+          <button key={p.id} role="radio" aria-checked={a.idiomaObjetivo === p.id} class={`ap-bv-opcion ${a.idiomaObjetivo === p.id ? 'activa' : ''}`} onClick={() => estudiarLengua(a, p.id).catch(console.error)}>
+            <b>{tr(p.textos.nombre)}{tr(p.textos.nombre) !== p.nombrePropio && <> · <span lang={p.id}>{p.nombrePropio}</span></>}</b>
+            <span>{tr(p.presentacion)}</span>
           </button>
         ))}
       </div>
@@ -48,7 +66,7 @@ function PasoNivel({ a }: { a: Ajustes }) {
       <p>{tr(textos.nivelAyuda)}</p>
       <div class="ap-bv-opciones" role="radiogroup" aria-label={tr('Nivel')}>
         {[principiante, ...niveles].map((n) => (
-          <button key={n.valor} role="radio" aria-checked={a.nivel === n.valor} class={`ap-bv-opcion ${a.nivel === n.valor ? 'activa' : ''}`} onClick={() => guardar({ nivel: n.valor, furigana: n.lectura, lectorFurigana: n.lectura, formatoLectura: n.valor === 'principiante absoluto' ? 'romaji' : 'hiragana' })}>
+          <button key={n.valor} role="radio" aria-checked={a.nivel === n.valor} class={`ap-bv-opcion ${a.nivel === n.valor ? 'activa' : ''}`} onClick={() => guardar({ nivel: n.valor, furigana: n.lectura, lectorFurigana: n.lectura, ...(sencillo ? { formatoLectura: n.valor === principiante.valor ? sencillo.id : lectura.formatoInicial } : {}) })}>
             <b>{tr(n.nombre)}</b>
             <span>{tr(n.ayuda)}</span>
           </button>
@@ -81,7 +99,7 @@ function PasoDiccionarios() {
   const recomendadas = fuentesRecomendadas(fuentes, idioma);
   const faltan = recomendadas.filter((f) => !instalados.some((d) => d.id === f.id));
   const enMarcha = faltan.some((f) => progreso[f.id] && progreso[f.id].fase !== 'error' && progreso[f.id].fase !== 'listo');
-  const sinPropio = !['es', 'en', 'de'].includes(idioma);
+  const sinPropio = fuentes.length > 0 && !fuentes.some((f) => f.tipo === 'terminos' && f.idioma === idioma);
   return (
     <>
       <h1>{tr('Diccionarios')}</h1>
@@ -209,7 +227,7 @@ export function Bienvenida({ a }: { a: Ajustes }) {
   const terminar = () => guardar({ bienvenidaVista: true });
   // Quien no toque nada, o se salte la bienvenida, también ha de tener las explicaciones en el idioma que se le muestra.
   useEffect(() => {
-    if (a.idiomaInterfaz === 'auto') elegirIdioma(resolverIdioma('auto'));
+    if (a.idiomaInterfaz === 'auto') elegirIdioma(resolverIdioma('auto'), a.idiomaObjetivo);
   }, []);
   return (
     <div class="ap-bienvenida" role="dialog" aria-modal="true" aria-label={tr('Bienvenida')}>
@@ -223,6 +241,7 @@ export function Bienvenida({ a }: { a: Ajustes }) {
         </div>
         <div class="ap-bv-cuerpo">
           {paso === 'idioma' && <PasoIdioma a={a} />}
+          {paso === 'lengua' && <PasoLengua a={a} />}
           {paso === 'nivel' && <PasoNivel a={a} />}
           {paso === 'diccionarios' && <PasoDiccionarios />}
           {paso === 'claude' && <PasoClaude a={a} />}

@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.3.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.4.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -103,7 +103,7 @@ Stand jeder Funktion in Version 0.3.0 und die Art ihrer Überprüfung.
 | Wortübersicht nach Status | Automatisch |
 | Niveaubewertung | Automatisch |
 | Vollständige Einstellungen und bearbeitbare Prompts | Automatisch |
-| Sicherung | Automatisch |
+| Sicherung aller Sprachen und der Einstellungen in einer einzigen Datei | Automatisch |
 
 ## Webseiten
 
@@ -127,6 +127,8 @@ Stand jeder Funktion in Version 0.3.0 und die Art ihrer Überprüfung.
 
 | Funktion | Überprüfung |
 |---|---|
+| Die Lernsprache wählen: in der Begrüßung, in den Einstellungen oder im Menü der Erweiterung | Automatisch |
+| Wörter, Wörterbücher, Karten und Einstellungen je Sprache getrennt | Automatisch |
 | Oberfläche auf Spanisch, Englisch, Deutsch, vereinfachtem Chinesisch, Koreanisch und Japanisch | Automatisch: vollständige Tabellen und Screenshots jeder Sprache |
 | Begrüßung mit Sprache, Niveau, Wörterbüchern, Schlüssel und Ziel der Karten | Automatisch |
 | Erklärungen und Übersetzungen in einer anderen Sprache als die Oberfläche, auch Portugiesisch und Französisch | Automatisch |
@@ -135,6 +137,26 @@ Stand jeder Funktion in Version 0.3.0 und die Art ihrer Überprüfung.
 | Farbpaletten: üblich, für Farbenblindheit und mit hohem Kontrast | Automatisch |
 | Frei wählbare Tastenkürzel, die mit jeder Tastaturbelegung funktionieren | Automatisch |
 | Monatliches Kostenlimit für Claude | Simulator |
+
+## Englisch
+
+| Funktion | Überprüfung |
+|---|---|
+| Englische Untertitel, mit jedem analysierten Wort und der Zweitspur in der Hilfssprache | Nachgeahmte Seite. Eine echte Sitzung steht noch aus |
+| Korrektur automatischer Untertitel und Erstellen von Englisch aus einer anderen Sprache | Nachgeahmte Seite |
+| Amerikanische und britische Aussprache in IPA, im Wortfenster und auf Wunsch über jedem Wort | Automatisch, mit echten Daten aus Wiktionary |
+| Farbe nach betonter Silbe: die erste, eine mittlere oder die letzte | Automatisch |
+| Definitionen und Übersetzungen aus Wiktionary auf Spanisch, Deutsch, Chinesisch, Koreanisch und Japanisch, dazu Definitionen auf Englisch | Automatisch, mit echten Daten |
+| Häufigkeit nach Untertiteln von Filmen und Serien | Automatisch, mit echten Daten |
+| Von welchem Wort jede Form stammt: *went* ist *go*, *didn't* ist *do* | Automatisch |
+| Partikelverben und feste Wendungen, auch getrennt: *picked it up* findet *pick up* | Automatisch |
+| Grammatik von A1 bis C2: 51 Regeln, von Claude bestätigt | Simulator |
+| Seiten-Reader, anfangs ausgeschaltet, der Seiten in anderen Sprachen in Ruhe lässt | Automatisch und auf 16 echten öffentlichen Websites |
+| Whisper auf Englisch, mit lesbar getrennten Zeilen | Automatisch, mit einer synthetischen Stimme |
+| Eigene Anweisungen an Claude für Englisch | Simulator |
+| Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
+| Neuronale Azure-Stimmen auf Englisch | Ausstehend |
+| Niveautest und Weg von A1 bis C2 | Automatisch |
 
 ## Gestaltungsgrundsätze
 
@@ -154,7 +176,9 @@ Stand jeder Funktion in Version 0.3.0 und die Art ihrer Überprüfung.
 
 | Einschränkung | Einzelheit |
 |---|---|
-| Lernsprache | Nur Japanisch: Die Analyselogik ist speziell auf diese Sprache ausgelegt |
+| Lernsprache | Japanisch und Englisch. Jede neue Sprache braucht ihr eigenes Paket in `src/lenguas` |
+| Analyse des Englischen | Sie erfolgt mit einem kleinen Modell, das in die Erweiterung passt. In mehrdeutigen Sätzen kann es die Wortart falsch bestimmen und damit auch die Übersetzung unter dem Wort. Das Wortfenster zeigt weiterhin alle Definitionen |
+| Englisch-Englisch-Wörterbuch | Es ist groß: etwa 110 MB Download und etwa 220 MB Speicherplatz. Installieren und Entfernen dauern einige Minuten. Es wird nur bei englischer Oberfläche vorgeschlagen |
 | Übersetzungen der Oberfläche | Mit KI-Unterstützung geschrieben, noch ohne Prüfung durch Muttersprachler. Fehler werden in `idiomas/` korrigiert |
 | Seiten-Reader | Wirkt nur im Hauptframe: Text in einem iframe erreicht er nicht. Was eine Seite auf eine Leinwand oder in ein Bild zeichnet, ist kein Text |
 | Claude-Prompts | Die Anweisungen bleiben auf Spanisch, auch wenn die Antwort in einer anderen Sprache angefordert wird |

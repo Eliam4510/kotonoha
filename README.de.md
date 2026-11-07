@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.de.png" alt="Kotonoha: interaktive Untertitel, Wörterbuch, Karten und Erklärungen von Claude zum Japanischlernen" width="100%">
+  <img src="docs/img/banner.de.png" alt="Kotonoha: interaktive Untertitel, Wörterbuch, Karten und Erklärungen von Claude zum Lernen von Japanisch und Englisch" width="100%">
 </p>
 
 <p align="center">
@@ -20,15 +20,16 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.3.0-A9E45B?style=flat-square" alt="Version 0.3.0">
+  <img src="https://img.shields.io/badge/Version-0.4.0-A9E45B?style=flat-square" alt="Version 0.4.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Kontinuierliche Integration"></a>
-  <img src="https://img.shields.io/badge/Unit--Tests-306-0ca30c?style=flat-square" alt="306 Unit-Tests">
+  <img src="https://img.shields.io/badge/Unit--Tests-386-0ca30c?style=flat-square" alt="386 Unit-Tests">
   <img src="https://img.shields.io/badge/Oberfl%C3%A4che-6%20Sprachen-8FCBFF?style=flat-square" alt="Oberfläche in 6 Sprachen">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 bis N1">
+  <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 bis C2">
 </p>
 
 <p align="center">
-  <b>Browser-Erweiterung, um Japanisch mit echten Videos und Texten zu lernen.</b>
+  <b>Browser-Erweiterung, um Japanisch und Englisch mit echten Videos und Texten zu lernen.</b>
 </p>
 
 <p align="center">
@@ -47,6 +48,8 @@
 ## Beschreibung
 
 Kotonoha (言の葉, „Blätter aus Worten“) legt interaktive Untertitel über YouTube, Netflix und andere Player. Jedes Wort zeigt seine Furigana, seinen Tonhöhenakzent und wie gut es bekannt ist, und beim Überfahren mit der Maus öffnet sich sein Wörterbucheintrag, ganz ohne Kosten. Eine Schaltfläche fragt Claude, was es in genau diesem Satz bedeutet. Dazu kommen ein Wörterbuch, das Erstellen von Karten für Anki oder eine eingebaute Wiederholung sowie Erklärungen im Kontext über die Claude-API. Auf jeder Webseite färbt die Erweiterung japanischen Text, ergänzt Furigana und schlägt Wörter mit einem Klick nach, auch in Chats wie dem von Claude, ohne die Seite zu zerstören. Sie funktioniert auch mit Texten, EPUB-Büchern und eigenen Videodateien. Die Oberfläche gibt es auf Spanisch, Englisch, Deutsch, Chinesisch, Koreanisch und Japanisch.
+
+Seit Version 0.4.0 lässt sich auch Englisch lernen: Das Wortfenster zeigt die amerikanische und britische Aussprache in IPA, findet Partikelverben auch dann, wenn sie getrennt stehen, und nennt das Wort, von dem jede unregelmäßige Form stammt. Die Wörterbücher stammen aus Wiktionary, in der Sprache der Oberfläche. Jede Sprache behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen, und der Wechsel zwischen ihnen braucht nur einen Klick.
 
 Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japans hat das menschliche Herz zum Samen, und aus ihm sprießen unzählige Blätter aus Worten.
 
@@ -113,6 +116,16 @@ Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japa
     <td valign="top"><b>Nach Maß</b><br>Farben für Farbenblindheit und hohen Kontrast, Lesungen in Kana oder Rōmaji, ein monatliches Kostenlimit und Websites, auf denen nichts geschehen soll. Von null bis N1.</td>
     <td valign="top"><b>Kürzel nach Wunsch</b><br>Alle Kürzel über dem Video lassen sich ändern, und sie funktionieren mit jeder Tastaturbelegung, auch bei aktivierter japanischer Eingabe.</td>
   </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/ingles-subtitulos.de.png" alt="Wortfenster eines englischen Wortes über einem Video"></td>
+    <td width="33%" align="center"><img src="docs/img/ingles-pagina.de.png" alt="Reader auf einem englischen Artikel, mit einem Partikelverb im Wortfenster"></td>
+    <td width="33%" align="center"><img src="docs/img/ingles-idioma.de.png" alt="Begrüßung mit der Wahl der Lernsprache"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Auch Englisch</b><br>Amerikanische und britische Aussprache in IPA, Grammatik von A1 bis C2 und Wörterbücher aus Wiktionary in der Sprache der Oberfläche. Whisper, Claude und Karten funktionieren wie beim Japanischen.</td>
+    <td valign="top"><b>Partikelverben</b><br>Das Wortfenster findet <i>pick up</i> auch dann, wenn im Satz <i>picked it up</i> steht, und erklärt, woher <i>went</i> kommt. Der Seiten-Reader ist anfangs ausgeschaltet, weil Englisch fast überall vorkommt, und wird im Menü der Erweiterung eingeschaltet.</td>
+    <td valign="top"><b>Jede Sprache für sich</b><br>Sie wird in der Begrüßung, in den Einstellungen oder im Menü der Erweiterung gewählt. Jede Sprache behält ihre Wörter, Wörterbücher, Karten und Einstellungen, und beim Zurückwechseln ist alles noch da.</td>
+  </tr>
 </table>
 
 Die vollständige Liste, mit der Art der Überprüfung jeder Funktion, steht in [docs/de/features.md](docs/de/features.md).
@@ -157,15 +170,15 @@ Anschließend wird der Ordner `dist` wie oben geladen. Beim erneuten Kompilieren
 
 ## Erste Schritte
 
-Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache und Niveau fragt und Folgendes vorschlägt:
+Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und Niveau fragt und Folgendes vorschlägt:
 
-1. Die Wörterbücher installieren: JMdict in der eigenen Sprache oder auf Englisch, falls es noch keines gibt, mit Tonhöhenakzent und Häufigkeit.
+1. Die Wörterbücher installieren. Für Japanisch JMdict in der eigenen Sprache oder auf Englisch, falls es noch keines gibt, mit Tonhöhenakzent und Häufigkeit. Für Englisch Wiktionary in der eigenen Sprache, mit Aussprache und Häufigkeit.
 2. Einen Claude-API-Schlüssel hinzufügen, der nur im Browser gespeichert wird. Das ist optional: Ohne ihn funktionieren Untertitel, Wörterbuch, Farben, Karten und Whisper.
 3. Wählen, wohin die Karten gehen: in die eingebaute Wiederholung oder zu Anki über das Add-on AnkiConnect.
 
 All das lässt sich überspringen und später unter **Einstellungen** im Fenster der Erweiterung (`Alt+Shift+K`) ändern.
 
-Danach erscheint beim Öffnen eines Videos mit japanischen Untertiteln die Kotonoha-Leiste, und auf jeder Seite mit japanischem Text erscheinen Farben und Furigana. Die [Anleitung](docs/de/guide.md) erklärt den Rest.
+Danach erscheint beim Öffnen eines Videos mit Untertiteln in der Lernsprache die Kotonoha-Leiste. Auf jeder Seite mit japanischem Text erscheinen Farben und Furigana; für Englisch muss der Reader zuerst im Menü der Erweiterung eingeschaltet werden. Die [Anleitung](docs/de/guide.md) erklärt den Rest.
 
 ### Helfer zum Transkribieren von Internetvideos
 
@@ -189,7 +202,7 @@ Bei der kompilierten Version wird er separat als `kotonoha-<version>-ayudante.zi
 | `S` | Satz wiederholen |
 | `G` | Untertitel-Navigator |
 | `Alt+Shift+M` | Audioaufnahme erlauben |
-| Klick auf ein Wort | Es nachschlagen, auf jeder Seite mit japanischem Text |
+| Klick auf ein Wort | Es nachschlagen, auf jeder Seite mit Text in der Lernsprache |
 
 ## Leistung der Transkription
 
@@ -246,8 +259,11 @@ Der letzte Befehl kompiliert und legt in `release/` die ZIP-Dateien der Erweiter
 | `npm test` | Die reine Logik in `src/nucleo` und dass die Übersetzungstabellen vollständig sind |
 | `node herramientas/idiomas.mjs` | Was in jeder Sprache fehlt oder übrig ist |
 | `node pruebas/lector.mjs` | Der Seiten-Reader in den schwierigen Fällen: Nichts bewegt sich, Klick, Links, Karussells, Akkordeons, live eintreffender Text, Shadow Trees und eine scrollende Box wie in einem Chat |
-| `node pruebas/lector-real.mjs` | Der Reader auf rund dreißig öffentlichen Websites, mit einem Screenshot von jeder |
+| `node pruebas/lector-real.mjs` | Der Reader auf rund dreißig öffentlichen Websites, mit einem Screenshot von jeder. Mit `KK_LENGUA=en` auf englischen Websites |
 | `node pruebas/trazos-web.mjs` | Die Strichfolge mit echten Daten, der Reader im Tab, die Zwischenablage und die geteilte Ansicht |
+| `node pruebas/ingles.mjs` | Englisch von Anfang bis Ende: die Sprache wählen, die Wörterbücher installieren, ein Video, eine Seite und zurück zum Japanischen, ohne dass sich etwas vermischt |
+| `node pruebas/ingles-whisper.mjs stimme.wav` | Whisper auf Englisch auf der GPU, mit simulierter Korrektur durch Claude |
+| `node pruebas/ingles-grande.mjs` | Das größte Wörterbuch mit einem leeren Profil: installieren, damit starten, nachschlagen und entfernen. Lädt etwa 110 MB herunter |
 | `node pruebas/e2e.mjs` | Die Erweiterung von Anfang bis Ende in Edge |
 | `node pruebas/subtitulos.mjs` | Übersetzen, korrigieren, exportieren und importieren, auf Seiten, die Netflix und YouTube nachahmen, mit einer simulierten Claude-API |
 | `node pruebas/experiencia.mjs` | Was über dem Video wahrnehmbar ist, Bild für Bild: Flackern, Zittern und Ziehen. Außerdem zählt der Test die Anfragen an Claude und prüft das Kostenprotokoll |
@@ -267,7 +283,7 @@ Die Browsertests verwenden eine Kompilierung mit fester Kennung, die mit `KK_SAL
 
 ## Projektstand
 
-Version 0.3.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft.
+Version 0.4.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader auf 16 echten öffentlichen Websites, aber noch nicht in einer echten Sitzung auf einer Videoseite.
 
 ## Datenschutz
 
@@ -275,6 +291,7 @@ Version 0.3.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe
 - Das von Whisper transkribierte Audio verlässt den Computer nicht. Ebenso wenig das Audio der Karten und das Einzelbild, außer sie werden an Anki gesendet.
 - An die Claude-API werden nur die für jede Aufgabe nötigen Texte gesendet: der Satz, das Skript der Untertitel und der Titel des Videos.
 - Suchen nach Audio und Bildern von Wörtern gehen direkt an JapanesePod101, Wikimedia Commons und Openverse, und die Striche jedes Kanji werden bei jsDelivr angefragt.
+- Wörterbücher werden nur einmal heruntergeladen: die japanischen und die englische Häufigkeitsliste von GitHub, die englischen von Hugging Face. Für Englisch kommt das Wort-Audio von Wikimedia Commons und Lingua Libre.
 - **Zwischenablage folgen** liest nur bei eingeschalteter Option und sichtbarem Tab, und das Gelesene verlässt den Computer nicht.
 - Die Erweiterung hat keinen eigenen Server und erhebt keine Nutzungsstatistiken.
 
@@ -283,6 +300,7 @@ Version 0.3.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe
 Der Code wird unter der [MIT-Lizenz](LICENSE) veröffentlicht. Die Komponenten von Dritten, die bei der Nutzung heruntergeladenen Daten und die Bedingungen für verantwortungsvolle Nutzung stehen in [docs/de/notices.md](docs/de/notices.md).
 
 - Wörterbücher: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) und [JPDB](https://jpdb.io), im Yomitan-Format.
+- Englisch: Definitionen und Aussprache aus [Wiktionary](https://www.wiktionary.org), aufbereitet von [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) und [kaikki.org](https://kaikki.org); Häufigkeit von [FrequencyWords](https://github.com/hermitdave/FrequencyWords); Analyse mit [wink-nlp](https://github.com/winkjs/wink-nlp).
 - Transkription: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) mit [Transformers.js](https://github.com/huggingface/transformers.js).
 - Strichfolge: [KanjiVG](https://kanjivg.tagaini.net) von Ulrich Apel, CC BY-SA 3.0.
 - Symbole: [Phosphor](https://phosphoricons.com). Schriften: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) und [Nunito](https://fonts.google.com/specimen/Nunito).

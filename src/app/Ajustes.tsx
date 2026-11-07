@@ -14,8 +14,9 @@ import { TAREAS_PERSONALIZABLES } from '../motor/prompts';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { estadoAnki, refrescarAnki } from './estadoApp';
 import { Cabecera, Interruptor, Mensaje } from './Piezas';
-import { IDIOMAS_INTERFAZ, LENGUAS, bcp47Actual, lenguaDe, numero, resolverIdioma, tm, tr } from '../compartido/i18n';
-import { lengua } from '../ui/lengua';
+import { IDIOMAS_INTERFAZ, bcp47Actual, lenguaDe, lenguasExplicacion, lenguasTraduccion, numero, resolverIdioma, tm, tr } from '../compartido/i18n';
+import { PAQUETES } from '../lenguas';
+import { estudiarLengua, lengua } from '../ui/lengua';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -68,10 +69,9 @@ const PESTANAS: [PestanaDiccionario, string][] = [
   ['enlaces', tm('Enlaces')],
 ];
 
-const NOMBRES_CONTENIDO: Record<Ajustes['ordenContenido'][number], string> = {
-  definiciones: tm('Definiciones'),
-  flexiones: tm('Conjugación'),
-  pestanas: tm('Pestañas'),
+const nombreContenido = (c: Ajustes['ordenContenido'][number]) => {
+  if (c === 'flexiones') return tr(lengua.value.textos.flexiones);
+  return c === 'definiciones' ? tr('Definiciones') : tr('Pestañas');
 };
 
 interface PropsSeccion {
@@ -331,10 +331,15 @@ function SeccionIdioma({ a, cambiar }: PropsSeccion) {
   return (
     <Seccion id="idioma" icono="nivel" titulo={tr('Idioma y nivel')} descripcion={tr('Las explicaciones se adaptan a tu nivel.')}>
       <div class="ap-grupo">
+        <Opcion titulo={tr('Idioma que estudias')} ayuda={tr('Cada idioma guarda sus propias palabras, diccionarios y tarjetas.')}>
+          <select class="selector" aria-label={tr('Idioma que estudias')} value={a.idiomaObjetivo} onChange={(e) => estudiarLengua(a, e.currentTarget.value).catch(console.error)}>
+            {PAQUETES.map((p) => <option key={p.id} value={p.id}>{tr(p.textos.nombre) === p.nombrePropio ? p.nombrePropio : `${tr(p.textos.nombre)} · ${p.nombrePropio}`}</option>)}
+          </select>
+        </Opcion>
         <Opcion titulo={tr('Idioma de la interfaz')} ayuda={tr('Al cambiarlo, también se ajustan las explicaciones y las traducciones. Luego puedes elegirlas por separado.')}>
           <select class="selector" aria-label={tr('Idioma de la interfaz')} value={a.idiomaInterfaz} onChange={(e) => {
             const v = e.currentTarget.value as Ajustes['idiomaInterfaz'];
-            const l = lenguaDe(resolverIdioma(v));
+            const l = lenguaDe(resolverIdioma(v), a.idiomaObjetivo);
             cambiar({ idiomaInterfaz: v, idiomaExplicaciones: l.explicaciones, idiomaTraduccion: l.traducciones, idiomaSecundario: l.secundaria });
           }}>
             <option value="auto">{tr('Automático, como el navegador')}</option>
@@ -349,8 +354,8 @@ function SeccionIdioma({ a, cambiar }: PropsSeccion) {
             <option value="nativo">{tr('Nativo')}</option>
           </select>
         </Opcion>
-        <Opcion titulo={tr('Lecturas')} ayuda={tr(lengua.value.textos.formatoAyuda)}>
-          <div class="segmentado" role="radiogroup" aria-label={tr('Lecturas')}>
+        <Opcion titulo={tr(lengua.value.textos.formatoTitulo)} ayuda={tr(lengua.value.textos.formatoAyuda)}>
+          <div class="segmentado" role="radiogroup" aria-label={tr(lengua.value.textos.formatoTitulo)}>
             {lengua.value.lectura.formatos.map(({ id: v, muestra: n }) => (
               <button key={v} role="radio" aria-checked={a.formatoLectura === v} class={a.formatoLectura === v ? 'activo' : ''} onClick={() => cambiar({ formatoLectura: v })}>{n}</button>
             ))}
@@ -358,12 +363,12 @@ function SeccionIdioma({ a, cambiar }: PropsSeccion) {
         </Opcion>
         <Opcion titulo={tr('Idioma de las explicaciones')}>
           <select class="selector" aria-label={tr('Idioma de las explicaciones')} value={a.idiomaExplicaciones} onChange={(e) => cambiar({ idiomaExplicaciones: e.currentTarget.value })}>
-            {LENGUAS.filter((l) => l.explica).map((l) => <option key={l.valor} value={l.valor}>{tr(l.nombre)}</option>)}
+            {lenguasExplicacion(a.idiomaObjetivo).map((l) => <option key={l.valor} value={l.valor}>{tr(l.nombre)}</option>)}
           </select>
         </Opcion>
         <Opcion titulo={tr('Idioma de las traducciones')}>
           <select class="selector" aria-label={tr('Idioma de las traducciones')} value={a.idiomaTraduccion} onChange={(e) => cambiar({ idiomaTraduccion: e.currentTarget.value })}>
-            {LENGUAS.filter((l) => l.traduce).map((l) => <option key={l.valor} value={l.valor}>{tr(l.nombre)}</option>)}
+            {lenguasTraduccion(a.idiomaObjetivo).map((l) => <option key={l.valor} value={l.valor}>{tr(l.nombre)}</option>)}
           </select>
         </Opcion>
       </div>
@@ -513,6 +518,8 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
   const [instalados, fijarInstalados] = useState<InfoDiccionario[]>([]);
   const [fuentes, fijarFuentes] = useState<FuenteBiblioteca[]>([]);
   const [progreso, fijarProgreso] = useState<Record<string, ProgresoInstalacion>>({});
+  const [borrando, fijarBorrando] = useState<string[]>([]);
+  const [errorBorrar, fijarErrorBorrar] = useState('');
   const entrada = useRef<HTMLInputElement>(null);
 
   const cargar = () => motor.estado().then((e) => fijarInstalados(e.diccionarios)).catch(console.error);
@@ -534,6 +541,19 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
     await motor.ordenarDiccionarios([...nueva, ...otros].map((x) => x.id));
   };
 
+  // Uno grande tarda en borrarse: sin avisar, parecería que el botón no hace nada.
+  const eliminar = async (id: string) => {
+    fijarErrorBorrar('');
+    fijarBorrando((b) => [...b, id]);
+    try {
+      await motor.eliminarDiccionario(id);
+    } catch (e) {
+      fijarErrorBorrar(e instanceof Error ? e.message : String(e));
+    } finally {
+      fijarBorrando((b) => b.filter((x) => x !== id));
+    }
+  };
+
   const filaInstalado = (d: InfoDiccionario, i: number, lista: InfoDiccionario[]) => (
     <div class="ap-opcion" key={d.id}>
       <div class="ap-opcion-texto">
@@ -547,7 +567,9 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
             <button class="btn-icono chico" disabled={i === lista.length - 1} aria-label={tr('Bajar {0}', d.titulo)} onClick={() => mover(lista, i, 1)}><Icono n="abajo" t={15} /></button>
           </>
         )}
-        <button class="btn-icono chico" aria-label={tr('Eliminar {0}', d.titulo)} data-tip={tr('Eliminar')} data-tip-lado="izq" onClick={() => motor.eliminarDiccionario(d.id)}><Icono n="basura" t={15} /></button>
+        {borrando.includes(d.id)
+          ? <span class="ayuda" role="status">{tr('Eliminando…')}</span>
+          : <button class="btn-icono chico" aria-label={tr('Eliminar {0}', d.titulo)} data-tip={tr('Eliminar')} data-tip-lado="izq" onClick={() => eliminar(d.id)}><Icono n="basura" t={15} /></button>}
       </div>
     </div>
   );
@@ -564,10 +586,11 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
         {terminos.map(filaInstalado)}
         {terminos.length === 0 && <div class="ap-opcion"><span class="ayuda">{tr('Aún no hay diccionarios instalados.')}</span></div>}
       </div>
+      {errorBorrar && <Mensaje error>{errorBorrar}</Mensaje>}
 
       {(frecuencias.length > 0 || otros.length > 0) && (
         <>
-          <Subtitulo>{tr('Frecuencia y acento')}</Subtitulo>
+          <Subtitulo>{tr(lengua.value.textos.frecuenciaYAcento)}</Subtitulo>
           <div class="ap-grupo">
             {frecuencias.map(filaInstalado)}
             {otros.map((d) => filaInstalado(d, 0, [d]))}
@@ -618,7 +641,7 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
       <div class="ap-grupo">
         <Opcion titulo={tr('Pestaña inicial')} ayuda={tr('Lo primero que ves al consultar una palabra. Una pestaña de Claude haría una petición por cada palabra nueva que abras.')}>
           <select class="selector" aria-label={tr('Pestaña inicial')} value={a.diccionarioPestana} onChange={(e) => cambiar({ diccionarioPestana: e.currentTarget.value as PestanaDiccionario })}>
-            {PESTANAS.map(([v, n]) => <option key={v} value={v}>{tr(n)}</option>)}
+            {PESTANAS.filter(([v]) => v !== 'trazos' || lengua.value.trazos).map(([v, n]) => <option key={v} value={v}>{tr(n)}</option>)}
           </select>
         </Opcion>
         <Opcion titulo={tr('Etiqueta de frecuencia')}>
@@ -628,14 +651,14 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
           </div>
         </Opcion>
         {a.ordenContenido.map((c, i) => (
-          <Opcion key={c} titulo={<><span class="ap-orden num">{i + 1}</span> {tr(NOMBRES_CONTENIDO[c])}</>} ayuda={i === 0 ? tr('Orden del contenido dentro de la ficha.') : undefined}>
+          <Opcion key={c} titulo={<><span class="ap-orden num">{i + 1}</span> {nombreContenido(c)}</>} ayuda={i === 0 ? tr('Orden del contenido dentro de la ficha.') : undefined}>
             <span class="ap-apretado">
-              <button class="btn-icono chico" disabled={i === 0} aria-label={tr('Subir {0}', tr(NOMBRES_CONTENIDO[c]))} onClick={() => {
+              <button class="btn-icono chico" disabled={i === 0} aria-label={tr('Subir {0}', nombreContenido(c))} onClick={() => {
                 const n = [...a.ordenContenido];
                 [n[i - 1], n[i]] = [n[i], n[i - 1]];
                 cambiar({ ordenContenido: n });
               }}><Icono n="arriba" t={15} /></button>
-              <button class="btn-icono chico" disabled={i === a.ordenContenido.length - 1} aria-label={tr('Bajar {0}', tr(NOMBRES_CONTENIDO[c]))} onClick={() => {
+              <button class="btn-icono chico" disabled={i === a.ordenContenido.length - 1} aria-label={tr('Bajar {0}', nombreContenido(c))} onClick={() => {
                 const n = [...a.ordenContenido];
                 [n[i + 1], n[i]] = [n[i], n[i + 1]];
                 cambiar({ ordenContenido: n });
@@ -801,7 +824,7 @@ function SeccionDatos({ a, cambiar }: PropsSeccion) {
         <Opcion titulo={tr('Copia de seguridad')} ayuda={tr('Palabras, tarjetas, biblioteca y ajustes en un archivo.')}>
           <span class="ap-botones">
             <button class="btn chico" onClick={async () => {
-              const json = await motor.exportarDatos();
+              const json = await motor.exportarDatos(a);
               const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
               const v = document.createElement('a');
               v.href = url;
@@ -815,7 +838,8 @@ function SeccionDatos({ a, cambiar }: PropsSeccion) {
             const f = e.currentTarget.files?.[0];
             if (!f) return;
             try {
-              await motor.importarDatos(await f.text());
+              const ajustes = await motor.importarDatos(await f.text());
+              if (ajustes) cambiar(ajustes);
               fijarMensaje({ texto: tr('Copia restaurada.') });
             } catch (err) {
               fijarMensaje({ texto: err instanceof Error ? err.message : String(err), error: true });

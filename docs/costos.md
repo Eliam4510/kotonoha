@@ -6,6 +6,8 @@ Lo que cuesta usar Kotonoha con una clave propia de la API de Claude, medido con
 
 Los subtítulos, el diccionario, el furigana, las tarjetas, el repaso y la transcripción con Whisper no usan la API y no cuestan nada.
 
+Las cifras son del japonés. En inglés el mecanismo es el mismo, pero aún no se ha medido.
+
 ## Resumen
 
 Con el crédito de referencia de 100 USD al mes:

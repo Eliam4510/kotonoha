@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.3.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.4.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -103,7 +103,7 @@ Estado de cada función en la versión 0.3.0, con la forma en que se ha verifica
 | Explorador de palabras por estado | Automática |
 | Evaluación de nivel | Automática |
 | Ajustes completos y prompts editables | Automática |
-| Copia de seguridad | Automática |
+| Copia de seguridad de todos los idiomas y de los ajustes, en un solo archivo | Automática |
 
 ## Páginas web
 
@@ -127,6 +127,8 @@ Estado de cada función en la versión 0.3.0, con la forma en que se ha verifica
 
 | Función | Verificación |
 |---|---|
+| Elegir el idioma que se estudia: en la bienvenida, en Ajustes o en el menú de la extensión | Automática |
+| Palabras, diccionarios, tarjetas y ajustes separados por idioma | Automática |
 | Interfaz en español, inglés, alemán, chino simplificado, coreano y japonés | Automática: tablas completas y capturas de cada idioma |
 | Bienvenida con idioma, nivel, diccionarios, clave y destino de las tarjetas | Automática |
 | Explicaciones y traducciones en un idioma distinto al de la interfaz, también portugués y francés | Automática |
@@ -135,6 +137,26 @@ Estado de cada función en la versión 0.3.0, con la forma en que se ha verifica
 | Paletas de color: habitual, para daltonismo y de alto contraste | Automática |
 | Atajos de teclado a elegir, que funcionan con cualquier distribución de teclado | Automática |
 | Tope de gasto mensual en Claude | Simulador |
+
+## Inglés
+
+| Función | Verificación |
+|---|---|
+| Subtítulos en inglés, con cada palabra analizada y los secundarios en el idioma de apoyo | Página imitada. Pendiente de una sesión real |
+| Corrección de subtítulos automáticos y creación de inglés desde otro idioma | Página imitada |
+| Pronunciación americana y británica en IPA, en la ficha y, si se pide, sobre cada palabra | Automática, con datos reales de Wiktionary |
+| Color por sílaba tónica: la primera, una del medio o la última | Automática |
+| Definiciones y traducciones de Wiktionary en español, alemán, chino, coreano y japonés, y definiciones en inglés | Automática, con datos reales |
+| Frecuencia según subtítulos de películas y series | Automática, con datos reales |
+| De qué palabra viene cada forma: *went* es *go*, *didn't* es *do* | Automática |
+| Verbos con partícula y frases hechas, también separados: *picked it up* encuentra *pick up* | Automática |
+| Gramática de A1 a C2: 51 reglas, confirmadas por Claude | Simulador |
+| Lector de páginas, apagado al empezar, que deja en paz las páginas en otro idioma | Automática, y en 16 sitios públicos reales |
+| Whisper en inglés, con las líneas partidas para leerlas | Automática, con una voz sintética |
+| Instrucciones a Claude propias del inglés | Simulador |
+| Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
+| Voces neuronales de Azure en inglés | Pendiente |
+| Evaluación de nivel y camino de A1 a C2 | Automática |
 
 ## Criterios de diseño
 
@@ -154,7 +176,9 @@ Estado de cada función en la versión 0.3.0, con la forma en que se ha verifica
 
 | Limitación | Detalle |
 |---|---|
-| Idioma de estudio | Solo japonés: la lógica de análisis es específica de este idioma |
+| Idioma de estudio | Japonés e inglés. Cada idioma nuevo necesita su propio paquete, en `src/lenguas` |
+| Análisis del inglés | Lo hace un modelo pequeño, que cabe en la extensión. En frases ambiguas puede equivocarse de categoría, y con ella de traducción bajo la palabra. La ficha sigue mostrando todas las definiciones |
+| Diccionario inglés-inglés | Es grande: descarga unos 110 MB y ocupa unos 220 MB. Instalarlo y quitarlo lleva unos minutos. Solo se propone con la interfaz en inglés |
 | Traducciones de la interfaz | Escritas con ayuda de IA, sin revisión nativa todavía. Los errores se corrigen en `idiomas/` |
 | Lector de páginas | Solo actúa en el marco principal: no llega al texto dentro de un iframe. Lo que una página dibuje en un lienzo o en una imagen no es texto |
 | Prompts de Claude | Las instrucciones siguen en español, también cuando pide la respuesta en otro idioma |

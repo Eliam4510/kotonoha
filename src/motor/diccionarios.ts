@@ -1,14 +1,16 @@
 // Instalación de diccionarios: biblioteca abierta o archivo en formato Yomitan.
 
+import type { Table } from 'dexie';
 import { strFromU8, unzipSync } from 'fflate';
 import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../compartido/tipos';
 import { fondo } from '../compartido/rpc';
-import { type FrecuenciaImportada, leerBancoMeta, leerBancoTerminos, leerKanjium } from '../nucleo/yomitan';
+import { type FrecuenciaImportada, leerBancoMeta, leerBancoTerminos, leerKanjium, leerListaFrecuencia } from '../nucleo/yomitan';
 import { db } from './db';
 import { tr } from '../compartido/i18n';
 import { motorLengua } from './lengua';
 
 const LOTE = 4000;
+const TANDA_BORRADO = 10000;
 
 function emitir(p: ProgresoInstalacion) {
   fondo.difundir({ tipo: 'instalacion', progreso: p }).catch(() => {});
@@ -42,9 +44,21 @@ async function siguienteOrden(): Promise<number> {
   return todos.reduce((m, d) => Math.max(m, d.orden), -1) + 1;
 }
 
+/**
+ * Borrar de una vez un diccionario grande no llega a terminar: con 850.000 filas, la operación se queda colgada. Por
+ * tandas, cada una en su transacción, acaba y el motor sigue atendiendo mientras tanto.
+ */
+async function borrarPorTandas<T extends { dic: string }, K>(tabla: Table<T, K>, id: string) {
+  for (;;) {
+    const claves = await tabla.where('dic').equals(id).limit(TANDA_BORRADO).primaryKeys();
+    if (!claves.length) return;
+    await tabla.bulkDelete(claves);
+  }
+}
+
 async function borrarFilas(id: string, tipo?: InfoDiccionario['tipo']) {
-  if (tipo === 'terminos' || !tipo) await db.terminos.where('dic').equals(id).delete();
-  if (tipo === 'frecuencia' || !tipo) await db.frecuencias.where('dic').equals(id).delete();
+  if (tipo === 'terminos' || !tipo) await borrarPorTandas(db.terminos, id);
+  if (tipo === 'frecuencia' || !tipo) await borrarPorTandas(db.frecuencias, id);
   if (tipo === 'acento' || !tipo) await db.acentos.clear();
 }
 
@@ -56,9 +70,16 @@ async function importarZip(
   datos: Partial<FuenteBiblioteca>,
   alAvance: (f: number) => void
 ): Promise<void> {
-  const archivos = unzipSync(zip);
-  const nombres = Object.keys(archivos);
-  const indice = archivos['index.json'] ? (JSON.parse(strFromU8(archivos['index.json'])) as { title?: string; attribution?: string }) : {};
+  // Se abre un banco cada vez: descomprimir de golpe un diccionario grande pediría más memoria de la que hay.
+  const nombres: string[] = [];
+  unzipSync(zip, {
+    filter: (f) => {
+      nombres.push(f.name);
+      return false;
+    },
+  });
+  const abrir = (nombre: string) => strFromU8(unzipSync(zip, { filter: (f) => f.name === nombre })[nombre]);
+  const indice = nombres.includes('index.json') ? (JSON.parse(abrir('index.json')) as { title?: string; attribution?: string }) : {};
   const bancos = nombres.filter((n) => /^term(_meta)?_bank_\d+\.json$/.test(n));
   if (!bancos.length) throw new Error(tr('El archivo no contiene un diccionario de términos reconocible'));
 
@@ -74,13 +95,15 @@ async function importarZip(
 
   for (let i = 0; i < bancos.length; i++) {
     const n = bancos[i];
-    const crudo = JSON.parse(strFromU8(archivos[n])) as unknown[][];
+    const crudo = JSON.parse(abrir(n)) as unknown[][];
     if (n.startsWith('term_bank')) {
-      const filas = leerBancoTerminos(crudo).map((f) => ({ ...f, dic: id }));
+      const filas = leerBancoTerminos(crudo, motorLengua().seccionesOmitidas).map((f) => ({ ...f, dic: id }));
       for (let j = 0; j < filas.length; j += LOTE) await db.terminos.bulkAdd(filas.slice(j, j + LOTE));
       filasTerminos += filas.length;
     } else {
-      const { frecuencias, acentos } = leerBancoMeta(crudo);
+      const { frecuencias, acentos: tonos, pronunciaciones } = leerBancoMeta(crudo);
+      const fila = motorLengua().filaPronunciacion;
+      const acentos = [...tonos, ...(fila ? pronunciaciones.flatMap((p) => fila(p) ?? []) : [])];
       for (const f of frecuencias) {
         const clave = `${f.termino}\u0001${f.lectura}`;
         const previa = mejoresRangos.get(clave);
@@ -131,6 +154,23 @@ export async function instalarDesdeBiblioteca(idFuente: string): Promise<void> {
         id: f.id,
         titulo: f.titulo,
         tipo: 'acento',
+        orden: await siguienteOrden(),
+        filas: filas.length,
+        fuente: f.url,
+        instalado: Date.now(),
+      });
+    } else if (f.formato === 'lista') {
+      const leidas = leerListaFrecuencia(new TextDecoder().decode(datos));
+      const filas = (await motorLengua().prepararFrecuencias?.(leidas)) ?? leidas;
+      await borrarFilas(f.id, 'frecuencia');
+      for (let j = 0; j < filas.length; j += LOTE) {
+        await db.frecuencias.bulkPut(filas.slice(j, j + LOTE).map((x) => ({ ...x, dic: f.id })));
+        progreso('guardando', j / filas.length);
+      }
+      await db.diccionarios.put({
+        id: f.id,
+        titulo: f.titulo,
+        tipo: 'frecuencia',
         orden: await siguienteOrden(),
         filas: filas.length,
         fuente: f.url,

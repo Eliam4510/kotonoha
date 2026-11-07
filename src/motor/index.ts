@@ -9,17 +9,17 @@ import type { Linea } from '../nucleo/subtitulos';
 import * as analisis from './analisis';
 import * as anki from './anki';
 import { consultarAyudante } from './ayudante';
-import { baseDe, baseGeneral, db } from './db';
+import { baseDe, baseGeneral, db, existeBaseDe, type FilaFrecuencia } from './db';
 import * as dics from './diccionarios';
 import * as grabacion from './grabacion';
 import * as ia from './ia';
 import { fijarLengua, lengua, motorLengua } from './lengua';
 import { rellenar } from './prompts';
-import { paqueteDe } from '../lenguas';
+import { PAQUETES, paqueteDe } from '../lenguas';
 import * as medios from './medios';
 import * as memoria from './memoria';
 import * as whisper from './whisper';
-import { fijarIdioma, tr } from '../compartido/i18n';
+import { fijarIdioma, tr } from '../compartido/i18n';
 import { trazosDe } from './trazos';
 
 let ajustes: Ajustes = completarAjustes(undefined);
@@ -28,7 +28,7 @@ async function refrescarAjustes(): Promise<Ajustes> {
   ajustes = completarAjustes((await fondo.ajustesCompletos()) as Partial<Ajustes>);
   anki.fijarPuerto(ajustes.ankiPuerto);
   await fijarIdioma(ajustes.idiomaInterfaz);
-  if (fijarLengua(ajustes.idiomaObjetivo)) analisis.olvidarLengua();
+  if (fijarLengua(ajustes.idiomaObjetivo)) alCambiarLengua();
   return ajustes;
 }
 
@@ -39,6 +39,15 @@ async function aj(): Promise<Ajustes> {
   } catch {
     return ajustes;
   }
+}
+
+/** Lo que había en memoria era de la lengua anterior. Lo guardado está cada uno en su base. */
+function alCambiarLengua() {
+  analisis.olvidarLengua();
+  analisis.cargarAnalizador().catch((e) => console.error('Analizador:', e));
+  analisis.recargarTerminos().catch((e) => console.error('Términos:', e));
+  repararDiccionarios().catch((e) => console.warn('Diccionarios:', e));
+  ia.limpiarCache().catch(() => {});
 }
 
 async function arrancar() {
@@ -65,9 +74,21 @@ async function repararDiccionarios() {
   await fondo.difundir({ tipo: 'diccionarios' });
 }
 
+/** Lo que una copia de seguridad guarda de cada lengua. */
+interface DatosDeLengua {
+  palabras?: never[];
+  biblioteca?: never[];
+  memoria?: never[];
+  generados?: never[];
+  correcciones?: never[];
+}
+
 let sinGpu: boolean | null = null;
 
 const api: ApiMotor = {
+  async fijarLengua(id) {
+    if (fijarLengua(id)) alCambiarLengua();
+  },
   // No cambia sin reiniciar el navegador: basta con mirarlo una vez.
   async sinAceleracion() {
     if (sinGpu === null) {
@@ -193,9 +214,16 @@ const api: ApiMotor = {
     const dicFrec = (await dics.listaDiccionarios()).find((d) => d.tipo === 'frecuencia')?.id;
     if (!dicFrec) throw new Error(tr('Instala primero la lista de frecuencia.'));
     const salida: { lema: string; lectura: string; rango: number }[] = [];
+    // Una lista de frecuencia también trae nombres propios y ruido: se pregunta solo lo que está en los diccionarios.
+    const terminos = await analisis.listaTerminos();
+    const total = await db.frecuencias.where('dic').equals(dicFrec).count();
     // Muestra por bandas de frecuencia, para estimar hasta dónde llega tu vocabulario.
     for (const rango of [200, 500, 1000, 2000, 3000, 5000, 7500, 10000, 15000, 20000, 30000, 40000]) {
-      const filas = await db.frecuencias.where('dic').equals(dicFrec).filter((f) => f.rango >= rango && f.rango < rango * 1.15 && !!f.lectura).limit(6).toArray();
+      const enLaBanda = (f: FilaFrecuencia) => f.rango >= rango && f.rango < rango * 1.15 && !!f.lectura && (!terminos.size || terminos.has(f.termino));
+      const dic = () => db.frecuencias.where('dic').equals(dicFrec);
+      // Las filas van por orden alfabético: se empieza en un punto al azar para no preguntar solo por lo que empieza por a.
+      let filas = await dic().offset(Math.floor(Math.random() * total)).filter(enLaBanda).limit(6).toArray();
+      if (!filas.length) filas = await dic().filter(enLaBanda).limit(6).toArray();
       if (filas.length) {
         const f = filas[Math.floor(Math.random() * filas.length)];
         salida.push({ lema: f.termino, lectura: f.lectura, rango: f.rango });
@@ -384,30 +412,38 @@ const api: ApiMotor = {
     await memoria.eliminar(id);
   },
 
-  async exportarDatos() {
-    return JSON.stringify({
-      version: 1,
-      lengua: lengua().id,
-      palabras: await db.palabras.toArray(),
-      biblioteca: await db.biblioteca.toArray(),
-      memoria: await db.memoria.toArray(),
-      // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
-      generados: await db.generados.toArray(),
-      correcciones: await db.correcciones.toArray(),
-      consumo: await baseGeneral.consumo.toArray(),
-    });
+  async exportarDatos(ajustes) {
+    // Quien hace una copia espera poder recuperarlo todo, no solo la lengua que estudia esta semana.
+    const lenguas: Record<string, unknown> = {};
+    for (const { id } of PAQUETES) {
+      if (!(await existeBaseDe(id))) continue;
+      const base = baseDe(id);
+      lenguas[id] = {
+        palabras: await base.palabras.toArray(),
+        biblioteca: await base.biblioteca.toArray(),
+        memoria: await base.memoria.toArray(),
+        // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
+        generados: await base.generados.toArray(),
+        correcciones: await base.correcciones.toArray(),
+      };
+    }
+    return JSON.stringify({ version: 2, ajustes, lenguas, consumo: await baseGeneral.consumo.toArray() });
   },
   async importarDatos(json) {
-    const d = JSON.parse(json) as { lengua?: string; palabras?: never[]; biblioteca?: never[]; memoria?: never[]; generados?: never[]; correcciones?: never[]; consumo?: never[] };
+    const d = JSON.parse(json) as DatosDeLengua & { lengua?: string; lenguas?: Record<string, DatosDeLengua>; consumo?: never[]; ajustes?: Partial<Ajustes> };
     // Las copias de antes de haber más lenguas no dicen de cuál son: todas eran de japonés.
-    const base = baseDe(paqueteDe(d.lengua ?? 'ja').id);
-    if (d.palabras) await base.palabras.bulkPut(d.palabras);
-    if (d.biblioteca) await base.biblioteca.bulkPut(d.biblioteca);
-    if (d.memoria) await base.memoria.bulkPut(d.memoria);
-    if (d.generados) await base.generados.bulkPut(d.generados);
-    if (d.correcciones) await base.correcciones.bulkPut(d.correcciones);
+    const lenguas = d.lenguas ?? { [d.lengua ?? 'ja']: d };
+    for (const [id, datos] of Object.entries(lenguas)) {
+      const base = baseDe(paqueteDe(id).id);
+      if (datos.palabras) await base.palabras.bulkPut(datos.palabras);
+      if (datos.biblioteca) await base.biblioteca.bulkPut(datos.biblioteca);
+      if (datos.memoria) await base.memoria.bulkPut(datos.memoria);
+      if (datos.generados) await base.generados.bulkPut(datos.generados);
+      if (datos.correcciones) await base.correcciones.bulkPut(datos.correcciones);
+    }
     if (d.consumo) await baseGeneral.consumo.bulkPut(d.consumo);
     await fondo.difundir({ tipo: 'palabrasRecargar' });
+    return d.ajustes ?? null;
   },
   async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen) {
     await db.generados.put({ clave: `${idVideo}|${idioma}`, idVideo, idioma, lineas, origen, creado: Date.now() });

@@ -1,6 +1,6 @@
 // Tipos compartidos entre el motor, el content script y la ventana de la app.
 
-import type { PuntoGramatica, SegmentoLectura } from '../lenguas/tipos';
+import type { PuntoGramatica, SegmentoLectura, Transcripcion } from '../lenguas/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 
 export type EstadoPalabra = 'desconocida' | 'aprendiendo' | 'conocida' | 'ignorada';
@@ -27,6 +27,7 @@ export interface PalabraToken {
   sentido?: string; // Sentido en esta frase cuando no es el primero del diccionario
   uso?: string; // literal, figurado, poético...
   lecturaCorregida?: boolean; // Claude corrigió la lectura del tokenizador
+  pronunciacion?: string; // Cómo suena su forma de diccionario, donde se guarda aparte: lectura.visible sabe escribirla
 }
 
 export type LineaAnalizada = Linea & { palabras: PalabraToken[]; gramatica?: PuntoGramatica[] };
@@ -71,6 +72,7 @@ export interface ResultadoBusqueda {
   estado: EstadoPalabra;
   rastreada: boolean;
   acentos: number[];
+  pronunciaciones?: Transcripcion[];
   patron?: string;
   frecuencias: EtiquetaFrecuencia[];
   entradas: EntradaDiccionario[];
@@ -94,7 +96,7 @@ export interface FuenteBiblioteca {
   tipo: InfoDiccionario['tipo'];
   idioma?: string;
   url: string;
-  formato: 'yomitan' | 'kanjium';
+  formato: 'yomitan' | 'kanjium' | 'lista';
   recomendado: boolean;
   licencia: string;
 }

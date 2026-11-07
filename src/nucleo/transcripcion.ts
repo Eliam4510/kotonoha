@@ -14,6 +14,10 @@ export interface ReglasTranscripcion {
   pausa: RegExp;
   /** Dónde cortar una frase sin puntuación. Con la marca g. */
   corteSinPuntuacion: RegExp;
+  /** Dónde cortar si no se encuentra ninguno de esos sitios. Sin esto, por la mitad: en japonés no molesta. */
+  corteDeReserva?: RegExp;
+  /** Si una cláusula larga entre comas también se parte, y no solo la última de la frase. */
+  partirClausulas?: boolean;
   maximoCaracteres: number;
   /** Lo que se tarda en decir un carácter, para cuando Whisper no da el final de un segmento. */
   msPorCaracter: number;
@@ -192,12 +196,17 @@ export function esTextoRecuperable(texto: string, reglas: ReglasTranscripcion): 
 function partirSinPuntuacion(texto: string, reglas: ReglasTranscripcion): string[] {
   if (texto.length <= reglas.maximoCaracteres) return [texto];
   const centro = Math.floor(texto.length / 2);
-  let mejor = -1;
-  for (const m of texto.matchAll(reglas.corteSinPuntuacion)) {
-    const corte = m.index + 1;
-    if (mejor < 0 || Math.abs(corte - centro) < Math.abs(mejor - centro)) mejor = corte;
-  }
-  if (mejor < 0) mejor = centro;
+  const mejorCorte = (re: RegExp | undefined) => {
+    let mejor = -1;
+    for (const m of re ? texto.matchAll(re) : []) {
+      const corte = m.index + 1;
+      if (mejor < 0 || Math.abs(corte - centro) < Math.abs(mejor - centro)) mejor = corte;
+    }
+    return mejor;
+  };
+  let mejor = mejorCorte(reglas.corteSinPuntuacion);
+  if (mejor <= 0) mejor = mejorCorte(reglas.corteDeReserva);
+  if (mejor <= 0) mejor = centro;
   return [...partirSinPuntuacion(texto.slice(0, mejor), reglas), ...partirSinPuntuacion(texto.slice(mejor), reglas)];
 }
 
@@ -213,12 +222,12 @@ export function partirTexto(texto: string, reglas: ReglasTranscripcion): string[
     let actual = '';
     for (const parte of f.split(reglas.pausa)) {
       if (actual && actual.length + parte.length > reglas.maximoCaracteres) {
-        salida.push(actual);
+        salida.push(...(reglas.partirClausulas ? partirSinPuntuacion(actual, reglas) : [actual]).map((t) => t.trim()));
         actual = '';
       }
       actual += parte;
     }
-    if (actual) salida.push(...partirSinPuntuacion(actual, reglas));
+    if (actual) salida.push(...partirSinPuntuacion(actual, reglas).map((t) => t.trim()));
   }
   return salida;
 }

@@ -25,7 +25,7 @@ import { TextoInteractivo } from './Lectura';
 import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
-import { lengua } from '../ui/lengua';
+import { lecturaDeTarjeta, lengua } from '../ui/lengua';
 
 // ---------- Inicio ----------
 
@@ -405,7 +405,7 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
               ajustes={ajustes}
               contexto={{ frase: frase || undefined }}
               pestanaInicial={frase ? 'ninguna' : 'audio'}
-              alEnviar={(x) => enviarAlCreador({ palabra: x.lema, lectura: x.lectura, frase, definicion: [...new Set(x.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>') }, false)}
+              alEnviar={(x) => enviarAlCreador({ palabra: x.lema, lectura: lecturaDeTarjeta(x), frase, definicion: [...new Set(x.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>') }, false)}
             />
           </div>
         ))}
@@ -591,7 +591,6 @@ function Libro({ e, alAbrir, alEliminar }: { e: ElementoBiblioteca; alAbrir: () 
   );
 }
 
-const IDEAS_RELATO = [tm('Un gato que pasea por Kioto'), tm('Una tarde de lluvia en el tren'), tm('El festival de verano del barrio')];
 
 export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: string }) {
   const [lista, fijarLista] = useState<ElementoBiblioteca[]>([]);
@@ -721,7 +720,7 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
             </div>
           ) : (
             <div class="ap-claude-ideas">
-              {IDEAS_RELATO.map((i) => <button key={i} class="chip" onClick={() => fijarTema(tr(i))}>{tr(i)}</button>)}
+              {lengua.value.ideasRelato.map((i) => <button key={i} class="chip" onClick={() => fijarTema(tr(i))}>{tr(i)}</button>)}
             </div>
           )}
         </section>

@@ -1,6 +1,7 @@
 // Recorre páginas reales con el lector: que no mueva nada, que pinte, que el clic consulte y que no rompa el sitio.
 // Mira páginas públicas, sin iniciar sesión, con un perfil de pruebas. Guarda una captura de cada una.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/lector-real.mjs [parte-de-la-direccion...]
+// Con KK_LENGUA=en, en páginas en inglés: una página en inglés tiene muchas más palabras que analizar.
 
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -9,12 +10,35 @@ import { recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
-const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-lector-real'));
-const CAPTURAS = join(RAIZ, 'capturas-e2e', 'lector-real');
+const INGLES = process.env.KK_LENGUA === 'en';
+const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, INGLES ? '.perfil-lector-real-ingles' : '.perfil-lector-real'));
+const CAPTURAS = join(RAIZ, 'capturas-e2e', INGLES ? 'lector-real-ingles' : 'lector-real');
 mkdirSync(CAPTURAS, { recursive: true });
 rmSync(PERFIL, { recursive: true, force: true });
 
-const SITIOS = [
+const SITIOS_INGLES = [
+  ['Wikipedia', 'https://en.wikipedia.org/wiki/English_language'],
+  ['Simple Wikipedia', 'https://simple.wikipedia.org/wiki/English_language'],
+  ['Wiktionary', 'https://en.wiktionary.org/wiki/study'],
+  ['Gutenberg', 'https://www.gutenberg.org/files/11/11-h/11-h.htm'],
+  ['VOA Learning English', 'https://learningenglish.voanews.com/'],
+  ['News in Levels', 'https://www.newsinlevels.com/'],
+  ['BBC Learning English', 'https://www.bbc.co.uk/learningenglish'],
+  ['BBC News', 'https://www.bbc.com/news'],
+  ['The Guardian', 'https://www.theguardian.com/international'],
+  ['NPR', 'https://www.npr.org/'],
+  ['NASA', 'https://www.nasa.gov/'],
+  ['Hacker News', 'https://news.ycombinator.com/'],
+  ['MDN', 'https://developer.mozilla.org/en-US/docs/Web/HTML'],
+  ['Python', 'https://docs.python.org/3/tutorial/index.html'],
+  ['GitHub Docs', 'https://docs.github.com/en'],
+  ['Amazon', 'https://www.amazon.com/'],
+  // Estas no están en inglés: el lector no debe tocarlas.
+  ['Wikipedia ES', 'https://es.wikipedia.org/wiki/Idioma_ingl%C3%A9s'],
+  ['Wikipedia JA', 'https://ja.wikipedia.org/wiki/%E8%8B%B1%E8%AA%9E'],
+];
+
+const SITIOS_JAPONES = [
   ['Wikipedia', 'https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E8%AA%9E'],
   ['Wikcionario', 'https://ja.wiktionary.org/wiki/%E5%8B%89%E5%BC%B7'],
   ['Aozora Bunko', 'https://www.aozora.gr.jp/cards/000148/files/789_14547.html'],
@@ -49,6 +73,7 @@ const SITIOS = [
   ['Wikipedia ES', 'https://es.wikipedia.org/wiki/Idioma_japon%C3%A9s'],
 ];
 
+const SITIOS = INGLES ? SITIOS_INGLES : SITIOS_JAPONES;
 const pedidos = process.argv.slice(2);
 const lista = pedidos.length ? SITIOS.filter(([n, u]) => pedidos.some((x) => (n + u).toLowerCase().includes(x.toLowerCase()))) : SITIOS;
 
@@ -56,7 +81,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   viewport: { width: 1366, height: 860 },
-  locale: 'ja-JP',
+  locale: INGLES ? 'en-US' : 'ja-JP',
   args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 const sw = await recargarExtension(contexto);
@@ -65,6 +90,22 @@ const fijar = (c) => sw.evaluate(async (c) => {
   await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), ...c } });
 }, c);
 await fijar({ lectorActivo: false, lectorFurigana: 'todas', destino: 'memoria', ankiPuerto: 1, bienvenidaVista: true, idiomaInterfaz: 'es', lectorColor: true });
+
+if (INGLES) {
+  const id = new URL(sw.url()).host;
+  const app = await contexto.newPage();
+  await app.goto(`chrome-extension://${id}/app.html#/ajustes`);
+  await app.waitForTimeout(1200);
+  await app.locator('select[aria-label="Idioma que estudias"]').selectOption('en');
+  await app.waitForTimeout(800);
+  for (const d of ['wty-en-es', 'wty-en-es-gloss', 'wty-en-ipa', 'frecuencia-subtitulos']) {
+    const r = await app.evaluate((d) => chrome.runtime.sendMessage({ canal: 'motor', metodo: 'instalarDiccionario', args: [d] }), d);
+    if (!r?.ok) throw new Error(`${d}: ${r?.error ?? 'sin respuesta'}`);
+  }
+  await app.close();
+  // En inglés, el peor caso: con la pronunciación sobre cada palabra.
+  await fijar({ lectorFurigana: 'todas' });
+}
 
 // Cada elemento se compara consigo mismo, no con el que ocupe su lugar en la lista: un carrusel que reordena sus
 // diapositivas descuadraría todo lo que va detrás, y parecería que se ha movido la página entera.
@@ -91,8 +132,8 @@ const distintos = (a, b) => (a && b ? Object.keys(a.salida).filter((k) => k in b
 const ficha = (p) => p.evaluate(() => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.ficha-palabra')?.textContent ?? null).catch(() => null);
 
 /** Una palabra de un párrafo visible que no esté en un enlace, y otra en un enlace o botón. */
-const buscarPuntos = (p) => p.evaluate(() => {
-  const KANJI = /[㐀-鿿]{2,}/;
+const buscarPuntos = (p) => p.evaluate((ingles) => {
+  const KANJI = ingles ? /\b[A-Za-z]{5,}\b/ : /[㐀-鿿]{2,}/;
   const res = { texto: null, enlace: null };
   const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   while (w.nextNode() && !(res.texto && res.enlace)) {
@@ -114,7 +155,7 @@ const buscarPuntos = (p) => p.evaluate(() => {
     if (!interactivo && !res.texto) res.texto = punto;
   }
   return res;
-}).catch(() => ({ texto: null, enlace: null }));
+}, INGLES).catch(() => ({ texto: null, enlace: null }));
 
 const filas = [];
 for (const [nombre, url] of lista) {
@@ -241,7 +282,7 @@ for (const [nombre, url] of lista) {
 
 writeFileSync(join(CAPTURAS, 'resultados.json'), JSON.stringify(filas, null, 1));
 const conLector = filas.filter((f) => f.bloques > 0);
-console.log(`\n${filas.length} sitios, ${conLector.length} con japonés analizado`);
+console.log(`\n${filas.length} sitios, ${conLector.length} con ${INGLES ? 'inglés' : 'japonés'} analizado`);
 console.log(`Diseño intacto: ${filas.filter((f) => f.ok).length}, con dudas: ${filas.filter((f) => f.ok === false).map((f) => f.sitio).join(', ') || 'ninguno'}`);
 console.log(`Con las líneas abiertas: ${filas.filter((f) => f.abiertos > 0).map((f) => `${f.sitio} ${f.abiertos} (+${f.crece} px)`).join(', ') || 'ninguno'}`);
 console.log(`Clic que abre la ficha: ${filas.filter((f) => f.clic && f.clic !== 'NADA' && !f.clic.startsWith('(')).length}, sin respuesta: ${filas.filter((f) => f.clic === 'NADA').map((f) => f.sitio).join(', ') || 'ninguno'}`);

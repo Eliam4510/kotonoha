@@ -13,6 +13,7 @@ Diese Anleitung beschreibt die tägliche Nutzung von Kotonoha. Die Installation 
 - [Karten](#karten)
 - [Audio, Bilder und Beispiele](#audio-bilder-und-beispiele)
 - [Webseiten, Reader und Bibliothek](#webseiten-reader-und-bibliothek)
+- [Englisch lernen](#englisch-lernen)
 - [Kosten für Claude](#kosten-für-claude)
 - [Daten und Sicherung](#daten-und-sicherung)
 - [Tastenkürzel](#tastenkürzel)
@@ -20,13 +21,14 @@ Diese Anleitung beschreibt die tägliche Nutzung von Kotonoha. Die Installation 
 
 ## Erste Einrichtung
 
-Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache und Niveau fragt und vorschlägt, die Wörterbücher zu installieren, den Claude-Schlüssel hinzuzufügen und festzulegen, wohin die Karten gehen. Sie lässt sich überspringen und unter **Einstellungen, Darstellung** erneut aufrufen. Alles Weitere wird unter **Einstellungen** im Fenster der Erweiterung festgelegt, das sich mit `Alt+Shift+K` öffnet.
+Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und Niveau fragt und vorschlägt, die Wörterbücher zu installieren, den Claude-Schlüssel hinzuzufügen und festzulegen, wohin die Karten gehen. Sie lässt sich überspringen und unter **Einstellungen, Darstellung** erneut aufrufen. Alles Weitere wird unter **Einstellungen** im Fenster der Erweiterung festgelegt, das sich mit `Alt+Shift+K` öffnet.
 
 | Schritt | Wo | Wofür |
 |---|---|---|
 | Wörterbücher | Einstellungen, Wörterbücher | JMdict auf Spanisch, Englisch oder Deutsch, Tonhöhenakzent von Kanjium und Häufigkeit von JPDB. Sie werden einmal heruntergeladen und bleiben im Browser |
 | Claude-API-Schlüssel | Einstellungen, Claude | Erklärungen, Prüfung der Lesungen, Übersetzung und Korrektur. Er wird nur im Browser gespeichert |
 | Sprache und Niveau | Einstellungen, Sprache und Niveau | Sprache der Oberfläche und, getrennt davon, die der Erklärungen und Übersetzungen. Das Niveau passt die Erklärungen an und bestimmt, wie viele Furigana anfangs sichtbar sind |
+| Sprache, die du lernst | Einstellungen, Sprache und Niveau, oder das Menü der Erweiterung | Japanisch oder Englisch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
 | Anki | Einstellungen, Karten und Anki | Optional. Erfordert ein geöffnetes Anki mit dem Add-on AnkiConnect |
 
 Die Erweiterung funktioniert ohne Claude-Schlüssel: Untertitel, Wörterbuch, Furigana, Farben, Karten und Whisper benötigen ihn nicht.
@@ -207,6 +209,23 @@ Nichts davon fügt dem Inhalt der Seite etwas hinzu. Die Farben verwenden die CS
 
 **Wörter und Bewertung.** Die Übersicht listet den Wortschatz nach Status, und die Niveaubewertung schätzt die anfangs bekannten Wörter.
 
+## Englisch lernen
+
+Die Sprache wird in der Begrüßung, unter **Einstellungen, Sprache und Niveau** oder im Menü der Erweiterung gewählt. Jede hat ihre eigenen Wörter, Wörterbücher, Karten, ihre Bibliothek und ihre Leseeinstellungen, und beim Zurückwechseln ist alles noch da. Oberfläche, Claude-Schlüssel und Kosten sind gemeinsam.
+
+Alles, was diese Anleitung erklärt, funktioniert genauso, mit diesen Unterschieden:
+
+| Element | Auf Englisch |
+|---|---|
+| Wörterbücher | Wiktionary in der Sprache der Oberfläche, in zwei Teilen: Definitionen und kurze Übersetzungen. Mit englischer Oberfläche wird das Englisch-Englisch-Wörterbuch vorgeschlagen, mit etwa 110 MB Download und etwa 220 MB Speicherplatz |
+| Aussprache | Amerikanische und britische IPA im Wortfenster. Über den Wörtern ist sie anfangs ausgeschaltet und wird im Fenster **Anzeige** eingeschaltet. Welche der beiden geschrieben wird, legt **Einstellungen, Sprache und Niveau** fest |
+| Akzentfarbe | Zeigt die betonte Silbe: die erste, eine mittlere oder die letzte. Auch sie ist anfangs ausgeschaltet |
+| Formen | Das Wortfenster nennt das Wort, von dem jede stammt: *went* öffnet *go*, und *didn't* öffnet *do* |
+| Partikelverben | Das Wortfenster sucht sie auch dann, wenn sie getrennt stehen: Bei *picked it up* erscheint *pick up*. Dasselbe gilt für feste Wendungen |
+| Grammatik | Punkte von A1 bis C2, mit derselben Bestätigung durch Claude |
+| Seiten-Reader | Anfangs ausgeschaltet, weil Englisch auf fast jeder Seite vorkommt. Er wird im Menü der Erweiterung oder unter **Einstellungen, Seiten-Reader** eingeschaltet |
+| Striche und Korrektur der Lesungen | Nicht verfügbar |
+
 ## Kosten für Claude
 
 Die Startseite enthält die Karte **Kosten für Claude** mit den Ausgaben des Monats im Vergleich zum in den Einstellungen angegebenen Guthaben, einem Diagramm nach Tagen und Modellen, der Verteilung nach Aufgaben und einem Protokoll jeder Anfrage mit ihren Tokens. Die Kosten werden aus den von der API gemeldeten Tokens und ihren öffentlichen Preisen berechnet und umfassen nur das, was von dieser Erweiterung in diesem Browser angefragt wurde.
@@ -223,7 +242,7 @@ Drei Einstellungen bestimmen, wie viel Wortanfragen genutzt werden:
 
 ## Daten und Sicherung
 
-Alle Daten werden im Browser in IndexedDB gespeichert. **Einstellungen, Deine Daten** erlaubt den Export und Import einer Sicherung mit Wörtern, Karten, Bibliothek, Einstellungen, erzeugten Untertiteln, Korrekturen und Kostenprotokoll.
+Alle Daten werden im Browser in IndexedDB gespeichert. **Einstellungen, Deine Daten** erlaubt den Export und Import einer einzigen Datei mit den Wörtern, Karten, der Bibliothek, den erzeugten Untertiteln und Korrekturen jeder verwendeten Sprache sowie den Einstellungen und dem Kostenprotokoll. Der Claude-Schlüssel und die Wörterbücher sind nicht enthalten. Eine Sicherung aus der Zeit vor Version 0.4.0 wird als Japanisch wiederhergestellt.
 
 ## Tastenkürzel
 

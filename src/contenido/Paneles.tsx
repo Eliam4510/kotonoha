@@ -29,7 +29,7 @@ import {
 } from './controlador';
 import { ajustes, analisisEnCurso, anclas, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
 import { cambiarAjuste } from './Reproductor';
-import { LENGUAS, numero, tm, tr } from '../compartido/i18n';
+import { LENGUAS, lenguasTraduccion, numero, tm, tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
 import type { TextosLengua } from '../lenguas/tipos';
 
@@ -151,10 +151,7 @@ function PanelVisual() {
           <Selector etiqueta={tr('Color de acento')} valor={a.colorAcento} opciones={[['ninguno', tr('Ninguno')], ['alPasar', tr('Al pasar el ratón')], ['siempre', tr('Siempre')]]} alCambiar={(v) => cambiarAjuste({ colorAcento: v })} />
         </Fila>
         <div class="leyenda">
-          <span class="ac-heiban">{tr('Heiban')}</span>
-          <span class="ac-atamadaka">{tr('Atamadaka')}</span>
-          <span class="ac-nakadaka">{tr('Nakadaka')}</span>
-          <span class="ac-odaka">{tr('Odaka')}</span>
+          {lengua.value.acento?.leyenda.map((l) => <span key={l.clase} class={`ac-${l.clase}`}>{tr(l.nombre)}</span>)}
         </div>
       </div>
       <TituloGrupo>{tr('Análisis')}</TituloGrupo>
@@ -165,8 +162,8 @@ function PanelVisual() {
         <Fila etq={tr(lengua.value.textos.gramaticaConocida)}>
           <Interruptor on={a.particulasConocidas} etiqueta={tr(lengua.value.textos.gramaticaConocida)} alCambiar={(v) => cambiarAjuste({ particulasConocidas: v })} />
         </Fila>
-        <Fila etq={tr('Buscar compuestos')} ayuda={tr('Palabras formadas con la siguiente')}>
-          <Interruptor on={a.busquedaCompuesta} etiqueta={tr('Buscar compuestos')} alCambiar={(v) => cambiarAjuste({ busquedaCompuesta: v })} />
+        <Fila etq={tr(lengua.value.textos.compuestosActivar)} ayuda={tr(lengua.value.textos.compuestosAyuda)}>
+          <Interruptor on={a.busquedaCompuesta} etiqueta={tr(lengua.value.textos.compuestosActivar)} alCambiar={(v) => cambiarAjuste({ busquedaCompuesta: v })} />
         </Fila>
       </div>
     </div>
@@ -702,7 +699,7 @@ function PanelGenerar() {
       <TituloGrupo icono="traducir" ia>{tr('Traducir al idioma de apoyo')}</TituloGrupo>
       <div class="grupo">
         <Fila etq={tr('Idioma')}>
-          <Selector<string> etiqueta={tr('Idioma de la traducción')} valor={a.idiomaSecundario} opciones={LENGUAS.filter((l) => l.traduce).map((l) => [l.id, tr(l.nombre)] as [string, string])} alCambiar={(v) => {
+          <Selector<string> etiqueta={tr('Idioma de la traducción')} valor={a.idiomaSecundario} opciones={lenguasTraduccion(a.idiomaObjetivo).map((l) => [l.id, tr(l.nombre)] as [string, string])} alCambiar={(v) => {
             cambiarAjuste({ idiomaSecundario: v, idiomaTraduccion: LENGUAS.find((l) => l.id === v)?.valor ?? v });
           }} />
         </Fila>
