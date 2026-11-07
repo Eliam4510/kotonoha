@@ -42,7 +42,7 @@ function respuestaPara(cuerpo) {
     const ajuste = [];
     let cursor = 0;
     letra.split('\n').map((l) => l.replace(/^\d+: /, '')).forEach((verso, v) => {
-      if (/^\[.*\]$/.test(verso)) return;
+      if (/^\[.*\]$/.test(verso)) return ajuste.push({ v, de: -2, a: -2 });
       const p = piezas(verso);
       const comunes = (i) => [...p].filter((x) => lineas[i].has(x)).length;
       let de = -1;

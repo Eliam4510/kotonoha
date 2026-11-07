@@ -16,6 +16,54 @@ const turbo = { id: 'onnx-community/whisper-large-v3-turbo', dtype: { encoder_mo
 const ligero = { id: 'onnx-community/whisper-large-v3-turbo', dtype: { encoder_model: 'q4f16', decoder_model_merged: 'q4f16' } };
 const LISTA = [['turbo', turbo], ['turbo-ligero', ligero]] as Parameters<typeof resumirModelos>[1];
 
+const tdt = {
+  revision: 'abc',
+  codificador: 'fp16/encoder.onnx',
+  datosCodificador: 'fp16/encoder.onnx.data',
+  decodificador: 'fp16/decoder_joint.onnx',
+  datosDecodificador: 'fp16/decoder_joint.onnx.data',
+  vocabulario: 'tokenizer.model',
+  nMels: 128,
+  bf16: true,
+  capasEstado: 2,
+  anchoEstado: 20480,
+};
+const transductor = { id: 'alguien/modelo-tdt', dtype: {}, tdt };
+const rutaTdt = (r: string) => `https://huggingface.co/alguien/modelo-tdt/resolve/abc/${r}`;
+
+describe('un modelo transductor', () => {
+  const partes = ['tokenizer.model', 'fp16/encoder.onnx', 'fp16/encoder.onnx.data', 'fp16/decoder_joint.onnx', 'fp16/decoder_joint.onnx.data'].map(rutaTdt);
+
+  it('necesita todas sus partes', () => {
+    expect(modeloCompleto(partes, transductor)).toBe(true);
+    expect(modeloCompleto(partes.slice(0, 4), transductor)).toBe(false);
+    expect(modeloCompleto(partes.slice(1), transductor)).toBe(false);
+  });
+
+  it('sus archivos son los suyos, y no otras precisiones del mismo repositorio', () => {
+    expect(archivoDelModelo(partes[1], transductor)).toBe(true);
+    expect(archivoDelModelo(rutaTdt('int8/encoder.onnx'), transductor)).toBe(false);
+    expect(archivoDelModelo(partes[1], turbo)).toBe(false);
+  });
+
+  it('se cuenta y se borra como cualquier otro', () => {
+    const lista = [['haas', transductor], ['turbo', turbo]] as Parameters<typeof resumirModelos>[1];
+    const archivos = partes.map((url) => ({ url, bytes: 100 }));
+    expect(resumirModelos(archivos, lista).modelos).toEqual([{ id: 'haas', bytes: 500 }]);
+    expect(archivosAlBorrar(partes, 'haas', lista)).toEqual(partes);
+  });
+});
+
+describe('un transductor sin datos externos', () => {
+  const sinDatos = { id: 'otro/modelo', dtype: {}, tdt: { ...tdt, datosCodificador: undefined, datosDecodificador: undefined, vocabulario: 'vocab.txt' } };
+  const ruta = (r: string) => `https://huggingface.co/otro/modelo/resolve/abc/${r}`;
+
+  it('está completo con sus tres archivos', () => {
+    expect(modeloCompleto(['vocab.txt', 'fp16/encoder.onnx', 'fp16/decoder_joint.onnx'].map(ruta), sinDatos)).toBe(true);
+    expect(modeloCompleto(['vocab.txt', 'fp16/encoder.onnx'].map(ruta), sinDatos)).toBe(false);
+  });
+});
+
 describe('archivoDelModelo', () => {
   it('reconoce sus partes, con sus datos externos, y lo común', () => {
     for (const u of [CONFIG, TOKENIZADOR, ENCODER_16, ENCODER_16_DATOS, DECODER]) expect(archivoDelModelo(u, turbo)).toBe(true);

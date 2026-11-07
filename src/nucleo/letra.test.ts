@@ -45,7 +45,7 @@ describe('mensajeAjuste', () => {
 
 describe('aplicarAjuste', () => {
   it('el texto sale tal cual de la letra y los tiempos, de la transcripción', () => {
-    const r = aplicarAjuste(VERSOS, LINEAS, [{ v: 0, de: 0, a: 0 }, { v: 1, de: 1, a: 1 }]);
+    const r = aplicarAjuste(VERSOS.slice(0, 2), LINEAS, [{ v: 0, de: 0, a: 0 }, { v: 1, de: 1, a: 1 }]);
     expect(textos(r.lineas)).toEqual([VERSOS[0], VERSOS[1]]);
     expect(tiempos(r.lineas)).toEqual([[10000, 13000], [14000, 17000]]);
     expect(r.conTiempo).toBe(2);
@@ -53,12 +53,12 @@ describe('aplicarAjuste', () => {
   });
 
   it('un verso que ocupa varias líneas va de la primera a la última', () => {
-    const r = aplicarAjuste(VERSOS, LINEAS, [{ v: 0, de: 1, a: 3 }]);
+    const r = aplicarAjuste(VERSOS.slice(0, 1), LINEAS, [{ v: 0, de: 1, a: 3 }]);
     expect(tiempos(r.lineas)).toEqual([[14000, 25000]]);
   });
 
   it('un estribillo que la letra escribe una vez puede sonar varias', () => {
-    const r = aplicarAjuste(VERSOS, LINEAS, [{ v: 2, de: 0, a: 0 }, { v: 0, de: 1, a: 1 }, { v: 2, de: 2, a: 2 }, { v: 2, de: 4, a: 4 }]);
+    const r = aplicarAjuste(VERSOS, LINEAS, [{ v: 1, de: -2, a: -2 }, { v: 3, de: -2, a: -2 }, { v: 2, de: 0, a: 0 }, { v: 0, de: 1, a: 1 }, { v: 2, de: 2, a: 2 }, { v: 2, de: 4, a: 4 }]);
     expect(textos(r.lineas)).toEqual([VERSOS[2], VERSOS[0], VERSOS[2], VERSOS[2]]);
     expect(r.lineas[3].inicio).toBe(26000);
   });
@@ -84,6 +84,38 @@ describe('aplicarAjuste', () => {
     expect(r.estimadas).toBe(1);
   });
 
+  it('lo que no se canta no entra, ni se confunde con lo que no se oyó', () => {
+    const r = aplicarAjuste(['Título', ...VERSOS.slice(0, 2)], LINEAS, [{ v: 0, de: -2, a: -2 }, { v: 1, de: 0, a: 0 }, { v: 2, de: 1, a: 1 }]);
+    expect(textos(r.lineas)).toEqual([VERSOS[0], VERSOS[1]]);
+    expect(r.estimadas).toBe(0);
+  });
+
+  it('un verso que Claude se salta no se pierde: va detrás del anterior de la letra', () => {
+    const r = aplicarAjuste(VERSOS.slice(0, 4), LINEAS, [{ v: 0, de: 0, a: 0 }, { v: 2, de: 2, a: 2 }, { v: 3, de: 3, a: 3 }]);
+    expect(textos(r.lineas)).toEqual(VERSOS.slice(0, 4));
+    expect(r.conTiempo).toBe(3);
+    expect(r.estimadas).toBe(1);
+    expect(r.lineas[1].inicio).toBeGreaterThanOrEqual(r.lineas[0].fin);
+    expect(r.lineas[1].fin).toBeLessThanOrEqual(r.lineas[2].inicio);
+  });
+
+  it('el primero también, delante de todo', () => {
+    const r = aplicarAjuste(VERSOS.slice(0, 2), LINEAS, [{ v: 1, de: 1, a: 1 }]);
+    expect(textos(r.lineas)).toEqual(VERSOS.slice(0, 2));
+    expect(r.lineas[0].fin).toBeLessThanOrEqual(r.lineas[1].inicio);
+  });
+
+  it('con un estribillo repetido, lo saltado va tras su primera aparición', () => {
+    const r = aplicarAjuste(['a', 'b', 'c'], LINEAS, [{ v: 0, de: 0, a: 0 }, { v: 2, de: 1, a: 1 }, { v: 0, de: 2, a: 2 }, { v: 2, de: 3, a: 3 }]);
+    expect(textos(r.lineas)).toEqual(['a', 'b', 'c', 'a', 'c']);
+  });
+
+  it('si nada tiene tiempo no se completa: no es la letra de esta canción', () => {
+    const r = aplicarAjuste(VERSOS.slice(0, 3), LINEAS, [{ v: 0, de: -1, a: -1 }]);
+    expect(r.conTiempo).toBe(0);
+    expect(textos(r.lineas)).toEqual([VERSOS[0]]);
+  });
+
   it('un pasaje instrumental no estira el verso que no se oyó', () => {
     const lejos = [lin(1, 0, 3000), lin(2, 60000, 63000)];
     const largo = 'x'.repeat(100);
@@ -94,7 +126,7 @@ describe('aplicarAjuste', () => {
   it('el primer verso sin tiempo no empieza antes del video', () => {
     const r = aplicarAjuste(['larguísimo verso que no se oyó', 'b'], [lin(1, 2000, 4000)], [{ v: 0, de: -1, a: -1 }, { v: 1, de: 0, a: 0 }]);
     expect(r.lineas[0].inicio).toBe(0);
-    expect(r.lineas[0].fin).toBe(2000);
+    expect(r.lineas[0].fin).toBe(2500);
   });
 
   it('el último sin tiempo va detrás del anterior', () => {
@@ -102,10 +134,29 @@ describe('aplicarAjuste', () => {
     expect(tiempos(r.lineas)[1]).toEqual([4000, 7000]);
   });
 
-  it('sin hueco en el que quepa, le quita tiempo a la línea anterior', () => {
+  it('sin hueco, los versos sin tiempo toman lo que le sobra a una línea larga del reconocedor', () => {
+    const larga = [lin(1, 10000, 12000), lin(2, 12000, 32000)];
+    const r = aplicarAjuste(['aaaa', 'bbbb', 'cccc', 'dddd'], larga, [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }, { v: 2, de: -1, a: -1 }, { v: 3, de: 1, a: 1 }]);
+    expect(textos(r.lineas)).toEqual(['aaaa', 'bbbb', 'cccc', 'dddd']);
+    // Cada verso de cuatro caracteres necesita 1,5 s, así que no se aplastan en un instante.
+    expect(r.lineas[1].fin - r.lineas[1].inicio).toBeGreaterThanOrEqual(1400);
+    expect(r.lineas[2].fin - r.lineas[2].inicio).toBeGreaterThanOrEqual(1400);
+    expect(r.lineas[3].fin).toBe(32000);
+    expect(r.lineas[3].inicio).toBeGreaterThanOrEqual(r.lineas[2].fin);
+  });
+
+  it('y también lo que le sobra a la anterior', () => {
+    const larga = [lin(1, 10000, 25000), lin(2, 25000, 28000)];
+    const r = aplicarAjuste(['aaaa', 'bbbb', 'cccc'], larga, [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }, { v: 2, de: 1, a: 1 }]);
+    expect(r.lineas[1].fin - r.lineas[1].inicio).toBeGreaterThanOrEqual(1400);
+    expect(r.lineas[0].fin).toBeLessThan(25000);
+    expect(r.lineas[2].inicio).toBe(25000);
+  });
+
+  it('a la línea anterior le quita lo que le sobra, y le deja lo suyo', () => {
     const pegadas = [lin(1, 0, 4000), lin(2, 4000, 8000)];
     const r = aplicarAjuste(['a', 'bbbbb', 'c'], pegadas, [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }, { v: 2, de: 1, a: 1 }]);
-    expect(tiempos(r.lineas)).toEqual([[0, 2000], [2000, 4000], [4000, 8000]]);
+    expect(tiempos(r.lineas)).toEqual([[0, 2500], [2500, 4000], [4000, 8000]]);
   });
 
   it('una entrada fuera de orden pierde su tiempo, pero no se lleva por delante a las demás', () => {
@@ -117,7 +168,7 @@ describe('aplicarAjuste', () => {
   });
 
   it('lo que no tiene sentido se descarta sin romper nada', () => {
-    const r = aplicarAjuste(VERSOS, LINEAS, [
+    const r = aplicarAjuste(VERSOS.slice(0, 3), LINEAS, [
       { v: 99, de: 0, a: 0 },
       { v: -1, de: 0, a: 0 },
       { v: 1.5, de: 0, a: 0 },
@@ -136,7 +187,7 @@ describe('aplicarAjuste', () => {
   });
 
   it('los identificadores no chocan con los de la transcripción', () => {
-    const r = aplicarAjuste(VERSOS, LINEAS, [{ v: 0, de: 0, a: 0 }, { v: 1, de: 1, a: 1 }]);
+    const r = aplicarAjuste(VERSOS.slice(0, 2), LINEAS, [{ v: 0, de: 0, a: 0 }, { v: 1, de: 1, a: 1 }]);
     expect(r.lineas.map((l) => l.id)).toEqual([ID_LETRA, ID_LETRA + 1]);
     expect(LINEAS.some((l) => l.id >= ID_LETRA)).toBe(false);
   });

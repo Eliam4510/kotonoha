@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.4.1-A9E45B?style=flat-square" alt="Version 0.4.1">
+  <img src="https://img.shields.io/badge/version-0.4.2-A9E45B?style=flat-square" alt="Version 0.4.2">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
-  <img src="https://img.shields.io/badge/unit%20tests-419-0ca30c?style=flat-square" alt="419 unit tests">
+  <img src="https://img.shields.io/badge/unit%20tests-459-0ca30c?style=flat-square" alt="459 unit tests">
   <img src="https://img.shields.io/badge/interface-6%20languages-8FCBFF?style=flat-square" alt="Interface in 6 languages">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 to N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 to C2">
@@ -76,7 +76,7 @@ The interface is available in Spanish, English, German, Chinese, Korean and Japa
   <tr>
     <td valign="top"><b>Translation and correction with Claude</b><br>Translation into the support language, starting with the part being watched. Automatic correction of homophones in generated subtitles, using the title and the full text as context, without asking anything.</td>
     <td valign="top"><b>SRT both ways</b><br>Import and export on any site: SRT, VTT, ASS and TTML. Imported files stay saved for that title, and Japanese subtitles from Netflix are kept even if another region does not offer them.</td>
-    <td valign="top"><b>Local transcription</b><br>Whisper on the graphics card through WebGPU, with audio staying on the computer: 30 minutes of video in about 5, without making the desktop stutter. It works in chunks with rest periods and recovers if the driver restarts. Paste a song's lyrics and Claude places them on Whisper's timing.</td>
+    <td valign="top"><b>Local transcription</b><br>Haas-ja for Japanese speech and Whisper for songs and other languages, on the graphics card through WebGPU, with audio staying on the computer: 30 minutes of video in about a minute with Haas-ja and in about 5 with Whisper, without making the desktop stutter. It works in chunks with rest periods and recovers if the driver restarts. Paste a song's lyrics and Claude places them on Whisper's timing.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="This month's Claude spending, by day, model and task"></td>
@@ -212,7 +212,7 @@ Measured with a Radeon RX 9060 XT 16 GB, 16 GB of RAM, a 4K 60 Hz monitor and re
 
 | Measure | Result |
 |---|---|
-| Speed in automatic mode | 30 minutes of video in about 5 minutes, 6.1 to 6.4 times real time |
+| Speed in automatic mode | 30 minutes of video in about a minute with Haas-ja, and in about 5 minutes with Whisper Turbo, 6.1 to 6.4 times real time |
 | Character error rate, on 126 real sentences | 8.8 % |
 | Two hours of audio in a row | 19.7 minutes, with no driver restarts and no memory growth |
 | Desktop smoothness during transcription | 99th percentile of 17.5 ms, no frames over 33 ms |
@@ -267,6 +267,7 @@ The last one builds and leaves the extension and helper ZIP files in `release/`,
 | `node pruebas/ingles-whisper.mjs voice.wav` | Whisper in English on the GPU, with Claude's correction simulated |
 | `node pruebas/letra.mjs voice.wav` | Placing lyrics on a transcription's timing: with an automatic track, and with Whisper on the GPU if a voice sample is given |
 | `node pruebas/modelos-guardados.mjs` | The saved models list: the space each one takes, and that deleting one does not break another that shares its files |
+| `node pruebas/modelos-voz.mjs voice.wav` | Which model transcribes what: Haas-ja for Japanese speech, Whisper Turbo for songs, and a manual choice |
 | `node pruebas/ingles-grande.mjs` | The largest dictionary on a clean profile: installing it, starting with it, looking words up and removing it. Downloads about 110 MB |
 | `node pruebas/e2e.mjs` | The extension end to end in Edge |
 | `node pruebas/subtitulos.mjs` | Translating, correcting, exporting and importing, on pages imitating Netflix and YouTube with a simulated Claude API |
@@ -287,7 +288,7 @@ Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist
 
 ## Project status
 
-Version 0.4.1 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while extended validation is still pending. The page reader has been tried on about thirty real public sites with an automated browser, without signing in. The interface translations were written with AI assistance and have not yet had a native review. English has been tested with real dictionaries and a synthetic voice on the GPU, on pages that imitate YouTube, and with the page reader on 16 real public sites, but not yet with a real session on a video site.
+Version 0.4.2 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while extended validation is still pending. The page reader has been tried on about thirty real public sites with an automated browser, without signing in. The interface translations were written with AI assistance and have not yet had a native review. English has been tested with real dictionaries and a synthetic voice on the GPU, on pages that imitate YouTube, and with the page reader on 16 real public sites, but not yet with a real session on a video site.
 
 ## Privacy
 

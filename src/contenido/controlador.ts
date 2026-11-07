@@ -9,7 +9,7 @@ import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, si
 import { aplicarAjuste, type EntradaAjuste, versosDeLetra } from '../nucleo/letra';
 import { analizarSubtitulos, aSrt, esSoloAcotacion, type Linea, siguienteLinea } from '../nucleo/subtitulos';
 import { fusionarLineas } from '../nucleo/transcripcion';
-import { guardarAjustes } from '../compartido/ajustes';
+import { guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
 import {
   ajustes,
   analisisEnCurso,
@@ -601,7 +601,7 @@ const reanalizar = () => refrescarAnalisis();
 
 export async function cargarVideoActual() {
   const info = await control.info();
-  infoVideo.value = { sitio: info.sitio, idVideo: info.idVideo, titulo: info.titulo };
+  infoVideo.value = { sitio: info.sitio, idVideo: info.idVideo, titulo: info.titulo, categoria: info.categoria };
   pistas.value = [];
   baseObjetivo = [];
   baseSecundaria = [];
@@ -654,7 +654,7 @@ export async function cargarVideoActual() {
   }
 
   // El título puede tardar más que la página en estar disponible.
-  control.info().then((i) => (infoVideo.value = { sitio: i.sitio, idVideo: i.idVideo, titulo: i.titulo })).catch(() => {});
+  control.info().then((i) => (infoVideo.value = { sitio: i.sitio, idVideo: i.idVideo, titulo: i.titulo, categoria: i.categoria })).catch(() => {});
 }
 
 const NOMBRE_ORIGEN: Partial<Record<PistaInfo['origen'], string>> = { whisper: tm('Whisper'), claude: tm('Claude'), importada: tm('importados'), recordada: tm('guardados'), letra: tm('letra') };
@@ -876,6 +876,8 @@ async function aplicarCorrecciones(parte: { i: number; t: string }[], lineas: Li
  * donde vas, así que lo que estás viendo queda corregido en segundos.
  */
 export async function corregirSubtitulos(manual = false) {
+  // Una letra ya es el texto verdadero: corregirla sería pagar por estropearla.
+  if (pistaObjetivoEsLetra()) return;
   flujoCorreccion?.cancelar();
   const lineas = crudas(baseObjetivo);
   if (!lineas.length) return;
@@ -925,6 +927,9 @@ export async function corregirSubtitulos(manual = false) {
     flujoCorreccion = null;
   }
 }
+
+/** Si lo que se está viendo es la letra verdadera de una canción. */
+export const pistaObjetivoEsLetra = () => pistas.value.find((p) => p.id === idObjetivo.value)?.origen === 'letra';
 
 export function cancelarCorreccion() {
   flujoCorreccion?.cancelar();
@@ -1032,6 +1037,16 @@ export async function actualizarAyudante() {
   return info;
 }
 
+/** Si lo que suena es una canción: con una letra pegada seguro, y si no, por lo que dicen el sitio y el título. */
+function esCancion(): boolean {
+  if (hayLetraPendiente()) return true;
+  const info = infoVideo.value;
+  const titulo = info?.titulo ?? '';
+  return info?.categoria === 'Music' || TITULO_DE_CANCION.test(titulo) || !!lengua.value.tituloDeCancion?.test(titulo);
+}
+
+const TITULO_DE_CANCION = /\b(mv|m\/v|music video|lyric video|lyrics?|official video|official audio|karaoke)\b/i;
+
 /** La dirección limpia del video: sin la lista de reproducción ni la marca de tiempo. */
 function urlDelVideo(): string {
   const info = infoVideo.value;
@@ -1052,7 +1067,8 @@ export async function iniciarWhisper(enVivo = false) {
     avisar(tr('Para oír el video hay que activar la captura de audio: {0} y vuelve a intentarlo.', comoActivarCaptura()), 'error', undefined, 8000);
     return;
   }
-  whisper.value = { fase: conAyudante ? 'bajando' : desdeArchivo ? 'extrayendo' : 'preparando', lineas: 0, desdeArchivo: !!desdeArchivo || conAyudante };
+  const modelo = modeloParaTranscribir(ajustes.value.whisperModelo, ajustes.value.idiomaObjetivo, esCancion());
+  whisper.value = { fase: conAyudante ? 'bajando' : desdeArchivo ? 'extrayendo' : 'preparando', lineas: 0, desdeArchivo: !!desdeArchivo || conAyudante, modelo: MODELOS_WHISPER[modelo].nombre };
   let audio: { url: string; pcmCrudo: boolean } | null = null;
   try {
     audio = desdeArchivo ? await desdeArchivo((porcentaje) => (whisper.value = whisper.value && { ...whisper.value, fase: 'extrayendo', porcentaje })) : null;
@@ -1086,7 +1102,7 @@ export async function iniciarWhisper(enVivo = false) {
   }
   let vistos = 0;
   const metodo = conAyudante ? 'transcribirDescarga' : audio ? 'transcribirArchivo' : 'transcribirEnVivo';
-  const f = flujoMotor(metodo, conAyudante ? [urlDelVideo(), desdeMs] : audio ? [audio.url, audio.pcmCrudo, desdeMs] : [], (acumulado) => {
+  const f = flujoMotor(metodo, conAyudante ? [urlDelVideo(), desdeMs, modelo] : audio ? [audio.url, audio.pcmCrudo, desdeMs, modelo] : [modelo], (acumulado) => {
     const texto = acumulado.slice(vistos);
     const fin = texto.lastIndexOf('\n');
     if (fin < 0) return;
@@ -1201,12 +1217,26 @@ export async function ajustarLetra() {
     await motor.guardarCorreccionesPista(clavePista(id), {}, false).catch(() => {});
     letraPegada.value = '';
     await seleccionarObjetivo(id);
+    retraducirTrasLetra();
     avisar(estimadas ? tr('Letra ajustada: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas) : tr('Letra ajustada: {0} versos con sus tiempos.', conTiempo), 'exito');
   } catch (e) {
     avisar(tr('No se pudo ajustar la letra: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
   } finally {
     ajustandoLetra.value = false;
   }
+}
+
+/**
+ * La traducción que hubiera era de lo que el reconocedor creyó oír, o de otra letra: al cambiar el texto deja de valer.
+ * Una pista del propio sitio se respeta, porque no depende de lo oído.
+ */
+function retraducirTrasLetra() {
+  const a = ajustes.value;
+  const actual = pistas.value.find((p) => p.id === idSecundaria.value);
+  if (actual ? actual.origen !== 'claude' : !a.generarSecundariosAuto) return;
+  importadas.delete(`generada:${a.idiomaSecundario}`);
+  publicarSecundaria([]);
+  generarSecundarios().catch(() => {});
 }
 
 /** Deja libre la tarjeta gráfica cuando la necesites, sin perder el punto en el que iba. */

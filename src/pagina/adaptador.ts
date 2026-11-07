@@ -9,6 +9,8 @@ export interface Adaptador {
   activo(): boolean;
   idVideo(): string | null;
   titulo(): string;
+  /** La categoría que le da el propio sitio. Sirve para saber si es música. */
+  categoria?(): string;
   anuncio(): boolean;
   listarPistas(): Promise<PistaInfo[]>;
   cargarPista(id: string): Promise<string>;

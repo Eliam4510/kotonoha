@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.4.1-A9E45B?style=flat-square" alt="Versión 0.4.1">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.4.2-A9E45B?style=flat-square" alt="Versión 0.4.2">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
-  <img src="https://img.shields.io/badge/pruebas%20unitarias-419-0ca30c?style=flat-square" alt="419 pruebas unitarias">
+  <img src="https://img.shields.io/badge/pruebas%20unitarias-459-0ca30c?style=flat-square" alt="459 pruebas unitarias">
   <img src="https://img.shields.io/badge/interfaz-6%20idiomas-8FCBFF?style=flat-square" alt="Interfaz en 6 idiomas">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 a N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 a C2">
@@ -74,7 +74,7 @@ El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Jap�
   <tr>
     <td valign="top"><b>Traducir y corregir con Claude</b><br>Traducción al idioma de apoyo, empezando por el tramo que se está viendo. Corrección automática de los homófonos de los subtítulos generados, con el título y todo el texto como contexto, sin preguntar nada.</td>
     <td valign="top"><b>SRT de ida y vuelta</b><br>Importación y exportación en cualquier sitio: SRT, VTT, ASS y TTML. Lo importado queda guardado para ese título, y los subtítulos en japonés de Netflix se conservan aunque otra región no los ofrezca.</td>
-    <td valign="top"><b>Transcripción local</b><br>Whisper en la tarjeta gráfica mediante WebGPU, sin que el audio salga del equipo: 30 minutos de video en unos 5, sin trabar el escritorio. Trabaja por tramos con descansos y se recupera si el controlador se reinicia. Si se pega la letra de una canción, Claude la coloca sobre los tiempos de Whisper.</td>
+    <td valign="top"><b>Transcripción local</b><br>Haas-ja para la voz en japonés y Whisper para las canciones y los demás idiomas, en la tarjeta gráfica mediante WebGPU y sin que el audio salga del equipo: 30 minutos de video en alrededor de un minuto con Haas-ja y en unos 5 con Whisper, sin trabar el escritorio. Trabaja por tramos con descansos y se recupera si el controlador se reinicia. Si se pega la letra de una canción, Claude la coloca sobre los tiempos de Whisper.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="Gasto del mes en Claude, por días, modelos y tareas"></td>
@@ -210,7 +210,7 @@ Medido con una Radeon RX 9060 XT de 16 GB, 16 GB de RAM, un monitor 4K a 60 Hz y
 
 | Medida | Resultado |
 |---|---|
-| Velocidad en modo automático | 30 minutos de video en unos 5 minutos, entre 6,1 y 6,4 veces el tiempo real |
+| Velocidad en modo automático | 30 minutos de video en alrededor de un minuto con Haas-ja, y en unos 5 minutos con Whisper Turbo, entre 6,1 y 6,4 veces el tiempo real |
 | Error por caracteres, en 126 frases reales | 8,8 % |
 | Dos horas de audio seguidas | 19,7 minutos, sin reinicios del controlador y sin que crezca la memoria |
 | Fluidez del escritorio durante la transcripción | Percentil 99 de 17,5 ms, sin fotogramas de más de 33 ms |
@@ -265,6 +265,7 @@ El último compila y deja en `release/` los ZIP de la extensión y del ayudante,
 | `node pruebas/ingles-whisper.mjs voz.wav` | Whisper en inglés en la GPU, con la corrección de Claude simulada |
 | `node pruebas/letra.mjs voz.wav` | Colocar una letra sobre los tiempos de una transcripción: con una pista automática, y con Whisper en la GPU si se da una muestra de voz |
 | `node pruebas/modelos-guardados.mjs` | La lista de modelos guardados: lo que ocupa cada uno, y que borrar uno no rompa otro que comparte sus archivos |
+| `node pruebas/modelos-voz.mjs voz.wav` | Qué modelo transcribe cada cosa: Haas-ja para la voz en japonés, Whisper Turbo para las canciones, y lo elegido a mano |
 | `node pruebas/ingles-grande.mjs` | El diccionario más grande con un perfil limpio: instalarlo, arrancar con él, consultarlo y quitarlo. Descarga unos 110 MB |
 | `node pruebas/e2e.mjs` | La extensión de extremo a extremo en Edge |
 | `node pruebas/subtitulos.mjs` | Traducir, corregir, exportar e importar, en páginas que imitan a Netflix y YouTube y con una API de Claude simulada |
@@ -285,7 +286,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.4.1 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, y con el lector de páginas en 16 sitios públicos reales, pero aún no con una sesión real en un sitio de video.
+La versión 0.4.2 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, y con el lector de páginas en 16 sitios públicos reales, pero aún no con una sesión real en un sitio de video.
 
 ## Privacidad
 

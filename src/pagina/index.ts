@@ -46,6 +46,7 @@ if (!window.__kotonohaPagina) {
       activo: adaptador.activo(),
       idVideo: adaptador.idVideo(),
       titulo: adaptador.titulo(),
+      categoria: adaptador.categoria?.() ?? '',
       anuncio: adaptador.anuncio(),
     }),
     listarPistas: () => adaptador.listarPistas(),

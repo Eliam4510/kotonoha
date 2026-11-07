@@ -523,6 +523,27 @@ const lineaVuelta = await esperaLinea(/図書館/);
 comprobar(/図書館/.test(lineaVuelta), 'Y el video vuelve a sus subtítulos en japonés', lineaVuelta);
 comprobar(await pv.evaluate(() => window.sinRecargar === true), 'Sin recargar la página');
 await menu.close();
+
+// Y sin salir del video: desde su panel de subtítulos.
+const enPanel = (fn, arg) => pv.evaluate(({ fn, arg }) => {
+  const r = (document.querySelector('kotonoha-overlay:not([popover])') ?? document.querySelector('kotonoha-overlay'))?.shadowRoot;
+  return r ? new Function('r', 'arg', `return (${fn})(r, arg)`)(r, arg) : null;
+}, { fn: fn.toString(), arg });
+await pv.mouse.move(700, 300);
+await enPanel((r) => r.querySelector('.barra-acciones button[aria-label="Ajustes de video"]')?.click());
+await pv.waitForTimeout(300);
+await enPanel((r) => [...r.querySelectorAll('.panel-flotante [role="tab"]')].find((b) => b.textContent.trim() === 'Subtítulos')?.click());
+await pv.waitForTimeout(300);
+const botonesPanel = await enPanel((r) => [...r.querySelectorAll('.panel-flotante .segmentado[aria-label="Idioma que estudias"] button')].map((b) => `${b.textContent}:${b.getAttribute('aria-checked')}`));
+comprobar(botonesPanel?.join('|') === 'Japonés:true|Inglés:false', 'El panel del video también deja elegir el idioma', botonesPanel?.join('|'));
+await enPanel((r) => [...r.querySelectorAll('.panel-flotante .segmentado[aria-label="Idioma que estudias"] button')].find((b) => b.textContent === 'Inglés')?.click());
+await pv.waitForTimeout(900);
+comprobar((await leerAjustes()).idiomaObjetivo === 'en', 'Un clic ahí pasa al inglés');
+const lineaPanel = await esperaLinea(/picked it up/i);
+comprobar(/picked it up/i.test(lineaPanel), 'Y los subtítulos cambian al momento', lineaPanel);
+await enPanel((r) => [...r.querySelectorAll('.panel-flotante .segmentado[aria-label="Idioma que estudias"] button')].find((b) => b.textContent === 'Japonés')?.click());
+await pv.waitForTimeout(900);
+comprobar((await leerAjustes()).idiomaObjetivo === 'ja', 'Y otro, de vuelta al japonés');
 await pv.close();
 
 if (errores.length) console.log('Errores de página:', errores.slice(0, 8).join('\n'));

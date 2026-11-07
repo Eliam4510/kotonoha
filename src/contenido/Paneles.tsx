@@ -3,7 +3,7 @@
 import { signal, useSignal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
 import type { Ajustes, ConfigModo, DisparadorPausa, IdModo, ModeloWhisper, ModoVelo, ObjetivoFrase, RevelarEnPausa } from '../compartido/ajustes';
-import { MODELOS_WHISPER, NOMBRES_MODO } from '../compartido/ajustes';
+import { MODELO_AUTOMATICO, MODELOS_WHISPER, modeloSirveParaLengua, NOMBRES_MODO, type OpcionModelo } from '../compartido/ajustes';
 import { flujoMotor, fondo } from '../compartido/rpc';
 import { NOMBRES_NIVEL, palabrasPrioritarias } from '../nucleo/frases';
 import { versosDeLetra } from '../nucleo/letra';
@@ -11,6 +11,7 @@ import { Icono, type NombreIcono } from '../ui/iconos';
 import {
   ajustarDesfase,
   ajustarLetra,
+  pistaObjetivoEsLetra,
   cancelarGeneracion,
   detenerWhisper,
   pausarWhisper,
@@ -32,7 +33,8 @@ import {
 import { ajustandoLetra, ajustes, analisisEnCurso, anclas, letraPegada, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
 import { cambiarAjuste } from './Reproductor';
 import { LENGUAS, lenguasTraduccion, numero, tm, tr } from '../compartido/i18n';
-import { lengua } from '../ui/lengua';
+import { estudiarLengua, lengua } from '../ui/lengua';
+import { PAQUETES } from '../lenguas';
 import type { TextosLengua } from '../lenguas/tipos';
 
 /** Anillo de progreso: comprensión del video, avance de una tarea de Claude. */
@@ -369,6 +371,17 @@ function PanelVideo() {
 
       {p === 'subtitulos' && (
         <>
+          {PAQUETES.length > 1 && (
+            <div class="grupo">
+              <Fila etq={tr('Idioma que estudias')}>
+                <div class="segmentado" role="radiogroup" aria-label={tr('Idioma que estudias')}>
+                  {PAQUETES.map((paquete) => (
+                    <button key={paquete.id} role="radio" aria-checked={a.idiomaObjetivo === paquete.id} class={a.idiomaObjetivo === paquete.id ? 'activo' : ''} onClick={() => estudiarLengua(a, paquete.id).catch(console.error)}>{tr(paquete.textos.nombre)}</button>
+                  ))}
+                </div>
+              </Fila>
+            </div>
+          )}
           <div class="columnas">
             <ControlPista titulo={tr(lengua.value.textos.subtitulos)} icono="subtitulos" valor={idObjetivo.value} idioma={a.idiomaObjetivo} destino="objetivo" alElegir={seleccionarObjetivo} puedeExportar={lineasObjetivo.value.length > 0} />
             <ControlPista titulo={tr('Subtítulos secundarios')} icono="traducir" valor={idSecundaria.value} idioma={a.idiomaSecundario} destino="secundaria" alElegir={seleccionarSecundaria} puedeExportar={lineasSecundarias.value.length > 0} />
@@ -627,11 +640,8 @@ function ProgresoWhisper() {
           </span>
         )}
       </div>
-      {conBarra ? (
-        <div class="barra-progreso"><div style={{ width: `${w.porcentaje}%` }} /></div>
-      ) : (
-        <div class="ayuda">{w.lineas === 1 ? tr('1 línea') : tr('{0} líneas', w.lineas)}{w.dispositivo ? ` · ${tr(w.dispositivo)}` : ''}</div>
-      )}
+      {conBarra && <div class="barra-progreso"><div style={{ width: `${w.porcentaje}%` }} /></div>}
+      <div class="ayuda">{w.lineas === 1 ? tr('1 línea') : tr('{0} líneas', w.lineas)}{w.modelo ? ` · ${tr(w.modelo)}` : ''}{w.dispositivo ? ` · ${tr(w.dispositivo)}` : ''}</div>
     </div>
   );
 }
@@ -647,15 +657,16 @@ function SeccionWhisper() {
   }, [archivo]);
   return (
     <>
-      <TituloGrupo icono="ondas">{tr('Generar con Whisper, en tu equipo')}</TituloGrupo>
+      <TituloGrupo icono="ondas">{tr('Transcribir en tu equipo')}</TituloGrupo>
       <div class="grupo">
         <div class="bloque-generar">
           <p>{enteroDeUnaVez ? tr('Transcribe el audio entero sin esperar a reproducirlo: 30 minutos tardan unos 5. El audio no sale de tu equipo.') : tr('Escucha el video mientras se reproduce, así que los subtítulos llegan con unos segundos de retraso.')}</p>
           {sinAceleracion.value && <p class="nota-grupo">{tr('Con la aceleración por hardware apagada, el navegador no ofrece la GPU: Whisper correrá en el procesador y tardará mucho más.')}</p>}
         </div>
         <Fila etq={tr('Modelo')}>
-          <select class="selector" aria-label={tr('Modelo de transcripción')} title={tr(MODELOS_WHISPER[a.whisperModelo]?.descripcion ?? '')} value={a.whisperModelo} disabled={!!w} onChange={(e) => cambiarAjuste({ whisperModelo: e.currentTarget.value as ModeloWhisper })}>
-            {(Object.entries(MODELOS_WHISPER) as [ModeloWhisper, (typeof MODELOS_WHISPER)[ModeloWhisper]][]).map(([id, m]) => <option key={id} value={id}>{m.nombre} · {m.mb >= 1000 ? `${(m.mb / 1000).toFixed(1)} GB` : `${m.mb} MB`}</option>)}
+          <select class="selector" aria-label={tr('Modelo de transcripción')} title={a.whisperModelo === 'auto' ? tr(MODELO_AUTOMATICO) : tr(MODELOS_WHISPER[a.whisperModelo]?.descripcion ?? '')} value={a.whisperModelo} disabled={!!w} onChange={(e) => cambiarAjuste({ whisperModelo: e.currentTarget.value as OpcionModelo })}>
+            <option value="auto">{tr('Automático')}</option>
+            {(Object.entries(MODELOS_WHISPER) as [ModeloWhisper, (typeof MODELOS_WHISPER)[ModeloWhisper]][]).filter(([id]) => modeloSirveParaLengua(id, a.idiomaObjetivo)).map(([id, m]) => <option key={id} value={id}>{tr(m.nombre)} · {m.mb >= 1000 ? `${(m.mb / 1000).toFixed(1)} GB` : `${m.mb} MB`}</option>)}
           </select>
         </Fila>
         {enteroDeUnaVez && (
@@ -719,9 +730,17 @@ function PanelGenerar() {
   const haySecundaria = lineasSecundarias.value.length > 0;
   const sitio = infoVideo.value?.sitio;
   const nombreSecundaria = pistas.value.find((p) => p.id === idSecundaria.value)?.nombre;
+  const generarConVoz = sitio !== 'netflix' && (
+    <>
+      <SeccionWhisper />
+      <SeccionLetra />
+    </>
+  );
   return (
     <div class={`panel-flotante panel-generar ${claseNavegador()}`} role="dialog" aria-label={tr('Generar subtítulos')}>
       <Cabecera titulo={tr('Subtítulos con IA')} icono="varita" />
+
+      {!hayObjetivo && generarConVoz}
 
       <TituloGrupo icono="traducir" ia>{tr('Traducir al idioma de apoyo')}</TituloGrupo>
       <div class="grupo">
@@ -755,7 +774,11 @@ function PanelGenerar() {
                 <Interruptor on={a.corregirAutomaticos} etiqueta={tr('Corregir los automáticos al abrirlos')} alCambiar={(v) => cambiarAjuste({ corregirAutomaticos: v })} />
               </Fila>
             )}
-            {c ? (
+            {pistaObjetivoEsLetra() ? (
+              <div class="bloque-generar">
+                <p class="nota-grupo">{tr('Esta pista sale de la letra que pegaste, así que no hay nada que corregir.')}</p>
+              </div>
+            ) : c ? (
               <div class="progreso-linea">
                 <div class="fila-texto"><span>{tr('Revisadas {0} de {1} · {2} corregidas', c.hechas, c.total, c.cambiadas)}</span><button class="btn chico" onClick={cancelarCorreccion}>{tr('Cancelar')}</button></div>
                 <div class="progreso-ia"><div style={{ width: `${(c.hechas / Math.max(c.total, 1)) * 100}%` }} /></div>
@@ -813,8 +836,7 @@ function PanelGenerar() {
       </div>
 
       {/* Netflix casi siempre trae subtítulos y su audio no se puede procesar por adelantado. */}
-      {sitio !== 'netflix' && <SeccionWhisper />}
-      {sitio !== 'netflix' && <SeccionLetra />}
+      {hayObjetivo && generarConVoz}
     </div>
   );
 }

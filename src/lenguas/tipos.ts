@@ -246,6 +246,8 @@ export interface PaqueteLengua {
   letra: string;
   /** Con qué ajustes empieza quien la elige por primera vez. */
   ajustes: Partial<AjustesLengua>;
+  /** Palabras que en un título delatan una canción en esta lengua, además de las de siempre como «MV». */
+  tituloDeCancion?: RegExp;
   /** Si las fichas del lector buscan también frases hechas que empiecen en la palabra. */
   frasesEnLector: boolean;
   /** Qué buscar para ilustrar una palabra, si no hace falta preguntárselo a Claude. */

@@ -2,6 +2,8 @@
 // Se empaqueta aparte porque pesa mucho y solo hace falta si generas subtítulos.
 
 import { env, pipeline } from '@huggingface/transformers';
+import type { ConfigTdt } from '../compartido/ajustes';
+import { cargarTdt, liberarTdt, transcribirTdt } from './motorTdt';
 
 env.allowLocalModels = false;
 env.useBrowserCache = true;
@@ -20,6 +22,7 @@ interface AdaptadorGpu {
 }
 
 let asr: Asr | null = null;
+let conTdt = false;
 let claveCargada = '';
 let dispositivo: 'webgpu' | 'wasm' = 'wasm';
 let nombreDispositivo = '';
@@ -56,15 +59,33 @@ async function vigilarGpu() {
 self.onmessage = async (e: MessageEvent) => {
   const m = e.data as
     | { tipo: 'cargar'; modelo: string; dtype: Record<string, string>; externos?: Record<string, number> }
+    | { tipo: 'cargarTdt'; modelo: string; tdt: ConfigTdt }
     | { tipo: 'perderGpuPrueba' }
     | { tipo: 'transcribir'; id: number; pcm: Float32Array; idioma: string };
   try {
+    if (m.tipo === 'cargarTdt') {
+      const clave = `tdt|${m.modelo}|${m.tdt.revision}`;
+      if (clave !== claveCargada) {
+        await asr?.dispose?.();
+        asr = null;
+        claveCargada = '';
+        await elegirDispositivo();
+        await cargarTdt(m.modelo, m.tdt, dispositivo === 'webgpu', (p) => self.postMessage({ tipo: 'descarga', archivo: p.archivo, cargado: p.cargado, total: p.total, estado: p.estado }));
+        conTdt = true;
+        claveCargada = clave;
+        vigilarGpu();
+      }
+      self.postMessage({ tipo: 'listo', dispositivo: nombreDispositivo });
+      return;
+    }
     if (m.tipo === 'cargar') {
       const clave = `${m.modelo}|${JSON.stringify(m.dtype)}`;
       if (clave !== claveCargada) {
         // Al cambiar de modelo se libera el anterior: si no, ambos ocuparían memoria de la GPU.
         await asr?.dispose?.();
         asr = null;
+        await liberarTdt();
+        conTdt = false;
         claveCargada = '';
         await elegirDispositivo();
         asr = (await pipeline('automatic-speech-recognition', m.modelo, {
@@ -85,6 +106,10 @@ self.onmessage = async (e: MessageEvent) => {
     }
     if (m.tipo === 'perderGpuPrueba') {
       gpuActual?.destroy();
+      return;
+    }
+    if (conTdt) {
+      self.postMessage({ tipo: 'resultado', id: m.id, tokens: await transcribirTdt(m.pcm) });
       return;
     }
     if (!asr) throw new Error('El modelo no está cargado');

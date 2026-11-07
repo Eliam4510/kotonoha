@@ -15,7 +15,7 @@ void [
 /** Control del video, igual para un sitio web que para el reproductor local. */
 export interface Control {
   sitio: string;
-  info(): Promise<{ sitio: string; activo: boolean; idVideo: string | null; titulo: string; anuncio: boolean }>;
+  info(): Promise<{ sitio: string; activo: boolean; idVideo: string | null; titulo: string; categoria?: string; anuncio: boolean }>;
   listarPistas(): Promise<PistaInfo[]>;
   cargarPista(id: string): Promise<string>;
   saltar(ms: number): Promise<void>;

@@ -28,7 +28,7 @@ The first time, a welcome screen asks for the language, the one to study and the
 | Dictionaries | Settings, Dictionaries | JMdict in Spanish, English or German, Kanjium pitch accent and JPDB frequency. They are downloaded once and stay in the browser |
 | Claude API key | Settings, Claude | Explanations, reading review, translation and correction. It is stored only in the browser |
 | Language and level | Settings, Language and level | The interface language and, separately, that of explanations and translations. The level adapts the explanations and decides how much furigana is shown at first |
-| Language you're studying | Settings, Language and level, or the extension menu | Japanese or English. Each keeps its own words, dictionaries, cards and settings |
+| Language you're studying | Settings, Language and level, the extension menu, or **Video settings, Subtitles** on the video itself | Japanese or English. Each keeps its own words, dictionaries, cards and settings |
 | Anki | Settings, Cards and Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
 
 The extension works without a Claude key: subtitles, the dictionary, furigana, colors, flashcards and Whisper do not need one.
@@ -130,11 +130,15 @@ Whisper generates Japanese subtitles when a video has none. It runs on the graph
 
 | Model | Download | Use |
 |---|---|---|
-| Whisper Turbo | 1.5 GB | Default. The highest measured accuracy |
+| Automatic | | Default. Haas-ja for Japanese speech, and Whisper Turbo for songs and other languages |
+| Haas-ja | 1.3 GB | Japanese only. The most accurate and fastest with spoken voice, even with background music, and it adds punctuation |
+| Whisper Turbo | 1.5 GB | The best for songs |
 | Whisper Turbo ligero (light) | 564 MB | Slightly less accurate, with less video memory |
 | Whisper Base | 165 MB | For computers without a powerful GPU |
 
-Models are stored in the browser and are not downloaded again: each time they load from disk, which can take a few seconds. **Settings, Transcription with Whisper, Saved models** shows the space each one takes and allows it to be deleted. Uninstalling the extension also deletes them.
+In automatic mode, a video counts as a song if its lyrics have been pasted, if the site classifies it as music, or if the title says so, such as "MV" or "歌ってみた". With Japanese speech, Haas-ja makes 3 % errors against 9 % for Whisper Turbo, and transcribes 30 minutes in about a minute, against about 5. With songs it writes only part of what is sung, and there Whisper Turbo is better. While transcribing, the panel shows which model is working.
+
+Models are stored in the browser and are not downloaded again: each time they load from disk, which can take a few seconds. **Settings, Speech transcription, Saved models** shows the space each one takes and allows it to be deleted. Uninstalling the extension also deletes them.
 
 **Intensity.** Sets the fraction of time the graphics card works. The rest is idle, and the idle time grows by itself if another application is using the card.
 

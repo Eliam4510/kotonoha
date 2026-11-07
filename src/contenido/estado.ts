@@ -13,7 +13,7 @@ import { tr } from '../compartido/i18n';
 
 export const ajustes = signal<Ajustes>(AJUSTES_INICIALES);
 
-export const infoVideo = signal<{ sitio: string; idVideo: string | null; titulo: string } | null>(null);
+export const infoVideo = signal<{ sitio: string; idVideo: string | null; titulo: string; categoria?: string } | null>(null);
 export const pistas = signal<PistaInfo[]>([]);
 export const idObjetivo = signal<string | null>(null);
 export const idSecundaria = signal<string | null>(null);
@@ -87,6 +87,8 @@ export const correccion = signal<{ hechas: number; total: number; cambiadas: num
 export const originales = signal<ReadonlyMap<number, string>>(new Map());
 export interface EstadoWhisper {
   fase: 'bajando' | 'extrayendo' | 'preparando' | 'descargando' | 'escuchando' | 'procesando' | 'terminando' | 'recuperando';
+  /** El modelo que está transcribiendo: en automático, depende del video. */
+  modelo?: string;
   pausado?: boolean;
   /** Segundos que faltan, medidos con el ritmo real y ya con los descansos incluidos. */
   restanteS?: number | null;
