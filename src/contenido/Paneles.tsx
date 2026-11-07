@@ -17,7 +17,7 @@ import {
   cancelarCorreccion,
   corregirSubtitulos,
   generarSecundarios,
-  traducirAlJapones,
+  traducirALengua,
   iniciarAnalisisProfundo,
   iniciarWhisper,
   importarArchivo,
@@ -30,6 +30,8 @@ import {
 import { ajustes, analisisEnCurso, anclas, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
 import { cambiarAjuste } from './Reproductor';
 import { LENGUAS, numero, tm, tr } from '../compartido/i18n';
+import { lengua } from '../ui/lengua';
+import type { TextosLengua } from '../lenguas/tipos';
 
 /** Anillo de progreso: comprensión del video, avance de una tarea de Claude. */
 export function Anillo({ valor, t = 36, grosor = 3.5, clase = '', children }: { valor: number; t?: number; grosor?: number; clase?: string; children?: preact.ComponentChildren }) {
@@ -139,8 +141,8 @@ function PanelVisual() {
       </div>
       <TituloGrupo>{tr('Sobre cada palabra')}</TituloGrupo>
       <div class="grupo">
-        <Fila etq={tr('Furigana')}>
-          <Selector etiqueta={tr('Furigana')} valor={a.furigana} opciones={[['ninguna', tr('Ninguna')], ['todas', tr('Todas las palabras')], ['desconocidas', tr('Desconocidas')], ['alPasar', tr('Al pasar el ratón')]]} alCambiar={(v) => cambiarAjuste({ furigana: v })} />
+        <Fila etq={tr(lengua.value.textos.lectura)}>
+          <Selector etiqueta={tr(lengua.value.textos.lectura)} valor={a.furigana} opciones={[['ninguna', tr('Ninguna')], ['todas', tr('Todas las palabras')], ['desconocidas', tr('Desconocidas')], ['alPasar', tr('Al pasar el ratón')]]} alCambiar={(v) => cambiarAjuste({ furigana: v })} />
         </Fila>
         <Fila etq={tr('Traducción de palabras')}>
           <Selector etiqueta={tr('Traducción de palabras')} valor={a.glosas} opciones={[['ninguna', tr('Ninguna')], ['desconocidas', tr('Desconocidas')], ['alPasar', tr('Al pasar el ratón')]]} alCambiar={(v) => cambiarAjuste({ glosas: v })} />
@@ -160,8 +162,8 @@ function PanelVisual() {
         <Fila etq={tr('Mostrar gramática')} ayuda={tr('Puntos gramaticales bajo cada línea')}>
           <Interruptor on={a.mostrarGramatica} etiqueta={tr('Mostrar gramática')} alCambiar={(v) => cambiarAjuste({ mostrarGramatica: v })} />
         </Fila>
-        <Fila etq={tr('Partículas como conocidas')}>
-          <Interruptor on={a.particulasConocidas} etiqueta={tr('Partículas como conocidas')} alCambiar={(v) => cambiarAjuste({ particulasConocidas: v })} />
+        <Fila etq={tr(lengua.value.textos.gramaticaConocida)}>
+          <Interruptor on={a.particulasConocidas} etiqueta={tr(lengua.value.textos.gramaticaConocida)} alCambiar={(v) => cambiarAjuste({ particulasConocidas: v })} />
         </Fila>
         <Fila etq={tr('Buscar compuestos')} ayuda={tr('Palabras formadas con la siguiente')}>
           <Interruptor on={a.busquedaCompuesta} etiqueta={tr('Buscar compuestos')} alCambiar={(v) => cambiarAjuste({ busquedaCompuesta: v })} />
@@ -341,7 +343,7 @@ function PanelVideo() {
               <Fila etq={tr('Momento de la pausa')}>
                 <Selector<DisparadorPausa> etiqueta={tr('Momento de la pausa')} valor={personal.disparador} opciones={[['ninguno', tr('Nunca')], ['antes', tr('Antes de la frase')], ['despues', tr('Después de la frase')], ['antesYDespues', tr('Antes y después')], ['rebobinar', tr('Retroceder y pausar')]]} alCambiar={(d) => setPersonal({ ...personal, disparador: d })} />
               </Fila>
-              <ControlVelo titulo={tr('Velo sobre el japonés')} clave="velarObjetivo" cfg={personal} alCambiar={setPersonal} />
+              <ControlVelo titulo={tr(lengua.value.textos.velo)} clave="velarObjetivo" cfg={personal} alCambiar={setPersonal} />
               <ControlVelo titulo={tr('Velo sobre la traducción')} clave="velarSecundario" cfg={personal} alCambiar={setPersonal} />
               <Fila etq={tr('Ajuste de la pausa')} ayuda={tr('En milisegundos')}>
                 <Paso etiqueta={tr('ajuste de la pausa')} valor={a.desfasePausaMs} paso={50} alCambiar={(v) => cambiarAjuste({ desfasePausaMs: v })} />
@@ -369,14 +371,14 @@ function PanelVideo() {
       {p === 'subtitulos' && (
         <>
           <div class="columnas">
-            <ControlPista titulo={tr('Subtítulos en japonés')} icono="subtitulos" valor={idObjetivo.value} idioma={a.idiomaObjetivo} destino="objetivo" alElegir={seleccionarObjetivo} puedeExportar={lineasObjetivo.value.length > 0} />
+            <ControlPista titulo={tr(lengua.value.textos.subtitulos)} icono="subtitulos" valor={idObjetivo.value} idioma={a.idiomaObjetivo} destino="objetivo" alElegir={seleccionarObjetivo} puedeExportar={lineasObjetivo.value.length > 0} />
             <ControlPista titulo={tr('Subtítulos secundarios')} icono="traducir" valor={idSecundaria.value} idioma={a.idiomaSecundario} destino="secundaria" alElegir={seleccionarSecundaria} puedeExportar={lineasSecundarias.value.length > 0} />
           </div>
           <p class="nota-grupo">{tr('También puedes arrastrar un archivo SRT, VTT, ASS o TTML directamente sobre el video.')}</p>
           <div class="columnas separada">
             <div class="grupo">
-              <Fila etq={tr('Mostrar japonés')}><Interruptor on={!a.ocultarObjetivo} etiqueta={tr('Mostrar japonés')} alCambiar={(v) => cambiarAjuste({ ocultarObjetivo: !v })} /></Fila>
-              <Fila etq={tr('Tamaño')}><Paso etiqueta={tr('tamaño del japonés')} valor={a.escalaObjetivo} paso={10} min={40} max={250} unidad="%" alCambiar={(v) => cambiarAjuste({ escalaObjetivo: v })} /></Fila>
+              <Fila etq={tr(lengua.value.textos.mostrar)}><Interruptor on={!a.ocultarObjetivo} etiqueta={tr(lengua.value.textos.mostrar)} alCambiar={(v) => cambiarAjuste({ ocultarObjetivo: !v })} /></Fila>
+              <Fila etq={tr('Tamaño')}><Paso etiqueta={tr(lengua.value.textos.tamano)} valor={a.escalaObjetivo} paso={10} min={40} max={250} unidad="%" alCambiar={(v) => cambiarAjuste({ escalaObjetivo: v })} /></Fila>
             </div>
             <div class="grupo">
               <Fila etq={tr('Mostrar secundarios')}><Interruptor on={!a.ocultarSecundario} etiqueta={tr('Mostrar secundarios')} alCambiar={(v) => cambiarAjuste({ ocultarSecundario: !v })} /></Fila>
@@ -405,10 +407,10 @@ function PanelVideo() {
         <>
           <p class="panel-intro">{tr('¿Los subtítulos no coinciden con lo que se dice? Muévelos a mano, o márcalos escuchando para una sincronía exacta.')}</p>
           <div class="columnas">
-            <ControlSincronia titulo={tr('Japonés')} pista="objetivo" disponible={lineasObjetivo.value.length > 0} />
+            <ControlSincronia titulo={tr(lengua.value.textos.nombre)} pista="objetivo" disponible={lineasObjetivo.value.length > 0} />
             <ControlSincronia titulo={tr('Secundarios')} pista="secundaria" disponible={lineasSecundarias.value.length > 0} />
           </div>
-          <p class="nota-grupo">{tr('Atajos para el japonés:')} <Teclas t={['Alt', '+', 'I', '/', 'O']} /></p>
+          <p class="nota-grupo">{tr(lengua.value.textos.atajos)} <Teclas t={['Alt', '+', 'I', '/', 'O']} /></p>
           <TituloGrupo>{tr('Sincronizar escuchando')}</TituloGrupo>
           <div class="grupo">
             <ol class="pasos-sinc">
@@ -472,7 +474,7 @@ function PanelVideo() {
 
 const FILA_CAPTURA = tm('Permitir captura de audio');
 
-const ATAJOS: { titulo: string; filas: [string, string[]][] }[][] = [
+const atajosDe = (textos: TextosLengua): { titulo: string; filas: [string, string[]][] }[][] => [
   [
     {
       titulo: tm('Barra'),
@@ -538,9 +540,9 @@ const ATAJOS: { titulo: string; filas: [string, string[]][] }[][] = [
       titulo: tm('Subtítulos'),
       filas: [
         [tm('Mostrar u ocultar todo'), ['R']],
-        [tm('Mostrar u ocultar japonés'), ['↑', '/', 'W']],
+        [textos.mostrarUOcultar, ['↑', '/', 'W']],
         [tm('Mostrar u ocultar secundarios'), [tm('Shift'), '+', '↑']],
-        [tm('Desfase del japonés'), [tm('Alt'), '+', 'I', '/', 'O']],
+        [textos.desfase, [tm('Alt'), '+', 'I', '/', 'O']],
         [tm('Desfase de secundarios'), [tm('Alt'), '+', tm('Shift'), '+', 'I', '/', 'O']],
         [tm('Generar secundarios'), [tm('Alt'), '+', tm('Shift'), '+', 'G']],
         [tm('Navegador de subtítulos'), ['G']],
@@ -557,7 +559,7 @@ function PanelAtajos() {
     <div class={`panel-flotante panel-atajos ${claseNavegador()}`} role="dialog" aria-label={tr('Atajos de teclado')}>
       <Cabecera titulo={tr('Atajos de teclado')} icono="teclado" />
       <div class="columnas-atajos">
-        {ATAJOS.map((col, i) => (
+        {atajosDe(lengua.value.textos).map((col, i) => (
           <div class="atajos-col" key={i}>
             {col.map((g) => (
               <div key={g.titulo}>
@@ -666,7 +668,7 @@ function SeccionWhisper() {
             </div>
           </Fila>
         )}
-        <Fila etq={tr('Corregir con Claude')} ayuda={tr('Kanji y homófonos del resultado')}>
+        <Fila etq={tr('Corregir con Claude')} ayuda={tr(lengua.value.textos.corregirResultado)}>
           <Interruptor on={a.whisperCorregir} etiqueta={tr('Corregir con Claude')} alCambiar={(v) => cambiarAjuste({ whisperCorregir: v })} />
         </Fila>
         {w ? (
@@ -712,7 +714,7 @@ function PanelGenerar() {
         ) : (
           <div class="bloque-generar">
             <button class="btn primario bloque" disabled={!hayObjetivo || !!g} onClick={() => generarSecundarios()}><Icono n="traducir" t={16} /> {tr('Traducir al')} {nombreIdioma(a.idiomaSecundario).toLowerCase()}</button>
-            {!hayObjetivo && <p class="nota-grupo">{tr('Primero necesitas subtítulos en japonés.')}</p>}
+            {!hayObjetivo && <p class="nota-grupo">{tr(lengua.value.textos.primeroNecesitas)}</p>}
           </div>
         )}
       </div>
@@ -749,7 +751,7 @@ function PanelGenerar() {
           <TituloGrupo icono="ia" ia>{tr('Revisar lecturas y gramática')}</TituloGrupo>
           <div class="grupo">
             <div class="bloque-generar">
-              <p>{tr('Corrige el furigana, detecta los usos figurados y marca la gramática de cada línea. Lo revisado se guarda, así que solo se hace una vez.')}</p>
+              <p>{tr(lengua.value.textos.revisionAyuda)}</p>
             </div>
             <Fila etq={tr('Revisar a medida que avanza')}>
               <Interruptor on={a.analisisAutomatico} etiqueta={tr('Revisar a medida que avanza')} alCambiar={(v) => cambiarAjuste({ analisisAutomatico: v })} />
@@ -768,10 +770,10 @@ function PanelGenerar() {
         </>
       )}
 
-      <TituloGrupo icono="traducir" ia>{tr('Crear japonés desde otro idioma')}</TituloGrupo>
+      <TituloGrupo icono="traducir" ia>{tr(lengua.value.textos.crearDesdeOtro)}</TituloGrupo>
       <div class="grupo">
         <div class="bloque-generar">
-          <p>{tr('Para cuando solo hay subtítulos en otro idioma y no encuentras un SRT en japonés. Es una traducción de una traducción, así que no coincidirá del todo con lo que se oye.')}</p>
+          <p>{tr(lengua.value.textos.crearDesdeOtroAyuda)}</p>
         </div>
         {g?.tipo === 'objetivo' ? (
           <div class="progreso-linea">
@@ -780,7 +782,7 @@ function PanelGenerar() {
           </div>
         ) : (
           <div class="bloque-generar">
-            <button class="btn ia bloque" disabled={!haySecundaria || !!g} onClick={() => traducirAlJapones()}><Icono n="traducir" t={16} /> {nombreSecundaria ? tr('Traducir «{0}» al japonés', nombreSecundaria) : tr('Traducir al japonés')}</button>
+            <button class="btn ia bloque" disabled={!haySecundaria || !!g} onClick={() => traducirALengua()}><Icono n="traducir" t={16} /> {nombreSecundaria ? tr(lengua.value.textos.traducirPista, nombreSecundaria) : tr(lengua.value.textos.traducirA)}</button>
             {!haySecundaria && <p class="nota-grupo">{tr('Elige primero unos subtítulos secundarios en la pestaña Subtítulos.')}</p>}
           </div>
         )}
@@ -815,7 +817,7 @@ function PanelTraductor() {
   return (
     <div class={`panel-flotante panel-traductor ${claseNavegador()}`} role="dialog" aria-label={tr('Traductor')}>
       <Cabecera titulo={tr('Traductor')} icono="traducir" ia />
-      <textarea class="campo" lang="ja" aria-label={tr('Texto a traducir')} placeholder="ここに書いてください" value={texto.value} onInput={(e) => (texto.value = e.currentTarget.value)} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) traducir(); e.stopPropagation(); }} />
+      <textarea class="campo" lang={lengua.value.id} aria-label={tr('Texto a traducir')} placeholder={lengua.value.ejemplos.escribir} value={texto.value} onInput={(e) => (texto.value = e.currentTarget.value)} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) traducir(); e.stopPropagation(); }} />
       <div class="accion-traducir">
         <Teclas t={['Ctrl', '+', 'Enter']} />
         <button class="btn ia" disabled={cargando.value || !texto.value.trim()} onClick={traducir}><Icono n="ia" t={16} /> {tr('Traducir')}</button>
@@ -883,7 +885,7 @@ function PanelComprension() {
           <TituloGrupo>{tr('Las que más te ayudarían aquí')}</TituloGrupo>
           <div class="chips-palabras">
             {prioritarias.map(({ palabra, veces }) => (
-              <span class="chip-palabra" key={palabra.clave} title={palabra.glosa} lang="ja">{palabra.lema} <small>×{veces}</small></span>
+              <span class="chip-palabra" key={palabra.clave} title={palabra.glosa} lang={lengua.value.id}>{palabra.lema} <small>×{veces}</small></span>
             ))}
           </div>
         </>
@@ -913,7 +915,7 @@ function ResumenGramatica() {
       <div class="chips-palabras">
         {lista.slice(0, 40).map(([patron, e]) => (
           <button key={patron} class={`chip-gram n-${e.nivel ?? ''}`} title={tr('{0}. Ir al primer ejemplo.', tr(e.significado))} onClick={() => irALinea(e.primera)}>
-            <span lang="ja">{patron}</span>{e.nivel && <small>{e.nivel}</small>}{e.veces > 1 && <small>×{e.veces}</small>}
+            <span lang={lengua.value.id}>{patron}</span>{e.nivel && <small>{e.nivel}</small>}{e.veces > 1 && <small>×{e.veces}</small>}
           </button>
         ))}
       </div>

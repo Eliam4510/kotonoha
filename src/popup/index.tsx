@@ -10,6 +10,7 @@ import { Icono, Marca, type NombreIcono } from '../ui/iconos';
 import { useTema } from '../ui/tema';
 import css from './popup.css';
 import { bcp47Actual, fijarIdioma, numero, tm, tr } from '../compartido/i18n';
+import { aplicarLengua, lengua } from '../ui/lengua';
 
 const RUTAS: [string, NombreIcono, string][] = [
   ['inicio', 'inicio', tm('Inicio')],
@@ -35,7 +36,10 @@ function Popup() {
   const tema = useTema(a?.tema ?? 'auto');
 
   useEffect(() => {
-    leerAjustes().then(fijarA);
+    leerAjustes().then((x) => {
+      aplicarLengua(x);
+      fijarA(x);
+    });
     // El menú está en español: no merece la pena esperar a la tipografía japonesa, que pesa megas.
     cargarFuentes({ soloLatin: true }).catch(() => {});
     chrome.tabs.query({ active: true, currentWindow: true }).then(([t]) => {
@@ -98,16 +102,16 @@ function Popup() {
         <div class="ap-menu-fila">
           <div class="ap-menu-texto">
             <b>{tr('Lector de páginas')}</b>
-            <span>{tr('Colores, furigana y consulta en cualquier texto japonés.')}</span>
+            <span>{tr(lengua.value.textos.lectorResumen)}</span>
           </div>
           <button class={`interruptor ${a.lectorActivo ? 'on' : ''}`} role="switch" aria-checked={a.lectorActivo} aria-label={tr('Lector de páginas')} onClick={() => cambiar({ lectorActivo: !a.lectorActivo })} />
         </div>
         {a.lectorActivo && (
           <div class="ap-menu-fila columna">
             <div class="ap-menu-texto">
-              <b>{tr('Furigana')}</b>
+              <b>{tr(lengua.value.textos.lectura)}</b>
             </div>
-            <div class="segmentado" role="radiogroup" aria-label={tr('Furigana')}>
+            <div class="segmentado" role="radiogroup" aria-label={tr(lengua.value.textos.lectura)}>
               {MODOS_FURIGANA.map(([v, n]) => (
                 <button key={v} role="radio" aria-checked={a.lectorFurigana === v} class={a.lectorFurigana === v ? 'activo' : ''} onClick={() => cambiar({ lectorFurigana: v })}>{tr(n)}</button>
               ))}

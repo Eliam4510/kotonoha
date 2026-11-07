@@ -6,14 +6,15 @@ import type { Ajustes } from '../compartido/ajustes';
 import { alRecibirEvento, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
 import { fraseConNegrita } from '../nucleo/frases';
-import { detectarGramatica, type PuntoGramatica } from '../nucleo/gramatica';
-import { lecturaVisible, pegarSignos } from '../nucleo/tokens';
+import { motorDe } from '../lenguas/motor';
+import type { PuntoGramatica } from '../lenguas/tipos';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { guardarPreferencia, leerPreferencia } from './estadoApp';
 import { Anillo } from './Piezas';
 import { numero, tr } from '../compartido/i18n';
+import { lengua } from '../ui/lengua';
 
 interface Abierta {
   palabra: PalabraToken;
@@ -25,13 +26,12 @@ interface Abierta {
   sitio: string;
 }
 
-const FIN_DE_FRASE = /(?<=[。！？!?])/;
 const TAMANO_MIN = 16;
 const TAMANO_MAX = 34;
 
 /** Parte el texto en párrafos y estos en frases, que es la unidad de la lectura en voz alta. */
 export function partirFrases(texto: string): string[] {
-  return texto.split(/\r?\n/).flatMap((p) => (p.trim() ? p.split(FIN_DE_FRASE) : [''])).filter((f, i, l) => f || (l[i - 1] && l[i - 1] !== ''));
+  return texto.split(/\r?\n/).flatMap((p) => (p.trim() ? p.split(lengua.value.escritura.frase.partir) : [''])).filter((f, i, l) => f || (l[i - 1] && l[i - 1] !== ''));
 }
 
 export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBarra, pie }: {
@@ -98,7 +98,7 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
     } else {
       await new Promise<void>((ok) => {
         const u = new SpeechSynthesisUtterance(f);
-        u.lang = 'ja-JP';
+        u.lang = lengua.value.bcp47;
         u.onend = () => ok();
         u.onerror = () => ok();
         speechSynthesis.speak(u);
@@ -145,13 +145,13 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
             )}
             <div class="ap-tamano" role="group" aria-label={tr('Tamaño del texto')}>
               <button class="btn-icono chico" aria-label={tr('Reducir el texto')} disabled={tam <= TAMANO_MIN} onClick={() => cambiarTam(-2)}><Icono n="menos" t={14} /></button>
-              <span aria-hidden="true">あ</span>
+              <span aria-hidden="true">{lengua.value.ejemplos.letra}</span>
               <button class="btn-icono chico" aria-label={tr('Aumentar el texto')} disabled={tam >= TAMANO_MAX} onClick={() => cambiarTam(2)}><Icono n="mas" t={14} /></button>
             </div>
           </div>
         </div>
 
-        <article class="ap-papel" lang="ja" style={{ fontSize: `${tam}px` }} onClick={() => fijarAbierta(null)}>
+        <article class="ap-papel" lang={lengua.value.id} style={{ fontSize: `${tam}px` }} onClick={() => fijarAbierta(null)}>
           {tokens.length === 0 && (
             <div aria-hidden="true">
               <span class="esqueleto" style={{ width: '96%' }} />
@@ -175,21 +175,21 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
                         frase: f,
                         antes: frases.slice(Math.max(0, i - 6), i),
                         despues: frases.slice(i + 1, i + 7),
-                        gramatica: detectarGramatica(f),
+                        gramatica: motorDe(lengua.value.id).detectarGramatica(f),
                         sitio: `${i}-${k}`,
                       });
                     }}
                   >
                     {p.furigana.map((s, j) =>
                       s.lectura && ajustes.furigana !== 'ninguna' ? (
-                        <ruby key={j}>{s.texto}<rt>{lecturaVisible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
+                        <ruby key={j}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
                       ) : (
                         <span key={j}>{s.texto}</span>
                       )
                     )}
                   </span>
                 ) : (
-                  <span key={k}>{pegarSignos(p.superficie)}</span>
+                  <span key={k}>{lengua.value.escritura.pegarSignos(p.superficie)}</span>
                 )
               )}
             </span>

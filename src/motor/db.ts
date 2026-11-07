@@ -111,9 +111,8 @@ class BaseKotonoha extends Dexie {
   consumo!: Table<FilaConsumo, number>;
   trazos!: Table<FilaTrazos, string>;
 
-  constructor() {
-    // Nombre de la primera versión. Cambiarlo dejaría atrás los diccionarios y palabras ya guardados.
-    super('kikitori');
+  constructor(nombre: string) {
+    super(nombre);
     this.version(1).stores({
       diccionarios: 'id, orden, tipo',
       terminos: '++id, termino, lectura, dic',
@@ -134,4 +133,30 @@ class BaseKotonoha extends Dexie {
   }
 }
 
-export const db = new BaseKotonoha();
+/**
+ * Cada lengua tiene su propia base: sus palabras, diccionarios y tarjetas no se pueden mezclar con los de otra, aunque
+ * se escriban igual, y quitar una lengua es borrar su base. La del japonés conserva el nombre de la primera versión:
+ * cambiarlo dejaría atrás los diccionarios y palabras ya guardados.
+ */
+export const nombreBase = (idLengua: string) => (idLengua === 'ja' ? 'kikitori' : `kikitori-${idLengua}`);
+
+const bases = new Map<string, BaseKotonoha>();
+
+export function baseDe(idLengua: string): BaseKotonoha {
+  let base = bases.get(idLengua);
+  if (!base) {
+    base = new BaseKotonoha(nombreBase(idLengua));
+    bases.set(idLengua, base);
+  }
+  return base;
+}
+
+/** Lo que no depende de la lengua, como lo gastado en Claude, está siempre en la base original. */
+export const baseGeneral = baseDe('ja');
+
+/** La base de la lengua que se estudia. */
+export let db = baseGeneral;
+
+export function usarBaseDe(idLengua: string) {
+  db = baseDe(idLengua);
+}

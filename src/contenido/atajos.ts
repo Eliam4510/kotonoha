@@ -5,7 +5,7 @@ import { motor, fondo } from '../compartido/rpc';
 import { type Combinacion, leerCombinacion, teclaLatina, textoCombinacion } from '../nucleo/teclas';
 import type { EstadoPalabra, LineaAnalizada } from '../compartido/tipos';
 import { desconocidas } from '../nucleo/frases';
-import { tieneJapones } from '../nucleo/tokens';
+import { lengua } from '../ui/lengua';
 import {
   abrirConsultaDe,
   ajustarDesfase,
@@ -114,9 +114,9 @@ export function instalarAtajos(): void {
       const meta = e.metaKey;
       if (meta || (ctrl && k !== 'x')) return;
 
-      // Con texto japonés seleccionado en la página, E y Alt+K/U/I actúan sobre la selección (webAtajos).
+      // Con texto seleccionado en la lengua que se estudia, E y Alt+K/U/I actúan sobre la selección (webAtajos).
       const seleccion = window.getSelection()?.toString() ?? '';
-      if (seleccion.trim() && tieneJapones(seleccion) && ((k === 'e' && !alt && !shift) || (alt && !shift && /^[kui]$/.test(k)))) return;
+      if (seleccion.trim() && lengua.value.escritura.tieneTexto(seleccion) && ((k === 'e' && !alt && !shift) || (alt && !shift && /^[kui]$/.test(k)))) return;
 
       const hay = lineasObjetivo.value.length > 0;
       const hecho = () => {
@@ -179,11 +179,11 @@ export function instalarAtajos(): void {
             return hecho();
           case 'i':
             ajustarDesfase('objetivo', -100);
-            avisar(tr('Japonés 0,1 s antes'), undefined, undefined, 1200);
+            avisar(tr(lengua.value.textos.antes), undefined, undefined, 1200);
             return hecho();
           case 'o':
             ajustarDesfase('objetivo', 100);
-            avisar(tr('Japonés 0,1 s después'), undefined, undefined, 1200);
+            avisar(tr(lengua.value.textos.despues), undefined, undefined, 1200);
             return hecho();
           case 'n':
             siguientePalabra(false);

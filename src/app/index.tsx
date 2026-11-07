@@ -9,7 +9,7 @@ import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
 import { Icono, Logo, Marca, type NombreIcono } from '../ui/iconos';
 import { variablesPaleta } from '../ui/paletas';
-import { formatoLectura } from '../ui/lecturas';
+import { aplicarLengua } from '../ui/lengua';
 import { useTema } from '../ui/tema';
 import appCss from './app.css';
 import { PantallaAjustes } from './Ajustes';
@@ -157,7 +157,7 @@ function App() {
   const [{ ruta, params }, fijarRuta] = useState(leerRuta());
   const tema = useTema(a.tema);
   const [cargados, fijarCargados] = useState(false);
-  formatoLectura.value = a.formatoLectura;
+  aplicarLengua(a);
 
   useEffect(() => {
     leerAjustes().then((x) => {

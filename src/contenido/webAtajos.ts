@@ -6,18 +6,17 @@
 import { motor } from '../compartido/rpc';
 import type { EstadoPalabra } from '../compartido/tipos';
 import { teclaLatina } from '../nucleo/teclas';
-import { tieneJapones } from '../nucleo/tokens';
+import { lengua } from '../ui/lengua';
 import { enviarAlCreador } from '../ui/borrador';
 import { tr } from '../compartido/i18n';
 
 type Notificar = (texto: string, tipo?: 'error' | 'exito') => void;
 
 /** Una selección corta y sin puntuación es una palabra; lo demás se trata como una frase. */
-const pareceFrase = (t: string) => t.length > 12 || /[。、!?!?]/.test(t);
 
 async function enviarSeleccion(texto: string, notificar: Notificar) {
   const comun = { fuente: document.title, url: location.href };
-  if (pareceFrase(texto)) {
+  if (lengua.value.escritura.pareceFrase(texto)) {
     await enviarAlCreador({ frase: texto, ...comun });
     return;
   }
@@ -82,10 +81,10 @@ export function instalarAtajosWeb(activo: () => boolean, notificar: Notificar) {
     if (objetivo && (objetivo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(objetivo.tagName))) return;
     const k = teclaLatina(e);
     const seleccion = window.getSelection()?.toString().trim() ?? '';
-    const conJapones = seleccion && tieneJapones(seleccion);
+    const enLengua = seleccion && lengua.value.escritura.tieneTexto(seleccion);
 
     if (k === 'e' && !e.altKey && !e.shiftKey) {
-      if (conJapones) {
+      if (enLengua) {
         e.preventDefault();
         enviarSeleccion(seleccion, notificar).catch((x) => notificar(String(x), 'error'));
       } else if (imagen?.isConnected) {
@@ -94,7 +93,7 @@ export function instalarAtajosWeb(activo: () => boolean, notificar: Notificar) {
       }
       return;
     }
-    if (e.altKey && !e.shiftKey && conJapones && ESTADO_POR_TECLA[k]) {
+    if (e.altKey && !e.shiftKey && enLengua && ESTADO_POR_TECLA[k]) {
       e.preventDefault();
       marcarSeleccion(seleccion, ESTADO_POR_TECLA[k], notificar).catch((x) => notificar(String(x), 'error'));
     }

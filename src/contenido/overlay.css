@@ -27,7 +27,7 @@
 .subs-bloque:not(.con-sombra) .linea-sub { -webkit-text-stroke: 0.1em rgba(4, 7, 5, 0.86); paint-order: stroke fill; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); color: #fff; }
 .subs-bloque:not(.con-sombra) .linea-sub .pal rt { -webkit-text-stroke: 0.14em rgba(4, 7, 5, 0.86); }
 .subs-bloque:not(.con-sombra) .linea-sub.secundaria { -webkit-text-stroke-width: 0.07em; }
-.linea-sub.objetivo { font-family: var(--letra-ja); font-weight: 700; line-height: 1.3; letter-spacing: 0.01em; padding-top: 0.2em; }
+.linea-sub.objetivo { font-family: var(--letra-lengua); font-weight: 700; line-height: 1.3; letter-spacing: 0.01em; padding-top: 0.2em; }
 .linea-sub.objetivo.fur-ninguna { padding-top: 0.08em; }
 .linea-sub.secundaria { font-weight: 600; line-height: 1.32; color: rgba(255, 255, 255, 0.84); letter-spacing: 0.002em; }
 .linea-sub.difuminada { filter: blur(0.32em); }
@@ -230,7 +230,7 @@
 .dato b { font-weight: 700; color: var(--texto); font-variant-numeric: tabular-nums; }
 .comp-caja { padding: 12px 14px; }
 .chips-palabras { display: flex; flex-wrap: wrap; gap: 5px; }
-.chip-palabra { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: var(--r-pill); background: var(--superficie-3); font-family: var(--letra-ja); font-size: 13.5px; font-weight: 700; }
+.chip-palabra { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: var(--r-pill); background: var(--superficie-3); font-family: var(--letra-lengua); font-size: 13.5px; font-weight: 700; }
 .chip-palabra small { font-family: var(--letra); font-size: 11px; font-weight: 700; color: var(--texto-3); }
 
 /* ---------- Navegador ---------- */
@@ -266,7 +266,7 @@
 .nav-punto.n1 { background: var(--est-aprendiendo); }
 .nav-punto.n2 { background: var(--est-desconocida); }
 .nav-punto.ninguna { background: var(--superficie-4); }
-.nav-texto { --pal-hover: var(--superficie-3); font-family: var(--letra-ja); font-size: 18px; line-height: 1.8; white-space: pre-wrap; font-weight: 700; color: var(--texto); }
+.nav-texto { --pal-hover: var(--superficie-3); font-family: var(--letra-lengua); font-size: 18px; line-height: 1.8; white-space: pre-wrap; font-weight: 700; color: var(--texto); }
 .nav-linea:not(.activa) .nav-texto { font-weight: 500; }
 .nav-texto .pal .glosa { display: none !important; }
 .nav-sec { margin-top: 1px; color: var(--texto-2); font-size: 12.5px; line-height: 1.4; }
@@ -318,7 +318,7 @@
 .popup-gramatica { padding: 0; }
 .gram-cab { flex: none; display: flex; align-items: flex-start; gap: 10px; padding: 16px 12px 10px 18px; }
 .gram-titulo { flex: 1; min-width: 0; }
-.gram-titulo h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-family: var(--letra-ja); font-size: 26px; font-weight: 900; line-height: 1.2; letter-spacing: 0.005em; }
+.gram-titulo h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-family: var(--letra-lengua); font-size: 26px; font-weight: 900; line-height: 1.2; letter-spacing: 0.005em; }
 .gram-significado { margin-top: 4px; font-size: 15px; font-weight: 700; }
 .gram-frase { margin-top: 2px; font-size: 12.5px; color: var(--texto-3); line-height: 1.4; }
 .gram-cuerpo { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 2px 14px 14px; overscroll-behavior: contain; }

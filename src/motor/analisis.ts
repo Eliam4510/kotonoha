@@ -12,40 +12,17 @@ import type {
 } from '../compartido/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 import { type AnalisisLinea, aplicarLecturas } from '../nucleo/analisisProfundo';
-import { detectarGramatica, type PuntoGramatica } from '../nucleo/gramatica';
-import { kataAHira, patronAcento, tieneJapones, type TokenCrudo, type TokenUnido, unirTokens } from '../nucleo/tokens';
+import type { PuntoGramatica, TokenUnido } from '../lenguas/tipos';
 import { db, type FilaPalabraDb, type FilaTermino } from './db';
 import { listaDiccionarios } from './diccionarios';
+import { lengua, motorLengua } from './lengua';
 
-interface Tokenizador {
-  tokenize(texto: string): TokenCrudo[];
-}
-
-declare const kuromoji: {
-  builder(o: { dicPath: string }): { build(cb: (e: Error | null, t: Tokenizador) => void): void };
-};
-
-let tokenizador: Tokenizador | null = null;
-let cargando: Promise<Tokenizador> | null = null;
 let terminos: Set<string> | null = null;
 
-export const tokenizadorListo = () => tokenizador !== null;
+export const analizadorListo = () => motorLengua().analizador.listo();
 export const totalTerminos = () => terminos?.size ?? 0;
 
-export function cargarTokenizador(): Promise<Tokenizador> {
-  if (tokenizador) return Promise.resolve(tokenizador);
-  cargando ??= new Promise((ok, mal) => {
-    // Ruta relativa al documento: Kuromoji rompe las URL absolutas al unirlas con path.join.
-    kuromoji.builder({ dicPath: 'dict/' }).build((e, t) => {
-      if (e) mal(e);
-      else {
-        tokenizador = t;
-        ok(t);
-      }
-    });
-  });
-  return cargando;
-}
+export const cargarAnalizador = () => motorLengua().analizador.cargar();
 
 let cargaTerminos: Promise<void> | null = null;
 
@@ -59,36 +36,40 @@ export function recargarTerminos(): Promise<void> {
   return cargaTerminos;
 }
 
-/** Espera a tener tokenizador y términos: sin ellos los compuestos saldrían partidos. */
-async function preparar(): Promise<Tokenizador> {
-  const t = await cargarTokenizador();
+/** Espera a tener analizador y términos: sin ellos los compuestos saldrían partidos. */
+async function preparar(): Promise<void> {
+  await cargarAnalizador();
   await (cargaTerminos ?? recargarTerminos()).catch(() => {});
-  return t;
+}
+
+/** Al cambiar de lengua, lo que había en memoria era de la anterior. */
+export function olvidarLengua() {
+  terminos = null;
+  cargaTerminos = null;
+  cacheTokens.clear();
+  cacheLecturaLema.clear();
 }
 
 const cacheTokens = new Map<string, TokenUnido[]>();
 const cacheLecturaLema = new Map<string, string>();
 
-function tokensDe(t: Tokenizador, texto: string): TokenUnido[] {
+function tokensDe(texto: string): TokenUnido[] {
   let r = cacheTokens.get(texto);
   if (!r) {
-    r = unirTokens(t.tokenize(texto), terminos ? (x) => terminos!.has(x) : undefined);
+    r = motorLengua().analizador.analizar(texto, terminos ? (x) => terminos!.has(x) : undefined);
     if (cacheTokens.size > 20000) cacheTokens.clear();
     cacheTokens.set(texto, r);
   }
   return r;
 }
 
-/** Lectura de la forma de diccionario. Un verbo conjugado no trae la del lema: se tokeniza aparte. */
-function lecturaLema(t: Tokenizador, token: TokenUnido & { lecturaLemaCorregida?: string }): string {
+/** Lectura de la forma de diccionario. Una palabra flexionada no trae la del lema: se pide aparte. */
+function lecturaLema(token: TokenUnido & { lecturaLemaCorregida?: string }): string {
   if (token.lecturaLemaCorregida) return token.lecturaLemaCorregida;
   if (!token.inflexionado) return token.lectura;
   let r = cacheLecturaLema.get(token.lema);
   if (r === undefined) {
-    r = t
-      .tokenize(token.lema)
-      .map((x) => (x.reading && x.reading !== '*' ? kataAHira(x.reading) : kataAHira(x.surface_form)))
-      .join('');
+    r = motorLengua().analizador.lecturaDeLema(token.lema);
     cacheLecturaLema.set(token.lema, r);
   }
   return r;
@@ -117,12 +98,12 @@ function glosaCorta(filas: FilaTermino[], orden: string[], lectura: string): str
   return undefined;
 }
 
-export async function enriquecer(tokensPorLinea: TokenUnido[][], t: Tokenizador, a: Ajustes): Promise<PalabraToken[][]> {
+export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Promise<PalabraToken[][]> {
   const claves = new Map<string, { lema: string; lectura: string }>();
   const lecturas = tokensPorLinea.map((linea) =>
     linea.map((tk) => {
       if (!tk.esPalabra) return '';
-      const l = lecturaLema(t, tk);
+      const l = lecturaLema(tk);
       claves.set(claveDe(tk.lema, l), { lema: tk.lema, lectura: l });
       return l;
     })
@@ -198,7 +179,7 @@ export async function enriquecer(tokensPorLinea: TokenUnido[][], t: Tokenizador,
         estado: d.fila?.estado ?? porDefecto,
         rastreada: d.fila?.rastreada === 1,
         acentos,
-        patron: acentos && !tk.esGramatica ? patronAcento(acentos[0], l) : undefined,
+        patron: acentos && !tk.esGramatica ? lengua().acento?.patron(acentos[0], l) : undefined,
         rango: d.rango,
         glosa: d.glosa,
         ...(corregida ? { lecturaCorregida: true } : {}),
@@ -214,7 +195,7 @@ export function claveLinea(texto: string): string {
 function gramaticaDe(texto: string, f: AnalisisLinea | undefined): PuntoGramatica[] {
   // Lo que dijo Claude manda; las reglas solo cubren lo que aún no se ha analizado.
   if (f) return f.gramatica.map((g) => ({ ...g, fuente: 'ia' as const }));
-  return detectarGramatica(texto);
+  return motorLengua().detectarGramatica(texto);
 }
 
 export async function analizarLineas(
@@ -222,13 +203,13 @@ export async function analizarLineas(
   a: Ajustes,
   fuente?: { titulo?: string; url?: string; idVideo?: string }
 ): Promise<LineaAnalizada[]> {
-  const t = await preparar();
+  await preparar();
   const filas = await db.analisis.bulkGet(lineas.map((l) => claveLinea(l.texto)));
   const tokens = lineas.map((l, i) => {
-    const base = tokensDe(t, l.texto);
-    return filas[i]?.lecturas.length ? aplicarLecturas(base, filas[i]!.lecturas) : base;
+    const base = tokensDe(l.texto);
+    return filas[i]?.lecturas.length ? aplicarLecturas(base, filas[i]!.lecturas, lengua().lectura) : base;
   });
-  const palabras = await enriquecer(tokens, t, a);
+  const palabras = await enriquecer(tokens, a);
   const salida: LineaAnalizada[] = lineas.map((l, i) => {
     const f = filas[i];
     const conSentido = f?.sentidos.length
@@ -244,22 +225,22 @@ export async function analizarLineas(
 }
 
 export async function analizarTexto(texto: string, a: Ajustes): Promise<PalabraToken[][]> {
-  const t = await preparar();
-  return enriquecer(texto.split(/\r?\n/).map((l) => tokensDe(t, l)), t, a);
+  await preparar();
+  return enriquecer(texto.split(/\r?\n/).map((l) => tokensDe(l)), a);
 }
 
-/** Texto para el análisis profundo: cada línea con las palabras y lecturas que calculó el tokenizador. */
+/** Texto para el análisis profundo: cada línea con las palabras y lecturas que calculó el analizador. */
 export async function entradasAnalisis(lineas: Linea[]): Promise<{ texto: string; palabras: string; clave: string; pendiente: boolean }[]> {
-  const t = await preparar();
+  await preparar();
   const hechas = await db.analisis.bulkGet(lineas.map((l) => claveLinea(l.texto)));
   return lineas.map((l, i) => ({
     texto: l.texto.replace(/\n/g, ' '),
-    palabras: tokensDe(t, l.texto)
+    palabras: tokensDe(l.texto)
       .filter((x) => x.esPalabra)
       .map((x) => (x.lectura && x.lectura !== x.superficie ? `${x.superficie}(${x.lectura})` : x.superficie))
       .join(' '),
     clave: claveLinea(l.texto),
-    pendiente: !hechas[i] && tieneJapones(l.texto),
+    pendiente: !hechas[i] && lengua().escritura.tieneTexto(l.texto),
   }));
 }
 
@@ -295,16 +276,17 @@ export async function ejemplos(lema: string): Promise<FraseEjemplo[]> {
 // ---------- Búsqueda en diccionarios ----------
 
 export async function buscar(lema: string, lectura?: string): Promise<ResultadoBusqueda> {
+  const { escritura, lectura: lecturas, acento: acentoLengua } = lengua();
   const lista = await listaDiccionarios();
   const dics = lista.filter((d) => d.tipo === 'terminos');
   const titulos = new Map(dics.map((d) => [d.id, d.titulo]));
   const ordenDic = new Map(dics.map((d, i) => [d.id, i]));
 
   let filas = await db.terminos.where('termino').equals(lema).toArray();
-  if (!filas.length && !/[^぀-ヿー]/.test(lema)) {
-    filas = await db.terminos.where('lectura').equals(kataAHira(lema)).limit(60).toArray();
+  if (!filas.length && lecturas.esSoloLectura(lema)) {
+    filas = await db.terminos.where('lectura').equals(lecturas.normalizar(lema)).limit(60).toArray();
   }
-  const lecturaFinal = lectura || filas.sort((a, b) => b.puntuacion - a.puntuacion)[0]?.lectura || (tieneJapones(lema) ? kataAHira(lema) : '');
+  const lecturaFinal = lectura || filas.sort((a, b) => b.puntuacion - a.puntuacion)[0]?.lectura || (escritura.tieneTexto(lema) ? lecturas.normalizar(lema) : '');
   const conLectura = filas.filter((f) => f.lectura === lecturaFinal);
   const elegidas = (conLectura.length ? conLectura : filas)
     .filter((f) => ordenDic.has(f.dic))
@@ -338,7 +320,7 @@ export async function buscar(lema: string, lectura?: string): Promise<ResultadoB
     estado: fila?.estado ?? 'desconocida',
     rastreada: fila?.rastreada === 1,
     acentos,
-    patron: acentos.length ? patronAcento(acentos[0], lecturaFinal) : undefined,
+    patron: acentos.length ? acentoLengua?.patron(acentos[0], lecturaFinal) : undefined,
     frecuencias,
     entradas,
   };
@@ -350,8 +332,8 @@ export async function buscarLibre(texto: string, a: Ajustes): Promise<ResultadoB
   if (!limpio) return [];
   const directo = await buscar(limpio);
   if (directo.entradas.length) return [directo];
-  const t = await preparar();
-  const [palabras] = await enriquecer([tokensDe(t, limpio)], t, a);
+  await preparar();
+  const [palabras] = await enriquecer([tokensDe(limpio)], a);
   const vistas = new Set<string>();
   const salida: ResultadoBusqueda[] = [];
   for (const p of palabras) {

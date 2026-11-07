@@ -3,7 +3,9 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   alinearFurigana,
   contarMoras,
+  kanaARomaji,
   kataAHira,
+  lecturaVisible,
   patronAcento,
   pegarSignos,
   separarMoras,
@@ -138,3 +140,21 @@ describe('signos y cortes de línea', () => {
   });
 });
 
+describe('rōmaji', () => {
+  it('convierte con Hepburn', () => {
+    expect(kanaARomaji('たべる')).toBe('taberu');
+    expect(kanaARomaji('しゃしん')).toBe('shashin');
+    expect(kanaARomaji('がっこう')).toBe('gakkou');
+    expect(kanaARomaji('まっちゃ')).toBe('matcha');
+    expect(kanaARomaji('コーヒー')).toBe('kōhī');
+    expect(kanaARomaji('ほんや')).toBe("hon'ya");
+    expect(kanaARomaji('ふじさん')).toBe('fujisan');
+  });
+
+  it('muestra la lectura en el formato elegido', () => {
+    expect(lecturaVisible('たべる', 'hiragana')).toBe('たべる');
+    expect(lecturaVisible('たべる', 'katakana')).toBe('タベル');
+    expect(lecturaVisible('たべる', 'romaji')).toBe('taberu');
+    expect(lecturaVisible('たべる', undefined)).toBe('たべる');
+  });
+});

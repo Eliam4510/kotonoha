@@ -2,16 +2,10 @@
 // Es deliberadamente conservadora: mejor no marcar que marcar mal. El análisis con Claude la
 // sustituye cuando está disponible, porque entiende el contexto y conoce muchas más formas.
 
-import { tm } from '../compartido/i18n';
-export type NivelJlpt = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
+import { tm } from '../../compartido/i18n';
+import type { PuntoGramatica } from '../tipos';
 
-export interface PuntoGramatica {
-  patron: string;
-  nivel?: string;
-  fragmento: string;
-  significado: string;
-  fuente: 'regla' | 'ia';
-}
+export type NivelJlpt = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
 interface Regla {
   patron: string;

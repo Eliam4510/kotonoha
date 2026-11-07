@@ -1,11 +1,14 @@
 // Atajos que se pueden reasignar. `defecto` es la combinación con la que los conoce atajos.ts: lo reasignado se traduce a ella.
 
 import { tm } from './i18n';
+import type { TextosLengua } from '../lenguas/tipos';
 
 export interface AccionTeclado {
   id: string;
   grupo: string;
   nombre: string;
+  /** Si el nombre depende de la lengua que se estudia, cuál de sus textos es. */
+  texto?: keyof TextosLengua;
   defecto: string;
 }
 
@@ -32,7 +35,8 @@ export const ACCIONES_TECLADO: AccionTeclado[] = [
   accion('conocida', PALABRA, tm('Marcar conocida'), 'k'),
   accion('ignorar', PALABRA, tm('Ignorar'), 'i'),
   accion('siguientePalabra', PALABRA, tm('Siguiente palabra desconocida'), 'n'),
-  accion('ocultarJapones', SUBS, tm('Mostrar u ocultar japonés'), 'w'),
+  // El identificador no cambia: con él están guardados los atajos que cada cual haya reasignado.
+  { ...accion('ocultarJapones', SUBS, '', 'w'), texto: 'mostrarUOcultar' },
   accion('ocultarTodo', SUBS, tm('Mostrar u ocultar todo'), 'r'),
   accion('navegador', SUBS, tm('Navegador de subtítulos'), 'g'),
   accion('copiar', SUBS, tm('Copiar el subtítulo'), 'c'),
@@ -40,3 +44,5 @@ export const ACCIONES_TECLADO: AccionTeclado[] = [
   accion('verBarra', BARRA, tm('Mostrarla mientras se mantiene'), 'alt+v'),
   accion('traductor', BARRA, tm('Abrir el traductor'), 'alt+t'),
 ];
+
+export const nombreAccion = (a: AccionTeclado, textos: TextosLengua) => (a.texto ? textos[a.texto] : a.nombre);

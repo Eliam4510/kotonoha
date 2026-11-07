@@ -5,7 +5,19 @@ import type { Linea } from './subtitulos';
 
 export const FRECUENCIA = 16000;
 
-const MS_POR_CARACTER = 170;
+/** Lo que cambia con la lengua: las alucinaciones de Whisper y cómo se cortan sus frases. */
+export interface ReglasTranscripcion {
+  alucinaciones: RegExp[];
+  /** Frases cortas que se aceptan en un trozo normal, pero no de un tramo recuperado sobre la música. */
+  comunesSobreMusica: RegExp;
+  finDeFrase: RegExp;
+  pausa: RegExp;
+  /** Dónde cortar una frase sin puntuación. Con la marca g. */
+  corteSinPuntuacion: RegExp;
+  maximoCaracteres: number;
+  /** Lo que se tarda en decir un carácter, para cuando Whisper no da el final de un segmento. */
+  msPorCaracter: number;
+}
 
 /** Whisper procesa ventanas de 30 s: el corte se busca antes de llegar al límite. */
 const MINIMO_S = 14;
@@ -118,20 +130,7 @@ export interface SegmentoWhisper {
   fin: number | null;
 }
 
-// Frases que Whisper se inventa en silencios y música porque abundan en sus datos de entrenamiento.
-const ALUCINACIONES = [
-  /ご(視聴|清聴)(いただき|頂き)?ありがとうございま/,
-  /チャンネル登録/,
-  /高評価/,
-  /次回の(動画|配信)/,
-  /^(字幕|翻訳|提供|制作|作詞|作曲|編曲)[::・\s]/,
-  /^(おやすみなさい|ありがとうございました)[。\s]*$/,
-  // Cuando solo oye música, a menudo lo dice.
-  /^[((\[]?(音楽|BGM|拍手|笑い?)[))\]]?[。\s]*$/i,
-  /^[♪〜~\s]+$/,
-];
-
-export const esAlucinacion = (texto: string) => ALUCINACIONES.some((r) => r.test(texto.trim()));
+export const esAlucinacion = (texto: string, reglas: ReglasTranscripcion) => reglas.alucinaciones.some((r) => r.test(texto.trim()));
 
 /** Whisper a veces entra en bucle repitiendo lo mismo: se deja una sola vez. */
 export function colapsarRepeticiones(texto: string): string {
@@ -161,12 +160,12 @@ export interface Hueco {
 }
 
 /** Tramos entre `desdeS` y `hastaS` que ningún segmento cubre. */
-export function huecosSinTexto(segmentos: SegmentoWhisper[], desdeS: number, hastaS: number, minimoS = HUECO_MINIMO_S): Hueco[] {
+export function huecosSinTexto(segmentos: SegmentoWhisper[], desdeS: number, hastaS: number, reglas: ReglasTranscripcion, minimoS = HUECO_MINIMO_S): Hueco[] {
   const huecos: Hueco[] = [];
   let cursor = desdeS;
   for (const s of [...segmentos].sort((a, b) => a.inicio - b.inicio)) {
     if (s.inicio - cursor >= minimoS) huecos.push({ desde: cursor, hasta: s.inicio });
-    cursor = Math.max(cursor, s.fin ?? s.inicio + (s.texto.length * MS_POR_CARACTER) / 1000);
+    cursor = Math.max(cursor, s.fin ?? s.inicio + (s.texto.length * reglas.msPorCaracter) / 1000);
   }
   if (hastaS - cursor >= minimoS) huecos.push({ desde: cursor, hasta: hastaS });
   return huecos;
@@ -182,49 +181,44 @@ export function ventanasDeHueco(h: Hueco, tamS = VENTANA_HUECO_S): Hueco[] {
   return ventanas;
 }
 
-// Frases cortas de cortesía que aparecen de la nada sobre la música.
-const COMUNES_SOBRE_MUSICA = /^(おはようございます|お(つかれ|疲れ)さまでした?|お疲れ様です|ごめん(ね|なさい)?|おわり|終わり|ごちそう(さま)?(でした)?)[。!!\s]*$/;
-
 /** Solo se acepta de un hueco lo que claramente es una frase: mejor perder un「うん」que inventarla. */
-export function esTextoRecuperable(texto: string): boolean {
+export function esTextoRecuperable(texto: string, reglas: ReglasTranscripcion): boolean {
   const t = texto.trim();
-  if (esAlucinacion(t) || esBucle(t) || COMUNES_SOBRE_MUSICA.test(t)) return false;
+  if (esAlucinacion(t, reglas) || esBucle(t) || reglas.comunesSobreMusica.test(t)) return false;
   return new Set(t.replace(/[\s\p{P}\p{S}]/gu, '')).size >= 4;
 }
 
-const MAXIMO_CARACTERES = 34;
-
-/** Sin puntuación, corta tras una partícula seguida de kanji o katakana, lo más cerca posible del centro. */
-function partirSinPuntuacion(texto: string): string[] {
-  if (texto.length <= MAXIMO_CARACTERES) return [texto];
+/** Sin puntuación, corta donde la lengua lo permite, lo más cerca posible del centro. */
+function partirSinPuntuacion(texto: string, reglas: ReglasTranscripcion): string[] {
+  if (texto.length <= reglas.maximoCaracteres) return [texto];
   const centro = Math.floor(texto.length / 2);
   let mejor = -1;
-  for (const m of texto.matchAll(/[はがをにでともへて](?=[\p{Script=Han}\p{Script=Katakana}])/gu)) {
+  for (const m of texto.matchAll(reglas.corteSinPuntuacion)) {
     const corte = m.index + 1;
     if (mejor < 0 || Math.abs(corte - centro) < Math.abs(mejor - centro)) mejor = corte;
   }
   if (mejor < 0) mejor = centro;
-  return [...partirSinPuntuacion(texto.slice(0, mejor)), ...partirSinPuntuacion(texto.slice(mejor))];
+  return [...partirSinPuntuacion(texto.slice(0, mejor), reglas), ...partirSinPuntuacion(texto.slice(mejor), reglas)];
 }
 
 /** Parte un segmento largo en líneas de subtítulo por la puntuación, sin cortar a mitad de palabra si se puede. */
-export function partirTexto(texto: string): string[] {
-  const frases = texto.split(/(?<=[。!?!?…])/u).map((s) => s.trim()).filter(Boolean);
+export function partirTexto(texto: string, reglas: ReglasTranscripcion): string[] {
+  const frases = texto.split(reglas.finDeFrase).map((s) => s.trim()).filter(Boolean);
   const salida: string[] = [];
   for (const f of frases) {
-    if (f.length <= MAXIMO_CARACTERES) {
+    if (f.length <= reglas.maximoCaracteres) {
       salida.push(f);
       continue;
     }
     let actual = '';
-    for (const parte of f.split(/(?<=[、,])/u)) {
-      if (actual && actual.length + parte.length > MAXIMO_CARACTERES) {
+    for (const parte of f.split(reglas.pausa)) {
+      if (actual && actual.length + parte.length > reglas.maximoCaracteres) {
         salida.push(actual);
         actual = '';
       }
       actual += parte;
     }
-    if (actual) salida.push(...partirSinPuntuacion(actual));
+    if (actual) salida.push(...partirSinPuntuacion(actual, reglas));
   }
   return salida;
 }
@@ -232,15 +226,15 @@ export function partirTexto(texto: string): string[] {
 const DURACION_MINIMA_MS = 700;
 
 /** Convierte los segmentos de Whisper en líneas con tiempos de video. */
-export function segmentosALineas(segmentos: SegmentoWhisper[], mapa: TramoTiempo[], duracionTrozoS: number, idInicial: number): Linea[] {
+export function segmentosALineas(segmentos: SegmentoWhisper[], mapa: TramoTiempo[], duracionTrozoS: number, idInicial: number, reglas: ReglasTranscripcion): Linea[] {
   const lineas: Linea[] = [];
   let id = idInicial;
   segmentos.forEach((s, i) => {
     const limpio = colapsarRepeticiones(s.texto.trim());
-    if (!limpio || esAlucinacion(limpio) || esBucle(s.texto)) return;
+    if (!limpio || esAlucinacion(limpio, reglas) || esBucle(s.texto)) return;
     const siguiente = segmentos[i + 1]?.inicio;
-    const finS = Math.min(s.fin ?? siguiente ?? s.inicio + (limpio.length * MS_POR_CARACTER) / 1000, duracionTrozoS);
-    const trozos = partirTexto(limpio);
+    const finS = Math.min(s.fin ?? siguiente ?? s.inicio + (limpio.length * reglas.msPorCaracter) / 1000, duracionTrozoS);
+    const trozos = partirTexto(limpio, reglas);
     const total = trozos.reduce((n, t) => n + t.length, 0);
     let cursor = s.inicio;
     for (const t of trozos) {

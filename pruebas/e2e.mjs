@@ -1,5 +1,5 @@
 // Pruebas de extremo a extremo con Chromium real y la extensión cargada.
-// Uso: node pruebas/e2e.mjs [diccionarios] [local] [youtube] [app]
+// Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/e2e.mjs [diccionarios] [local] [youtube] [app]
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -9,7 +9,7 @@ import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
-const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, 'dist'));
+const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-e2e'));
 const CAPTURAS = join(RAIZ, 'capturas-e2e');
 const FIXTURES = join(RAIZ, 'pruebas', 'fixtures');
@@ -209,7 +209,7 @@ if (quiere('local')) {
   // Los ajustes persisten en el perfil: se parte de un estado conocido.
   await sw.evaluate(async () => {
     const d = await chrome.storage.local.get('ajustes');
-    await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), navegadorAbierto: false, modo: 'normal', salto: 'no', desanclarBarra: false } });
+    await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), idiomaInterfaz: 'es', idiomaSecundario: 'es', bienvenidaVista: true, destino: 'memoria', ankiPuerto: 1, navegadorAbierto: false, modo: 'normal', salto: 'no', desanclarBarra: false } });
   });
   const s = await servidor();
   const puerto = s.address().port;

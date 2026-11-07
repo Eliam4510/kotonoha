@@ -15,7 +15,7 @@
 
 import type { Ajustes } from '../../compartido/ajustes';
 import { compresionLectura, esFondoOscuro, esFondoVisible, interlineadoAbierto, interlineadoNecesario, tamanoLectura, tramosConLectura } from '../../nucleo/lectorTexto';
-import { lecturaVisible } from '../../nucleo/tokens';
+import { lengua } from '../../ui/lengua';
 import { paletaDe } from '../../ui/paletas';
 import { type Bloque, rangoDe, tieneRubyPropio, type TokenPagina } from './indice';
 
@@ -436,7 +436,7 @@ export class Pintor {
       if (!rango) continue;
       const el = document.createElement('span');
       el.className = 'rt';
-      const texto = lecturaVisible(t.lectura, this.a.formatoLectura);
+      const texto = lengua.value.lectura.visible(t.lectura, this.a.formatoLectura);
       el.setAttribute('data-r', texto);
       const c = rango.startContainer;
       salida.push({ el, rango, padre: c.nodeType === Node.ELEMENT_NODE ? (c as Element) : c.parentElement, capa, texto, tapada: false, fuera: false, marca: '', cx: 0, cy: 0 });
@@ -920,7 +920,7 @@ export class Pintor {
       }
       if (l.fuera !== fuera) escrituras.push(() => this.marcarFuera(l, fuera));
     };
-    const anchoCaracter = this.a.formatoLectura === 'romaji' ? 0.55 : 1;
+    const anchoCaracter = lengua.value.lectura.anchoCaracter(this.a.formatoLectura);
     for (const l of lista) {
       const caja = l.rango.getClientRects()[0];
       const e = estiloDe(l.padre);

@@ -5,14 +5,17 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { type Ajustes, CLAVE_API, type Esfuerzo, guardarAjustes, MODELOS, MODELOS_WHISPER, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
-import { ACCIONES_TECLADO } from '../compartido/accionesTeclado';
+import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
 import { mostrarCombinacion, teclaLatina, textoCombinacion } from '../nucleo/teclas';
 import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../compartido/tipos';
-import { PROMPTS_BASE, TAREAS_PERSONALIZABLES } from '../motor/prompts';
+import { motorDe } from '../lenguas/motor';
+import type { TareaPrompt, TextosLengua } from '../lenguas/tipos';
+import { TAREAS_PERSONALIZABLES } from '../motor/prompts';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { estadoAnki, refrescarAnki } from './estadoApp';
 import { Cabecera, Interruptor, Mensaje } from './Piezas';
 import { IDIOMAS_INTERFAZ, LENGUAS, bcp47Actual, lenguaDe, numero, resolverIdioma, tm, tr } from '../compartido/i18n';
+import { lengua } from '../ui/lengua';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -28,11 +31,11 @@ const NOMBRES_TAREA: [TareaIA, string][] = [
   ['profundo', tm('Botón «Profundizar»')],
 ];
 
-const CAMPOS_TARJETA: [string, string][] = [
+const camposTarjeta = (textos: TextosLengua): [string, string][] => [
   ['palabra', tm('Palabra')],
   ['lectura', tm('Lectura')],
   ['frase', tm('Frase')],
-  ['furigana', tm('Frase con furigana')],
+  ['furigana', textos.fraseConLectura],
   ['traduccion', tm('Traducción')],
   ['definicion', tm('Definición')],
   ['audioFrase', tm('Audio de la frase')],
@@ -135,24 +138,24 @@ const PALETAS: { id: Ajustes['paleta']; nombre: string; ayuda: string; colores: 
 
 function SeccionLector({ a, cambiar }: PropsSeccion) {
   return (
-    <Seccion id="lector" icono="lector" titulo={tr('Lector de páginas')} descripcion={tr('Colores, furigana y consulta en cualquier texto japonés, sin añadir nada al contenido de las páginas.')}>
+    <Seccion id="lector" icono="lector" titulo={tr('Lector de páginas')} descripcion={tr(lengua.value.textos.lectorAyuda)}>
       <div class="ap-grupo">
-        <Opcion titulo={tr('Activar en las páginas con japonés')}>
-          <Interruptor etiqueta={tr('Activar en las páginas con japonés')} on={a.lectorActivo} alCambiar={(v) => cambiar({ lectorActivo: v })} />
+        <Opcion titulo={tr(lengua.value.textos.lectorActivar)}>
+          <Interruptor etiqueta={tr(lengua.value.textos.lectorActivar)} on={a.lectorActivo} alCambiar={(v) => cambiar({ lectorActivo: v })} />
         </Opcion>
         <Opcion titulo={tr('Colores')} ayuda={tr('Subraya las palabras según lo que sabes de ellas.')}>
           <Interruptor etiqueta={tr('Colores')} on={a.lectorColor} alCambiar={(v) => cambiar({ lectorColor: v })} />
         </Opcion>
-        <Opcion titulo={tr('Furigana')}>
-          <select class="selector" aria-label={tr('Furigana')} value={a.lectorFurigana} onChange={(e) => cambiar({ lectorFurigana: e.currentTarget.value as Ajustes['lectorFurigana'] })}>
+        <Opcion titulo={tr(lengua.value.textos.lectura)}>
+          <select class="selector" aria-label={tr(lengua.value.textos.lectura)} value={a.lectorFurigana} onChange={(e) => cambiar({ lectorFurigana: e.currentTarget.value as Ajustes['lectorFurigana'] })}>
             <option value="todas">{tr('En todas las palabras')}</option>
             <option value="desconocidas">{tr('Solo en las nuevas')}</option>
             <option value="alPasar">{tr('Al pasar el ratón')}</option>
             <option value="ninguna">{tr('Nunca')}</option>
           </select>
         </Opcion>
-        <Opcion titulo={tr('Separar las líneas para el furigana')} ayuda={tr('Si el furigana no cabe entre dos líneas, abre un poco ese texto. Apagado, el diseño de la página no se mueve nada, pero el furigana puede chocar con la línea de arriba.')}>
-          <Interruptor etiqueta={tr('Separar las líneas para el furigana')} on={a.lectorInterlineado} alCambiar={(v) => cambiar({ lectorInterlineado: v })} />
+        <Opcion titulo={tr(lengua.value.textos.separarLineas)} ayuda={tr(lengua.value.textos.separarLineasAyuda)}>
+          <Interruptor etiqueta={tr(lengua.value.textos.separarLineas)} on={a.lectorInterlineado} alCambiar={(v) => cambiar({ lectorInterlineado: v })} />
         </Opcion>
         <Opcion titulo={tr('Abrir la ficha')}>
           <div class="segmentado" role="radiogroup" aria-label={tr('Abrir la ficha')}>
@@ -163,7 +166,7 @@ function SeccionLector({ a, cambiar }: PropsSeccion) {
         <Opcion titulo={tr('El clic en enlaces y botones consulta la palabra')} ayuda={tr('Apagado, siguen funcionando como siempre y la ficha se abre al dejar el ratón encima. Encendido, para usar el enlace habrá que hacerlo sin el lector.')}>
           <Interruptor etiqueta={tr('El clic en enlaces y botones consulta la palabra')} on={a.lectorClicEnlaces} alCambiar={(v) => cambiar({ lectorClicEnlaces: v })} />
         </Opcion>
-        <Opcion titulo={tr('Botón en el borde de la página')} ayuda={tr('Para ajustar los colores y el furigana sin venir aquí.')}>
+        <Opcion titulo={tr('Botón en el borde de la página')} ayuda={tr(lengua.value.textos.lectorBotonAyuda)}>
           <Interruptor etiqueta={tr('Botón en el borde de la página')} on={a.lectorBoton} alCambiar={(v) => cambiar({ lectorBoton: v })} />
         </Opcion>
       </div>
@@ -341,14 +344,14 @@ function SeccionIdioma({ a, cambiar }: PropsSeccion) {
         <CampoNombre a={a} cambiar={cambiar} />
         <Opcion titulo={tr('Nivel')}>
           <select class="selector" aria-label={tr('Nivel')} value={a.nivel} onChange={(e) => cambiar({ nivel: e.currentTarget.value })}>
-            <option value="principiante absoluto">{tr('Empiezo desde cero')}</option>
-            {['JLPT N5', 'JLPT N4', 'JLPT N3', 'JLPT N2', 'JLPT N1'].map((n) => <option key={n} value={n}>{n}</option>)}
+            <option value={lengua.value.principiante.valor}>{tr(lengua.value.principiante.nombre)}</option>
+            {lengua.value.niveles.map((n) => <option key={n.valor} value={n.valor}>{n.valor}</option>)}
             <option value="nativo">{tr('Nativo')}</option>
           </select>
         </Opcion>
-        <Opcion titulo={tr('Lecturas')} ayuda={tr('Cómo se escribe el furigana, en todas partes.')}>
+        <Opcion titulo={tr('Lecturas')} ayuda={tr(lengua.value.textos.formatoAyuda)}>
           <div class="segmentado" role="radiogroup" aria-label={tr('Lecturas')}>
-            {([['hiragana', 'あ'], ['katakana', 'ア'], ['romaji', 'a']] as const).map(([v, n]) => (
+            {lengua.value.lectura.formatos.map(({ id: v, muestra: n }) => (
               <button key={v} role="radio" aria-checked={a.formatoLectura === v} class={a.formatoLectura === v ? 'activo' : ''} onClick={() => cambiar({ formatoLectura: v })}>{n}</button>
             ))}
           </div>
@@ -422,7 +425,7 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
   }, []);
   const modelos = Object.entries(MODELOS_WHISPER) as [ModeloWhisper, (typeof MODELOS_WHISPER)[ModeloWhisper]][];
   return (
-    <Seccion id="transcripcion" icono="ondas" titulo={tr('Transcripción con Whisper')} descripcion={tr('Genera subtítulos en japonés cuando un video no los trae. Corre en tu tarjeta gráfica: el audio no sale de tu equipo.')}>
+    <Seccion id="transcripcion" icono="ondas" titulo={tr('Transcripción con Whisper')} descripcion={tr(lengua.value.textos.whisperAyuda)}>
       <div class="ap-whisper-modelos" role="radiogroup" aria-label={tr('Modelo de transcripción')}>
         {modelos.map(([id, m]) => (
           <button key={id} class={`ap-whisper-modelo ${a.whisperModelo === id ? 'activo' : ''}`} role="radio" aria-checked={a.whisperModelo === id} onClick={() => cambiar({ whisperModelo: id })}>
@@ -442,7 +445,7 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
             ))}
           </div>
         </Opcion>
-        <Opcion titulo={tr('Corregir con Claude')} ayuda={tr('Arregla kanji, homófonos y puntuación a medida que llega el texto.')}>
+        <Opcion titulo={tr('Corregir con Claude')} ayuda={tr(lengua.value.textos.whisperCorregirAyuda)}>
           <Interruptor etiqueta={tr('Corregir con Claude')} on={a.whisperCorregir} alCambiar={(v) => cambiar({ whisperCorregir: v })} />
         </Opcion>
         <AyudanteLocal />
@@ -462,12 +465,13 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
 const VARIABLES_PROMPT = ['PALABRA', 'SUPERFICIE', 'LECTURA', 'FRASE', 'ENTORNO', 'TRADUCCION', 'TITULO', 'NIVEL', 'IDIOMA', 'PREGUNTA'];
 
 function SeccionPrompts({ a, cambiar }: PropsSeccion) {
-  const [tarea, fijarTarea] = useState<keyof typeof PROMPTS_BASE>('explicar');
-  const actual = a.prompts[tarea] ?? PROMPTS_BASE[tarea];
+  const [tarea, fijarTarea] = useState<TareaPrompt>('explicar');
+  const originales = motorDe(lengua.value.id).prompts.base;
+  const actual = a.prompts[tarea] ?? originales[tarea];
   const [sistema, fijarSistema] = useState(actual.sistema);
   const [usuario, fijarUsuario] = useState(actual.usuario);
   useEffect(() => {
-    const p = a.prompts[tarea] ?? PROMPTS_BASE[tarea];
+    const p = a.prompts[tarea] ?? originales[tarea];
     fijarSistema(p.sistema);
     fijarUsuario(p.usuario);
   }, [tarea]);
@@ -496,8 +500,8 @@ function SeccionPrompts({ a, cambiar }: PropsSeccion) {
           <button class="btn" disabled={!personalizado} onClick={() => {
             const { [tarea]: _quitado, ...resto } = a.prompts;
             cambiar({ prompts: resto });
-            fijarSistema(PROMPTS_BASE[tarea].sistema);
-            fijarUsuario(PROMPTS_BASE[tarea].usuario);
+            fijarSistema(originales[tarea].sistema);
+            fijarUsuario(originales[tarea].usuario);
           }}>{tr('Restablecer')}</button>
         </div>
       </div>
@@ -708,7 +712,7 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
         <>
           <Subtitulo>{tr('Campos de')} {a.ankiModelo}</Subtitulo>
           <div class="ap-grupo">
-            {CAMPOS_TARJETA.map(([dato, nombre]) => (
+            {camposTarjeta(lengua.value.textos).map(([dato, nombre]) => (
               <Opcion key={dato} titulo={tr(nombre)}>
                 <select class="selector" aria-label={tr('Campo para {0}', tr(nombre))} value={a.ankiCampos[dato] ?? ''} onChange={(ev) => cambiar({ ankiCampos: { ...a.ankiCampos, [dato]: ev.currentTarget.value } })}>
                   <option value="">{tr('No usar')}</option>
@@ -761,15 +765,7 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
 }
 
 function SeccionVoces({ a, cambiar }: PropsSeccion) {
-  const VOCES = [
-    ['ja-JP-MasaruMultilingualNeural', tr('Masaru')],
-    ['ja-JP-KeitaNeural', tr('Keita')],
-    ['ja-JP-DaichiNeural', tr('Daichi')],
-    ['ja-JP-NanamiNeural', tr('Nanami')],
-    ['ja-JP-AoiNeural', tr('Aoi')],
-    ['ja-JP-MayuNeural', tr('Mayu')],
-    ['ja-JP-ShioriNeural', tr('Shiori')],
-  ];
+  const VOCES = lengua.value.voces.map((v) => [v.id, tr(v.nombre)]);
   return (
     <Seccion id="voces" icono="voz" titulo={tr('Voces')} descripcion={tr('Para frases sin audio del video. Azure Speech ofrece medio millón de caracteres gratis al mes con tu propia cuenta. Sin clave se usa la voz del sistema, que no se puede guardar en tarjetas.')}>
       <div class="ap-grupo">
@@ -851,7 +847,7 @@ function SeccionAtajos({ a, cambiar }: PropsSeccion) {
       const nueva = textoCombinacion({ k: teclaLatina(e), alt: e.altKey, shift: e.shiftKey, ctrl: e.ctrlKey });
       const ocupada = ACCIONES_TECLADO.find((x) => x.id !== grabando && (a.atajosPersonales[x.id] ?? x.defecto) === nueva);
       if (ocupada) {
-        fijarAviso(tr('Esa combinación ya es de «{0}».', tr(ocupada.nombre)));
+        fijarAviso(tr('Esa combinación ya es de «{0}».', tr(nombreAccion(ocupada, lengua.value.textos))));
         return;
       }
       fijarAviso('');
@@ -878,7 +874,7 @@ function SeccionAtajos({ a, cambiar }: PropsSeccion) {
               const cambiado = actual !== x.defecto;
               return (
                 <div class="ap-opcion" key={x.id}>
-                  <div class="ap-opcion-texto"><b>{tr(x.nombre)}</b></div>
+                  <div class="ap-opcion-texto"><b>{tr(nombreAccion(x, lengua.value.textos))}</b></div>
                   <div class="ap-opcion-control ap-apretado">
                     <button class={`btn chico ${grabando === x.id ? 'primario' : ''}`} onClick={() => { fijarAviso(''); fijarGrabando(grabando === x.id ? null : x.id); }}>
                       {grabando === x.id ? tr('Pulsa una tecla…') : mostrarCombinacion(actual)}

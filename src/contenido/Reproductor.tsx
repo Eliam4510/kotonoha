@@ -10,7 +10,6 @@ import { filtrarLineas, type FiltroNavegador, NOMBRES_NIVEL } from '../nucleo/fr
 import { visibilidadVelo } from '../nucleo/modos';
 import { type CajaSubs, conImanes, enZonaActivacion, enZonaSegura, ESPERA_MOSTRAR_MS, ESPERA_OCULTAR_MS, factorLargo, pixelesDe, type PosicionSubs, posicionDesde, posicionInicial } from '../nucleo/presentacion';
 import type { Linea } from '../nucleo/subtitulos';
-import { pegarSignos, lecturaVisible } from '../nucleo/tokens';
 import { enviarAlCreador } from '../ui/borrador';
 import { colocarJunto, Ficha, PanelFlujo } from '../ui/Ficha';
 import { Icono, Logo, type NombreIcono } from '../ui/iconos';
@@ -73,6 +72,7 @@ import {
 import { Anillo, PanelesFlotantes, pestanaVideo } from './Paneles';
 import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas';
 import { numero, tm, tr } from '../compartido/i18n';
+import { lengua } from '../ui/lengua';
 
 export const ANCHO_NAVEGADOR = 380;
 
@@ -161,7 +161,7 @@ function alPasarPorPalabra(p: PalabraToken, l: LineaAnalizada | null, el: Elemen
 }
 
 export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraToken; l: LineaAnalizada | null }) {
-  if (!p.esPalabra) return <span>{pegarSignos(p.superficie)}</span>;
+  if (!p.esPalabra) return <span>{lengua.value.escritura.pegarSignos(p.superficie)}</span>;
   const a = ajustes.value;
   const clases = ['pal', `est-${p.estado}`];
   if (p.rastreada) clases.push('rastreada');
@@ -197,7 +197,7 @@ export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraTok
         s.lectura ? (
           <ruby key={i}>
             {s.texto}
-            <rt>{lecturaVisible(s.lectura, a.formatoLectura)}</rt>
+            <rt>{lengua.value.lectura.visible(s.lectura, a.formatoLectura)}</rt>
           </ruby>
         ) : (
           <span key={i}>{s.texto}</span>
@@ -374,7 +374,7 @@ function Subtitulos() {
             {linea && (
               <div
                 class={`linea-sub objetivo ${visObjetivo === 'difuminada' ? 'difuminada' : ''} ${consulta.value ? 'consultando' : ''} ${clasesRaiz(a)}`}
-                lang="ja"
+                lang={lengua.value.id}
                 style={{ fontSize: `${(base * a.escalaObjetivo * factorLargo(linea.texto.length)) / 100}px` }}
                 onMouseEnter={(e) => {
                   encimaSubtitulo.value = true;
@@ -398,7 +398,7 @@ function Subtitulos() {
                     consulta.value = null;
                     consultaGramatica.value = consultaGramatica.value?.punto.patron === g.patron ? null : { punto: g, linea, ancla: { left: c.left, top: caja.top, width: c.width, height: caja.height } };
                   }}>
-                    <span lang="ja">{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
+                    <span lang={lengua.value.id}>{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
                   </button>
                 ))}
               </div>
@@ -505,9 +505,9 @@ function PopupGramatica() {
     <div class={`popup-palabra popup-gramatica ${clase}`} style={{ ...estilo, width: `${ancho}px` }} role="dialog" aria-label={tr('Gramática: {0}', punto.patron)} onClick={(e) => e.stopPropagation()}>
       <div class="gram-cab">
         <div class="gram-titulo">
-          <h3 lang="ja">{punto.patron} {punto.nivel && <span class={`chip-gram n-${punto.nivel}`}>{punto.nivel}</span>}</h3>
+          <h3 lang={lengua.value.id}>{punto.patron} {punto.nivel && <span class={`chip-gram n-${punto.nivel}`}>{punto.nivel}</span>}</h3>
           <p class="gram-significado">{tr(punto.significado)}</p>
-          <p class="gram-frase">{tr('En esta frase:')} <span lang="ja">「{punto.fragmento}」</span>{punto.fuente === 'regla' ? tr(' · detectado por reglas') : tr(' · detectado por Claude')}</p>
+          <p class="gram-frase">{tr('En esta frase:')} <span lang={lengua.value.id}>{lengua.value.escritura.comillar(punto.fragmento)}</span>{punto.fuente === 'regla' ? tr(' · detectado por reglas') : tr(' · detectado por Claude')}</p>
         </div>
         <button class="btn-icono chico relleno" data-tip={tr('Enviar al creador')} aria-label={tr('Enviar al creador de tarjetas')} onClick={() => enviarAlCreador({ tipo: 'frase', palabra: punto.patron, frase: linea.texto.replace(punto.fragmento, `<b>${punto.fragmento}</b>`), definicion: punto.significado, fuente: infoVideo.value?.titulo, url: location.href, etiquetas: ['gramatica', ...(punto.nivel ? [punto.nivel] : [])] })}><Icono n="enviar" t={15} /></button>
         <button class="btn-icono chico" aria-label={tr('Cerrar')} onClick={() => (consultaGramatica.value = null)}><Icono n="cerrar" t={15} /></button>
@@ -628,7 +628,7 @@ function Barra() {
             </button>
           ) : (
             <>
-              <span class="barra-estado">{tr('Sin subtítulos en japonés')}</span>
+              <span class="barra-estado">{tr(lengua.value.textos.sinSubtitulos)}</span>
               <button class="btn chico" onClick={() => abrirVideo('subtitulos')}><Icono n="archivo-subir" t={14} /> {tr('Importar')}</button>
             </>
           )}
@@ -724,17 +724,17 @@ const LineaNavegador = memo(function LineaNavegador({
         <button class="btn-icono chico" title={tr('Sincronizar: esta línea suena ahora')} aria-label={tr('Sincronizar: esta línea suena ahora')} onClick={(e) => { e.stopPropagation(); anclarLinea(l); }}><Icono n="reloj" t={15} /></button>
         <button class="btn-icono chico" title={tr('Crear tarjeta')} aria-label={tr('Crear tarjeta')} onClick={(e) => { e.stopPropagation(); crearUnClic(null, l, fijarOculto); }}><Icono n="rayo" t={15} /></button>
       </div>
-      <div class={`nav-texto ${raiz}`} lang="ja">{l.palabras.map((p, k) => <PalabraVista key={k} p={p} l={l} />)}</div>
+      <div class={`nav-texto ${raiz}`} lang={lengua.value.id}>{l.palabras.map((p, k) => <PalabraVista key={k} p={p} l={l} />)}</div>
       {sec && <div class="nav-sec">{sec}</div>}
       {ajustes.value.mostrarGramatica && (l.gramatica?.length ?? 0) > 0 && (
         <div class="nav-gram">
-          {l.gramatica!.map((g) => <span key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={g.significado} lang="ja">{g.patron}</span>)}
+          {l.gramatica!.map((g) => <span key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={g.significado} lang={lengua.value.id}>{g.patron}</span>)}
         </div>
       )}
       <div class="nav-tiempo">
         {hora(l.inicio)} – {hora(l.fin)}
         {marcada && <Icono n="marcador" t={12} />}
-        {originales.value.has(l.id) && <span class="nav-corregida" title={`Antes: ${originales.value.get(l.id)}`} lang="ja"><Icono n="ia" t={12} /> {tr('Corregida')}</span>}
+        {originales.value.has(l.id) && <span class="nav-corregida" title={`Antes: ${originales.value.get(l.id)}`} lang={lengua.value.id}><Icono n="ia" t={12} /> {tr('Corregida')}</span>}
       </div>
     </div>
   );
@@ -810,7 +810,7 @@ function Navegador() {
             ) : (
               <>
                 <span class="hoja-icono"><Icono n="subtitulos" t={22} /></span>
-                <h3>{tr('Sin subtítulos en japonés')}</h3>
+                <h3>{tr(lengua.value.textos.sinSubtitulos)}</h3>
                 <p>{tr('Arrastra un archivo SRT sobre el video o genera unos.')}</p>
                 <button class="btn chico" onClick={() => { pestanaVideo.value = 'subtitulos'; panel.value = 'video'; }}><Icono n="archivo-subir" t={14} /> {tr('Importar')}</button>
               </>
@@ -908,7 +908,7 @@ function ZonaSoltar() {
       <div class="zona-soltar-marco">
         <span class="hoja-icono"><Icono n="archivo-subir" t={38} /></span>
         <h3>{tr('Suelta aquí tus subtítulos')}</h3>
-        <p>{lineasObjetivo.value.length ? tr('SRT, VTT, ASS o TTML · se añadirán como subtítulos secundarios') : tr('SRT, VTT, ASS o TTML · se añadirán como subtítulos en japonés')}</p>
+        <p>{lineasObjetivo.value.length ? tr('SRT, VTT, ASS o TTML · se añadirán como subtítulos secundarios') : tr(lengua.value.textos.soltarSubtitulos)}</p>
       </div>
     </div>
   );

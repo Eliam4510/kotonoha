@@ -4,7 +4,7 @@ import { render } from 'preact';
 import { alCambiarAjustes, leerAjustes } from '../compartido/ajustes';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import base from '../ui/estilos';
-import { formatoLectura } from '../ui/lecturas';
+import { aplicarLengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { cargarFuentes } from '../ui/fuentes';
 import { ejecutarComando, instalarAtajos } from './atajos';
@@ -50,10 +50,10 @@ async function iniciarReproductor() {
   const a = await leerAjustes();
   ajustes.value = a;
   await fijarIdioma(a.idiomaInterfaz);
-  formatoLectura.value = a.formatoLectura;
+  aplicarLengua(a);
   alCambiarAjustes((n) => {
     ajustes.value = n;
-    formatoLectura.value = n.formatoLectura;
+    aplicarLengua(n);
     fijarIdioma(n.idiomaInterfaz).catch(() => {});
   });
   if (!a.activo || a.sitiosDesactivados.includes(location.hostname)) return;

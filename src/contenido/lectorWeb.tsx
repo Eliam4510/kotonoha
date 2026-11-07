@@ -14,7 +14,7 @@ import base from '../ui/estilos';
 import { colocarJunto, Ficha } from '../ui/Ficha';
 import { cargarFuentes } from '../ui/fuentes';
 import { Icono } from '../ui/iconos';
-import { formatoLectura } from '../ui/lecturas';
+import { aplicarLengua, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { avisar, avisos } from './estado';
 import { type Bloque, contenedorDe, esAparte, IndicePagina, rangoDe, type TokenPagina } from './lector/indice';
@@ -38,7 +38,7 @@ interface Consulta {
 const consultaWeb = signal<Consulta | null>(null);
 const ajustesWeb = signal<Ajustes | null>(null);
 const panelAbierto = signal(false);
-const hayJapones = signal(false);
+const hayTexto = signal(false);
 
 let indice: IndicePagina;
 let pintor: Pintor | null = null;
@@ -240,7 +240,7 @@ function vigilar(nuevos: Bloque[]) {
 }
 
 function aplicarEscaneo(raiz: Node) {
-  const conKanaAntes = indice.paginaConKana;
+  const enLenguaAntes = indice.paginaEnLengua;
   const { nuevos, quitados } = indice.escanear(raiz);
   for (const b of quitados) {
     pendientes.delete(b);
@@ -266,11 +266,11 @@ function aplicarEscaneo(raiz: Node) {
   }
   for (const c of contenedoresGrandes) actualizarGrande(c);
   if (indice.bloques.size) {
-    hayJapones.value = true;
+    hayTexto.value = true;
     montarInterfaz();
   }
-  // Al descubrir que la página tiene japonés, los ideogramas sueltos que se descartaron antes ya cuentan.
-  if (!conKanaAntes && indice.paginaConKana && raiz !== document.body) aplicarEscaneo(document.body);
+  // Al descubrir que la página está en la lengua, lo que se descartó antes por dudoso ya cuenta.
+  if (!enLenguaAntes && indice.paginaEnLengua && raiz !== document.body) aplicarEscaneo(document.body);
   procesarCola();
 }
 
@@ -367,14 +367,15 @@ function esInteractivo(el: Element | null): boolean {
 // ---------- Consulta ----------
 
 function contextoAlrededor(b: Bloque, inicio: number, fin: number) {
-  const { frase, inicio: i, fin: f } = fraseAlrededor(b.texto, inicio, fin);
-  const antes = partirEnFrases(b.texto.slice(0, i));
-  const despues = partirEnFrases(b.texto.slice(f));
+  const signos = lengua.value.escritura.frase;
+  const { frase, inicio: i, fin: f } = fraseAlrededor(b.texto, inicio, fin, signos);
+  const antes = partirEnFrases(b.texto.slice(0, i), signos);
+  const despues = partirEnFrases(b.texto.slice(f), signos);
   // También lo que dicen los párrafos de alrededor, hasta unas 20 frases a cada lado.
   const todos = [...indice.bloques];
   const k = todos.indexOf(b);
-  for (let n = k - 1; n >= 0 && antes.length < 20; n--) antes.unshift(...partirEnFrases(todos[n].texto));
-  for (let n = k + 1; n < todos.length && despues.length < 20; n++) despues.push(...partirEnFrases(todos[n].texto));
+  for (let n = k - 1; n >= 0 && antes.length < 20; n--) antes.unshift(...partirEnFrases(todos[n].texto, signos));
+  for (let n = k + 1; n < todos.length && despues.length < 20; n++) despues.push(...partirEnFrases(todos[n].texto, signos));
   return { frase, antes: antes.slice(-20), despues: despues.slice(0, 20) };
 }
 
@@ -495,7 +496,7 @@ function ControlLector() {
   const a = ajustesWeb.value;
   const [plegado, fijarPlegado] = useState(false);
   // Apagado solo en este sitio sigue a la vista: desde aquí mismo se vuelve a encender.
-  if (!a || !a.activo || !a.lectorActivo || !hayJapones.value || !a.lectorBoton || plegado) return null;
+  if (!a || !a.activo || !a.lectorActivo || !hayTexto.value || !a.lectorBoton || plegado) return null;
   const cambiar = (c: Partial<Ajustes>) => guardarAjustes(c).catch(console.error);
   const abierto = panelAbierto.value;
   return (
@@ -513,13 +514,13 @@ function ControlLector() {
             <b>{tr('Colores')}</b>
             <button class={`interruptor ${a.lectorColor ? 'on' : ''}`} role="switch" aria-checked={a.lectorColor} aria-label={tr('Colores')} onClick={() => cambiar({ lectorColor: !a.lectorColor })} />
           </div>
-          <div class="lector-fila" data-tip={tr('Si el furigana no cabe entre dos líneas, abre un poco ese texto. Apagado, el diseño de la página no se mueve nada, pero el furigana puede chocar con la línea de arriba.')}>
+          <div class="lector-fila" data-tip={tr(lengua.value.textos.separarLineasAyuda)}>
             <b>{tr('Separar líneas')}</b>
             <button class={`interruptor ${a.lectorInterlineado ? 'on' : ''}`} role="switch" aria-checked={a.lectorInterlineado} aria-label={tr('Separar líneas')} onClick={() => cambiar({ lectorInterlineado: !a.lectorInterlineado })} />
           </div>
           <div class="lector-grupo">
-            <b>{tr('Furigana')}</b>
-            <div class="segmentado" role="radiogroup" aria-label={tr('Furigana')}>
+            <b>{tr(lengua.value.textos.lectura)}</b>
+            <div class="segmentado" role="radiogroup" aria-label={tr(lengua.value.textos.lectura)}>
               {([['todas', tr('Todo')], ['desconocidas', tr('Nuevas')], ['alPasar', tr('Al pasar')], ['ninguna', tr('Nada')]] as const).map(([v, n]) => (
                 <button key={v} role="radio" aria-checked={a.lectorFurigana === v} class={a.lectorFurigana === v ? 'activo' : ''} onClick={() => cambiar({ lectorFurigana: v })}>{n}</button>
               ))}
@@ -866,7 +867,7 @@ export async function iniciarLectorWeb() {
   const a = await leerAjustes();
   await fijarIdioma(a.idiomaInterfaz);
   ajustesWeb.value = a;
-  formatoLectura.value = a.formatoLectura;
+  aplicarLengua(a);
   indice = new IndicePagina();
 
   anfitrion = document.createElement('kotonoha-overlay');
@@ -899,7 +900,7 @@ export async function iniciarLectorWeb() {
   alCambiarAjustes((n) => {
     const antes = ajustesWeb.value;
     ajustesWeb.value = n;
-    formatoLectura.value = n.formatoLectura;
+    aplicarLengua(n);
     aplicarPaleta(n);
     fijarIdioma(n.idiomaInterfaz).then(() => {
       raiz.lang = bcp47Actual();

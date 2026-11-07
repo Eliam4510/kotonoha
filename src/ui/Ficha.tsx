@@ -6,12 +6,11 @@ import type { Ajustes, PestanaDiccionario } from '../compartido/ajustes';
 import { type FlujoCancelable, flujoMotor, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
-import type { PuntoGramatica } from '../nucleo/gramatica';
-import { alinearFurigana, nombreFlexion, separarMoras, lecturaVisible } from '../nucleo/tokens';
+import type { PuntoGramatica } from '../lenguas/tipos';
 import { enviarAlCreador } from './borrador';
 import { Icono, type NombreIcono } from './iconos';
-import { formatoLectura } from './lecturas';
-import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
+import { formatoLectura, lengua } from './lengua';
+import { numero, tm, tr } from '../compartido/i18n';
 import { PanelTrazos } from './Trazos';
 
 export const NOMBRE_ESTADO: Record<EstadoPalabra, string> = {
@@ -45,14 +44,14 @@ export function colocarJunto(ancla: { left: number; top: number; width: number; 
 
 export function ConFurigana({ texto, lectura }: { texto: string; lectura?: string }) {
   if (!lectura) return <>{texto}</>;
-  const seg = alinearFurigana(texto, lectura);
+  const seg = lengua.value.lectura.segmentar(texto, lectura);
   return (
     <>
       {seg.map((s, i) =>
         s.lectura ? (
           <ruby key={i}>
             {s.texto}
-            <rt>{lecturaVisible(s.lectura, formatoLectura.value)}</rt>
+            <rt>{lengua.value.lectura.visible(s.lectura, formatoLectura.value)}</rt>
           </ruby>
         ) : (
           <span key={i}>{s.texto}</span>
@@ -64,7 +63,7 @@ export function ConFurigana({ texto, lectura }: { texto: string; lectura?: strin
 
 /** Curva tonal sobre cada mora, con un punto hueco para la partícula siguiente. */
 export function CurvaAcento({ lectura, posicion }: { lectura: string; posicion: number }) {
-  const moras = separarMoras(lectura);
+  const moras = lengua.value.acento?.moras(lectura) ?? [];
   const paso = 17;
   const inicio = 7;
   const alta = 5;
@@ -222,7 +221,7 @@ function Desglose({ texto }: { texto: string }) {
     <>
       {trozos.map((t, i) => (
         <div class="fragmento" key={i}>
-          <b lang="ja">{t.cabeza}</b>
+          <b lang={lengua.value.id}>{t.cabeza}</b>
           {t.significado && <div class="fragmento-sentido">{t.significado}</div>}
           {t.explicacion && <div class="fragmento-nota">{t.explicacion}</div>}
         </div>
@@ -230,19 +229,6 @@ function Desglose({ texto }: { texto: string }) {
     </>
   );
 }
-
-const ENLACES: { nombre: string; url: (p: string, entrada?: number) => string }[] = [
-  { nombre: tm('Jisho'), url: (p) => `https://jisho.org/search/${encodeURIComponent(p)}` },
-  // JapanDict usa los números de entrada de JMdict: así se abre justo la acepción, no una lista de homógrafos.
-  { nombre: 'JapanDict', url: (p, entrada) => `https://www.japandict.com/${encodeURIComponent(p)}${entrada ? `#entry-${entrada}` : ''}` },
-  { nombre: tm('Weblio'), url: (p) => `https://www.weblio.jp/content/${encodeURIComponent(p)}` },
-  { nombre: tm('Goo 辞書'), url: (p) => `https://dictionary.goo.ne.jp/srch/all/${encodeURIComponent(p)}/m0u/` },
-  { nombre: 'コトバンク', url: (p) => `https://kotobank.jp/gs/?q=${encodeURIComponent(p)}` },
-  { nombre: tm('Wiktionary'), url: (p) => `https://${idiomaActual()}.wiktionary.org/wiki/${encodeURIComponent(p)}` },
-  { nombre: tm('Forvo'), url: (p) => `https://forvo.com/search/${encodeURIComponent(p)}/ja/` },
-  { nombre: tm('Massif'), url: (p) => `https://massif.la/ja/search?q=${encodeURIComponent(p)}` },
-  { nombre: tm('Imágenes'), url: (p) => `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p)}` },
-];
 
 async function reproducirBase64(datos: string, tipo = 'audio/mpeg') {
   await new Audio(`data:${tipo};base64,${datos}`).play();
@@ -253,7 +239,7 @@ function BotonAudio({ lema, lectura }: { lema: string; lectura: string }) {
   const [estado, fijarEstado] = useState<'listo' | 'cargando' | 'sonando'>('listo');
   const voz = () => {
     const u = new SpeechSynthesisUtterance(lema);
-    u.lang = 'ja-JP';
+    u.lang = lengua.value.bcp47;
     u.onend = () => fijarEstado('listo');
     u.onerror = () => fijarEstado('listo');
     fijarEstado('sonando');
@@ -295,7 +281,7 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
         await reproducirBase64(await motor.vozFrase(texto, voz));
       } else {
         const u = new SpeechSynthesisUtterance(texto);
-        u.lang = 'ja-JP';
+        u.lang = lengua.value.bcp47;
         speechSynthesis.speak(u);
       }
     } catch (e) {
@@ -334,7 +320,7 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
             ajustes.vocesFrase.map((v) => (
               <div class="fila-audio" key={v}>
                 <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con {0}', v)} onClick={() => tocarVoz(v, frase)}><Icono n="reproducir" t={14} /></button>
-                <span class="fila-audio-nombre">{v.replace(/^ja-JP-/, '').replace(/(Multilingual)?Neural$/, '')}</span>
+                <span class="fila-audio-nombre">{v.replace(`${lengua.value.bcp47}-`, '').replace(/(Multilingual)?Neural$/, '')}</span>
               </div>
             ))
           ) : (
@@ -420,7 +406,7 @@ function PanelEjemplos({ lema, enviar }: { lema: string; enviar: boolean }) {
       {filas?.map((f, i) => (
         <div class="ejemplo" key={i}>
           <div class="ejemplo-texto">
-            <span lang="ja">{f.texto}</span>
+            <span lang={lengua.value.id}>{f.texto}</span>
             {f.fuente && <small>{f.fuente}</small>}
           </div>
           {enviar && <button class="btn fantasma chico" onClick={() => enviarAlCreador({ ejemplos: f.texto })}>{tr('Enviar')}</button>}
@@ -558,7 +544,7 @@ function CorregirLectura({ contexto, textoLinea, superficie, alHecho, alCerrar }
           }
         }}><Icono n="ia" t={14} /> {tr('Revisar con Claude')}</button>
         <span class="ayuda">o</span>
-        <input class="campo" lang="ja" placeholder={tr('en hiragana')} aria-label={tr('Lectura correcta')} value={manual} onInput={(e) => fijarManual(e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
+        <input class="campo" lang={lengua.value.id} placeholder={tr(lengua.value.textos.lecturaCampo)} aria-label={tr('Lectura correcta')} value={manual} onInput={(e) => fijarManual(e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
         <button class="btn chico" disabled={!manual.trim()} onClick={async () => {
           await motor.corregirLectura(textoLinea, { superficie, lectura: manual.trim() });
           fijarEstado(tr('Lectura guardada'));
@@ -736,7 +722,7 @@ export function Ficha(p: PropsFicha) {
   }
   const definiciones = [...porDic.values()].flatMap((d) => d.glosas);
   const definicionesUnicas = [...new Set(definiciones)];
-  const nombresFlexion = (p.flexion ?? []).map((f) => [f, nombreFlexion(f)] as const);
+  const nombresFlexion = (p.flexion ?? []).map((f) => [f, lengua.value.nombreFlexion(f)] as const);
 
   const contexto: ContextoIA = { ...p.contexto, lema: r.lema, lectura: r.lectura, superficie: p.superficie };
   // La definición que Claude señala como la más cercana va la primera.
@@ -753,7 +739,7 @@ export function Ficha(p: PropsFicha) {
       <div class="ficha-chips">
         {p.gramatica.map((g) => (
           <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={tr(g.significado)} aria-pressed={patron?.patron === g.patron} onClick={() => fijarPatron(patron?.patron === g.patron ? null : g)}>
-            <span lang="ja">{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
+            <span lang={lengua.value.id}>{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
           </button>
         ))}
       </div>
@@ -791,7 +777,7 @@ export function Ficha(p: PropsFicha) {
             <ul class="lista-compuestos">
               {extras.map((e) => (
                 <li key={e.clave}>
-                  <b lang="ja">{e.lema}</b> <span class="ayuda" lang="ja">{e.lectura}</span>
+                  <b lang={lengua.value.id}>{e.lema}</b> <span class="ayuda" lang={lengua.value.id}>{e.lectura}</span>
                   <div class="compuesto-def">{e.entradas[0]?.glosas.slice(0, 2).join('; ')}</div>
                 </li>
               ))}
@@ -802,10 +788,10 @@ export function Ficha(p: PropsFicha) {
     ),
     flexiones: nombresFlexion.length ? (
       <div key="flex" class="ficha-bloque">
-        <div class="subtitulo-def">{tr('Conjugación de')} <span lang="ja">{p.superficie}</span></div>
+        <div class="subtitulo-def">{tr('Conjugación de')} <span lang={lengua.value.id}>{p.superficie}</span></div>
         <div class="flexiones">
           {nombresFlexion.map(([f, n], i) => (
-            <span key={i} class="chip"><b lang="ja">{f}</b>{n ? <span>{n}</span> : null}</span>
+            <span key={i} class="chip"><b lang={lengua.value.id}>{f}</b>{n ? <span>{n}</span> : null}</span>
           ))}
         </div>
       </div>
@@ -847,8 +833,8 @@ export function Ficha(p: PropsFicha) {
           {sincronizada && pestana === 'traduccion' && <PanelFlujo metodo="traducir" args={[contexto]} titulo={tr('Traducción')} />}
           {pestana === 'enlaces' && (
             <div class="enlaces">
-              {ENLACES.map((e) => (
-                <a key={e.nombre} class="chip" href={e.url(r.lema, r.entradas.find((x) => x.dic.startsWith('jmdict') && x.seq)?.seq)} target="_blank" rel="noreferrer noopener">{tr(e.nombre)} <Icono n="externo" t={12} /></a>
+              {lengua.value.enlaces.map((e) => (
+                <a key={e.nombre} class="chip" href={e.url(r.lema, r.entradas)} target="_blank" rel="noreferrer noopener">{tr(e.nombre)} <Icono n="externo" t={12} /></a>
               ))}
             </div>
           )}
@@ -858,7 +844,7 @@ export function Ficha(p: PropsFicha) {
   };
 
   const iaDock = PESTANAS.filter((x) => x.ia);
-  const otrasDock = PESTANAS.filter((x) => !x.ia);
+  const otrasDock = PESTANAS.filter((x) => !x.ia && (x.id !== 'trazos' || lengua.value.trazos));
   const botonPestana = (x: (typeof PESTANAS)[number]) => (
     <button
       key={x.id}
@@ -880,11 +866,11 @@ export function Ficha(p: PropsFicha) {
       <div class="ficha-cab">
         <div class="ficha-titulo">
           <div class="ficha-izq">
-            <div class="ficha-palabra" lang="ja">
+            <div class="ficha-palabra" lang={lengua.value.id}>
               <ConFurigana texto={r.lema} lectura={r.lectura} />
             </div>
             {r.acentos.length > 0 && (
-              <div class={`ficha-tono ac-${r.patron ?? ''}`} lang="ja">
+              <div class={`ficha-tono ac-${r.patron ?? ''}`} lang={lengua.value.id}>
                 {r.acentos.slice(0, 2).map((a) => <CurvaAcento key={a} lectura={r.lectura} posicion={a} />)}
               </div>
             )}

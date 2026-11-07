@@ -6,7 +6,7 @@ import { AJUSTES_INICIALES, type Ajustes, configDeModo } from '../compartido/aju
 import type { LineaAnalizada, PalabraToken, PistaInfo } from '../compartido/tipos';
 import { calcularEstadisticas, clasificarFrase, type FiltroNavegador } from '../nucleo/frases';
 import type { TipoPausa } from '../nucleo/modos';
-import type { PuntoGramatica } from '../nucleo/gramatica';
+import type { PuntoGramatica } from '../lenguas/tipos';
 import { type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA } from '../nucleo/sincronia';
 import { type Linea, lineaConPuente, lineaEn } from '../nucleo/subtitulos';
 import { tr } from '../compartido/i18n';

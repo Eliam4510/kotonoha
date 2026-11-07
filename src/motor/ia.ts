@@ -7,19 +7,11 @@ import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import { type Lote, ordenarPorCercania, partirEnLotes } from '../nucleo/lotes';
 import { claveDia, claveMes, costeDe, type UsoTokens } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
-import { db } from './db';
+import type { TareaPrompt } from '../lenguas/tipos';
+import { baseGeneral, db } from './db';
 import { tr } from '../compartido/i18n';
-import {
-  ESQUEMA_ANALISIS,
-  ESQUEMA_CORRECCIONES,
-  ESQUEMA_SENTIDO,
-  PROMPT_ANALISIS,
-  PROMPT_CORRECCION,
-  PROMPT_SENTIDO,
-  PROMPTS_BASE,
-  rellenar,
-  type VariablesPrompt,
-} from './prompts';
+import { lengua, motorLengua } from './lengua';
+import { rellenar, type VariablesPrompt } from './prompts';
 
 let claveApi = '';
 let urlBase: string | undefined;
@@ -123,7 +115,7 @@ function anotarConsumo(tarea: string, modelo: string, u: UsoApi | undefined, tit
   const uso: UsoTokens = { entrada: u.input_tokens ?? 0, salida: u.output_tokens ?? 0, cacheEscritura5m: escritura5m, cacheEscritura1h: escritura1h, cacheLectura: u.cache_read_input_tokens ?? 0 };
   const t = Date.now();
   gastadoCache = null;
-  db.consumo.add({ ...uso, t, dia: claveDia(t), mes: claveMes(t), tarea, modelo, coste: costeDe(modelo, uso), titulo }).catch((e) => console.warn('Kotonoha: no se pudo anotar el gasto', e));
+  baseGeneral.consumo.add({ ...uso, t, dia: claveDia(t), mes: claveMes(t), tarea, modelo, coste: costeDe(modelo, uso), titulo }).catch((e) => console.warn('Kotonoha: no se pudo anotar el gasto', e));
 }
 
 /** Lo gastado este mes, para no pasar del tope. Se recuerda un momento: se pregunta en cada petición. */
@@ -131,7 +123,7 @@ let gastadoCache: { t: number; total: number } | null = null;
 async function gastadoEsteMes(): Promise<number> {
   const ahora = Date.now();
   if (gastadoCache && ahora - gastadoCache.t < 30000) return gastadoCache.total;
-  const filas = await db.consumo.where('mes').equals(claveMes(ahora)).toArray();
+  const filas = await baseGeneral.consumo.where('mes').equals(claveMes(ahora)).toArray();
   const total = filas.reduce((s, f) => s + (f.coste ?? 0), 0);
   gastadoCache = { t: ahora, total };
   return total;
@@ -248,11 +240,11 @@ function bloqueEntorno(c: ContextoIA): string {
   return partes.join('\n\n') + (partes.length ? '\n' : '');
 }
 
-type TareaTexto = keyof typeof PROMPTS_BASE;
+type TareaTexto = TareaPrompt;
 
 function plantilla(a: Ajustes, tarea: TareaTexto) {
   const p = a.prompts[tarea];
-  return p?.sistema && p.usuario ? p : PROMPTS_BASE[tarea];
+  return p?.sistema && p.usuario ? p : motorLengua().prompts.base[tarea];
 }
 
 function preparar(a: Ajustes, tarea: TareaTexto, c: ContextoIA, extra: Partial<VariablesPrompt> = {}, profundo = false): OpcionesPeticion {
@@ -298,18 +290,19 @@ export const flujos = {
 
 /** Qué significa la palabra en esta frase: resuelve el problema del «siempre el sentido básico». */
 function peticionSentido(a: Ajustes, c: ContextoIA, definiciones: string[]): OpcionesPeticion {
+  const { comillar } = lengua().escritura;
   const lista = definiciones.slice(0, 12).map((d, i) => `${i}. ${d}`).join('\n');
   return {
     a,
     tarea: 'sentido',
-    sistema: rellenar(PROMPT_SENTIDO, a, {}),
-    usuario: `${bloqueEntorno(c)}Frase: 「${c.frase}」
-Palabra: ${c.lema} (en la frase aparece como 「${c.superficie ?? c.lema}」, lectura ${c.lectura ?? ''})
+    sistema: rellenar(motorLengua().prompts.sentido, a, {}),
+    usuario: `${bloqueEntorno(c)}Frase: ${comillar(c.frase ?? '')}
+Palabra: ${c.lema} (en la frase aparece como ${comillar(c.superficie ?? c.lema ?? '')}, lectura ${c.lectura ?? ''})
 Definiciones del diccionario:
 ${lista || '(ninguna)'}`,
     titulo: c.titulo,
     maxTokens: 8000,
-    formato: { type: 'json_schema', schema: ESQUEMA_SENTIDO },
+    formato: { type: 'json_schema', schema: motorLengua().prompts.esquemaSentido },
   };
 }
 
@@ -339,7 +332,7 @@ export async function consultaImagen(a: Ajustes, lema: string, frase?: string): 
     {
       a,
       tarea: 'generar',
-      sistema: 'Devuelve solo dos o tres palabras en inglés útiles para buscar una imagen que ilustre el término japonés dado, según su sentido en la frase. Sin comillas.',
+      sistema: motorLengua().prompts.imagen,
       usuario: frase ? `Término: ${lema}\nFrase: ${frase}` : `Término: ${lema}`,
     },
     false
@@ -352,7 +345,7 @@ export async function glosaBreve(a: Ajustes, lema: string, frase?: string): Prom
     {
       a,
       tarea: 'sentido',
-      sistema: `Traduce el término japonés a ${a.idiomaTraduccion} con una o dos palabras, en forma de diccionario. Responde solo con la traducción.`,
+      sistema: motorLengua().prompts.glosa(a.idiomaTraduccion),
       usuario: frase ? `Término: ${lema}\nContexto: ${frase}` : `Término: ${lema}`,
     },
     false
@@ -362,12 +355,13 @@ export async function glosaBreve(a: Ajustes, lema: string, frase?: string): Prom
 
 /** Revisa una lectura concreta que el usuario señaló como dudosa. */
 export async function revisarLectura(a: Ajustes, c: ContextoIA): Promise<{ lectura: string; lema: string; lectura_lema: string; motivo: string }> {
+  const { comillar } = lengua().escritura;
   const texto = await ejecutar({
     a,
     tarea: 'sentido',
-    sistema: `Eres un experto en lecturas de kanji. Decide cómo se lee esta palabra en esta frase, teniendo en cuenta el contexto y, en canciones o poesía, las lecturas poéticas. Responde en ${a.idiomaExplicaciones}.`,
-    usuario: `${bloqueEntorno(c)}Frase: 「${c.frase}」
-Palabra: 「${c.superficie ?? c.lema}」
+    sistema: motorLengua().prompts.revisarLectura(a.idiomaExplicaciones),
+    usuario: `${bloqueEntorno(c)}Frase: ${comillar(c.frase ?? '')}
+Palabra: ${comillar(c.superficie ?? c.lema ?? '')}
 Lectura actual: ${c.lectura ?? ''}`,
     guion: c.guion,
     titulo: c.titulo,
@@ -481,7 +475,7 @@ export async function corregirSubtitulos(
   await porLotes(lineas.length, TAM_LOTE_CORRECCION, indice, true, async (l) => {
     if (senal?.aborted) return;
     const usuario = mensajeLote(lineas, l, titulo, 'Líneas a revisar');
-    const texto = await ejecutar({ a, tarea: 'corregir', sistema: PROMPT_CORRECCION, usuario, guion: contexto, siempreGuion: true, cacheCorta: true, titulo, maxTokens: 16000, formato: { type: 'json_schema', schema: ESQUEMA_CORRECCIONES } }, undefined, senal);
+    const texto = await ejecutar({ a, tarea: 'corregir', sistema: motorLengua().prompts.correccion, usuario, guion: contexto, siempreGuion: true, cacheCorta: true, titulo, maxTokens: 16000, formato: { type: 'json_schema', schema: motorLengua().prompts.esquemaCorrecciones } }, undefined, senal);
     if (!texto) return;
     const datos = JSON.parse(texto) as { correcciones: ParteTexto[] };
     hechas += l.hasta - l.desde;
@@ -508,7 +502,7 @@ export async function analisisProfundo(
   indice = -1,
   todas: EntradaAnalisis[] = entradas
 ): Promise<void> {
-  const sistema = rellenar(PROMPT_ANALISIS, a, {});
+  const sistema = rellenar(motorLengua().prompts.analisis, a, {});
   const posicion = new Map(todas.map((e, i) => [e, i]));
   let hechas = 0;
   await porLotes(entradas.length, 60, indice, false, async ({ desde, hasta }) => {
@@ -526,7 +520,7 @@ export async function analisisProfundo(
       despues ? `Líneas siguientes, solo como contexto:\n${despues}` : '',
     ].filter(Boolean).join('\n\n');
     // Sin señal a propósito: este lote ya está pagado. Si te vas del video, termina y queda guardado.
-    const texto = await ejecutar({ a, tarea: 'analisis', sistema, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: ESQUEMA_ANALISIS } });
+    const texto = await ejecutar({ a, tarea: 'analisis', sistema, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: motorLengua().prompts.esquemaAnalisis } });
     if (!texto) return;
     const datos = JSON.parse(texto) as { lineas: (AnalisisLinea & { i: number })[] };
     const r = new Map<number, AnalisisLinea>();

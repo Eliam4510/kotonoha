@@ -60,7 +60,8 @@ flowchart TB
 | **Whisper-Worker** | Das Modell laden und auf der GPU transkribieren | Sehr schwer, würde die Engine blockieren. Wird separat gepackt und nur bei Bedarf geladen |
 | **Lokaler Helfer** | Das Audio eines Internetvideos herunterladen | Eine Erweiterung kann das nicht allein. Nur die Erweiterung kann ihn aufrufen, und er akzeptiert nur http- oder https-Adressen |
 | **Anwendungsfenster** | Verwaltungsseiten und lokaler Player | Eine normale Seite der Erweiterung, die dieselbe Engine per RPC nutzt |
-| **Kern (`src/nucleo`)** | Reine Logik: Parser, Tokens, Modi, Statistiken, Grammatik, Synchronisierung, Transkription und Stapel | Ohne Browser-Abhängigkeiten, getestet mit Vitest |
+| **Kern (`src/nucleo`)** | Reine Logik: Parser, Modi, Statistiken, Synchronisierung, Transkription und Stapel | Ohne Browser-Abhängigkeiten, getestet mit Vitest |
+| **Sprachpakete (`src/lenguas`)** | Alles, was von der gelernten Sprache abhängt | Der Rest des Programms kennt nur ihre Schnittstelle |
 
 ## Ablauf eines Untertitels
 
@@ -220,11 +221,23 @@ Teuer sind das Messen und das Ändern des DOM. Chromium baut nach jeder Änderun
 - Was noch `elementFromPoint` braucht, geschieht zeilenweise, in freien Momenten und bei ruhender Seite.
 - Was sich entfernt, wird gesammelt entfernt, und kehrt es vorher zurück, wird es nicht angefasst.
 
+## Sprachpakete
+
+Alles, was von der gelernten Sprache abhängt, liegt in `src/lenguas/<Sprache>`, und der Rest des Programms kennt nur die Schnittstellen in `src/lenguas/tipos.ts`. Derzeit gibt es nur das Paket für Japanisch. Jedes Paket besteht aus zwei Teilen:
+
+- **`PaqueteLengua`** ist leichtgewichtig und wird von allen Ansichten genutzt, auch vom Content Script: wie die Sprache in einem Text erkannt wird, wie ihre Lesungen geschrieben werden, ihre Stufen, Stimmen und Links sowie die Sätze der Oberfläche, die sie benennen.
+- **`MotorLengua`** wird nur in der Engine und im Anwendungsfenster geladen: Analysator, Grammatikregeln, Prompts, Transkriptionsregeln, Wörterbücher und Audio.
+
+Jede Sprache hat ihre eigene Datenbank. Die japanische behält den ursprünglichen Namen `kikitori`, die anderen heißen `kikitori-<Sprache>`. So wird ein Wort, das in zwei Sprachen gleich geschrieben wird, nie vermischt, und vorhandene Daten müssen nicht migriert werden. Die Kosten für Claude hängen nicht von der Sprache ab und werden immer in der ursprünglichen Datenbank gespeichert.
+
+Die Prompts jedes Pakets sind mit ihren Prüfsummen in den Tests festgelegt, denn eine Änderung entwertet die gespeicherten Antworten, die dann erneut bezahlt werden müssten.
+
 ## Ordnerstruktur
 
 ```
 src/
-  nucleo/       Reine, getestete Logik: Untertitel, Tokens, Modi, Grammatik, Synchronisierung, Transkription, Stapel
+  nucleo/       Reine, getestete Logik: Untertitel, Modi, Synchronisierung, Transkription, Stapel
+  lenguas/      Was von der gelernten Sprache abhängt: ein Paket pro Sprache
   compartido/   Typen, Einstellungen und RPC zwischen Kontexten
   pagina/       Adapter der MAIN-Welt
   contenido/    Oberfläche über dem Video und Seiten-Reader (lector/)

@@ -25,6 +25,7 @@ import { TextoInteractivo } from './Lectura';
 import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
+import { lengua } from '../ui/lengua';
 
 // ---------- Inicio ----------
 
@@ -39,35 +40,13 @@ const SITIOS = [
   [tm('Prime Video'), 'https://www.primevideo.com'],
 ];
 
-const LECTURAS = [
-  [tm('Principiante'), tm('Matcha'), 'https://matcha-jp.com/easy'],
-  [tm('Principiante'), tm('NHK Easy'), 'https://news.web.nhk/news/easy/'],
-  [tm('Intermedio'), '多読道場', 'https://yomujp.com/'],
-  [tm('Intermedio'), '旅色', 'https://tabiiro.jp/'],
-  [tm('Avanzado'), tm('Wikipedia'), 'https://ja.wikipedia.org/'],
-  [tm('Avanzado'), 'NHK', 'https://www3.nhk.or.jp/news/'],
-];
-
 const NIVELES_LECTURA = [tm('Principiante'), tm('Intermedio'), tm('Avanzado')];
 
-// Vocabulario que suele asociarse a cada nivel del JLPT. Son cifras orientativas, no oficiales.
-const HITOS = [
-  { nivel: 'N5', palabras: 800 },
-  { nivel: 'N4', palabras: 1500 },
-  { nivel: 'N3', palabras: 3750 },
-  { nivel: 'N2', palabras: 6000 },
-  { nivel: 'N1', palabras: 10000 },
-];
+/** La cita del prólogo del Kokin Wakashū explica el nombre de Kotonoha: es japonés se estudie lo que se estudie. */
+const LENGUA_DE_LA_MARCA = 'ja';
 
-// La escala es una raíz cuadrada para que los primeros niveles no queden apretados al principio.
-const posicionHito = (n: number) => Math.min(100, Math.sqrt(n / 10000) * 100);
-
-function saludoJapones(): string {
-  const h = new Date().getHours();
-  if (h >= 5 && h < 11) return 'おはようございます';
-  if (h >= 11 && h < 18) return 'こんにちは';
-  return 'こんばんは';
-}
+/** El idioma de un título: el que se estudia si está escrito en él. */
+const langDe = (titulo: string) => (lengua.value.escritura.tieneTexto(titulo) ? lengua.value.id : undefined);
 
 const ATAJOS: [string, string[]][] = [
   [tm('Crear tarjeta de la frase'), ['Q']],
@@ -78,12 +57,16 @@ const ATAJOS: [string, string[]][] = [
 ];
 
 function Sendero({ conocidas }: { conocidas: number }) {
-  const siguiente = HITOS.find((h) => conocidas < h.palabras);
+  const hitos = lengua.value.niveles.flatMap((n) => (n.palabras ? [{ nivel: n.nombre, palabras: n.palabras }] : []));
+  const tope = hitos[hitos.length - 1].palabras;
+  // La escala es una raíz cuadrada para que los primeros niveles no queden apretados al principio.
+  const posicionHito = (n: number) => Math.min(100, Math.sqrt(n / tope) * 100);
+  const siguiente = hitos.find((h) => conocidas < h.palabras);
   return (
     <div class="ap-sendero">
       <div class="ap-sendero-pista">
         <div class="ap-sendero-lleno" style={{ width: `${posicionHito(conocidas)}%` }} />
-        {HITOS.map((h) => (
+        {hitos.map((h) => (
           <span key={h.nivel} class={`ap-hito ${conocidas >= h.palabras ? 'alcanzado' : ''}`} style={{ left: `${posicionHito(h.palabras)}%` }}>
             <i />
             <b>{h.nivel}</b>
@@ -93,7 +76,7 @@ function Sendero({ conocidas }: { conocidas: number }) {
       <p class="ayuda">
         {siguiente
           ? tr('Te faltan {0} palabras para el vocabulario habitual de {1}.', numero(siguiente.palabras - conocidas), siguiente.nivel)
-          : tr('Ya superas el vocabulario habitual de N1.')}
+          : tr(lengua.value.textos.vocabularioSuperado)}
       </p>
     </div>
   );
@@ -105,7 +88,7 @@ function PrimerosPasos({ estado, anki, instalando, alInstalar }: { estado: Estad
     {
       hecho: hayDics,
       titulo: tr('Diccionarios'),
-      ayuda: instalando ? `${instalando.titulo}: ${Math.round(instalando.avance * 100)} %` : tr('JMdict, acento tonal y frecuencia'),
+      ayuda: instalando ? `${instalando.titulo}: ${Math.round(instalando.avance * 100)} %` : tr(lengua.value.textos.diccionariosResumen),
       accion: !hayDics && !instalando ? <button class="btn chico primario" onClick={alInstalar}>{tr('Instalar')}</button> : null,
       progreso: instalando ? instalando.avance : null,
     },
@@ -157,7 +140,7 @@ function SeguirLeyendo({ e }: { e: ElementoBiblioteca }) {
       <span class={`ap-tapa mini ${claseTono(e)}`} aria-hidden="true"><span class="ap-obi" /></span>
       <div class="ap-seguir-texto">
         <span class="ayuda">{tr('Sigue leyendo')}</span>
-        <b lang={TIENE_JAPONES.test(e.titulo) ? 'ja' : undefined}>{e.titulo}</b>
+        <b lang={langDe(e.titulo)}>{e.titulo}</b>
       </div>
       {total > 1 && (
         <div class="ap-seguir-avance">
@@ -210,7 +193,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
   return (
     <div class="ap-lienzo ap-inicio">
       <header class="ap-saludo">
-        <h1 lang="ja">{saludoJapones()}{ajustes.nombre.trim() ? `、${ajustes.nombre.trim()}さん` : ''}</h1>
+        <h1 lang={lengua.value.id}>{lengua.value.saludo(new Date().getHours(), ajustes.nombre.trim())}</h1>
         <p>{pendientes ? (pendientes === 1 ? tr('Hoy tienes 1 tarjeta por repasar.') : tr('Hoy tienes {0} tarjetas por repasar.', numero(pendientes))) : tr('Hoy no tienes tarjetas pendientes. Buen momento para ver algo nuevo.')}</p>
       </header>
 
@@ -226,7 +209,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
             <dl class="ap-cifras-menores">
               <div><dt>{tr('Aprendiendo')}</dt><dd class="num">{palabras ? numero(palabras.aprendiendo) : '–'}</dd></div>
               <div><dt>{tr('Rastreadas')}</dt><dd class="num">{palabras ? numero(palabras.rastreadas) : '–'}</dd></div>
-              <div><dt>{tr('Tu nivel')}</dt><dd>{ajustes.nivel.replace('JLPT ', '')}</dd></div>
+              <div><dt>{tr('Tu nivel')}</dt><dd>{lengua.value.nombreNivel(ajustes.nivel)}</dd></div>
             </dl>
           </div>
           <Sendero conocidas={conocidas} />
@@ -256,7 +239,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
             <span class="hoja-icono chica"><Icono n="video" t={18} /></span>
             <h2 id="ap-t-video">{tr('Mira un video')}</h2>
           </div>
-          <p class="ayuda ap-tarjeta-ayuda">{tr('Abre uno con subtítulos en japonés y aparecerá la barra de Kotonoha. Si no tiene, arrastra tu archivo SRT sobre él.')}</p>
+          <p class="ayuda ap-tarjeta-ayuda">{tr(lengua.value.textos.primerVideo)}</p>
           <div class="ap-mosaicos">
             {SITIOS.map(([n, u]) => (
               <a key={n} class="ap-mosaico" href={u} target="_blank" rel="noreferrer noopener">
@@ -273,13 +256,13 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
             <span class="hoja-icono chica"><Icono n="lector" t={18} /></span>
             <h2 id="ap-t-leer">{tr('O lee una página')}</h2>
           </div>
-          <p class="ayuda ap-tarjeta-ayuda">{tr('En cualquier página, haz clic en una palabra japonesa para ver su ficha.')}</p>
+          <p class="ayuda ap-tarjeta-ayuda">{tr(lengua.value.textos.primeraPagina)}</p>
           <div class="ap-niveles">
             {NIVELES_LECTURA.map((nivel) => (
               <div class="ap-nivel" key={nivel}>
                 <span>{tr(nivel)}</span>
                 <div>
-                  {LECTURAS.filter(([l]) => l === nivel).map(([, n, u]) => (
+                  {lengua.value.sitiosLectura.filter((s) => s.nivel === nivel).map(({ nombre: n, url: u }) => (
                     <a key={n} class="chip" href={u} target="_blank" rel="noreferrer noopener">{n}</a>
                   ))}
                 </div>
@@ -297,7 +280,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
             <h2 id="ap-t-sabes">{tr('Enséñale lo que ya sabes')}</h2>
           </div>
           <p class="ayuda ap-tarjeta-ayuda">{tr('Pega una lista de palabras o cualquier texto: se marcarán como conocidas.')}</p>
-          <textarea class="campo ap-campo-ja" lang="ja" aria-label={tr('Palabras que ya conoces')} value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} placeholder="猫、犬、食べる…" />
+          <textarea class="campo ap-campo-lengua" lang={lengua.value.id} aria-label={tr('Palabras que ya conoces')} value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} placeholder={lengua.value.ejemplos.lista} />
           <div class="ap-botones">
             <button class="btn primario" disabled={!texto.trim()} onClick={async () => {
               const n = await motor.anadirConocidas(texto);
@@ -328,7 +311,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 
       <footer class="ap-cita">
         <span class="ap-cita-hoja"><Icono n="hoja" t={18} /></span>
-        <blockquote lang="ja">やまとうたは、人の心を種として、よろづの言の葉とぞなれりける</blockquote>
+        <blockquote lang={LENGUA_DE_LA_MARCA}>やまとうたは、人の心を種として、よろづの言の葉とぞなれりける</blockquote>
         <p>{tr('La poesía de Japón tiene por semilla el corazón humano, y de él brotan miríadas de hojas de palabras.')}</p>
         <cite>{tr('Prólogo del Kokin Wakashū, c. 905. De ahí viene nuestro nombre.')}</cite>
       </footer>
@@ -337,8 +320,6 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 }
 
 // ---------- Diccionario ----------
-
-const SUGERENCIAS = ['食べる', '言の葉', '勉強', '星'];
 
 export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta: string }) {
   const [texto, fijarTexto] = useState(consulta);
@@ -374,7 +355,7 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
   }, [consulta]);
 
   const inicial = resultados === null;
-  const atajos = recientes.length ? recientes : SUGERENCIAS;
+  const atajos = recientes.length ? recientes : lengua.value.ejemplos.sugerencias;
 
   return (
     <div class={`ap-lienzo ap-diccionario ${inicial ? 'inicial' : ''}`}>
@@ -382,31 +363,31 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
         <div class="ap-dic-portada">
           <span class="hoja-icono"><Icono n="diccionario" t={24} /></span>
           <h1>{tr('¿Qué palabra buscas?')}</h1>
-          <p>{tr('Escríbela en japonés. También entiende formas conjugadas y frases enteras.')}</p>
+          <p>{tr(lengua.value.textos.buscarAyuda)}</p>
         </div>
       )}
       <form class="ap-buscador" role="search" onSubmit={(e) => { e.preventDefault(); buscar(texto); }}>
         <Icono n="buscar" t={20} />
-        <input lang="ja" aria-label={tr('Buscar en el diccionario')} placeholder="食べた、勉強する、一日でも…" value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} autoFocus />
+        <input lang={lengua.value.id} aria-label={tr('Buscar en el diccionario')} placeholder={lengua.value.ejemplos.busqueda} value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} autoFocus />
         <button class="btn primario" type="submit" disabled={!texto.trim() || cargando}>{cargando ? tr('Buscando…') : tr('Buscar')}</button>
       </form>
       <label class="ap-contexto">
         <Icono n="ia" t={15} />
-        <input lang="ja" aria-label={tr('Frase de contexto opcional')} placeholder={tr('Opcional: la frase donde la viste, para que Claude la explique en contexto')} value={frase} onInput={(e) => fijarFrase(e.currentTarget.value)} />
+        <input lang={lengua.value.id} aria-label={tr('Frase de contexto opcional')} placeholder={tr('Opcional: la frase donde la viste, para que Claude la explique en contexto')} value={frase} onInput={(e) => fijarFrase(e.currentTarget.value)} />
       </label>
 
       {inicial && (
         <div class="ap-dic-atajos">
           <span class="ayuda">{recientes.length ? tr('Búsquedas recientes') : tr('Prueba con')}</span>
           {atajos.map((r) => (
-            <button key={r} class="chip" lang="ja" onClick={() => { fijarTexto(r); buscar(r); }}>{r}</button>
+            <button key={r} class="chip" lang={lengua.value.id} onClick={() => { fijarTexto(r); buscar(r); }}>{r}</button>
           ))}
         </div>
       )}
 
       {resultados && resultados.length > 0 && (
         <h2 class="ap-seccion-titulo">
-          {resultados.length === 1 ? tr('1 resultado') : tr('{0} resultados', resultados.length)} · <span lang="ja">{buscado}</span>
+          {resultados.length === 1 ? tr('1 resultado') : tr('{0} resultados', resultados.length)} · <span lang={lengua.value.id}>{buscado}</span>
         </h2>
       )}
       {resultados?.length === 0 && (
@@ -434,8 +415,6 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
 }
 
 // ---------- Lector ----------
-
-const TEXTO_EJEMPLO = '吾輩は猫である。名前はまだ無い。\nどこで生れたかとんと見当がつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。\n吾輩はここで始めて人間というものを見た。';
 
 export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; inicial: string; web?: boolean }) {
   const [texto, fijarTexto] = useState(inicial);
@@ -489,9 +468,9 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
 
   return (
     <div class="ap-lienzo ap-lector-entrada">
-      <Cabecera titulo={tr('Lector')} sub={tr('Pega cualquier texto japonés para leerlo con furigana, diccionario y Claude al alcance de un clic.')}>{botonWeb}</Cabecera>
+      <Cabecera titulo={tr('Lector')} sub={tr(lengua.value.textos.lectorPegar)}>{botonWeb}</Cabecera>
       <div class="ap-hoja-escritura">
-        <textarea lang="ja" aria-label={tr('Texto a leer')} value={texto} placeholder="ここに日本語の文章を貼り付けてください" onInput={(e) => fijarTexto(e.currentTarget.value)} />
+        <textarea lang={lengua.value.id} aria-label={tr('Texto a leer')} value={texto} placeholder={lengua.value.ejemplos.pegarTexto} onInput={(e) => fijarTexto(e.currentTarget.value)} />
         <div class="ap-hoja-pie">
           <div class="ap-botones">
             <button class="btn fantasma chico" onClick={async () => fijarTexto(await navigator.clipboard.readText())}><Icono n="portapapeles" t={15} /> {tr('Pegar')}</button>
@@ -501,7 +480,7 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
                 if (web) guardarTextoLector('').catch(console.error);
               }}><Icono n="basura" t={15} /> {tr('Borrar')}</button>
             ) : (
-              <button class="btn fantasma chico" onClick={() => fijarTexto(TEXTO_EJEMPLO)}><Icono n="pergamino" t={15} /> {tr('Probar con un ejemplo')}</button>
+              <button class="btn fantasma chico" onClick={() => fijarTexto(lengua.value.ejemplos.texto)}><Icono n="pergamino" t={15} /> {tr('Probar con un ejemplo')}</button>
             )}
           </div>
           <div class="ap-botones">
@@ -569,7 +548,6 @@ async function textoDeEpub(datos: ArrayBuffer): Promise<string> {
   return partes.join('\n\n');
 }
 
-const TIENE_JAPONES = /[぀-ヿ㐀-鿿]/;
 const TONOS_PORTADA = 5;
 
 /** El tono de la portada sale del título, para que cada libro conserve siempre el suyo. */
@@ -592,13 +570,13 @@ function Libro({ e, alAbrir, alEliminar }: { e: ElementoBiblioteca; alAbrir: () 
   const total = paginasDe(e);
   const pagina = Math.min((e.pagina ?? 0) + 1, total);
   const empezado = (e.pagina ?? 0) > 0;
-  const japones = TIENE_JAPONES.test(e.titulo);
+  const titulo = langDe(e.titulo);
   const claude = e.origen === 'historia';
   return (
     <article class="ap-libro">
       <div class="ap-libro-tapa-marco">
-        <button class={`ap-tapa ${claseTono(e)} ${japones ? 'vertical' : 'horizontal'}`} aria-label={tr('Leer {0}', e.titulo)} onClick={alAbrir}>
-          <span class="ap-tapa-titulo" lang={japones ? 'ja' : undefined}>{e.titulo}</span>
+        <button class={`ap-tapa ${claseTono(e)} ${titulo && lengua.value.escritura.portadaVertical ? 'vertical' : 'horizontal'}`} aria-label={tr('Leer {0}', e.titulo)} onClick={alAbrir}>
+          <span class="ap-tapa-titulo" lang={titulo}>{e.titulo}</span>
           <span class="ap-obi">
             {claude ? <Icono n="ia" t={13} /> : <Icono n="hoja" t={13} />}
             <span class="num">{empezado ? tr('Pág. {0} de {1}', pagina, total) : total === 1 ? tr('Lectura breve') : tr('{0} páginas', total)}</span>
@@ -607,7 +585,7 @@ function Libro({ e, alAbrir, alEliminar }: { e: ElementoBiblioteca; alAbrir: () 
         </button>
         <button class="btn-icono chico relleno ap-libro-quitar" aria-label={tr('Eliminar {0}', e.titulo)} data-tip={tr('Eliminar')} onClick={alEliminar}><Icono n="basura" t={14} /></button>
       </div>
-      <h3 title={e.titulo} lang={japones ? 'ja' : undefined}>{e.titulo}</h3>
+      <h3 title={e.titulo} lang={titulo}>{e.titulo}</h3>
       <p class="ayuda" title={tr('{0} caracteres', numero(e.texto.length))}>{tr(NOMBRE_ORIGEN[e.origen])}</p>
     </article>
   );
@@ -660,7 +638,7 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
     fijarError('');
     try {
       const { filas } = await motor.listarPalabras({ estado: 'aprendiendo', limite: 15 });
-      const texto = await flujoMotor('historia', [tema, filas.map((f) => f.lema).join('、')], fijarRelato);
+      const texto = await flujoMotor('historia', [tema, filas.map((f) => f.lema).join(lengua.value.escritura.separadorLista)], fijarRelato);
       const titulo = texto.split('\n')[0].slice(0, 40) || tema;
       await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo, texto, origen: 'historia', creado: Date.now() });
       fijarTema('');
@@ -689,7 +667,7 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
           inicioBarra={
             <>
               <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Biblioteca')}</button>
-              <b class="ap-lectura-titulo" lang="ja">{abierto.titulo}</b>
+              <b class="ap-lectura-titulo" lang={lengua.value.id}>{abierto.titulo}</b>
             </>
           }
           pie={
@@ -734,11 +712,11 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
           </div>
           <p class="ayuda ap-tarjeta-ayuda">{tr('Escrito para tu nivel ({0}) y con las palabras que estás aprendiendo.', ajustes.nivel)}</p>
           <form class="ap-claude-form" onSubmit={(e) => { e.preventDefault(); if (tema.trim() && !generando) generar(); }}>
-            <input class="campo" aria-label={tr('Tema del relato')} placeholder={tr('Un gato que pasea por Kioto…')} value={tema} onInput={(e) => fijarTema(e.currentTarget.value)} />
+            <input class="campo" aria-label={tr('Tema del relato')} placeholder={tr(lengua.value.textos.temaRelato)} value={tema} onInput={(e) => fijarTema(e.currentTarget.value)} />
             <button class="btn ia" type="submit" disabled={!tema.trim() || generando}><Icono n={generando ? 'espera' : 'ia'} t={16} /> {generando ? tr('Escribiendo…') : tr('Escribir')}</button>
           </form>
           {generando ? (
-            <div class="ap-claude-relato" lang="ja" aria-live="polite">
+            <div class="ap-claude-relato" lang={lengua.value.id} aria-live="polite">
               {relato ? <p class="panel-ia-texto">{relato}</p> : <><span class="esqueleto" style={{ width: '92%' }} /><span class="esqueleto" style={{ width: '78%' }} /><span class="esqueleto" style={{ width: '85%' }} /></>}
             </div>
           ) : (
@@ -871,14 +849,14 @@ export function Memoria() {
       ) : t ? (
         <div class="ap-repaso">
           <div class={`ap-naipe ${volteada ? 'volteada' : ''} ${cola.length > 1 ? 'mazo' : ''}`} key={t.id}>
-            <div class="ap-naipe-frente" lang="ja" dangerouslySetInnerHTML={{ __html: t.frente }} />
+            <div class="ap-naipe-frente" lang={lengua.value.id} dangerouslySetInnerHTML={{ __html: t.frente }} />
             {t.borrador.audioFrase[0] && <button class="btn chico" onClick={() => new Audio(medio(t.borrador.audioFrase[0])).play()}><Icono n="altavoz" t={15} /> {tr('Escuchar')}</button>}
             {volteada && (
               <div class="ap-naipe-reverso">
                 {t.borrador.palabra && (
                   <h3>
-                    <span lang="ja">{t.borrador.palabra}</span>
-                    {t.borrador.lectura && <small lang="ja">{t.borrador.lectura}</small>}
+                    <span lang={lengua.value.id}>{t.borrador.palabra}</span>
+                    {t.borrador.lectura && <small lang={lengua.value.id}>{t.borrador.lectura}</small>}
                   </h3>
                 )}
                 {t.borrador.traduccion && <p class="ap-naipe-traduccion">{t.borrador.traduccion}</p>}
@@ -984,7 +962,7 @@ function Evaluacion({ alCerrar, alTerminar }: { alCerrar: () => void; alTerminar
               <span class="ayuda num">{tr('Palabra {0} de {1}', i + 1, muestra.length)}</span>
               <div class="barra-progreso"><div style={{ width: `${(i / muestra.length) * 100}%` }} /></div>
             </div>
-            <div class="ap-evaluacion-palabra" lang="ja" key={m.lema}>{m.lema}</div>
+            <div class="ap-evaluacion-palabra" lang={lengua.value.id} key={m.lema}>{m.lema}</div>
             <p class="ayuda">{tr('¿Conoces esta palabra?')}</p>
             <div class="ap-evaluacion-botones">
               <button class="btn grande" onClick={() => responder(false)}>{tr('No')} <kbd class="tecla ap-tecla-icono"><Icono n="flecha-izq" t={12} /></kbd></button>
@@ -1077,8 +1055,8 @@ export function Palabras({ evaluar = false }: { evaluar?: boolean }) {
 
         <section class="tarjeta ap-anadir-conocidas" aria-labelledby="ap-t-pegar">
           <h2 id="ap-t-pegar">{tr('Añadir conocidas')}</h2>
-          <p class="ayuda">{tr('Pega una lista o cualquier texto japonés.')}</p>
-          <textarea class="campo ap-campo-ja" lang="ja" aria-label={tr('Añadir palabras conocidas')} placeholder="猫、犬、食べる…" value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} />
+          <p class="ayuda">{tr(lengua.value.textos.pegarLista)}</p>
+          <textarea class="campo ap-campo-lengua" lang={lengua.value.id} aria-label={tr('Añadir palabras conocidas')} placeholder={lengua.value.ejemplos.lista} value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} />
           <button class="btn bloque" disabled={!texto.trim()} onClick={async () => { await motor.anadirConocidas(texto); fijarTexto(''); await cargar(); }}>{tr('Añadir')}</button>
         </section>
       </div>
@@ -1119,8 +1097,8 @@ export function Palabras({ evaluar = false }: { evaluar?: boolean }) {
                 fijarSel(s);
               }} />
               <div class="ap-fila-termino">
-                <b lang="ja">{f.lema}</b>
-                {f.lectura !== f.lema && <span lang="ja">{f.lectura}</span>}
+                <b lang={lengua.value.id}>{f.lema}</b>
+                {f.lectura !== f.lema && <span lang={lengua.value.id}>{f.lectura}</span>}
               </div>
               <span class="ap-fila-datos num">
                 {f.rastreada && <span class="ap-rastreada" data-tip={tr('Rastreada')} aria-label={tr('Rastreada')}><Icono n="huella" t={15} /></span>}
