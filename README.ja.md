@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.4.0-A9E45B?style=flat-square" alt="バージョン 0.4.0">
+  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.4.1-A9E45B?style=flat-square" alt="バージョン 0.4.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="継続的インテグレーション"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-386-0ca30c?style=flat-square" alt="単体テスト 386 件">
+  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-419-0ca30c?style=flat-square" alt="単体テスト 419 件">
   <img src="https://img.shields.io/badge/%E8%A1%A8%E7%A4%BA-6%20%E8%A8%80%E8%AA%9E-8FCBFF?style=flat-square" alt="表示は 6 言語">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5〜N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1〜C2">
@@ -74,7 +74,7 @@ Kotonoha（言の葉）は、YouTube、Netflix などのプレーヤーにイン
   <tr>
     <td valign="top"><b>Claude で翻訳と修正</b><br>今見ている部分から補助言語に翻訳します。タイトルと全文を文脈にして、自動生成字幕の同音異義語を確認なしで直します。</td>
     <td valign="top"><b>SRT の読み込みと書き出し</b><br>どのサイトでも SRT、VTT、ASS、TTML を読み込み、書き出せます。読み込んだ字幕はタイトルごとに保存され、Netflix の日本語字幕は他の地域で提供されなくても残ります。</td>
-    <td valign="top"><b>ローカルの文字起こし</b><br>WebGPU でグラフィックカード上の Whisper を動かし、音声はパソコンの外に出ません。30 分の動画を約 5 分で処理し、デスクトップは重くなりません。区切りごとに休み、ドライバーが再起動しても復旧します。</td>
+    <td valign="top"><b>ローカルの文字起こし</b><br>WebGPU でグラフィックカード上の Whisper を動かし、音声はパソコンの外に出ません。30 分の動画を約 5 分で処理し、デスクトップは重くなりません。区切りごとに休み、ドライバーが再起動しても復旧します。曲の歌詞を貼り付けると、Claude が Whisper のタイミングに配置します。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="今月の Claude の費用、日別・モデル別・作業別"></td>
@@ -263,6 +263,8 @@ npm run paquete
 | `node pruebas/trazos-web.mjs` | 実データの書き順、タブのリーダー、クリップボード、分割表示 |
 | `node pruebas/ingles.mjs` | 英語の学習を最初から最後まで：言語の選択、辞書のインストール、動画、ページ、そして何も混ざらずに日本語に戻ること |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU での英語の Whisper と、シミュレートした Claude の修正 |
+| `node pruebas/letra.mjs voice.wav` | 歌詞を文字起こしのタイミングに配置：自動トラックで、音声サンプルがあれば GPU の Whisper で |
+| `node pruebas/modelos-guardados.mjs` | 保存済みモデルの一覧：それぞれの使用容量と、1 つ削除してもファイルを共有する別のモデルが壊れないこと |
 | `node pruebas/ingles-grande.mjs` | 最も大きな辞書を空のプロファイルで：インストール、入れたままの起動、検索、削除。約 110 MB をダウンロードします |
 | `node pruebas/e2e.mjs` | Edge での拡張機能全体 |
 | `node pruebas/subtitulos.mjs` | Netflix と YouTube を模したページと模擬 Claude API での翻訳、修正、書き出し、読み込み |
@@ -283,13 +285,13 @@ npm run paquete
 
 ## プロジェクトの状況
 
-現在のバージョンは 0.4.0 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストしましたが、動画サイトの実際のセッションではまだテストしていません。
+現在のバージョンは 0.4.1 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストしましたが、動画サイトの実際のセッションではまだテストしていません。
 
 ## プライバシー
 
 - Claude の API キーとすべてのデータはブラウザにのみ保存されます。
 - Whisper が文字起こしする音声はパソコンの外に出ません。カードの音声と画面も、Anki に送らない限り同様です。
-- Claude API には作業に必要なテキストだけを送ります：文、字幕の台本、動画のタイトル。
+- Claude API には作業に必要なテキストだけを送ります：文、字幕の台本、動画のタイトル。曲の歌詞を貼り付けた場合は、その歌詞も送信します。
 - 単語の音声と画像の検索は JapanesePod101、Wikimedia Commons、Openverse に直接送られ、各漢字の画は jsDelivr に要求します。
 - 辞書のダウンロードは一度だけです。日本語の辞書と英語の頻度表は GitHub から、英語の辞書は Hugging Face から取得します。英単語の音声は Wikimedia Commons と Lingua Libre から取得します。
 - **クリップボードを追う**は、オプションがオンでタブが表示されている間だけ読み取り、読み取った内容はパソコンの外に出ません。

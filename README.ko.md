@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.4.0-A9E45B?style=flat-square" alt="버전 0.4.0">
+  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.4.1-A9E45B?style=flat-square" alt="버전 0.4.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="지속적 통합"></a>
-  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-386-0ca30c?style=flat-square" alt="단위 테스트 386개">
+  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-419-0ca30c?style=flat-square" alt="단위 테스트 419개">
   <img src="https://img.shields.io/badge/%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4-6%EA%B0%9C%20%EC%96%B8%EC%96%B4-8FCBFF?style=flat-square" alt="인터페이스 6개 언어">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5~N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1~C2">
@@ -74,7 +74,7 @@ Kotonoha(言の葉, ‘말의 잎’)는 YouTube, Netflix 및 다른 플레이�
   <tr>
     <td valign="top"><b>Claude로 번역하고 수정</b><br>지금 보고 있는 구간부터 보조 언어로 번역합니다. 제목과 전체 텍스트를 맥락으로 삼아 생성된 자막의 동음이의어를 묻지 않고 자동으로 고칩니다.</td>
     <td valign="top"><b>SRT 가져오기와 내보내기</b><br>어느 사이트에서든 SRT, VTT, ASS, TTML을 가져오고 내보냅니다. 가져온 자막은 해당 제목에 저장되고, Netflix 일본어 자막은 다른 지역에서 제공하지 않아도 유지됩니다.</td>
-    <td valign="top"><b>로컬 전사</b><br>WebGPU로 그래픽 카드에서 Whisper를 실행하며 오디오는 컴퓨터 밖으로 나가지 않습니다. 30분 영상을 약 5분에 처리하고 바탕 화면이 버벅이지 않습니다. 구간별로 쉬면서 작업하고 드라이버가 다시 시작되어도 복구합니다.</td>
+    <td valign="top"><b>로컬 전사</b><br>WebGPU로 그래픽 카드에서 Whisper를 실행하며 오디오는 컴퓨터 밖으로 나가지 않습니다. 30분 영상을 약 5분에 처리하고 바탕 화면이 버벅이지 않습니다. 구간별로 쉬면서 작업하고 드라이버가 다시 시작되어도 복구합니다. 노래 가사를 붙여넣으면 Claude가 Whisper의 시간에 맞춰 배치합니다.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="이번 달 Claude 비용, 일별·모델별·작업별"></td>
@@ -263,6 +263,8 @@ npm run paquete
 | `node pruebas/trazos-web.mjs` | 실제 데이터의 획순, 탭의 리더, 클립보드, 분할 화면 |
 | `node pruebas/ingles.mjs` | 영어 공부의 처음부터 끝까지: 언어 선택, 사전 설치, 영상, 페이지, 그리고 아무것도 섞이지 않은 채 일본어로 돌아오기 |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU에서 실행하는 영어 Whisper와 모의 Claude 수정 |
+| `node pruebas/letra.mjs voice.wav` | 가사를 전사 시간에 배치: 자동 트랙으로, 음성 샘플을 주면 GPU의 Whisper로 |
+| `node pruebas/modelos-guardados.mjs` | 저장된 모델 목록: 각 모델이 차지하는 용량, 그리고 모델 하나를 삭제해도 파일을 공유하는 다른 모델이 손상되지 않는지 |
 | `node pruebas/ingles-grande.mjs` | 깨끗한 프로필에서 가장 큰 사전을 설치하고, 사전을 넣은 채 시작하고, 조회하고, 삭제합니다. 약 110MB를 내려받습니다 |
 | `node pruebas/e2e.mjs` | Edge에서 확장 프로그램 전체 흐름 |
 | `node pruebas/subtitulos.mjs` | Netflix와 YouTube를 흉내 낸 페이지와 모의 Claude API로 번역, 수정, 내보내기, 가져오기 |
@@ -283,13 +285,13 @@ npm run paquete
 
 ## 프로젝트 상태
 
-현재 버전은 0.4.0입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, 동영상 사이트의 실제 세션에서는 아직 테스트하지 않았습니다.
+현재 버전은 0.4.1입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, 동영상 사이트의 실제 세션에서는 아직 테스트하지 않았습니다.
 
 ## 개인정보
 
 - Claude API 키와 모든 데이터는 브라우저에만 저장됩니다.
 - Whisper가 전사하는 오디오는 컴퓨터 밖으로 나가지 않습니다. 카드의 오디오와 화면도 Anki로 보내지 않는 한 마찬가지입니다.
-- Claude API에는 작업에 필요한 텍스트만 보냅니다: 문장, 자막 대본, 영상 제목.
+- Claude API에는 작업에 필요한 텍스트만 보냅니다: 문장, 자막 대본, 영상 제목. 노래 가사를 붙여넣으면 그 가사도 전송됩니다.
 - 단어의 오디오와 이미지 검색은 JapanesePod101, Wikimedia Commons, Openverse로 직접 전달되고, 한자별 획은 jsDelivr에 요청합니다.
 - 사전은 한 번만 내려받습니다. 일본어 사전과 영어 빈도표는 GitHub에서, 영어 사전은 Hugging Face에서 받습니다. 영어 단어 오디오는 Wikimedia Commons와 Lingua Libre에서 가져옵니다.
 - **클립보드 따라가기**는 옵션이 켜져 있고 탭이 보일 때만 읽으며, 읽은 내용은 컴퓨터 밖으로 나가지 않습니다.

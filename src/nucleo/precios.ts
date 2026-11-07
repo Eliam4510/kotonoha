@@ -73,6 +73,7 @@ export const NOMBRE_TAREA: Record<string, string> = {
   sentido: tm('Significado en la frase'),
   analisis: tm('Revisión de lecturas y gramática'),
   corregir: tm('Corrección de subtítulos'),
+  letra: tm('Ajuste de letras'),
   profundo: tm('Análisis a fondo'),
   conexion: tm('Prueba de conexión'),
 };

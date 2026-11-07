@@ -134,6 +134,8 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 | Whisper Turbo ligero | 564 MB | Algo menos preciso, con menos memoria de video |
 | Whisper Base | 165 MB | Para equipos sin una GPU potente |
 
+Los modelos se guardan en el navegador y no se vuelven a descargar: cada vez se leen del disco, lo que puede tardar unos segundos. En **Ajustes, Transcripción con Whisper, Modelos guardados** se ve lo que ocupa cada uno y se puede borrar. Desinstalar la extensión también los borra.
+
 **Intensidad.** Determina qué fracción del tiempo trabaja la tarjeta gráfica. El resto lo descansa, y el descanso crece solo si otra aplicación la está ocupando.
 
 | Intensidad | Ocupación | 30 minutos de video |
@@ -143,6 +145,17 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 | Rápida | 90 % | Unos 4 minutos |
 
 Durante la transcripción se puede pausar para liberar la tarjeta al instante y reanudar por el mismo punto. Si el controlador de video se reinicia, Whisper espera 20 segundos, recarga el modelo y continúa a la mínima intensidad. Al segundo fallo se detiene, y lo transcrito queda guardado.
+
+### Letras de canciones
+
+Whisper acierta los tiempos, pero en una canción falla muchas palabras. Si alguien ha publicado la letra, por ejemplo en un comentario del video, se puede pegar en **Letra de la canción**, en el panel **Subtítulos con IA**, y Claude la coloca sobre esos tiempos.
+
+- Claude solo indica qué verso suena sobre qué líneas de la transcripción. Las palabras salen tal cual de la letra, y los tiempos, de Whisper.
+- Si la letra se pega antes de transcribir o durante la transcripción, se ajusta sola al terminar, y no se gasta en corregir ni en revisar lo que Whisper oyó. Si el video ya tiene una pista, también sirve como referencia de tiempos, con **Ajustar la letra a estos tiempos**.
+- Un estribillo escrito una sola vez se coloca en cada sitio donde suene. Lo que no se canta, como marcas de sección, rōmaji o traducciones, se ignora.
+- Un verso que Whisper no recogió recibe un tiempo estimado, y el aviso final dice cuántos hay. En ese caso, **Esta línea suena ahora**, en el navegador, permite afinar la sincronía.
+- El resultado es una pista más, «Japonés (letra)», guardada para ese video. La transcripción original sigue disponible. Se hace una sola petición a Claude por canción, y repetir el ajuste con la misma letra no vuelve a gastar.
+- En un video de internet sin el ayudante local, Whisper tiene que oír la canción entera: al terminar el video, la transcripción se detiene sola y la letra se ajusta.
 
 ### Ayudante local
 

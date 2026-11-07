@@ -45,7 +45,7 @@ export interface PistaInfo {
   nombre: string;
   automatica?: boolean; // Generada por el sitio (ASR)
   cc?: boolean;
-  origen: 'sitio' | 'importada' | 'claude' | 'whisper' | 'recordada';
+  origen: 'sitio' | 'importada' | 'claude' | 'whisper' | 'recordada' | 'letra';
 }
 
 export interface EntradaDiccionario {

@@ -313,6 +313,9 @@ export interface PromptsLengua {
   subtitulos: string;
   correccion: string;
   esquemaCorrecciones: unknown;
+  /** Coloca la letra verdadera de una canción sobre los tiempos de una transcripción. */
+  letra: string;
+  esquemaLetra: unknown;
   /** De otro idioma a esta lengua. */
   aLengua: string;
   imagen: string;

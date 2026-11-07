@@ -30,6 +30,7 @@ const CUES = [
 ];
 const json3 = JSON.stringify({ events: CUES.map(([a, b, t]) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: t }] })) });
 const ES = JSON.stringify({ events: CUES.map(([a, b], i) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: `Línea traducida ${i + 1}` }] })) });
+const JA = JSON.stringify({ events: CUES.map(([a, b]) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: '図書館で本を読む' }] })) });
 
 const PAGINA_VIDEO = `<!doctype html><html lang="en"><meta charset="utf-8"><title>An English lecture - YouTube</title>
 <body style="margin:0;background:#0f0f0f;color:#fff;font-family:sans-serif">
@@ -83,7 +84,7 @@ await contexto.route('https://media.test/**', (r) => {
 });
 await contexto.route('https://www.youtube.com/**', (r) => {
   const u = new URL(r.request().url());
-  if (u.pathname.includes('/api/timedtext')) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: u.searchParams.get('lang') === 'es' ? ES : json3 });
+  if (u.pathname.includes('/api/timedtext')) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: { es: ES, ja: JA }[u.searchParams.get('lang')] ?? json3 });
   if (u.pathname === '/watch') return r.fulfill({ status: 200, contentType: 'text/html', body: PAGINA_VIDEO });
   return r.fulfill({ status: 204 });
 });
@@ -465,6 +466,64 @@ comprobar((await motor('estadisticasPalabras')).conocidas === enIngles.conocidas
 await motor('cambiarPalabras', [{ clave: 'wait|wait', lema: 'wait', lectura: 'wait', estado: 'desconocida' }]);
 await app.locator('select[aria-label="Idioma que estudias"]').selectOption('ja');
 await app.waitForTimeout(600);
+
+// ---------- Alternar con un clic ----------
+
+console.log('\n== Alternar desde el menú, con un video abierto ==');
+const pv = await contexto.newPage();
+pv.on('pageerror', (e) => errores.push(`alternar: ${e.message}`));
+await pv.goto(`https://www.youtube.com/watch?v=${ID}`);
+await pv.waitForFunction(() => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.barra'), null, { timeout: 30000 });
+await pv.evaluate(() => {
+  window.sinRecargar = true;
+  const v = document.querySelector('#v');
+  v.pause();
+  v.currentTime = 1;
+});
+const lineaVideo = () => pv.evaluate(() => {
+  const l = (document.querySelector('kotonoha-overlay:not([popover])') ?? document.querySelector('kotonoha-overlay'))?.shadowRoot?.querySelector('.linea-sub.objetivo');
+  if (!l) return '';
+  const c = l.cloneNode(true);
+  c.querySelectorAll('rt, .glosa').forEach((x) => x.remove());
+  return c.textContent.replaceAll('⁠', '');
+});
+const esperaLinea = async (re) => {
+  const limite = Date.now() + 15000;
+  for (;;) {
+    const l = await lineaVideo().catch(() => '');
+    if (re.test(l) || Date.now() > limite) return l;
+    await pv.waitForTimeout(150);
+  }
+};
+const lineaJa = await esperaLinea(/図書館/);
+comprobar(/図書館/.test(lineaJa), 'Estudiando japonés, el video muestra sus subtítulos en japonés', lineaJa);
+
+const menu = await contexto.newPage();
+menu.on('pageerror', (e) => errores.push(`menú: ${e.message}`));
+await menu.goto(`chrome-extension://${id}/popup.html`);
+await menu.waitForTimeout(700);
+const botonMenu = (nombre) => menu.locator('.segmentado[aria-label="Idioma que estudias"] button', { hasText: nombre });
+const conocidasMenu = async () => Number((await menu.locator('.ap-menu-conocidas b').innerText()).replace(/\D/g, ''));
+comprobar((await botonMenu('Japonés').getAttribute('aria-checked')) === 'true', 'El menú dice qué idioma se estudia');
+const conocidasJa = await conocidasMenu();
+
+await botonMenu('Inglés').click();
+await menu.waitForTimeout(900);
+comprobar((await leerAjustes()).idiomaObjetivo === 'en', 'Un clic en el menú pasa al inglés');
+comprobar((await botonMenu('Inglés').getAttribute('aria-checked')) === 'true', 'Y el menú lo refleja');
+comprobar((await conocidasMenu()) === enIngles.conocidas, 'Con las palabras conocidas del inglés', await conocidasMenu());
+const lineaEn = await esperaLinea(/picked it up/i);
+comprobar(/picked it up/i.test(lineaEn), 'El video abierto pasa a sus subtítulos en inglés', lineaEn);
+
+await botonMenu('Japonés').click();
+await menu.waitForTimeout(900);
+comprobar((await leerAjustes()).idiomaObjetivo === 'ja', 'Otro clic vuelve al japonés');
+comprobar((await conocidasMenu()) === conocidasJa, 'Con sus palabras conocidas', await conocidasMenu());
+const lineaVuelta = await esperaLinea(/図書館/);
+comprobar(/図書館/.test(lineaVuelta), 'Y el video vuelve a sus subtítulos en japonés', lineaVuelta);
+comprobar(await pv.evaluate(() => window.sinRecargar === true), 'Sin recargar la página');
+await menu.close();
+await pv.close();
 
 if (errores.length) console.log('Errores de página:', errores.slice(0, 8).join('\n'));
 comprobar(!errores.length, 'Ningún error de página', errores.length);

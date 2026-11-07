@@ -47,7 +47,7 @@ export type IdModo =
   | 'enfoque1d'
   | 'personalizado';
 
-export type TareaIA = 'explicar' | 'desglosar' | 'traducir' | 'generar' | 'subtitulos' | 'historia' | 'preguntar' | 'sentido' | 'analisis' | 'corregir' | 'profundo';
+export type TareaIA = 'explicar' | 'desglosar' | 'traducir' | 'generar' | 'subtitulos' | 'historia' | 'preguntar' | 'sentido' | 'analisis' | 'corregir' | 'profundo' | 'letra';
 
 export const MODELOS = [
   { id: 'claude-sonnet-5-5', nombre: tm('Claude Sonnet 5.5') },
@@ -361,6 +361,7 @@ export const AJUSTES_INICIALES: Ajustes = {
     sentido: 'claude-sonnet-5-5',
     analisis: 'claude-sonnet-5-5',
     corregir: 'claude-sonnet-5-5',
+    letra: 'claude-sonnet-5-5',
     profundo: 'claude-opus-5-5',
   },
   esfuerzos: {
@@ -374,6 +375,7 @@ export const AJUSTES_INICIALES: Ajustes = {
     sentido: 'low',
     analisis: 'medium',
     corregir: 'medium',
+    letra: 'medium',
     profundo: 'high',
   },
   respaldoSeguridad: true,

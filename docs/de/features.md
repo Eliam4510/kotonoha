@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.4.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.4.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -66,6 +66,8 @@ Stand jeder Funktion in Version 0.4.0 und die Art ihrer Überprüfung.
 | Wiederherstellung bei Verlust der GPU | Automatisch, durch Zerstören des WebGPU-Geräts |
 | Lokaler Helfer mit yt-dlp und FFmpeg | Automatisch, mit lokalem Download. Es fehlen die echte Registrierung im Browser und ein echter YouTube-Download |
 | Korrektur des Ergebnisses mit Claude | Simulator |
+| Liedtext auf die Zeiten der Transkription gelegt: der Text aus dem Liedtext, die Zeiten von Whisper | Simulator, mit echtem Whisper, und echte Sitzung mit einem Lied |
+| Liste der gespeicherten Modelle mit dem Platzbedarf jedes Modells und Löschen pro Modell. Das Laden von der Festplatte wird nicht mehr als Download angezeigt | Automatisch und mit echtem Whisper |
 
 ## Karten
 
@@ -187,3 +189,4 @@ Stand jeder Funktion in Version 0.4.0 und die Art ihrer Überprüfung.
 | Audio mit DRM | Eine geschützte Website kann ihren Ton der Aufnahme vorenthalten. Nach zwei stummen Sätzen in Folge in einem Video wird die Zeile nicht mehr zur Aufnahme erneut abgespielt |
 | Synchronisierung | Ohne Server: Die Übertragung zwischen Computern erfolgt über die Sicherung |
 | Hintergrundmusik | Whisper kann leise Gespräche unter lauter Musik verlieren |
+| Liedtexte | Die Zeiten gelten je Whisper-Zeile, nicht je Wort. Bei sehr lauter Musik hört Whisper womöglich wenig, und dann erhalten mehr Verse eine geschätzte Zeit |

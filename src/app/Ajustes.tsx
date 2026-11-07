@@ -4,6 +4,7 @@ import type { InfoAyudante } from '../compartido/api';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { type Ajustes, CLAVE_API, type Esfuerzo, guardarAjustes, MODELOS, MODELOS_WHISPER, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
+import { borrarArchivosSueltos, borrarModeloGuardado, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
 import { mostrarCombinacion, teclaLatina, textoCombinacion } from '../nucleo/teclas';
@@ -23,6 +24,7 @@ const NOMBRES_TAREA: [TareaIA, string][] = [
   ['sentido', tm('Significado en la frase')],
   ['analisis', tm('Revisión de lecturas, sentidos y gramática')],
   ['corregir', tm('Corrección de subtítulos automáticos')],
+  ['letra', tm('Ajuste de letras')],
   ['desglosar', tm('Desglose de frases')],
   ['traducir', tm('Traducción de frases')],
   ['subtitulos', tm('Traducción de subtítulos completos')],
@@ -303,10 +305,10 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
           <div class="ap-opcion ap-modelo" key={t}>
             <div class="ap-opcion-texto"><b>{tr(n)}</b></div>
             <div class="ap-opcion-control">
-              <select class="selector" aria-label={tr('Modelo para {0}', n)} value={a.modelos[t]} onChange={(e) => cambiar({ modelos: { ...a.modelos, [t]: e.currentTarget.value } })}>
+              <select class="selector" aria-label={tr('Modelo para {0}', tr(n))} value={a.modelos[t]} onChange={(e) => cambiar({ modelos: { ...a.modelos, [t]: e.currentTarget.value } })}>
                 {MODELOS.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
               </select>
-              <select class="selector" aria-label={tr('Esfuerzo para {0}', n)} value={a.esfuerzos[t]} onChange={(e) => cambiar({ esfuerzos: { ...a.esfuerzos, [t]: e.currentTarget.value as Esfuerzo } })}>
+              <select class="selector" aria-label={tr('Esfuerzo para {0}', tr(n))} value={a.esfuerzos[t]} onChange={(e) => cambiar({ esfuerzos: { ...a.esfuerzos, [t]: e.currentTarget.value as Esfuerzo } })}>
                 <option value="low">{tr('Bajo')}</option>
                 <option value="medium">{tr('Medio')}</option>
                 <option value="high">{tr('Alto')}</option>
@@ -376,17 +378,9 @@ function SeccionIdioma({ a, cambiar }: PropsSeccion) {
   );
 }
 
-const CACHE_MODELOS = 'transformers-cache';
-
-/** Qué modelos están ya guardados: los descarga Transformers.js en la caché del navegador. */
-async function modelosDescargados(): Promise<Set<ModeloWhisper>> {
-  const salida = new Set<ModeloWhisper>();
-  const cache = await caches.open(CACHE_MODELOS);
-  const urls = (await cache.keys()).map((k) => k.url);
-  for (const [id, m] of Object.entries(MODELOS_WHISPER) as [ModeloWhisper, (typeof MODELOS_WHISPER)[ModeloWhisper]][]) {
-    if (urls.some((u) => u.includes(m.id) && u.includes(`encoder_model_${m.dtype.encoder_model}.onnx`))) salida.add(id);
-  }
-  return salida;
+/** Un tamaño para leerlo: 1,5 GB o 185 MB. */
+function textoTamano(mb: number): string {
+  return mb >= 1000 ? `${(mb / 1000).toLocaleString(bcp47Actual(), { maximumFractionDigits: 1 })} GB` : `${Math.max(1, Math.round(mb))} MB`;
 }
 
 const INTENSIDADES: { id: Ajustes['whisperIntensidad']; nombre: string; ayuda: string }[] = [
@@ -424,10 +418,12 @@ function AyudanteLocal() {
 }
 
 function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
-  const [descargados, fijarDescargados] = useState<Set<ModeloWhisper>>(new Set());
+  const [guardados, fijarGuardados] = useState<ResumenModelos | null>(null);
+  const releer = () => leerModelosGuardados().then(fijarGuardados).catch(() => {});
   useEffect(() => {
-    modelosDescargados().then(fijarDescargados).catch(() => {});
+    releer();
   }, []);
+  const descargados = new Set(guardados?.modelos.map((m) => m.id));
   const modelos = Object.entries(MODELOS_WHISPER) as [ModeloWhisper, (typeof MODELOS_WHISPER)[ModeloWhisper]][];
   return (
     <Seccion id="transcripcion" icono="ondas" titulo={tr('Transcripción con Whisper')} descripcion={tr(lengua.value.textos.whisperAyuda)}>
@@ -437,7 +433,7 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
             <b>{m.nombre}</b>
             <span class="ayuda">{tr(m.descripcion)}</span>
             <span class="ap-whisper-tam num">
-              {descargados.has(id) ? <><Icono n="check" t={14} /> {tr('Descargado')}</> : <><Icono n="descargar" t={14} /> {m.mb >= 1000 ? `${(m.mb / 1000).toLocaleString(bcp47Actual(), { maximumFractionDigits: 1 })} GB` : `${m.mb} MB`}</>}
+              {descargados.has(id) ? <><Icono n="check" t={14} /> {tr('Descargado')}</> : <><Icono n="descargar" t={14} /> {textoTamano(m.mb)}</>}
             </span>
           </button>
         ))}
@@ -454,15 +450,28 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
           <Interruptor etiqueta={tr('Corregir con Claude')} on={a.whisperCorregir} alCambiar={(v) => cambiar({ whisperCorregir: v })} />
         </Opcion>
         <AyudanteLocal />
-        {descargados.size > 0 && (
-          <Opcion titulo={tr('Modelos descargados')} ayuda={tr('Si los borras, se volverán a descargar la próxima vez que transcribas.')}>
-            <button class="btn chico fantasma" onClick={async () => {
-              await caches.delete(CACHE_MODELOS);
-              fijarDescargados(new Set());
-            }}><Icono n="basura" t={14} /> {tr('Borrar')}</button>
-          </Opcion>
-        )}
       </div>
+      {guardados && guardados.totalBytes > 0 && (
+        <>
+          <Subtitulo>{tr('Modelos guardados')}</Subtitulo>
+          <p class="ayuda ap-subtitulo-ayuda">
+            {tr('Se guardan en este navegador: se leen del disco y no se vuelven a descargar. Si borras uno, se descargará de nuevo la próxima vez que lo uses. Desinstalar la extensión también los borra.')}
+            {guardados.modelos.length > 1 && ` ${tr('En total ocupan {0}.', textoTamano(guardados.totalBytes / 1e6))}`}
+          </p>
+          <div class="ap-grupo">
+            {guardados.modelos.map(({ id, bytes }) => (
+              <Opcion key={id} titulo={tr(MODELOS_WHISPER[id].nombre)} ayuda={textoTamano(bytes / 1e6)}>
+                <button class="btn chico fantasma" aria-label={`${tr('Borrar')}: ${tr(MODELOS_WHISPER[id].nombre)}`} onClick={() => borrarModeloGuardado(id).then(releer)}><Icono n="basura" t={14} /> {tr('Borrar')}</button>
+              </Opcion>
+            ))}
+            {guardados.otrosBytes > 0 && (
+              <Opcion titulo={tr('Archivos sueltos')} ayuda={`${tr('De una descarga que no terminó o de un modelo que ya no se ofrece.')} ${textoTamano(guardados.otrosBytes / 1e6)}`}>
+                <button class="btn chico fantasma" aria-label={`${tr('Borrar')}: ${tr('Archivos sueltos')}`} onClick={() => borrarArchivosSueltos().then(releer)}><Icono n="basura" t={14} /> {tr('Borrar')}</button>
+              </Opcion>
+            )}
+          </div>
+        </>
+      )}
     </Seccion>
   );
 }

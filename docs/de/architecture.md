@@ -121,6 +121,8 @@ Pausenloses Arbeiten hält die GPU stundenlang bei 100 %, was den Desktop ausbre
 | Verlust der GPU | Wartet 20 s, lädt das Modell neu und arbeitet im Modus Sanft weiter. Beim zweiten Ausfall hält es an, das Transkribierte bleibt gespeichert |
 | Fortsetzung | Eine neue Transkription derselben Datei setzt dort fort, wo sie aufgehört hat |
 
+**Liedtexte.** `src/nucleo/letra.ts` legt einen eingefügten Liedtext auf die Zeiten einer Spur. Claude wird über ein JSON-Schema um eine Liste von Einträgen `{Vers, erste Zeile, letzte Zeile}` in der Reihenfolge des Gesangs gebeten. Weder die Wörter noch die Zeiten stammen von ihm: Der Text ist der des Liedes, die Zeiten sind die der Transkription, sodass es beides nicht verändern kann. Die Antwort gibt den Liedtext nicht wieder und ist klein. Einträge außerhalb der Reihenfolge verlieren ihre Zeit, ohne die übrigen zu beeinflussen (längste aufsteigende Teilfolge), Verse ohne Zeit werden nach ihrer Länge geschätzt, und Verse, die sich eine Zeile teilen, teilen sich deren Dauer.
+
 ## Technische Entscheidungen
 
 | Entscheidung | Wahl | Grund |

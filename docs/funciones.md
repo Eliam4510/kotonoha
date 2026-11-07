@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.4.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.4.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -66,6 +66,8 @@ Estado de cada función en la versión 0.4.0, con la forma en que se ha verifica
 | Recuperación ante la pérdida de la GPU | Automática, destruyendo el dispositivo WebGPU |
 | Ayudante local con yt-dlp y FFmpeg | Automática, con descarga local. Falta el registro real en el navegador y una descarga real de YouTube |
 | Corrección del resultado con Claude | Simulador |
+| Letra de una canción colocada sobre los tiempos de la transcripción: el texto sale de la letra y los tiempos, de Whisper | Simulador, con Whisper real, y sesión real con una canción |
+| Lista de modelos guardados, con lo que ocupa cada uno y borrado por modelo. Leerlos del disco ya no se anuncia como una descarga | Automática, y con Whisper real |
 
 ## Tarjetas
 
@@ -187,3 +189,4 @@ Estado de cada función en la versión 0.4.0, con la forma en que se ha verifica
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
+| Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |

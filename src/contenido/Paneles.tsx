@@ -6,9 +6,11 @@ import type { Ajustes, ConfigModo, DisparadorPausa, IdModo, ModeloWhisper, ModoV
 import { MODELOS_WHISPER, NOMBRES_MODO } from '../compartido/ajustes';
 import { flujoMotor, fondo } from '../compartido/rpc';
 import { NOMBRES_NIVEL, palabrasPrioritarias } from '../nucleo/frases';
+import { versosDeLetra } from '../nucleo/letra';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import {
   ajustarDesfase,
+  ajustarLetra,
   cancelarGeneracion,
   detenerWhisper,
   pausarWhisper,
@@ -27,7 +29,7 @@ import {
   seleccionarObjetivo,
   seleccionarSecundaria,
 } from './controlador';
-import { ajustes, analisisEnCurso, anclas, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
+import { ajustandoLetra, ajustes, analisisEnCurso, anclas, letraPegada, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
 import { cambiarAjuste } from './Reproductor';
 import { LENGUAS, lenguasTraduccion, numero, tm, tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
@@ -683,6 +685,31 @@ function SeccionWhisper() {
   );
 }
 
+/** Whisper acierta los tiempos pero no siempre las palabras; la letra verdadera suele estar en un comentario. */
+function SeccionLetra() {
+  const hayLetra = versosDeLetra(letraPegada.value).length > 0;
+  const transcribiendo = !!whisper.value;
+  const hayTiempos = lineasObjetivo.value.length > 0;
+  return (
+    <>
+      <TituloGrupo icono="musica" ia>{tr('Letra de la canción')}</TituloGrupo>
+      <div class="grupo">
+        <div class="bloque-generar">
+          <p>{tr('Whisper acierta los tiempos, pero no siempre las palabras. Pega aquí la letra, por ejemplo la de un comentario, y Claude la coloca sobre esos tiempos. Las palabras salen tal cual de tu letra.')}</p>
+          <textarea class="campo area-letra" lang={lengua.value.id} rows={5} aria-label={tr('Letra de la canción')} placeholder={tr('Un verso por línea…')} value={letraPegada.value} disabled={ajustandoLetra.value} onInput={(e) => (letraPegada.value = e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
+          {ajustandoLetra.value ? (
+            <p class="nota-grupo">{tr('Ajustando la letra a los tiempos…')}</p>
+          ) : transcribiendo ? (
+            hayLetra && <p class="nota-grupo">{tr('Cuando termine la transcripción, la letra se ajustará sola.')}</p>
+          ) : (
+            <button class="btn ia bloque" disabled={!hayLetra} onClick={() => (hayTiempos ? ajustarLetra() : iniciarWhisper())}><Icono n="musica" t={16} /> {hayTiempos ? tr('Ajustar la letra a estos tiempos') : tr('Transcribir y ajustar la letra')}</button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 function PanelGenerar() {
   const a = ajustes.value;
   const g = generacion.value;
@@ -787,6 +814,7 @@ function PanelGenerar() {
 
       {/* Netflix casi siempre trae subtítulos y su audio no se puede procesar por adelantado. */}
       {sitio !== 'netflix' && <SeccionWhisper />}
+      {sitio !== 'netflix' && <SeccionLetra />}
     </div>
   );
 }

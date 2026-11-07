@@ -134,6 +134,8 @@ Whisper generates Japanese subtitles when a video has none. It runs on the graph
 | Whisper Turbo ligero (light) | 564 MB | Slightly less accurate, with less video memory |
 | Whisper Base | 165 MB | For computers without a powerful GPU |
 
+Models are stored in the browser and are not downloaded again: each time they load from disk, which can take a few seconds. **Settings, Transcription with Whisper, Saved models** shows the space each one takes and allows it to be deleted. Uninstalling the extension also deletes them.
+
 **Intensity.** Sets the fraction of time the graphics card works. The rest is idle, and the idle time grows by itself if another application is using the card.
 
 | Intensity | Occupancy | 30 minutes of video |
@@ -143,6 +145,17 @@ Whisper generates Japanese subtitles when a video has none. It runs on the graph
 | Rápida (fast) | 90 % | About 4 minutes |
 
 Transcription can be paused to free the card at once and resumed from the same point. If the video driver restarts, Whisper waits 20 seconds, reloads the model and continues at the lowest intensity. On a second failure it stops, and what has been transcribed stays saved.
+
+### Song lyrics
+
+Whisper gets the timing right, but in a song it misses many words. If someone has published the lyrics, for example in a comment on the video, they can be pasted into **Song lyrics**, in the **AI subtitles** panel, and Claude places them on that timing.
+
+- Claude only says which verse sounds over which lines of the transcription. The words come exactly from the lyrics, and the timing from Whisper.
+- If the lyrics are pasted before or during transcription, they are aligned automatically at the end, and nothing is spent correcting or reviewing what Whisper heard. If the video already has a track, it can also serve as the timing reference, with **Align the lyrics to this timing**.
+- A chorus written only once is placed wherever it sounds. What is not sung, such as section marks, rōmaji or translations, is ignored.
+- A verse Whisper did not pick up gets an estimated time, and the final notice says how many there are. In that case, **Sync: this line is playing now**, in the navigator, fine-tunes the timing.
+- The result is one more track, "Japanese (lyrics)", saved for that video. The original transcription stays available. Each song takes a single request to Claude, and repeating the alignment with the same lyrics costs nothing.
+- On an online video without the local helper, Whisper has to hear the whole song: when the video ends, transcription stops by itself and the lyrics are aligned.
 
 ### Local helper
 

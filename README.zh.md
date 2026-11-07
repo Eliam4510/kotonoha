@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.4.0-A9E45B?style=flat-square" alt="版本 0.4.0">
+  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.4.1-A9E45B?style=flat-square" alt="版本 0.4.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="持续集成"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-386-0ca30c?style=flat-square" alt="386 个单元测试">
+  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-419-0ca30c?style=flat-square" alt="419 个单元测试">
   <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-6%20%E7%A7%8D%E8%AF%AD%E8%A8%80-8FCBFF?style=flat-square" alt="界面支持 6 种语言">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 至 N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 至 C2">
@@ -74,7 +74,7 @@ Kotonoha（言の葉，意为“言语之叶”）在 YouTube、Netflix 和其�
   <tr>
     <td valign="top"><b>用 Claude 翻译和更正</b><br>翻译成辅助语言，从正在观看的部分开始。以标题和全文作为上下文，自动更正生成字幕中的同音词，无需询问。</td>
     <td valign="top"><b>SRT 导入导出</b><br>在任何网站都能导入和导出 SRT、VTT、ASS 和 TTML。导入的内容按标题保存；即使其他地区不提供，Netflix 的日语字幕也会保留。</td>
-    <td valign="top"><b>本地转录</b><br>通过 WebGPU 在显卡上运行 Whisper，音频不会离开电脑：30 分钟的视频约需 5 分钟，桌面不卡顿。它分段工作并适当休息，驱动程序重启后也能恢复。</td>
+    <td valign="top"><b>本地转录</b><br>通过 WebGPU 在显卡上运行 Whisper，音频不会离开电脑：30 分钟的视频约需 5 分钟，桌面不卡顿。它分段工作并适当休息，驱动程序重启后也能恢复。粘贴歌词后，Claude 会把它放到 Whisper 的时间上。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="本月 Claude 费用，按天、模型和任务显示"></td>
@@ -263,6 +263,8 @@ npm run paquete
 | `node pruebas/trazos-web.mjs` | 真实数据的笔顺、标签页中的阅读器、剪贴板和分屏视图 |
 | `node pruebas/ingles.mjs` | 从头到尾学习英语：选择语言、安装词典、一个视频、一个网页，再回到日语，互不混淆 |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU 上的英语 Whisper，并模拟 Claude 的更正 |
+| `node pruebas/letra.mjs voice.wav` | 把歌词放到转录的时间上：使用自动字幕轨；如果提供语音样本，则使用 GPU 上的 Whisper |
+| `node pruebas/modelos-guardados.mjs` | 已保存模型列表：每个模型占用的空间，以及删除一个模型不会破坏与其共享文件的另一个模型 |
 | `node pruebas/ingles-grande.mjs` | 在干净的配置文件上测试最大的词典：安装、带着它启动、查询和删除。下载约 110 MB |
 | `node pruebas/e2e.mjs` | 在 Edge 中端到端测试扩展 |
 | `node pruebas/subtitulos.mjs` | 翻译、更正、导出和导入，在模仿 Netflix 和 YouTube 的页面上，使用模拟的 Claude API |
@@ -283,13 +285,13 @@ npm run paquete
 
 ## 项目状态
 
-当前版本是 0.4.0。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，但尚未在视频网站的真实会话中测试。
+当前版本是 0.4.1。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，但尚未在视频网站的真实会话中测试。
 
 ## 隐私
 
 - Claude API 密钥和所有数据只保存在浏览器中。
 - Whisper 转录的音频不会离开电脑。卡片的音频和画面也不会，除非发送到 Anki。
-- 只向 Claude API 发送每项任务所需的文本：句子、字幕脚本和视频标题。
+- 只向 Claude API 发送每项任务所需的文本：句子、字幕脚本和视频标题。如果粘贴了歌词，也包括歌词。
 - 单词的音频和图片搜索直接发送到 JapanesePod101、Wikimedia Commons 和 Openverse，每个汉字的笔画从 jsDelivr 获取。
 - 词典只下载一次：日语词典和英语频率表来自 GitHub，英语词典来自 Hugging Face。英语单词的音频来自 Wikimedia Commons 和 Lingua Libre。
 - **跟随剪贴板**只在选项开启且标签页可见时读取，读取的内容不会离开电脑。
