@@ -10,7 +10,8 @@ import { Icono, Marca, type NombreIcono } from '../ui/iconos';
 import { useTema } from '../ui/tema';
 import css from './popup.css';
 import { bcp47Actual, fijarIdioma, numero, tm, tr } from '../compartido/i18n';
-import { aplicarLengua, lengua } from '../ui/lengua';
+import { PAQUETES } from '../lenguas';
+import { aplicarLengua, estudiarLengua, lengua } from '../ui/lengua';
 
 const RUTAS: [string, NombreIcono, string][] = [
   ['inicio', 'inicio', tm('Inicio')],
@@ -63,6 +64,17 @@ function Popup() {
     fijarA(n);
     guardarAjustes(c);
   };
+  const estudiar = (id: string) => {
+    estudiarLengua(a, id)
+      .then(() => leerAjustes())
+      .then((n) => {
+        aplicarLengua(n);
+        fijarA(n);
+        return motor.estadisticasPalabras();
+      })
+      .then((s) => fijarConocidas(s.conocidas))
+      .catch(console.error);
+  };
   const desactivado = a.sitiosDesactivados.includes(host);
   const esWeb = !!host;
 
@@ -77,6 +89,16 @@ function Popup() {
       </header>
 
       <section class="ap-menu-grupo">
+        <div class="ap-menu-fila columna">
+          <div class="ap-menu-texto">
+            <b>{tr('Idioma que estudias')}</b>
+          </div>
+          <div class="segmentado" role="radiogroup" aria-label={tr('Idioma que estudias')}>
+            {PAQUETES.map((p) => (
+              <button key={p.id} role="radio" aria-checked={a.idiomaObjetivo === p.id} class={a.idiomaObjetivo === p.id ? 'activo' : ''} onClick={() => estudiar(p.id)}>{tr(p.textos.nombre)}</button>
+            ))}
+          </div>
+        </div>
         <div class="ap-menu-fila">
           <div class="ap-menu-texto">
             <b>{a.activo ? tr('Activado') : tr('En pausa')}</b>

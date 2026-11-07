@@ -12,7 +12,7 @@ import type {
 } from '../compartido/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 import { type AnalisisLinea, aplicarLecturas } from '../nucleo/analisisProfundo';
-import type { PuntoGramatica, TokenUnido } from '../lenguas/tipos';
+import type { PuntoGramatica, TokenUnido, Transcripcion } from '../lenguas/tipos';
 import { db, type FilaPalabraDb, type FilaTermino } from './db';
 import { listaDiccionarios } from './diccionarios';
 import { lengua, motorLengua } from './lengua';
@@ -25,25 +25,37 @@ export const totalTerminos = () => terminos?.size ?? 0;
 export const cargarAnalizador = () => motorLengua().analizador.cargar();
 
 let cargaTerminos: Promise<void> | null = null;
+let ultimaCarga = 0;
 
 /** Conjunto de todos los términos, para unir compuestos sin consultar la base por cada token. */
 export function recargarTerminos(): Promise<void> {
+  const esta = ++ultimaCarga;
   cargaTerminos = (async () => {
     const claves = (await db.terminos.orderBy('termino').uniqueKeys()) as string[];
+    // Una carga larga puede acabar después de cambiar de lengua: lo que traiga ya no sirve.
+    if (esta !== ultimaCarga) return;
     terminos = new Set(claves);
     cacheTokens.clear();
   })();
   return cargaTerminos;
 }
 
-/** Espera a tener analizador y términos: sin ellos los compuestos saldrían partidos. */
+/** La lista de términos de los diccionarios, esperando a que esté cargada. */
+export async function listaTerminos(): Promise<Set<string>> {
+  await (cargaTerminos ?? recargarTerminos()).catch(() => {});
+  return terminos ?? new Set();
+}
+
+/** Espera a tener analizador y términos, salvo que la lengua pueda seguir sin ellos. */
 async function preparar(): Promise<void> {
   await cargarAnalizador();
-  await (cargaTerminos ?? recargarTerminos()).catch(() => {});
+  const carga = (cargaTerminos ?? recargarTerminos()).catch(() => {});
+  if (!motorLengua().analizador.terminosOpcionales) await carga;
 }
 
 /** Al cambiar de lengua, lo que había en memoria era de la anterior. */
 export function olvidarLengua() {
+  ultimaCarga++;
   terminos = null;
   cargaTerminos = null;
   cacheTokens.clear();
@@ -87,24 +99,31 @@ async function ordenDics(): Promise<string[]> {
 }
 
 /** Primer sentido en el idioma preferido: el diccionario en la cima de la lista manda. */
-function glosaCorta(filas: FilaTermino[], orden: string[], lectura: string): string | undefined {
+function glosaCorta(filas: FilaTermino[], orden: string[], lectura: string, categoria: string): string | undefined {
   if (!filas.length) return undefined;
   const conLectura = filas.filter((f) => f.lectura === lectura);
-  const candidatas = conLectura.length ? conLectura : filas;
+  const delaLectura = conLectura.length ? conLectura : filas;
+  const encaja = motorLengua().encajaCategoria;
+  const deLaCategoria = encaja ? delaLectura.filter((f) => encaja(f.reglas, categoria)) : [];
+  const candidatas = deLaCategoria.length ? deLaCategoria : delaLectura;
   for (const dic of orden) {
     const f = candidatas.filter((x) => x.dic === dic).sort((a, b) => b.puntuacion - a.puntuacion)[0];
-    if (f) return f.glosas[0]?.split(/[;；]/)[0].trim();
+    if (f) {
+      const glosa = f.glosas[0];
+      if (!glosa) return undefined;
+      return motorLengua().recortarGlosa?.(glosa) ?? glosa.split(/[;；]/)[0].trim();
+    }
   }
   return undefined;
 }
 
 export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Promise<PalabraToken[][]> {
-  const claves = new Map<string, { lema: string; lectura: string }>();
+  const claves = new Map<string, { lema: string; lectura: string; categoria: string }>();
   const lecturas = tokensPorLinea.map((linea) =>
     linea.map((tk) => {
       if (!tk.esPalabra) return '';
       const l = lecturaLema(tk);
-      claves.set(claveDe(tk.lema, l), { lema: tk.lema, lectura: l });
+      claves.set(claveDe(tk.lema, l), { lema: tk.lema, lectura: l, categoria: tk.categoria });
       return l;
     })
   );
@@ -123,6 +142,13 @@ export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Pr
   const respaldoFrec = faltanFrec.length ? await db.frecuencias.bulkGet(faltanFrec) : [];
   const frecPorLema = new Map(respaldoFrec.filter(Boolean).map((f) => [f!.termino, f!.rango]));
 
+  // Donde la pronunciación va aparte, se escribe la de cada forma: went no suena como go.
+  const { lectura: lecturaDeLengua } = lengua();
+  const dePronunciacion = lecturaDeLengua.dePronunciacion;
+  const formas = dePronunciacion ? [...new Set(tokensPorLinea.flat().filter((tk) => tk.esPalabra).map((tk) => tk.superficie.toLowerCase()))] : [];
+  const filasForma = formas.length ? await db.acentos.bulkGet(formas.map((s) => [s, s] as [string, string])) : [];
+  const porForma = new Map(formas.map((s, i) => [s, filasForma[i]?.transcripciones]));
+
   const glosasIA = await db.glosas.bulkGet(unicas.map(([k]) => k));
   const lemas = [...new Set(unicas.map(([, v]) => v.lema))];
   const filasTerminos = lemas.length ? await db.terminos.where('termino').anyOf(lemas).toArray() : [];
@@ -133,13 +159,14 @@ export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Pr
     else porTermino.set(f.termino, [f]);
   }
 
-  const datos = new Map<string, { fila?: FilaPalabraDb; acentos?: number[]; rango?: number; glosa?: string }>();
+  const datos = new Map<string, { fila?: FilaPalabraDb; acentos?: number[]; rango?: number; glosa?: string; transcripciones?: Transcripcion[] }>();
   unicas.forEach(([k, v], i) => {
     datos.set(k, {
       fila: filasPalabra[i],
       acentos: filasAcento[i]?.posiciones,
+      transcripciones: filasAcento[i]?.transcripciones,
       rango: filasFrec[i]?.rango ?? frecPorLema.get(v.lema),
-      glosa: glosasIA[i]?.glosa ?? glosaCorta(porTermino.get(v.lema) ?? [], orden, v.lectura),
+      glosa: glosasIA[i]?.glosa ?? glosaCorta(porTermino.get(v.lema) ?? [], orden, v.lectura, v.categoria),
     });
   });
 
@@ -166,6 +193,7 @@ export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Pr
       const corregida = (tk as TokenUnido & { lecturaCorregida?: boolean }).lecturaCorregida;
       const porDefecto: EstadoPalabra = tk.esGramatica && a.particulasConocidas ? 'conocida' : 'desconocida';
       const acentos = d.acentos?.length ? d.acentos : undefined;
+      const deLaForma = dePronunciacion && (porForma.get(tk.superficie.toLowerCase()) ?? d.transcripciones);
       return {
         superficie: tk.superficie,
         lema: tk.lema,
@@ -175,7 +203,8 @@ export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Pr
         esPalabra: true,
         esGramatica: tk.esGramatica,
         flexion: tk.flexion,
-        furigana: tk.furigana,
+        furigana: deLaForma ? [{ texto: tk.superficie, lectura: dePronunciacion(deLaForma) }] : tk.furigana,
+        ...(dePronunciacion && d.transcripciones ? { pronunciacion: dePronunciacion(d.transcripciones) } : {}),
         estado: d.fila?.estado ?? porDefecto,
         rastreada: d.fila?.rastreada === 1,
         acentos,
@@ -237,7 +266,7 @@ export async function entradasAnalisis(lineas: Linea[]): Promise<{ texto: string
     texto: l.texto.replace(/\n/g, ' '),
     palabras: tokensDe(l.texto)
       .filter((x) => x.esPalabra)
-      .map((x) => (x.lectura && x.lectura !== x.superficie ? `${x.superficie}(${x.lectura})` : x.superficie))
+      .map((x) => motorLengua().describirPalabra?.(x) ?? (x.lectura && x.lectura !== x.superficie ? `${x.superficie}(${x.lectura})` : x.superficie))
       .join(' '),
     clave: claveLinea(l.texto),
     pendiente: !hechas[i] && lengua().escritura.tieneTexto(l.texto),
@@ -275,8 +304,10 @@ export async function ejemplos(lema: string): Promise<FraseEjemplo[]> {
 
 // ---------- Búsqueda en diccionarios ----------
 
-export async function buscar(lema: string, lectura?: string): Promise<ResultadoBusqueda> {
+export async function buscar(lema: string, lecturaPedida?: string): Promise<ResultadoBusqueda> {
   const { escritura, lectura: lecturas, acento: acentoLengua } = lengua();
+  // Donde la lectura no distingue palabras, lo que venga es la pronunciación de una tarjeta: aquí no significa nada.
+  const lectura = lecturas.distingue ? lecturaPedida : undefined;
   const lista = await listaDiccionarios();
   const dics = lista.filter((d) => d.tipo === 'terminos');
   const titulos = new Map(dics.map((d) => [d.id, d.titulo]));
@@ -286,7 +317,7 @@ export async function buscar(lema: string, lectura?: string): Promise<ResultadoB
   if (!filas.length && lecturas.esSoloLectura(lema)) {
     filas = await db.terminos.where('lectura').equals(lecturas.normalizar(lema)).limit(60).toArray();
   }
-  const lecturaFinal = lectura || filas.sort((a, b) => b.puntuacion - a.puntuacion)[0]?.lectura || (escritura.tieneTexto(lema) ? lecturas.normalizar(lema) : '');
+  const lecturaFinal = (lecturas.distingue ? lectura || filas.sort((a, b) => b.puntuacion - a.puntuacion)[0]?.lectura : lema) || (escritura.tieneTexto(lema) ? lecturas.normalizar(lema) : '');
   const conLectura = filas.filter((f) => f.lectura === lecturaFinal);
   const elegidas = (conLectura.length ? conLectura : filas)
     .filter((f) => ordenDic.has(f.dic))
@@ -321,6 +352,7 @@ export async function buscar(lema: string, lectura?: string): Promise<ResultadoB
     rastreada: fila?.rastreada === 1,
     acentos,
     patron: acentos.length ? acentoLengua?.patron(acentos[0], lecturaFinal) : undefined,
+    pronunciaciones: acento?.transcripciones,
     frecuencias,
     entradas,
   };
@@ -347,8 +379,8 @@ export async function buscarLibre(texto: string, a: Ajustes): Promise<ResultadoB
 /** Busca frases hechas que empiecen en la palabra consultada: 食べ + 物, 気 + に + なる. */
 export async function compuestos(superficies: string[]): Promise<ResultadoBusqueda[]> {
   const salida: ResultadoBusqueda[] = [];
-  for (let n = Math.min(superficies.length, 6); n >= 2; n--) {
-    const candidato = superficies.slice(0, n).join('');
+  const unirSinEspacios = (lista: string[]) => Array.from({ length: Math.max(0, Math.min(lista.length, 6) - 1) }, (_, i) => lista.slice(0, Math.min(lista.length, 6) - i).join(''));
+  for (const candidato of motorLengua().candidatosCompuestos?.(superficies) ?? unirSinEspacios(superficies)) {
     if (terminos?.has(candidato)) {
       const r = await buscar(candidato);
       if (r.entradas.length) salida.push(r);

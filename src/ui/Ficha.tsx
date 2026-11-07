@@ -63,7 +63,7 @@ export function ConFurigana({ texto, lectura }: { texto: string; lectura?: strin
 
 /** Curva tonal sobre cada mora, con un punto hueco para la partícula siguiente. */
 export function CurvaAcento({ lectura, posicion }: { lectura: string; posicion: number }) {
-  const moras = lengua.value.acento?.moras(lectura) ?? [];
+  const moras = lengua.value.acento?.moras?.(lectura) ?? [];
   const paso = 17;
   const inicio = 7;
   const alta = 5;
@@ -320,7 +320,7 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
             ajustes.vocesFrase.map((v) => (
               <div class="fila-audio" key={v}>
                 <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con {0}', v)} onClick={() => tocarVoz(v, frase)}><Icono n="reproducir" t={14} /></button>
-                <span class="fila-audio-nombre">{v.replace(`${lengua.value.bcp47}-`, '').replace(/(Multilingual)?Neural$/, '')}</span>
+                <span class="fila-audio-nombre">{v.replace(/^[a-z]{2}-[A-Z]{2}-/, '').replace(/(Multilingual)?Neural$/, '')}</span>
               </div>
             ))
           ) : (
@@ -773,11 +773,11 @@ export function Ficha(p: PropsFicha) {
         )}
         {extras.length > 0 && (
           <>
-            <div class="subtitulo-def">{tr('Compuestos')}</div>
+            <div class="subtitulo-def">{tr(lengua.value.textos.compuestos)}</div>
             <ul class="lista-compuestos">
               {extras.map((e) => (
                 <li key={e.clave}>
-                  <b lang={lengua.value.id}>{e.lema}</b> <span class="ayuda" lang={lengua.value.id}>{e.lectura}</span>
+                  <b lang={lengua.value.id}>{e.lema}</b> {e.lectura !== e.lema && <span class="ayuda" lang={lengua.value.id}>{e.lectura}</span>}
                   <div class="compuesto-def">{e.entradas[0]?.glosas.slice(0, 2).join('; ')}</div>
                 </li>
               ))}
@@ -788,7 +788,7 @@ export function Ficha(p: PropsFicha) {
     ),
     flexiones: nombresFlexion.length ? (
       <div key="flex" class="ficha-bloque">
-        <div class="subtitulo-def">{tr('Conjugación de')} <span lang={lengua.value.id}>{p.superficie}</span></div>
+        <div class="subtitulo-def">{tr(lengua.value.textos.flexionDe)} <span lang={lengua.value.id}>{p.superficie}</span></div>
         <div class="flexiones">
           {nombresFlexion.map(([f, n], i) => (
             <span key={i} class="chip"><b lang={lengua.value.id}>{f}</b>{n ? <span>{n}</span> : null}</span>
@@ -801,7 +801,7 @@ export function Ficha(p: PropsFicha) {
         {bloqueGramatica}
         <div key="tabs" class="ficha-bloque ficha-panel" ref={zonaPestana} style={altoPanel ? { minHeight: `${altoPanel}px` } : undefined}>
           {pestana === 'audio' && <PanelAudio lema={r.lema} lectura={r.lectura} frase={p.contexto.frase} ajustes={p.ajustes} enviar={enviar} />}
-          {pestana === 'imagenes' && <PanelImagenes lema={r.lema} frase={p.contexto.frase} enviar={enviar} primeraGlosa={r.entradas.find((e) => e.dic === 'jmdict-en')?.glosas[0] ?? definicionesUnicas[0]} />}
+          {pestana === 'imagenes' && <PanelImagenes lema={r.lema} frase={p.contexto.frase} enviar={enviar} primeraGlosa={lengua.value.consultaImagen(r.lema, r.entradas, definicionesUnicas)} />}
           {pestana === 'ejemplos' && <PanelEjemplos lema={r.lema} enviar={enviar} />}
           {pestana === 'trazos' && <PanelTrazos palabra={r.lema} />}
           {sincronizada && pestana === 'explicar' && (
@@ -869,7 +869,12 @@ export function Ficha(p: PropsFicha) {
             <div class="ficha-palabra" lang={lengua.value.id}>
               <ConFurigana texto={r.lema} lectura={r.lectura} />
             </div>
-            {r.acentos.length > 0 && (
+            {!!r.pronunciaciones?.length && (
+              <div class="ficha-ipa">
+                {r.pronunciaciones.map((t) => <span key={t.zona}><small>{t.zona.toUpperCase()}</small>{t.ipa}</span>)}
+              </div>
+            )}
+            {r.acentos.length > 0 && !!lengua.value.acento?.moras && (
               <div class={`ficha-tono ac-${r.patron ?? ''}`} lang={lengua.value.id}>
                 {r.acentos.slice(0, 2).map((a) => <CurvaAcento key={a} lectura={r.lectura} posicion={a} />)}
               </div>
@@ -882,7 +887,7 @@ export function Ficha(p: PropsFicha) {
                 <Icono n="sello" t={18} />
               </button>
             )}
-            {tieneFrase && (
+            {tieneFrase && lengua.value.lectura.distingue && (
               <button class={`btn-icono ${corrigiendo ? 'activo' : ''}`} data-tip={tr('¿Lectura incorrecta?')} aria-label={tr('¿Lectura incorrecta?')} aria-pressed={corrigiendo} onClick={() => {
                 fijarCorrigiendo(!corrigiendo);
                 if (!corrigiendo) cuerpo.current?.scrollTo({ top: 0, behavior: 'smooth' });

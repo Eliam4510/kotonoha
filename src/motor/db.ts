@@ -5,6 +5,7 @@ import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
+import type { Transcripcion } from '../lenguas/tipos';
 import type { DatosTrazos } from '../nucleo/trazos';
 
 export interface FilaTermino {
@@ -28,6 +29,8 @@ export interface FilaFrecuencia {
 }
 
 export interface FilaAcento {
+  /** Cómo se pronuncia, en las lenguas donde se guarda aparte de la palabra. */
+  transcripciones?: Transcripcion[];
   termino: string;
   lectura: string;
   posiciones: number[];
@@ -150,6 +153,9 @@ export function baseDe(idLengua: string): BaseKotonoha {
   }
   return base;
 }
+
+/** Si esa lengua se ha usado alguna vez. Preguntarlo no crea su base, a diferencia de abrirla. */
+export const existeBaseDe = (idLengua: string) => Dexie.exists(nombreBase(idLengua));
 
 /** Lo que no depende de la lengua, como lo gastado en Claude, está siempre en la base original. */
 export const baseGeneral = baseDe('ja');

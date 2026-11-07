@@ -36,10 +36,18 @@ const CORTAN = new Set(['BR', 'HR']);
 const SIEMPRE_BLOQUE = new Set(['BUTTON', 'LI', 'TD', 'TH', 'P', 'DIV', 'SECTION', 'ARTICLE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
 const LARGO_MAXIMO = 4000;
 
-const inlinePorElemento = new WeakMap<Element, boolean | 'oculto'>();
+let inlinePorElemento = new WeakMap<Element, boolean | 'oculto'>();
+let lenguaDeLaClasificacion = '';
 
-/** Si un elemento forma parte de la misma frase que lo que le rodea. `inline-block` también: se usa para partir líneas. */
+/**
+ * Si un elemento forma parte de la misma frase que lo que le rodea. `inline-block` también, porque en japonés se usa para
+ * partir líneas. Donde las palabras llevan espacios, en cambio, son enlaces de un menú pegados entre sí.
+ */
 function clasificar(el: Element): boolean | 'oculto' {
+  if (lenguaDeLaClasificacion !== lengua.value.id) {
+    inlinePorElemento = new WeakMap();
+    lenguaDeLaClasificacion = lengua.value.id;
+  }
   const guardado = inlinePorElemento.get(el);
   if (guardado !== undefined) return guardado;
   // Fuera del documento no tiene estilos: no se puede saber, y no se debe recordar.
@@ -48,7 +56,7 @@ function clasificar(el: Element): boolean | 'oculto' {
   let r: boolean | 'oculto';
   if (d === 'none') r = 'oculto';
   else if (SIEMPRE_BLOQUE.has(el.tagName)) r = d === 'contents' ? true : false;
-  else r = d === 'inline' || d === 'inline-block' || d === 'contents' || d.startsWith('ruby');
+  else r = d === 'inline' || (d === 'inline-block' && !lengua.value.escritura.palabrasSeparadas) || d === 'contents' || d.startsWith('ruby');
   inlinePorElemento.set(el, r);
   return r;
 }

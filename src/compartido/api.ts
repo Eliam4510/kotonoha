@@ -1,9 +1,10 @@
 // Contratos de las llamadas entre contextos.
 
+import type { Ajustes } from './ajustes';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { DatosTrazos } from '../nucleo/trazos';
-import type {
+import type {
   BorradorTarjeta,
   ContextoIA,
   ElementoBiblioteca,
@@ -60,6 +61,8 @@ export interface CambioPalabra {
 }
 
 export interface ApiMotor {
+  /** Pasa a estudiar otra lengua sin esperar a la siguiente petición. */
+  fijarLengua(id: string): Promise<void>;
   estado(): Promise<EstadoMotor>;
   /** Si el navegador lo pinta todo con el procesador, porque tiene apagada la aceleración por hardware. */
   sinAceleracion(): Promise<boolean>;
@@ -144,8 +147,10 @@ export interface ApiMotor {
   memoriaResponder(id: string, nota: 1 | 2 | 3 | 4): Promise<void>;
   memoriaEliminar(id: string): Promise<void>;
 
-  exportarDatos(): Promise<string>;
-  importarDatos(json: string): Promise<void>;
+  /** La copia lleva lo de todas las lenguas que se han usado, y los ajustes que se le pasan. */
+  exportarDatos(ajustes: Ajustes): Promise<string>;
+  /** Devuelve los ajustes que traía la copia, para que los guarde quien la restaura. */
+  importarDatos(json: string): Promise<Partial<Ajustes> | null>;
   guardarSubtitulosGenerados(idVideo: string, idioma: string, lineas: Linea[], origen?: string): Promise<void>;
   subtitulosGenerados(idVideo: string): Promise<{ idioma: string; lineas: Linea[]; origen?: string; creado: number }[]>;
   correccionesPista(clave: string): Promise<{ cambios: Record<number, string>; completa: boolean } | undefined>;

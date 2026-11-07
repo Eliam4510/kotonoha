@@ -9,7 +9,7 @@ import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
 import { Icono, Logo, Marca, type NombreIcono } from '../ui/iconos';
 import { variablesPaleta } from '../ui/paletas';
-import { aplicarLengua } from '../ui/lengua';
+import { aplicarLengua, lengua } from '../ui/lengua';
 import { useTema } from '../ui/tema';
 import appCss from './app.css';
 import { PantallaAjustes } from './Ajustes';
@@ -191,10 +191,10 @@ function App() {
   }, [ruta, a.idiomaInterfaz, idiomaActual()]);
 
   return (
-    <div class="kk-raiz ap-app" data-tema={tema} lang={bcp47Actual()} style={variablesPaleta(a.paleta, tema === 'oscuro')}>
+    <div class="kk-raiz ap-app" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
       <style>{base + overlay + appCss}</style>
       <Lateral ruta={ruta} />
-      <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={ruta}>
+      <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={`${ruta}:${a.idiomaObjetivo}`}>
         {ruta === 'inicio' && <Inicio ajustes={a} />}
         {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} />}
         {ruta === 'lector' && <Lector ajustes={a} inicial={params.get('t') ?? ''} />}

@@ -5,9 +5,10 @@
 // PaqueteLengua es ligero y lo usan todas las pantallas, también el content script que corre en cada página.
 // MotorLengua trae lo que pesa más (analizador, reglas, prompts) y solo se carga donde hace falta.
 
-import type { ModoLectura, PromptPersonalizado } from '../compartido/ajustes';
+import type { AjustesLengua, ModoLectura, PromptPersonalizado } from '../compartido/ajustes';
 import type { EntradaDiccionario, FuenteBiblioteca, ResultadoAudio } from '../compartido/tipos';
 import type { ReglasTranscripcion } from '../nucleo/transcripcion';
+import type { FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
 import type { DatosTrazos } from '../nucleo/trazos';
 
 // ---------- Palabras ----------
@@ -29,6 +30,12 @@ export interface TokenUnido {
   flexion: string[]; // Colas unidas: た, ない, ている...
   furigana: SegmentoLectura[];
   inflexionado: boolean; // La superficie no coincide con el lema
+}
+
+/** Cómo se pronuncia una palabra en una zona, en alfabeto fonético: /ɡoʊ/ en «us». */
+export interface Transcripcion {
+  zona: string;
+  ipa: string;
 }
 
 export interface PuntoGramatica {
@@ -69,6 +76,8 @@ export interface EscrituraLengua {
   /** Evita que un signo quede solo al principio de una línea. */
   pegarSignos(signos: string): string;
   /** Si los títulos de las portadas de la biblioteca se escriben en vertical. */
+  /** Si las palabras se separan con espacios: entonces dos elementos pegados nunca forman una palabra. */
+  palabrasSeparadas?: boolean;
   portadaVertical: boolean;
 }
 
@@ -85,6 +94,11 @@ export interface SignosFrase {
 
 /** Lo que se escribe encima de las palabras para leerlas. */
 export interface LecturaLengua {
+  /**
+   * Si la lectura forma parte de la palabra: 生 se lee なま o せい, y son dos palabras. Si no, es solo cómo suena: no se
+   * corrige a mano, no va en la frase de las tarjetas y no cuenta al buscar.
+   */
+  distingue: boolean;
   /** Las formas de escribirla que se pueden elegir, con una muestra de cada una. */
   formatos: { id: string; muestra: string }[];
   formatoInicial: string;
@@ -100,13 +114,18 @@ export interface LecturaLengua {
   esSoloLectura(texto: string): boolean;
   /** Ancho de un carácter de la lectura respecto a su tamaño, para saber si cabe. */
   anchoCaracter(formato: string): number;
+  /** Si la lectura es la pronunciación guardada, cómo se escribe sobre la palabra. `visible` sabrá leerlo. */
+  dePronunciacion?(transcripciones: Transcripcion[]): string;
 }
 
 /** El acento de las palabras, si la lengua lo marca. */
 export interface AcentoLengua {
-  /** El nombre del patrón: colorea la palabra con la clase `ac-<patrón>`. */
-  patron(posicion: number, lectura: string): string;
-  moras(lectura: string): string[];
+  /** El nombre del patrón: colorea la palabra con la clase `ac-<patrón>`. Sin patrón, no se colorea. */
+  patron(posicion: number, lectura: string): string | undefined;
+  /** Las moras de una palabra, si el acento se dibuja como una curva sobre ellas. */
+  moras?(lectura: string): string[];
+  /** Qué significa cada color. */
+  leyenda: { clase: string; nombre: string }[];
 }
 
 export interface NivelLengua {
@@ -189,10 +208,17 @@ export interface TextosLengua {
   lectorBotonAyuda: string;
   separarLineas: string;
   separarLineasAyuda: string;
+  formatoTitulo: string;
   formatoAyuda: string;
   lecturaCampo: string;
   fraseConLectura: string;
   gramaticaConocida: string;
+  compuestos: string;
+  compuestosActivar: string;
+  compuestosAyuda: string;
+  flexionDe: string;
+  flexiones: string;
+  frecuenciaYAcento: string;
   nivelPregunta: string;
   nivelAyuda: string;
   vocabularioSuperado: string;
@@ -212,6 +238,18 @@ export interface PaqueteLengua {
   id: string;
   /** Código con región: las voces. */
   bcp47: string;
+  /** Su nombre, escrito en ella misma. */
+  nombrePropio: string;
+  /** Una palabra para probar el diccionario al elegirla, y lo que se aprende con ella. */
+  presentacion: string;
+  /** La tipografía de lo escrito en esta lengua, como valor de CSS. */
+  letra: string;
+  /** Con qué ajustes empieza quien la elige por primera vez. */
+  ajustes: Partial<AjustesLengua>;
+  /** Si las fichas del lector buscan también frases hechas que empiecen en la palabra. */
+  frasesEnLector: boolean;
+  /** Qué buscar para ilustrar una palabra, si no hace falta preguntárselo a Claude. */
+  consultaImagen(lema: string, entradas: EntradaDiccionario[], definiciones: string[]): string | undefined;
   escritura: EscrituraLengua;
   lectura: LecturaLengua;
   acento?: AcentoLengua;
@@ -238,6 +276,8 @@ export interface PaqueteLengua {
   /** El saludo de la pantalla de inicio, en la lengua que se estudia. */
   saludo(hora: number, nombre: string): string;
   textos: TextosLengua;
+  /** Temas que se proponen para generar un relato. */
+  ideasRelato: string[];
 }
 
 // ---------- Lo pesado: el motor ----------
@@ -253,6 +293,8 @@ export interface Analizador {
   analizar(texto: string, existe?: (termino: string) => boolean): TokenUnido[];
   /** La lectura de una forma de diccionario: una palabra flexionada no trae la de su lema. */
   lecturaDeLema(lema: string): string;
+  /** Si sin la lista de términos solo se pierde algo menor: entonces se analiza sin esperar a que se cargue. */
+  terminosOpcionales?: boolean;
 }
 
 export type TareaPrompt = 'explicar' | 'desglosar' | 'traducir' | 'generar' | 'historia' | 'preguntar' | 'gramatica';
@@ -305,4 +347,18 @@ export interface MotorLengua {
   };
   /** Los diccionarios que una versión anterior dejó mal: se reinstalan solos, en segundo plano. */
   diccionariosPorReparar?(datos: DatosDiccionarios): Promise<string[]>;
+  /** Qué términos buscar a partir de la palabra consultada y las que la siguen. Sin esto, se unen sin espacios. */
+  candidatosCompuestos?(superficies: string[]): string[];
+  /** Cómo se le enseña a Claude una palabra analizada. Sin esto, con su lectura entre paréntesis. */
+  describirPalabra?(token: TokenUnido): string;
+  /** La parte de una definición que cabe bajo una palabra. Sin esto, hasta el primer punto y coma. */
+  recortarGlosa?(glosa: string): string;
+  /** Si una entrada de diccionario es de la misma categoría que la palabra analizada, para elegir su traducción. */
+  encajaCategoria?(reglas: string, categoria: string): boolean;
+  /** Prepara una lista de frecuencia antes de guardarla: por ejemplo, para quedarse con las formas de diccionario. */
+  prepararFrecuencias?(filas: FrecuenciaImportada[]): Promise<FrecuenciaImportada[]>;
+  /** Lo que en los diccionarios de esta lengua no es la definición, además de lo que nunca lo es. */
+  seccionesOmitidas?: ReadonlySet<string>;
+  /** Convierte lo que trae un diccionario de pronunciación en lo que se guarda de cada palabra. */
+  filaPronunciacion?(p: PronunciacionImportada): { termino: string; lectura: string; posiciones: number[]; transcripciones: Transcripcion[] } | null;
 }

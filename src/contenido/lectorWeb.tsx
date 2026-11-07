@@ -7,14 +7,14 @@ import { signal } from '@preact/signals';
 import { render } from 'preact';
 import { useState } from 'preact/hooks';
 import { alCambiarAjustes, type Ajustes, guardarAjustes, leerAjustes } from '../compartido/ajustes';
-import { bcp47Actual, fijarIdioma, tr } from '../compartido/i18n';
+import { bcp47Actual, fijarIdioma, tr, idiomaActual } from '../compartido/i18n';
 import { alRecibirEvento, motor } from '../compartido/rpc';
 import { alinearSuperficies, fraseAlrededor, partirEnFrases } from '../nucleo/lectorTexto';
 import base from '../ui/estilos';
 import { colocarJunto, Ficha } from '../ui/Ficha';
 import { cargarFuentes } from '../ui/fuentes';
 import { Icono } from '../ui/iconos';
-import { aplicarLengua, lengua } from '../ui/lengua';
+import { aplicarLengua, lecturaDeTarjeta, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { avisar, avisos } from './estado';
 import { type Bloque, contenedorDe, esAparte, IndicePagina, rangoDe, type TokenPagina } from './lector/indice';
@@ -468,6 +468,7 @@ function PopupWeb() {
         lectura={p.lecturaLema}
         superficie={p.superficie}
         flexion={p.flexion}
+        compuestos={lengua.value.frasesEnLector && c.bloque.tokens ? c.bloque.tokens.slice(c.bloque.tokens.indexOf(c.token)).map((t) => t.p.superficie) : undefined}
         ajustes={a}
         estado={p.estado}
         rastreada={p.rastreada}
@@ -478,7 +479,7 @@ function PopupWeb() {
           const { enviarAlCreador } = await import('../ui/borrador');
           await enviarAlCreador({
             palabra: r.lema,
-            lectura: r.lectura,
+            lectura: lecturaDeTarjeta(r),
             frase: c.frase,
             definicion: [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>'),
             fuente: document.title,
@@ -554,7 +555,7 @@ function montarInterfaz() {
  * kanji raros, eso puede cambiar su altura. Por eso se cargan al tocar una palabra, y no solo por visitar la página.
  */
 function pedirFuentes() {
-  cargarFuentes().catch(() => {});
+  cargarFuentes({ soloLatin: lengua.value.id !== 'ja' && idiomaActual() !== 'ja' }).catch(() => {});
 }
 
 /** Por encima de todo, también de los diálogos y de la pantalla completa, sin competir con z-index. */
@@ -885,6 +886,7 @@ export async function iniciarLectorWeb() {
     Object.entries(variablesPaleta(x.paleta, true)).forEach(([k, v]) => raiz.style.setProperty(k, v));
   };
   aplicarPaleta(a);
+  lengua.subscribe((l) => raiz.style.setProperty('--letra-lengua', l.letra));
   sombra.appendChild(raiz);
   render(<Interfaz />, raiz);
 
@@ -905,6 +907,12 @@ export async function iniciarLectorWeb() {
     fijarIdioma(n.idiomaInterfaz).then(() => {
       raiz.lang = bcp47Actual();
     }).catch(() => {});
+    // Lo analizado y lo pintado era de la otra lengua: se mira la página desde cero.
+    if (antes && n.idiomaObjetivo !== antes.idiomaObjetivo) {
+      if (pintor) apagar();
+      cacheAnalisis.clear();
+      hayTexto.value = false;
+    }
     const encendido = !!pintor;
     if (debeEstar(n) && !encendido) encender();
     else if (!debeEstar(n) && encendido) apagar();

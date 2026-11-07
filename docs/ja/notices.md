@@ -23,6 +23,8 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | [lamejs](https://github.com/gideonstele/lamejs)、`@breezystack/lamejs` | MP3 のエンコード | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 復習の計画 | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | ZIP ファイルの読み取り | MIT |
+| [wink-nlp](https://github.com/winkjs/wink-nlp) | 英語の形態素解析 | MIT |
+| [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | wink-nlp 用の英語モデル | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | アイコン | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) と [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | フォント | OFL-1.1 |
 
@@ -42,6 +44,9 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | 書き順 | [KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、jsDelivr が配信する元のファイル | CC BY-SA 3.0 |
 | 単語の音声 | JapanesePod101 と [Lingua Libre](https://lingualibre.org) | 各出所の条件 |
 | 画像 | [Openverse](https://openverse.org) | 各画像のライセンス |
+| 英語の辞書と発音 | [Wiktionary](https://www.wiktionary.org)。[kaikki.org](https://kaikki.org) をもとに [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) が整形し、Hugging Face から配信 | CC BY-SA 4.0 |
+| 英語の頻度 | Hermit Dave の [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、OpenSubtitles に基づく | CC BY-SA 4.0 |
+| 英単語の音声 | Wikimedia Commons、[Lingua Libre](https://lingualibre.org) | 各録音の条件 |
 
 ## 外部プログラム
 

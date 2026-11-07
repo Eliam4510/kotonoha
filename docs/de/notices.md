@@ -23,6 +23,8 @@ Der Code von Kotonoha wird unter der [MIT-Lizenz](../../LICENSE) veröffentlicht
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3-Kodierung | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planung der Wiederholung | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Lesen von ZIP-Dateien | MIT |
+| [wink-nlp](https://github.com/winkjs/wink-nlp) | Morphologische Analyse des Englischen | MIT |
+| [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | Englisches Modell für wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Symbole | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) und [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Schrift | OFL-1.1 |
 
@@ -42,6 +44,9 @@ Keine dieser Daten gehört zum Repository. Die Erweiterung lädt sie bei Bedarf 
 | Strichfolge | [KanjiVG](https://kanjivg.tagaini.net) von Ulrich Apel, mit den Originaldateien über jsDelivr | CC BY-SA 3.0 |
 | Audio von Wörtern | JapanesePod101 und [Lingua Libre](https://lingualibre.org) | Die jeder Quelle |
 | Bilder | [Openverse](https://openverse.org) | Die Lizenz jedes Bildes |
+| Wörterbücher und Aussprache des Englischen | [Wiktionary](https://www.wiktionary.org), aufbereitet von [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) aus [kaikki.org](https://kaikki.org) und über Hugging Face bereitgestellt | CC BY-SA 4.0 |
+| Häufigkeiten des Englischen | [FrequencyWords](https://github.com/hermitdave/FrequencyWords) von Hermit Dave, auf Basis von OpenSubtitles | CC BY-SA 4.0 |
+| Wort-Audio auf Englisch | Wikimedia Commons und [Lingua Libre](https://lingualibre.org) | Die der jeweiligen Aufnahme |
 
 ## Externe Programme
 

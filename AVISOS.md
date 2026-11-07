@@ -23,6 +23,8 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planificación del repaso | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Lectura de archivos ZIP | MIT |
+| [wink-nlp](https://github.com/winkjs/wink-nlp) | Análisis morfológico del inglés | MIT |
+| [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | Modelo de inglés para wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Iconos | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) y [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Tipografía | OFL-1.1 |
 
@@ -42,6 +44,9 @@ Ninguno de estos datos forma parte del repositorio. La extensión los descarga b
 | Orden de los trazos | [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, con los archivos originales servidos por jsDelivr | CC BY-SA 3.0 |
 | Audio de palabras | JapanesePod101 y [Lingua Libre](https://lingualibre.org) | Las de cada fuente |
 | Imágenes | [Openverse](https://openverse.org) | La licencia de cada imagen |
+| Diccionarios y pronunciación del inglés | [Wiktionary](https://www.wiktionary.org), preparados por [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) a partir de [kaikki.org](https://kaikki.org), y servidos desde Hugging Face | CC BY-SA 4.0 |
+| Frecuencias del inglés | [FrequencyWords](https://github.com/hermitdave/FrequencyWords), de Hermit Dave, a partir de OpenSubtitles | CC BY-SA 4.0 |
+| Audio de palabras en inglés | Wikimedia Commons y [Lingua Libre](https://lingualibre.org) | Las de cada grabación |
 
 ### Programas externos
 
@@ -81,6 +86,8 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Review scheduling | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Reading ZIP files | MIT |
+| [wink-nlp](https://github.com/winkjs/wink-nlp) | Morphological analysis of English | MIT |
+| [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | English model for wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Icons | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) and [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Typography | OFL-1.1 |
 
@@ -100,6 +107,9 @@ None of this data is part of the repository. The extension downloads it on deman
 | Stroke order | [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, with the original files served by jsDelivr | CC BY-SA 3.0 |
 | Word audio | JapanesePod101 and [Lingua Libre](https://lingualibre.org) | Those of each source |
 | Images | [Openverse](https://openverse.org) | The license of each image |
+| English dictionaries and pronunciation | [Wiktionary](https://www.wiktionary.org), prepared by [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) from [kaikki.org](https://kaikki.org), and served from Hugging Face | CC BY-SA 4.0 |
+| English frequencies | [FrequencyWords](https://github.com/hermitdave/FrequencyWords), by Hermit Dave, from OpenSubtitles | CC BY-SA 4.0 |
+| English word audio | Wikimedia Commons and [Lingua Libre](https://lingualibre.org) | Those of each recording |
 
 ### External programs
 

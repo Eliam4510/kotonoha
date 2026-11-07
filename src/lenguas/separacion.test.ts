@@ -1,5 +1,5 @@
 // Que lo propio de una lengua siga en su paquete: si algo nuevo escribe japonés fuera de él, esta prueba lo señala
-// antes de que estorbe a las demás lenguas.
+// antes de que estorbe a las demás lenguas. El inglés no se puede buscar así: comparte alfabeto con el código.
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -10,7 +10,7 @@ const SRC = join(import.meta.dirname, '..');
 function archivos(carpeta: string): string[] {
   return readdirSync(carpeta, { withFileTypes: true }).flatMap((e) => {
     const ruta = join(carpeta, e.name);
-    if (e.isDirectory()) return e.name === 'japones' ? [] : archivos(ruta);
+    if (e.isDirectory()) return e.name === 'japones' || e.name === 'ingles' ? [] : archivos(ruta);
     return /\.tsx?$/.test(e.name) && !/\.test\.|\.d\.ts$|-datos\.ts$/.test(e.name) ? [ruta] : [];
   });
 }
@@ -49,7 +49,7 @@ describe('lo japonés está en su paquete', () => {
     const encontrados = buscar(/\bt[rm]\('[^']*(jap[oó]n|kanji|furigana|\bkana\b|hiragana|r[oō]maji|JLPT)/i, {
       // La tabla de idiomas de las pistas, y los idiomas en que Claude puede explicar: los nombra a todos.
       'contenido/controlador.ts': /tr\('Japonés'\), es: tr\('Español'\)/,
-      'compartido/i18n.ts': /tm\('Japonés sencillo'\)/,
+      'compartido/i18n.ts': /tm\('Japonés( sencillo)?'\)/,
       // Sobre el nombre del programa.
       'app/Pantallas.tsx': /tr\('La poesía de Japón/,
     });
@@ -57,6 +57,6 @@ describe('lo japonés está en su paquete', () => {
   });
 
   it('los módulos del japonés solo se importan desde su registro', () => {
-    expect(buscar(/from '[^']*lenguas\/japones/, {})).toEqual([]);
+    expect(buscar(/from '[^']*lenguas\/(japones|ingles)/, {})).toEqual([]);
   });
 });

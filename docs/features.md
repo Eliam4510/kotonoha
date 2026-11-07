@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.3.0, along with how it has been verified.
+Status of each feature in version 0.4.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -103,7 +103,7 @@ Status of each feature in version 0.3.0, along with how it has been verified.
 | Word explorer by status | Automated |
 | Level assessment | Automated |
 | Full settings and editable prompts | Automated |
-| Backups | Automated |
+| Backups of every language and the settings, in a single file | Automated |
 
 ## Web pages
 
@@ -127,6 +127,8 @@ Status of each feature in version 0.3.0, along with how it has been verified.
 
 | Feature | Verification |
 |---|---|
+| Choosing the language to study: in the welcome screen, in Settings or in the extension menu | Automated |
+| Words, dictionaries, cards and settings kept apart per language | Automated |
 | Interface in Spanish, English, German, Simplified Chinese, Korean and Japanese | Automated: complete tables and screenshots of each language |
 | Welcome screen with language, level, dictionaries, key and card destination | Automated |
 | Explanations and translations in a language other than the interface's, also Portuguese and French | Automated |
@@ -135,6 +137,26 @@ Status of each feature in version 0.3.0, along with how it has been verified.
 | Color palettes: usual, for color blindness and high contrast | Automated |
 | Keyboard shortcuts of your choice, working with any keyboard layout | Automated |
 | Monthly spending limit for Claude | Simulator |
+
+## English
+
+| Feature | Verification |
+|---|---|
+| English subtitles, with each word analyzed and the secondary track in the support language | Imitation page. A real session is pending |
+| Correction of automatic subtitles and creation of English from another language | Imitation page |
+| American and British pronunciation in IPA, in the word panel and, on request, over each word | Automated, with real Wiktionary data |
+| Color by stressed syllable: the first, a middle one or the last | Automated |
+| Wiktionary definitions and translations in Spanish, German, Chinese, Korean and Japanese, and definitions in English | Automated, with real data |
+| Frequency based on movie and series subtitles | Automated, with real data |
+| Which word each form comes from: *went* is *go*, *didn't* is *do* | Automated |
+| Phrasal verbs and set phrases, even when split: *picked it up* finds *pick up* | Automated |
+| Grammar from A1 to C2: 51 rules, confirmed by Claude | Simulator |
+| Page reader, off at the start, that leaves pages in other languages alone | Automated, and on 16 real public sites |
+| Whisper in English, with lines split for reading | Automated, with a synthetic voice |
+| Instructions to Claude specific to English | Simulator |
+| Word audio from Wikimedia Commons and Lingua Libre | Automated |
+| Azure neural voices in English | Pending |
+| Level assessment and path from A1 to C2 | Automated |
 
 ## Design principles
 
@@ -154,7 +176,9 @@ Status of each feature in version 0.3.0, along with how it has been verified.
 
 | Limitation | Detail |
 |---|---|
-| Study language | Japanese only: the analysis logic is specific to this language |
+| Study language | Japanese and English. Each new language needs its own package, in `src/lenguas` |
+| English analysis | It is done by a small model that fits in the extension. In ambiguous sentences it can pick the wrong category, and with it the wrong translation under the word. The word panel still shows every definition |
+| English-English dictionary | It is large: about 110 MB to download and about 220 MB on disk. Installing and removing it takes a few minutes. It is only suggested with the interface in English |
 | Interface translations | Written with AI assistance, with no native review yet. Mistakes are fixed in `idiomas/` |
 | Page reader | Acts only on the main frame: it does not reach text inside an iframe. What a page draws on a canvas or in an image is not text |
 | Claude prompts | The instructions remain in Spanish, also when asking for an answer in another language |

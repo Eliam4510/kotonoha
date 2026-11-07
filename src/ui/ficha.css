@@ -88,6 +88,8 @@ button.chip-gram:active { transform: scale(0.96); }
 .ficha-cab { flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 4px 18px; }
 .esq-palabra { width: 46%; height: 34px; }
 .esq-estados { width: 100%; height: 30px; }
+.ficha-ipa { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-top: 3px; font: 500 14px/1.35 'Segoe UI', 'Lucida Sans Unicode', 'DejaVu Sans', sans-serif; color: var(--texto-2); }
+.ficha-ipa small { margin-right: 4px; font: 800 10px var(--letra); letter-spacing: 0.04em; color: var(--texto-3); }
 .ficha-titulo { display: flex; align-items: flex-start; gap: 10px; min-height: 52px; }
 .ficha-izq { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 14px; }
 .ficha-palabra { font-family: var(--letra-lengua); font-size: 36px; font-weight: 900; line-height: 1.2; letter-spacing: 0.01em; min-width: 0; }

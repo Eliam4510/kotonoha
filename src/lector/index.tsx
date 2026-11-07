@@ -86,7 +86,7 @@ function LectorWeb() {
   }, [a.tema, idiomaActual()]);
 
   return (
-    <div class="kk-raiz ap-app ap-web" data-tema={tema} lang={bcp47Actual()} style={variablesPaleta(a.paleta, tema === 'oscuro')}>
+    <div class="kk-raiz ap-app ap-web" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
       <style>{base + overlay + appCss}</style>
       <header class="ap-web-cab">
         <Marca t={24} />

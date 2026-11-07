@@ -6,6 +6,8 @@ Was die Nutzung von Kotonoha mit einem eigenen Claude-API-Schlüssel kostet, gem
 
 Untertitel, Wörterbuch, Furigana, Karten, Wiederholung und die Transkription mit Whisper verwenden die API nicht und kosten nichts.
 
+Diese Zahlen gelten für Japanisch. Bei Englisch ist der Mechanismus derselbe, wurde aber noch nicht gemessen.
+
 ## Zusammenfassung
 
 Mit dem Referenzguthaben von 100 USD im Monat:

@@ -19,6 +19,8 @@ const entradas = {
   app: 'src/app/index.tsx',
   popup: 'src/popup/index.tsx',
   lector: 'src/lector/index.tsx',
+  // El analizador del inglés, con su modelo: pesa varios megas y solo se carga si se estudia inglés.
+  ingles: 'src/lenguas/ingles/wink.ts',
 };
 
 const opciones = {

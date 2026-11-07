@@ -80,7 +80,9 @@
 
   /* Tipografía */
   --letra: 'Kotonoha Latin', 'Kotonoha JP', 'Hiragino Maru Gothic ProN', 'Yu Gothic UI', Meiryo, 'Segoe UI', system-ui, sans-serif;
-  --letra-lengua: 'Kotonoha JP', 'Hiragino Maru Gothic ProN', 'Yu Gothic UI', Meiryo, sans-serif;
+  --letra-japones: 'Kotonoha JP', 'Hiragino Maru Gothic ProN', 'Yu Gothic UI', Meiryo, sans-serif;
+  /* Lo escrito en la lengua que se estudia. Cada lengua pone la suya en la raíz. */
+  --letra-lengua: var(--letra-japones);
 
   /* Alias de la versión anterior: se eliminan al terminar el rediseño de cada pantalla. */
   --panel: var(--superficie);
@@ -173,7 +175,7 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; font-weight: 800; letter-spacing: 
 p { margin: 0; }
 small { font-size: 0.84em; }
 ::selection { background: var(--hoja-media); }
-[lang='ja'] { font-family: var(--letra-lengua); }
+[lang='ja'] { font-family: var(--letra-japones); }
 .num { font-variant-numeric: tabular-nums; }
 .ico { display: block; flex: none; }
 .ico .d { opacity: var(--ico-opacidad, 0.24); fill: var(--ico-capa, currentColor); }

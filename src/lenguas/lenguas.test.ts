@@ -2,18 +2,19 @@
 
 import { describe, expect, it } from 'vitest';
 import { AJUSTES_INICIALES, completarAjustes } from '../compartido/ajustes';
-import { PAQUETE_INICIAL, paqueteDe } from '.';
+import { PAQUETE_INICIAL, PAQUETES, paqueteDe } from '.';
+import { INGLES } from './ingles';
 import { JAPONES } from './japones';
 import { motorDe } from './motor';
 import type { TareaPrompt } from './tipos';
 
-const PAQUETES = [JAPONES];
 const TAREAS: TareaPrompt[] = ['explicar', 'desglosar', 'traducir', 'generar', 'historia', 'preguntar', 'gramatica'];
 
 describe('registro de lenguas', () => {
   it('encuentra una lengua por su código, con o sin región', () => {
     expect(paqueteDe('ja')).toBe(JAPONES);
     expect(paqueteDe('ja-JP')).toBe(JAPONES);
+    expect(paqueteDe('en-GB')).toBe(INGLES);
   });
 
   it('un código desconocido no deja el programa sin lengua', () => {
@@ -43,7 +44,7 @@ describe.each(PAQUETES.map((p) => [p.id, p] as const))('paquete %s', (id, p) => 
   });
 
   it('sus voces son de la lengua, y las iniciales están en la lista', () => {
-    for (const v of p.voces) expect(v.id.startsWith(`${p.bcp47}-`), v.id).toBe(true);
+    for (const v of p.voces) expect(v.id.startsWith(`${p.id}-`), v.id).toBe(true);
     for (const v of p.vocesIniciales) expect(p.voces.map((x) => x.id)).toContain(v);
   });
 
@@ -63,6 +64,16 @@ describe.each(PAQUETES.map((p) => [p.id, p] as const))('paquete %s', (id, p) => 
     const ids = m.diccionarios.map((d) => d.id);
     expect(new Set(ids).size).toBe(ids.length);
     expect(m.diccionarios.some((d) => d.tipo === 'terminos' && d.recomendado)).toBe(true);
+  });
+
+  it('sus ajustes iniciales son coherentes con lo que ofrece', () => {
+    if (p.ajustes.nivel) expect(p.ajustes.nivel).toBe(p.nivelInicial);
+    if (p.ajustes.formatoLectura) expect(p.ajustes.formatoLectura).toBe(p.lectura.formatoInicial);
+    if (p.ajustes.vocesFrase) expect(p.ajustes.vocesFrase).toEqual(p.vocesIniciales);
+  });
+
+  it('su acento sabe qué significa cada color', () => {
+    if (p.acento) expect(p.acento.leyenda.length).toBeGreaterThan(0);
   });
 
   it('si enseña trazos, tiene de dónde sacarlos y a quién dar crédito', () => {

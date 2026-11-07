@@ -223,7 +223,7 @@ Lo caro es medir y cambiar el DOM. Chromium reconstruye todos los marcadores de 
 
 ## Paquetes de lengua
 
-Todo lo que depende de la lengua que se estudia vive en `src/lenguas/<lengua>`, y el resto del programa solo conoce las interfaces de `src/lenguas/tipos.ts`. Por ahora el único paquete es el del japonés. Cada paquete tiene dos partes:
+Todo lo que depende de la lengua que se estudia vive en `src/lenguas/<lengua>`, y el resto del programa solo conoce las interfaces de `src/lenguas/tipos.ts`. Hay dos paquetes: japonés e inglés. Cada paquete tiene dos partes:
 
 - **`PaqueteLengua`** es ligero y lo usan todas las pantallas, incluido el content script: cómo se reconoce la lengua en un texto, cómo se escriben sus lecturas, sus niveles, voces y enlaces, y las frases de la interfaz que la nombran.
 - **`MotorLengua`** solo se carga en el motor y en la ventana de la aplicación: el analizador, las reglas de gramática, los prompts, las reglas de transcripción, los diccionarios y el audio.
@@ -231,6 +231,20 @@ Todo lo que depende de la lengua que se estudia vive en `src/lenguas/<lengua>`, 
 Cada lengua tiene su propia base de datos. La del japonés conserva el nombre original, `kikitori`, y las demás se llaman `kikitori-<lengua>`. Así, una palabra que se escribe igual en dos lenguas nunca se mezcla, y los datos existentes no necesitan migración. El gasto en Claude no depende de la lengua y se guarda siempre en la base original.
 
 Los prompts de cada paquete tienen sus huellas fijadas en las pruebas, porque cambiar uno invalida las respuestas guardadas y obligaría a pagarlas otra vez.
+
+El paquete del inglés muestra en qué difieren las lenguas:
+
+| Aspecto | Japonés | Inglés |
+|---|---|---|
+| Analizador | Kuromoji con IPADIC | wink-nlp con su modelo pequeño, compilado aparte (`ingles.js`) y cargado solo al estudiar inglés |
+| Lectura | Forma parte de la palabra: distingue homógrafos y entra en su clave | No distingue nada: la clave es la forma de diccionario, y la IPA se guarda aparte, por zona |
+| Acento | Patrón tonal por moras, de Kanjium | Sílaba tónica, deducida de la IPA |
+| Diccionarios | JMdict, Kanjium y JPDB | Wiktionary, con wiktionary-to-yomitan, y FrequencyWords |
+| Lista de términos en memoria | Se espera a tenerla: sin ella, los compuestos saldrían partidos | No se espera: solo sirve para unir palabras con guion |
+
+Los ajustes que dependen de la lengua se guardan en `porLengua` y se restauran al cambiar de una a otra (`ajustesParaLengua`). El resto del programa sigue leyéndolos en su sitio de siempre.
+
+Los diccionarios se descomprimen banco a banco, para que la memoria no dependa del tamaño del archivo, y se borran por tandas, porque una sola transacción con cientos de miles de filas no llega a terminar. Medido con el inglés-inglés de Wiktionary, de 847.853 filas: entre 1,5 y 3 minutos de instalación con la descarga incluida, unos 220 MB en disco y consultas de menos de 10 ms. Quitarlo lleva unos 3 minutos, durante los cuales las consultas tardan de 2 a 5 segundos.
 
 ## Estructura de carpetas
 

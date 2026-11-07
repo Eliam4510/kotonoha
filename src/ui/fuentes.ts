@@ -13,13 +13,13 @@ const ARCHIVOS: { familia: string; archivo: string; peso: string; rango?: string
   { familia: 'Kotonoha JP', archivo: 'japanese-900', peso: '900' },
 ];
 
-let cargadas = false;
+const cargadas = new Set<string>();
 
 export async function cargarFuentes({ soloLatin = false }: { soloLatin?: boolean } = {}): Promise<void> {
-  if (cargadas) return;
-  cargadas = true;
+  const pendientes = ARCHIVOS.filter((f) => (!soloLatin || f.familia === 'Kotonoha Latin') && !cargadas.has(f.archivo));
+  for (const f of pendientes) cargadas.add(f.archivo);
   await Promise.all(
-    ARCHIVOS.filter((f) => !soloLatin || f.familia === 'Kotonoha Latin').map(async ({ familia, archivo, peso, rango }) => {
+    pendientes.map(async ({ familia, archivo, peso, rango }) => {
       try {
         const datos = await (await fetch(chrome.runtime.getURL(`fuentes/${archivo}.woff2`))).arrayBuffer();
         const f = new FontFace(familia, datos, { weight: peso, display: 'swap', ...(rango ? { unicodeRange: rango } : {}) });

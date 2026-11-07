@@ -223,7 +223,7 @@ Teuer sind das Messen und das Ändern des DOM. Chromium baut nach jeder Änderun
 
 ## Sprachpakete
 
-Alles, was von der gelernten Sprache abhängt, liegt in `src/lenguas/<Sprache>`, und der Rest des Programms kennt nur die Schnittstellen in `src/lenguas/tipos.ts`. Derzeit gibt es nur das Paket für Japanisch. Jedes Paket besteht aus zwei Teilen:
+Alles, was von der gelernten Sprache abhängt, liegt in `src/lenguas/<Sprache>`, und der Rest des Programms kennt nur die Schnittstellen in `src/lenguas/tipos.ts`. Es gibt zwei Pakete: Japanisch und Englisch. Jedes Paket besteht aus zwei Teilen:
 
 - **`PaqueteLengua`** ist leichtgewichtig und wird von allen Ansichten genutzt, auch vom Content Script: wie die Sprache in einem Text erkannt wird, wie ihre Lesungen geschrieben werden, ihre Stufen, Stimmen und Links sowie die Sätze der Oberfläche, die sie benennen.
 - **`MotorLengua`** wird nur in der Engine und im Anwendungsfenster geladen: Analysator, Grammatikregeln, Prompts, Transkriptionsregeln, Wörterbücher und Audio.
@@ -231,6 +231,20 @@ Alles, was von der gelernten Sprache abhängt, liegt in `src/lenguas/<Sprache>`,
 Jede Sprache hat ihre eigene Datenbank. Die japanische behält den ursprünglichen Namen `kikitori`, die anderen heißen `kikitori-<Sprache>`. So wird ein Wort, das in zwei Sprachen gleich geschrieben wird, nie vermischt, und vorhandene Daten müssen nicht migriert werden. Die Kosten für Claude hängen nicht von der Sprache ab und werden immer in der ursprünglichen Datenbank gespeichert.
 
 Die Prompts jedes Pakets sind mit ihren Prüfsummen in den Tests festgelegt, denn eine Änderung entwertet die gespeicherten Antworten, die dann erneut bezahlt werden müssten.
+
+Das Paket für Englisch zeigt, worin sich die Sprachen unterscheiden:
+
+| Aspekt | Japanisch | Englisch |
+|---|---|---|
+| Analysator | Kuromoji mit IPADIC | wink-nlp mit seinem kleinen Modell, separat kompiliert (`ingles.js`) und nur beim Lernen von Englisch geladen |
+| Lesung | Teil des Wortes: Sie unterscheidet Homographen und gehört zum Schlüssel | Sie unterscheidet nichts: Der Schlüssel ist die Wörterbuchform, die IPA wird getrennt nach Region gespeichert |
+| Akzent | Tonmuster nach Moren, von Kanjium | Betonte Silbe, aus der IPA abgeleitet |
+| Wörterbücher | JMdict, Kanjium und JPDB | Wiktionary über wiktionary-to-yomitan und FrequencyWords |
+| Liste der Begriffe im Speicher | Die Analyse wartet darauf: Ohne sie würden Komposita getrennt | Die Analyse wartet nicht: Sie dient nur dazu, Wörter mit Bindestrich zu verbinden |
+
+Einstellungen, die von der Sprache abhängen, werden in `porLengua` gespeichert und beim Wechsel wiederhergestellt (`ajustesParaLengua`). Der Rest des Programms liest sie weiterhin an ihrem gewohnten Ort.
+
+Wörterbücher werden Bank für Bank entpackt, damit der Speicherbedarf nicht von der Dateigröße abhängt, und in Etappen gelöscht, weil eine einzige Transaktion mit Hunderttausenden Zeilen nicht fertig wird. Gemessen mit dem Englisch-Englisch-Wörterbuch aus Wiktionary mit 847.853 Zeilen: 1,5 bis 3 Minuten Installation einschließlich Download, etwa 220 MB Speicherplatz und Abfragen unter 10 ms. Das Entfernen dauert etwa 3 Minuten, währenddessen Abfragen 2 bis 5 Sekunden brauchen.
 
 ## Ordnerstruktur
 

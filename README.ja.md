@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.ja.png" alt="Kotonoha：日本語を学ぶためのインタラクティブな字幕、辞書、カード、Claude の解説" width="100%">
+  <img src="docs/img/banner.ja.png" alt="Kotonoha：日本語と英語を学ぶためのインタラクティブな字幕、辞書、カード、Claude の解説" width="100%">
 </p>
 
 <p align="center">
@@ -20,15 +20,16 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.3.0-A9E45B?style=flat-square" alt="バージョン 0.3.0">
+  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.4.0-A9E45B?style=flat-square" alt="バージョン 0.4.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="継続的インテグレーション"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-306-0ca30c?style=flat-square" alt="単体テスト 306 件">
+  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-386-0ca30c?style=flat-square" alt="単体テスト 386 件">
   <img src="https://img.shields.io/badge/%E8%A1%A8%E7%A4%BA-6%20%E8%A8%80%E8%AA%9E-8FCBFF?style=flat-square" alt="表示は 6 言語">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5〜N1">
+  <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1〜C2">
 </p>
 
 <p align="center">
-  <b>本物の動画と文章で日本語を学ぶためのブラウザ拡張機能です。</b>
+  <b>本物の動画と文章で日本語と英語を学ぶためのブラウザ拡張機能です。</b>
 </p>
 
 <p align="center">
@@ -47,6 +48,8 @@
 ## 概要
 
 Kotonoha（言の葉）は、YouTube、Netflix などのプレーヤーにインタラクティブな字幕を重ねて表示します。各単語にはふりがな、ピッチアクセント、どれだけ知っているかが示され、マウスを合わせると費用なしで辞書の項目が開きます。ボタンひとつで、その文での意味を Claude に尋ねられます。さらに、辞書、Anki または内蔵の復習向けのカード作成、Claude API による文脈に沿った説明を備えています。どのウェブページでも、Claude のようなチャットでも、ページを壊さずに日本語のテキストを色分けし、ふりがなを付け、クリックひとつで単語を調べられます。テキスト、EPUB の本、手元の動画ファイルにも対応します。表示言語はスペイン語、英語、ドイツ語、中国語、韓国語、日本語です。
+
+バージョン 0.4.0 からは英語も学べます。単語パネルにはアメリカ英語とイギリス英語の発音が IPA で示され、句動詞は離れていても見つかり、不規則形がどの単語から来ているかもわかります。辞書は Wiktionary のもので、表示言語に合わせて使えます。言語ごとに単語、辞書、カード、設定を別々に保存し、クリックひとつで切り替えられます。
 
 名前は『古今和歌集』仮名序（905 年頃）に由来します。「やまとうたは、人の心を種として、万の言の葉とぞなれりける」。
 
@@ -113,6 +116,16 @@ Kotonoha（言の葉）は、YouTube、Netflix などのプレーヤーにイン
     <td valign="top"><b>好みに合わせて</b><br>色覚多様性向けとハイコントラストの配色、かなまたはローマ字の読み方、月間の費用の上限、動作させないサイト。ゼロから N1 まで。</td>
     <td valign="top"><b>好みのショートカット</b><br>動画の上のショートカットはすべて変更でき、どのキーボード配列でも、日本語入力がオンでも動作します。</td>
   </tr>
+  <tr>
+    <td width="33%" align="center"><img src="docs/img/ingles-subtitulos.ja.png" alt="動画の上に表示された英単語の単語パネル"></td>
+    <td width="33%" align="center"><img src="docs/img/ingles-pagina.ja.png" alt="英語の記事の上のリーダーと、単語パネルの句動詞"></td>
+    <td width="33%" align="center"><img src="docs/img/ingles-idioma.ja.png" alt="勉強する言語を選ぶようこそ画面"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>英語も</b><br>アメリカ英語とイギリス英語の IPA 発音、A1 から C2 までの文法、表示言語の Wiktionary 辞書を備えています。Whisper、Claude、カードは日本語と同じように使えます。</td>
+    <td valign="top"><b>句動詞</b><br>文が <i>picked it up</i> となっていてもパネルは <i>pick up</i> を見つけ、<i>went</i> がどの単語から来ているかも説明します。英語はほとんどどこにでもあるので、ページリーダーは最初はオフで、拡張機能のメニューからオンにします。</td>
+    <td valign="top"><b>言語ごとに別々</b><br>ようこそ画面、設定、拡張機能のメニューで選びます。言語ごとに単語、辞書、カード、設定を別々に保存し、戻っても何も変わりません。</td>
+  </tr>
 </table>
 
 全機能の一覧と各機能の確認方法は [docs/ja/features.md](docs/ja/features.md) にあります。
@@ -157,15 +170,15 @@ npm run build
 
 ## はじめに
 
-最初にようこそ画面が開き、言語とレベルを尋ねて、次のことを提案します。
+最初にようこそ画面が開き、言語、勉強する言語、レベルを尋ねて、次のことを提案します。
 
-1. 辞書のインストール：自分の言語の JMdict（まだなければ英語版）、ピッチアクセント、頻度。
+1. 辞書のインストール。日本語は自分の言語の JMdict（まだなければ英語版）、ピッチアクセント、頻度。英語は自分の言語の Wiktionary、発音、頻度。
 2. Claude の API キーの追加。ブラウザにのみ保存されます。任意で、なくても字幕、辞書、色分け、カード、Whisper は使えます。
 3. カードの保存先の選択：内蔵の復習、または AnkiConnect アドオン経由の Anki。
 
 すべてスキップでき、あとで拡張機能のウィンドウ（`Alt+Shift+K`）の**設定**で変更できます。
 
-これで、日本語字幕のある動画を開くと Kotonoha のバーが表示され、日本語のあるページには色分けとふりがなが表示されます。詳しくは[使い方](docs/ja/guide.md)をご覧ください。
+これで、勉強する言語の字幕がある動画を開くと Kotonoha のバーが表示されます。日本語のあるページには色分けとふりがなが表示され、英語の場合は先に拡張機能のメニューからリーダーをオンにします。詳しくは[使い方](docs/ja/guide.md)をご覧ください。
 
 ### ネット動画を文字起こしするヘルパー
 
@@ -189,7 +202,7 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 | `S` | 文を繰り返す |
 | `G` | 字幕ナビ |
 | `Alt+Shift+M` | 音声キャプチャを許可 |
-| 単語をクリック | 日本語のあるページで調べる |
+| 単語をクリック | 勉強する言語のテキストがあるページで調べる |
 
 ## 文字起こしの性能
 
@@ -246,8 +259,11 @@ npm run paquete
 | `npm test` | `src/nucleo` の純粋なロジックと、翻訳表がそろっていること |
 | `node herramientas/idiomas.mjs` | 言語ごとの不足と余分 |
 | `node pruebas/lector.mjs` | ページリーダーの難しい場合：何も動かないこと、クリック、リンク、カルーセル、アコーディオン、届き続けるテキスト、シャドウツリー、チャットのようなスクロールするボックス |
-| `node pruebas/lector-real.mjs` | 約 30 の公開サイトでのリーダー、各サイトのスクリーンショット付き |
+| `node pruebas/lector-real.mjs` | 約 30 の公開サイトでのリーダー、各サイトのスクリーンショット付き。`KK_LENGUA=en` を付けると英語のサイトで実行します |
 | `node pruebas/trazos-web.mjs` | 実データの書き順、タブのリーダー、クリップボード、分割表示 |
+| `node pruebas/ingles.mjs` | 英語の学習を最初から最後まで：言語の選択、辞書のインストール、動画、ページ、そして何も混ざらずに日本語に戻ること |
+| `node pruebas/ingles-whisper.mjs voice.wav` | GPU での英語の Whisper と、シミュレートした Claude の修正 |
+| `node pruebas/ingles-grande.mjs` | 最も大きな辞書を空のプロファイルで：インストール、入れたままの起動、検索、削除。約 110 MB をダウンロードします |
 | `node pruebas/e2e.mjs` | Edge での拡張機能全体 |
 | `node pruebas/subtitulos.mjs` | Netflix と YouTube を模したページと模擬 Claude API での翻訳、修正、書き出し、読み込み |
 | `node pruebas/experiencia.mjs` | 動画の上で感じられるものをフレームごとに：ちらつき、揺れ、ドラッグ。Claude へのリクエスト数と費用の記録も確認 |
@@ -267,7 +283,7 @@ npm run paquete
 
 ## プロジェクトの状況
 
-現在のバージョンは 0.3.0 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。
+現在のバージョンは 0.4.0 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストしましたが、動画サイトの実際のセッションではまだテストしていません。
 
 ## プライバシー
 
@@ -275,6 +291,7 @@ npm run paquete
 - Whisper が文字起こしする音声はパソコンの外に出ません。カードの音声と画面も、Anki に送らない限り同様です。
 - Claude API には作業に必要なテキストだけを送ります：文、字幕の台本、動画のタイトル。
 - 単語の音声と画像の検索は JapanesePod101、Wikimedia Commons、Openverse に直接送られ、各漢字の画は jsDelivr に要求します。
+- 辞書のダウンロードは一度だけです。日本語の辞書と英語の頻度表は GitHub から、英語の辞書は Hugging Face から取得します。英単語の音声は Wikimedia Commons と Lingua Libre から取得します。
 - **クリップボードを追う**は、オプションがオンでタブが表示されている間だけ読み取り、読み取った内容はパソコンの外に出ません。
 - 拡張機能に独自のサーバーはなく、利用統計も集めません。
 
@@ -283,6 +300,7 @@ npm run paquete
 コードは [MIT ライセンス](LICENSE)で公開しています。第三者のコンポーネント、利用時にダウンロードするデータ、責任ある利用の条件は [docs/ja/notices.md](docs/ja/notices.md) にあります。
 
 - 辞書：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium)、[JPDB](https://jpdb.io)、Yomitan 形式。
+- 英語：定義と発音は [Wiktionary](https://www.wiktionary.org)、整形は [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org)、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。
 - 文字起こし：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) と [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 書き順：[KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、CC BY-SA 3.0。
 - アイコン：[Phosphor](https://phosphoricons.com)。フォント：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic)、[Nunito](https://fonts.google.com/specimen/Nunito)。

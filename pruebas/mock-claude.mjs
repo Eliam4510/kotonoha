@@ -40,6 +40,10 @@ function respuestaPara(cuerpo) {
       .map((m) => ({ i: Number(m[1]), t: m[2].replace('たぶん', '多分').replace('医師の', '意志の') }));
     return JSON.stringify({ correcciones });
   }
+  if (formato?.properties?.lineas && sistema.includes('subtítulos al inglés')) {
+    const lineas = [...texto.matchAll(/(\d+): ([^\\]+)/g)].map((m) => ({ i: Number(m[1]), t: `This is English line ${m[1]}` }));
+    return JSON.stringify({ lineas });
+  }
   if (formato?.properties?.lineas && sistema.includes('subtítulos al japonés')) {
     const lineas = [...texto.matchAll(/(\d+): ([^\\]+)/g)].map((m) => ({ i: Number(m[1]), t: `日本語の文${m[1]}です` }));
     return JSON.stringify({ lineas });
@@ -52,6 +56,7 @@ function respuestaPara(cuerpo) {
     return '## 赤い星と青い\nSignificado: una estrella roja y una azul\nExplicación: と une los dos nombres, y el adjetivo 青い modifica al sustantivo que sigue.\n\n## 星を\nSignificado: a las estrellas\nExplicación: を marca el objeto directo de la acción.\n\n## 食べる\nSignificado: las devora, las hace suyas\nExplicación: Forma de diccionario del verbo. En la letra tiene un sentido figurado, no literal.';
   }
   if (sistema.includes('traductor profesional')) return 'Soñé que devoraba estrellas rojas y azules';
+  if (sistema.includes('gramática inglesa')) return 'Aquí used to habla de un hábito del pasado que ya no se da. Se forma con used to más el verbo en infinitivo. No se confunde con be used to, que significa estar acostumbrado.';
   if (sistema.includes('gramática japonesa')) return 'Aquí 〜と思う presenta lo que dice el hablante como su opinión o intención, y suaviza la afirmación. Se forma con la forma simple del verbo más と思う. Se confunde con 〜と考える, más reflexivo y formal.\n\n明日は雨だと思う。 Creo que mañana lloverá.';
   if (sistema.includes('autor de lecturas')) return '猫の散歩\n\n京都に猫がいました。猫は毎日、川の近くを歩きました。ある日、猫は小さな花を見つけました。';
   if (sistema.includes('autor de material')) return '毎朝、公園で友達とパンを食べる。';

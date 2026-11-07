@@ -10,7 +10,7 @@ import { Icono, type NombreIcono } from '../ui/iconos';
 import { creadorAbierto, creadorFijado, estadoAnki, guardarPreferencia, refrescarAnki, useMedia } from './estadoApp';
 import { Mensaje } from './Piezas';
 import { tr } from '../compartido/i18n';
-import { lengua } from '../ui/lengua';
+import { lecturaDeTarjeta, lengua } from '../ui/lengua';
 
 /** Acción de un campo. En glicina solo si la hace Claude. */
 function AccionCampo({ texto, icono, alPulsar, ocupado, ia }: { texto: string; icono: NombreIcono; alPulsar: () => void; ocupado: boolean; ia?: boolean }) {
@@ -152,7 +152,7 @@ export function Creador({ ajustes }: { ajustes: Ajustes }) {
   const buscarDefinicion = () => conOcupado('definicion', async () => {
     if (!b.palabra) throw new Error(tr('Escribe primero la palabra.'));
     const r = await motor.buscar(b.palabra, b.lectura || undefined);
-    set({ definicion: [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>'), lectura: b.lectura || r.lectura });
+    set({ definicion: [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>'), lectura: b.lectura || lecturaDeTarjeta(r) });
   });
   const crearAudioFrase = () => conOcupado('audioFrase', async () => {
     if (!b.frase) throw new Error(tr('Escribe primero la frase.'));

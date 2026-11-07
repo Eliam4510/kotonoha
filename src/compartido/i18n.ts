@@ -65,13 +65,32 @@ export const LENGUAS = [
   { id: 'ko', valor: 'coreano', nombre: tm('Coreano'), ingles: 'Korean', explica: true, traduce: true },
   { id: 'pt', valor: 'portugués', nombre: tm('Portugués'), ingles: 'Portuguese', explica: true, traduce: true },
   { id: 'fr', valor: 'francés', nombre: tm('Francés'), ingles: 'French', explica: true, traduce: true },
-  { id: 'ja', valor: 'japonés sencillo', nombre: tm('Japonés sencillo'), ingles: 'simple Japanese', explica: true, traduce: false },
+  { id: 'ja', valor: 'japonés', nombre: tm('Japonés'), ingles: 'Japanese', explica: true, traduce: true },
+  // Para quien estudia la lengua en la que habla: en ella, solo tiene sentido explicar con palabras sencillas.
+  { id: 'ja', valor: 'japonés sencillo', nombre: tm('Japonés sencillo'), ingles: 'simple Japanese', explica: true, traduce: false, sencilla: true },
+  { id: 'en', valor: 'inglés sencillo', nombre: tm('Inglés sencillo'), ingles: 'simple English', explica: true, traduce: false, sencilla: true },
 ] as const;
 
-/** Lo que conviene por omisión según el idioma que habla: en japonés, explicaciones sencillas y traducción al inglés. */
-export const lenguaDe = (idioma: CodigoIdioma) => {
-  const propia = LENGUAS.find((l) => l.id === idioma) ?? LENGUAS[1];
-  return { explicaciones: propia.valor, traducciones: idioma === 'ja' ? 'inglés' : propia.valor, secundaria: idioma === 'ja' ? 'en' : idioma };
+const esSencilla = (l: (typeof LENGUAS)[number]) => 'sencilla' in l;
+
+/** En qué lenguas se le puede explicar algo a quien estudia `objetivo`. */
+export const lenguasExplicacion = (objetivo: string) => LENGUAS.filter((l) => l.explica && (l.id === objetivo) === esSencilla(l));
+
+/** A qué lenguas puede traducir quien estudia `objetivo`: a esa misma no tiene sentido. */
+export const lenguasTraduccion = (objetivo: string) => LENGUAS.filter((l) => l.traduce && l.id !== objetivo);
+
+/**
+ * Lo que conviene por omisión según el idioma que habla y la lengua que estudia. Si son la misma, explicaciones
+ * sencillas en ella y traducción a otra: al inglés, o al español si es el inglés lo que estudia.
+ */
+export const lenguaDe = (idioma: CodigoIdioma, objetivo = 'ja') => {
+  if (idioma === objetivo) {
+    const sencilla = LENGUAS.find((l) => l.id === idioma && esSencilla(l)) ?? LENGUAS[1];
+    const otra = idioma === 'en' ? LENGUAS[0] : LENGUAS[1];
+    return { explicaciones: sencilla.valor, traducciones: otra.valor, secundaria: otra.id };
+  }
+  const propia = LENGUAS.find((l) => l.id === idioma && !esSencilla(l)) ?? LENGUAS[1];
+  return { explicaciones: propia.valor, traducciones: propia.valor, secundaria: idioma };
 };
 
 /** Nombre en inglés de una lengua guardada, para los prompts en inglés. */

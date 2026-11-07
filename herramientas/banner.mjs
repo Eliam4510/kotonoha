@@ -43,12 +43,12 @@ const PALABRAS = [
 const palabrasHtml = PALABRAS.map(({ t, r, c, s, u }) => `<span class="pal${s ? ' con' : ''}${u ? ' cola' : ''}" style="color:${c};${s ? `--sub:${s}` : ''}">${r ? `<ruby>${t}<rt>${r}</rt></ruby>` : t}</span>`).join('');
 
 const TEXTOS = {
-  'banner.png': { lema: 'Subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés con video y texto real', traduccion: 'Recoger hojas de palabras' },
-  'banner.en.png': { lema: 'Interactive subtitles, a dictionary, flashcards and explanations from Claude for learning Japanese from real video and text', traduccion: 'Gathering leaves of words' },
-  'banner.de.png': { lema: 'Interaktive Untertitel, ein Wörterbuch, Karten und Erklärungen von Claude, um Japanisch mit echten Videos und Texten zu lernen', traduccion: 'Blätter aus Worten sammeln' },
-  'banner.zh.png': { lema: '交互式字幕、词典、卡片和 Claude 讲解，通过真实的视频和文章学日语', traduccion: '拾取言语之叶' },
-  'banner.ko.png': { lema: '대화형 자막, 사전, 카드, Claude 설명으로 실제 영상과 글에서 일본어를 배웁니다', traduccion: '말의 잎을 모으다' },
-  'banner.ja.png': { lema: 'インタラクティブな字幕、辞書、カード、Claude の解説で、本物の動画や文章から日本語を学ぶ', traduccion: '人の心を種として' },
+  'banner.png': { lema: 'Subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés e inglés con video y texto real', traduccion: 'Recoger hojas de palabras' },
+  'banner.en.png': { lema: 'Interactive subtitles, a dictionary, flashcards and explanations from Claude for learning Japanese and English from real video and text', traduccion: 'Gathering leaves of words' },
+  'banner.de.png': { lema: 'Interaktive Untertitel, ein Wörterbuch, Karten und Erklärungen von Claude, um Japanisch und Englisch mit echten Videos und Texten zu lernen', traduccion: 'Blätter aus Worten sammeln' },
+  'banner.zh.png': { lema: '交互式字幕、词典、卡片和 Claude 讲解，通过真实的视频和文章学日语和英语', traduccion: '拾取言语之叶' },
+  'banner.ko.png': { lema: '대화형 자막, 사전, 카드, Claude 설명으로 실제 영상과 글에서 일본어와 영어를 배웁니다', traduccion: '말의 잎을 모으다' },
+  'banner.ja.png': { lema: 'インタラクティブな字幕、辞書、カード、Claude の解説で、本物の動画や文章から日本語と英語を学ぶ', traduccion: '人の心を種として' },
 };
 
 const contexto = await chromium.launch({ channel: process.env.KK_CANAL ?? 'msedge', headless: true });

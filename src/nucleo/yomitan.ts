@@ -23,6 +23,12 @@ export interface AcentoImportado {
   posiciones: number[];
 }
 
+export interface PronunciacionImportada {
+  termino: string;
+  lectura: string;
+  transcripciones: { ipa: string; tags: string[] }[];
+}
+
 /** Secciones del contenido estructurado que no son la definición en sí. */
 const SECCIONES_OMITIDAS = new Set([
   'attribution',
@@ -48,6 +54,8 @@ const SECCIONES_OMITIDAS = new Set([
   'infoGlossary',
 ]);
 
+const NINGUNA: ReadonlySet<string> = new Set();
+
 type NodoEstructurado = string | NodoEstructurado[] | {
   tag?: string;
   type?: string;
@@ -56,38 +64,84 @@ type NodoEstructurado = string | NodoEstructurado[] | {
   text?: string;
 };
 
-function textoDe(n: NodoEstructurado | undefined): string {
+const seOmite = (n: Exclude<NodoEstructurado, string | NodoEstructurado[]>, omitir: ReadonlySet<string>) =>
+  !!n.data?.content && (SECCIONES_OMITIDAS.has(n.data.content) || omitir.has(n.data.content));
+
+/** Si dentro hay más definiciones: las listas de lo que no es la definición, como los sinónimos, no cuentan. */
+function contieneLista(n: NodoEstructurado | undefined, omitir: ReadonlySet<string>): boolean {
+  if (n === undefined || n === null || typeof n === 'string') return false;
+  if (Array.isArray(n)) return n.some((h) => contieneLista(h, omitir));
+  if (seOmite(n, omitir)) return false;
+  return n.tag === 'li' || contieneLista(n.content, omitir);
+}
+
+/** Las traducciones de un sentido que se enseñan: después de las primeras suelen venir las de cada región. */
+const MAXIMO_TRADUCCIONES = 4;
+
+function textoSinOmitir(n: NodoEstructurado | undefined): string {
   if (n === undefined || n === null) return '';
   if (typeof n === 'string') return n;
-  if (Array.isArray(n)) return n.map(textoDe).join('');
+  if (Array.isArray(n)) return n.map(textoSinOmitir).join('');
+  return textoSinOmitir(n.content);
+}
+
+function textoDe(n: NodoEstructurado | undefined, omitir: ReadonlySet<string>): string {
+  if (n === undefined || n === null) return '';
+  if (typeof n === 'string') return n;
+  if (Array.isArray(n)) return n.map((h) => textoDe(h, omitir)).join('');
   if (n.tag === 'rt' || n.tag === 'rp') return '';
-  if (n.data?.content && SECCIONES_OMITIDAS.has(n.data.content)) return '';
-  return textoDe(n.content);
+  if (seOmite(n, omitir)) return '';
+  return textoDe(n.content, omitir);
+}
+
+/** En mandarín, cada traducción viene en sus dos escrituras, «撿 /捡»: la segunda es la simplificada. */
+const soloSimplificada = (t: string) => t.replace(/^\p{Script=Han}+ \/(\p{Script=Han}+)$/u, '$1');
+
+/**
+ * Las tablas de traducción de Wiktionary dan una etiqueta de sentido y varias traducciones. Juntas son una sola
+ * definición, «pico, zapapico (pickaxe)»: sueltas, no se sabría a qué sentido corresponde cada una.
+ */
+function traduccionesDeUnSentido(n: Exclude<NodoEstructurado, string | NodoEstructurado[]>, omitir: ReadonlySet<string>): string | null {
+  if (!Array.isArray(n.content)) return null;
+  const hijos = n.content.filter((h) => h && typeof h === 'object' && !Array.isArray(h)) as Exclude<NodoEstructurado, string | NodoEstructurado[]>[];
+  const etiqueta = hijos.find((h) => h.data?.content === 'sense-label');
+  const lista = hijos.find((h) => h.data?.content === 'glossary');
+  if (!etiqueta || !lista || !Array.isArray(lista.content)) return null;
+  const palabras = [...new Set(lista.content.map((h) => soloSimplificada(textoDe(h, omitir).trim())).filter(Boolean))].slice(0, MAXIMO_TRADUCCIONES);
+  if (!palabras.length) return null;
+  const sentido = (typeof etiqueta.content === 'string' ? etiqueta.content : textoSinOmitir(etiqueta.content)).trim();
+  return sentido ? `${palabras.join(', ')} (${sentido})` : palabras.join(', ');
 }
 
 /** Saca las glosas de una lista estructurada: cada <li> de glosario es una definición. */
-function glosasEstructuradas(n: NodoEstructurado, salida: string[]): void {
+function glosasEstructuradas(n: NodoEstructurado, salida: string[], omitir: ReadonlySet<string>): void {
   if (n === undefined || n === null || typeof n === 'string') return;
   if (Array.isArray(n)) {
-    for (const h of n) glosasEstructuradas(h, salida);
+    for (const h of n) glosasEstructuradas(h, salida, omitir);
     return;
   }
-  if (n.data?.content && SECCIONES_OMITIDAS.has(n.data.content)) return;
+  if (seOmite(n, omitir)) return;
+  const traducciones = traduccionesDeUnSentido(n, omitir);
+  if (traducciones) {
+    salida.push(traducciones);
+    return;
+  }
   if (n.tag === 'li' || n.data?.content === 'glossary') {
     const interior = Array.isArray(n.content) ? n.content : [n.content as NodoEstructurado];
-    const tieneListas = JSON.stringify(n.content ?? '').includes('"tag":"li"');
+    const tieneListas = contieneLista(n.content, omitir);
     if (n.tag === 'li' && !tieneListas) {
-      const t = textoDe(n).trim();
+      const t = textoDe(n, omitir).trim();
       if (t) salida.push(t);
       return;
     }
-    for (const h of interior) glosasEstructuradas(h, salida);
+    for (const h of interior) glosasEstructuradas(h, salida, omitir);
     return;
   }
-  glosasEstructuradas(n.content as NodoEstructurado, salida);
+  glosasEstructuradas(n.content as NodoEstructurado, salida, omitir);
 }
 
-export function extraerGlosas(glosario: unknown[]): string[] {
+/** `omitir` son las secciones que, además de las de siempre, no son la definición en los diccionarios de esa lengua. */
+export function extraerGlosas(glosario: unknown[], omitir: ReadonlySet<string> = NINGUNA): string[] {
   const salida: string[] = [];
   for (const g of glosario) {
     if (typeof g === 'string') {
@@ -97,9 +151,9 @@ export function extraerGlosas(glosario: unknown[]): string[] {
       if (o.type === 'text' && o.text) salida.push(o.text);
       else if (o.type === 'structured-content') {
         const antes = salida.length;
-        glosasEstructuradas(o.content as NodoEstructurado, salida);
+        glosasEstructuradas(o.content as NodoEstructurado, salida, omitir);
         if (salida.length === antes) {
-          const t = textoDe(o.content as NodoEstructurado).trim();
+          const t = textoDe(o.content as NodoEstructurado, omitir).trim();
           if (t) salida.push(t);
         }
       }
@@ -108,10 +162,10 @@ export function extraerGlosas(glosario: unknown[]): string[] {
   return salida;
 }
 
-export function leerBancoTerminos(filas: unknown[][]): TerminoImportado[] {
+export function leerBancoTerminos(filas: unknown[][], omitir: ReadonlySet<string> = NINGUNA): TerminoImportado[] {
   const salida: TerminoImportado[] = [];
   for (const f of filas) {
-    const glosas = extraerGlosas((f[5] as unknown[]) ?? []);
+    const glosas = extraerGlosas((f[5] as unknown[]) ?? [], omitir);
     if (!glosas.length) continue;
     salida.push({
       termino: String(f[0] ?? ''),
@@ -140,13 +194,14 @@ function valorFrecuencia(d: unknown): { rango: number; texto?: string } | null {
   return null;
 }
 
-export function leerBancoMeta(filas: unknown[][]): { frecuencias: FrecuenciaImportada[]; acentos: AcentoImportado[] } {
+export function leerBancoMeta(filas: unknown[][]): { frecuencias: FrecuenciaImportada[]; acentos: AcentoImportado[]; pronunciaciones: PronunciacionImportada[] } {
   const frecuencias: FrecuenciaImportada[] = [];
   const acentos: AcentoImportado[] = [];
+  const pronunciaciones: PronunciacionImportada[] = [];
   for (const f of filas) {
     const termino = String(f[0] ?? '');
     const tipo = f[1];
-    const d = f[2] as { reading?: string; pitches?: { position?: number }[] };
+    const d = f[2] as { reading?: string; pitches?: { position?: number }[]; transcriptions?: { ipa?: string; tags?: string[] }[] };
     if (tipo === 'freq') {
       const v = valorFrecuencia(d);
       if (v) frecuencias.push({ termino, lectura: (d && typeof d === 'object' && d.reading) || '', rango: v.rango, texto: v.texto });
@@ -156,9 +211,25 @@ export function leerBancoMeta(filas: unknown[][]): { frecuencias: FrecuenciaImpo
         lectura: d.reading,
         posiciones: (d.pitches ?? []).map((p) => p.position).filter((p): p is number => typeof p === 'number'),
       });
+    } else if (tipo === 'ipa' && d?.transcriptions?.length) {
+      pronunciaciones.push({
+        termino,
+        lectura: d.reading || termino,
+        transcripciones: d.transcriptions.flatMap((t) => (t.ipa ? [{ ipa: t.ipa, tags: t.tags ?? [] }] : [])),
+      });
     }
   }
-  return { frecuencias, acentos };
+  return { frecuencias, acentos, pronunciaciones };
+}
+
+/** Una lista de frecuencia en texto, con una palabra y sus apariciones por línea, de la más frecuente a la menos. */
+export function leerListaFrecuencia(texto: string): FrecuenciaImportada[] {
+  const salida: FrecuenciaImportada[] = [];
+  for (const fila of texto.split(/\r?\n/)) {
+    const palabra = fila.split(/\s/)[0];
+    if (palabra) salida.push({ termino: palabra, lectura: palabra, rango: salida.length + 1 });
+  }
+  return salida;
 }
 
 /** Kanjium accents.txt: palabra, lectura y posiciones separadas por comas, con posibles notas: (名)0 */
