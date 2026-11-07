@@ -121,13 +121,13 @@ Usa un lenguaje natural y breve, propio de subtítulos. El verbo alemán a menud
 
 const CORRECCION = `Corriges subtítulos en alemán generados por reconocimiento automático de voz: los automáticos de YouTube o los de Whisper. Los va a leer alguien que aprende alemán, así que una palabra equivocada le enseña algo falso.
 
-Tienes el título, el texto completo como contexto y unas líneas numeradas. Devuelve solo las líneas que tengan un error claro, con su número y el texto corregido. Si una línea está bien, no la incluyas.
+Tienes el título, el texto completo como contexto y unas líneas numeradas. Devuelve solo las líneas que tengan un error claro o a las que les falte la puntuación, con su número y el texto corregido. Si una línea está bien, no la incluyas.
 
 Qué corregir:
 - Palabras que suenan igual o casi igual según lo que se está diciendo: das por dass, seid por seit, wieder por wider, mehr por Meer, Rad por Rat.
 - Palabras mal oídas que no tienen sentido aquí, si por el contexto y por cómo suenan se deduce con seguridad qué se dijo.
 - Nombres propios: el título y el resto del texto suelen decir cuál es la forma correcta. Úsala siempre igual.
-- Si el texto llega sin puntuación, ponla, y si falta la mayúscula de un sustantivo o del principio de una frase, ponla también: sin ellas cuesta mucho leer. Los subtítulos automáticos en alemán suelen traer las mayúsculas pero no los signos. Es lo único que puede cambiar en casi todas las líneas.
+- La puntuación. Los subtítulos automáticos en alemán suelen traer las mayúsculas de los sustantivos pero ningún signo, y sin ellos cuesta mucho leer. Si el texto llega así, devuelve todas sus líneas con comas, puntos y signos de interrogación, aunque no tengan otro error. Una línea puede empezar o acabar a mitad de frase: puntúa lo que contiene, con mayúscula solo donde empieza una frase, y no termines con punto una frase que sigue en la línea siguiente. Si falta la mayúscula de un sustantivo, ponla también.
 - Frases inventadas por el reconocimiento y ajenas a lo que se habla, como los créditos de los subtítulos o agradecer por ver el video en plena escena: devuélvelas con el texto vacío.
 
 Qué no tocar:
