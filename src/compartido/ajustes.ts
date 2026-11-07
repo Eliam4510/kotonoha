@@ -64,18 +64,76 @@ export interface PromptPersonalizado {
 
 export type Tema = 'auto' | 'oscuro' | 'claro';
 
-export type ModeloWhisper = 'turbo' | 'turbo-ligero' | 'base';
+export type ModeloWhisper = 'turbo' | 'turbo-ligero' | 'base' | 'haas';
+/** Lo que se elige en los ajustes: un modelo concreto, o que se decida según el video. */
+export type OpcionModelo = ModeloWhisper | 'auto';
+
+/** Un modelo transductor: Transformers.js no los conoce, así que aquí va lo necesario para ejecutarlo. */
+export interface ConfigTdt {
+  /** La versión exacta del repositorio: si cambiara, no se descargaría otra cosa de lo que se ha medido. */
+  revision: string;
+  codificador: string;
+  /** Los pesos van aparte cuando el grafo pasa de 2 GB. */
+  datosCodificador?: string;
+  decodificador: string;
+  datosDecodificador?: string;
+  vocabulario: string;
+  /** Un modelo de SentencePiece, o una lista de «pieza número» por línea. */
+  formatoVocabulario?: 'sentencepiece' | 'lista';
+  nMels: number;
+  bf16: boolean;
+  /** La forma del estado del decodificador, si el grafo no la dice. */
+  capasEstado: number;
+  anchoEstado: number;
+}
+
+export interface DefinicionModeloVoz {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  dtype: Record<string, string>;
+  mb: number;
+  externos?: Record<string, number>;
+  /** Solo sirve para estas lenguas. Sin esto, para todas. */
+  lenguas?: string[];
+  /** Es el mejor para voz hablada en sus lenguas, pero no para canciones. */
+  voz?: boolean;
+  tdt?: ConfigTdt;
+}
 
 /**
  * Modelos de transcripción. Se descargan la primera vez y quedan guardados en el navegador.
  * Elegidos midiendo con voz humana (pruebas/whisper-comparar.mjs) y con videos reales: Turbo superó
  * a Kotoba Whisper en todas las pruebas, y sin comprimir el codificador comete un 10 % menos de errores.
+ * Con voz hablada en japonés gana Haas-ja, también con música de fondo: 3,1 % de error frente a 8,8 %, y siete veces más
+ * rápido. Con canto se queda corto, porque escribe solo una parte de lo que se canta, y ahí sigue ganando Whisper.
  */
-export const MODELOS_WHISPER: Record<ModeloWhisper, { id: string; nombre: string; descripcion: string; dtype: Record<string, string>; mb: number; externos?: Record<string, number> }> = {
+export const MODELOS_WHISPER: Record<ModeloWhisper, DefinicionModeloVoz> = {
+  haas: {
+    id: 'Sanami/haas-ja-onnx',
+    nombre: tm('Haas-ja'),
+    descripcion: tm('El más preciso y rápido con voz hablada, también con música de fondo, y con puntuación. Usa unos 2,5 GB de memoria de video. Para canciones, mejor Whisper Turbo.'),
+    dtype: {},
+    mb: 1280,
+    lenguas: ['ja'],
+    voz: true,
+    tdt: {
+      revision: '354baedfd9612b00e74cc1ae87dff7f2c558db6f',
+      codificador: 'fp16/encoder.onnx',
+      datosCodificador: 'fp16/encoder.onnx.data',
+      decodificador: 'fp16/decoder_joint.onnx',
+      datosDecodificador: 'fp16/decoder_joint.onnx.data',
+      vocabulario: 'tokenizer.model',
+      nMels: 128,
+      bf16: true,
+      capasEstado: 2,
+      anchoEstado: 20480,
+    },
+  },
   turbo: {
     id: 'onnx-community/whisper-large-v3-turbo',
     nombre: tm('Whisper Turbo'),
-    descripcion: tm('La mejor precisión. Usa unos 4 GB de memoria de video.'),
+    descripcion: tm('El mejor con canciones. Usa unos 4 GB de memoria de video.'),
     dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4f16' },
     mb: 1468,
   },
@@ -94,6 +152,21 @@ export const MODELOS_WHISPER: Record<ModeloWhisper, { id: string; nombre: string
     mb: 165,
   },
 };
+
+/** Lo que hace la opción automática. */
+export const MODELO_AUTOMATICO = tm('Elige solo según el video: el más preciso para la voz hablada en este idioma y Whisper Turbo para las canciones.');
+
+export const modeloSirveParaLengua = (m: ModeloWhisper, lengua: string) => {
+  const lenguas = MODELOS_WHISPER[m]?.lenguas;
+  return !lenguas || lenguas.includes(lengua);
+};
+
+/** El modelo que se usa de verdad: en automático, el mejor para voz de esa lengua, y Whisper Turbo para las canciones. */
+export function modeloParaTranscribir(opcion: OpcionModelo, lengua: string, esCancion: boolean): ModeloWhisper {
+  if (opcion !== 'auto') return modeloSirveParaLengua(opcion, lengua) ? opcion : 'turbo';
+  if (esCancion) return 'turbo';
+  return (Object.keys(MODELOS_WHISPER) as ModeloWhisper[]).find((m) => MODELOS_WHISPER[m].voz && modeloSirveParaLengua(m, lengua)) ?? 'turbo';
+}
 
 export interface Ajustes {
   /** Versión de los valores por omisión con la que se guardaron estos ajustes. */
@@ -128,7 +201,7 @@ export interface Ajustes {
   subsPosicion: { x: number; y: number } | null;
   /** Tema de la ventana de la app y del menú. Sobre el video el overlay siempre es oscuro. */
   tema: Tema;
-  whisperModelo: ModeloWhisper;
+  whisperModelo: OpcionModelo;
   /** Cuánto se le exige a la GPU. En automático va suave mientras usas el equipo. */
   whisperIntensidad: 'auto' | 'suave' | 'rapida';
   /** Corrige con Claude los subtítulos automáticos de YouTube al abrirlos. */
@@ -227,7 +300,7 @@ export interface Ajustes {
 }
 
 /** Lo que cada lengua recuerda por su cuenta: el nivel en japonés no es el nivel en inglés. */
-export const CLAVES_POR_LENGUA = ['nivel', 'diccionarioPestana', 'formatoLectura', 'furigana', 'lectorFurigana', 'lectorActivo', 'colorAcento', 'particulasConocidas', 'vocesFrase', 'prompts', 'ankiMazo'] as const;
+export const CLAVES_POR_LENGUA = ['nivel', 'diccionarioPestana', 'formatoLectura', 'furigana', 'lectorFurigana', 'lectorActivo', 'colorAcento', 'particulasConocidas', 'vocesFrase', 'prompts', 'ankiMazo', 'whisperModelo'] as const;
 
 export type AjustesLengua = Pick<Ajustes, (typeof CLAVES_POR_LENGUA)[number]>;
 
@@ -252,7 +325,7 @@ export interface Prellenado {
 const VELO_NO: Velo = { modo: 'no', revelarEnPausa: [], revelarPorEstado: [], revelarAlPasar: true };
 
 export const AJUSTES_INICIALES: Ajustes = {
-  migracion: 1,
+  migracion: 2,
   creditoMensual: 0,
   limiteGasto: 0,
   bienvenidaVista: false,
@@ -269,7 +342,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   nombre: '',
   subsPosicion: null,
   tema: 'auto',
-  whisperModelo: 'turbo',
+  whisperModelo: 'auto',
   whisperIntensidad: 'auto',
   corregirAutomaticos: true,
   whisperCorregir: true,
@@ -375,7 +448,7 @@ export const AJUSTES_INICIALES: Ajustes = {
     sentido: 'low',
     analisis: 'medium',
     corregir: 'medium',
-    letra: 'medium',
+    letra: 'high',
     profundo: 'high',
   },
   respaldoSeguridad: true,
@@ -437,7 +510,7 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
   salida.modelos = { ...AJUSTES_INICIALES.modelos, ...(guardados?.modelos ?? {}) };
   salida.esfuerzos = { ...AJUSTES_INICIALES.esfuerzos, ...(guardados?.esfuerzos ?? {}) };
   // Un modelo que ya no existe (Kotoba se retiró al comparar con videos reales) pasa al de siempre.
-  if (!MODELOS_WHISPER[salida.whisperModelo]) salida.whisperModelo = AJUSTES_INICIALES.whisperModelo;
+  if (salida.whisperModelo !== 'auto' && !MODELOS_WHISPER[salida.whisperModelo]) salida.whisperModelo = AJUSTES_INICIALES.whisperModelo;
   // Quien ya usaba la extensión no tiene por qué pasar por el asistente de bienvenida.
   if (guardados && guardados.bienvenidaVista === undefined) salida.bienvenidaVista = true;
   // Y hasta ahora la interfaz solo estaba en español: no debe cambiarle de idioma por seguir al navegador.
@@ -448,6 +521,13 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
     salida.sentidoAutomatico = false;
     salida.usarGuion = false;
     if (salida.diccionarioPestana === 'explicar') salida.diccionarioPestana = 'ninguna';
+  }
+  // Con esfuerzo medio, Claude se saltaba versos enteros al colocar una letra.
+  if (guardados && (guardados.migracion ?? 0) < 2) {
+    salida.migracion = 2;
+    if (salida.esfuerzos.letra === 'medium') salida.esfuerzos = { ...salida.esfuerzos, letra: 'high' };
+    // Turbo era el valor inicial: ahora lo es elegir según el video. Quien eligió otro modelo lo conserva.
+    if (salida.whisperModelo === 'turbo') salida.whisperModelo = 'auto';
   }
   return salida;
 }

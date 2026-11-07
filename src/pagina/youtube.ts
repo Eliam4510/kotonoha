@@ -8,7 +8,7 @@ import { type Adaptador, esperar, normalizarIdioma, sondear } from './adaptador'
 import type { PistaInfo } from '../compartido/tipos';
 
 interface JugadorYT extends HTMLElement {
-  getPlayerResponse?(): { videoDetails?: { videoId?: string; title?: string }; captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: PistaYT[] } } };
+  getPlayerResponse?(): { videoDetails?: { videoId?: string; title?: string }; microformat?: { playerMicroformatRenderer?: { category?: string } }; captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: PistaYT[] } } };
   getAudioTrack?(): { captionTracks?: PistaYT[] };
   getVideoData?(): { video_id?: string; title?: string };
   loadModule?(m: string): void;
@@ -131,6 +131,7 @@ export const adaptadorYouTube: Adaptador = {
   activo: () => idDeUrl() !== null,
   idVideo: idDeUrl,
   titulo: () => jugador()?.getVideoData?.()?.title || document.title.replace(/ - YouTube$/, ''),
+  categoria: () => (hayAnuncio() ? '' : (jugador()?.getPlayerResponse?.()?.microformat?.playerMicroformatRenderer?.category ?? '')),
   anuncio: hayAnuncio,
 
   async listarPistas(): Promise<PistaInfo[]> {

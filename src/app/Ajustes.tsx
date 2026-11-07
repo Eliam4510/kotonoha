@@ -3,7 +3,7 @@
 import type { InfoAyudante } from '../compartido/api';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { type Ajustes, CLAVE_API, type Esfuerzo, guardarAjustes, MODELOS, MODELOS_WHISPER, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
+import { type Ajustes, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
 import { borrarArchivosSueltos, borrarModeloGuardado, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
@@ -424,13 +424,17 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
     releer();
   }, []);
   const descargados = new Set(guardados?.modelos.map((m) => m.id));
-  const modelos = Object.entries(MODELOS_WHISPER) as [ModeloWhisper, (typeof MODELOS_WHISPER)[ModeloWhisper]][];
+  const modelos = (Object.entries(MODELOS_WHISPER) as [ModeloWhisper, (typeof MODELOS_WHISPER)[ModeloWhisper]][]).filter(([id]) => modeloSirveParaLengua(id, a.idiomaObjetivo));
   return (
-    <Seccion id="transcripcion" icono="ondas" titulo={tr('Transcripción con Whisper')} descripcion={tr(lengua.value.textos.whisperAyuda)}>
+    <Seccion id="transcripcion" icono="ondas" titulo={tr('Transcripción de voz')} descripcion={tr(lengua.value.textos.whisperAyuda)}>
       <div class="ap-whisper-modelos" role="radiogroup" aria-label={tr('Modelo de transcripción')}>
+        <button class={`ap-whisper-modelo ${a.whisperModelo === 'auto' ? 'activo' : ''}`} role="radio" aria-checked={a.whisperModelo === 'auto'} onClick={() => cambiar({ whisperModelo: 'auto' })}>
+          <b>{tr('Automático')}</b>
+          <span class="ayuda">{tr(MODELO_AUTOMATICO)}</span>
+        </button>
         {modelos.map(([id, m]) => (
           <button key={id} class={`ap-whisper-modelo ${a.whisperModelo === id ? 'activo' : ''}`} role="radio" aria-checked={a.whisperModelo === id} onClick={() => cambiar({ whisperModelo: id })}>
-            <b>{m.nombre}</b>
+            <b>{tr(m.nombre)}</b>
             <span class="ayuda">{tr(m.descripcion)}</span>
             <span class="ap-whisper-tam num">
               {descargados.has(id) ? <><Icono n="check" t={14} /> {tr('Descargado')}</> : <><Icono n="descargar" t={14} /> {textoTamano(m.mb)}</>}

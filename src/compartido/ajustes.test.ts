@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AJUSTES_INICIALES, type Ajustes, ajustesParaLengua, completarAjustes } from './ajustes';
+import { AJUSTES_INICIALES, type Ajustes, ajustesParaLengua, completarAjustes, modeloParaTranscribir } from './ajustes';
 
 describe('ajustes guardados', () => {
   it('sin datos usa los valores iniciales', () => {
@@ -38,13 +38,60 @@ describe('idioma de la interfaz', () => {
   });
 });
 
+describe('modeloParaTranscribir', () => {
+  it('en automático, el mejor para voz en esa lengua', () => {
+    expect(modeloParaTranscribir('auto', 'ja', false)).toBe('haas');
+  });
+
+  it('una canción la transcribe Whisper Turbo', () => {
+    expect(modeloParaTranscribir('auto', 'ja', true)).toBe('turbo');
+  });
+
+  it('una lengua sin modelo propio usa Whisper Turbo', () => {
+    expect(modeloParaTranscribir('auto', 'xx', false)).toBe('turbo');
+  });
+
+  it('lo elegido a mano se respeta', () => {
+    expect(modeloParaTranscribir('base', 'ja', false)).toBe('base');
+    expect(modeloParaTranscribir('turbo-ligero', 'en', true)).toBe('turbo-ligero');
+    expect(modeloParaTranscribir('haas', 'ja', true)).toBe('haas');
+  });
+
+  it('salvo un modelo que no sirve para esa lengua', () => {
+    expect(modeloParaTranscribir('haas', 'en', false)).toBe('turbo');
+  });
+});
+
+describe('el modelo de transcripción en los ajustes guardados', () => {
+  it('quien tenía Turbo, el valor inicial de antes, pasa a automático', () => {
+    expect(completarAjustes({ migracion: 1, whisperModelo: 'turbo' } as never).whisperModelo).toBe('auto');
+  });
+
+  it('quien eligió otro lo conserva', () => {
+    expect(completarAjustes({ migracion: 1, whisperModelo: 'base' } as never).whisperModelo).toBe('base');
+  });
+
+  it('una vez migrado, Turbo elegido a mano se queda', () => {
+    expect(completarAjustes({ migracion: 2, whisperModelo: 'turbo' } as never).whisperModelo).toBe('turbo');
+  });
+
+  it('un modelo que ya no existe pasa a automático', () => {
+    expect(completarAjustes({ migracion: 2, whisperModelo: 'kotoba' } as never).whisperModelo).toBe('auto');
+  });
+
+  it('el esfuerzo del ajuste de letras sube a alto, si seguía en el valor de antes', () => {
+    expect(completarAjustes({ migracion: 1, esfuerzos: { letra: 'medium' } } as never).esfuerzos.letra).toBe('high');
+    expect(completarAjustes({ migracion: 1, esfuerzos: { letra: 'low' } } as never).esfuerzos.letra).toBe('low');
+  });
+});
+
 describe('la ficha abre con el diccionario', () => {
   it('quien tenía los valores de antes deja de gastar al abrir una palabra', () => {
     const a = completarAjustes({ diccionarioPestana: 'explicar', sentidoAutomatico: true, usarGuion: true } as never);
     expect(a.diccionarioPestana).toBe('ninguna');
     expect(a.sentidoAutomatico).toBe(false);
     expect(a.usarGuion).toBe(false);
-    expect(a.migracion).toBe(1);
+    expect(a.migracion).toBe(2);
   });
 
   it('otra pestaña elegida a propósito se respeta', () => {

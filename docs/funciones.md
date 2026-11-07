@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.4.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.4.2, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -67,6 +67,7 @@ Estado de cada función en la versión 0.4.1, con la forma en que se ha verifica
 | Ayudante local con yt-dlp y FFmpeg | Automática, con descarga local. Falta el registro real en el navegador y una descarga real de YouTube |
 | Corrección del resultado con Claude | Simulador |
 | Letra de una canción colocada sobre los tiempos de la transcripción: el texto sale de la letra y los tiempos, de Whisper | Simulador, con Whisper real, y sesión real con una canción |
+| Haas-ja para la voz hablada en japonés y Whisper Turbo para las canciones, elegidos según el video | Automática, con Haas-ja y Whisper reales en la GPU |
 | Lista de modelos guardados, con lo que ocupa cada uno y borrado por modelo. Leerlos del disco ya no se anuncia como una descarga | Automática, y con Whisper real |
 
 ## Tarjetas

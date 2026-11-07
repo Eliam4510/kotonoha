@@ -1,6 +1,6 @@
 // Punto de entrada del motor: vive en un documento offscreen para no detenerse a mitad de una tarea.
 
-import { type Ajustes, completarAjustes } from '../compartido/ajustes';
+import { type Ajustes, completarAjustes, modeloParaTranscribir, type ModeloWhisper } from '../compartido/ajustes';
 import type { ApiMotor, CambioPalabra, FiltroPalabras } from '../compartido/api';
 import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
@@ -521,21 +521,22 @@ atenderFlujos({
     return String(unicas.length);
   },
   // Whisper emite cada evento como una línea de JSON.
-  transcribirEnVivo: async (emitir, senal) => {
-    const a = await aj();
-    return String(await whisper.transcribirEnVivo(a.whisperModelo, (e) => emitir(`${JSON.stringify(e)}\n`), senal));
-  },
-  transcribirDescarga: async (emitir, senal, url: string, desdeMs?: number) => {
-    const a = await aj();
+  // El modelo lo elige quien pide transcribir, que sabe si el video es una canción. Sin él, el de los ajustes, como voz.
+  transcribirEnVivo: async (emitir, senal, modelo?: ModeloWhisper) => String(await whisper.transcribirEnVivo(modelo ?? (await modeloPorOmision()), (e) => emitir(`${JSON.stringify(e)}\n`), senal)),
+  transcribirDescarga: async (emitir, senal, url: string, desdeMs?: number, modelo?: ModeloWhisper) => {
     const intensidad = async () => (await aj()).whisperIntensidad;
-    return String(await whisper.transcribirDescarga(url, a.whisperModelo, intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, desdeMs));
+    return String(await whisper.transcribirDescarga(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, desdeMs));
   },
-  transcribirArchivo: async (emitir, senal, url: string, pcmCrudo?: boolean, desdeMs?: number) => {
-    const a = await aj();
+  transcribirArchivo: async (emitir, senal, url: string, pcmCrudo?: boolean, desdeMs?: number, modelo?: ModeloWhisper) => {
     // La intensidad se vuelve a leer en cada trozo: se puede cambiar mientras transcribe.
     const intensidad = async () => (await aj()).whisperIntensidad;
-    return String(await whisper.transcribirArchivo(url, a.whisperModelo, intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, pcmCrudo, desdeMs));
+    return String(await whisper.transcribirArchivo(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, pcmCrudo, desdeMs));
   },
 });
+
+async function modeloPorOmision(): Promise<ModeloWhisper> {
+  const a = await aj();
+  return modeloParaTranscribir(a.whisperModelo, a.idiomaObjetivo, false);
+}
 
 arrancar().catch((e) => console.error('Arranque del motor:', e));

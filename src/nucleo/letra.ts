@@ -3,7 +3,10 @@
 
 import type { Linea } from './subtitulos';
 
-/** El verso `v` suena sobre las líneas `de` a `a` de la transcripción. Con -1, se canta pero la transcripción no lo recoge. */
+/**
+ * El verso `v` suena sobre las líneas `de` a `a` de la transcripción. Con -1, se canta pero la transcripción no lo recoge;
+ * con -2, no se canta: una marca de sección o un crédito.
+ */
 export interface EntradaAjuste {
   v: number;
   de: number;
@@ -19,6 +22,8 @@ export interface ResultadoAjuste {
 
 /** Las líneas de la letra no chocan con las de la transcripción: lo que se guarda por línea no se confunde. */
 export const ID_LETRA = 1_000_000;
+
+const NO_SE_CANTA = -2;
 
 const DURACION_MINIMA_MS = 700;
 const ESTIMADA_MINIMA_MS = 1500;
@@ -77,9 +82,32 @@ interface Pendiente {
   a: number;
 }
 
+/**
+ * Un verso que Claude se salta se sigue cantando, y faltaría en pantalla. Entra sin tiempo, detrás de donde suena por primera
+ * vez el anterior de la letra. Si nada tiene tiempo no se completa: esa letra no es de esta canción.
+ */
+function completar(versos: string[], ajuste: EntradaAjuste[]): EntradaAjuste[] {
+  if (!ajuste.some((e) => e.de >= 0)) return ajuste;
+  const salida = [...ajuste];
+  const vistos = new Set(ajuste.map((e) => e.v));
+  for (let v = 0; v < versos.length; v++) {
+    if (vistos.has(v)) continue;
+    let pos = 0;
+    for (let anterior = v - 1; anterior >= 0; anterior--) {
+      const i = salida.findIndex((e) => e.v === anterior);
+      if (i >= 0) {
+        pos = i + 1;
+        break;
+      }
+    }
+    salida.splice(pos, 0, { v, de: -1, a: -1 });
+  }
+  return salida;
+}
+
 /** Las entradas utilizables, en el orden en que suenan. Lo que no encaje en ese orden se queda sin tiempo, no sin verso. */
 function depurar(versos: string[], lineas: Linea[], ajuste: EntradaAjuste[]): Pendiente[] {
-  const validas = ajuste.filter((e) => Number.isInteger(e.v) && e.v >= 0 && e.v < versos.length);
+  const validas = completar(versos, ajuste.filter((e) => Number.isInteger(e.v) && e.v >= 0 && e.v < versos.length)).filter((e) => e.de !== NO_SE_CANTA);
   const tieneTiempo = (e: EntradaAjuste) => Number.isInteger(e.de) && e.de >= 0 && e.de < lineas.length;
   const conTiempo = validas.map((e, i) => ({ e, i })).filter(({ e }) => tieneTiempo(e));
   const enOrden = indicesEnOrden(conTiempo.map(({ e }) => e.de));
@@ -108,13 +136,13 @@ const duracionEstimada = (texto: string) => Math.min(ESTIMADA_MAXIMA_MS, Math.ma
 
 /**
  * Da tiempo a unos versos que la transcripción no recogió. Si el hueco es largo, por ejemplo un pasaje instrumental, se
- * pegan al verso siguiente, que es adonde llevan; si no hay siguiente, al anterior.
+ * pegan al verso siguiente, que es adonde llevan; si no hay siguiente, al anterior. Si no caben, toman lo que les sobra a sus
+ * vecinos: el reconocedor suele alargar una línea sobre lo que no entendió, y ahí es donde suenan. Devuelve dónde acaban.
  */
-function colocarEstimadas(textos: string[], salida: Linea[], siguiente: number | null, idDe: (k: number) => number) {
+function colocarEstimadas(textos: string[], salida: Linea[], siguiente: number | null, holguraSiguiente: number, idDe: (k: number) => number): number {
   const previa = salida[salida.length - 1];
   const finPrevia = previa?.fin ?? 0;
-  const deseadas = textos.map(duracionEstimada);
-  const total = deseadas.reduce((s, d) => s + d, 0);
+  const total = textos.reduce((s, t) => s + duracionEstimada(t), 0);
   let desde: number;
   let hasta: number;
   if (siguiente === null) {
@@ -124,9 +152,12 @@ function colocarEstimadas(textos: string[], salida: Linea[], siguiente: number |
     desde = siguiente - total;
     hasta = siguiente;
   } else {
-    desde = finPrevia;
-    hasta = siguiente;
-    // Sin hueco en el que quepan, se le quita la mitad a la línea anterior.
+    const falta = total - (siguiente - finPrevia);
+    const dePrevia = previa ? Math.min(falta, Math.max(0, previa.fin - previa.inicio - duracionEstimada(previa.texto))) : 0;
+    if (previa) previa.fin -= dePrevia;
+    desde = finPrevia - dePrevia;
+    hasta = siguiente + Math.min(falta - dePrevia, holguraSiguiente);
+    // Y si aun así no caben, se le quita la mitad a la línea anterior.
     if (previa && hasta - desde < HUECO_POR_LINEA_MS * textos.length) {
       previa.fin = previa.inicio + (previa.fin - previa.inicio) / 2;
       desde = previa.fin;
@@ -135,6 +166,18 @@ function colocarEstimadas(textos: string[], salida: Linea[], siguiente: number |
   for (const [k, t] of repartir(textos, desde, hasta).entries()) {
     salida.push({ id: idDe(salida.length), inicio: t.inicio, fin: t.fin, texto: textos[k] });
   }
+  return hasta;
+}
+
+/** Los versos que comparten alguna línea de la transcripción, desde el que empieza en `i`. */
+function bloqueDesde(entradas: Pendiente[], i: number): { versos: Pendiente[]; hasta: number } {
+  const versos = [entradas[i]];
+  let hasta = entradas[i].a;
+  for (let k = i + 1; k < entradas.length && entradas[k].de >= 0 && entradas[k].de <= hasta; k++) {
+    versos.push(entradas[k]);
+    hasta = Math.max(hasta, entradas[k].a);
+  }
+  return { versos, hasta };
 }
 
 /** Construye las líneas finales: el texto, de la letra; los tiempos, de la transcripción. */
@@ -145,27 +188,30 @@ export function aplicarAjuste(versos: string[], lineas: Linea[], ajuste: Entrada
   let conTiempo = 0;
   let estimadas = 0;
   let i = 0;
+  let noAntesDe = 0;
   while (i < entradas.length) {
     if (entradas[i].de < 0) {
       const sinTiempo: string[] = [];
       while (i < entradas.length && entradas[i].de < 0) sinTiempo.push(entradas[i++].texto);
-      const siguiente = i < entradas.length ? lineas[entradas[i].de].inicio : null;
-      colocarEstimadas(sinTiempo, salida, siguiente, idDe);
+      let siguiente: number | null = null;
+      let holgura = 0;
+      if (i < entradas.length) {
+        const { versos, hasta } = bloqueDesde(entradas, i);
+        siguiente = lineas[entradas[i].de].inicio;
+        holgura = Math.max(0, lineas[hasta].fin - siguiente - versos.reduce((s, e) => s + duracionEstimada(e.texto), 0));
+      }
+      noAntesDe = colocarEstimadas(sinTiempo, salida, siguiente, holgura, idDe);
       estimadas += sinTiempo.length;
       continue;
     }
     // Los versos que comparten alguna línea de la transcripción se reparten su tiempo entre todos.
-    const bloque = [entradas[i]];
-    let hasta = entradas[i].a;
-    for (i++; i < entradas.length && entradas[i].de >= 0 && entradas[i].de <= hasta; i++) {
-      bloque.push(entradas[i]);
-      hasta = Math.max(hasta, entradas[i].a);
-    }
-    const textos = bloque.map((e) => e.texto);
-    for (const [k, t] of repartir(textos, lineas[bloque[0].de].inicio, lineas[hasta].fin).entries()) {
+    const { versos, hasta } = bloqueDesde(entradas, i);
+    const textos = versos.map((e) => e.texto);
+    for (const [k, t] of repartir(textos, Math.max(lineas[entradas[i].de].inicio, noAntesDe), lineas[hasta].fin).entries()) {
       salida.push({ id: idDe(salida.length), inicio: t.inicio, fin: t.fin, texto: textos[k] });
     }
-    conTiempo += bloque.length;
+    i += versos.length;
+    conTiempo += versos.length;
   }
   // Una línea no sigue en pantalla cuando empieza la siguiente, ni pasa tan deprisa que no se pueda leer.
   for (let k = 0; k < salida.length; k++) {

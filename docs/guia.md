@@ -28,7 +28,7 @@ La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere e
 | Diccionarios | Ajustes, Diccionarios | JMdict en español, inglés o alemán, acento tonal de Kanjium y frecuencia de JPDB. Se descargan una vez y quedan en el navegador |
 | Clave de la API de Claude | Ajustes, Claude | Explicaciones, revisión de lecturas, traducción y corrección. Se guarda solo en el navegador |
 | Idioma y nivel | Ajustes, Idioma y nivel | Idioma de la interfaz, y por separado el de las explicaciones y las traducciones. El nivel adapta las explicaciones y decide cuánto furigana se ve al principio |
-| Idioma que estudias | Ajustes, Idioma y nivel, o el menú de la extensión | Japonés o inglés. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
+| Idioma que estudias | Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés o inglés. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
 La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
@@ -130,11 +130,15 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 
 | Modelo | Descarga | Uso |
 |---|---|---|
-| Whisper Turbo | 1,5 GB | Por omisión. La mayor precisión medida |
+| Automático | | Por omisión. Haas-ja para la voz en japonés, y Whisper Turbo para las canciones y los demás idiomas |
+| Haas-ja | 1,3 GB | Solo japonés. El más preciso y rápido con voz hablada, también con música de fondo, y con puntuación |
+| Whisper Turbo | 1,5 GB | El mejor con canciones |
 | Whisper Turbo ligero | 564 MB | Algo menos preciso, con menos memoria de video |
 | Whisper Base | 165 MB | Para equipos sin una GPU potente |
 
-Los modelos se guardan en el navegador y no se vuelven a descargar: cada vez se leen del disco, lo que puede tardar unos segundos. En **Ajustes, Transcripción con Whisper, Modelos guardados** se ve lo que ocupa cada uno y se puede borrar. Desinstalar la extensión también los borra.
+En automático, un video es una canción si se ha pegado su letra, si el sitio lo clasifica como música o si el título lo dice, como «MV» o «歌ってみた». Con voz hablada en japonés, Haas-ja comete un 3 % de errores frente al 9 % de Whisper Turbo, y transcribe 30 minutos en alrededor de un minuto, frente a unos 5. Con canciones escribe solo una parte de lo que se canta, y ahí Whisper Turbo es mejor. Mientras transcribe, el panel indica qué modelo está trabajando.
+
+Los modelos se guardan en el navegador y no se vuelven a descargar: cada vez se leen del disco, lo que puede tardar unos segundos. En **Ajustes, Transcripción de voz, Modelos guardados** se ve lo que ocupa cada uno y se puede borrar. Desinstalar la extensión también los borra.
 
 **Intensidad.** Determina qué fracción del tiempo trabaja la tarjeta gráfica. El resto lo descansa, y el descanso crece solo si otra aplicación la está ocupando.
 

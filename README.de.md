@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.4.1-A9E45B?style=flat-square" alt="Version 0.4.1">
+  <img src="https://img.shields.io/badge/Version-0.4.2-A9E45B?style=flat-square" alt="Version 0.4.2">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Kontinuierliche Integration"></a>
-  <img src="https://img.shields.io/badge/Unit--Tests-419-0ca30c?style=flat-square" alt="419 Unit-Tests">
+  <img src="https://img.shields.io/badge/Unit--Tests-459-0ca30c?style=flat-square" alt="459 Unit-Tests">
   <img src="https://img.shields.io/badge/Oberfl%C3%A4che-6%20Sprachen-8FCBFF?style=flat-square" alt="Oberfläche in 6 Sprachen">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 bis N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 bis C2">
@@ -74,7 +74,7 @@ Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japa
   <tr>
     <td valign="top"><b>Übersetzen und korrigieren mit Claude</b><br>Übersetzung in die Hilfssprache, beginnend bei dem Abschnitt, der gerade läuft. Automatische Korrektur der Homophone in generierten Untertiteln, mit Titel und Gesamttext als Kontext und ohne Rückfragen.</td>
     <td valign="top"><b>SRT hin und zurück</b><br>Import und Export auf jeder Website: SRT, VTT, ASS und TTML. Importiertes bleibt für diesen Titel gespeichert, und japanische Netflix-Untertitel bleiben erhalten, auch wenn eine andere Region sie nicht anbietet.</td>
-    <td valign="top"><b>Lokale Transkription</b><br>Whisper auf der Grafikkarte über WebGPU, ohne dass das Audio den Computer verlässt: 30 Minuten Video in etwa 5, ohne den Desktop auszubremsen. Es arbeitet in Abschnitten mit Pausen und erholt sich, wenn der Treiber neu startet. Wird der Text eines Liedes eingefügt, legt Claude ihn auf die Zeiten von Whisper.</td>
+    <td valign="top"><b>Lokale Transkription</b><br>Haas-ja für gesprochenes Japanisch und Whisper für Lieder und andere Sprachen, auf der Grafikkarte über WebGPU, ohne dass das Audio den Computer verlässt: 30 Minuten Video in etwa einer Minute mit Haas-ja und in etwa 5 mit Whisper, ohne den Desktop auszubremsen. Es arbeitet in Abschnitten mit Pausen und erholt sich, wenn der Treiber neu startet. Wird der Text eines Liedes eingefügt, legt Claude ihn auf die Zeiten von Whisper.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="Kosten für Claude im Monat, nach Tagen, Modellen und Aufgaben"></td>
@@ -210,7 +210,7 @@ Gemessen mit einer Radeon RX 9060 XT mit 16 GB, 16 GB RAM, einem 4K-Monitor mit 
 
 | Messgröße | Ergebnis |
 |---|---|
-| Geschwindigkeit im automatischen Modus | 30 Minuten Video in etwa 5 Minuten, das 6,1- bis 6,4-Fache der Echtzeit |
+| Geschwindigkeit im automatischen Modus | 30 Minuten Video in etwa einer Minute mit Haas-ja und in etwa 5 Minuten mit Whisper Turbo, das 6,1- bis 6,4-Fache der Echtzeit |
 | Zeichenfehler bei 126 echten Sätzen | 8,8 % |
 | Zwei Stunden Audio am Stück | 19,7 Minuten, ohne Treiber-Neustarts und ohne wachsenden Speicher |
 | Flüssigkeit des Desktops während der Transkription | 99. Perzentil von 17,5 ms, keine Bilder über 33 ms |
@@ -265,6 +265,7 @@ Der letzte Befehl kompiliert und legt in `release/` die ZIP-Dateien der Erweiter
 | `node pruebas/ingles-whisper.mjs stimme.wav` | Whisper auf Englisch auf der GPU, mit simulierter Korrektur durch Claude |
 | `node pruebas/letra.mjs stimme.wav` | Einen Liedtext auf die Zeiten einer Transkription legen: mit einer automatischen Spur und, mit einer Stimmprobe, mit Whisper auf der GPU |
 | `node pruebas/modelos-guardados.mjs` | Die Liste der gespeicherten Modelle: der Platzbedarf jedes Modells und dass das Löschen eines Modells kein anderes beschädigt, das Dateien mit ihm teilt |
+| `node pruebas/modelos-voz.mjs stimme.wav` | Welches Modell was transkribiert: Haas-ja für gesprochenes Japanisch, Whisper Turbo für Lieder, und die manuelle Wahl |
 | `node pruebas/ingles-grande.mjs` | Das größte Wörterbuch mit einem leeren Profil: installieren, damit starten, nachschlagen und entfernen. Lädt etwa 110 MB herunter |
 | `node pruebas/e2e.mjs` | Die Erweiterung von Anfang bis Ende in Edge |
 | `node pruebas/subtitulos.mjs` | Übersetzen, korrigieren, exportieren und importieren, auf Seiten, die Netflix und YouTube nachahmen, mit einer simulierten Claude-API |
@@ -285,7 +286,7 @@ Die Browsertests verwenden eine Kompilierung mit fester Kennung, die mit `KK_SAL
 
 ## Projektstand
 
-Version 0.4.1 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader auf 16 echten öffentlichen Websites, aber noch nicht in einer echten Sitzung auf einer Videoseite.
+Version 0.4.2 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader auf 16 echten öffentlichen Websites, aber noch nicht in einer echten Sitzung auf einer Videoseite.
 
 ## Datenschutz
 

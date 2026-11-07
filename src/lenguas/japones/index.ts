@@ -13,6 +13,7 @@ function saludo(hora: number, nombre: string): string {
 }
 
 export const JAPONES: PaqueteLengua = {
+  tituloDeCancion: /ミュージックビデオ|歌ってみた|カラオケ|主題歌|歌詞|オリジナル曲/,
   id: 'ja',
   bcp47: 'ja-JP',
   nombrePropio: '日本語',

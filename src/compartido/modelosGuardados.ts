@@ -5,7 +5,7 @@ import { MODELOS_WHISPER, type ModeloWhisper } from './ajustes';
 
 export const CACHE_MODELOS = 'transformers-cache';
 
-export type DefinicionModelo = Pick<(typeof MODELOS_WHISPER)[ModeloWhisper], 'id' | 'dtype'>;
+export type DefinicionModelo = Pick<(typeof MODELOS_WHISPER)[ModeloWhisper], 'id' | 'dtype' | 'tdt'>;
 
 export interface ArchivoGuardado {
   url: string;
@@ -28,10 +28,12 @@ const LISTA = Object.entries(MODELOS_WHISPER) as [ModeloWhisper, DefinicionModel
 
 const nombreDe = (url: string) => decodeURIComponent(new URL(url).pathname.split('/').pop() ?? '');
 const esDelRepositorio = (url: string, modelo: DefinicionModelo) => url.includes(`/${modelo.id}/`);
+const rutasTdt = ({ tdt }: DefinicionModelo) => (tdt ? [tdt.vocabulario, tdt.codificador, tdt.datosCodificador, tdt.decodificador, tdt.datosDecodificador].filter((r): r is string => !!r) : []);
 
 /** Sus partes son archivos ONNX de una precisión concreta; la configuración y el tokenizador valen para cualquiera. */
 export function archivoDelModelo(url: string, modelo: DefinicionModelo): boolean {
   if (!esDelRepositorio(url, modelo)) return false;
+  if (modelo.tdt) return rutasTdt(modelo).some((r) => url.endsWith(`/${r}`));
   const nombre = nombreDe(url);
   if (!nombre.includes('.onnx')) return true;
   return Object.entries(modelo.dtype).some(([parte, tipo]) => nombre === `${parte}_${tipo}.onnx` || nombre === `${parte}_${tipo}.onnx_data`);
@@ -39,6 +41,7 @@ export function archivoDelModelo(url: string, modelo: DefinicionModelo): boolean
 
 /** Solo cuenta como guardado con todas sus partes: una descarga se puede cortar entre una y otra. */
 export function modeloCompleto(urls: string[], modelo: DefinicionModelo): boolean {
+  if (modelo.tdt) return rutasTdt(modelo).every((r) => urls.some((u) => esDelRepositorio(u, modelo) && u.endsWith(`/${r}`)));
   return Object.entries(modelo.dtype).every(([parte, tipo]) => urls.some((u) => esDelRepositorio(u, modelo) && nombreDe(u) === `${parte}_${tipo}.onnx`));
 }
 

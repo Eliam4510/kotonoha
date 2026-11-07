@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.4.1-A9E45B?style=flat-square" alt="버전 0.4.1">
+  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.4.2-A9E45B?style=flat-square" alt="버전 0.4.2">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="지속적 통합"></a>
-  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-419-0ca30c?style=flat-square" alt="단위 테스트 419개">
+  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-459-0ca30c?style=flat-square" alt="단위 테스트 459개">
   <img src="https://img.shields.io/badge/%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4-6%EA%B0%9C%20%EC%96%B8%EC%96%B4-8FCBFF?style=flat-square" alt="인터페이스 6개 언어">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5~N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1~C2">
@@ -74,7 +74,7 @@ Kotonoha(言の葉, ‘말의 잎’)는 YouTube, Netflix 및 다른 플레이�
   <tr>
     <td valign="top"><b>Claude로 번역하고 수정</b><br>지금 보고 있는 구간부터 보조 언어로 번역합니다. 제목과 전체 텍스트를 맥락으로 삼아 생성된 자막의 동음이의어를 묻지 않고 자동으로 고칩니다.</td>
     <td valign="top"><b>SRT 가져오기와 내보내기</b><br>어느 사이트에서든 SRT, VTT, ASS, TTML을 가져오고 내보냅니다. 가져온 자막은 해당 제목에 저장되고, Netflix 일본어 자막은 다른 지역에서 제공하지 않아도 유지됩니다.</td>
-    <td valign="top"><b>로컬 전사</b><br>WebGPU로 그래픽 카드에서 Whisper를 실행하며 오디오는 컴퓨터 밖으로 나가지 않습니다. 30분 영상을 약 5분에 처리하고 바탕 화면이 버벅이지 않습니다. 구간별로 쉬면서 작업하고 드라이버가 다시 시작되어도 복구합니다. 노래 가사를 붙여넣으면 Claude가 Whisper의 시간에 맞춰 배치합니다.</td>
+    <td valign="top"><b>로컬 전사</b><br>일본어 말소리에는 Haas-ja, 노래와 다른 언어에는 Whisper를 WebGPU로 그래픽 카드에서 실행하며 오디오는 컴퓨터 밖으로 나가지 않습니다. 30분 영상을 Haas-ja로 약 1분, Whisper로 약 5분에 처리하고 바탕 화면이 버벅이지 않습니다. 구간별로 쉬면서 작업하고 드라이버가 다시 시작되어도 복구합니다. 노래 가사를 붙여넣으면 Claude가 Whisper의 시간에 맞춰 배치합니다.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="이번 달 Claude 비용, 일별·모델별·작업별"></td>
@@ -210,7 +210,7 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 
 | 항목 | 결과 |
 |---|---|
-| 자동 모드 속도 | 30분 영상에 약 5분, 실시간의 6.1~6.4배 |
+| 자동 모드 속도 | 30분 영상에 Haas-ja로 약 1분, Whisper Turbo로 약 5분, 실시간의 6.1~6.4배 |
 | 실제 문장 126개의 문자 오류율 | 8.8% |
 | 연속 2시간 오디오 | 19.7분, 드라이버 재시작 없음, 메모리 증가 없음 |
 | 전사 중 바탕 화면 부드러움 | 99번째 백분위수 17.5ms, 33ms 초과 프레임 없음 |
@@ -265,6 +265,7 @@ npm run paquete
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU에서 실행하는 영어 Whisper와 모의 Claude 수정 |
 | `node pruebas/letra.mjs voice.wav` | 가사를 전사 시간에 배치: 자동 트랙으로, 음성 샘플을 주면 GPU의 Whisper로 |
 | `node pruebas/modelos-guardados.mjs` | 저장된 모델 목록: 각 모델이 차지하는 용량, 그리고 모델 하나를 삭제해도 파일을 공유하는 다른 모델이 손상되지 않는지 |
+| `node pruebas/modelos-voz.mjs voice.wav` | 어떤 모델이 무엇을 전사하는지: 일본어 말소리는 Haas-ja, 노래는 Whisper Turbo, 그리고 직접 고른 모델 |
 | `node pruebas/ingles-grande.mjs` | 깨끗한 프로필에서 가장 큰 사전을 설치하고, 사전을 넣은 채 시작하고, 조회하고, 삭제합니다. 약 110MB를 내려받습니다 |
 | `node pruebas/e2e.mjs` | Edge에서 확장 프로그램 전체 흐름 |
 | `node pruebas/subtitulos.mjs` | Netflix와 YouTube를 흉내 낸 페이지와 모의 Claude API로 번역, 수정, 내보내기, 가져오기 |
@@ -285,7 +286,7 @@ npm run paquete
 
 ## 프로젝트 상태
 
-현재 버전은 0.4.1입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, 동영상 사이트의 실제 세션에서는 아직 테스트하지 않았습니다.
+현재 버전은 0.4.2입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, 동영상 사이트의 실제 세션에서는 아직 테스트하지 않았습니다.
 
 ## 개인정보
 

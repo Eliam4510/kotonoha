@@ -185,7 +185,8 @@ const lineaEn = async (pagina, segundos) => {
   await pagina.waitForTimeout(500);
   return enOverlay(pagina, (r) => {
     const l = r.querySelector('.linea-sub.objetivo');
-    if (!l) return '';
+    // La última línea se desvanece al acabar: sigue en la página un momento, pero ya no se ve.
+    if (!l || l.closest('.saliendo')) return '';
     const c = l.cloneNode(true);
     c.querySelectorAll('rt, .glosa').forEach((x) => x.remove());
     return c.textContent.replaceAll('\u2060', '').trim();
@@ -250,6 +251,14 @@ comprobar((await lineaEn(p, 3)) === '夜の川を歩いて', 'Sobre el video se 
 comprobar((await lineaEn(p, 11)) === '', 'Y nada donde no se canta', await lineaEn(p, 11));
 await p.screenshot({ path: join(CAPTURAS, 'video.png') });
 comprobar((await area.inputValue()) === '', 'El panel se queda listo para otra');
+// La traducción que había era de lo que oyó el reconocedor: se rehace sola con la letra.
+let rehecha = null;
+for (let i = 0; i < 30 && !rehecha; i++) {
+  const es = (await motor('subtitulosGenerados', ID)).find((g) => g.idioma === 'es');
+  if (es?.lineas.length && es.lineas.every((l) => l.id >= 1_000_000)) rehecha = es;
+  else await p.waitForTimeout(500);
+}
+comprobar(rehecha?.lineas.length === 4, 'La traducción se rehace sola con la letra', rehecha?.lineas.length);
 
 const opciones = () => enOverlay(p, (r) => [...r.querySelectorAll('.panel-flotante select[aria-label="Subtítulos en japonés"] option')].map((o) => o.textContent));
 await p.keyboard.press('Escape');
@@ -278,6 +287,7 @@ comprobar((await lineaEn(p, 3)) === '夜の川を歩いて', 'Y vuelve la letra'
 // Traducirla no arrastra lo traducido de la otra pista.
 const traducida = await traducirPista();
 comprobar(traducida?.lineas.length === 4, 'La traducción tiene una línea por verso, ni una más', traducida?.lineas.length);
+comprobar(traducida?.lineas.every((l) => l.id >= 1_000_000), 'Y es de la letra, no de lo que oyó el reconocedor');
 
 // Al volver.
 await p.reload();

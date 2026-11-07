@@ -10,6 +10,7 @@ import { modeloGuardado } from '../compartido/modelosGuardados';
 import { tr } from '../compartido/i18n';
 import { fondo } from '../compartido/rpc';
 import type { Linea } from '../nucleo/subtitulos';
+import { segmentosDeTokens, type TokenConTiempo } from '../nucleo/tdt';
 import {
   AcumuladorAudio,
   esAlucinacion,
@@ -51,7 +52,7 @@ const reglas = () => motorLengua().transcripcion.reglas;
 
 let trabajador: Worker | null = null;
 let contadorId = 0;
-const pendientes = new Map<number, { ok: (r: { trozos: { text: string; timestamp: [number, number | null] }[] }) => void; mal: (e: Error) => void }>();
+const pendientes = new Map<number, { ok: (r: { trozos?: { text: string; timestamp: [number, number | null] }[]; tokens?: TokenConTiempo[] }) => void; mal: (e: Error) => void }>();
 let alMensajeCarga: ((m: Record<string, unknown>) => void) | null = null;
 let temporizadorLiberar: ReturnType<typeof setTimeout> | null = null;
 
@@ -131,7 +132,7 @@ async function cargarModelo(idModelo: ModeloWhisper, emitir: Emitir): Promise<st
       }
     };
     emitir({ tipo: 'preparando' });
-    t.postMessage({ tipo: 'cargar', modelo: modelo.id, dtype: modelo.dtype, externos: modelo.externos });
+    t.postMessage(modelo.tdt ? { tipo: 'cargarTdt', modelo: modelo.id, tdt: modelo.tdt } : { tipo: 'cargar', modelo: modelo.id, dtype: modelo.dtype, externos: modelo.externos });
   });
 }
 
@@ -150,7 +151,7 @@ function transcribirTrozo(pcm: Float32Array): Promise<SegmentoWhisper[]> {
     pendientes.set(id, {
       ok: (r) => {
         clearTimeout(vigilante);
-        ok(r.trozos.map((c) => ({ texto: c.text, inicio: c.timestamp[0] ?? 0, fin: c.timestamp[1] ?? null })));
+        ok(r.tokens ? segmentosDeTokens(r.tokens, reglas()) : (r.trozos ?? []).map((c) => ({ texto: c.text, inicio: c.timestamp[0] ?? 0, fin: c.timestamp[1] ?? null })));
       },
       mal: (e) => {
         clearTimeout(vigilante);
@@ -242,7 +243,9 @@ async function procesarTrozo(trozo: TrozoAudio, idModelo: ModeloWhisper, emitir:
   };
 
   const segmentos = (await pasada({ desde: 0, hasta: duracion })).filter((s) => !esBucle(s.texto) && !esAlucinacion(s.texto, reglas()));
-  for (const h of huecosSinTexto(segmentos, 0, duracion, reglas())) {
+  // Un transductor no se salta la voz por haber dado por terminado un trozo: volver a pasarlo no recupera nada.
+  const huecos = MODELOS_WHISPER[idModelo]?.tdt ? [] : huecosSinTexto(segmentos, 0, duracion, reglas());
+  for (const h of huecos) {
     if (senal.aborted) break;
     // Si faltó todo el trozo, repetir la misma ventana daría lo mismo: se prueba con otras más cortas.
     const todo = h.hasta - h.desde >= duracion - 1;
