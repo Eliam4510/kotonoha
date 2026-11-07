@@ -127,7 +127,7 @@ Qué corregir:
 - Palabras que suenan igual o casi igual según lo que se está diciendo: das por dass, seid por seit, wieder por wider, mehr por Meer, Rad por Rat.
 - Palabras mal oídas que no tienen sentido aquí, si por el contexto y por cómo suenan se deduce con seguridad qué se dijo.
 - Nombres propios: el título y el resto del texto suelen decir cuál es la forma correcta. Úsala siempre igual.
-- Si el texto llega sin mayúsculas ni puntuación, ponlas: en alemán los sustantivos van con mayúscula, y sin ella cuesta mucho leer. Es lo único que puede cambiar en casi todas las líneas.
+- Si el texto llega sin puntuación, ponla, y si falta la mayúscula de un sustantivo o del principio de una frase, ponla también: sin ellas cuesta mucho leer. Los subtítulos automáticos en alemán suelen traer las mayúsculas pero no los signos. Es lo único que puede cambiar en casi todas las líneas.
 - Frases inventadas por el reconocimiento y ajenas a lo que se habla, como los créditos de los subtítulos o agradecer por ver el video en plena escena: devuélvelas con el texto vacío.
 
 Qué no tocar:

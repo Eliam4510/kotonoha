@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.5.0-A9E45B?style=flat-square" alt="Versión 0.5.0">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.5.1-A9E45B?style=flat-square" alt="Versión 0.5.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
   <img src="https://img.shields.io/badge/pruebas%20unitarias-508-0ca30c?style=flat-square" alt="508 pruebas unitarias">
   <img src="https://img.shields.io/badge/interfaz-6%20idiomas-8FCBFF?style=flat-square" alt="Interfaz en 6 idiomas">
@@ -289,7 +289,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.5.0 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, con el lector de páginas en 16 sitios públicos reales, y a mano con una sesión real en YouTube: subtítulos automáticos corregidos por Claude, explicaciones y la letra de una canción. El alemán se ha probado con los diccionarios reales de Wiktionary, sobre páginas que imitan a YouTube y con el lector de páginas, y su transcripción con una grabación real; aún no con una sesión real en un sitio de video.
+La versión 0.5.1 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, con el lector de páginas en 16 sitios públicos reales, y a mano con una sesión real en YouTube: subtítulos automáticos corregidos por Claude, explicaciones y la letra de una canción. El alemán se ha probado con los diccionarios reales de Wiktionary, sobre páginas que imitan a YouTube y con el lector de páginas, su transcripción con una grabación real, y a mano en YouTube: el cambio de idioma desde el video, los subtítulos propios y los automáticos, y su corrección con Claude.
 
 ## Privacidad
 

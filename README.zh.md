@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.5.0-A9E45B?style=flat-square" alt="版本 0.5.0">
+  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.5.1-A9E45B?style=flat-square" alt="版本 0.5.1">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="持续集成"></a>
   <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-508-0ca30c?style=flat-square" alt="508 个单元测试">
   <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-6%20%E7%A7%8D%E8%AF%AD%E8%A8%80-8FCBFF?style=flat-square" alt="界面支持 6 种语言">
@@ -289,7 +289,7 @@ npm run paquete
 
 ## 项目状态
 
-当前版本是 0.5.0。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。德语已使用 Wiktionary 的真实词典，在模仿 YouTube 的页面上和网页阅读器中测试过，转录用一段真实录音测试过；尚未在视频网站的真实会话中测试。
+当前版本是 0.5.1。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。德语已使用 Wiktionary 的真实词典，在模仿 YouTube 的页面上和网页阅读器中测试过，转录用一段真实录音测试过，并在 YouTube 上手动测试过：在视频中切换语言、视频自带字幕和自动字幕，以及 Claude 的更正。
 
 ## 隐私
 
