@@ -18,8 +18,9 @@ describe('bases de datos por lengua', () => {
     expect(db).toBe(baseDe('ja'));
   });
 
-  it('abre lo que dejó la versión anterior sin migrar nada', async () => {
-    // Una base como la de quien ya usaba la extensión: la misma versión, con sus datos.
+  it('abre lo que dejó la versión anterior sin perder nada', async () => {
+    // Una base como la de quien ya usaba la extensión, en la versión 5: se abre en la 6, que solo añade la tabla de
+    // las formas flexionadas, con sus datos intactos.
     const anterior = new Dexie('kikitori-anterior');
     anterior.version(5).stores({ palabras: 'clave, estado, lema, actualizada, rastreada' });
     await anterior.open();
@@ -29,7 +30,8 @@ describe('bases de datos por lengua', () => {
     const base = baseDe('anterior');
     expect(base.name).toBe('kikitori-anterior');
     await base.open();
-    expect(base.verno).toBe(5);
+    expect(base.verno).toBe(6);
+    expect(base.tables.map((t) => t.name)).toContain('formas');
     expect(await base.palabras.get('猫|')).toMatchObject({ lema: '猫', estado: 'conocida' });
     // La misma palabra de la versión anterior no aparece repetida ni con otra clave.
     expect(await base.palabras.count()).toBe(1);

@@ -21,12 +21,38 @@ export interface ReglasTranscripcion {
   maximoCaracteres: number;
   /** Lo que se tarda en decir un carácter, para cuando Whisper no da el final de un segmento. */
   msPorCaracter: number;
+  /** Si las palabras se separan con espacios: entonces un segmento que no empieza con uno sigue la palabra anterior. */
+  espacios?: boolean;
+}
+
+/**
+ * Whisper pone a veces el límite entre dos segmentos dentro de una palabra: «über da» y «s Zimmer ging». Se nota en que
+ * el segundo no empieza con un espacio, como empiezan los demás. Ese trozo vuelve a su palabra, en el segmento anterior.
+ */
+export function unirPalabrasPartidas(segmentos: SegmentoWhisper[]): SegmentoWhisper[] {
+  const salida = segmentos.map((s) => ({ ...s }));
+  for (let i = 1; i < salida.length; i++) {
+    const previo = salida[i - 1];
+    const actual = salida[i];
+    const resto = /^[\p{L}\p{M}'’]{1,6}(?=\s|[,.;:!?…]|$)/u.exec(actual.texto)?.[0];
+    if (!resto || !/\p{L}$/u.test(previo.texto.trimEnd())) continue;
+    // Una palabra partida no deja hueco entre los dos: con una pausa en medio, son dos palabras.
+    if (previo.fin !== null && actual.inicio - previo.fin > 0.3) continue;
+    previo.texto = previo.texto.trimEnd() + resto;
+    actual.texto = actual.texto.slice(resto.length);
+  }
+  return salida;
 }
 
 /** Whisper procesa ventanas de 30 s: el corte se busca antes de llegar al límite. */
 const MINIMO_S = 14;
 const MAXIMO_S = 27;
-const VENTANA_SILENCIO_S = 0.25;
+/**
+ * Lo que se mira para decidir dónde hay un silencio. Con un cuarto de segundo, en una lectura sin pausas ganaba a veces
+ * una consonante sorda, como la s de «das» o la ch de «vermochte», que suena con poca energía: el corte partía la
+ * palabra, y Whisper oía «da» en un trozo y «s Zimmer» en el siguiente. Casi medio segundo ya no cabe en una consonante.
+ */
+const VENTANA_SILENCIO_S = 0.45;
 
 /** Por debajo de esta energía no hay voz: enviarlo a Whisper solo produce alucinaciones. */
 const UMBRAL_SILENCIO = 0.004;
@@ -241,6 +267,7 @@ const DURACION_MINIMA_MS = 700;
 export function segmentosALineas(segmentos: SegmentoWhisper[], mapa: TramoTiempo[], duracionTrozoS: number, idInicial: number, reglas: ReglasTranscripcion): Linea[] {
   const lineas: Linea[] = [];
   let id = idInicial;
+  if (reglas.espacios) segmentos = unirPalabrasPartidas(segmentos);
   segmentos.forEach((s, i) => {
     const limpio = colapsarRepeticiones(s.texto.trim());
     if (!limpio || esAlucinacion(limpio, reglas) || esBucle(s.texto)) return;

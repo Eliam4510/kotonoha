@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.4.3, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.5.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -145,7 +145,7 @@ Estado de cada función en la versión 0.4.3, con la forma en que se ha verifica
 
 | Función | Verificación |
 |---|---|
-| Subtítulos en inglés, con cada palabra analizada y los secundarios en el idioma de apoyo | Página imitada. Pendiente de una sesión real |
+| Subtítulos en inglés, con cada palabra analizada y los secundarios en el idioma de apoyo | Página imitada, y sesión real en YouTube |
 | Corrección de subtítulos automáticos y creación de inglés desde otro idioma | Página imitada |
 | Pronunciación americana y británica en IPA, en la ficha y, si se pide, sobre cada palabra | Automática, con datos reales de Wiktionary |
 | Color por sílaba tónica: la primera, una del medio o la última | Automática |
@@ -155,11 +155,27 @@ Estado de cada función en la versión 0.4.3, con la forma en que se ha verifica
 | Verbos con partícula y frases hechas, también separados: *picked it up* encuentra *pick up* | Automática |
 | Gramática de A1 a C2: 51 reglas, confirmadas por Claude | Simulador |
 | Lector de páginas, apagado al empezar, que deja en paz las páginas en otro idioma | Automática, y en 16 sitios públicos reales |
-| Whisper en inglés, con las líneas partidas para leerlas | Automática, con una voz sintética |
+| Parakeet y Whisper en inglés, con las líneas partidas para leerlas | Automática, con una voz sintética, y en una sesión real |
 | Instrucciones a Claude propias del inglés | Simulador |
 | Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
 | Voces neuronales de Azure en inglés | Pendiente |
 | Evaluación de nivel y camino de A1 a C2 | Automática |
+
+## Alemán
+
+| Función | Verificación |
+|---|---|
+| Subtítulos en alemán, con cada palabra analizada y los secundarios en el idioma de apoyo | Página imitada. Pendiente de una sesión real |
+| Corrección de subtítulos automáticos con las instrucciones del alemán | Página imitada |
+| De qué palabra sale cada forma, con las formas de Wiktionary: *ging* es *gehen*, *Häuser* es *Haus*. Entre dos posibles, la más frecuente | Automática, con datos reales |
+| Verbos separables con la partícula al final: *fängt morgen an* encuentra *anfangen* | Automática, con datos reales |
+| Pronunciación en IPA, sin variantes regionales, y color por sílaba tónica | Automática, con datos reales de Wiktionary |
+| Definiciones y traducciones de Wiktionary en español, inglés, chino, coreano y japonés, y definiciones en alemán | Automática, con datos reales |
+| Frecuencia según subtítulos de películas y series | Automática, con datos reales |
+| Gramática de A1 a C2: 24 reglas, confirmadas por Claude | Automática |
+| Lector de páginas, apagado al empezar | Automática |
+| Parakeet para la voz y Whisper Turbo para las canciones | Automática, con una grabación real |
+| Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
 
 ## Criterios de diseño
 
@@ -179,8 +195,10 @@ Estado de cada función en la versión 0.4.3, con la forma en que se ha verifica
 
 | Limitación | Detalle |
 |---|---|
-| Idioma de estudio | Japonés e inglés. Cada idioma nuevo necesita su propio paquete, en `src/lenguas` |
+| Idioma de estudio | Japonés, inglés y alemán. Cada idioma nuevo necesita su propio paquete, en `src/lenguas` |
 | Análisis del inglés | Lo hace un modelo pequeño, que cabe en la extensión. En frases ambiguas puede equivocarse de categoría, y con ella de traducción bajo la palabra. La ficha sigue mostrando todas las definiciones |
+| Análisis del alemán | Sale de las formas de los diccionarios: sin el alemán–inglés, cada palabra es su propia forma. Entre dos palabras posibles decide la frecuencia, sin mirar la frase; Claude corrige lo que falle al revisar la línea |
+| Compuestos alemanes | Un sustantivo compuesto que no esté en los diccionarios no se descompone en sus partes |
 | Diccionario inglés-inglés | Es grande: descarga unos 110 MB y ocupa unos 220 MB. Instalarlo y quitarlo lleva unos minutos. Solo se propone con la interfaz en inglés |
 | Traducciones de la interfaz | Escritas con ayuda de IA, sin revisión nativa todavía. Los errores se corrigen en `idiomas/` |
 | Lector de páginas | Solo actúa en el marco principal: no llega al texto dentro de un iframe. Lo que una página dibuje en un lienzo o en una imagen no es texto |

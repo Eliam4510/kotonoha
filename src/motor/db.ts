@@ -5,7 +5,7 @@ import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
-import type { Transcripcion } from '../lenguas/tipos';
+import type { FormaFlexionada, Transcripcion } from '../lenguas/tipos';
 import type { DatosTrazos } from '../nucleo/trazos';
 
 export interface FilaTermino {
@@ -18,6 +18,13 @@ export interface FilaTermino {
   puntuacion: number;
   glosas: string[];
   seq: number;
+}
+
+/** Una forma flexionada y las palabras de las que sale, según un diccionario: ging, de gehen. */
+export interface FilaForma {
+  dic: string;
+  forma: string;
+  lemas: FormaFlexionada[];
 }
 
 export interface FilaFrecuencia {
@@ -113,6 +120,7 @@ class BaseKotonoha extends Dexie {
   correcciones!: Table<FilaCorrecciones, string>;
   consumo!: Table<FilaConsumo, number>;
   trazos!: Table<FilaTrazos, string>;
+  formas!: Table<FilaForma, [string, string]>;
 
   constructor(nombre: string) {
     super(nombre);
@@ -133,6 +141,7 @@ class BaseKotonoha extends Dexie {
     this.version(3).stores({ correcciones: 'clave' });
     this.version(4).stores({ consumo: '++id, mes, t' });
     this.version(5).stores({ trazos: 'caracter' });
+    this.version(6).stores({ formas: '[dic+forma], dic' });
   }
 }
 

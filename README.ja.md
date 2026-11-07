@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.ja.png" alt="Kotonoha：日本語と英語を学ぶためのインタラクティブな字幕、辞書、カード、Claude の解説" width="100%">
+  <img src="docs/img/banner.ja.png" alt="Kotonoha：日本語、英語、ドイツ語を学ぶためのインタラクティブな字幕、辞書、カード、Claude の解説" width="100%">
 </p>
 
 <p align="center">
@@ -20,16 +20,16 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.4.3-A9E45B?style=flat-square" alt="バージョン 0.4.3">
+  <img src="https://img.shields.io/badge/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3-0.5.0-A9E45B?style=flat-square" alt="バージョン 0.5.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="継続的インテグレーション"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-463-0ca30c?style=flat-square" alt="単体テスト 463 件">
+  <img src="https://img.shields.io/badge/%E5%8D%98%E4%BD%93%E3%83%86%E3%82%B9%E3%83%88-508-0ca30c?style=flat-square" alt="単体テスト 508 件">
   <img src="https://img.shields.io/badge/%E8%A1%A8%E7%A4%BA-6%20%E8%A8%80%E8%AA%9E-8FCBFF?style=flat-square" alt="表示は 6 言語">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5〜N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1〜C2">
 </p>
 
 <p align="center">
-  <b>本物の動画と文章で日本語と英語を学ぶためのブラウザ拡張機能です。</b>
+  <b>本物の動画と文章で日本語、英語、ドイツ語を学ぶためのブラウザ拡張機能です。</b>
 </p>
 
 <p align="center">
@@ -50,6 +50,8 @@
 Kotonoha（言の葉）は、YouTube、Netflix などのプレーヤーにインタラクティブな字幕を重ねて表示します。各単語にはふりがな、ピッチアクセント、どれだけ知っているかが示され、マウスを合わせると費用なしで辞書の項目が開きます。ボタンひとつで、その文での意味を Claude に尋ねられます。さらに、辞書、Anki または内蔵の復習向けのカード作成、Claude API による文脈に沿った説明を備えています。どのウェブページでも、Claude のようなチャットでも、ページを壊さずに日本語のテキストを色分けし、ふりがなを付け、クリックひとつで単語を調べられます。テキスト、EPUB の本、手元の動画ファイルにも対応します。表示言語はスペイン語、英語、ドイツ語、中国語、韓国語、日本語です。
 
 バージョン 0.4.0 からは英語も学べます。単語パネルにはアメリカ英語とイギリス英語の発音が IPA で示され、句動詞は離れていても見つかり、不規則形がどの単語から来ているかもわかります。辞書は Wiktionary のもので、表示言語に合わせて使えます。言語ごとに単語、辞書、カード、設定を別々に保存し、クリックひとつで切り替えられます。
+
+バージョン 0.5.0 からはドイツ語も学べます。単語パネルには活用形や格変化形がどの単語から来ているかが示され（*ging* は *gehen*、*Häuser* は *Haus*）、分離動詞は前つづりが文末にあっても見つかり、発音は IPA で示されます。辞書は同じく Wiktionary のもので、ドイツ語の話し声は Parakeet が文字起こしします。
 
 名前は『古今和歌集』仮名序（905 年頃）に由来します。「やまとうたは、人の心を種として、万の言の葉とぞなれりける」。
 
@@ -74,7 +76,7 @@ Kotonoha（言の葉）は、YouTube、Netflix などのプレーヤーにイン
   <tr>
     <td valign="top"><b>Claude で翻訳と修正</b><br>今見ている部分から補助言語に翻訳します。タイトルと全文を文脈にして、自動生成字幕の同音異義語を確認なしで直します。</td>
     <td valign="top"><b>SRT の読み込みと書き出し</b><br>どのサイトでも SRT、VTT、ASS、TTML を読み込み、書き出せます。読み込んだ字幕はタイトルごとに保存され、Netflix の日本語字幕は他の地域で提供されなくても残ります。</td>
-    <td valign="top"><b>ローカルの文字起こし</b><br>日本語の話し声には Haas-ja、英語の話し声には Parakeet、歌には Whisper を、WebGPU でグラフィックカード上で動かし、音声はパソコンの外に出ません。30 分の動画を Haas-ja か Parakeet なら約 1 分、Whisper なら約 5 分で処理し、デスクトップは重くなりません。区切りごとに休み、ドライバーが再起動しても復旧します。曲の歌詞を貼り付けると、Claude が Whisper のタイミングに配置します。</td>
+    <td valign="top"><b>ローカルの文字起こし</b><br>日本語の話し声には Haas-ja、英語とドイツ語の話し声には Parakeet、歌には Whisper を、WebGPU でグラフィックカード上で動かし、音声はパソコンの外に出ません。30 分の動画を Haas-ja か Parakeet なら約 1 分、Whisper なら約 5 分で処理し、デスクトップは重くなりません。区切りごとに休み、ドライバーが再起動しても復旧します。曲の歌詞を貼り付けると、Claude が Whisper のタイミングに配置します。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="今月の Claude の費用、日別・モデル別・作業別"></td>
@@ -172,13 +174,13 @@ npm run build
 
 最初にようこそ画面が開き、言語、勉強する言語、レベルを尋ねて、次のことを提案します。
 
-1. 辞書のインストール。日本語は自分の言語の JMdict（まだなければ英語版）、ピッチアクセント、頻度。英語は自分の言語の Wiktionary、発音、頻度。
+1. 辞書のインストール。日本語は自分の言語の JMdict（まだなければ英語版）、ピッチアクセント、頻度。英語とドイツ語は自分の言語の Wiktionary、発音、頻度。ドイツ語には、各形がどの単語から来ているかがわかるドイツ語–英語の辞書が加わります。
 2. Claude の API キーの追加。ブラウザにのみ保存されます。任意で、なくても字幕、辞書、色分け、カード、Whisper は使えます。
 3. カードの保存先の選択：内蔵の復習、または AnkiConnect アドオン経由の Anki。
 
 すべてスキップでき、あとで拡張機能のウィンドウ（`Alt+Shift+K`）の**設定**で変更できます。
 
-これで、勉強する言語の字幕がある動画を開くと Kotonoha のバーが表示されます。日本語のあるページには色分けとふりがなが表示され、英語の場合は先に拡張機能のメニューからリーダーをオンにします。詳しくは[使い方](docs/ja/guide.md)をご覧ください。
+これで、勉強する言語の字幕がある動画を開くと Kotonoha のバーが表示されます。日本語のあるページには色分けとふりがなが表示され、英語とドイツ語の場合は先に拡張機能のメニューからリーダーをオンにします。詳しくは[使い方](docs/ja/guide.md)をご覧ください。
 
 ### ネット動画を文字起こしするヘルパー
 
@@ -263,6 +265,7 @@ npm run paquete
 | `node pruebas/trazos-web.mjs` | 実データの書き順、タブのリーダー、クリップボード、分割表示 |
 | `node pruebas/ingles.mjs` | 英語の学習を最初から最後まで：言語の選択、辞書のインストール、動画、ページ、そして何も混ざらずに日本語に戻ること |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU での英語の Whisper と、シミュレートした Claude の修正 |
+| `node pruebas/aleman.mjs` | 実際の辞書でドイツ語を最初から最後まで：言語の選択、辞書のインストール、解析、動画、ページ、日本語へ戻る |
 | `node pruebas/letra.mjs voice.wav` | 歌詞を文字起こしのタイミングに配置：自動トラックで、音声サンプルがあれば GPU の Whisper で |
 | `node pruebas/modelos-guardados.mjs` | 保存済みモデルの一覧：それぞれの使用容量と、1 つ削除してもファイルを共有する別のモデルが壊れないこと |
 | `node pruebas/modelos-voz.mjs voice.wav` | どのモデルが何を文字起こしするか：日本語の話し声は Haas-ja、歌は Whisper Turbo、手動で選んだモデル |
@@ -286,7 +289,7 @@ npm run paquete
 
 ## プロジェクトの状況
 
-現在のバージョンは 0.4.3 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストし、YouTube の実際のセッションでも手作業で確認しました。Claude が直した自動字幕、解説、歌の歌詞です。
+現在のバージョンは 0.5.0 です。自動テストは、実際の Edge、実際の GPU 上の Whisper、Claude API と AnkiConnect の模擬サーバーで主な流れを確認しています。動画サイトは自動操作のブラウザに字幕を提供しないので、YouTube と Netflix はプレーヤーの構造を模したページでテストします。YouTube は実際のセッションでも手動で確認しましたが、長期の検証はこれからです。ページリーダーは自動操作のブラウザで、ログインせずに約 30 の実際の公開サイトで試しました。画面とこの文書の翻訳は AI の助けで書かれたもので、ネイティブによる確認はまだです。 英語は実際の辞書と GPU 上の合成音声を使い、YouTube を模したページでテストし、ページリーダーは実際の公開サイト 16 か所でテストし、YouTube の実際のセッションでも手作業で確認しました。Claude が直した自動字幕、解説、歌の歌詞です。ドイツ語は Wiktionary の実際の辞書を使い、YouTube を模したページとページリーダーでテストし、文字起こしは実際の録音でテストしました。動画サイトの実際のセッションではまだテストしていません。
 
 ## プライバシー
 
@@ -294,7 +297,7 @@ npm run paquete
 - Whisper が文字起こしする音声はパソコンの外に出ません。カードの音声と画面も、Anki に送らない限り同様です。
 - Claude API には作業に必要なテキストだけを送ります：文、字幕の台本、動画のタイトル。曲の歌詞を貼り付けた場合は、その歌詞も送信します。
 - 単語の音声と画像の検索は JapanesePod101、Wikimedia Commons、Openverse に直接送られ、各漢字の画は jsDelivr に要求します。
-- 辞書のダウンロードは一度だけです。日本語の辞書と英語の頻度表は GitHub から、英語の辞書は Hugging Face から取得します。英単語の音声は Wikimedia Commons と Lingua Libre から取得します。
+- 辞書のダウンロードは一度だけです。日本語の辞書と英語・ドイツ語の頻度表は GitHub から、英語・ドイツ語の辞書は Hugging Face から取得します。英語とドイツ語の単語の音声は Wikimedia Commons と Lingua Libre から取得します。
 - **クリップボードを追う**は、オプションがオンでタブが表示されている間だけ読み取り、読み取った内容はパソコンの外に出ません。
 - 拡張機能に独自のサーバーはなく、利用統計も集めません。
 
@@ -303,7 +306,7 @@ npm run paquete
 コードは [MIT ライセンス](LICENSE)で公開しています。第三者のコンポーネント、利用時にダウンロードするデータ、責任ある利用の条件は [docs/ja/notices.md](docs/ja/notices.md) にあります。
 
 - 辞書：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium)、[JPDB](https://jpdb.io)、Yomitan 形式。
-- 英語：定義と発音は [Wiktionary](https://www.wiktionary.org)、整形は [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org)、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。
+- 英語とドイツ語：定義と発音は [Wiktionary](https://www.wiktionary.org)、整形は [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org)、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、英語の解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。
 - 文字起こし：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) と [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 書き順：[KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、CC BY-SA 3.0。
 - アイコン：[Phosphor](https://phosphoricons.com)。フォント：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic)、[Nunito](https://fonts.google.com/specimen/Nunito)。

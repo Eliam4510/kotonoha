@@ -180,6 +180,36 @@ export function leerBancoTerminos(filas: unknown[][], omitir: ReadonlySet<string
   return salida;
 }
 
+/** Una forma flexionada y las palabras de las que sale, según un diccionario. */
+export interface FormaImportada {
+  forma: string;
+  lemas: { lema: string; flexion: string; pos: string }[];
+}
+
+/**
+ * Las filas que no definen nada, sino que dicen de qué palabra es forma otra:
+ * ["ging", "", "non-lemma", "v", 0, [["gehen", ["first/third-person singular preterite"]]], 0, ""].
+ * En las lenguas sin un analizador que lo sepa, con ellas se encuentra la forma de diccionario.
+ */
+export function leerBancoFormas(filas: unknown[][], acumuladas = new Map<string, FormaImportada>()): Map<string, FormaImportada> {
+  for (const f of filas) {
+    const definiciones = f[5];
+    if (!Array.isArray(definiciones)) continue;
+    const forma = String(f[0] ?? '');
+    for (const d of definiciones) {
+      if (!Array.isArray(d) || typeof d[0] !== 'string' || !Array.isArray(d[1])) continue;
+      const lema = d[0];
+      if (!lema || lema === forma) continue;
+      const fila = acumuladas.get(forma) ?? { forma, lemas: [] };
+      if (!fila.lemas.some((x) => x.lema === lema)) {
+        fila.lemas.push({ lema, flexion: d[1].filter((x): x is string => typeof x === 'string').join('; '), pos: String(f[3] ?? '') });
+      }
+      acumuladas.set(forma, fila);
+    }
+  }
+  return acumuladas;
+}
+
 function valorFrecuencia(d: unknown): { rango: number; texto?: string } | null {
   if (typeof d === 'number') return { rango: d };
   if (typeof d === 'string') {

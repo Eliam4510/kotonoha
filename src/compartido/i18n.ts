@@ -69,6 +69,7 @@ export const LENGUAS = [
   // Para quien estudia la lengua en la que habla: en ella, solo tiene sentido explicar con palabras sencillas.
   { id: 'ja', valor: 'japonés sencillo', nombre: tm('Japonés sencillo'), ingles: 'simple Japanese', explica: true, traduce: false, sencilla: true },
   { id: 'en', valor: 'inglés sencillo', nombre: tm('Inglés sencillo'), ingles: 'simple English', explica: true, traduce: false, sencilla: true },
+  { id: 'de', valor: 'alemán sencillo', nombre: tm('Alemán sencillo'), ingles: 'simple German', explica: true, traduce: false, sencilla: true },
 ] as const;
 
 const esSencilla = (l: (typeof LENGUAS)[number]) => 'sencilla' in l;

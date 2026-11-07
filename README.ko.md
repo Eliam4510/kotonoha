@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.ko.png" alt="Kotonoha: 일본어와 영어 학습을 위한 대화형 자막, 사전, 카드, Claude 설명" width="100%">
+  <img src="docs/img/banner.ko.png" alt="Kotonoha: 일본어, 영어, 독일어 학습을 위한 대화형 자막, 사전, 카드, Claude 설명" width="100%">
 </p>
 
 <p align="center">
@@ -20,16 +20,16 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.4.3-A9E45B?style=flat-square" alt="버전 0.4.3">
+  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.5.0-A9E45B?style=flat-square" alt="버전 0.5.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="지속적 통합"></a>
-  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-463-0ca30c?style=flat-square" alt="단위 테스트 463개">
+  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-508-0ca30c?style=flat-square" alt="단위 테스트 508개">
   <img src="https://img.shields.io/badge/%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4-6%EA%B0%9C%20%EC%96%B8%EC%96%B4-8FCBFF?style=flat-square" alt="인터페이스 6개 언어">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5~N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1~C2">
 </p>
 
 <p align="center">
-  <b>실제 영상과 글로 일본어와 영어를 배우는 브라우저 확장 프로그램입니다.</b>
+  <b>실제 영상과 글로 일본어, 영어, 독일어를 배우는 브라우저 확장 프로그램입니다.</b>
 </p>
 
 <p align="center">
@@ -50,6 +50,8 @@
 Kotonoha(言の葉, ‘말의 잎’)는 YouTube, Netflix 및 다른 플레이어 위에 대화형 자막을 겹쳐 표시합니다. 각 단어에는 후리가나, 고저 악센트, 아는 정도가 표시되고, 마우스를 올리면 비용 없이 사전 항목이 열립니다. 버튼 하나로 그 문장에서 어떤 뜻인지 Claude에게 물어볼 수 있습니다. 사전, Anki 또는 내장 복습용 카드 제작, Claude API로 생성하는 맥락별 설명도 제공합니다. 어떤 웹 페이지에서든, Claude 같은 채팅에서도, 페이지를 망가뜨리지 않고 일본어 글에 색을 입히고 후리가나를 달며 클릭 한 번으로 단어를 찾아봅니다. 글, EPUB 책, 내 영상 파일에서도 작동합니다. 인터페이스는 스페인어, 영어, 독일어, 중국어, 한국어, 일본어로 제공됩니다.
 
 버전 0.4.0부터 영어도 공부할 수 있습니다. 단어 패널은 미국식과 영국식 발음을 IPA로 보여 주고, 구동사가 떨어져 있어도 찾아내며, 불규칙형이 어떤 단어에서 왔는지 알려 줍니다. 사전은 Wiktionary에서 가져오며 인터페이스 언어로 제공됩니다. 언어마다 단어, 사전, 카드, 설정을 따로 저장하고, 클릭 한 번으로 바꿀 수 있습니다.
+
+버전 0.5.0부터 독일어도 공부할 수 있습니다. 단어 패널은 활용형과 격변화형이 어떤 단어에서 왔는지 알려 주고(*ging*은 *gehen*, *Häuser*는 *Haus*), 분리 동사의 접두사가 문장 끝에 있어도 찾아내며, IPA 발음을 보여 줍니다. 독일어 사전도 Wiktionary에서 가져오며, 독일어 말소리는 Parakeet가 전사합니다.
 
 이름은 『고킨와카슈』 서문(905년경)에서 왔습니다. 일본의 시가는 사람의 마음을 씨앗으로 삼아, 거기서 수많은 말의 잎이 돋아난다는 구절입니다.
 
@@ -74,7 +76,7 @@ Kotonoha(言の葉, ‘말의 잎’)는 YouTube, Netflix 및 다른 플레이�
   <tr>
     <td valign="top"><b>Claude로 번역하고 수정</b><br>지금 보고 있는 구간부터 보조 언어로 번역합니다. 제목과 전체 텍스트를 맥락으로 삼아 생성된 자막의 동음이의어를 묻지 않고 자동으로 고칩니다.</td>
     <td valign="top"><b>SRT 가져오기와 내보내기</b><br>어느 사이트에서든 SRT, VTT, ASS, TTML을 가져오고 내보냅니다. 가져온 자막은 해당 제목에 저장되고, Netflix 일본어 자막은 다른 지역에서 제공하지 않아도 유지됩니다.</td>
-    <td valign="top"><b>로컬 전사</b><br>일본어 말소리에는 Haas-ja, 영어 말소리에는 Parakeet, 노래에는 Whisper를 WebGPU로 그래픽 카드에서 실행하며 오디오는 컴퓨터 밖으로 나가지 않습니다. 30분 영상을 Haas-ja나 Parakeet로 약 1분, Whisper로 약 5분에 처리하고 바탕 화면이 버벅이지 않습니다. 구간별로 쉬면서 작업하고 드라이버가 다시 시작되어도 복구합니다. 노래 가사를 붙여넣으면 Claude가 Whisper의 시간에 맞춰 배치합니다.</td>
+    <td valign="top"><b>로컬 전사</b><br>일본어 말소리에는 Haas-ja, 영어와 독일어 말소리에는 Parakeet, 노래에는 Whisper를 WebGPU로 그래픽 카드에서 실행하며 오디오는 컴퓨터 밖으로 나가지 않습니다. 30분 영상을 Haas-ja나 Parakeet로 약 1분, Whisper로 약 5분에 처리하고 바탕 화면이 버벅이지 않습니다. 구간별로 쉬면서 작업하고 드라이버가 다시 시작되어도 복구합니다. 노래 가사를 붙여넣으면 Claude가 Whisper의 시간에 맞춰 배치합니다.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="이번 달 Claude 비용, 일별·모델별·작업별"></td>
@@ -172,13 +174,13 @@ npm run build
 
 처음에는 환영 화면이 열려 언어, 공부할 언어, 수준을 묻고 다음을 제안합니다.
 
-1. 사전 설치. 일본어는 내 언어의 JMdict(아직 없으면 영어판), 고저 악센트, 빈도. 영어는 내 언어의 Wiktionary, 발음, 빈도.
+1. 사전 설치. 일본어는 내 언어의 JMdict(아직 없으면 영어판), 고저 악센트, 빈도. 영어와 독일어는 내 언어의 Wiktionary, 발음, 빈도. 독일어에는 각 형태의 원래 단어를 알려 주는 독일어–영어 사전이 더해집니다.
 2. Claude API 키 추가. 브라우저에만 저장됩니다. 선택 사항이며, 키가 없어도 자막, 사전, 색상, 카드, Whisper는 작동합니다.
 3. 카드 저장 위치 선택: 내장 복습 또는 AnkiConnect 부가 기능을 통한 Anki.
 
 모두 건너뛸 수 있고 나중에 확장 프로그램 창(`Alt+Shift+K`)의 **설정**에서 바꿀 수 있습니다.
 
-이후 공부하는 언어의 자막이 있는 영상을 열면 Kotonoha 바가 나타납니다. 일본어 글이 있는 페이지에는 색상과 후리가나가 나타나고, 영어는 먼저 확장 프로그램 메뉴에서 리더를 켜야 합니다. 나머지는 [사용 안내](docs/ko/guide.md)를 참고하세요.
+이후 공부하는 언어의 자막이 있는 영상을 열면 Kotonoha 바가 나타납니다. 일본어 글이 있는 페이지에는 색상과 후리가나가 나타나고, 영어와 독일어는 먼저 확장 프로그램 메뉴에서 리더를 켜야 합니다. 나머지는 [사용 안내](docs/ko/guide.md)를 참고하세요.
 
 ### 인터넷 영상 전사용 도우미
 
@@ -263,6 +265,7 @@ npm run paquete
 | `node pruebas/trazos-web.mjs` | 실제 데이터의 획순, 탭의 리더, 클립보드, 분할 화면 |
 | `node pruebas/ingles.mjs` | 영어 공부의 처음부터 끝까지: 언어 선택, 사전 설치, 영상, 페이지, 그리고 아무것도 섞이지 않은 채 일본어로 돌아오기 |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU에서 실행하는 영어 Whisper와 모의 Claude 수정 |
+| `node pruebas/aleman.mjs` | 실제 사전으로 처음부터 끝까지 독일어 공부: 언어 선택, 사전 설치, 분석, 영상, 페이지, 일본어로 돌아가기 |
 | `node pruebas/letra.mjs voice.wav` | 가사를 전사 시간에 배치: 자동 트랙으로, 음성 샘플을 주면 GPU의 Whisper로 |
 | `node pruebas/modelos-guardados.mjs` | 저장된 모델 목록: 각 모델이 차지하는 용량, 그리고 모델 하나를 삭제해도 파일을 공유하는 다른 모델이 손상되지 않는지 |
 | `node pruebas/modelos-voz.mjs voice.wav` | 어떤 모델이 무엇을 전사하는지: 일본어 말소리는 Haas-ja, 노래는 Whisper Turbo, 그리고 직접 고른 모델 |
@@ -286,7 +289,7 @@ npm run paquete
 
 ## 프로젝트 상태
 
-현재 버전은 0.4.3입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, YouTube 실제 세션에서도 직접 확인했습니다. Claude가 고친 자동 자막, 설명, 노래 가사입니다.
+현재 버전은 0.5.0입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, YouTube 실제 세션에서도 직접 확인했습니다. Claude가 고친 자동 자막, 설명, 노래 가사입니다. 독일어는 Wiktionary의 실제 사전으로, YouTube를 흉내 낸 페이지와 페이지 리더에서 테스트했고, 전사는 실제 녹음으로 테스트했습니다. 동영상 사이트의 실제 세션에서는 아직 테스트하지 않았습니다.
 
 ## 개인정보
 
@@ -294,7 +297,7 @@ npm run paquete
 - Whisper가 전사하는 오디오는 컴퓨터 밖으로 나가지 않습니다. 카드의 오디오와 화면도 Anki로 보내지 않는 한 마찬가지입니다.
 - Claude API에는 작업에 필요한 텍스트만 보냅니다: 문장, 자막 대본, 영상 제목. 노래 가사를 붙여넣으면 그 가사도 전송됩니다.
 - 단어의 오디오와 이미지 검색은 JapanesePod101, Wikimedia Commons, Openverse로 직접 전달되고, 한자별 획은 jsDelivr에 요청합니다.
-- 사전은 한 번만 내려받습니다. 일본어 사전과 영어 빈도표는 GitHub에서, 영어 사전은 Hugging Face에서 받습니다. 영어 단어 오디오는 Wikimedia Commons와 Lingua Libre에서 가져옵니다.
+- 사전은 한 번만 내려받습니다. 일본어 사전과 영어·독일어 빈도표는 GitHub에서, 영어·독일어 사전은 Hugging Face에서 받습니다. 영어와 독일어 단어 오디오는 Wikimedia Commons와 Lingua Libre에서 가져옵니다.
 - **클립보드 따라가기**는 옵션이 켜져 있고 탭이 보일 때만 읽으며, 읽은 내용은 컴퓨터 밖으로 나가지 않습니다.
 - 확장 프로그램에는 자체 서버가 없고 사용 통계를 수집하지 않습니다.
 
@@ -303,7 +306,7 @@ npm run paquete
 코드는 [MIT 라이선스](LICENSE)로 공개됩니다. 서드파티 구성 요소, 사용 중 내려받는 데이터, 책임 있는 사용 조건은 [docs/ko/notices.md](docs/ko/notices.md)에 있습니다.
 
 - 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io), Yomitan 형식.
-- 영어: 정의와 발음은 [Wiktionary](https://www.wiktionary.org), 정리는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org), 빈도는 [FrequencyWords](https://github.com/hermitdave/FrequencyWords), 분석은 [wink-nlp](https://github.com/winkjs/wink-nlp).
+- 영어와 독일어: 정의와 발음은 [Wiktionary](https://www.wiktionary.org), 정리는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org), 빈도는 [FrequencyWords](https://github.com/hermitdave/FrequencyWords), 영어 분석은 [wink-nlp](https://github.com/winkjs/wink-nlp).
 - 전사: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)와 [Transformers.js](https://github.com/huggingface/transformers.js).
 - 획순: [KanjiVG](https://kanjivg.tagaini.net), Ulrich Apel, CC BY-SA 3.0.
 - 아이콘: [Phosphor](https://phosphoricons.com). 글꼴: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic), [Nunito](https://fonts.google.com/specimen/Nunito).

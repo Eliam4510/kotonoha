@@ -18,6 +18,8 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Claude API 클라이언트 | Apache-2.0 |
 | [Transformers.js](https://github.com/huggingface/transformers.js)와 [ONNX Runtime](https://onnxruntime.ai) | Whisper 실행 | Apache-2.0 및 MIT |
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | 전사 모델, 사용 시 다운로드 | MIT |
+| [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0), Third Intelligence 제작, [Sanami의 ONNX 변환](https://huggingface.co/Sanami/haas-ja-onnx) | 일본어 전사 모델, 사용할 때 다운로드 | Apache-2.0 |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), NVIDIA 제작, [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx)와 [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx)의 ONNX 변환 | 영어와 독일어 전사 모델, 사용할 때 다운로드 | CC-BY-4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | 내 파일 읽기 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg 코어, 컴파일 시 복사 | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 인코딩 | LGPL-3.0 |
@@ -44,9 +46,9 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | 획순 | [KanjiVG](https://kanjivg.tagaini.net), Ulrich Apel, jsDelivr가 제공하는 원본 파일 | CC BY-SA 3.0 |
 | 단어 오디오 | JapanesePod101과 [Lingua Libre](https://lingualibre.org) | 각 출처의 조건 |
 | 이미지 | [Openverse](https://openverse.org) | 각 이미지의 라이선스 |
-| 영어 사전과 발음 | [Wiktionary](https://www.wiktionary.org), [kaikki.org](https://kaikki.org)를 바탕으로 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)이 정리, Hugging Face에서 제공 | CC BY-SA 4.0 |
-| 영어 빈도 | Hermit Dave의 [FrequencyWords](https://github.com/hermitdave/FrequencyWords), OpenSubtitles 기반 | CC BY-SA 4.0 |
-| 영어 단어 오디오 | Wikimedia Commons, [Lingua Libre](https://lingualibre.org) | 각 녹음의 조건 |
+| 영어와 독일어 사전과 발음 | [Wiktionary](https://www.wiktionary.org), [kaikki.org](https://kaikki.org)를 바탕으로 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)이 정리, Hugging Face에서 제공 | CC BY-SA 4.0 |
+| 영어와 독일어 빈도 | Hermit Dave의 [FrequencyWords](https://github.com/hermitdave/FrequencyWords), OpenSubtitles 기반 | CC BY-SA 4.0 |
+| 영어와 독일어 단어 오디오 | Wikimedia Commons, [Lingua Libre](https://lingualibre.org) | 각 녹음의 조건 |
 
 ## 외부 프로그램
 

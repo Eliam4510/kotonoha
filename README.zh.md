@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.zh.png" alt="Kotonoha：交互式字幕、词典、卡片和 Claude 讲解，用于学习日语和英语" width="100%">
+  <img src="docs/img/banner.zh.png" alt="Kotonoha：交互式字幕、词典、卡片和 Claude 讲解，用于学习日语、英语和德语" width="100%">
 </p>
 
 <p align="center">
@@ -20,16 +20,16 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.4.3-A9E45B?style=flat-square" alt="版本 0.4.3">
+  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.5.0-A9E45B?style=flat-square" alt="版本 0.5.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="持续集成"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-463-0ca30c?style=flat-square" alt="463 个单元测试">
+  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-508-0ca30c?style=flat-square" alt="508 个单元测试">
   <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-6%20%E7%A7%8D%E8%AF%AD%E8%A8%80-8FCBFF?style=flat-square" alt="界面支持 6 种语言">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 至 N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 至 C2">
 </p>
 
 <p align="center">
-  <b>一款通过真实视频和文章学习日语和英语的浏览器扩展。</b>
+  <b>一款通过真实视频和文章学习日语、英语和德语的浏览器扩展。</b>
 </p>
 
 <p align="center">
@@ -50,6 +50,8 @@
 Kotonoha（言の葉，意为“言语之叶”）在 YouTube、Netflix 和其他播放器上叠加交互式字幕。每个单词都显示注音、音调重音和掌握程度，鼠标悬停即可打开词典条目，不产生任何费用。一个按钮可以询问 Claude 这个词在这句话中的含义。扩展还提供词典、为 Anki 或内置复习功能制作卡片，以及通过 Claude API 生成的结合上下文的解释。在任何网页上，它都能为日语文本着色、添加注音，并通过单击查词，也适用于 Claude 这样的聊天页面，不会破坏页面。它也支持文本、EPUB 书籍和本地视频文件。界面提供西班牙语、英语、德语、中文、韩语和日语。
 
 从 0.4.0 版开始也可以学习英语：单词面板给出美式和英式的 IPA 发音，即使短语动词被拆开也能找到，并指出每个不规则形式来自哪个词。词典来自 Wiktionary，以界面语言提供。每种语言都保存自己的单词、词典、卡片和设置，单击即可切换。
+
+从 0.5.0 版开始也可以学习德语：单词面板指出每个变位或变格形式来自哪个词，例如 *ging* 来自 *gehen*，*Häuser* 来自 *Haus*；即使可分动词的前缀位于句末也能找到；并给出 IPA 发音。德语词典同样来自 Wiktionary，德语口语由 Parakeet 转录。
 
 名字出自《古今和歌集》的序文（约 905 年）：日本的诗歌以人心为种子，从中生出万千言语之叶。
 
@@ -74,7 +76,7 @@ Kotonoha（言の葉，意为“言语之叶”）在 YouTube、Netflix 和其�
   <tr>
     <td valign="top"><b>用 Claude 翻译和更正</b><br>翻译成辅助语言，从正在观看的部分开始。以标题和全文作为上下文，自动更正生成字幕中的同音词，无需询问。</td>
     <td valign="top"><b>SRT 导入导出</b><br>在任何网站都能导入和导出 SRT、VTT、ASS 和 TTML。导入的内容按标题保存；即使其他地区不提供，Netflix 的日语字幕也会保留。</td>
-    <td valign="top"><b>本地转录</b><br>日语口语用 Haas-ja，英语口语用 Parakeet，歌曲用 Whisper，通过 WebGPU 在显卡上运行，音频不会离开电脑：30 分钟的视频用 Haas-ja 或 Parakeet 约需 1 分钟，用 Whisper 约需 5 分钟，桌面不卡顿。它分段工作并适当休息，驱动程序重启后也能恢复。粘贴歌词后，Claude 会把它放到 Whisper 的时间上。</td>
+    <td valign="top"><b>本地转录</b><br>日语口语用 Haas-ja，英语和德语口语用 Parakeet，歌曲用 Whisper，通过 WebGPU 在显卡上运行，音频不会离开电脑：30 分钟的视频用 Haas-ja 或 Parakeet 约需 1 分钟，用 Whisper 约需 5 分钟，桌面不卡顿。它分段工作并适当休息，驱动程序重启后也能恢复。粘贴歌词后，Claude 会把它放到 Whisper 的时间上。</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/gasto.png" alt="本月 Claude 费用，按天、模型和任务显示"></td>
@@ -172,13 +174,13 @@ npm run build
 
 首次使用时会打开欢迎页，询问语言、要学习的语言和水平，并建议：
 
-1. 安装词典。日语：所用语言的 JMdict，如果还没有则使用英语版，以及音调重音和频率。英语：所用语言的 Wiktionary，以及发音和频率。
+1. 安装词典。日语：所用语言的 JMdict，如果还没有则使用英语版，以及音调重音和频率。英语和德语：所用语言的 Wiktionary，以及发音和频率；德语另加德英词典，可查出每个形式来自哪个词。
 2. 添加 Claude API 密钥，它只保存在浏览器中。这是可选的：没有它，字幕、词典、颜色、卡片和 Whisper 也能使用。
 3. 选择卡片保存到哪里：内置复习，或通过 AnkiConnect 插件发送到 Anki。
 
 这些都可以跳过，之后可在扩展窗口（`Alt+Shift+K`）的**设置**中更改。
 
-之后，打开带所学语言字幕的视频时会出现 Kotonoha 工具栏。任何含日语文本的页面都会显示颜色和注音；英语则需要先在扩展菜单中开启阅读器。其余内容见[使用指南](docs/zh/guide.md)。
+之后，打开带所学语言字幕的视频时会出现 Kotonoha 工具栏。任何含日语文本的页面都会显示颜色和注音；英语和德语则需要先在扩展菜单中开启阅读器。其余内容见[使用指南](docs/zh/guide.md)。
 
 ### 转录网络视频的助手
 
@@ -263,6 +265,7 @@ npm run paquete
 | `node pruebas/trazos-web.mjs` | 真实数据的笔顺、标签页中的阅读器、剪贴板和分屏视图 |
 | `node pruebas/ingles.mjs` | 从头到尾学习英语：选择语言、安装词典、一个视频、一个网页，再回到日语，互不混淆 |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU 上的英语 Whisper，并模拟 Claude 的更正 |
+| `node pruebas/aleman.mjs` | 用真实词典从头到尾学习德语：选择语言、安装词典、分析、一个视频、一个网页，再回到日语 |
 | `node pruebas/letra.mjs voice.wav` | 把歌词放到转录的时间上：使用自动字幕轨；如果提供语音样本，则使用 GPU 上的 Whisper |
 | `node pruebas/modelos-guardados.mjs` | 已保存模型列表：每个模型占用的空间，以及删除一个模型不会破坏与其共享文件的另一个模型 |
 | `node pruebas/modelos-voz.mjs voice.wav` | 哪个模型转录什么：日语口语用 Haas-ja，歌曲用 Whisper Turbo，以及手动选择 |
@@ -286,7 +289,7 @@ npm run paquete
 
 ## 项目状态
 
-当前版本是 0.4.3。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。
+当前版本是 0.5.0。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。德语已使用 Wiktionary 的真实词典，在模仿 YouTube 的页面上和网页阅读器中测试过，转录用一段真实录音测试过；尚未在视频网站的真实会话中测试。
 
 ## 隐私
 
@@ -294,7 +297,7 @@ npm run paquete
 - Whisper 转录的音频不会离开电脑。卡片的音频和画面也不会，除非发送到 Anki。
 - 只向 Claude API 发送每项任务所需的文本：句子、字幕脚本和视频标题。如果粘贴了歌词，也包括歌词。
 - 单词的音频和图片搜索直接发送到 JapanesePod101、Wikimedia Commons 和 Openverse，每个汉字的笔画从 jsDelivr 获取。
-- 词典只下载一次：日语词典和英语频率表来自 GitHub，英语词典来自 Hugging Face。英语单词的音频来自 Wikimedia Commons 和 Lingua Libre。
+- 词典只下载一次：日语词典以及英语和德语频率表来自 GitHub，英语和德语词典来自 Hugging Face。英语和德语单词的音频来自 Wikimedia Commons 和 Lingua Libre。
 - **跟随剪贴板**只在选项开启且标签页可见时读取，读取的内容不会离开电脑。
 - 扩展没有自己的服务器，也不收集使用统计。
 
@@ -303,7 +306,7 @@ npm run paquete
 代码以 [MIT 许可证](LICENSE)发布。第三方组件、使用时下载的数据以及负责任使用的条件详见 [docs/zh/notices.md](docs/zh/notices.md)。
 
 - 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)，Yomitan 格式。
-- 英语：释义和发音来自 [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理；频率来自 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)；分析使用 [wink-nlp](https://github.com/winkjs/wink-nlp)。
+- 英语和德语：释义和发音来自 [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理；频率来自 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)；英语分析使用 [wink-nlp](https://github.com/winkjs/wink-nlp)。
 - 转录：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)，使用 [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0。
 - 图标：[Phosphor](https://phosphoricons.com)。字体：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) 和 [Nunito](https://fonts.google.com/specimen/Nunito)。

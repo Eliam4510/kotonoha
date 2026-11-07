@@ -12,19 +12,64 @@ import type {
 } from '../compartido/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 import { type AnalisisLinea, aplicarLecturas } from '../nucleo/analisisProfundo';
-import type { PuntoGramatica, TokenUnido, Transcripcion } from '../lenguas/tipos';
+import type { ConsultasAnalisis, FormaFlexionada, PuntoGramatica, TokenUnido, Transcripcion } from '../lenguas/tipos';
 import { db, type FilaPalabraDb, type FilaTermino } from './db';
 import { listaDiccionarios } from './diccionarios';
 import { lengua, motorLengua } from './lengua';
 
 let terminos: Set<string> | null = null;
+/** En las lenguas que lo usan, de qué palabras sale cada forma flexionada (ging, de gehen) y cuánto se usa cada una. */
+let formas: Map<string, FormaFlexionada[]> | null = null;
+let rangos: Map<string, number> | null = null;
 /** De qué lengua son los términos en memoria. */
 let lenguaTerminos = '';
 /**
  * Los de la lengua anterior. Quien estudia dos alterna entre ellas, y leer de nuevo los términos tarda unos segundos
  * con diccionarios grandes: sin ellos, al volver los subtítulos tardaban en aparecer.
  */
-let terminosAnteriores: { lengua: string; terminos: Set<string> } | null = null;
+let terminosAnteriores: {
+  lengua: string;
+  terminos: Set<string>;
+  formas: Map<string, FormaFlexionada[]> | null;
+  rangos: Map<string, number> | null;
+} | null = null;
+
+/** Lo que el analizador puede preguntar de los diccionarios sin esperar a la base. */
+const consultas: ConsultasAnalisis = {
+  formas: (palabra) => formas?.get(palabra),
+  // Las listas de frecuencia vienen en minúsculas: Essen cuenta como «essen».
+  rango: (termino) => rangos?.get(termino) ?? rangos?.get(termino.toLocaleLowerCase()),
+};
+
+/** Las formas de todos los diccionarios, juntas: la misma puede venir en varios. */
+async function leerFormas(): Promise<Map<string, FormaFlexionada[]>> {
+  const salida = new Map<string, FormaFlexionada[]>();
+  // Medio millón de formas repiten unas pocas descripciones («past participle») y lemas: cada texto se guarda una vez.
+  const unicos = new Map<string, string>();
+  const unico = (s: string) => {
+    const previo = unicos.get(s);
+    if (previo !== undefined) return previo;
+    unicos.set(s, s);
+    return s;
+  };
+  for (const f of await db.formas.toArray()) {
+    const lemas = f.lemas.map((l) => ({ lema: unico(l.lema), flexion: unico(l.flexion), pos: unico(l.pos) }));
+    const previas = salida.get(f.forma);
+    if (!previas) salida.set(f.forma, lemas);
+    else for (const l of lemas) if (!previas.some((x) => x.lema === l.lema)) previas.push(l);
+  }
+  return salida;
+}
+
+/** El mejor puesto de cada palabra entre las listas de frecuencia instaladas. */
+async function leerRangos(): Promise<Map<string, number>> {
+  const salida = new Map<string, number>();
+  for (const f of await db.frecuencias.toArray()) {
+    const previo = salida.get(f.termino);
+    if (previo === undefined || f.rango < previo) salida.set(f.termino, f.rango);
+  }
+  return salida;
+}
 
 export const analizadorListo = () => motorLengua().analizador.listo();
 export const totalTerminos = () => terminos?.size ?? 0;
@@ -38,11 +83,16 @@ let ultimaCarga = 0;
 export function recargarTerminos(): Promise<void> {
   const esta = ++ultimaCarga;
   const id = lengua().id;
+  const conFormas = !!motorLengua().formasDeDiccionario;
   cargaTerminos = (async () => {
     const claves = (await db.terminos.orderBy('termino').uniqueKeys()) as string[];
+    const nuevasFormas = conFormas ? await leerFormas() : null;
+    const nuevosRangos = conFormas ? await leerRangos() : null;
     // Una carga larga puede acabar después de cambiar de lengua: lo que traiga ya no sirve.
     if (esta !== ultimaCarga) return;
     terminos = new Set(claves);
+    formas = nuevasFormas;
+    rangos = nuevosRangos;
     lenguaTerminos = id;
     cacheTokens.clear();
   })();
@@ -68,12 +118,14 @@ async function preparar(): Promise<void> {
 export function olvidarLengua() {
   ultimaCarga++;
   const id = lengua().id;
-  const salientes = terminos && lenguaTerminos && lenguaTerminos !== id ? { lengua: lenguaTerminos, terminos } : null;
+  const salientes = terminos && lenguaTerminos && lenguaTerminos !== id ? { lengua: lenguaTerminos, terminos, formas, rangos } : null;
   if (terminosAnteriores?.lengua === id) {
-    terminos = terminosAnteriores.terminos;
+    ({ terminos, formas, rangos } = terminosAnteriores);
     lenguaTerminos = id;
   } else {
     terminos = null;
+    formas = null;
+    rangos = null;
     lenguaTerminos = '';
   }
   terminosAnteriores = salientes ?? terminosAnteriores;
@@ -88,7 +140,7 @@ const cacheLecturaLema = new Map<string, string>();
 function tokensDe(texto: string): TokenUnido[] {
   let r = cacheTokens.get(texto);
   if (!r) {
-    r = motorLengua().analizador.analizar(texto, terminos ? (x) => terminos!.has(x) : undefined);
+    r = motorLengua().analizador.analizar(texto, terminos ? (x) => terminos!.has(x) : undefined, consultas);
     if (cacheTokens.size > 20000) cacheTokens.clear();
     cacheTokens.set(texto, r);
   }
@@ -161,6 +213,16 @@ export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Pr
   const faltanFrec = dicFrec ? unicas.filter((_, i) => !filasFrec[i]).map(([, v]) => [dicFrec, v.lema, ''] as [string, string, string]) : [];
   const respaldoFrec = faltanFrec.length ? await db.frecuencias.bulkGet(faltanFrec) : [];
   const frecPorLema = new Map(respaldoFrec.filter(Boolean).map((f) => [f!.termino, f!.rango]));
+  // Las listas de frecuencia vienen en minúsculas: un sustantivo alemán, Kind, está como «kind».
+  const conMayuscula = dicFrec
+    ? [...new Set(unicas.filter(([, v], i) => !filasFrec[i] && !frecPorLema.has(v.lema) && v.lema !== v.lema.toLocaleLowerCase()).map(([, v]) => v.lema))]
+    : [];
+  if (conMayuscula.length) {
+    const filas = await db.frecuencias.bulkGet(conMayuscula.map((l) => [dicFrec!, l.toLocaleLowerCase(), l.toLocaleLowerCase()] as [string, string, string]));
+    conMayuscula.forEach((l, i) => {
+      if (filas[i]) frecPorLema.set(l, filas[i]!.rango);
+    });
+  }
 
   // Donde la pronunciación va aparte, se escribe la de cada forma: went no suena como go.
   const { lectura: lecturaDeLengua } = lengua();
@@ -356,7 +418,12 @@ export async function buscar(lema: string, lecturaPedida?: string): Promise<Resu
   const dicsFrec = lista.filter((d) => d.tipo === 'frecuencia');
   const frecuencias: EtiquetaFrecuencia[] = [];
   for (const d of dicsFrec) {
-    const f = (await db.frecuencias.get([d.id, lema, lecturaFinal])) ?? (await db.frecuencias.get([d.id, lema, '']));
+    const minuscula = lema.toLocaleLowerCase();
+    const f =
+      (await db.frecuencias.get([d.id, lema, lecturaFinal])) ??
+      (await db.frecuencias.get([d.id, lema, ''])) ??
+      // Las listas vienen en minúsculas: un sustantivo alemán, Kind, está como «kind».
+      (minuscula !== lema ? await db.frecuencias.get([d.id, minuscula, minuscula]) : undefined);
     if (f) frecuencias.push({ lista: d.titulo, rango: f.rango, texto: f.texto });
   }
 
@@ -400,7 +467,8 @@ export async function buscarLibre(texto: string, a: Ajustes): Promise<ResultadoB
 export async function compuestos(superficies: string[]): Promise<ResultadoBusqueda[]> {
   const salida: ResultadoBusqueda[] = [];
   const unirSinEspacios = (lista: string[]) => Array.from({ length: Math.max(0, Math.min(lista.length, 6) - 1) }, (_, i) => lista.slice(0, Math.min(lista.length, 6) - i).join(''));
-  for (const candidato of motorLengua().candidatosCompuestos?.(superficies) ?? unirSinEspacios(superficies)) {
+  const existe = terminos ? (x: string) => terminos!.has(x) : undefined;
+  for (const candidato of motorLengua().candidatosCompuestos?.(superficies, existe, consultas) ?? unirSinEspacios(superficies)) {
     if (terminos?.has(candidato)) {
       const r = await buscar(candidato);
       if (r.entradas.length) salida.push(r);

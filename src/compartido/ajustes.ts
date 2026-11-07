@@ -134,10 +134,10 @@ export const MODELOS_WHISPER: Record<ModeloWhisper, DefinicionModeloVoz> = {
   parakeet: {
     id: 'ysdede/parakeet-tdt-0.6b-v3-onnx',
     nombre: tm('Parakeet'),
-    descripcion: tm('El más preciso con voz hablada en inglés, también con música de fondo, con puntuación y los tiempos más exactos. Usa unos 2,5 GB de memoria de video. Para canciones, mejor Whisper Turbo.'),
+    descripcion: tm('El más preciso con voz hablada en inglés y en alemán, también con música de fondo, con puntuación y los tiempos más exactos. Usa unos 2,5 GB de memoria de video. Para canciones, mejor Whisper Turbo.'),
     dtype: {},
     mb: 1280,
-    lenguas: ['en'],
+    lenguas: ['en', 'de'],
     voz: true,
     tdt: {
       revision: 'e5356bf6e24bdb7a269536b0e9e7869bc034b893',

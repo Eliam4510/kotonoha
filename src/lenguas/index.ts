@@ -1,5 +1,6 @@
 // Las lenguas que se pueden estudiar. Para añadir una: su carpeta aquí al lado, y una línea en este archivo y en motor.ts.
 
+import { ALEMAN } from './aleman';
 import { INGLES } from './ingles';
 import { JAPONES } from './japones';
 import type { PaqueteLengua } from './tipos';
@@ -7,7 +8,7 @@ import type { PaqueteLengua } from './tipos';
 export type { PaqueteLengua } from './tipos';
 
 /** En el orden en que se ofrecen. */
-export const PAQUETES: PaqueteLengua[] = [JAPONES, INGLES];
+export const PAQUETES: PaqueteLengua[] = [JAPONES, INGLES, ALEMAN];
 
 const POR_ID = new Map(PAQUETES.map((p) => [p.id, p]));
 

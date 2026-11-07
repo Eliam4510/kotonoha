@@ -18,6 +18,8 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Claude API 客户端 | Apache-2.0 |
 | [Transformers.js](https://github.com/huggingface/transformers.js) 和 [ONNX Runtime](https://onnxruntime.ai) | 运行 Whisper | Apache-2.0 和 MIT |
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | 转录模型，使用时下载 | MIT |
+| [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0)，Third Intelligence 出品，使用 [Sanami 的 ONNX 转换版](https://huggingface.co/Sanami/haas-ja-onnx) | 日语转录模型，使用时下载 | Apache-2.0 |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)，NVIDIA 出品，使用 [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) 和 [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) 的 ONNX 转换版 | 英语和德语转录模型，使用时下载 | CC-BY-4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/ffmpeg` | 读取本地文件 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/core` | FFmpeg 核心，编译时复制 | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs)，`@breezystack/lamejs` | MP3 编码 | LGPL-3.0 |
@@ -44,9 +46,9 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | 笔顺 | [KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，原始文件由 jsDelivr 提供 | CC BY-SA 3.0 |
 | 单词音频 | JapanesePod101 和 [Lingua Libre](https://lingualibre.org) | 以各来源为准 |
 | 图片 | [Openverse](https://openverse.org) | 以每张图片的许可证为准 |
-| 英语词典和发音 | [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 根据 [kaikki.org](https://kaikki.org) 整理，从 Hugging Face 提供 | CC BY-SA 4.0 |
-| 英语频率 | Hermit Dave 的 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)，基于 OpenSubtitles | CC BY-SA 4.0 |
-| 英语单词音频 | Wikimedia Commons 和 [Lingua Libre](https://lingualibre.org) | 各录音的条款 |
+| 英语和德语词典和发音 | [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 根据 [kaikki.org](https://kaikki.org) 整理，从 Hugging Face 提供 | CC BY-SA 4.0 |
+| 英语和德语频率 | Hermit Dave 的 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)，基于 OpenSubtitles | CC BY-SA 4.0 |
+| 英语和德语单词音频 | Wikimedia Commons 和 [Lingua Libre](https://lingualibre.org) | 各录音的条款 |
 
 ## 外部程序
 

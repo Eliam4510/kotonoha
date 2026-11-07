@@ -18,6 +18,8 @@ Der Code von Kotonoha wird unter der [MIT-Lizenz](../../LICENSE) veröffentlicht
 | [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Client der Claude-API | Apache-2.0 |
 | [Transformers.js](https://github.com/huggingface/transformers.js) und [ONNX Runtime](https://onnxruntime.ai) | Ausführung von Whisper | Apache-2.0 und MIT |
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | Transkriptionsmodell, bei Nutzung heruntergeladen | MIT |
+| [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0), von Third Intelligence, in der [ONNX-Umwandlung von Sanami](https://huggingface.co/Sanami/haas-ja-onnx) | Transkriptionsmodell für Japanisch, bei Nutzung heruntergeladen | Apache-2.0 |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), von NVIDIA, in der ONNX-Umwandlung von [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) und [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) | Transkriptionsmodell für Englisch und Deutsch, bei Nutzung heruntergeladen | CC-BY-4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lesen eigener Dateien | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg-Kern, beim Kompilieren kopiert | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3-Kodierung | LGPL-3.0 |
@@ -44,9 +46,9 @@ Keine dieser Daten gehört zum Repository. Die Erweiterung lädt sie bei Bedarf 
 | Strichfolge | [KanjiVG](https://kanjivg.tagaini.net) von Ulrich Apel, mit den Originaldateien über jsDelivr | CC BY-SA 3.0 |
 | Audio von Wörtern | JapanesePod101 und [Lingua Libre](https://lingualibre.org) | Die jeder Quelle |
 | Bilder | [Openverse](https://openverse.org) | Die Lizenz jedes Bildes |
-| Wörterbücher und Aussprache des Englischen | [Wiktionary](https://www.wiktionary.org), aufbereitet von [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) aus [kaikki.org](https://kaikki.org) und über Hugging Face bereitgestellt | CC BY-SA 4.0 |
-| Häufigkeiten des Englischen | [FrequencyWords](https://github.com/hermitdave/FrequencyWords) von Hermit Dave, auf Basis von OpenSubtitles | CC BY-SA 4.0 |
-| Wort-Audio auf Englisch | Wikimedia Commons und [Lingua Libre](https://lingualibre.org) | Die der jeweiligen Aufnahme |
+| Wörterbücher und Aussprache des Englischen und Deutschen | [Wiktionary](https://www.wiktionary.org), aufbereitet von [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) aus [kaikki.org](https://kaikki.org) und über Hugging Face bereitgestellt | CC BY-SA 4.0 |
+| Häufigkeiten des Englischen und Deutschen | [FrequencyWords](https://github.com/hermitdave/FrequencyWords) von Hermit Dave, auf Basis von OpenSubtitles | CC BY-SA 4.0 |
+| Wort-Audio auf Englisch und Deutsch | Wikimedia Commons und [Lingua Libre](https://lingualibre.org) | Die der jeweiligen Aufnahme |
 
 ## Externe Programme
 

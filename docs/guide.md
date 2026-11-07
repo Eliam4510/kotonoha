@@ -14,6 +14,7 @@ This guide covers day-to-day use of Kotonoha. Installation is described in the [
 - [Audio, images and examples](#audio-images-and-examples)
 - [Web pages, reader and library](#web-pages-reader-and-library)
 - [Studying English](#studying-english)
+- [Studying German](#studying-german)
 - [Claude spending](#claude-spending)
 - [Data and backups](#data-and-backups)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -28,7 +29,7 @@ The first time, a welcome screen asks for the language, the one to study and the
 | Dictionaries | Settings, Dictionaries | JMdict in Spanish, English or German, Kanjium pitch accent and JPDB frequency. They are downloaded once and stay in the browser |
 | Claude API key | Settings, Claude | Explanations, reading review, translation and correction. It is stored only in the browser |
 | Language and level | Settings, Language and level | The interface language and, separately, that of explanations and translations. The level adapts the explanations and decides how much furigana is shown at first |
-| Language you're studying | Settings, Language and level, the extension menu, or **Video settings, Subtitles** on the video itself | Japanese or English. Each keeps its own words, dictionaries, cards and settings |
+| Language you're studying | Settings, Language and level, the extension menu, or **Video settings, Subtitles** on the video itself | Japanese, English or German. Each keeps its own words, dictionaries, cards and settings |
 | Anki | Settings, Cards and Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
 
 The extension works without a Claude key: subtitles, the dictionary, furigana, colors, flashcards and Whisper do not need one.
@@ -130,9 +131,9 @@ Whisper generates Japanese subtitles when a video has none. It runs on the graph
 
 | Model | Download | Use |
 |---|---|---|
-| Automatic | | Default. Haas-ja for Japanese speech, Parakeet for English speech and Whisper Turbo for songs |
+| Automatic | | Default. Haas-ja for Japanese speech, Parakeet for English and German speech, and Whisper Turbo for songs |
 | Haas-ja | 1.3 GB | Japanese only. The most accurate and fastest with spoken voice, even with background music, and it adds punctuation |
-| Parakeet | 1.3 GB | English only. The most accurate and fastest with spoken voice, even with background music, with punctuation and the most precise timing |
+| Parakeet | 1.3 GB | English and German. The most accurate and fastest with spoken voice, even with background music, with punctuation and the most precise timing |
 | Whisper Turbo | 1.5 GB | The best for songs |
 | Whisper Turbo ligero (light) | 564 MB | Slightly less accurate, with less video memory |
 | Whisper Base | 165 MB | For computers without a powerful GPU |
@@ -242,6 +243,21 @@ Everything this guide explains works the same way, with these differences:
 | Phrasal verbs | The panel looks for them even when they are split: *picked it up* brings up *pick up*. The same goes for set phrases |
 | Grammar | Points from A1 to C2, with the same confirmation by Claude |
 | Page reader | It starts off, because English is on almost every page. It is turned on in the extension menu or under **Settings, Page reader** |
+| Strokes and reading correction | Not offered |
+
+## Studying German
+
+It is chosen like English, and everything works the same way, with these differences:
+
+| Element | In German |
+|---|---|
+| Dictionaries | Wiktionary in the interface language, with definitions and short translations, plus German–English, which is always suggested because it brings the conjugated and declined forms of each word: about 17 MB to download. With the interface in German, German–German is suggested too, about 55 MB |
+| Forms | The panel opens the word each form comes from and says which form it is: *ging* opens *gehen*, in the simple past, and *Häuser*, *Haus*, in the plural. If a form can come from two words, such as *schönen*, the more frequent one wins. Articles go to *der* and *ein*, and the forms of *sein*, to *sein* |
+| Separable verbs | The panel looks for them even when the particle sits at the end of the clause: *fängt morgen an* brings up *anfangen*. The same goes for set phrases |
+| Pronunciation | IPA in the word panel, without regional variants. Over the words it starts off, as does the accent color, which shows the stressed syllable |
+| Grammar | Points from A1 to C2, such as the Perfekt, the Konjunktiv, the passive or subordinate clauses with the verb at the end, with the same confirmation by Claude |
+| Transcription | Parakeet for speech and Whisper Turbo for songs. With a real recording, Parakeet wrote with capitals and punctuation in less than half of Whisper's time |
+| Page reader | It starts off. It is turned on in the extension menu or under **Settings, Page reader** |
 | Strokes and reading correction | Not offered |
 
 ## Claude spending
