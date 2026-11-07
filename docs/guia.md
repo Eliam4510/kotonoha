@@ -1,4 +1,4 @@
-<p align="right"><b>Español</b> · <a href="guide.md">English</a></p>
+<p align="right"><b>Español</b> · <a href="guide.md">English</a> · <a href="de/guide.md">Deutsch</a> · <a href="zh/guide.md">简体中文</a> · <a href="ko/guide.md">한국어</a> · <a href="ja/guide.md">日本語</a></p>
 
 # Guía de uso
 
@@ -20,16 +20,26 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 
 ## Puesta en marcha
 
-Todo se configura en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+K`.
+La primera vez se abre una bienvenida que pregunta el idioma y el nivel, y propone instalar los diccionarios, añadir la clave de Claude y elegir dónde van las tarjetas. Se puede saltar, y volver a verla desde **Ajustes, Apariencia**. Todo se configura después en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+K`.
 
 | Paso | Dónde | Para qué sirve |
 |---|---|---|
-| Diccionarios | Ajustes, Diccionarios | JMdict en español e inglés, acento tonal de Kanjium y frecuencia de JPDB. Se descargan una vez y quedan en el navegador |
+| Diccionarios | Ajustes, Diccionarios | JMdict en español, inglés o alemán, acento tonal de Kanjium y frecuencia de JPDB. Se descargan una vez y quedan en el navegador |
 | Clave de la API de Claude | Ajustes, Claude | Explicaciones, revisión de lecturas, traducción y corrección. Se guarda solo en el navegador |
-| Nivel e idioma | Ajustes, Tu nivel e idioma | Adapta las explicaciones, que pueden pedirse en español, inglés o japonés sencillo |
+| Idioma y nivel | Ajustes, Idioma y nivel | Idioma de la interfaz, y por separado el de las explicaciones y las traducciones. El nivel adapta las explicaciones y decide cuánto furigana se ve al principio |
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
-La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, las tarjetas y Whisper no la necesitan.
+La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
+
+### Adaptarla
+
+| Opción | Dónde | Para qué sirve |
+|---|---|---|
+| Lecturas en rōmaji | Ajustes, Idioma y nivel | Para quien aún no lee kana. Vale para los subtítulos, las fichas y las páginas |
+| Colores de las palabras | Ajustes, Apariencia | Tres paletas: la habitual, una para daltonismo que se distingue sin rojo ni verde, y una de alto contraste |
+| Atajos | Ajustes, Atajos de teclado | Los de sobre el video se cambian ahí. Los que usa el navegador, como la captura de audio, en su página de atajos |
+| Tope de gasto | Ajustes, Claude | Al llegar a él, Claude deja de usarse hasta el mes siguiente |
+| Sitios sin lector | Ajustes, Lector de páginas, o el botón del borde de la página | Lo apaga solo donde estorbe |
 
 ## Sobre el video
 
@@ -39,9 +49,11 @@ Al abrir un video con subtítulos en japonés aparece una barra flotante en la p
 
 **Mover los subtítulos.** Se arrastran desde cualquier punto, incluso desde una palabra, a la altura y el lado que se prefiera. La posición se guarda para todos los videos y se conserva en proporción al tamaño del video, también en modo teatro. Un doble clic sobre el fondo, o **Volver a su sitio** en los ajustes de visualización, los devuelve a su lugar.
 
-**Ficha de palabra.** Al pasar el ratón sobre una palabra se abre su ficha, sin ninguna petición a Claude, con definiciones, frecuencia, audio, imágenes, ejemplos y enlaces a Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo y Massif. El enlace a JapanDict abre la entrada exacta de JMdict, no la lista de homógrafos.
+**Ficha de palabra.** Al pasar el ratón sobre una palabra se abre su ficha, sin ninguna petición a Claude, con definiciones, frecuencia, audio, imágenes, ejemplos, orden de los trazos y enlaces a Jisho, JapanDict, Weblio, Goo, Kotobank, Wiktionary, Forvo y Massif. El enlace a JapanDict abre la entrada exacta de JMdict, no la lista de homógrafos.
 
 **En esta frase.** Con clave de Claude, el botón **¿Qué significa en esta frase?** indica el sentido de la palabra en ese contexto y señala cuándo el uso es figurado o poético. Claude recibe 40 líneas alrededor de la frase y la traducción. Las pestañas **Explicar**, **Desglose** y **Traducir** funcionan igual: preguntan al pulsarlas. Toda respuesta se guarda, de modo que volver a esa palabra en esa frase no gasta nada y la ficha lo indica con **Guardada, sin gasto**. El botón **Profundizar** repite la consulta con Opus 5.5.
+
+**Trazos.** La pestaña **Trazos** de la ficha enseña cómo se escribe cada kanji de la palabra: los trazos se dibujan uno a uno, en bucle y con su número. Se puede pausar, avanzar de uno en uno y cambiar la velocidad. Los datos son de [KanjiVG](https://kanjivg.tagaini.net): cada kanji se descarga la primera vez y queda guardado en el navegador.
 
 **Navegador de subtítulos.** Con `G` se abre un panel lateral con todas las líneas, filtros, marcadores y selección múltiple. También permite unir líneas, crear varias tarjetas y sincronizar.
 
@@ -175,9 +187,19 @@ Las tarjetas pueden enviarse a Anki mediante AnkiConnect, con un tipo de nota pr
 
 ## Páginas web, lector y biblioteca
 
-**Páginas web.** Manteniendo `Shift` y pasando el ratón sobre una palabra japonesa se abre su ficha, en cualquier página. El subrayado por estado no modifica el documento: usa la CSS Custom Highlight API, de modo que no interfiere con aplicaciones como las hechas con React. `Alt+K`, `Alt+U` y `Alt+I` marcan en bloque el texto seleccionado como conocido, desconocido o ignorado.
+**Páginas web.** En cualquier página con texto japonés, el lector subraya las palabras según lo que se sabe de ellas y les añade furigana. Un clic en una palabra abre su ficha. En enlaces y botones el clic sigue siendo del sitio, y la ficha se abre al dejar el ratón encima, o al momento con `Shift`. Arrastrar sigue seleccionando texto, y con la ficha abierta funcionan `1` a `4` y `Q`.
+
+El botón del borde derecho ajusta los colores y el furigana sin salir de la página, y el menú de la extensión enciende y apaga el lector. El furigana tiene cuatro modos: en todas las palabras, solo en las nuevas, al pasar el ratón o nunca. En **Ajustes, Lector de páginas** se puede pedir que la ficha se abra siempre al pasar el ratón, o que el clic en enlaces también consulte.
+
+Nada de esto añade nada al contenido de la página. Los colores usan la CSS Custom Highlight API y las lecturas van en una capa aparte, de modo que seleccionar, copiar y buscar siguen igual, y no interfiere con aplicaciones como las hechas con React. También funciona en lo que se desplaza dentro de una caja, como la conversación de un chat: el furigana se mueve con el texto y pasa por debajo de la barra de escribir. No actúa sobre campos de texto ni sobre texto en chino o coreano.
+
+**Separar líneas.** Muchas páginas dejan poco aire entre líneas, y el furigana chocaría con la línea de arriba. Ahí se abre el interlineado de ese texto, solo lo necesario, y es lo único que el lector puede mover en una página. No se hace en botones ni en menús, ni donde el texto se saldría de una caja de alto fijo: en esos casos, si no hay ningún aire, el furigana se deja para cuando se pasa el ratón. El interruptor **Separar líneas**, en el botón del borde, lo desactiva, y entonces el diseño no se mueve nada.
+
+`Alt+K`, `Alt+U` y `Alt+I` marcan en bloque el texto seleccionado como conocido, desconocido o ignorado.
 
 **Lector.** Muestra cualquier texto pegado con las mismas ayudas que los subtítulos.
+
+**Modo web.** La ventana de la aplicación no tiene pestañas, así que no puede entrar en la vista dividida del navegador. El botón **Modo web** del lector lo abre en una pestaña normal, sin la barra lateral, y **Abrir el lector junto a esta pestaña**, en el menú de la extensión, lo pone directamente al lado de la página que se esté viendo (Chrome 155 o posterior). En esa pestaña, **Seguir el portapapeles** añade debajo el japonés que se copie en cualquier sitio, mientras la pestaña esté a la vista. Es una página de la propia extensión: no necesita servidor, funciona sin conexión y el texto no sale del equipo.
 
 **Biblioteca.** Guarda libros EPUB, textos y subtítulos SRT, con el punto de lectura. También puede generar relatos con Claude ajustados al nivel configurado.
 
@@ -205,7 +227,7 @@ Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos**
 
 ## Atajos de teclado
 
-La referencia completa está en el panel de atajos, sobre el video.
+La referencia completa está en el panel de atajos, sobre el video. Se pueden cambiar en **Ajustes, Atajos de teclado**, y también funcionan con teclados coreanos, rusos o con el japonés activado, porque se guía por la posición de la tecla.
 
 | Grupo | Atajo | Acción |
 |---|---|---|

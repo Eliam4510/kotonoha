@@ -1,0 +1,61 @@
+<p align="right"><a href="../../AVISOS.md">Español · English</a> · <a href="../de/notices.md">Deutsch</a> · <a href="../zh/notices.md">简体中文</a> · <a href="../ko/notices.md">한국어</a> · <b>日本語</b></p>
+
+# 告知
+
+参考訳です。[AVISOS.md](../../AVISOS.md) の原文が優先します。
+
+## プロジェクトのライセンス
+
+Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開しています。第三者のコンポーネントはそれぞれのライセンスに従います。
+
+## 第三者のコンポーネント
+
+| コンポーネント | 用途 | ライセンス |
+|---|---|---|
+| [Preact](https://preactjs.com) と Preact Signals | 画面 | MIT |
+| [Dexie](https://dexie.org) | ローカルデータベース | Apache-2.0 |
+| [Kuromoji](https://github.com/takuyaa/kuromoji.js) | 形態素解析、IPADIC 辞書を使用 | Apache-2.0 と IPADIC 独自のライセンス |
+| [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Claude API のクライアント | Apache-2.0 |
+| [Transformers.js](https://github.com/huggingface/transformers.js) と [ONNX Runtime](https://onnxruntime.ai) | Whisper の実行 | Apache-2.0 と MIT |
+| [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | 文字起こしのモデル、使用時にダウンロード | MIT |
+| [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/ffmpeg` | 手元のファイルの読み取り | MIT |
+| [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/core` | FFmpeg のコア、コンパイル時にコピー | GPL-2.0-or-later |
+| [lamejs](https://github.com/gideonstele/lamejs)、`@breezystack/lamejs` | MP3 のエンコード | LGPL-3.0 |
+| [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 復習の計画 | MIT |
+| [fflate](https://github.com/101arrowz/fflate) | ZIP ファイルの読み取り | MIT |
+| [Phosphor Icons](https://phosphoricons.com) | アイコン | MIT |
+| [Nunito](https://fonts.google.com/specimen/Nunito) と [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | フォント | OFL-1.1 |
+
+このリポジトリのコードに第三者のバイナリは含まれません。インストール時に npm から取得します。`dist` フォルダと各バージョンのコンパイル済みパッケージには `@ffmpeg/core` と `lamejs` が含まれ、`licencias` フォルダにすべてのコンポーネントの文書と告知があります。
+
+対応するソースコードは [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10)（ライブラリとともに [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) をコンパイル）と [lamejs](https://github.com/gideonstele/lamejs) にあります。これらのパッケージを再配布する場合は、そのソースコードの提供を含め、GPL と LGPL に従う必要があります。
+
+## 拡張機能の使用時にダウンロードするデータ
+
+これらのデータはいずれもリポジトリに含まれません。拡張機能が必要に応じてダウンロードします。
+
+| データ | 出所 | 条件 |
+|---|---|---|
+| JMdict と JMnedict | [EDRDG](https://www.edrdg.org/edrdg/licence.html)、[jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) の形式 | CC BY-SA 4.0 |
+| ピッチアクセント | [Kanjium](https://github.com/mifunetoshiro/kanjium) | プロジェクトの定めるとおり |
+| 頻度 | [JPDB](https://jpdb.io)、[yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) の形式 | プロジェクトの定めるとおり |
+| 書き順 | [KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、jsDelivr が配信する元のファイル | CC BY-SA 3.0 |
+| 単語の音声 | JapanesePod101 と [Lingua Libre](https://lingualibre.org) | 各出所の条件 |
+| 画像 | [Openverse](https://openverse.org) | 各画像のライセンス |
+
+## 外部プログラム
+
+ローカルヘルパーは [yt-dlp](https://github.com/yt-dlp/yt-dlp)（Unlicense）と [FFmpeg](https://ffmpeg.org)（ビルドにより LGPL または GPL）を使います。このリポジトリにもパッケージにも含まれず、パソコンにインストールされたものを使います。
+
+## 責任ある利用
+
+Kotonoha は個人利用の学習ツールです。
+
+- コピー防止の仕組みを回避しません。プレーヤーがユーザーのセッションにすでに提供している字幕を読み取ります。
+- ローカルヘルパーは、ユーザーがダウンロードする権利を持つコンテンツにのみ、各サイトの規約を守って使ってください。
+- 各動画サービスの利用規約を守ることはユーザーの責任です。
+- 字幕やその他の著作物は著作権で保護されている場合があり、許可なく再配布してはいけません。
+
+## 商標
+
+YouTube、Netflix、Disney+、Crunchyroll、Viki、Bilibili、iQIYI、Prime Video、Anki、Claude、Anthropic は各所有者の商標です。このプロジェクトは独立しており、これらと提携せず、後援や保証も受けていません。

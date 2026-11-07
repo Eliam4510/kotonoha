@@ -1,8 +1,8 @@
-<p align="right"><b>Español</b> · <a href="features.md">English</a></p>
+<p align="right"><b>Español</b> · <a href="features.md">English</a> · <a href="de/features.md">Deutsch</a> · <a href="zh/features.md">简体中文</a> · <a href="ko/features.md">한국어</a> · <a href="ja/features.md">日本語</a></p>
 
 # Funciones
 
-Estado de cada función en la versión 0.2.5, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.3.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -25,6 +25,7 @@ Estado de cada función en la versión 0.2.5, con la forma en que se ha verifica
 | Subtítulos con furigana, color por acento tonal y subrayado por estado | Automática |
 | Modos de furigana, glosas y color: siempre, al pasar, desconocidas, nunca | Automática |
 | Ficha de palabra: definiciones, estado, frecuencia, audio, imágenes, ejemplos y enlaces | Automática |
+| Orden de los trazos de cada kanji, animado y en bucle, con pausa y avance de uno en uno | Automática, con datos reales de KanjiVG |
 | La ficha abre con el diccionario, sin ninguna petición a Claude | Simulador y sesión real |
 | Qué significa en esta frase, explicar, desglosar y traducir con Claude, a petición | Simulador, y sesión real para el significado en la frase |
 | Cada respuesta se guarda: la misma palabra en la misma frase no se vuelve a pedir | Simulador y sesión real |
@@ -93,6 +94,8 @@ Estado de cada función en la versión 0.2.5, con la forma en que se ha verifica
 | Gasto en Claude: total del mes, gráfica por días y modelos, tareas y registro de peticiones | Simulador |
 | Diccionario con búsqueda libre y formas conjugadas | Automática |
 | Lector de texto pegado | Automática |
+| Lector en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
+| Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
 | Biblioteca: EPUB, TXT y SRT | Automática |
 | Relatos generados según el nivel | Simulador |
 | Reproductor de archivos propios | Automática |
@@ -106,10 +109,32 @@ Estado de cada función en la versión 0.2.5, con la forma en que se ha verifica
 
 | Función | Verificación |
 |---|---|
-| Consulta de palabras con `Shift` y el ratón | Automática |
-| Subrayado por estado, sin modificar la página | Automática |
+| Consulta de una palabra con un clic; en enlaces y botones, al dejar el ratón encima | Automática, y en 31 sitios públicos reales |
+| Subrayado por estado y furigana, sin añadir nada al contenido de la página | Automática, y en 31 sitios públicos reales |
+| Sin separar líneas, el diseño no se mueve: ni elementos, ni medidas del documento | Automática, y en 31 sitios públicos reales |
+| Si el furigana no cabe entre dos líneas, se abre el interlineado de ese texto, y se puede desactivar | Automática, y en el chat de Claude con una sesión real |
+| En una caja con scroll propio, el furigana se mueve con el texto, sin estela, y se recorta bajo lo que tape la caja | Automática, y en el chat de Claude con una sesión real |
+| Recuadros de código con japonés | Automática, y en el chat de Claude con una sesión real |
+| Enlaces y botones siguen funcionando con su propio clic | Automática |
+| Furigana en todas las palabras, en las nuevas, al pasar el ratón o nunca, en kana o rōmaji | Automática |
+| Texto que cambia: el que llega en directo, carruseles, acordeones y cajas con scroll | Automática |
+| Árboles de sombra | Automática |
+| Botón del borde de la página para ajustar colores y furigana | Automática |
 | Envío de la selección o de una imagen al creador con `E` | Automática |
 | Marcado en bloque del texto seleccionado con `Alt+K`, `Alt+U` y `Alt+I` | Automática |
+
+## Idiomas y personalización
+
+| Función | Verificación |
+|---|---|
+| Interfaz en español, inglés, alemán, chino simplificado, coreano y japonés | Automática: tablas completas y capturas de cada idioma |
+| Bienvenida con idioma, nivel, diccionarios, clave y destino de las tarjetas | Automática |
+| Explicaciones y traducciones en un idioma distinto al de la interfaz, también portugués y francés | Automática |
+| JMdict en alemán, además de español e inglés | Automática |
+| Lecturas en kana o rōmaji | Automática |
+| Paletas de color: habitual, para daltonismo y de alto contraste | Automática |
+| Atajos de teclado a elegir, que funcionan con cualquier distribución de teclado | Automática |
+| Tope de gasto mensual en Claude | Simulador |
 
 ## Criterios de diseño
 
@@ -122,7 +147,7 @@ Estado de cada función en la versión 0.2.5, con la forma en que se ha verifica
 | Claude solo cuando hace falta | La ficha abre con el diccionario, y la revisión cubre el tramo que está por verse en lugar del video entero |
 | Empezar por lo que se ve | Traducción, corrección y revisión ordenan los tramos según el punto de reproducción |
 | El equipo sigue siendo usable | La transcripción descansa, se adapta al uso y se detiene ante fallos repetidos |
-| Las páginas no se tocan | El subrayado web usa la CSS Custom Highlight API, sin reescribir el DOM |
+| Las páginas no se reescriben | El subrayado web usa la CSS Custom Highlight API, sin añadir nada al contenido. Solo se abre el interlineado donde el furigana no cabe |
 | Datos locales | Todo queda en el navegador, y el audio de la transcripción no sale del equipo |
 
 ## Limitaciones conocidas
@@ -130,7 +155,9 @@ Estado de cada función en la versión 0.2.5, con la forma en que se ha verifica
 | Limitación | Detalle |
 |---|---|
 | Idioma de estudio | Solo japonés: la lógica de análisis es específica de este idioma |
-| Idioma de la interfaz | Solo español. Las explicaciones de Claude pueden pedirse en español, inglés o japonés sencillo |
+| Traducciones de la interfaz | Escritas con ayuda de IA, sin revisión nativa todavía. Los errores se corrigen en `idiomas/` |
+| Lector de páginas | Solo actúa en el marco principal: no llega al texto dentro de un iframe. Lo que una página dibuje en un lienzo o en una imagen no es texto |
+| Prompts de Claude | Las instrucciones siguen en español, también cuando pide la respuesta en otro idioma |
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |

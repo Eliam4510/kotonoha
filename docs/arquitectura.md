@@ -1,4 +1,4 @@
-<p align="right"><b>Español</b> · <a href="architecture.md">English</a></p>
+<p align="right"><b>Español</b> · <a href="architecture.md">English</a> · <a href="de/architecture.md">Deutsch</a> · <a href="zh/architecture.md">简体中文</a> · <a href="ko/architecture.md">한국어</a> · <a href="ja/architecture.md">日本語</a></p>
 
 # Arquitectura
 
@@ -135,7 +135,14 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 | Archivos propios | ffmpeg.wasm | Subtítulos incrustados y pistas de audio de MKV, sin programas externos |
 | Tarjetas | AnkiConnect y un repaso interno con FSRS | Integración con Anki, o repaso dentro de la aplicación |
 | Audio de tarjetas | `tabCapture` y `MediaRecorder`, exportado a MP3 | Funciona en cualquier sitio sin descargar el video |
-| Páginas web | CSS Custom Highlight API | No modifica el DOM, y por tanto no interfiere con aplicaciones React y similares |
+| Páginas web | CSS Custom Highlight API para los colores, y una capa propia, fuera de `<body>`, para las lecturas | No añade nada al contenido de la página y no interfiere con aplicaciones React y similares |
+| Furigana en una caja con scroll | Una hoja por caja, movida por `ScrollTimeline` y recortada por un marco | El navegador desplaza esas cajas sin pasar por el hilo principal: recolocar las lecturas desde el código las dejaría siempre un fotograma por detrás del texto, y se vería una estela. Enlazadas al scroll se mueven a la vez que el texto, aunque la página esté ocupada |
+| Interlineado | `line-height` en línea, sin unidad, solo en texto de varias líneas o filas pegadas | Con 15 px de letra y 21 de línea quedan 6 para una lectura de 9 y un subrayado. Es lo único que el lector toca en la página: se revierte si el texto se saldría de una caja de alto fijo, y se puede desactivar |
+| Qué palabra hay bajo el ratón | `caretPositionFromPoint` con un índice de los nodos de texto | Resuelve el clic sin envolver cada palabra en un elemento |
+| Idiomas de la interfaz | Una tabla JSON por idioma, con el texto en español como clave, que se carga aparte | El content script corre en todas las páginas y no debe arrastrar seis idiomas. Con frases enteras, porque el orden de las palabras cambia en coreano, japonés y alemán |
+| Orden de los trazos | [KanjiVG](https://kanjivg.tagaini.net), pedido carácter a carácter a jsDelivr con la versión fijada, y dibujado como SVG animado | Son más de 10.000 archivos: cada kanji se descarga al usarlo y queda guardado. El SVG se ve nítido a cualquier tamaño y sigue el tema, y de cada archivo solo se aceptan los trazados y sus números |
+| Lector en una pestaña | Una página de la extensión, `lector.html`, abierta en una pestaña normal | La ventana de la aplicación es de tipo `popup`, sin pestañas, y no puede entrar en la vista dividida. Una página de la extensión sí, y no necesita servidor. `chrome.tabs.create({ splitWithTabId })` la coloca junto a la pestaña actual desde Chrome 155 |
+| Seguir el portapapeles | `execCommand('paste')` en el documento offscreen | Sin el foco, `navigator.clipboard` no deja leer, y en la vista dividida el foco está en la otra página. Solo se lee con la opción encendida y la pestaña a la vista |
 | Iconos | Phosphor en versión duotono | Conjunto consistente, del que solo se empaqueta lo que el código usa |
 | Tipografía | Nunito para el latín y Zen Maru Gothic para el japonés | Ambas redondeadas. Se cargan como datos para que la política de seguridad de cada sitio no las bloquee |
 
@@ -196,6 +203,23 @@ La memoria no crece con el tiempo, y el ritmo se mantiene. La memoria de video i
 
 **Recuperación.** Destruir el dispositivo WebGPU produce el mismo evento que un reinicio del controlador. Whisper retoma el trabajo a los 27 s, sin perder ni desordenar lo transcrito, y al segundo fallo se detiene con un aviso.
 
+### Coste del lector de páginas
+
+Tiempo del hilo principal, con todas las palabras desconocidas y furigana en todas: el peor caso. Medido en Edge a 1366×860 con `Performance.getMetrics`, con el lector ya cargado.
+
+| Página | Encender | 6 s quieta | Bajar 3,5 s, sin lector | Bajar 3,5 s, con lector |
+|---|---|---|---|---|
+| Wikipedia, artículo largo (16.000 elementos) | 500 ms | 300 ms la primera vez, luego 0 | 30 ms | 850 ms |
+| Portada de un periódico con anuncios | 340 ms | 160 ms (120 ms sin lector) | 70-560 ms | 640-790 ms |
+
+Lo caro es medir y cambiar el DOM. Chromium reconstruye todos los marcadores de resaltado tras cualquier cambio en el documento, de modo que el lector agrupa lo que escribe. Por eso:
+
+- La capa de lecturas va con el documento, y la de una caja con scroll, con esa caja: al desplazarlas no hay nada que calcular.
+- Cada lectura lleva el `z-index` efectivo de su texto, y el navegador resuelve qué tapa a qué sin hacer pruebas de impacto. Lo recortado se decide comparando rectángulos.
+- Si la caja de un bloque no se ha movido, sus lecturas tampoco: se comprueba una caja en vez de cada palabra.
+- Lo que aún necesita `elementFromPoint` se hace por líneas, en ratos libres y con la página quieta.
+- Lo que se aleja se retira en grupo, y si vuelve antes no se toca.
+
 ## Estructura de carpetas
 
 ```
@@ -203,13 +227,15 @@ src/
   nucleo/       Lógica pura y probada: subtítulos, tokens, modos, gramática, sincronía, transcripción, lotes
   compartido/   Tipos, ajustes y RPC entre contextos
   pagina/       Adaptadores del mundo MAIN
-  contenido/    Interfaz sobre el video y lector de páginas web
+  contenido/    Interfaz sobre el video y lector de páginas web (lector/)
   fondo/        Service worker
   motor/        Documento offscreen: base de datos, tokenizador, Claude, Anki, grabación, Whisper
   app/          Ventana de la aplicación
+  lector/       El lector en una pestaña normal
   popup/        Menú del icono de la extensión
   ui/           Sistema de diseño, ficha de palabra, iconos y marca
-herramientas/   Generadores de iconos, marca y banner; ayudante local en ayudante/
+idiomas/        Tablas de traducción de la interfaz
+herramientas/   Generadores de iconos, marca y banner; textos a traducir; ayudante local en ayudante/
 pruebas/        Banco de capturas, pruebas de extremo a extremo y servidores simulados
-docs/           Documentación en español e inglés
+docs/           Documentación: español e inglés aquí, y alemán, chino, coreano y japonés en subcarpetas
 ```
