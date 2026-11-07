@@ -1161,8 +1161,8 @@ export async function iniciarWhisper(enVivo = false) {
     }
   } catch (e) {
     const mensaje = e instanceof Error ? e.message : String(e);
-    // Si el video no se puede bajar, aún queda oírlo mientras se reproduce.
-    if (conAyudante) avisar(tr('No se pudo bajar el audio: {0}', mensaje), 'error', { texto: tr('Transcribir al reproducir'), fn: () => iniciarWhisper(true) }, 12000);
+    // Si el video no se puede bajar, aún queda oírlo mientras se reproduce. Un fallo después de bajarlo es de la transcripción.
+    if (conAyudante && whisper.value?.fase === 'bajando') avisar(tr('No se pudo bajar el audio: {0}', mensaje), 'error', { texto: tr('Transcribir al reproducir'), fn: () => iniciarWhisper(true) }, 12000);
     else avisar(tr('No se pudo transcribir: {0}', mensaje), 'error', undefined, 8000);
   } finally {
     if (intervaloMarcas) clearInterval(intervaloMarcas);

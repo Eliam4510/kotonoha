@@ -50,6 +50,8 @@ async function vigilarGpu() {
     if (!gpu?.lost) return;
     gpuActual = gpu;
     const info = await gpu.lost;
+    // Al cambiar de modelo se libera el anterior, y con él puede irse su dispositivo: eso no es un fallo de la GPU.
+    if (gpu !== gpuActual) return;
     self.postMessage({ tipo: 'gpuPerdida', motivo: info?.message || info?.reason });
   } catch {
     // Sin acceso al dispositivo queda el vigilante de tiempo del motor.
@@ -66,6 +68,7 @@ self.onmessage = async (e: MessageEvent) => {
     if (m.tipo === 'cargarTdt') {
       const clave = `tdt|${m.modelo}|${m.tdt.revision}`;
       if (clave !== claveCargada) {
+        gpuActual = null;
         await asr?.dispose?.();
         asr = null;
         claveCargada = '';
@@ -82,6 +85,7 @@ self.onmessage = async (e: MessageEvent) => {
       const clave = `${m.modelo}|${JSON.stringify(m.dtype)}`;
       if (clave !== claveCargada) {
         // Al cambiar de modelo se libera el anterior: si no, ambos ocuparían memoria de la GPU.
+        gpuActual = null;
         await asr?.dispose?.();
         asr = null;
         await liberarTdt();
