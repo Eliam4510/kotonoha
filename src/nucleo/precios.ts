@@ -1,6 +1,7 @@
 // Lo que cuesta cada petición a Claude, a partir de los tokens que la API dice haber usado.
 // Precios en dólares por millón de tokens.
 
+import { tm } from '../compartido/i18n';
 export interface UsoTokens {
   entrada: number;
   salida: number;
@@ -62,18 +63,18 @@ export const claveDia = (t: number) => {
 export const claveMes = (t: number) => claveDia(t).slice(0, 7);
 
 export const NOMBRE_TAREA: Record<string, string> = {
-  explicar: 'Explicación de una palabra',
-  desglosar: 'Desglose de una frase',
-  traducir: 'Traducción de una frase',
-  generar: 'Texto para una tarjeta',
-  subtitulos: 'Traducción de subtítulos',
-  historia: 'Relato',
-  preguntar: 'Pregunta libre',
-  sentido: 'Significado en la frase',
-  analisis: 'Revisión de lecturas y gramática',
-  corregir: 'Corrección de subtítulos',
-  profundo: 'Análisis a fondo',
-  conexion: 'Prueba de conexión',
+  explicar: tm('Explicación de una palabra'),
+  desglosar: tm('Desglose de una frase'),
+  traducir: tm('Traducción de una frase'),
+  generar: tm('Texto para una tarjeta'),
+  subtitulos: tm('Traducción de subtítulos'),
+  historia: tm('Relato'),
+  preguntar: tm('Pregunta libre'),
+  sentido: tm('Significado en la frase'),
+  analisis: tm('Revisión de lecturas y gramática'),
+  corregir: tm('Corrección de subtítulos'),
+  profundo: tm('Análisis a fondo'),
+  conexion: tm('Prueba de conexión'),
 };
 
 export interface GrupoConsumo extends UsoTokens {

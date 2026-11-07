@@ -1,5 +1,6 @@
 // Prepara lo que se publica con cada versión: la extensión compilada y el ayudante, en dos ZIP.
 // Uso: npm run paquete. El resultado queda en release/, con sus sumas SHA-256.
+// Con KK_PUBLICAR=carpeta compila ahí en lugar de en dist, para no recargar una copia que se esté usando desde dist.
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -8,11 +9,12 @@ import { extname, join } from 'node:path';
 import { zipSync } from 'fflate';
 
 const SALIDA = 'release';
+const COMPILADO = process.env.KK_PUBLICAR ?? 'dist';
 const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
 
 execFileSync(process.execPath, ['build.mjs'], { stdio: 'inherit' });
 
-const manifiesto = JSON.parse(readFileSync('dist/manifest.json', 'utf8'));
+const manifiesto = JSON.parse(readFileSync(join(COMPILADO, 'manifest.json'), 'utf8'));
 if (manifiesto.version !== version) throw new Error(`El manifiesto dice ${manifiesto.version} y package.json ${version}`);
 // Con clave, todas las copias compartirían identificador. La compilación normal no debe llevarla.
 if (manifiesto.key) throw new Error('La compilación que se publica no debe llevar clave');
@@ -43,7 +45,7 @@ mkdirSync(SALIDA, { recursive: true });
 
 // compilacion.txt va al final: al descomprimir encima de una copia en uso, la extensión se recarga
 // cuando este archivo cambia, y para entonces todo lo demás ya está escrito.
-const extension = listar('dist').sort(([a], [b]) => Number(a === 'compilacion.txt') - Number(b === 'compilacion.txt'));
+const extension = listar(COMPILADO).sort(([a], [b]) => Number(a === 'compilacion.txt') - Number(b === 'compilacion.txt'));
 
 // Solo estos archivos del ayudante: los que genera su instalador llevan las rutas de cada equipo.
 const ayudante = [

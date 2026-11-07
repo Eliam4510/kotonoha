@@ -9,17 +9,20 @@ import { cargarFuentes } from '../ui/fuentes';
 import { Icono, Marca, type NombreIcono } from '../ui/iconos';
 import { useTema } from '../ui/tema';
 import css from './popup.css';
+import { bcp47Actual, fijarIdioma, numero, tm, tr } from '../compartido/i18n';
 
 const RUTAS: [string, NombreIcono, string][] = [
-  ['inicio', 'inicio', 'Inicio'],
-  ['diccionario', 'diccionario', 'Diccionario'],
-  ['lector', 'lector', 'Lector'],
-  ['biblioteca', 'biblioteca', 'Biblioteca'],
-  ['reproductor', 'video', 'Reproductor'],
-  ['memoria', 'tarjetas', 'Memoria'],
-  ['palabras', 'palabras', 'Palabras'],
-  ['ajustes', 'ajustes', 'Ajustes'],
+  ['inicio', 'inicio', tm('Inicio')],
+  ['diccionario', 'diccionario', tm('Diccionario')],
+  ['lector', 'lector', tm('Lector')],
+  ['biblioteca', 'biblioteca', tm('Biblioteca')],
+  ['reproductor', 'video', tm('Reproductor')],
+  ['memoria', 'tarjetas', tm('Memoria')],
+  ['palabras', 'palabras', tm('Palabras')],
+  ['ajustes', 'ajustes', tm('Ajustes')],
 ];
+
+const MODOS_FURIGANA: [Ajustes['lectorFurigana'], string][] = [['todas', tm('Todo')], ['desconocidas', tm('Nuevas')], ['alPasar', tm('Al pasar')], ['ninguna', tm('Nada')]];
 
 function Popup() {
   const [a, fijarA] = useState<Ajustes | null>(null);
@@ -64,53 +67,62 @@ function Popup() {
       <style>{base + css}</style>
       <header class="ap-menu-cab">
         <Marca t={28} />
-        <button class="ap-menu-conocidas" aria-label="Ver mis palabras" onClick={() => fondo.abrirApp('palabras')}>
-          <b class="num">{conocidas?.toLocaleString('es') ?? '–'}</b> conocidas
+        <button class="ap-menu-conocidas" aria-label={tr('Ver mis palabras')} onClick={() => fondo.abrirApp('palabras')}>
+          <b class="num">{numero(conocidas) ?? '–'}</b> {tr('conocidas')}
         </button>
       </header>
 
       <section class="ap-menu-grupo">
         <div class="ap-menu-fila">
           <div class="ap-menu-texto">
-            <b>{a.activo ? 'Activado' : 'En pausa'}</b>
-            <span>En todas las páginas</span>
+            <b>{a.activo ? tr('Activado') : tr('En pausa')}</b>
+            <span>{tr('En todas las páginas')}</span>
           </div>
-          <button class={`interruptor ${a.activo ? 'on' : ''}`} role="switch" aria-checked={a.activo} aria-label="Activar Kotonoha" onClick={() => cambiar({ activo: !a.activo })} />
+          <button class={`interruptor ${a.activo ? 'on' : ''}`} role="switch" aria-checked={a.activo} aria-label={tr('Activar Kotonoha')} onClick={() => cambiar({ activo: !a.activo })} />
         </div>
         {esWeb && (
           <div class="ap-menu-fila">
             <div class="ap-menu-texto">
-              <b>En este sitio</b>
+              <b>{tr('En este sitio')}</b>
               <span>{host}</span>
             </div>
             <button
               class={`interruptor ${!desactivado ? 'on' : ''}`}
               role="switch"
               aria-checked={!desactivado}
-              aria-label={`Activar Kotonoha en ${host}`}
+              aria-label={tr('Activar Kotonoha en {0}', host)}
               onClick={() => cambiar({ sitiosDesactivados: desactivado ? a.sitiosDesactivados.filter((s) => s !== host) : [...new Set([...a.sitiosDesactivados, host])] })}
             />
           </div>
         )}
-        <div class="ap-menu-fila columna">
-          <div class="ap-menu-texto">
-            <b>Modo en páginas web</b>
-            <span>{a.modoRender === 'ligero' ? 'Consulta con Shift y el ratón.' : 'Además subraya las palabras por estado, sin alterar la página.'}</span>
-          </div>
-          <div class="segmentado" role="radiogroup" aria-label="Modo en páginas web">
-            <button role="radio" aria-checked={a.modoRender === 'ligero'} class={a.modoRender === 'ligero' ? 'activo' : ''} onClick={() => cambiar({ modoRender: 'ligero' })}>Ligero</button>
-            <button role="radio" aria-checked={a.modoRender === 'completo'} class={a.modoRender === 'completo' ? 'activo' : ''} onClick={() => cambiar({ modoRender: 'completo' })}>Completo</button>
-          </div>
-        </div>
         <div class="ap-menu-fila">
           <div class="ap-menu-texto">
-            <b>Capturar imagen y audio</b>
+            <b>{tr('Lector de páginas')}</b>
+            <span>{tr('Colores, furigana y consulta en cualquier texto japonés.')}</span>
+          </div>
+          <button class={`interruptor ${a.lectorActivo ? 'on' : ''}`} role="switch" aria-checked={a.lectorActivo} aria-label={tr('Lector de páginas')} onClick={() => cambiar({ lectorActivo: !a.lectorActivo })} />
+        </div>
+        {a.lectorActivo && (
+          <div class="ap-menu-fila columna">
+            <div class="ap-menu-texto">
+              <b>{tr('Furigana')}</b>
+            </div>
+            <div class="segmentado" role="radiogroup" aria-label={tr('Furigana')}>
+              {MODOS_FURIGANA.map(([v, n]) => (
+                <button key={v} role="radio" aria-checked={a.lectorFurigana === v} class={a.lectorFurigana === v ? 'activo' : ''} onClick={() => cambiar({ lectorFurigana: v })}>{tr(n)}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div class="ap-menu-fila">
+          <div class="ap-menu-texto">
+            <b>{tr('Capturar imagen y audio')}</b>
             <span>
-              Durante esta sesión{' '}
-              {atajoCaptura ? atajoCaptura.split('+').map((x) => <kbd class="tecla" key={x}>{x}</kbd>) : <button class="enlace" onClick={() => fondo.abrirAtajos()}>Asignar un atajo</button>}
+              {tr('Durante esta sesión')}{' '}
+              {atajoCaptura ? atajoCaptura.split('+').map((x) => <kbd class="tecla" key={x}>{x}</kbd>) : <button class="enlace" onClick={() => fondo.abrirAtajos()}>{tr('Asignar un atajo')}</button>}
             </span>
           </div>
-          <button class={`interruptor ${captura ? 'on' : ''}`} role="switch" aria-checked={captura} aria-label="Capturar imagen y audio" onClick={async () => {
+          <button class={`interruptor ${captura ? 'on' : ''}`} role="switch" aria-checked={captura} aria-label={tr('Capturar imagen y audio')} onClick={async () => {
             try {
               fijarError('');
               fijarCaptura(await fondo.alternarCaptura());
@@ -122,22 +134,35 @@ function Popup() {
         {error && <p class="ap-menu-error" role="alert">{error}</p>}
       </section>
 
-      <nav class="ap-menu-grupo ap-menu-rutas" aria-label="Abrir la ventana de Kotonoha">
+      <nav class="ap-menu-grupo ap-menu-rutas" aria-label={tr('Abrir la ventana de Kotonoha')}>
         {RUTAS.map(([r, i, n]) => (
           <button key={r} class="ap-menu-ruta" onClick={() => fondo.abrirApp(r)}>
             <Icono n={i} t={20} />
-            {n}
+            {tr(n)}
           </button>
         ))}
       </nav>
 
+      <button class="btn fantasma chico ap-menu-activar" onClick={() => {
+        fondo.abrirLectorWeb(esWeb).catch(console.error);
+        window.close();
+      }}>
+        <Icono n="dividir" t={15} /> {esWeb ? tr('Abrir el lector junto a esta pestaña') : tr('Abrir el lector en una pestaña')}
+      </button>
+
       {pestana !== undefined && !/youtube|netflix|disneyplus|viki|iq\.com|bilibili|crunchyroll|primevideo/.test(host) && esWeb && (
         <button class="btn fantasma chico ap-menu-activar" onClick={() => chrome.tabs.sendMessage(pestana, { activarVideoAqui: true })}>
-          <Icono n="video" t={15} /> Usar el reproductor en el video de esta página
+          <Icono n="video" t={15} /> {tr('Usar el reproductor en el video de esta página')}
         </button>
       )}
     </div>
   );
 }
 
-render(<Popup />, document.getElementById('raiz')!);
+leerAjustes()
+  .then((a) => fijarIdioma(a.idiomaInterfaz))
+  .catch(() => {})
+  .finally(() => {
+    document.documentElement.lang = bcp47Actual();
+    render(<Popup />, document.getElementById('raiz')!);
+  });

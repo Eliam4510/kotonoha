@@ -11,6 +11,7 @@ import { Icono } from '../ui/iconos';
 import type { Ajustes } from '../compartido/ajustes';
 import { extraerAudioParaWhisper, extraerPistaAudio, extraerSubtitulos, type InformeMedio, inspeccionarArchivo, sincronizarAudio } from './medios';
 import { Mensaje } from './Piezas';
+import { tr } from '../compartido/i18n';
 
 const RE_VIDEO = /\.(mp4|webm|mkv|mov|m4v|ogv)$/i;
 const RE_SUB = /\.(srt|vtt|ass|ssa|ttml|dfxp|xml)$/i;
@@ -40,11 +41,11 @@ const control: Control = {
     alInforme(informe);
     return (informe?.subtitulos ?? [])
       .filter((s) => !s.imagen)
-      .map((s) => ({ id: `incrustada:${s.indice}`, idioma: s.idioma, nombre: s.titulo || `${nombreIdioma(s.idioma)} (incrustados)`, origen: 'sitio' as const }));
+      .map((s) => ({ id: `incrustada:${s.indice}`, idioma: s.idioma, nombre: s.titulo || tr('{0} (incrustados)', nombreIdioma(s.idioma)), origen: 'sitio' as const }));
   },
   async cargarPista(id) {
     const pista = informe?.subtitulos.find((s) => `incrustada:${s.indice}` === id);
-    if (!pista || !archivoActual) throw new Error('Esta pista ya no está disponible');
+    if (!pista || !archivoActual) throw new Error(tr('Esta pista ya no está disponible'));
     return extraerSubtitulos(archivoActual, pista);
   },
   async saltar(ms) {
@@ -115,7 +116,7 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
       if (i && japones && nativa && japones.indice !== nativa.indice) cambiarAudio(japones.indice, i);
     };
     fijarFuenteArchivo(async (alProgreso) => {
-      if (!archivoActual) throw new Error('No hay ningún archivo abierto');
+      if (!archivoActual) throw new Error(tr('No hay ningún archivo abierto'));
       const pista = informe?.audio.find((p) => p.indice === indiceAudio);
       return { url: await extraerAudioParaWhisper(archivoActual, pista, alProgreso), pcmCrudo: true };
     });
@@ -175,7 +176,7 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
     } else if (actual >= 0) {
       for (const s of subs) await importarArchivo(s, 'objetivo');
     } else if (subs.length) {
-      fijarError('Elige primero el video: los subtítulos se añadirán a él.');
+      fijarError(tr('Elige primero el video: los subtítulos se añadirán a él.'));
     }
   };
 
@@ -192,29 +193,29 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
         anadir([...(e.dataTransfer?.files ?? [])]);
       }}
     >
-      <video ref={video} controls style={{ display: hayVideo ? 'block' : 'none' }} onError={() => fijarError('El navegador no puede reproducir este archivo. Prueba con MP4 o WebM.')} onEnded={() => {
+      <video ref={video} controls style={{ display: hayVideo ? 'block' : 'none' }} onError={() => fijarError(tr('El navegador no puede reproducir este archivo. Prueba con MP4 o WebM.'))} onEnded={() => {
         if (actual + 1 < lista.length) abrir(actual + 1);
       }} />
       {!hayVideo && (
         <div class={`ap-local-vacio ${arrastrando ? 'activo' : ''}`}>
           <span class="hoja-icono ap-local-icono"><Icono n="pelicula" t={32} /></span>
-          <h1>Tus videos, con todo Kotonoha</h1>
-          <p>Arrastra aquí un video y sus subtítulos. Tendrás furigana, diccionario, tarjetas y Claude, y el video no sale de tu ordenador.</p>
-          <button class="btn primario grande" onClick={() => entrada.current?.click()}><Icono n="subir" t={18} /> Elegir archivos</button>
+          <h1>{tr('Tus videos, con todo Kotonoha')}</h1>
+          <p>{tr('Arrastra aquí un video y sus subtítulos. Tendrás furigana, diccionario, tarjetas y Claude, y el video no sale de tu ordenador.')}</p>
+          <button class="btn primario grande" onClick={() => entrada.current?.click()}><Icono n="subir" t={18} /> {tr('Elegir archivos')}</button>
           <div class="ap-local-formatos">
-            <span class="ap-formatos"><b>Video</b>{['MP4', 'WebM', 'MKV', 'MOV'].map((f) => <i key={f}>{f}</i>)}</span>
-            <span class="ap-formatos"><b>Subtítulos</b>{['SRT', 'VTT', 'ASS', 'TTML'].map((f) => <i key={f}>{f}</i>)}</span>
+            <span class="ap-formatos"><b>{tr('Video')}</b>{['MP4', 'WebM', 'MKV', 'MOV'].map((f) => <i key={f}>{f}</i>)}</span>
+            <span class="ap-formatos"><b>{tr('Subtítulos')}</b>{['SRT', 'VTT', 'ASS', 'TTML'].map((f) => <i key={f}>{f}</i>)}</span>
           </div>
         </div>
       )}
-      {hayVideo && arrastrando && <div class="ap-local-soltar"><Icono n="subir" t={28} /> Suelta para añadir</div>}
-      <input ref={entrada} type="file" multiple hidden aria-label="Elegir archivos" accept=".mp4,.webm,.mkv,.mov,.m4v,.ogv,.srt,.vtt,.ass,.ssa,.ttml,.dfxp,.xml" onChange={(e) => {
+      {hayVideo && arrastrando && <div class="ap-local-soltar"><Icono n="subir" t={28} /> {tr('Suelta para añadir')}</div>}
+      <input ref={entrada} type="file" multiple hidden aria-label={tr('Elegir archivos')} accept=".mp4,.webm,.mkv,.mov,.m4v,.ogv,.srt,.vtt,.ass,.ssa,.ttml,.dfxp,.xml" onChange={(e) => {
         anadir([...(e.currentTarget.files ?? [])]);
         e.currentTarget.value = '';
       }} />
       {error && <div class="ap-local-error"><Mensaje error>{error}</Mensaje></div>}
       {lista.length > 1 && (
-        <div class="ap-local-lista" role="tablist" aria-label="Lista de reproducción">
+        <div class="ap-local-lista" role="tablist" aria-label={tr('Lista de reproducción')}>
           {lista.map((f, i) => (
             <button key={f.name} role="tab" aria-selected={i === actual} class={i === actual ? 'activo' : ''} onClick={() => abrir(i)}>{f.name.replace(/\.[^.]+$/, '').slice(0, 26)}</button>
           ))}
@@ -223,7 +224,7 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
       {hayVideo && datosMedio && datosMedio.audio.length > 1 && (
         <div class="ap-local-audio">
           <Icono n="altavoz" t={15} />
-          <select class="selector" aria-label="Pista de audio" value={audioElegido} disabled={extrayendoAudio !== null} onChange={(e) => cambiarAudio(Number(e.currentTarget.value))}>
+          <select class="selector" aria-label={tr('Pista de audio')} value={audioElegido} disabled={extrayendoAudio !== null} onChange={(e) => cambiarAudio(Number(e.currentTarget.value))}>
             {datosMedio.audio.map((p) => (
               <option key={p.indice} value={p.indice}>{p.titulo || nombreIdioma(p.idioma)}{p.titulo && p.idioma !== 'und' ? ` (${nombreIdioma(p.idioma)})` : ''}</option>
             ))}

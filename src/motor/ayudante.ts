@@ -6,6 +6,7 @@
 import { PUERTO_AYUDANTE } from '../compartido/api';
 import type { InfoAyudante } from '../compartido/api';
 import type { FuenteMuestras } from './whisper';
+import { tr } from '../compartido/i18n';
 
 type MensajeAyudante =
   | ({ tipo: 'hola' } & InfoAyudante)
@@ -75,7 +76,7 @@ export function abrirDescarga(url: string, alAvance: (porcentaje: number) => voi
     };
     const alAbortar = () => {
       cerrar();
-      fallar(new Error('Cancelado'));
+      fallar(new Error(tr('Cancelado')));
     };
     senal.addEventListener('abort', alAbortar);
 
@@ -87,7 +88,7 @@ export function abrirDescarga(url: string, alAvance: (porcentaje: number) => voi
           cerrar,
           leer: (desde, cuantas) =>
             new Promise((okLectura, malLectura) => {
-              if (!abierto) return malLectura(new Error('Se perdió la conexión con el ayudante'));
+              if (!abierto) return malLectura(new Error(tr('Se perdió la conexión con el ayudante')));
               const id = ++contador;
               lecturas.set(id, { partes: [], ok: okLectura, mal: malLectura });
               puerto.postMessage({ accion: 'leer', id, desde, cuantas });
@@ -111,12 +112,12 @@ export function abrirDescarga(url: string, alAvance: (porcentaje: number) => voi
         cerrar();
         fallar(new Error(m.mensaje));
       } else if (m.tipo === 'desconectado') {
-        fallar(new Error('Se perdió la conexión con el ayudante'));
+        fallar(new Error(tr('Se perdió la conexión con el ayudante')));
       }
     });
     puerto.onDisconnect.addListener(() => {
       void chrome.runtime.lastError;
-      if (abierto) fallar(new Error('Se perdió la conexión con el ayudante'));
+      if (abierto) fallar(new Error(tr('Se perdió la conexión con el ayudante')));
     });
     puerto.postMessage({ accion: 'abrir', url });
   });

@@ -7,6 +7,7 @@ import { borradorVacio, enviarAlCreador } from '../ui/borrador';
 import { actualizarCaptura, empezarGrabacionLinea, pausar, reproducir, saltar, terminarGrabacionLinea } from './controlador';
 import { ajustes, avisar, comoActivarCaptura, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
 import type { Control } from './puente';
+import { tr } from '../compartido/i18n';
 
 let control: Control;
 export const iniciarTarjetas = (c: Control) => {
@@ -124,7 +125,7 @@ async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) 
       const oficial = await imagenDelSitio();
       if (negrasSeguidas.veces === 1) {
         // Puede ser DRM o una escena a oscuras: lo cierto es solo que salió negro.
-        avisar(oficial ? 'El fotograma salió negro: la tarjeta lleva la imagen oficial del episodio.' : 'El fotograma salió negro: la tarjeta va sin captura del video.', undefined, undefined, 7000);
+        avisar(oficial ? tr('El fotograma salió negro: la tarjeta lleva la imagen oficial del episodio.') : tr('El fotograma salió negro: la tarjeta va sin captura del video.'), undefined, undefined, 7000);
       }
       return oficial;
     }
@@ -199,20 +200,20 @@ async function grabarLinea(l: LineaAnalizada, ocultarOverlay: (v: boolean) => vo
     }
     const clip = await motor.terminarClip();
     // En texto, para poder leerlo también al copiar la consola.
-    const resumen = !clip ? 'nada' : 'mudo' in clip ? 'mudo' : `${clip.segundos.toFixed(2)} s, pico ${clip.pico.toFixed(3)}`;
+    const resumen = !clip ? 'nada' : 'mudo' in clip ? 'mudo' : tr('{0} s, pico {1}', clip.segundos.toFixed(2), clip.pico.toFixed(3));
     console.info(`Kotonoha: grabación ${JSON.stringify({ arranco, clip: resumen, videoMudo: v.muted, volumen: v.volume, desde: inicio, hasta: fin, llego: Math.round(v.currentTime * 1000) })}`);
     if (!arranco) {
-      avisar('El video no arrancó para grabar la frase: la tarjeta va sin audio.', 'error', undefined, 7000);
+      avisar(tr('El video no arrancó para grabar la frase: la tarjeta va sin audio.'), 'error', undefined, 7000);
     } else if (clip && 'mudo' in clip) {
       const sonaba = !v.muted && v.volume > 0;
       if (sonaba) {
         const clave = claveVideo();
         mudasSeguidas = { video: clave, veces: mudasSeguidas.video === clave ? mudasSeguidas.veces + 1 : 1 };
       }
-      avisar(sonaba ? 'La grabación salió muda: este sitio no entrega su audio a la captura, o la frase no tiene sonido. La tarjeta va sin audio.' : 'La grabación salió muda porque el video está silenciado.', 'error', undefined, 9000);
+      avisar(sonaba ? tr('La grabación salió muda: este sitio no entrega su audio a la captura, o la frase no tiene sonido. La tarjeta va sin audio.') : tr('La grabación salió muda porque el video está silenciado.'), 'error', undefined, 9000);
     } else if (clip) {
       mudasSeguidas = { video: '', veces: 0 };
-      audio = { id: 'clip', nombre: `kotonoha_${Date.now()}.mp3`, tipo: clip.tipo, datos: clip.datos, etiqueta: 'Video' };
+      audio = { id: 'clip', nombre: `kotonoha_${Date.now()}.mp3`, tipo: clip.tipo, datos: clip.datos, etiqueta: tr('Video') };
     }
     if (capturando) imagen = await capturando;
   } finally {
@@ -297,7 +298,7 @@ export async function construirBorrador(p: PalabraToken | null, l: LineaAnalizad
   }
 
   // La grabación va aparte: mueve el video y dura lo que dure la frase.
-  const v = control.video();
+  const v = grabar ? control?.video() : null;
   if (l && grabar && v) {
     // Se pregunta en este momento: la captura pudo cortarse o estar en otra pestaña.
     const conCaptura = pre.audioFraseVideo && !audioProtegido() && (await actualizarCaptura().catch(() => false));
@@ -310,13 +311,13 @@ export async function construirBorrador(p: PalabraToken | null, l: LineaAnalizad
         const imagen = await capturarImagen(v, ocultarOverlay);
         if (imagen) b.imagenes = [imagen];
       }
-      if (pre.audioFraseVideo && !audioProtegido()) avisar(`Sin audio del video: ${comoActivarCaptura()} en esta pestaña para activar la captura.`, undefined, undefined, 6000);
+      if (pre.audioFraseVideo && !audioProtegido()) avisar(tr('Sin audio del video: {0} en esta pestaña para activar la captura.', comoActivarCaptura()), undefined, undefined, 6000);
     }
   }
   if (!b.audioFrase.length && pre.audioFraseVoz && a.azureClave && b.frase) {
     tareas.push(
       motor.vozFrase(l?.texto ?? b.frase, a.vocesFrase[0]).then((d) => {
-        b.audioFrase = [{ id: 'voz', nombre: `kotonoha_voz_${Date.now()}.mp3`, tipo: 'audio/mpeg', datos: d, etiqueta: 'Voz' }];
+        b.audioFrase = [{ id: 'voz', nombre: `kotonoha_voz_${Date.now()}.mp3`, tipo: 'audio/mpeg', datos: d, etiqueta: tr('Voz') }];
       }).catch(() => {})
     );
   }
@@ -331,7 +332,7 @@ export const cancelarUnClic = () => {
 
 export async function crearUnClic(p: PalabraToken | null, l: LineaAnalizada | null, ocultarOverlay: (v: boolean) => void) {
   cancelada = false;
-  const aviso = avisar('Creando tarjeta…', undefined, undefined, 0);
+  const aviso = avisar(tr('Creando tarjeta…'), undefined, undefined, 0);
   try {
     const b = await construirBorrador(p, l, ocultarOverlay, true);
     if (cancelada) return;
@@ -340,21 +341,21 @@ export async function crearUnClic(p: PalabraToken | null, l: LineaAnalizada | nu
     if (palabra && palabra.estado === 'desconocida') {
       await motor.cambiarPalabras([{ clave: palabra.clave, lema: palabra.lema, lectura: palabra.lecturaLema, estado: 'aprendiendo' }]);
     }
-    avisar(`Tarjeta creada${palabra ? `: ${palabra.lema}` : ''}`, 'exito');
+    avisar(tr('Tarjeta creada{0}', palabra ? `: ${palabra.lema}` : ''), 'exito');
   } catch (e) {
-    avisar(`No se pudo crear la tarjeta: ${e instanceof Error ? e.message : e}`, 'error', undefined, 9000);
+    avisar(tr('No se pudo crear la tarjeta: {0}', e instanceof Error ? e.message : e), 'error', undefined, 9000);
   } finally {
     quitarAviso(aviso);
   }
 }
 
 export async function enviarACreador(p: PalabraToken | null, l: LineaAnalizada | null, ocultarOverlay: (v: boolean) => void) {
-  const aviso = avisar('Preparando la tarjeta…', undefined, undefined, 0);
+  const aviso = avisar(tr('Preparando la tarjeta…'), undefined, undefined, 0);
   try {
     const b = await construirBorrador(p, l, ocultarOverlay, true);
     await enviarAlCreador(b);
   } catch (e) {
-    avisar(`No se pudo enviar: ${e instanceof Error ? e.message : e}`, 'error');
+    avisar(tr('No se pudo enviar: {0}', e instanceof Error ? e.message : e), 'error');
   } finally {
     quitarAviso(aviso);
   }

@@ -2,17 +2,18 @@
 
 import type { ObjetivoFrase } from '../compartido/ajustes';
 import type { LineaAnalizada, PalabraToken } from '../compartido/tipos';
+import { tm } from '../compartido/i18n';
 
 export type NivelComprension = 'excepcional' | 'excelente' | 'genial' | 'buena' | 'asequible' | 'dificil' | 'ambiciosa';
 
 export const NOMBRES_NIVEL: Record<NivelComprension, string> = {
-  excepcional: 'Excepcional',
-  excelente: 'Excelente',
-  genial: 'Muy buena',
-  buena: 'Buena',
-  asequible: 'Asequible',
-  dificil: 'Difícil',
-  ambiciosa: 'Ambiciosa',
+  excepcional: tm('Excepcional'),
+  excelente: tm('Excelente'),
+  genial: tm('Muy buena'),
+  buena: tm('Buena'),
+  asequible: tm('Asequible'),
+  dificil: tm('Difícil'),
+  ambiciosa: tm('Ambiciosa'),
 };
 
 export interface OpcionesFrase {

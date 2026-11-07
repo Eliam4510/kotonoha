@@ -4,6 +4,7 @@
 
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { analizarInformeFfmpeg, formatoExtraccionAudio, type InformeMedio, type PistaMedio } from '../nucleo/medios';
+import { tr } from '../compartido/i18n';
 
 export type { InformeMedio, PistaMedio };
 
@@ -77,7 +78,7 @@ export function extraerSubtitulos(archivo: File, pista: PistaMedio): Promise<str
     const ass = /^(ass|ssa)$/.test(pista.codec);
     const salida = ass ? '/sub.ass' : '/sub.srt';
     const codigo = await f.exec(['-y', '-i', ruta, '-map', `0:s:${pista.indice}`, ...(ass ? ['-c:s', 'copy'] : ['-c:s', 'srt']), salida]);
-    if (codigo !== 0) throw new Error('No se pudieron extraer estos subtítulos.');
+    if (codigo !== 0) throw new Error(tr('No se pudieron extraer estos subtítulos.'));
     const datos = (await f.readFile(salida, 'utf8')) as string;
     await f.deleteFile(salida).catch(() => {});
     return datos;
@@ -99,7 +100,7 @@ export async function extraerAudioParaWhisper(archivo: File, pista: PistaMedio |
     conProgreso(f, alProgreso, async () => {
       const salida = '/whisper.pcm';
       const codigo = await f.exec(['-y', '-i', ruta, '-map', `0:a:${pista?.indice ?? 0}`, '-vn', '-ac', '1', '-ar', '16000', '-f', 'f32le', salida]);
-      if (codigo !== 0) throw new Error('No se pudo extraer el audio de este archivo.');
+      if (codigo !== 0) throw new Error(tr('No se pudo extraer el audio de este archivo.'));
       const datos = (await f.readFile(salida)) as Uint8Array<ArrayBuffer>;
       await f.deleteFile(salida).catch(() => {});
       return URL.createObjectURL(new Blob([datos], { type: 'application/octet-stream' }));
@@ -118,7 +119,7 @@ export function extraerPistaAudio(archivo: File, pista: PistaMedio, alProgreso?:
       const formato = formatoExtraccionAudio(pista.codec);
       const salida = `/pista.${formato.extension}`;
       const codigo = await f.exec(['-y', '-i', ruta, '-map', `0:a:${pista.indice}`, '-vn', ...formato.args, salida]);
-      if (codigo !== 0) throw new Error('No se pudo extraer esta pista de audio.');
+      if (codigo !== 0) throw new Error(tr('No se pudo extraer esta pista de audio.'));
       const datos = (await f.readFile(salida)) as Uint8Array<ArrayBuffer>;
       await f.deleteFile(salida).catch(() => {});
       return URL.createObjectURL(new Blob([datos], { type: formato.tipo }));

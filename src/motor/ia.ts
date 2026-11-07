@@ -8,6 +8,7 @@ import { type Lote, ordenarPorCercania, partirEnLotes } from '../nucleo/lotes';
 import { claveDia, claveMes, costeDe, type UsoTokens } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import { db } from './db';
+import { tr } from '../compartido/i18n';
 import {
   ESQUEMA_ANALISIS,
   ESQUEMA_CORRECCIONES,
@@ -33,7 +34,7 @@ export function fijarClave(clave: string, baseURL?: string) {
 export const hayClave = () => claveApi.length > 0;
 
 function obtenerCliente(): Anthropic {
-  if (!claveApi) throw new Error('Falta la clave de la API de Claude. Añádela en Ajustes.');
+  if (!claveApi) throw new Error(tr('Falta la clave de la API de Claude. Añádela en Ajustes.'));
   // Corre en el documento offscreen: los scripts de las páginas nunca ven la clave.
   cliente ??= new Anthropic({ apiKey: claveApi, dangerouslyAllowBrowser: true, ...(urlBase ? { baseURL: urlBase } : {}) });
   return cliente;
@@ -99,10 +100,10 @@ function textoDe(m: { content: { type: string; text?: string }[] }): string {
 }
 
 function mensajeError(e: unknown): Error {
-  if (e instanceof Anthropic.AuthenticationError) return new Error('La clave de la API no es válida. Revísala en Ajustes.');
-  if (e instanceof Anthropic.RateLimitError) return new Error('Se superó el límite de la API. Espera un momento y vuelve a intentarlo.');
-  if (e instanceof Anthropic.BadRequestError && /credit balance/i.test(e.message)) return new Error('No queda saldo en la API de Claude.');
-  if (e instanceof Anthropic.APIError) return new Error(`Error de la API de Claude (${e.status ?? 'sin conexión'}): ${e.message}`);
+  if (e instanceof Anthropic.AuthenticationError) return new Error(tr('La clave de la API no es válida. Revísala en Ajustes.'));
+  if (e instanceof Anthropic.RateLimitError) return new Error(tr('Se superó el límite de la API. Espera un momento y vuelve a intentarlo.'));
+  if (e instanceof Anthropic.BadRequestError && /credit balance/i.test(e.message)) return new Error(tr('No queda saldo en la API de Claude.'));
+  if (e instanceof Anthropic.APIError) return new Error(tr('Error de la API de Claude ({0}): {1}', e.status ?? tr('sin conexión'), e.message));
   return e instanceof Error ? e : new Error(String(e));
 }
 
@@ -121,17 +122,36 @@ function anotarConsumo(tarea: string, modelo: string, u: UsoApi | undefined, tit
   const escritura5m = u.cache_creation?.ephemeral_5m_input_tokens ?? Math.max(0, (u.cache_creation_input_tokens ?? 0) - escritura1h);
   const uso: UsoTokens = { entrada: u.input_tokens ?? 0, salida: u.output_tokens ?? 0, cacheEscritura5m: escritura5m, cacheEscritura1h: escritura1h, cacheLectura: u.cache_read_input_tokens ?? 0 };
   const t = Date.now();
+  gastadoCache = null;
   db.consumo.add({ ...uso, t, dia: claveDia(t), mes: claveMes(t), tarea, modelo, coste: costeDe(modelo, uso), titulo }).catch((e) => console.warn('Kotonoha: no se pudo anotar el gasto', e));
 }
 
+/** Lo gastado este mes, para no pasar del tope. Se recuerda un momento: se pregunta en cada petición. */
+let gastadoCache: { t: number; total: number } | null = null;
+async function gastadoEsteMes(): Promise<number> {
+  const ahora = Date.now();
+  if (gastadoCache && ahora - gastadoCache.t < 30000) return gastadoCache.total;
+  const filas = await db.consumo.where('mes').equals(claveMes(ahora)).toArray();
+  const total = filas.reduce((s, f) => s + (f.coste ?? 0), 0);
+  gastadoCache = { t: ahora, total };
+  return total;
+}
+
+async function comprobarTope(a: Ajustes) {
+  if (a.limiteGasto > 0 && (await gastadoEsteMes()) >= a.limiteGasto) {
+    throw new Error(tr('Has llegado a tu tope de {0} dólares este mes. Puedes cambiarlo en Ajustes.', a.limiteGasto));
+  }
+}
+
 async function ejecutar(o: OpcionesPeticion, emitir?: (t: string) => void, senal?: AbortSignal): Promise<string> {
+  await comprobarTope(o.a);
   try {
     const flujo = abrirFlujo(o, senal);
     if (emitir) (flujo as unknown as { on(e: 'text', fn: (d: string) => void): void }).on('text', (d) => emitir(d));
     const final = (await flujo.finalMessage()) as unknown as { model?: string; usage?: UsoApi; stop_reason?: string; content: { type: string; text?: string }[] };
     const tarea = o.profundo ? 'profundo' : o.tarea;
     anotarConsumo(tarea, final.model ?? o.a.modelos[tarea], final.usage, o.titulo);
-    if (final.stop_reason === 'refusal') throw new Error('Claude rechazó esta petición por sus reglas de seguridad.');
+    if (final.stop_reason === 'refusal') throw new Error(tr('Claude rechazó esta petición por sus reglas de seguridad.'));
     return textoDe(final);
   } catch (e) {
     if (senal?.aborted) return '';

@@ -2,6 +2,7 @@
 
 import type { Ajustes } from '../compartido/ajustes';
 import type { BorradorTarjeta, EstadoAnki, MedioTarjeta } from '../compartido/tipos';
+import { tr } from '../compartido/i18n';
 
 let puerto = 8765;
 
@@ -17,9 +18,9 @@ async function invocar<T>(action: string, params: Record<string, unknown> = {}):
       body: JSON.stringify({ action, version: 6, params }),
     });
   } catch {
-    throw new Error('Anki no responde. Ábrelo y comprueba que AnkiConnect está instalado.');
+    throw new Error(tr('Anki no responde. Ábrelo y comprueba que AnkiConnect está instalado.'));
   }
-  if (r.status === 403) throw new Error('Anki rechazó la conexión: pulsa «Conectar con Anki» en Ajustes y acepta el aviso en Anki.');
+  if (r.status === 403) throw new Error(tr('Anki rechazó la conexión: pulsa «Conectar con Anki» en Ajustes y acepta el aviso en Anki.'));
   const d = (await r.json()) as { result: T; error: string | null };
   if (d.error) throw new Error(d.error);
   return d.result;
@@ -28,7 +29,7 @@ async function invocar<T>(action: string, params: Record<string, unknown> = {}):
 /** Pide permiso para este origen; Anki muestra un cuadro de diálogo la primera vez. */
 export async function pedirPermiso(): Promise<EstadoAnki> {
   const r = await invocar<{ permission: string }>('requestPermission');
-  if (r.permission !== 'granted') throw new Error('Anki no concedió el permiso');
+  if (r.permission !== 'granted') throw new Error(tr('Anki no concedió el permiso'));
   return estado();
 }
 

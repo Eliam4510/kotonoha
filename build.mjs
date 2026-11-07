@@ -5,10 +5,11 @@ import { copyFile, cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/p
 import { join } from 'node:path';
 import { generarIconos } from './herramientas/iconos.mjs';
 import { escribirLicencias } from './herramientas/licencias.mjs';
-import { manifiesto } from './manifiesto.mjs';
+import { MENSAJES, manifiesto } from './manifiesto.mjs';
 
 const vigilar = process.argv.includes('--watch');
-const SALIDA = process.env.KK_SALIDA ?? 'dist';
+// KK_SALIDA es para las pruebas: lleva clave fija y sin minificar. KK_PUBLICAR es igual que dist, pero en otra carpeta.
+const SALIDA = process.env.KK_SALIDA ?? process.env.KK_PUBLICAR ?? 'dist';
 
 const entradas = {
   pagina: 'src/pagina/index.ts',
@@ -17,6 +18,7 @@ const entradas = {
   motor: 'src/motor/index.ts',
   app: 'src/app/index.tsx',
   popup: 'src/popup/index.tsx',
+  lector: 'src/lector/index.tsx',
 };
 
 const opciones = {
@@ -55,7 +57,7 @@ async function estaticos() {
   const clavePrueba = process.env.KK_SALIDA ? { key: (await readFile('pruebas/clave-extension-pruebas.txt', 'utf8')).trim() } : {};
   await writeFile(join(SALIDA, 'manifest.json'), JSON.stringify({ ...manifiesto, ...clavePrueba }, null, 2));
 
-  for (const pagina of ['app', 'popup', 'motor']) {
+  for (const pagina of ['app', 'popup', 'motor', 'lector']) {
     await copyFile(`src/${pagina}/index.html`, join(SALIDA, `${pagina}.html`));
   }
   await cp('publico', SALIDA, { recursive: true });
@@ -85,6 +87,17 @@ async function estaticos() {
   await copyFile('node_modules/kuromoji/build/kuromoji.js', join(SALIDA, 'kuromoji.js'));
   for (const archivo of await readdir('node_modules/kuromoji/dict')) {
     await copyFile(join('node_modules/kuromoji/dict', archivo), join(SALIDA, 'dict', archivo));
+  }
+
+  // Una tabla por idioma, aparte: el content script solo carga la que hace falta.
+  for (const [idioma, textos] of Object.entries(MENSAJES)) {
+    await mkdir(join(SALIDA, '_locales', idioma), { recursive: true });
+    const mensajes = Object.fromEntries(Object.entries(textos).map(([clave, message]) => [clave, { message }]));
+    await writeFile(join(SALIDA, '_locales', idioma, 'messages.json'), JSON.stringify(mensajes, null, 1));
+  }
+  await mkdir(join(SALIDA, 'idiomas'), { recursive: true });
+  for (const archivo of await readdir('idiomas', { withFileTypes: true })) {
+    if (archivo.isFile() && archivo.name.endsWith('.json')) await copyFile(join('idiomas', archivo.name), join(SALIDA, 'idiomas', archivo.name));
   }
 
   escribirLicencias(SALIDA);

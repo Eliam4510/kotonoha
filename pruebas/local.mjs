@@ -1,6 +1,7 @@
 // Prueba del reproductor local con un MKV real: subtítulos incrustados, pista de audio y Whisper.
 // Uso: KK_SALIDA=.dist-local node build.mjs && node pruebas/local.mjs [ruta/video.mkv]
-// Sin ruta usa capturas-e2e/prueba.mkv, que crea pruebas/medios.mjs.
+// Sin ruta usa capturas-e2e/prueba.mkv, que crea pruebas/medios.mjs. Whisper necesita voz: si ese archivo
+// se creó con un tono, avisa de que no oyó nada y las dos comprobaciones de transcripción fallan.
 
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -9,7 +10,7 @@ import { iniciarMock } from './mock-claude.mjs';
 import { recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
-const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-local'));
+const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-local'));
 const CAPTURAS = resolve(process.env.KK_CAPTURAS ?? join(RAIZ, 'capturas-e2e', 'local'));
 const ARCHIVO = resolve(process.argv[2] ?? join(RAIZ, 'capturas-e2e', 'prueba.mkv'));
@@ -100,6 +101,10 @@ if (abrirPanel) {
   await p.screenshot({ path: join(CAPTURAS, 'local-panel-generar.png') });
   const boton = await p.evaluateHandle(() => [...document.querySelectorAll('.panel-flotante button')].find((b) => /whisper|transcrib/i.test(b.textContent) && !b.disabled));
   if (boton.asElement()) {
+    await p.evaluate(() => {
+      window.__avisos = new Set();
+      setInterval(() => document.querySelectorAll('.aviso').forEach((a) => window.__avisos.add(a.textContent)), 200);
+    });
     await boton.asElement().click();
     await p.waitForTimeout(2500);
     await p.screenshot({ path: join(CAPTURAS, 'local-whisper-curso.png') });
@@ -113,9 +118,27 @@ if (abrirPanel) {
       v.currentTime = 12;
     });
     await p.waitForTimeout(1500);
-    const linea = await p.evaluate(() => document.querySelector('.linea-sub.objetivo')?.textContent);
+    // Whisper y la corrección tardan lo que tardan: se espera a que ocurran, con un límite.
+    const hasta = (fn, ms) => new Promise((listo) => {
+      const limite = Date.now() + ms;
+      const mirar = async () => {
+        if (await fn()) return listo(true);
+        if (Date.now() > limite) return listo(false);
+        setTimeout(mirar, 500);
+      };
+      mirar();
+    });
+    const leerLinea = () => p.evaluate(() => document.querySelector('.linea-sub.objetivo')?.textContent);
+    await hasta(async () => /休|ペース|一日|1日/.test((await leerLinea()) ?? ''), 420000);
+    const linea = await leerLinea();
     comprobar(/休|ペース|一日|1日/.test(linea ?? ''), 'Whisper genera la pista desde el audio del archivo', linea ?? 'sin línea');
-    comprobar(mock.peticiones.some((x) => JSON.stringify(x.cuerpo.system ?? '').includes('Corriges subtítulos')), 'Claude corrige la transcripción');
+    const corregida = await hasta(() => mock.peticiones.some((x) => JSON.stringify(x.cuerpo.system ?? '').includes('Corriges subtítulos')), 60000);
+    comprobar(corregida, 'Claude corrige la transcripción');
+    if (!corregida) {
+      console.log(`Peticiones a Claude: ${mock.peticiones.length}`);
+      for (const x of mock.peticiones.slice(0, 8)) console.log(' -', JSON.stringify(x.cuerpo.system ?? '').slice(0, 110));
+      console.log('Avisos:', await p.evaluate(() => [...window.__avisos].join(' | ')));
+    }
     await p.screenshot({ path: join(CAPTURAS, 'local-whisper-final.png') });
   } else {
     console.log('El panel no tiene aún el botón de Whisper');

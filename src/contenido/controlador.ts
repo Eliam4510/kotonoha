@@ -49,6 +49,7 @@ import {
   whisper,
 } from './estado';
 import type { Control } from './puente';
+import { tm, tr } from '../compartido/i18n';
 
 let control: Control;
 
@@ -93,10 +94,10 @@ export function iniciarControlador(c: Control) {
     if (e.tipo === 'captura') {
       const antes = capturaActiva.value;
       actualizarCaptura().then((ahora) => {
-        if (ahora !== antes) avisar(ahora ? 'Captura de audio activada en esta pestaña' : 'Captura de audio desactivada', undefined, undefined, 2500);
+        if (ahora !== antes) avisar(ahora ? tr('Captura de audio activada en esta pestaña') : tr('Captura de audio desactivada'), undefined, undefined, 2500);
       }).catch(() => {});
     }
-    if (e.tipo === 'capturaFallida') avisar(`No se pudo activar la captura: ${e.motivo}`, 'error', undefined, 9000);
+    if (e.tipo === 'capturaFallida') avisar(tr('No se pudo activar la captura: {0}', e.motivo), 'error', undefined, 9000);
   });
   actualizarCaptura().catch(() => {});
   actualizarAtajos();
@@ -236,7 +237,7 @@ let avisoActualizacion = false;
 function comprobarConexion() {
   if (avisoActualizacion || chrome.runtime?.id) return;
   avisoActualizacion = true;
-  avisar('Kotonoha se actualizó. Recarga la página para usar la versión nueva.', undefined, { texto: 'Recargar', fn: () => location.reload() }, 0);
+  avisar('Kotonoha se actualizó. Recarga la página para usar la versión nueva.', undefined, { texto: tr('Recargar'), fn: () => location.reload() }, 0);
 }
 
 function tick() {
@@ -389,7 +390,7 @@ export function anclarLinea(l: LineaAnalizada) {
   const nuevas = [...anclas.value.filter((a) => a.linea !== punto.linea), punto].sort((a, b) => a.linea - b.linea).slice(-2);
   anclas.value = nuevas;
   fijarSincronia('objetivo', sincroniaDesdePuntos(nuevas));
-  avisar(nuevas.length === 1 ? 'Línea alineada. Marca otra lejos de esta para ajustar también la velocidad.' : 'Sincronía ajustada con dos marcas.', 'exito');
+  avisar(nuevas.length === 1 ? tr('Línea alineada. Marca otra lejos de esta para ajustar también la velocidad.') : tr('Sincronía ajustada con dos marcas.'), 'exito');
 }
 
 export function reiniciarSincronia(pista: 'objetivo' | 'secundaria') {
@@ -401,7 +402,7 @@ export function reiniciarSincronia(pista: 'objetivo' | 'secundaria') {
 export function exportarSrt(pista: 'objetivo' | 'secundaria') {
   const lineas: Linea[] = pista === 'objetivo' ? lineasObjetivo.value : lineasSecundarias.value;
   if (!lineas.length) {
-    avisar('No hay subtítulos que exportar.', 'error');
+    avisar(tr('No hay subtítulos que exportar.'), 'error');
     return;
   }
   const idioma = pista === 'objetivo' ? ajustes.value.idiomaObjetivo : ajustes.value.idiomaSecundario;
@@ -452,7 +453,7 @@ export async function iniciarAnalisisProfundo(todoElVideo = false) {
   ventanaRevision = todoElVideo ? { desde: 0, hasta: lineas.length } : { desde, hasta: desde + VENTANA_REVISION };
   const estado = await motor.estado();
   if (!estado.claveIA) {
-    if (todoElVideo) avisar('Añade tu clave de la API de Claude en Ajustes para revisar lecturas, sentidos y gramática.', 'error', { texto: 'Ajustes', fn: () => fondo.abrirApp('ajustes') }, 8000);
+    if (todoElVideo) avisar(tr('Añade tu clave de la API de Claude en Ajustes para revisar lecturas, sentidos y gramática.'), 'error', { texto: tr('Ajustes'), fn: () => fondo.abrirApp('ajustes') }, 8000);
     return;
   }
   if (!a.analisisAutomatico && !todoElVideo) return;
@@ -472,9 +473,9 @@ export async function iniciarAnalisisProfundo(todoElVideo = false) {
   try {
     const n = await f;
     if (turno === turnoCarga && n !== '0' && n !== '') await refrescarAnalisis();
-    if (todoElVideo && n === '0') avisar('Estas líneas ya estaban revisadas.');
+    if (todoElVideo && n === '0') avisar(tr('Estas líneas ya estaban revisadas.'));
   } catch (e) {
-    avisar(`No se pudo revisar con Claude: ${e instanceof Error ? e.message : e}`, 'error', undefined, 8000);
+    avisar(tr('No se pudo revisar con Claude: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
   } finally {
     if (turno === turnoCarga) analisisEnCurso.value = null;
     flujoAnalisis = null;
@@ -586,7 +587,7 @@ export async function seleccionarSecundaria(id: string | null) {
     sincronias.value = { ...sincronias.value, secundaria: await leerSincronia(id) };
     publicarSecundaria(lineas);
   } catch (e) {
-    avisar(`No se pudo cargar la pista secundaria: ${e instanceof Error ? e.message : e}`, 'error');
+    avisar(tr('No se pudo cargar la pista secundaria: {0}', e instanceof Error ? e.message : e), 'error');
   }
 }
 
@@ -623,7 +624,7 @@ export async function cargarVideoActual() {
       const id = `generada:${g.idioma}`;
       importadas.set(id, g.lineas);
       const origen = (g.origen ?? (g.idioma === ajustes.value.idiomaObjetivo ? 'whisper' : 'claude')) as PistaInfo['origen'];
-      propias.push({ id, idioma: g.idioma, nombre: `${nombreIdioma(g.idioma)} (${NOMBRE_ORIGEN[origen] ?? 'Claude'})`, origen });
+      propias.push({ id, idioma: g.idioma, nombre: `${nombreIdioma(g.idioma)} (${tr(NOMBRE_ORIGEN[origen] ?? 'Claude')})`, origen });
     }
   }
   pistas.value = propias;
@@ -649,10 +650,10 @@ export async function cargarVideoActual() {
   control.info().then((i) => (infoVideo.value = { sitio: i.sitio, idVideo: i.idVideo, titulo: i.titulo })).catch(() => {});
 }
 
-const NOMBRE_ORIGEN: Partial<Record<PistaInfo['origen'], string>> = { whisper: 'Whisper', claude: 'Claude', importada: 'importados', recordada: 'guardados' };
+const NOMBRE_ORIGEN: Partial<Record<PistaInfo['origen'], string>> = { whisper: tm('Whisper'), claude: tm('Claude'), importada: tm('importados'), recordada: tm('guardados') };
 
 export const nombreIdioma = (c: string) =>
-  ({ ja: 'Japonés', es: 'Español', en: 'Inglés', ko: 'Coreano', zh: 'Chino', pt: 'Portugués', fr: 'Francés', de: 'Alemán' } as Record<string, string>)[c.split('-')[0]] ?? c;
+  ({ ja: tr('Japonés'), es: tr('Español'), en: tr('Inglés'), ko: tr('Coreano'), zh: tr('Chino'), pt: tr('Portugués'), fr: tr('Francés'), de: tr('Alemán') } as Record<string, string>)[c.split('-')[0]] ?? c;
 
 export function vigilarAnuncios() {
   setInterval(async () => {
@@ -672,7 +673,7 @@ export async function importarArchivo(archivo: File, destino: 'objetivo' | 'secu
     const idioma = destino === 'objetivo' ? ajustes.value.idiomaObjetivo : ajustes.value.idiomaSecundario;
     const id = `generada:${idioma}`;
     importadas.set(id, lineas);
-    pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: `${nombreIdioma(idioma)} (importados)`, origen: 'importada' }];
+    pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (importados)', nombreIdioma(idioma)), origen: 'importada' }];
     const video = infoVideo.value?.idVideo;
     if (video) await motor.guardarSubtitulosGenerados(video, idioma, lineas, 'importada').catch(() => {});
     // Un archivo nuevo empieza sin el ajuste de sincronía del anterior, y sin sus correcciones.
@@ -680,9 +681,9 @@ export async function importarArchivo(archivo: File, destino: 'objetivo' | 'secu
     await motor.guardarCorreccionesPista(clavePista(id), {}, false).catch(() => {});
     if (destino === 'objetivo') await seleccionarObjetivo(id);
     else await seleccionarSecundaria(id);
-    avisar(`Importado: ${archivo.name} (${lineas.length} líneas)`, 'exito');
+    avisar(tr('Importado: {0} ({1} líneas)', archivo.name, lineas.length), 'exito');
   } catch (e) {
-    avisar(`No se pudo importar: ${e instanceof Error ? e.message : e}`, 'error');
+    avisar(tr('No se pudo importar: {0}', e instanceof Error ? e.message : e), 'error');
   }
 }
 
@@ -725,7 +726,7 @@ interface EventoTraduccion {
 export async function generarSecundarios() {
   const fuente = crudas(baseObjetivo);
   if (!fuente.length) {
-    avisar('Primero elige los subtítulos en japonés.', 'error');
+    avisar(tr('Primero elige los subtítulos en japonés.'), 'error');
     return;
   }
   const idioma = ajustes.value.idiomaSecundario;
@@ -736,7 +737,7 @@ export async function generarSecundarios() {
   const faltan = fuente.filter((l) => !hechas.has(l.id));
   if (!faltan.length) hechas.clear();
   const porTraducir = faltan.length ? faltan : fuente;
-  pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: `${nombreIdioma(idioma)} (Claude)`, origen: 'claude' }];
+  pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (Claude)', nombreIdioma(idioma)), origen: 'claude' }];
   idSecundaria.value = id;
   const yaHechas = fuente.length - porTraducir.length;
   generacion.value = { tipo: 'secundarios', hechas: yaHechas, total: fuente.length };
@@ -760,9 +761,9 @@ export async function generarSecundarios() {
   flujoGeneracion = f;
   try {
     await f;
-    if (generacion.value) avisar('Traducción lista.', 'exito');
+    if (generacion.value) avisar(tr('Traducción lista.'), 'exito');
   } catch (e) {
-    avisar(`No se pudo traducir: ${e instanceof Error ? e.message : e}`, 'error', undefined, 8000);
+    avisar(tr('No se pudo traducir: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
   } finally {
     generacion.value = null;
     flujoGeneracion = null;
@@ -776,7 +777,7 @@ export async function generarSecundarios() {
 export async function traducirAlJapones() {
   const fuente = baseSecundaria;
   if (!fuente.length) {
-    avisar('Elige primero unos subtítulos secundarios: de ellos sale la traducción.', 'error');
+    avisar(tr('Elige primero unos subtítulos secundarios: de ellos sale la traducción.'), 'error');
     return;
   }
   const idioma = ajustes.value.idiomaObjetivo;
@@ -786,7 +787,7 @@ export async function traducirAlJapones() {
   flujoAnalisis?.cancelar();
   ventanaRevision = null;
   flujoCorreccion?.cancelar();
-  pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: `${nombreIdioma(idioma)} (traducidos por Claude)`, origen: 'claude' }];
+  pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (traducidos por Claude)', nombreIdioma(idioma)), origen: 'claude' }];
   idObjetivo.value = id;
   errorPista.value = null;
   baseObjetivo = [];
@@ -819,11 +820,11 @@ export async function traducirAlJapones() {
     await f;
     await cola;
     if (turno === turnoCarga && generacion.value) {
-      avisar('Subtítulos en japonés listos. Al ser una traducción, pueden diferir de lo que se oye.', 'exito', undefined, 7000);
+      avisar(tr('Subtítulos en japonés listos. Al ser una traducción, pueden diferir de lo que se oye.'), 'exito', undefined, 7000);
       iniciarAnalisisProfundo().catch(() => {});
     }
   } catch (e) {
-    avisar(`No se pudo traducir: ${e instanceof Error ? e.message : e}`, 'error', undefined, 8000);
+    avisar(tr('No se pudo traducir: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
   } finally {
     generacion.value = null;
     flujoGeneracion = null;
@@ -873,7 +874,7 @@ export async function corregirSubtitulos(manual = false) {
   const turno = turnoCarga;
   const estado = await motor.estado().catch(() => null);
   if (!estado?.claveIA) {
-    if (manual) avisar('Añade tu clave de la API de Claude en Ajustes para corregir los subtítulos.', 'error', { texto: 'Ajustes', fn: () => fondo.abrirApp('ajustes') }, 8000);
+    if (manual) avisar(tr('Añade tu clave de la API de Claude en Ajustes para corregir los subtítulos.'), 'error', { texto: tr('Ajustes'), fn: () => fondo.abrirApp('ajustes') }, 8000);
     return;
   }
   if (turno !== turnoCarga) return;
@@ -907,9 +908,9 @@ export async function corregirSubtitulos(manual = false) {
       importadas.set(id, crudas(baseObjetivo));
       await guardarGenerada();
     }
-    if (manual || cambiadas) avisar(cambiadas ? `Claude corrigió ${cambiadas} ${cambiadas === 1 ? 'línea' : 'líneas'}.` : 'Claude no encontró nada que corregir.', cambiadas ? 'exito' : undefined);
+    if (manual || cambiadas) avisar(cambiadas ? (cambiadas === 1 ? tr('Claude corrigió 1 línea.') : tr('Claude corrigió {0} líneas.', cambiadas)) : tr('Claude no encontró nada que corregir.'), cambiadas ? 'exito' : undefined);
   } catch (e) {
-    if (manual) avisar(`No se pudo corregir: ${e instanceof Error ? e.message : e}`, 'error', undefined, 8000);
+    if (manual) avisar(tr('No se pudo corregir: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
     else console.warn('Kotonoha: no se pudieron corregir los subtítulos', e);
   } finally {
     if (turno === turnoCarga) correccion.value = null;
@@ -991,14 +992,17 @@ async function activarPistaWhisper() {
   if (idObjetivo.value === id) return;
   const previa = importadas.get(id) ?? [];
   importadas.set(id, previa);
-  pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: `${nombreIdioma(idioma)} (Whisper)`, origen: 'whisper' }];
+  pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (Whisper)', nombreIdioma(idioma)), origen: 'whisper' }];
   await seleccionarObjetivo(id);
 }
 
+/** El nombre que da el trabajador de Whisper cuando no hay GPU. Viene en español: se traduce al mostrarlo. */
+const DISPOSITIVO_SIN_GPU = tm('procesador (sin GPU)');
+
 /** Sin WebGPU Whisper corre en el procesador, muy por debajo del tiempo real: mejor saberlo. */
 function avisarSiNoHayGpu(anterior: string | undefined, actual: string | undefined) {
-  if (actual && actual !== anterior && actual.includes('sin GPU')) {
-    avisar('El navegador no ofrece acceso a la GPU: la transcripción irá muy lenta. Revisa la aceleración por hardware en los ajustes del navegador.', 'error', undefined, 10000);
+  if (actual && actual !== anterior && actual === DISPOSITIVO_SIN_GPU) {
+    avisar(tr('El navegador no ofrece acceso a la GPU: la transcripción irá muy lenta. Revisa la aceleración por hardware en los ajustes del navegador.'), 'error', undefined, 10000);
   }
 }
 
@@ -1035,7 +1039,7 @@ export async function iniciarWhisper(enVivo = false) {
   // Netflix siempre tiene subtítulos y su audio no se puede bajar: ahí nunca se usa el ayudante.
   const conAyudante = !enVivo && !desdeArchivo && infoVideo.value?.sitio !== 'netflix' && !!(await actualizarAyudante());
   if (!desdeArchivo && !conAyudante && !capturaActiva.value) {
-    avisar(`Para oír el video hay que activar la captura de audio: ${comoActivarCaptura()} y vuelve a intentarlo.`, 'error', undefined, 8000);
+    avisar(tr('Para oír el video hay que activar la captura de audio: {0} y vuelve a intentarlo.', comoActivarCaptura()), 'error', undefined, 8000);
     return;
   }
   whisper.value = { fase: conAyudante ? 'bajando' : desdeArchivo ? 'extrayendo' : 'preparando', lineas: 0, desdeArchivo: !!desdeArchivo || conAyudante };
@@ -1043,7 +1047,7 @@ export async function iniciarWhisper(enVivo = false) {
   try {
     audio = desdeArchivo ? await desdeArchivo((porcentaje) => (whisper.value = whisper.value && { ...whisper.value, fase: 'extrayendo', porcentaje })) : null;
   } catch (e) {
-    avisar(`No se pudo leer el audio: ${e instanceof Error ? e.message : e}`, 'error', undefined, 8000);
+    avisar(tr('No se pudo leer el audio: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
     whisper.value = null;
     return;
   }
@@ -1056,7 +1060,7 @@ export async function iniciarWhisper(enVivo = false) {
     if (ultimo > 0 && duracionMs && ultimo < duracionMs - 20000) {
       desdeMs = Math.max(0, ultimo - 1000);
       const s = Math.floor(desdeMs / 1000);
-      avisar(`Sigo desde donde iba: ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}.`);
+      avisar(tr('Sigo desde donde iba: {0}:{1}.', Math.floor(s / 60), String(s % 60).padStart(2, '0')));
     }
   }
   sinCorregir = [];
@@ -1103,9 +1107,9 @@ export async function iniciarWhisper(enVivo = false) {
         whisper.value = { ...actual, pausado: e.pausado };
       } else if (e.tipo === 'recuperando') {
         whisper.value = { ...actual, fase: 'recuperando' };
-        avisar(`La tarjeta gráfica se reinició. Espero ${e.segundos} s y sigo a la mínima intensidad. Lo transcrito está guardado.`, 'error', undefined, 10000);
+        avisar(tr('La tarjeta gráfica se reinició. Espero {0} s y sigo a la mínima intensidad. Lo transcrito está guardado.', e.segundos), 'error', undefined, 10000);
       } else if (e.tipo === 'retraso') {
-        if (!avisoRetraso) avisar('La tarjeta gráfica va justa y la transcripción lleva retraso. Cierra otras aplicaciones exigentes si quieres que se ponga al día.', undefined, undefined, 8000);
+        if (!avisoRetraso) avisar(tr('La tarjeta gráfica va justa y la transcripción lleva retraso. Cierra otras aplicaciones exigentes si quieres que se ponga al día.'), undefined, undefined, 8000);
         avisoRetraso = true;
       } else if (e.tipo === 'preparando') {
         whisper.value = { ...actual, fase: 'preparando' };
@@ -1121,15 +1125,15 @@ export async function iniciarWhisper(enVivo = false) {
     await colaCorreccion;
     await corregirLote(lote);
     const n = whisper.value?.lineas ?? 0;
-    avisar(n ? `Transcripción lista: ${n} líneas.` : 'No se oyó voz que transcribir.', n ? 'exito' : undefined);
+    avisar(n ? tr('Transcripción lista: {0} líneas.', n) : tr('No se oyó voz que transcribir.'), n ? 'exito' : undefined);
     importadas.set(`generada:${ajustes.value.idiomaObjetivo}`, crudas(baseObjetivo));
     if (n && (audio || conAyudante) && ajustes.value.whisperCorregir) await corregirSubtitulos();
     if (n) iniciarAnalisisProfundo().catch(() => {});
   } catch (e) {
     const mensaje = e instanceof Error ? e.message : String(e);
     // Si el video no se puede bajar, aún queda oírlo mientras se reproduce.
-    if (conAyudante) avisar(`No se pudo bajar el audio: ${mensaje}`, 'error', { texto: 'Transcribir al reproducir', fn: () => iniciarWhisper(true) }, 12000);
-    else avisar(`No se pudo transcribir: ${mensaje}`, 'error', undefined, 8000);
+    if (conAyudante) avisar(tr('No se pudo bajar el audio: {0}', mensaje), 'error', { texto: tr('Transcribir al reproducir'), fn: () => iniciarWhisper(true) }, 12000);
+    else avisar(tr('No se pudo transcribir: {0}', mensaje), 'error', undefined, 8000);
   } finally {
     if (intervaloMarcas) clearInterval(intervaloMarcas);
     intervaloMarcas = null;

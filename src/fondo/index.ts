@@ -1,8 +1,9 @@
 // Service worker: comandos, captura y difusión de eventos. No guarda estado: Chrome puede detenerlo.
 
-import { CLAVE_API, leerAjustes } from '../compartido/ajustes';
+import { alCambiarAjustes, CLAVE_API, leerAjustes } from '../compartido/ajustes';
 import { type ApiFondo, type EventoDifundido, HOST_AYUDANTE, PUERTO_AYUDANTE } from '../compartido/api';
 import { atender, motor, type ConRemitente } from '../compartido/rpc';
+import { fijarIdioma, tr } from '../compartido/i18n';
 
 const RUTA_MOTOR = 'motor.html';
 let creando: Promise<void> | null = null;
@@ -13,8 +14,8 @@ async function asegurarMotor(): Promise<void> {
   creando ??= chrome.offscreen
     .createDocument({
       url: RUTA_MOTOR,
-      reasons: ['WORKERS', 'USER_MEDIA', 'BLOBS'] as chrome.offscreen.Reason[],
-      justification: 'Tokenizador, base de datos, cliente de Claude y grabación de audio para tarjetas.',
+      reasons: ['WORKERS', 'USER_MEDIA', 'BLOBS', 'CLIPBOARD'] as chrome.offscreen.Reason[],
+      justification: 'Tokenizador, base de datos, cliente de Claude, grabación de audio para tarjetas y lectura del portapapeles para el lector.',
     })
     .finally(() => {
       creando = null;
@@ -44,7 +45,7 @@ async function activarCaptura(idPestana: number): Promise<void> {
   const streamId = await new Promise<string>((ok, mal) => {
     chrome.tabCapture.getMediaStreamId({ targetTabId: idPestana }, (id) => {
       const e = chrome.runtime.lastError;
-      if (e || !id) mal(new Error(e?.message ?? 'Chrome no concedió la captura'));
+      if (e || !id) mal(new Error(e?.message ?? tr('Chrome no concedió la captura')));
       else ok(id);
     });
   });
@@ -61,7 +62,7 @@ async function desactivarCaptura(): Promise<void> {
 
 async function alternarCaptura(idPestana?: number): Promise<boolean> {
   const id = idPestana ?? (await chrome.tabs.query({ active: true, currentWindow: true }))[0]?.id;
-  if (id === undefined) throw new Error('No hay pestaña activa');
+  if (id === undefined) throw new Error(tr('No hay pestaña activa'));
   const actual = await pestanaCapturada();
   if (actual !== null) {
     await desactivarCaptura();
@@ -82,8 +83,47 @@ async function abrirApp(ruta = 'inicio'): Promise<void> {
   await chrome.windows.create({ url, type: 'popup', width: 1280, height: 900 });
 }
 
+/**
+ * El lector en una pestaña normal. La ventana de la app no tiene pestañas: hay que ir a una ventana del navegador, y
+ * solo ahí puede entrar en la vista dividida. Si ya está abierta no se duplica, porque compartirían el mismo texto.
+ */
+async function abrirLectorWeb(junto = false): Promise<void> {
+  const url = chrome.runtime.getURL('lector.html');
+  const enfocar = async (t: chrome.tabs.Tab) => {
+    if (t.id !== undefined) await chrome.tabs.update(t.id, { active: true });
+    if (t.windowId !== undefined) await chrome.windows.update(t.windowId, { focused: true });
+  };
+  const ventana = await chrome.windows.getLastFocused({ windowTypes: ['normal'] }).catch(() => null);
+  if (!ventana?.id) {
+    await chrome.windows.create({ url, type: 'normal' });
+    return;
+  }
+  const [activa] = await chrome.tabs.query({ active: true, windowId: ventana.id });
+  const [abierta] = await chrome.tabs.query({ url: `${url}*` });
+  if (abierta) {
+    if (junto && activa?.id !== undefined && abierta.id !== undefined && activa.id !== abierta.id && abierta.windowId === ventana.id) {
+      // No se puede con una pestaña que ya está dividida: entonces basta con llevar a ella.
+      await (chrome.tabs as unknown as { createSplit(ids: number[]): Promise<number> }).createSplit([activa.id, abierta.id]).catch(() => {});
+    }
+    await enfocar(abierta);
+    return;
+  }
+  // El navegador rechaza la opción si es anterior a la vista dividida, o si esa pestaña no puede entrar en una.
+  if (junto && activa?.id !== undefined) {
+    try {
+      const creada = await chrome.tabs.create({ url, windowId: ventana.id, splitWithTabId: activa.id } as chrome.tabs.CreateProperties);
+      await enfocar(creada);
+      return;
+    } catch (e) {
+      console.debug('Kotonoha: sin vista dividida', e);
+    }
+  }
+  await enfocar(await chrome.tabs.create({ url, windowId: ventana.id }));
+}
+
 const api: ApiFondo & { _: never } = {
   asegurarMotor,
+  abrirLectorWeb,
   async claveIA() {
     const d = await chrome.storage.local.get(CLAVE_API);
     return (d[CLAVE_API] as string | undefined) ?? null;
@@ -99,11 +139,11 @@ const api: ApiFondo & { _: never } = {
   async capturaVisible(this: ConRemitente) {
     // La ventana de quien pide la captura: la que tenga el foco puede ser otra, como la del creador de tarjetas.
     const remitente = this.remitente;
-    if (remitente?.tab && !remitente.tab.active) throw new Error('La pestaña del video no está a la vista');
+    if (remitente?.tab && !remitente.tab.active) throw new Error(tr('La pestaña del video no está a la vista'));
     return new Promise<string>((ok, mal) => {
       chrome.tabs.captureVisibleTab(remitente?.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT, { format: 'jpeg', quality: 90 }, (url) => {
         const e = chrome.runtime.lastError;
-        if (e || !url) mal(new Error(e?.message ?? 'No se pudo capturar la pestaña'));
+        if (e || !url) mal(new Error(e?.message ?? tr('No se pudo capturar la pestaña')));
         else ok(url);
       });
     });
@@ -173,9 +213,24 @@ chrome.tabs.onRemoved.addListener(async (id) => {
 });
 
 chrome.runtime.onInstalled.addListener((d) => {
-  chrome.contextMenus.create({ id: 'kotonoha-buscar', title: 'Buscar «%s» en Kotonoha', contexts: ['selection'] }, () => void chrome.runtime.lastError);
-  chrome.contextMenus.create({ id: 'kotonoha-leer', title: 'Abrir selección en el lector', contexts: ['selection'] }, () => void chrome.runtime.lastError);
+  crearMenus().catch(console.error);
   if (d.reason === 'install') abrirApp('inicio').catch(console.error);
+});
+
+/** Los menús contextuales se rehacen al cambiar de idioma: una vez creados no se traducen solos. */
+async function crearMenus() {
+  await fijarIdioma((await leerAjustes()).idiomaInterfaz);
+  await chrome.contextMenus.removeAll();
+  chrome.contextMenus.create({ id: 'kotonoha-buscar', title: tr('Buscar «%s» en Kotonoha'), contexts: ['selection'] }, () => void chrome.runtime.lastError);
+  chrome.contextMenus.create({ id: 'kotonoha-leer', title: tr('Abrir selección en el lector'), contexts: ['selection'] }, () => void chrome.runtime.lastError);
+}
+
+let idiomaMenus: string | undefined;
+alCambiarAjustes((a) => {
+  if (a.idiomaInterfaz !== idiomaMenus) {
+    idiomaMenus = a.idiomaInterfaz;
+    crearMenus().catch(console.error);
+  }
 });
 
 chrome.contextMenus.onClicked.addListener((info) => {

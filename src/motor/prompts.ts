@@ -3,6 +3,7 @@
 // [PALABRA] [SUPERFICIE] [LECTURA] [FRASE] [ENTORNO] [TRADUCCION] [TITULO] [NIVEL] [IDIOMA] [PREGUNTA]
 
 import type { Ajustes, PromptPersonalizado, TareaIA } from '../compartido/ajustes';
+import { tm } from '../compartido/i18n';
 
 const CRITERIO_LITERARIO = `El primer significado del diccionario suele ser el literal y a menudo no es el correcto aquí.
 Fíjate en el género del texto: en canciones, poesía y narrativa abundan las metáforas, los usos figurados, las lecturas poéticas y las palabras elegidas por su imagen o su ritmo. En una canción, interpreta el verso dentro de la imagen que construye la letra, no palabra por palabra.`;
@@ -230,7 +231,9 @@ export interface VariablesPrompt {
 }
 
 export function rellenar(plantilla: string, a: Pick<Ajustes, 'nivel' | 'idiomaExplicaciones'>, v: VariablesPrompt): string {
-  return plantilla
+  // En español el texto queda idéntico: si cambiara, las respuestas guardadas no servirían y se pagarían otra vez.
+  const adaptada = a.idiomaExplicaciones === 'español' ? plantilla : plantilla.replaceAll('un estudiante hispanohablante', 'un estudiante que habla [IDIOMA]').replaceAll('un hispanohablante', 'alguien que habla [IDIOMA]');
+  return adaptada
     .replaceAll('[NIVEL]', a.nivel)
     .replaceAll('[IDIOMA]', v.idioma ?? a.idiomaExplicaciones)
     .replaceAll('[PALABRA]', v.palabra ?? '')
@@ -244,13 +247,13 @@ export function rellenar(plantilla: string, a: Pick<Ajustes, 'nivel' | 'idiomaEx
 }
 
 export const TAREAS_PERSONALIZABLES: { id: keyof typeof PROMPTS_BASE; nombre: string }[] = [
-  { id: 'explicar', nombre: 'Explicación de palabra' },
-  { id: 'desglosar', nombre: 'Desglose de frase' },
-  { id: 'traducir', nombre: 'Traducción de frase' },
-  { id: 'gramatica', nombre: 'Explicación de gramática' },
-  { id: 'generar', nombre: 'Frase de ejemplo' },
-  { id: 'preguntar', nombre: 'Pregunta libre' },
-  { id: 'historia', nombre: 'Relato' },
+  { id: 'explicar', nombre: tm('Explicación de palabra') },
+  { id: 'desglosar', nombre: tm('Desglose de frase') },
+  { id: 'traducir', nombre: tm('Traducción de frase') },
+  { id: 'gramatica', nombre: tm('Explicación de gramática') },
+  { id: 'generar', nombre: tm('Frase de ejemplo') },
+  { id: 'preguntar', nombre: tm('Pregunta libre') },
+  { id: 'historia', nombre: tm('Relato') },
 ];
 
 export type { TareaIA };

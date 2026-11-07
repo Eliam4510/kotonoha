@@ -1,10 +1,12 @@
+import type { IdPaleta } from '../ui/paletas';
+import type { FormatoLectura } from '../nucleo/tokens';
+import { type PreferenciaIdioma, tm } from './i18n';
 // Ajustes del usuario, guardados en chrome.storage.local.
 
 export type ModoLectura = 'ninguna' | 'todas' | 'desconocidas' | 'alPasar';
 export type ModoGlosa = 'ninguna' | 'desconocidas' | 'alPasar';
 export type ModoColor = 'ninguno' | 'alPasar' | 'siempre';
 export type PausaInteraccion = 'nunca' | 'alPasarSubtitulo' | 'consultaPalabra';
-export type ModoRender = 'ligero' | 'completo';
 export type ModoSalto = 'no' | '2' | '4' | '6' | '8' | 'saltar';
 
 export type ObjetivoFrase =
@@ -48,9 +50,9 @@ export type IdModo =
 export type TareaIA = 'explicar' | 'desglosar' | 'traducir' | 'generar' | 'subtitulos' | 'historia' | 'preguntar' | 'sentido' | 'analisis' | 'corregir' | 'profundo';
 
 export const MODELOS = [
-  { id: 'claude-sonnet-5-5', nombre: 'Claude Sonnet 5.5' },
-  { id: 'claude-opus-5-5', nombre: 'Claude Opus 5.5' },
-  { id: 'claude-haiku-5-5', nombre: 'Claude Haiku 5.5' },
+  { id: 'claude-sonnet-5-5', nombre: tm('Claude Sonnet 5.5') },
+  { id: 'claude-opus-5-5', nombre: tm('Claude Opus 5.5') },
+  { id: 'claude-haiku-5-5', nombre: tm('Claude Haiku 5.5') },
 ] as const;
 
 export type Esfuerzo = 'low' | 'medium' | 'high';
@@ -72,22 +74,22 @@ export type ModeloWhisper = 'turbo' | 'turbo-ligero' | 'base';
 export const MODELOS_WHISPER: Record<ModeloWhisper, { id: string; nombre: string; descripcion: string; dtype: Record<string, string>; mb: number; externos?: Record<string, number> }> = {
   turbo: {
     id: 'onnx-community/whisper-large-v3-turbo',
-    nombre: 'Whisper Turbo',
-    descripcion: 'La mejor precisión. Usa unos 4 GB de memoria de video.',
+    nombre: tm('Whisper Turbo'),
+    descripcion: tm('La mejor precisión. Usa unos 4 GB de memoria de video.'),
     dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4f16' },
     mb: 1468,
   },
   'turbo-ligero': {
     id: 'onnx-community/whisper-large-v3-turbo',
-    nombre: 'Whisper Turbo ligero',
-    descripcion: 'Algo menos preciso y un poco más rápido. Usa menos de 2 GB de memoria de video.',
+    nombre: tm('Whisper Turbo ligero'),
+    descripcion: tm('Algo menos preciso y un poco más rápido. Usa menos de 2 GB de memoria de video.'),
     dtype: { encoder_model: 'q4f16', decoder_model_merged: 'q4f16' },
     mb: 564,
   },
   base: {
     id: 'onnx-community/whisper-base',
-    nombre: 'Whisper Base',
-    descripcion: 'Muy ligero y mucho menos preciso. Para equipos sin una GPU potente.',
+    nombre: tm('Whisper Base'),
+    descripcion: tm('Muy ligero y mucho menos preciso. Para equipos sin una GPU potente.'),
     dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
     mb: 165,
   },
@@ -98,6 +100,28 @@ export interface Ajustes {
   migracion: number;
   /** Crédito mensual de la API, para ver el gasto en contexto. */
   creditoMensual: number;
+  /** Tope de gasto al mes, en dólares. Al llegar, Claude deja de usarse hasta el mes siguiente. Con 0 no hay tope. */
+  limiteGasto: number;
+  /** Ya vio o saltó el asistente de la primera vez. */
+  bienvenidaVista: boolean;
+  /** Cómo se escriben las lecturas: kana, o rōmaji para quien aún no lo lee. */
+  formatoLectura: FormatoLectura;
+  /** Colores de los estados de una palabra. */
+  paleta: IdPaleta;
+  // Lector de páginas
+  lectorActivo: boolean;
+  lectorColor: boolean;
+  lectorFurigana: ModoLectura;
+  /** Cómo se abre la ficha: con un clic, o al pasar el ratón. En enlaces y botones siempre es al pasar. */
+  lectorAbrir: 'clic' | 'pasar';
+  /** El clic en un enlace o un botón consulta la palabra, en lugar de hacer lo suyo. */
+  lectorClicEnlaces: boolean;
+  /** El botoncito del lector en las páginas con japonés. */
+  lectorBoton: boolean;
+  /** Abre un poco las líneas de un texto donde el furigana no cabe. Es lo único que el lector mueve en una página. */
+  lectorInterlineado: boolean;
+  /** Atajos reasignados: acción y combinación nueva. */
+  atajosPersonales: Record<string, string>;
   /** Cómo saludar en la pantalla de inicio. Si está vacío, el saludo va sin nombre. */
   nombre: string;
   /** Dónde se colocan los subtítulos sobre el video, si los has movido. */
@@ -113,7 +137,6 @@ export interface Ajustes {
   whisperCorregir: boolean;
   activo: boolean;
   sitiosDesactivados: string[];
-  modoRender: ModoRender;
 
   // Visualización
   mostrarEstado: boolean;
@@ -194,13 +217,14 @@ export interface Ajustes {
   vocesFrase: string[];
 
   // Apariencia
-  idiomaInterfaz: 'es' | 'en';
+  /** Idioma de la interfaz. En automático sigue al del navegador. */
+  idiomaInterfaz: PreferenciaIdioma;
   estiloFrecuencia: 'numero' | 'estrellas';
   frecuenciaMaxRecomendada: number;
   guardarHistorial: boolean;
 }
 
-export type PestanaDiccionario = 'ninguna' | 'audio' | 'imagenes' | 'explicar' | 'desglose' | 'traduccion' | 'enlaces' | 'ejemplos';
+export type PestanaDiccionario = 'ninguna' | 'audio' | 'imagenes' | 'explicar' | 'desglose' | 'traduccion' | 'trazos' | 'enlaces' | 'ejemplos';
 
 export interface Prellenado {
   fraseVideo: boolean;
@@ -222,7 +246,19 @@ const VELO_NO: Velo = { modo: 'no', revelarEnPausa: [], revelarPorEstado: [], re
 
 export const AJUSTES_INICIALES: Ajustes = {
   migracion: 1,
-  creditoMensual: 100,
+  creditoMensual: 0,
+  limiteGasto: 0,
+  bienvenidaVista: false,
+  formatoLectura: 'hiragana',
+  paleta: 'predeterminada',
+  lectorActivo: true,
+  lectorColor: true,
+  lectorFurigana: 'desconocidas',
+  lectorAbrir: 'clic',
+  lectorClicEnlaces: false,
+  lectorBoton: true,
+  lectorInterlineado: true,
+  atajosPersonales: {},
   nombre: '',
   subsPosicion: null,
   tema: 'auto',
@@ -232,7 +268,6 @@ export const AJUSTES_INICIALES: Ajustes = {
   whisperCorregir: true,
   activo: true,
   sitiosDesactivados: [],
-  modoRender: 'ligero',
 
   mostrarEstado: true,
   furigana: 'todas',
@@ -281,7 +316,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   rellenoInicioMs: 500,
   rellenoFinMs: 500,
 
-  destino: 'anki',
+  destino: 'memoria',
   ankiMazo: 'Kotonoha',
   ankiModelo: 'Kotonoha',
   ankiCampos: {},
@@ -336,8 +371,8 @@ export const AJUSTES_INICIALES: Ajustes = {
   respaldoSeguridad: true,
   usarGuion: false,
   nivel: 'JLPT N3',
-  idiomaExplicaciones: 'español',
-  idiomaTraduccion: 'español',
+  idiomaExplicaciones: tm('español'),
+  idiomaTraduccion: tm('español'),
   prompts: {},
   analisisAutomatico: true,
   sentidoAutomatico: false,
@@ -347,7 +382,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   azureRegion: '',
   vocesFrase: ['ja-JP-MasaruMultilingualNeural', 'ja-JP-NanamiNeural'],
 
-  idiomaInterfaz: 'es',
+  idiomaInterfaz: 'auto',
   estiloFrecuencia: 'numero',
   frecuenciaMaxRecomendada: 20000,
   guardarHistorial: true,
@@ -364,6 +399,10 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
   salida.esfuerzos = { ...AJUSTES_INICIALES.esfuerzos, ...(guardados?.esfuerzos ?? {}) };
   // Un modelo que ya no existe (Kotoba se retiró al comparar con videos reales) pasa al de siempre.
   if (!MODELOS_WHISPER[salida.whisperModelo]) salida.whisperModelo = AJUSTES_INICIALES.whisperModelo;
+  // Quien ya usaba la extensión no tiene por qué pasar por el asistente de bienvenida.
+  if (guardados && guardados.bienvenidaVista === undefined) salida.bienvenidaVista = true;
+  // Y hasta ahora la interfaz solo estaba en español: no debe cambiarle de idioma por seguir al navegador.
+  if (guardados && guardados.idiomaInterfaz === undefined) salida.idiomaInterfaz = 'es';
   // La ficha pasó a abrirse solo con el diccionario: Claude se usa cuando se pide, no al pasar el ratón.
   if (guardados && (guardados.migracion ?? 0) < 1) {
     salida.migracion = 1;
@@ -449,27 +488,27 @@ export function configDeModo(a: Ajustes): ConfigModo {
 }
 
 export const NOMBRES_MODO: Record<IdModo, { titulo: string; descripcion: string }> = {
-  normal: { titulo: 'Normal', descripcion: 'Reproduce sin detenerse ni ocultar subtítulos.' },
+  normal: { titulo: tm('Normal'), descripcion: tm('Reproduce sin detenerse ni ocultar subtítulos.') },
   escuchaPreparada: {
-    titulo: 'Escucha preparada',
-    descripcion: 'Pausa antes de cada frase y muestra la traducción para que escuches sabiendo qué esperar.',
+    titulo: tm('Escucha preparada'),
+    descripcion: tm('Pausa antes de cada frase y muestra la traducción para que escuches sabiendo qué esperar.'),
   },
   lecturaIntensiva: {
-    titulo: 'Lectura intensiva',
-    descripcion: 'Pausa antes de cada frase para que leas el subtítulo y luego lo escuches.',
+    titulo: tm('Lectura intensiva'),
+    descripcion: tm('Pausa antes de cada frase para que leas el subtítulo y luego lo escuches.'),
   },
   escuchaIntensiva: {
-    titulo: 'Escucha intensiva',
-    descripcion: 'Oculta los subtítulos hasta que se dice la frase; después pausa y los revela.',
+    titulo: tm('Escucha intensiva'),
+    descripcion: tm('Oculta los subtítulos hasta que se dice la frase; después pausa y los revela.'),
   },
   hibridoIntensivo: {
-    titulo: 'Híbrido intensivo',
-    descripcion: 'Pausa después de cada frase, con los subtítulos siempre visibles.',
+    titulo: tm('Híbrido intensivo'),
+    descripcion: tm('Pausa después de cada frase, con los subtítulos siempre visibles.'),
   },
-  alPausar: { titulo: 'Mostrar al pausar', descripcion: 'Solo muestra subtítulos cuando el video está en pausa.' },
+  alPausar: { titulo: tm('Mostrar al pausar'), descripcion: tm('Solo muestra subtítulos cuando el video está en pausa.') },
   enfoque1d: {
-    titulo: 'Enfoque 1D',
-    descripcion: 'Muestra las frases con una sola palabra desconocida; retrocede y pausa tras ellas.',
+    titulo: tm('Enfoque 1D'),
+    descripcion: tm('Muestra las frases con una sola palabra desconocida; retrocede y pausa tras ellas.'),
   },
-  personalizado: { titulo: 'Personalizado', descripcion: 'Ajusta las pausas y lo que se oculta con controles avanzados.' },
+  personalizado: { titulo: tm('Personalizado'), descripcion: tm('Ajusta las pausas y lo que se oculta con controles avanzados.') },
 };

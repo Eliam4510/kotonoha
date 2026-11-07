@@ -7,15 +7,18 @@ import { type FlujoCancelable, flujoMotor, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
 import type { PuntoGramatica } from '../nucleo/gramatica';
-import { alinearFurigana, nombreFlexion, separarMoras } from '../nucleo/tokens';
+import { alinearFurigana, nombreFlexion, separarMoras, lecturaVisible } from '../nucleo/tokens';
 import { enviarAlCreador } from './borrador';
 import { Icono, type NombreIcono } from './iconos';
+import { formatoLectura } from './lecturas';
+import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
+import { PanelTrazos } from './Trazos';
 
 export const NOMBRE_ESTADO: Record<EstadoPalabra, string> = {
-  desconocida: 'Desconocida',
-  aprendiendo: 'Aprendiendo',
-  conocida: 'Conocida',
-  ignorada: 'Ignorada',
+  desconocida: tm('Desconocida'),
+  aprendiendo: tm('Aprendiendo'),
+  conocida: tm('Conocida'),
+  ignorada: tm('Ignorada'),
 };
 
 /**
@@ -49,7 +52,7 @@ export function ConFurigana({ texto, lectura }: { texto: string; lectura?: strin
         s.lectura ? (
           <ruby key={i}>
             {s.texto}
-            <rt>{s.lectura}</rt>
+            <rt>{lecturaVisible(s.lectura, formatoLectura.value)}</rt>
           </ruby>
         ) : (
           <span key={i}>{s.texto}</span>
@@ -77,7 +80,7 @@ export function CurvaAcento({ lectura, posicion }: { lectura: string; posicion: 
   const puntos = esBaja.map((b, i) => `${i * paso + inicio},${y(b)}`);
   const ancho = xFinal + inicio;
   return (
-    <svg class="curva-acento" width={ancho} height="37" viewBox={`0 0 ${ancho} 37`} role="img" aria-label={`Acento en la posición ${posicion}`}>
+    <svg class="curva-acento" width={ancho} height="37" viewBox={`0 0 ${ancho} 37`} role="img" aria-label={tr('Acento en la posición {0}', posicion)}>
       <polyline points={[...puntos, `${xFinal},${y(finalBaja)}`].join(' ')} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       {esBaja.map((b, i) => (
         <circle key={i} cx={i * paso + inicio} cy={y(b)} r="3.2" fill="currentColor" />
@@ -176,9 +179,9 @@ export function PanelFlujo({
       <div class="panel-ia-cab">
         <span class="panel-ia-titulo"><Icono n="ia" t={15} /> <span>{titulo}</span></span>
         <span class="panel-ia-acciones">
-          {guardada && <span class="panel-ia-guardada" title="Esta respuesta ya estaba guardada: no se ha vuelto a pedir a Claude.">Guardada, sin gasto</span>}
+          {guardada && <span class="panel-ia-guardada" title={tr('Esta respuesta ya estaba guardada: no se ha vuelto a pedir a Claude.')}>{tr('Guardada, sin gasto')}</span>}
           {extra}
-          <button class="btn-icono chico ia" title="Volver a preguntar a Claude" aria-label="Volver a generar" onClick={() => {
+          <button class="btn-icono chico ia" title={tr('Volver a preguntar a Claude')} aria-label={tr('Volver a generar')} onClick={() => {
             forzar.current = true;
             fijarRecarga((r) => r + 1);
           }} disabled={cargando}>
@@ -190,7 +193,7 @@ export function PanelFlujo({
         <div class="panel-ia-error" role="alert">
           <Icono n="aviso" t={16} />
           <span>{error}</span>
-          <button class="btn chico" onClick={() => fijarRecarga((r) => r + 1)}>Reintentar</button>
+          <button class="btn chico" onClick={() => fijarRecarga((r) => r + 1)}>{tr('Reintentar')}</button>
         </div>
       ) : !texto && cargando ? (
         <Esqueleto />
@@ -229,16 +232,16 @@ function Desglose({ texto }: { texto: string }) {
 }
 
 const ENLACES: { nombre: string; url: (p: string, entrada?: number) => string }[] = [
-  { nombre: 'Jisho', url: (p) => `https://jisho.org/search/${encodeURIComponent(p)}` },
+  { nombre: tm('Jisho'), url: (p) => `https://jisho.org/search/${encodeURIComponent(p)}` },
   // JapanDict usa los números de entrada de JMdict: así se abre justo la acepción, no una lista de homógrafos.
   { nombre: 'JapanDict', url: (p, entrada) => `https://www.japandict.com/${encodeURIComponent(p)}${entrada ? `#entry-${entrada}` : ''}` },
-  { nombre: 'Weblio', url: (p) => `https://www.weblio.jp/content/${encodeURIComponent(p)}` },
-  { nombre: 'Goo 辞書', url: (p) => `https://dictionary.goo.ne.jp/srch/all/${encodeURIComponent(p)}/m0u/` },
+  { nombre: tm('Weblio'), url: (p) => `https://www.weblio.jp/content/${encodeURIComponent(p)}` },
+  { nombre: tm('Goo 辞書'), url: (p) => `https://dictionary.goo.ne.jp/srch/all/${encodeURIComponent(p)}/m0u/` },
   { nombre: 'コトバンク', url: (p) => `https://kotobank.jp/gs/?q=${encodeURIComponent(p)}` },
-  { nombre: 'Wiktionary', url: (p) => `https://es.wiktionary.org/wiki/${encodeURIComponent(p)}` },
-  { nombre: 'Forvo', url: (p) => `https://forvo.com/search/${encodeURIComponent(p)}/ja/` },
-  { nombre: 'Massif', url: (p) => `https://massif.la/ja/search?q=${encodeURIComponent(p)}` },
-  { nombre: 'Imágenes', url: (p) => `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p)}` },
+  { nombre: tm('Wiktionary'), url: (p) => `https://${idiomaActual()}.wiktionary.org/wiki/${encodeURIComponent(p)}` },
+  { nombre: tm('Forvo'), url: (p) => `https://forvo.com/search/${encodeURIComponent(p)}/ja/` },
+  { nombre: tm('Massif'), url: (p) => `https://massif.la/ja/search?q=${encodeURIComponent(p)}` },
+  { nombre: tm('Imágenes'), url: (p) => `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p)}` },
 ];
 
 async function reproducirBase64(datos: string, tipo = 'audio/mpeg') {
@@ -272,7 +275,7 @@ function BotonAudio({ lema, lectura }: { lema: string; lectura: string }) {
     }
   };
   return (
-    <button class={`btn-icono relleno ${estado === 'sonando' ? 'activo' : ''}`} data-tip="Escuchar" aria-label="Escuchar la palabra" onClick={tocar}>
+    <button class={`btn-icono relleno ${estado === 'sonando' ? 'activo' : ''}`} data-tip={tr('Escuchar')} aria-label={tr('Escuchar la palabra')} onClick={tocar}>
       {estado === 'cargando' ? <span class="giro" /> : <Icono n="altavoz" t={18} />}
     </button>
   );
@@ -302,11 +305,11 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
 
   return (
     <div class="panel-medios">
-      <div class="subtitulo-def">Palabra</div>
+      <div class="subtitulo-def">{tr('Palabra')}</div>
       {audios === null && <Esqueleto lineas={2} />}
       {audios?.map((a, i) => (
         <div class="fila-audio" key={i}>
-          <button class="btn-icono chico relleno" title="Reproducir" aria-label={`Reproducir ${a.etiqueta}`} onClick={() => new Audio(a.url).play().catch(() => fijarError('No se pudo reproducir el audio'))}>
+          <button class="btn-icono chico relleno" title={tr('Reproducir')} aria-label={tr('Reproducir {0}', a.etiqueta)} onClick={() => new Audio(a.url).play().catch(() => fijarError(tr('No se pudo reproducir el audio')))}>
             <Icono n="reproducir" t={14} />
           </button>
           <span class="fila-audio-nombre">{a.etiqueta}</span>
@@ -314,30 +317,30 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
             <button class="btn fantasma chico" onClick={async () => {
               const m = await motor.descargarMedio(a.url);
               await enviarAlCreador({ audioPalabra: [{ id: a.url, nombre: `kotonoha_${lema}.mp3`, tipo: m.tipo, datos: m.datos, etiqueta: a.etiqueta }] });
-            }}>Enviar</button>
+            }}>{tr('Enviar')}</button>
           )}
         </div>
       ))}
       {audios?.length === 0 && (
         <div class="fila-audio">
-          <button class="btn-icono chico relleno" aria-label="Reproducir voz sintética" onClick={() => tocarVoz(ajustes.vocesFrase[0], lema)}><Icono n="reproducir" t={14} /></button>
-          <span class="fila-audio-nombre">Voz sintética (sin grabación disponible)</span>
+          <button class="btn-icono chico relleno" aria-label={tr('Reproducir voz sintética')} onClick={() => tocarVoz(ajustes.vocesFrase[0], lema)}><Icono n="reproducir" t={14} /></button>
+          <span class="fila-audio-nombre">{tr('Voz sintética (sin grabación disponible)')}</span>
         </div>
       )}
       {frase && (
         <>
-          <div class="subtitulo-def">Frase</div>
+          <div class="subtitulo-def">{tr('Frase')}</div>
           {ajustes.azureClave ? (
             ajustes.vocesFrase.map((v) => (
               <div class="fila-audio" key={v}>
-                <button class="btn-icono chico relleno" aria-label={`Leer la frase con ${v}`} onClick={() => tocarVoz(v, frase)}><Icono n="reproducir" t={14} /></button>
+                <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con {0}', v)} onClick={() => tocarVoz(v, frase)}><Icono n="reproducir" t={14} /></button>
                 <span class="fila-audio-nombre">{v.replace(/^ja-JP-/, '').replace(/(Multilingual)?Neural$/, '')}</span>
               </div>
             ))
           ) : (
             <div class="fila-audio">
-              <button class="btn-icono chico relleno" aria-label="Leer la frase con la voz del sistema" onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
-              <span class="fila-audio-nombre">Voz del sistema <small class="ayuda">· Configura Azure en Ajustes para voces neuronales</small></span>
+              <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con la voz del sistema')} onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
+              <span class="fila-audio-nombre">{tr('Voz del sistema')} <small class="ayuda">{tr('· Configura Azure en Ajustes para voces neuronales')}</small></span>
             </div>
           )}
         </>
@@ -378,11 +381,11 @@ function PanelImagenes({ lema, frase, enviar, primeraGlosa }: { lema: string; fr
           <span class="esqueleto imagen-vacia" />
         </div>
       )}
-      {imgs?.length === 0 && <div class="ayuda">No se encontraron imágenes.</div>}
+      {imgs?.length === 0 && <div class="ayuda">{tr('No se encontraron imágenes.')}</div>}
       {!!imgs?.length && (
         <div class="imagenes-fila">
           {imgs.map((m) => (
-            <button key={m.url} title={enviar ? 'Enviar al creador de tarjetas' : m.titulo} onClick={async () => {
+            <button key={m.url} title={enviar ? tr('Enviar al creador de tarjetas') : m.titulo} onClick={async () => {
               if (!enviar) return;
               const d = await motor.descargarMedio(m.miniatura);
               await enviarAlCreador({ imagenes: [{ id: m.url, nombre: `kotonoha_${Date.now()}.jpg`, tipo: d.tipo, datos: d.datos }] });
@@ -393,8 +396,8 @@ function PanelImagenes({ lema, frase, enviar, primeraGlosa }: { lema: string; fr
         </div>
       )}
       <div class="fila fila-suelta">
-        <span class="ayuda">Modo meme</span>
-        <button class={`interruptor ${meme ? 'on' : ''}`} role="switch" aria-checked={meme} aria-label="Modo meme" onClick={() => fijarMeme(!meme)} />
+        <span class="ayuda">{tr('Modo meme')}</span>
+        <button class={`interruptor ${meme ? 'on' : ''}`} role="switch" aria-checked={meme} aria-label={tr('Modo meme')} onClick={() => fijarMeme(!meme)} />
       </div>
     </div>
   );
@@ -411,7 +414,7 @@ function PanelEjemplos({ lema, enviar }: { lema: string; enviar: boolean }) {
       {filas?.length === 0 && (
         <div class="vacio-corto">
           <span class="hoja-icono chica"><Icono n="frases" t={16} /></span>
-          <span>Aún no has visto esta palabra en otras frases. Irán apareciendo aquí conforme la encuentres.</span>
+          <span>{tr('Aún no has visto esta palabra en otras frases. Irán apareciendo aquí conforme la encuentres.')}</span>
         </div>
       )}
       {filas?.map((f, i) => (
@@ -420,7 +423,7 @@ function PanelEjemplos({ lema, enviar }: { lema: string; enviar: boolean }) {
             <span lang="ja">{f.texto}</span>
             {f.fuente && <small>{f.fuente}</small>}
           </div>
-          {enviar && <button class="btn fantasma chico" onClick={() => enviarAlCreador({ ejemplos: f.texto })}>Enviar</button>}
+          {enviar && <button class="btn fantasma chico" onClick={() => enviarAlCreador({ ejemplos: f.texto })}>{tr('Enviar')}</button>}
         </div>
       ))}
     </div>
@@ -515,7 +518,7 @@ function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegi
   const bloque = significado || cargando ? (
     <div class={`sentido ${significado ? '' : 'cargando'}`}>
       <div class="sentido-cab">
-        <span class="sentido-et"><Icono n="ia" t={14} /> En esta frase</span>
+        <span class="sentido-et"><Icono n="ia" t={14} /> {tr('En esta frase')}</span>
         {uso && uso !== 'literal' && <span class="uso">{NOMBRES_USO[uso] ?? uso}</span>}
       </div>
       {significado ? <b>{significado}</b> : <Esqueleto lineas={2} />}
@@ -525,8 +528,8 @@ function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegi
   // Si la revisión del video ya dijo qué significa aquí, no hace falta pagar por volver a preguntarlo.
   const boton = contexto.frase && !s && !previo && !cargando ? (
     <div class="sentido-pedir">
-      <button class="btn chico ia" title="Pregunta a Claude qué significa esta palabra en esta frase. La respuesta se guarda y no se vuelve a pagar." onClick={pedir}>
-        <Icono n="ia" t={14} /> ¿Qué significa en esta frase?
+      <button class="btn chico ia" title={tr('Pregunta a Claude qué significa esta palabra en esta frase. La respuesta se guarda y no se vuelve a pagar.')} onClick={pedir}>
+        <Icono n="ia" t={14} /> {tr('¿Qué significa en esta frase?')}
       </button>
       {error && <span class="texto-error" role="alert">{error}</span>}
     </div>
@@ -540,12 +543,12 @@ function CorregirLectura({ contexto, textoLinea, superficie, alHecho, alCerrar }
   return (
     <div class="corregir-lectura">
       <div class="corregir-cab">
-        <b>¿La lectura no es correcta?</b>
-        <button class="btn-icono chico" aria-label="Cerrar" onClick={alCerrar}><Icono n="cerrar" t={14} /></button>
+        <b>{tr('¿La lectura no es correcta?')}</b>
+        <button class="btn-icono chico" aria-label={tr('Cerrar')} onClick={alCerrar}><Icono n="cerrar" t={14} /></button>
       </div>
       <div class="corregir-fila">
         <button class="btn chico ia" disabled={estado === 'Revisando…'} onClick={async () => {
-          fijarEstado('Revisando…');
+          fijarEstado(tr('Revisando…'));
           try {
             const r = await motor.revisarLectura({ ...contexto, superficie }, textoLinea);
             fijarEstado(`${r.lectura}: ${r.motivo}`);
@@ -553,14 +556,14 @@ function CorregirLectura({ contexto, textoLinea, superficie, alHecho, alCerrar }
           } catch (e) {
             fijarEstado(e instanceof Error ? e.message : String(e));
           }
-        }}><Icono n="ia" t={14} /> Revisar con Claude</button>
+        }}><Icono n="ia" t={14} /> {tr('Revisar con Claude')}</button>
         <span class="ayuda">o</span>
-        <input class="campo" lang="ja" placeholder="en hiragana" aria-label="Lectura correcta" value={manual} onInput={(e) => fijarManual(e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
+        <input class="campo" lang="ja" placeholder={tr('en hiragana')} aria-label={tr('Lectura correcta')} value={manual} onInput={(e) => fijarManual(e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
         <button class="btn chico" disabled={!manual.trim()} onClick={async () => {
           await motor.corregirLectura(textoLinea, { superficie, lectura: manual.trim() });
-          fijarEstado('Lectura guardada');
+          fijarEstado(tr('Lectura guardada'));
           alHecho?.();
-        }}>Guardar</button>
+        }}>{tr('Guardar')}</button>
       </div>
       {estado && <span class="ayuda corregir-estado">{estado}</span>}
     </div>
@@ -570,9 +573,9 @@ function CorregirLectura({ contexto, textoLinea, superficie, alHecho, alCerrar }
 function Frecuencia({ lista, rango, estilo }: { lista: string; rango: number; estilo: Ajustes['estiloFrecuencia'] }) {
   const nombre = lista.replace(/^Frecuencia /, '');
   const nivel = rango <= 1500 ? 5 : rango <= 5000 ? 4 : rango <= 15000 ? 3 : rango <= 30000 ? 2 : 1;
-  const posicion = rango.toLocaleString('es');
+  const posicion = numero(rango);
   return (
-    <span class="etiqueta-frec" data-tip={`Frecuencia ${nombre}: puesto ${posicion}`}>
+    <span class="etiqueta-frec" data-tip={tr('Frecuencia {0}: puesto {1}', nombre, posicion)}>
       {estilo === 'estrellas' ? (
         <span class="frec-estrellas" aria-label={`${nivel} de 5`}>{'★'.repeat(nivel)}<i>{'★'.repeat(5 - nivel)}</i></span>
       ) : (
@@ -593,13 +596,14 @@ const ESTADOS: { e: EstadoPalabra; tecla: string }[] = [
 ];
 
 const PESTANAS: { id: PestanaDiccionario; icono: NombreIcono; nombre: string; titulo: string; ia?: boolean; conFrase?: boolean; larga?: boolean }[] = [
-  { id: 'explicar', icono: 'ia', nombre: 'Explicar', titulo: 'Explicar con Claude', ia: true, larga: true },
-  { id: 'desglose', icono: 'gramatica', nombre: 'Desglose', titulo: 'Desglose de la frase', ia: true, conFrase: true, larga: true },
-  { id: 'traduccion', icono: 'traducir', nombre: 'Traducir', titulo: 'Traducir la frase', ia: true, conFrase: true },
-  { id: 'audio', icono: 'altavoz', nombre: 'Audio', titulo: 'Audio' },
-  { id: 'imagenes', icono: 'imagen', nombre: 'Imágenes', titulo: 'Imágenes' },
-  { id: 'ejemplos', icono: 'frases', nombre: 'Ejemplos', titulo: 'Frases de ejemplo de lo que has visto' },
-  { id: 'enlaces', icono: 'enlace', nombre: 'Enlaces', titulo: 'Enlaces externos' },
+  { id: 'explicar', icono: 'ia', nombre: tm('Explicar'), titulo: tm('Explicar con Claude'), ia: true, larga: true },
+  { id: 'desglose', icono: 'gramatica', nombre: tm('Desglose'), titulo: tm('Desglose de la frase'), ia: true, conFrase: true, larga: true },
+  { id: 'traduccion', icono: 'traducir', nombre: tm('Traducir'), titulo: tm('Traducir la frase'), ia: true, conFrase: true },
+  { id: 'audio', icono: 'altavoz', nombre: tm('Audio'), titulo: tm('Audio') },
+  { id: 'imagenes', icono: 'imagen', nombre: tm('Imágenes'), titulo: tm('Imágenes') },
+  { id: 'ejemplos', icono: 'frases', nombre: tm('Ejemplos'), titulo: tm('Frases de ejemplo de lo que has visto') },
+  { id: 'trazos', icono: 'trazos', nombre: tm('Trazos'), titulo: tm('Orden de los trazos') },
+  { id: 'enlaces', icono: 'enlace', nombre: tm('Enlaces'), titulo: tm('Enlaces externos') },
 ];
 
 export function Ficha(p: PropsFicha) {
@@ -745,17 +749,17 @@ export function Ficha(p: PropsFicha) {
 
   const bloqueGramatica = p.gramatica && p.gramatica.length > 0 ? (
     <div key="gram" class="ficha-bloque">
-      <div class="subtitulo-def">Gramática en esta frase</div>
+      <div class="subtitulo-def">{tr('Gramática en esta frase')}</div>
       <div class="ficha-chips">
         {p.gramatica.map((g) => (
-          <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={g.significado} aria-pressed={patron?.patron === g.patron} onClick={() => fijarPatron(patron?.patron === g.patron ? null : g)}>
+          <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={tr(g.significado)} aria-pressed={patron?.patron === g.patron} onClick={() => fijarPatron(patron?.patron === g.patron ? null : g)}>
             <span lang="ja">{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
           </button>
         ))}
       </div>
       {patron && (
         <div class="ficha-patron">
-          <div class="ayuda">{patron.significado}</div>
+          <div class="ayuda">{tr(patron.significado)}</div>
           <PanelFlujo metodo="gramatica" args={[{ ...contexto, lema: patron.patron }]} titulo={patron.patron} />
         </div>
       )}
@@ -765,25 +769,25 @@ export function Ficha(p: PropsFicha) {
   const bloques = {
     definiciones: (
       <div key="def" class="ficha-bloque">
-        <div class="subtitulo-def">Definiciones</div>
-        {definicionesUnicas.length === 0 && <div class="ayuda">Sin entrada en los diccionarios instalados. Puedes preguntarle a Claude con «Explicar».</div>}
+        <div class="subtitulo-def">{tr('Definiciones')}</div>
+        {definicionesUnicas.length === 0 && <div class="ayuda">{tr('Sin entrada en los diccionarios instalados. Puedes preguntarle a Claude con «Explicar».')}</div>}
         <ol class="lista-defs">
           {defsVisibles.map((g, i) => (
-            <li key={g} class={i === 0 && elegida >= 0 ? 'elegida' : ''} title={i === 0 && elegida >= 0 ? 'Claude la señala como la más cercana en esta frase' : undefined}>
+            <li key={g} class={i === 0 && elegida >= 0 ? 'elegida' : ''} title={i === 0 && elegida >= 0 ? tr('Claude la señala como la más cercana en esta frase') : undefined}>
               <span class="def-texto">{g}</span>
-              {enviar && <button class="def-enviar" aria-label={`Enviar «${g}» al creador`} title="Enviar al creador de tarjetas" onClick={() => enviarAlCreador({ definicion: g })}><Icono n="enviar" t={13} /></button>}
+              {enviar && <button class="def-enviar" aria-label={tr('Enviar «{0}» al creador', g)} title={tr('Enviar al creador de tarjetas')} onClick={() => enviarAlCreador({ definicion: g })}><Icono n="enviar" t={13} /></button>}
             </li>
           ))}
         </ol>
         {defsOrdenadas.length > 5 && (
           <button class="btn fantasma chico ver-mas" onClick={() => fijarVerTodas(!verTodas)}>
-            {verTodas ? 'Ver menos' : `Ver ${defsOrdenadas.length - 5} más`}
+            {verTodas ? tr('Ver menos') : tr('Ver {0} más', defsOrdenadas.length - 5)}
             <Icono n={verTodas ? 'arriba' : 'abajo'} t={12} />
           </button>
         )}
         {extras.length > 0 && (
           <>
-            <div class="subtitulo-def">Compuestos</div>
+            <div class="subtitulo-def">{tr('Compuestos')}</div>
             <ul class="lista-compuestos">
               {extras.map((e) => (
                 <li key={e.clave}>
@@ -798,7 +802,7 @@ export function Ficha(p: PropsFicha) {
     ),
     flexiones: nombresFlexion.length ? (
       <div key="flex" class="ficha-bloque">
-        <div class="subtitulo-def">Conjugación de <span lang="ja">{p.superficie}</span></div>
+        <div class="subtitulo-def">{tr('Conjugación de')} <span lang="ja">{p.superficie}</span></div>
         <div class="flexiones">
           {nombresFlexion.map(([f, n], i) => (
             <span key={i} class="chip"><b lang="ja">{f}</b>{n ? <span>{n}</span> : null}</span>
@@ -813,13 +817,14 @@ export function Ficha(p: PropsFicha) {
           {pestana === 'audio' && <PanelAudio lema={r.lema} lectura={r.lectura} frase={p.contexto.frase} ajustes={p.ajustes} enviar={enviar} />}
           {pestana === 'imagenes' && <PanelImagenes lema={r.lema} frase={p.contexto.frase} enviar={enviar} primeraGlosa={r.entradas.find((e) => e.dic === 'jmdict-en')?.glosas[0] ?? definicionesUnicas[0]} />}
           {pestana === 'ejemplos' && <PanelEjemplos lema={r.lema} enviar={enviar} />}
+          {pestana === 'trazos' && <PanelTrazos palabra={r.lema} />}
           {sincronizada && pestana === 'explicar' && (
             <>
               <PanelFlujo
                 metodo="explicar"
                 args={[contexto, profundo]}
-                titulo={profundo ? 'Análisis a fondo con Opus' : '¿Qué significa aquí?'}
-                extra={!profundo && <button class="btn chico ia" title="Vuelve a preguntar con Claude Opus, con más razonamiento. Útil con versos difíciles." onClick={() => fijarProfundo(true)}>Profundizar</button>}
+                titulo={profundo ? tr('Análisis a fondo con Opus') : tr('¿Qué significa aquí?')}
+                extra={!profundo && <button class="btn chico ia" title={tr('Vuelve a preguntar con Claude Opus, con más razonamiento. Útil con versos difíciles.')} onClick={() => fijarProfundo(true)}>{tr('Profundizar')}</button>}
               />
               {preguntaEnviada && (
                 <div class="pregunta-respuesta">
@@ -833,17 +838,17 @@ export function Ficha(p: PropsFicha) {
                   fijarPregunta('');
                 }
               }}>
-                <input class="campo" placeholder="Pregúntale a Claude sobre esta palabra o frase" value={pregunta} onInput={(e) => fijarPregunta(e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} aria-label="Pregunta a Claude" />
-                <button class="btn-icono ia" type="submit" aria-label="Preguntar" title="Preguntar" disabled={!pregunta.trim()}><Icono n="enviar" t={17} /></button>
+                <input class="campo" placeholder={tr('Pregúntale a Claude sobre esta palabra o frase')} value={pregunta} onInput={(e) => fijarPregunta(e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} aria-label={tr('Pregunta a Claude')} />
+                <button class="btn-icono ia" type="submit" aria-label={tr('Preguntar')} title={tr('Preguntar')} disabled={!pregunta.trim()}><Icono n="enviar" t={17} /></button>
               </form>
             </>
           )}
-          {sincronizada && pestana === 'desglose' && <PanelFlujo metodo="desglosar" args={[contexto]} titulo="Desglose de la frase" render={(t) => <Desglose texto={t} />} />}
-          {sincronizada && pestana === 'traduccion' && <PanelFlujo metodo="traducir" args={[contexto]} titulo="Traducción" />}
+          {sincronizada && pestana === 'desglose' && <PanelFlujo metodo="desglosar" args={[contexto]} titulo={tr('Desglose de la frase')} render={(t) => <Desglose texto={t} />} />}
+          {sincronizada && pestana === 'traduccion' && <PanelFlujo metodo="traducir" args={[contexto]} titulo={tr('Traducción')} />}
           {pestana === 'enlaces' && (
             <div class="enlaces">
               {ENLACES.map((e) => (
-                <a key={e.nombre} class="chip" href={e.url(r.lema, r.entradas.find((x) => x.dic.startsWith('jmdict') && x.seq)?.seq)} target="_blank" rel="noreferrer noopener">{e.nombre} <Icono n="externo" t={12} /></a>
+                <a key={e.nombre} class="chip" href={e.url(r.lema, r.entradas.find((x) => x.dic.startsWith('jmdict') && x.seq)?.seq)} target="_blank" rel="noreferrer noopener">{tr(e.nombre)} <Icono n="externo" t={12} /></a>
               ))}
             </div>
           )}
@@ -858,15 +863,15 @@ export function Ficha(p: PropsFicha) {
     <button
       key={x.id}
       class={`pestana ${x.ia ? 'ia' : ''} ${pestana === x.id ? 'activo' : ''}`}
-      title={x.titulo}
-      aria-label={x.titulo}
+      title={tr(x.titulo)}
+      aria-label={tr(x.titulo)}
       role="tab"
       aria-selected={pestana === x.id}
       disabled={x.conFrase && !tieneFrase}
       onClick={() => elegirPestana(x.id)}
     >
       <Icono n={x.icono} t={18} />
-      <span>{x.nombre}</span>
+      <span>{tr(x.nombre)}</span>
     </button>
   );
 
@@ -887,12 +892,12 @@ export function Ficha(p: PropsFicha) {
           <div class="ficha-herr">
             {r.frecuencias.map((f) => <Frecuencia key={f.lista} lista={f.lista} rango={f.rango} estilo={p.ajustes.estiloFrecuencia} />)}
             {tieneTarjeta && (
-              <button class="btn-icono activo" data-tip="Ya tienes tarjeta: ver" aria-label="Ya tienes tarjeta: ver" onClick={() => motor.ankiVerTarjeta(r.lema)}>
+              <button class="btn-icono activo" data-tip={tr('Ya tienes tarjeta: ver')} aria-label={tr('Ya tienes tarjeta: ver')} onClick={() => motor.ankiVerTarjeta(r.lema)}>
                 <Icono n="sello" t={18} />
               </button>
             )}
             {tieneFrase && (
-              <button class={`btn-icono ${corrigiendo ? 'activo' : ''}`} data-tip="¿Lectura incorrecta?" aria-label="¿Lectura incorrecta?" aria-pressed={corrigiendo} onClick={() => {
+              <button class={`btn-icono ${corrigiendo ? 'activo' : ''}`} data-tip={tr('¿Lectura incorrecta?')} aria-label={tr('¿Lectura incorrecta?')} aria-pressed={corrigiendo} onClick={() => {
                 fijarCorrigiendo(!corrigiendo);
                 if (!corrigiendo) cuerpo.current?.scrollTo({ top: 0, behavior: 'smooth' });
               }}>
@@ -900,33 +905,33 @@ export function Ficha(p: PropsFicha) {
               </button>
             )}
             <BotonAudio key={r.clave} lema={r.lema} lectura={r.lectura} />
-            {p.alCerrar && <button class="btn-icono" data-tip="Cerrar · Esc" aria-label="Cerrar" onClick={p.alCerrar}><Icono n="cerrar" t={17} /></button>}
+            {p.alCerrar && <button class="btn-icono" data-tip={tr('Cerrar · Esc')} aria-label={tr('Cerrar')} onClick={p.alCerrar}><Icono n="cerrar" t={17} /></button>}
           </div>
         </div>
         <div class="ficha-estado">
-          <div class="estados" role="radiogroup" aria-label="Estado de la palabra">
+          <div class="estados" role="radiogroup" aria-label={tr('Estado de la palabra')}>
             {ESTADOS.map(({ e, tecla }) => (
               <button
                 key={e}
                 role="radio"
                 aria-checked={e === r.estado}
                 class={`estado ${e} ${e === r.estado ? 'activo' : ''}`}
-                title={`${NOMBRE_ESTADO[e]} (${tecla})`}
+                title={`${tr(NOMBRE_ESTADO[e])} (${tecla})`}
                 onClick={() => cambiar(e)}
               >
                 <i aria-hidden="true" />
-                {NOMBRE_ESTADO[e]}
+                {tr(NOMBRE_ESTADO[e])}
                 {e === 'conocida' && hojas > 0 && <span class="hoja-vuela" key={hojas} aria-hidden="true"><Icono n="hoja" t={16} /></span>}
               </button>
             ))}
           </div>
-          <button class={`btn-icono chico rastrear ${r.rastreada ? 'activo' : ''}`} data-tip="Rastrear esta palabra · 2" data-tip-lado="izq" aria-label="Rastrear esta palabra" aria-pressed={r.rastreada} onClick={() => cambiar(undefined, !r.rastreada)}>
+          <button class={`btn-icono chico rastrear ${r.rastreada ? 'activo' : ''}`} data-tip={tr('Rastrear esta palabra · 2')} data-tip-lado="izq" aria-label={tr('Rastrear esta palabra')} aria-pressed={r.rastreada} onClick={() => cambiar(undefined, !r.rastreada)}>
             <Icono n="huella" t={16} />
           </button>
         </div>
         {p.lecturaCorregida && (
           <div class="ficha-notas">
-            <span class="nota-ia"><Icono n="ia" t={13} /> Lectura revisada por Claude</span>
+            <span class="nota-ia"><Icono n="ia" t={13} /> {tr('Lectura revisada por Claude')}</span>
           </div>
         )}
       </div>
@@ -945,7 +950,7 @@ export function Ficha(p: PropsFicha) {
         </ConSentido>
       </div>
 
-      <div class="ficha-dock" role="tablist" aria-label="Más sobre esta palabra">
+      <div class="ficha-dock" role="tablist" aria-label={tr('Más sobre esta palabra')}>
         {iaDock.map(botonPestana)}
         <span class="dock-sep" aria-hidden="true" />
         {otrasDock.map(botonPestana)}
@@ -954,13 +959,13 @@ export function Ficha(p: PropsFicha) {
       {(p.alCrear || p.alEnviar) && (
         <div class="ficha-pie">
           {p.alCrear && (
-            <button class="btn primario" title="Crear tarjeta de un clic (Q)" onClick={() => p.alCrear!(r)}>
-              <Icono n="rayo" t={16} /> Crear tarjeta <kbd class="tecla">Q</kbd>
+            <button class="btn primario" title={tr('Crear tarjeta de un clic (Q)')} onClick={() => p.alCrear!(r)}>
+              <Icono n="rayo" t={16} /> {tr('Crear tarjeta')} <kbd class="tecla">Q</kbd>
             </button>
           )}
           {p.alEnviar && (
-            <button class={`btn ${p.alCrear ? '' : 'primario'}`} title="Enviar al creador de tarjetas (E)" onClick={() => p.alEnviar!(r)}>
-              <Icono n="enviar" t={16} /> Enviar al creador {p.alCrear && <kbd class="tecla">E</kbd>}
+            <button class={`btn ${p.alCrear ? '' : 'primario'}`} title={tr('Enviar al creador de tarjetas (E)')} onClick={() => p.alEnviar!(r)}>
+              <Icono n="enviar" t={16} /> {tr('Enviar al creador')} {p.alCrear && <kbd class="tecla">E</kbd>}
             </button>
           )}
         </div>

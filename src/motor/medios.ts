@@ -3,6 +3,7 @@
 import type { Ajustes } from '../compartido/ajustes';
 import type { ResultadoAudio, ResultadoImagen } from '../compartido/tipos';
 import { bytesABase64 } from './grabacion';
+import { tr } from '../compartido/i18n';
 
 /** JapanesePod101 devuelve este audio cuando no tiene la palabra: «no disponible». */
 const TAM_AUDIO_NO_DISPONIBLE = 52288;
@@ -59,7 +60,7 @@ export async function audiosPalabra(lema: string, lectura: string): Promise<Resu
 
 /** Voz neuronal de Azure con tu propia clave (el nivel gratuito incluye 0,5 M de caracteres al mes). */
 export async function vozAzure(a: Ajustes, texto: string, voz: string): Promise<string> {
-  if (!a.azureClave || !a.azureRegion) throw new Error('Configura Azure Speech en Ajustes para usar voces sintéticas.');
+  if (!a.azureClave || !a.azureRegion) throw new Error(tr('Configura Azure Speech en Ajustes para usar voces sintéticas.'));
   const escapado = texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const r = await fetch(`https://${a.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`, {
     method: 'POST',
@@ -70,13 +71,13 @@ export async function vozAzure(a: Ajustes, texto: string, voz: string): Promise<
     },
     body: `<speak version="1.0" xml:lang="ja-JP"><voice name="${voz}">${escapado}</voice></speak>`,
   });
-  if (!r.ok) throw new Error(`Azure Speech respondió ${r.status}`);
+  if (!r.ok) throw new Error(tr('Azure Speech respondió {0}', r.status));
   return bytesABase64(new Uint8Array(await r.arrayBuffer()));
 }
 
 export async function descargarMedio(url: string): Promise<{ datos: string; tipo: string }> {
   const r = await fetch(url);
-  if (!r.ok) throw new Error(`No se pudo descargar (${r.status})`);
+  if (!r.ok) throw new Error(tr('No se pudo descargar ({0})', r.status));
   return { datos: bytesABase64(new Uint8Array(await r.arrayBuffer())), tipo: r.headers.get('content-type') ?? 'application/octet-stream' };
 }
 
@@ -84,7 +85,7 @@ export async function descargarMedio(url: string): Promise<{ datos: string; tipo
 export async function buscarImagenes(consulta: string): Promise<ResultadoImagen[]> {
   const params = new URLSearchParams({ q: consulta, page_size: '12', mature: 'false' });
   const r = await fetch(`https://api.openverse.org/v1/images/?${params}`);
-  if (!r.ok) throw new Error(`La búsqueda de imágenes falló (${r.status})`);
+  if (!r.ok) throw new Error(tr('La búsqueda de imágenes falló ({0})', r.status));
   const d = (await r.json()) as { results?: { url: string; thumbnail?: string; title?: string }[] };
   return (d.results ?? []).map((x) => ({ url: x.url, miniatura: x.thumbnail ?? x.url, titulo: x.title }));
 }

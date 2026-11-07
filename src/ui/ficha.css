@@ -170,8 +170,34 @@ button.chip-gram:active { transform: scale(0.96); }
 .flexiones .chip { height: 26px; padding: 0 10px; cursor: default; font-weight: 600; }
 .flexiones .chip b { font-weight: 700; color: var(--texto); }
 
+/* Orden de los trazos */
+.trazos { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+.trazos-lienzos { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.trazo-kanji { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11.5px; color: var(--texto-3); }
+.trazo-kanji b { font-size: 13px; color: var(--texto-2); font-family: var(--letra-ja); }
+.trazo-kanji svg, .trazo-vacio, .trazo-esqueleto { width: 104px; height: 104px; border-radius: 14px; }
+.trazos-lienzos.grandes svg, .trazos-lienzos.grandes .trazo-vacio { width: 148px; height: 148px; }
+.trazo-kanji svg { background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); transition: box-shadow 0.2s; }
+.trazo-kanji.activo svg { box-shadow: inset 0 0 0 1.5px var(--hoja); }
+.trazo-vacio { display: grid; place-items: center; font-family: var(--letra-ja); font-size: 52px; color: var(--texto-3); background: var(--superficie-2); }
+.trazo-guia { fill: none; stroke: var(--borde-2); stroke-width: 0.6; stroke-dasharray: 2 2.5; }
+.trazo-fondo, .trazo-hecho, .trazo-dibujando { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.trazo-fondo { stroke: var(--texto-3); opacity: 0.2; }
+.trazo-hecho { stroke: var(--texto); }
+.trazo-hecho.ultimo, .trazo-dibujando { stroke: var(--hoja); }
+.trazo-dibujando { stroke-dasharray: 1; stroke-dashoffset: 1; animation: kk-trazo 0.5s linear forwards; }
+@keyframes kk-trazo { to { stroke-dashoffset: 0; } }
+.trazo-numero { font-size: 7.5px; font-weight: 700; font-family: var(--letra-latin, inherit); fill: var(--texto-2); paint-order: stroke; stroke: var(--superficie-2); stroke-width: 2; }
+.trazos-controles { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 4px; }
+.trazos-cuenta { margin: 0 8px; font-size: 12px; color: var(--texto-2); white-space: nowrap; }
+.trazos-velocidad button { height: 24px; padding: 0 8px; font-size: 11px; }
+.trazos-credito { margin: 0; text-align: center; font-size: 10.5px; color: var(--texto-3); }
+.trazos-credito a { color: inherit; text-decoration: underline; }
+
 /* Barra de pestañas, siempre a la vista */
 .ficha-dock { flex: none; display: flex; align-items: stretch; gap: 1px; padding: 5px 8px; border-top: 1px solid var(--borde); }
+.ficha-dock .pestana { min-width: 0; }
+.ficha-dock .pestana span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .pestana { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 5px 0 4px; border-radius: 12px; font-size: 10.5px; font-weight: 600; line-height: 1.1; color: var(--texto-3); transition: background 0.14s, color 0.14s, transform 0.18s var(--resorte); }
 .pestana:hover:not(:disabled) { background: var(--superficie-3); color: var(--texto); }
 .pestana:active:not(:disabled) { transform: scale(0.94); }

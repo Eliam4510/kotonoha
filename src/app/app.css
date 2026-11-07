@@ -687,3 +687,47 @@ section .ap-botones { margin-top: 10px; }
   .ap-gasto-registro li { grid-template-columns: minmax(0, 1fr) auto; }
   .ap-gasto-registro time, .ap-gasto-uso { grid-column: 1 / -1; }
 }
+
+/* ---------- Bienvenida ---------- */
+.ap-bienvenida { position: absolute; inset: 0; z-index: 2147483001; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--fondo); overflow: auto; }
+.ap-bv-marco { display: flex; flex-direction: column; width: min(680px, 100%); max-height: 100%; border-radius: var(--r-5); background: var(--superficie); box-shadow: var(--sombra-3), inset 0 0 0 1px var(--borde); }
+.ap-bv-cab { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px 0; }
+.ap-bv-puntos { display: flex; gap: 6px; }
+.ap-bv-puntos i { width: 8px; height: 8px; border-radius: 50%; background: var(--superficie-3); transition: background 0.2s, transform 0.2s; }
+.ap-bv-puntos i.hecho { background: var(--hoja-media, var(--hoja)); opacity: 0.55; }
+.ap-bv-puntos i.activo { background: var(--hoja); transform: scale(1.25); }
+.ap-bv-cuerpo { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 12px; padding: 24px 28px; }
+.ap-bv-cuerpo h1 { font-size: 26px; line-height: 1.25; }
+.ap-bv-cuerpo > p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--texto-2); }
+.ap-bv-pie { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 22px 20px; }
+.ap-bv-opciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 6px; }
+.ap-bv-opcion { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 0; border-radius: var(--r-3); background: var(--superficie-2); color: var(--texto); text-align: start; cursor: pointer; font: inherit; box-shadow: inset 0 0 0 1px var(--borde); transition: background 0.14s, box-shadow 0.14s, transform 0.14s; }
+.ap-bv-opcion:hover { background: var(--superficie-3); transform: translateY(-1px); }
+.ap-bv-opcion.activa { box-shadow: inset 0 0 0 2px var(--hoja); background: var(--hoja-suave); }
+.ap-bv-opcion b { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 700; }
+.ap-bv-opcion span { font-size: 12.5px; line-height: 1.4; color: var(--texto-2); }
+.ap-bv-interruptor { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; padding: 12px 14px; border-radius: var(--r-3); background: var(--superficie-2); font-size: 13.5px; line-height: 1.4; color: var(--texto-2); }
+.ap-bv-interruptor b { color: var(--texto); }
+.ap-bv-lista { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.ap-bv-fila { display: flex; gap: 12px; align-items: flex-start; }
+.ap-bv-fila > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; font-size: 13.5px; line-height: 1.45; color: var(--texto-2); }
+.ap-bv-fila b { color: var(--texto); font-size: 14.5px; }
+.ap-bv-enlace { align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; color: var(--acento); }
+.ap-paso-marca.hecho { color: var(--hoja); }
+/* Paletas */
+.ap-paletas { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.ap-paleta { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border: 0; border-radius: var(--r-3); background: var(--superficie-2); color: var(--texto); text-align: start; cursor: pointer; font: inherit; box-shadow: inset 0 0 0 1px var(--borde); }
+.ap-paleta.activo { box-shadow: inset 0 0 0 2px var(--hoja); }
+.ap-paleta b { font-size: 13.5px; }
+.ap-paleta-muestra { display: flex; gap: 4px; margin-bottom: 4px; }
+.ap-paleta-muestra i { width: 22px; height: 6px; border-radius: var(--r-pill); }
+
+/* El lector en una pestaña normal: sin barra lateral, y estrecho si comparte la vista con otra página */
+.ap-app.ap-web { flex-direction: column; }
+.ap-web-cab { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 18px; border-bottom: 1px solid var(--borde); }
+.ap-web-acciones { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.ap-web-seguir { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--texto-2); }
+.ap-web-cuerpo { flex: 1; min-height: 0; display: flex; }
+.ap-web .ap-lienzo { padding: 22px 20px 48px; }
+.ap-web .ap-lectura-ficha { height: calc(100vh - 88px); }
+@container (max-width: 560px) { .ap-web .ap-papel { padding: 22px 18px 30px; } }

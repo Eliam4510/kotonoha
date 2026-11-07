@@ -2,7 +2,8 @@
 
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
-import type {
+import type { DatosTrazos } from '../nucleo/trazos';
+import type {
   BorradorTarjeta,
   ContextoIA,
   ElementoBiblioteca,
@@ -69,6 +70,10 @@ export interface ApiMotor {
   analizarTexto(texto: string): Promise<PalabraToken[][]>;
 
   buscar(lema: string, lectura?: string): Promise<ResultadoBusqueda>;
+  /** Cómo se escribe un carácter, trazo a trazo. Sin datos, null. */
+  trazos(caracter: string): Promise<DatosTrazos | null>;
+  /** Lo que hay en el portapapeles. El motor puede leerlo sin tener el foco. */
+  leerPortapapeles(): Promise<string>;
   buscarLibre(texto: string): Promise<ResultadoBusqueda[]>;
   compuestos(palabras: string[]): Promise<ResultadoBusqueda[]>;
   ejemplos(lema: string): Promise<FraseEjemplo[]>;
@@ -149,6 +154,8 @@ export interface ApiMotor {
 
 export interface ApiFondo {
   asegurarMotor(): Promise<void>;
+  /** Abre el lector en una pestaña normal. Con `junto`, en vista dividida con la pestaña que se esté viendo. */
+  abrirLectorWeb(junto?: boolean): Promise<void>;
   claveIA(): Promise<string | null>;
   urlBaseIA(): Promise<string | null>;
   ajustesCompletos(): Promise<unknown>;

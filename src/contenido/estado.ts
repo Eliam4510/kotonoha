@@ -9,6 +9,7 @@ import type { TipoPausa } from '../nucleo/modos';
 import type { PuntoGramatica } from '../nucleo/gramatica';
 import { type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA } from '../nucleo/sincronia';
 import { type Linea, lineaConPuente, lineaEn } from '../nucleo/subtitulos';
+import { tr } from '../compartido/i18n';
 
 export const ajustes = signal<Ajustes>(AJUSTES_INICIALES);
 
@@ -76,7 +77,7 @@ export const atajosChrome = signal<Record<string, string>>({});
 /** Cómo se activa la captura en este navegador, para decirlo en los avisos. */
 export const comoActivarCaptura = () => {
   const tecla = atajosChrome.value['alternar-captura'];
-  return tecla ? `pulsa ${tecla}` : 'usa el interruptor del menú de la extensión';
+  return tecla ? `pulsa ${tecla}` : tr('usa el interruptor del menú de la extensión');
 };
 export const generacion = signal<{ tipo: 'secundarios' | 'objetivo'; hechas: number; total: number } | null>(null);
 export const analisisEnCurso = signal<{ hechas: number; total: number } | null>(null);
