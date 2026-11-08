@@ -1,6 +1,9 @@
 // El reconocimiento de texto (OCR) del visor, en un trabajador: la página no se congela mientras lee. Dos juegos de modelos,
-// medidos con libros reales antes de elegirlos. Para libros impresos, PP-OCRv5 (21 MB): entre un 1 y un 4 % de error por
-// carácter, en un segundo por página. Para el manga, un detector de globos y manga-ocr (178 MB), que lee el texto vertical
+// medidos con libros reales antes de elegirlos. Para libros impresos, el detector de PP-OCRv5 mobile y el reconocedor de
+// PP-OCRv6 small (25 MB): en tres páginas de referencia, de 2,2 % de error por carácter con todo PP-OCRv5 a 0,9 %, a la
+// misma velocidad. PP-OCRv6 entero lee igual de bien pero su detector parte peor las líneas, y PP-OCRv6 medium apenas
+// mejora al small con el triple de tiempo; NDLOCR-Lite, con su propio programa, se quedó en un 6 %. Para el manga, un
+// detector de globos y manga-ocr (178 MB), que lee el texto vertical
 // y no confunde el furigana: menos de un 1 % en tres páginas de un tomo, en un segundo y medio por página. Sobre lo que
 // leen los modelos, el manga deja repetir los signos («……»), quita las marcas de agua y lo suelto dudoso, y ordena los
 // globos por viñetas; en 18 páginas de cinco series, en el navegador, de 4,3 % a 2,8 % de error y de 11 falsos a 4.
@@ -41,7 +44,10 @@ export type RespuestaOcr =
 
 /** Los modelos, fijados a un commit de Hugging Face: se descarga siempre lo que se midió. */
 const MODELOS = {
-  libro: { repositorio: 'nakamura196/ppocrv5-mobile-web-onnx', revision: 'dc7e2271c00d961a4c0a38dcebe23beb735ba33e', detector: 'PP-OCRv5_mobile_det.onnx', lector: 'PP-OCRv5_mobile_rec.onnx', diccionario: 'PP-OCRv5_mobile_rec.dict.json' },
+  libro: { repositorio: 'nakamura196/ppocrv5-mobile-web-onnx', revision: 'dc7e2271c00d961a4c0a38dcebe23beb735ba33e', detector: 'PP-OCRv5_mobile_det.onnx' },
+  // El diccionario va en la propia extensión (publico/modelos): el modelo lo trae dentro de un YAML. Lo saca
+  // herramientas/diccionario-ocr.mjs del mismo commit.
+  lectorLibro: { repositorio: 'PaddlePaddle/PP-OCRv6_small_rec_onnx', revision: 'b8f84f0b80c529de40b4fbb3544b84fa7233a513', archivo: 'inference.onnx', diccionario: 'modelos/PP-OCRv6_small_rec.dict.json' },
   globos: { repositorio: 'ogkalu/comic-text-and-bubble-detector', revision: '16e8a622f91fabc6b5b65c96d32d1183f8843546', archivo: 'detector-v4-s_int8.onnx' },
   mangaOcr: { repositorio: 'onnx-community/manga-ocr-base-ONNX', revision: 'f9023406bb2f6b17df67bc4a327c56ecd20611f0', codificador: 'onnx/encoder_model_q4f16.onnx', decodificador: 'onnx/decoder_model.onnx' },
   vocabulario: { repositorio: 'kha-white/manga-ocr-base', revision: 'aa6573bd10b0d446cbf622e29c3e084914df9741', archivo: 'vocab.txt' },
@@ -112,9 +118,13 @@ let manga: Promise<ModelosManga> | null = null;
 function cargarLibro(): Promise<ModelosLibro> {
   libro ??= (async () => {
     const m = MODELOS.libro;
-    const leer = (archivo: string) => descargar(m.repositorio, m.revision, archivo);
-    const [det, rec, dic] = await Promise.all([leer(m.detector), leer(m.lector), leer(m.diccionario)]);
-    return { detector: await sesion(det, true), lector: await sesion(rec, true), diccionario: JSON.parse(new TextDecoder().decode(dic)) as string[] };
+    const l = MODELOS.lectorLibro;
+    const [det, rec, dic] = await Promise.all([
+      descargar(m.repositorio, m.revision, m.detector),
+      descargar(l.repositorio, l.revision, l.archivo),
+      fetch(new URL(l.diccionario, self.location.href)).then((r) => r.json() as Promise<string[]>),
+    ]);
+    return { detector: await sesion(det, true), lector: await sesion(rec, true), diccionario: dic };
   })().catch((e) => {
     libro = null;
     throw e;

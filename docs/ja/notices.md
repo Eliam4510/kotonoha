@@ -20,7 +20,8 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | 文字起こしのモデル、使用時にダウンロード | MIT |
 | [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0)、Third Intelligence 作、[Sanami による ONNX 変換](https://huggingface.co/Sanami/haas-ja-onnx) | 日本語の文字起こしモデル、使用時にダウンロード | Apache-2.0 |
 | [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)、NVIDIA 作、[istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) と [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) による ONNX 変換 | 英語とドイツ語の文字起こしモデル、使用時にダウンロード | CC-BY-4.0 |
-| [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR)、PaddlePaddle 製、[nakamura196 による ONNX 変換](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | 本の文字認識。使うときにダウンロード | Apache-2.0 |
+| [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR)、PaddlePaddle 製、[nakamura196 による ONNX 変換](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | 本の文字行の検出。使うときにダウンロード | Apache-2.0 |
+| [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx)、PaddlePaddle 製 | 本の文字認識。使うときにダウンロード。辞書は拡張機能に同梱（`modelos/`） | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr)、kha-white 製、[onnx-community による ONNX 変換](https://huggingface.co/onnx-community/manga-ocr-base-ONNX)、および [ogkalu の吹き出し検出器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 漫画の文字認識。使うときにダウンロード | Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/ffmpeg` | 手元のファイルの読み取り | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/core` | FFmpeg のコア、コンパイル時にコピー | GPL-2.0-or-later |

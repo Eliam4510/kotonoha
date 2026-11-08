@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.9.5 · 2026-11-08
+
+- **Un OCR de libros más fino.** El modo Libro lee con el reconocedor de PP-OCRv6, que salió en junio de 2026, y conserva el detector de antes, que parte mejor las líneas. En las páginas de referencia, el error baja casi un tercio en el visor (del 4,7 % al 3,4 %), a la misma velocidad. Recupera kanji sueltos que antes se perdían, como el 水 de «塩は水に溶ける», y respeta la puntuación de los libros de ciencias. Se comparó también con PP-OCRv6 medium, que apenas mejora y tarda el triple, y con NDLOCR-Lite, que se quedó en un 6 %.
+- La descarga para libros pasa de 21 a 25 MB. Lo leído en modo Libro se vuelve a leer con el reconocedor nuevo; lo del manga y lo editado se conservan.
+
 ## 0.9.4 · 2026-11-08
 
 - **Leer sin esperas.** El OCR lee las páginas siguientes antes de llegar a ellas (ocho en un manga, cuatro en un libro), así que al pasar de página su texto ya está. Si se salta a otra parte del libro, lo que se dejó atrás deja de leerse y va primero lo que se ve.
@@ -83,6 +88,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.9.5 · 2026-11-08
+
+- **Sharper OCR for books.** Book mode reads with the PP-OCRv6 recognizer, released in June 2026, and keeps the previous detector, which splits lines better. On the reference pages, the error drops by almost a third in the viewer (from 4.7 % to 3.4 %), at the same speed. It recovers single kanji that used to get lost, such as the 水 in «塩は水に溶ける», and keeps the punctuation of science books. It was also compared with PP-OCRv6 medium, which barely improves and takes three times as long, and with NDLOCR-Lite, which stayed at 6 %.
+- The download for books goes from 21 to 25 MB. What was read in Book mode is read again with the new recognizer; manga pages and edits are kept.
 
 ## 0.9.4 · 2026-11-08
 
