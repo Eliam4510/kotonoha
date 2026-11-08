@@ -45,7 +45,7 @@ Funciona en el propio equipo. El diccionario, el análisis, la transcripción de
 
 <table>
   <tr><td><b>Ver</b></td><td>Subtítulos con furigana, acento tonal y el estado de cada palabra en YouTube, Netflix, Disney+, Crunchyroll, Prime Video y archivos propios.</td></tr>
-  <tr><td><b>Leer</b></td><td>Cualquier página web, lo que se copia, y libros EPUB, PDF y manga, también escaneados.</td></tr>
+  <tr><td><b>Leer</b></td><td>Cualquier página web, lo que se copia, y libros EPUB, PDF y manga, también escaneados o en carpetas de imágenes.</td></tr>
   <tr><td><b>Recordar</b></td><td>Tarjetas de un clic, con el audio y la imagen de la escena, para Anki o para el repaso integrado.</td></tr>
   <tr><td><b>Idiomas</b></td><td>Se estudia japonés, inglés o alemán. La interfaz está en español, inglés, alemán, chino, coreano y japonés.</td></tr>
 </table>
@@ -86,7 +86,7 @@ En noticias, blogs, wikis o en un chat como el de Claude, el texto japonés reci
 
 <img src="docs/img/libro-texto.png" alt="Novela japonesa en vertical, con ruby, colores y la ficha de una palabra" width="100%">
 
-La **Ayuda de lectura** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más.
+La **Ayuda de lectura** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras.
 
 <img src="docs/img/ocr.png" alt="Página escaneada con su texto reconocido y el panel de la línea con la ficha de 週末" width="100%">
 

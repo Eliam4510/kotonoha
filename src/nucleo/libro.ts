@@ -24,7 +24,37 @@ export interface LibroDePaginas {
   indice: EntradaIndice[];
 }
 
-const IMAGEN = /\.(jpe?g|png|webp|gif|avif|bmp)$/i;
+export const IMAGEN = /\.(jpe?g|png|webp|gif|avif|bmp)$/i;
+
+/** El nombre de una portada, sin la extensión: «cover», «cover_000», «00_cover», «表紙»… Pero no «back_cover». */
+const PORTADA = /^(?:\d*[\s_.-]*)?(?:cover|front|folder|表紙|カバー)(?:[\s_.-]*\d*)?$/i;
+
+/**
+ * Las imágenes de un CBZ o de una carpeta en orden de lectura: carpeta a carpeta y, dentro de cada una, en orden natural
+ * («p2» antes que «p10»), pero con la portada delante, que el orden natural deja al final si se llama «cover.jpg» y las
+ * páginas «00001.jpg». La portada de un capítulo va delante de su capítulo, no del libro.
+ */
+export function ordenDePaginas(rutas: string[]): string[] {
+  const partes = (r: string) => [r.slice(0, r.lastIndexOf('/') + 1), r.slice(r.lastIndexOf('/') + 1)] as const;
+  const esPortada = (nombre: string) => PORTADA.test(nombre.replace(/\.[^.]+$/, ''));
+  return [...rutas].sort((a, b) => {
+    const [carpetaA, nombreA] = partes(a);
+    const [carpetaB, nombreB] = partes(b);
+    return ordenNatural(carpetaA, carpetaB) || Number(esPortada(nombreB)) - Number(esPortada(nombreA)) || ordenNatural(nombreA, nombreB);
+  });
+}
+
+/** El índice de un CBZ con una carpeta por capítulo: cada carpeta abre una entrada. Si todo está en una, no hay índice. */
+function indiceDeCarpetas(paginas: string[]): EntradaIndice[] {
+  const carpeta = (r: string) => r.slice(0, Math.max(0, r.lastIndexOf('/')));
+  if (new Set(paginas.map(carpeta)).size < 2) return [];
+  const salida: EntradaIndice[] = [];
+  paginas.forEach((p, i) => {
+    const c = carpeta(p);
+    if (c && (i === 0 || carpeta(paginas[i - 1]) !== c)) salida.push({ titulo: c.slice(c.lastIndexOf('/') + 1), pagina: i });
+  });
+  return salida;
+}
 
 const ENTIDADES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 export const sinEntidades = (s: string) =>
@@ -254,9 +284,12 @@ export async function leerEpubDeTexto(f: FuenteBytes, indice: Map<string, Entrad
   };
 }
 
-/** Un CBZ: sus imágenes en orden natural. ComicInfo.xml, si lo trae, dice el título y si se lee como manga. */
+/**
+ * Un CBZ: sus imágenes en orden natural, con la portada delante, y una entrada del índice por carpeta si viene por
+ * capítulos. ComicInfo.xml, si lo trae, dice el título y si se lee como manga.
+ */
 export async function leerCbz(f: FuenteBytes, indice: Map<string, EntradaZip>, nombre: string, porDefecto: Direccion): Promise<LibroDePaginas> {
-  const paginas = [...indice.keys()].filter((n) => IMAGEN.test(n) && !/(^|\/)(__MACOSX|\.)/.test(n)).sort(ordenNatural);
+  const paginas = ordenDePaginas([...indice.keys()].filter((n) => IMAGEN.test(n) && !/(^|\/)(__MACOSX|\.)/.test(n)));
   if (!paginas.length) throw new Error('El CBZ no trae imágenes');
   const info = [...indice.keys()].find((n) => /(^|\/)ComicInfo\.xml$/i.test(n));
   const xml = info ? await leerTexto(f, indice, info) : null;
@@ -269,7 +302,7 @@ export async function leerCbz(f: FuenteBytes, indice: Map<string, EntradaZip>, n
     direccion: direccionDelArchivo ? (/RightToLeft/i.test(manga) ? 'rtl' : 'ltr') : porDefecto,
     direccionDelArchivo,
     paginas,
-    indice: [],
+    indice: indiceDeCarpetas(paginas),
   };
 }
 

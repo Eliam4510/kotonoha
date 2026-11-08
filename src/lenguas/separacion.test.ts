@@ -43,6 +43,9 @@ describe('lo japonés está en su paquete', () => {
       'compartido/i18n.ts': /nombre: '(简体中文|日本語)'/,
       // Una palabra para comprobar que Claude responde, sea cual sea la lengua.
       'motor/ia.ts': /接続/,
+      // Cómo se nombran los tomos, los capítulos y las portadas en las carpetas y los CBZ de manga, se estudie lo que se estudie.
+      'nucleo/carpetas.ts': /^const (TOMO|CAPITULO|EMPIEZA_POR_TOMO) = \//,
+      'nucleo/libro.ts': /^const PORTADA = \//,
     });
     expect(encontrados).toEqual([]);
   });

@@ -2,6 +2,12 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.9.1 · 2026-11-08
+
+- **Carpetas de imágenes.** El manga que viene en imágenes entra en la Ayuda de lectura eligiendo la carpeta o arrastrándola: cada carpeta, o cada tomo dentro de ella, es un libro, con la portada delante, el título de la serie y un índice por capítulos si viene en carpetas. Se guarda como un CBZ, sin copiar las imágenes en memoria: 40 tomos reales, 3,3 GB, entran en unos 40 segundos.
+- **Dobles páginas enteras.** En doble página, una doble escaneada de una pieza, como las páginas a color del principio de un tomo, va sola.
+- Las imágenes sueltas también se importan: juntas, son un libro. Y un CBZ con la portada llamada cover.jpg ya la pone delante.
+
 ## 0.9.0 · 2026-11-08
 
 - **EPUB de texto con su propio formato.** Una novela se ve en el visor como la hizo su editorial: capítulos, CSS, ruby, ilustraciones y escritura vertical, con el lector de páginas encima. Índice, zoom, enlaces entre capítulos y memoria del punto exacto donde se dejó.
@@ -61,6 +67,12 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.9.1 · 2026-11-08
+
+- **Image folders.** Manga that comes as images enters the Reading assistant by choosing or dragging the folder: each folder, or each volume inside it, becomes a book, with the cover first, the series title and a table of contents by chapter when it comes in folders. It is stored as a CBZ, without copying the images into memory: 40 real volumes, 3.3 GB, come in in about 40 seconds.
+- **Whole two-page spreads.** In a two-page spread, a spread scanned in one piece, such as the colour pages at the start of a volume, stands on its own.
+- Loose images can be imported too: together, they make one book. And a CBZ whose cover is called cover.jpg now puts it first.
 
 ## 0.9.0 · 2026-11-08
 

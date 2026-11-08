@@ -5,7 +5,7 @@ import { tr } from '../compartido/i18n';
 import type { LineaTexto } from '../nucleo/capaTexto';
 import { type Tamano, tamanoDeImagen, tipoDeImagen } from '../nucleo/imagenes';
 import { type Direccion, type EntradaIndice, leerLibro } from '../nucleo/libro';
-import { fuenteDeArchivo, leerEntrada } from '../nucleo/zip';
+import { fuenteDeArchivo, leerEntrada, leerPrincipio } from '../nucleo/zip';
 
 export interface PaginaImagen extends Tamano {
   url: string;
@@ -21,8 +21,13 @@ export interface Paginador {
   imagen(n: number): Promise<PaginaImagen>;
   /** El texto que trae el propio archivo, por líneas, o ninguna si la página es una imagen. Solo los PDF lo tienen. */
   textoPropio?(n: number): Promise<LineaTexto[]>;
+  /** Las páginas apaisadas: una doble página escaneada de una pieza, que en doble página va sola. Solo en los ZIP. */
+  anchas?(): Promise<number[]>;
   cerrar(): void;
 }
+
+/** Lo que se lee de cada imagen para saber su tamaño: la cabecera suele caber en mucho menos. */
+const CABECERA_IMAGEN = 64 * 1024;
 
 /** Las páginas que se guardan pintadas. Más allá, se sueltan: un libro entero no cabe en memoria. */
 const LIMITE_CACHE = 40;
@@ -86,6 +91,19 @@ export async function paginadorDeZip(archivo: Blob, nombre: string, porDefecto: 
         tamanos.set(n, t);
         return { url: URL.createObjectURL(blob), ...t };
       }),
+    // Mide todas las páginas por su cabecera, sin descodificarlas; de paso, el visor ya sabe el tamaño de cada una.
+    anchas: async () => {
+      const salida: number[] = [];
+      for (const [n, ruta] of libro.paginas.entries()) {
+        const entrada = indice.get(ruta);
+        if (!entrada) continue;
+        const t = tamanos.get(n) ?? tamanoDeImagen(await leerPrincipio(f, entrada, CABECERA_IMAGEN)) ?? tamanoDeImagen(await leerEntrada(f, entrada));
+        if (!t) continue;
+        tamanos.set(n, t);
+        if (t.ancho > t.alto) salida.push(n);
+      }
+      return salida;
+    },
     cerrar: () => cache.vaciar(),
   };
 }
@@ -101,12 +119,16 @@ export async function miniaturaDe(blob: Blob, ancho = 240): Promise<string> {
   return lienzo.toDataURL('image/jpeg', 0.82);
 }
 
-/** La portada de un EPUB de imágenes o un CBZ: su primera página, en pequeño. */
-export async function portadaDeZip(archivo: Blob, nombre: string): Promise<string | undefined> {
+/** Lo que la estantería guarda de un EPUB de imágenes o un CBZ al importarlo: la portada en pequeño y las páginas apaisadas. */
+export async function datosDeZip(archivo: Blob, nombre: string): Promise<{ portada?: string; anchas: number[] }> {
   const p = await paginadorDeZip(archivo, nombre, 'ltr');
   try {
-    const primera = await p.imagen(0);
-    return await miniaturaDe(await (await fetch(primera.url)).blob());
+    const anchas = await p.anchas!().catch(() => []);
+    const portada = await p
+      .imagen(0)
+      .then(async (primera) => miniaturaDe(await (await fetch(primera.url)).blob()))
+      .catch(() => undefined);
+    return { portada, anchas };
   } finally {
     p.cerrar();
   }

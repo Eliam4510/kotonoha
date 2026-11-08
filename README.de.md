@@ -41,7 +41,7 @@ Alles läuft auf dem eigenen Rechner. Wörterbuch, Textanalyse, Transkription un
 
 <table>
   <tr><td><b>Schauen</b></td><td>Untertitel mit Furigana, Tonhöhenakzent und dem Stand jedes Wortes auf YouTube, Netflix, Disney+, Crunchyroll, Prime Video und in eigenen Dateien.</td></tr>
-  <tr><td><b>Lesen</b></td><td>Jede Webseite, alles Kopierte und Bücher als EPUB, PDF und Manga, auch eingescannte.</td></tr>
+  <tr><td><b>Lesen</b></td><td>Jede Webseite, alles Kopierte und Bücher als EPUB, PDF und Manga, auch eingescannte oder als Bilderordner.</td></tr>
   <tr><td><b>Behalten</b></td><td>Karten mit einem Klick, mit Ton und Bild der Szene, für Anki oder die eingebaute Wiederholung.</td></tr>
   <tr><td><b>Sprachen</b></td><td>Gelernt wird Japanisch, Englisch oder Deutsch. Die Oberfläche gibt es auf Deutsch, Englisch, Spanisch, Chinesisch, Koreanisch und Japanisch.</td></tr>
 </table>
@@ -82,7 +82,7 @@ Auf Nachrichtenseiten, Blogs, Wikis oder in einem Chat wie dem von Claude bekomm
 
 <img src="docs/img/libro-texto.de.png" alt="Japanischer Roman in vertikaler Schrift, mit Ruby, Farben und einem Wortfenster" width="100%">
 
-Die **Lesehilfe** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Doppelseiten, fortlaufendes Scrollen, Inhaltsverzeichnis, Miniaturen und die Seite, an der jedes Buch zuletzt aufgeschlagen war. Ein Text-EPUB wie ein Roman behält sein eigenes Layout, seine Ruby und seine vertikale Schrift, mit dem Seiten-Reader darüber: Farben, Furigana und Wortfenster wie im Web. Ein PDF, das Text enthält, lässt sich sofort Wort für Wort lesen.
+Die **Lesehilfe** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Doppelseiten, fortlaufendes Scrollen, Inhaltsverzeichnis, Miniaturen und die Seite, an der jedes Buch zuletzt aufgeschlagen war. Ein Text-EPUB wie ein Roman behält sein eigenes Layout, seine Ruby und seine vertikale Schrift, mit dem Seiten-Reader darüber: Farben, Furigana und Wortfenster wie im Web. Ein PDF, das Text enthält, lässt sich sofort Wort für Wort lesen. Manga in Bilderordnern werden durch Auswahl des Ordners importiert: Jeder Band wird ein Buch, mit der Titelseite vorn und den Farbdoppelseiten im Ganzen.
 
 <img src="docs/img/ocr.de.png" alt="Eingescannte Seite mit erkanntem Text und dem Zeilenfenster zum Wort 週末" width="100%">
 
