@@ -163,6 +163,8 @@ export interface ApiFondo {
   asegurarMotor(): Promise<void>;
   /** Abre el lector en una pestaña normal. Con `junto`, en vista dividida con la pestaña que se esté viendo. */
   abrirLectorWeb(junto?: boolean): Promise<void>;
+  /** Abre un libro de la Ayuda de lectura en el visor, en una pestaña normal. */
+  abrirVisor(id: string): Promise<void>;
   claveIA(): Promise<string | null>;
   urlBaseIA(): Promise<string | null>;
   ajustesCompletos(): Promise<unknown>;

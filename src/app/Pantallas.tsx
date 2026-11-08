@@ -15,7 +15,11 @@ import type {
   ResultadoBusqueda,
   TarjetaMemoria,
 } from '../compartido/tipos';
+import { guardarArchivoDocumento } from '../compartido/documentos';
 import { estructuraDeHtml, estructuraDeNodo, type NodoHtml, normalizarTextoPlano, textoConEstructura } from '../nucleo/estructura';
+import { leerLibro } from '../nucleo/libro';
+import { fuenteDeArchivo } from '../nucleo/zip';
+import { portadaDeZip } from '../visor/paginador';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
@@ -138,7 +142,7 @@ function SeguirLeyendo({ e }: { e: ElementoBiblioteca }) {
   const pagina = Math.min((e.pagina ?? 0) + 1, total);
   return (
     <section class="tarjeta ap-seguir ap-c12" aria-label={tr('Seguir leyendo')}>
-      <span class={`ap-tapa mini ${claseTono(e)}`} aria-hidden="true"><span class="ap-obi" /></span>
+      <span class={`ap-tapa mini ${claseTono(e)} ${e.documento?.portada ? 'con-portada' : ''}`} aria-hidden="true"><Portada e={e} /><span class="ap-obi" /></span>
       <div class="ap-seguir-texto">
         <span class="ayuda">{tr('Sigue leyendo')}</span>
         <b lang={langDe(e.titulo)}>{e.titulo}</b>
@@ -602,7 +606,37 @@ function tonoDe(titulo: string): number {
 }
 
 const claseTono = (e: ElementoBiblioteca) => (e.origen === 'historia' ? 'claude' : `tono-${tonoDe(e.titulo)}`);
-const paginasDe = (e: ElementoBiblioteca) => Math.max(1, Math.ceil(e.texto.length / TAM_PAGINA));
+const paginasDe = (e: ElementoBiblioteca) => Math.max(1, e.documento ? e.documento.paginas : Math.ceil(e.texto.length / TAM_PAGINA));
+const megas = (bytes: number) => `${numero(Math.max(0.1, Math.round(bytes / 1e5) / 10))} MB`;
+
+/** La portada de verdad de un libro de páginas, encima de la tapa dibujada. */
+const Portada = ({ e }: { e: ElementoBiblioteca }) => (e.documento?.portada ? <img class="ap-tapa-imagen" src={e.documento.portada} alt="" draggable={false} /> : null);
+
+/**
+ * Un libro de páginas (EPUB de imágenes, CBZ o PDF) se guarda tal cual, aparte, y se lee en el visor. Devuelve false si
+ * no lo es, como un EPUB de texto, que sigue el camino del texto.
+ */
+async function importarDocumento(f: File): Promise<boolean> {
+  const formato = /\.pdf$/i.test(f.name) ? 'pdf' : /\.cbz$/i.test(f.name) ? 'cbz' : /\.epub$/i.test(f.name) ? 'epub' : null;
+  if (!formato) return false;
+  let titulo = f.name.replace(/\.[^.]+$/, '');
+  let paginas = 0;
+  let direccion: 'rtl' | 'ltr' = 'ltr';
+  let portada: string | undefined;
+  if (formato !== 'pdf') {
+    // Un CBZ no dice su sentido si no trae ComicInfo: en japonés, lo normal es el manga, de derecha a izquierda.
+    const { libro } = await leerLibro(fuenteDeArchivo(f), f.name, lengua.value.id === 'ja' ? 'rtl' : 'ltr');
+    if (!libro) return false;
+    titulo = libro.titulo;
+    paginas = libro.paginas.length;
+    direccion = libro.direccion;
+    portada = await portadaDeZip(f, f.name).catch(() => undefined);
+  }
+  const id = crypto.randomUUID();
+  await guardarArchivoDocumento(id, f);
+  await motor.bibliotecaGuardar({ id, titulo, texto: '', origen: 'archivo', creado: Date.now(), documento: { formato, paginas, direccion, tamano: f.size, portada } });
+  return true;
+}
 
 const NOMBRE_ORIGEN: Record<ElementoBiblioteca['origen'], string> = {
   historia: tm('Relato de Claude'),
@@ -619,18 +653,31 @@ function Libro({ e, alAbrir, alEliminar }: { e: ElementoBiblioteca; alAbrir: () 
   return (
     <article class="ap-libro">
       <div class="ap-libro-tapa-marco">
-        <button class={`ap-tapa ${claseTono(e)} ${titulo && lengua.value.escritura.portadaVertical ? 'vertical' : 'horizontal'}`} aria-label={tr('Leer {0}', e.titulo)} onClick={alAbrir}>
+        <button class={`ap-tapa ${claseTono(e)} ${titulo && lengua.value.escritura.portadaVertical ? 'vertical' : 'horizontal'} ${e.documento?.portada ? 'con-portada' : ''}`} aria-label={tr('Leer {0}', e.titulo)} onClick={alAbrir}>
+          <Portada e={e} />
           <span class="ap-tapa-titulo" lang={titulo}>{e.titulo}</span>
           <span class="ap-obi">
-            {claude ? <Icono n="ia" t={13} /> : <Icono n="hoja" t={13} />}
-            <span class="num">{empezado ? tr('Pág. {0} de {1}', pagina, total) : total === 1 ? tr('Lectura breve') : tr('{0} páginas', total)}</span>
+            {claude ? <Icono n="ia" t={13} /> : <Icono n={e.documento ? 'libro' : 'hoja'} t={13} />}
+            <span class="num">
+              {e.documento && !e.documento.paginas
+                ? e.documento.formato.toUpperCase()
+                : empezado
+                  ? tr('Pág. {0} de {1}', pagina, total)
+                  : total === 1
+                    ? tr('Lectura breve')
+                    : tr('{0} páginas', total)}
+            </span>
             {empezado && <i class="ap-obi-avance" style={{ width: `${(pagina / total) * 100}%` }} />}
           </span>
         </button>
         <button class="btn-icono chico relleno ap-libro-quitar" aria-label={tr('Eliminar {0}', e.titulo)} data-tip={tr('Eliminar')} onClick={alEliminar}><Icono n="basura" t={14} /></button>
       </div>
       <h3 title={e.titulo} lang={titulo}>{e.titulo}</h3>
-      <p class="ayuda" title={tr('{0} caracteres', numero(e.texto.length))}>{tr(NOMBRE_ORIGEN[e.origen])}</p>
+      {e.documento ? (
+        <p class="ayuda">{`${e.documento.formato.toUpperCase()} · ${megas(e.documento.tamano)}`}</p>
+      ) : (
+        <p class="ayuda" title={tr('{0} caracteres', numero(e.texto.length))}>{tr(NOMBRE_ORIGEN[e.origen])}</p>
+      )}
     </article>
   );
 }
@@ -651,6 +698,11 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
   const cargar = () => motor.bibliotecaListar().then((l) => { fijarLista(l); fijarCargada(true); return l; }).catch(console.error);
 
   const abrirLibro = (e: ElementoBiblioteca) => {
+    // Un libro de páginas se lee en el visor, en su propia pestaña; él guarda por dónde se va.
+    if (e.documento) {
+      fondo.abrirVisor(e.id).catch((x) => fijarError(x instanceof Error ? x.message : String(x)));
+      return;
+    }
     fijarPagina(e.pagina ?? 0);
     fijarAbierto(e);
     motor.bibliotecaGuardar({ ...e, abierto: Date.now() }).catch(console.error);
@@ -667,6 +719,7 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
     fijarError('');
     for (const f of [...(archivos ?? [])]) {
       try {
+        if (await importarDocumento(f)) continue;
         await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo: f.name.replace(/\.[^.]+$/, ''), texto: await textoDeArchivo(f), origen: 'archivo', creado: Date.now() });
       } catch (e) {
         fijarError(`${f.name}: ${e instanceof Error ? e.message : e}`);
@@ -744,9 +797,9 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
           <span class="hoja-icono"><Icono n="subir" t={22} /></span>
           <b>{tr('Importa un libro o unos subtítulos')}</b>
           <span class="ayuda">{tr('Arrástralos aquí o haz clic para elegirlos')}</span>
-          <span class="ap-formatos">{['EPUB', 'TXT', 'HTML', 'SRT', 'VTT', 'ASS'].map((f) => <i key={f}>{f}</i>)}</span>
+          <span class="ap-formatos">{['EPUB', 'PDF', 'CBZ', 'TXT', 'HTML', 'SRT', 'VTT', 'ASS'].map((f) => <i key={f}>{f}</i>)}</span>
         </button>
-        <input ref={entrada} type="file" multiple hidden aria-label={tr('Importar archivos')} accept=".txt,.html,.htm,.epub,.srt,.vtt,.ass,.ssa,.md" onChange={(e) => importar(e.currentTarget.files)} />
+        <input ref={entrada} type="file" multiple hidden aria-label={tr('Importar archivos')} accept=".txt,.html,.htm,.epub,.pdf,.cbz,.srt,.vtt,.ass,.ssa,.md" onChange={(e) => importar(e.currentTarget.files)} />
 
         <section class="ap-claude" aria-labelledby="ap-t-relato">
           <div class="ap-tarjeta-cab">

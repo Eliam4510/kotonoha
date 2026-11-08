@@ -384,6 +384,11 @@ section .ap-botones { margin-top: 10px; }
 .ap-tapa.mini:hover { transform: none; }
 .ap-tapa.mini .ap-obi { padding: 0; box-shadow: none; }
 .ap-tapa-titulo { position: absolute; font-weight: 700; line-height: 1.3; }
+/* Un libro de páginas lleva su portada de verdad, con el lomo dibujado encima y la faja delante. */
+.ap-tapa-imagen { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ap-tapa.con-portada .ap-tapa-titulo { display: none; }
+.ap-tapa.con-portada::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, rgba(0, 0, 0, 0) 90%, rgba(0, 0, 0, 0.1) 96%, rgba(255, 255, 255, 0.18) 98%, rgba(0, 0, 0, 0.14)); }
+.ap-tapa.con-portada .ap-obi { z-index: 2; }
 .ap-tapa.vertical .ap-tapa-titulo { top: 12%; right: 16%; max-height: 58%; writing-mode: vertical-rl; font-family: var(--letra-lengua); font-size: 19px; letter-spacing: 0.12em; overflow: hidden; }
 .ap-tapa.horizontal .ap-tapa-titulo { top: 12%; left: 10%; right: 14%; max-height: 56%; font-size: 15px; overflow: hidden; word-break: break-word; }
 .ap-obi { position: absolute; left: 0; right: 0; bottom: 0; height: 21%; display: flex; align-items: center; gap: 5px; padding: 0 10%; font-size: 11px; font-weight: 700; color: var(--obi-tinta); background: var(--obi); box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.14); --ico-opacidad: 0.45; }

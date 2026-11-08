@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.6.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.7.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -100,6 +100,10 @@ Estado de cada función en la versión 0.6.0, con la forma en que se ha verifica
 | Portapapeles en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
 | Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
 | Ayuda de lectura: EPUB, TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
+| Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
+| Sentido de derecha a izquierda tomado del propio libro, con la portada sola en doble página | Automática |
+| Miniaturas, índice del libro, ir a una página, pantalla completa y colores invertidos | Automática |
+| Los libros se guardan aparte y se leen a trozos: un PDF de cientos de MB no se carga entero. El visor recuerda la página, la vista y el zoom de cada uno | Automática, y con un PDF real de 347 MB |
 | Relatos generados según el nivel | Simulador |
 | Reproductor de archivos propios | Automática |
 | Subtítulos incrustados en MKV y elección de pista de audio, con ffmpeg.wasm | Automática |
@@ -206,6 +210,7 @@ Estado de cada función en la versión 0.6.0, con la forma en que se ha verifica
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
+| Visor | Las páginas de imagen aún no tienen texto que consultar. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad: en otro equipo hay que volver a importarlos |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
 | Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |

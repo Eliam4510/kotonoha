@@ -224,6 +224,8 @@ Nada de esto añade nada al contenido de la página. Los colores usan la CSS Cus
 
 **Ayuda de lectura.** Guarda libros EPUB, textos y subtítulos SRT, con el punto de lectura y la estructura de cada capítulo. También puede generar relatos con Claude ajustados al nivel configurado.
 
+**Visor.** Los EPUB hechos de imágenes, como el manga y los libros escaneados, los CBZ y los PDF se abren en el visor, en una pestaña propia, como en un lector de PDF. Tiene zoom (**Acercar**, **Alejar**, **Ajustar al ancho** y **Página completa**, también con Ctrl y la rueda del ratón), tres vistas (**Una página**, **Doble página** y **Desplazamiento continuo**), **Miniaturas**, el **Índice** del libro y **Pantalla completa**. Un libro que declara que se lee de derecha a izquierda, como el manga, se muestra así: la flecha izquierda avanza, y en doble página la portada puede ir sola para que las parejas coincidan con el tomo impreso. Las flechas, Inicio y Fin pasan de página, y F activa la pantalla completa. El archivo se guarda tal cual en el almacenamiento del navegador y se lee a trozos, sin cargarlo entero, y el visor recuerda la página, la vista y el zoom de cada libro. Las páginas de imagen todavía no tienen texto que consultar.
+
 **Reproductor local.** Reproduce archivos propios, con los subtítulos incrustados de un MKV y la elección de pista de audio, mediante ffmpeg.wasm.
 
 **Palabras y evaluación.** El explorador lista el vocabulario por estado, y la evaluación de nivel estima las palabras conocidas de partida.

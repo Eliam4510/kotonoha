@@ -121,9 +121,22 @@ async function abrirLectorWeb(junto = false): Promise<void> {
   await enfocar(await chrome.tabs.create({ url, windowId: ventana.id }));
 }
 
+/** El visor de la Ayuda de lectura, en una pestaña normal: para leer a pantalla completa o en vista dividida. */
+async function abrirVisor(id: string): Promise<void> {
+  const url = chrome.runtime.getURL(`visor.html#${encodeURIComponent(id)}`);
+  const ventana = await chrome.windows.getLastFocused({ windowTypes: ['normal'] }).catch(() => null);
+  if (!ventana?.id) {
+    await chrome.windows.create({ url, type: 'normal' });
+    return;
+  }
+  await chrome.tabs.create({ url, windowId: ventana.id });
+  await chrome.windows.update(ventana.id, { focused: true });
+}
+
 const api: ApiFondo & { _: never } = {
   asegurarMotor,
   abrirLectorWeb,
+  abrirVisor,
   async claveIA() {
     const d = await chrome.storage.local.get(CLAVE_API);
     return (d[CLAVE_API] as string | undefined) ?? null;

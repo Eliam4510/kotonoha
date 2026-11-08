@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.6.0-A9E45B?style=flat-square" alt="Version 0.6.0">
+  <img src="https://img.shields.io/badge/Version-0.7.0-A9E45B?style=flat-square" alt="Version 0.7.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Kontinuierliche Integration"></a>
-  <img src="https://img.shields.io/badge/Unit--Tests-712-0ca30c?style=flat-square" alt="712 Unit-Tests">
+  <img src="https://img.shields.io/badge/Unit--Tests-737-0ca30c?style=flat-square" alt="737 Unit-Tests">
   <img src="https://img.shields.io/badge/Oberfl%C3%A4che-6%20Sprachen-8FCBFF?style=flat-square" alt="Oberfläche in 6 Sprachen">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 bis N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 bis C2">
@@ -96,7 +96,7 @@ Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japa
   <tr>
     <td valign="top"><b>Eine vollständige Anwendung</b><br>Startseite, Wörterbuch mit konjugierten Formen, Wortübersicht nach Status, Niveaubewertung, Einstellungen pro Aufgabe und bearbeitbare Prompts. Helles und dunkles Design.</td>
     <td valign="top"><b>Karten mit einem Klick</b><br>Mit Audio und Einzelbild des Videos, direkt an Anki über AnkiConnect oder an die eingebaute Wiederholung mit FSRS.</td>
-    <td valign="top"><b>Mehr als Video</b><br>Eine Zwischenablage, die die Struktur des Kopierten bewahrt, eine Lesehilfe für EPUB-Bücher, Geschichten passend zum Niveau und ein Player für eigene Dateien mit MKV-Untertiteln.</td>
+    <td valign="top"><b>Mehr als Video</b><br>Eine Zwischenablage, die die Struktur des Kopierten bewahrt, eine Lesehilfe mit einem Betrachter für EPUB, CBZ und PDF, Geschichten passend zum Niveau und ein Player für eigene Dateien mit MKV-Untertiteln.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/paginas.de.png" alt="Reader auf einem japanischen Artikel, mit Farben und Furigana"></td>
@@ -263,6 +263,7 @@ Der letzte Befehl kompiliert und legt in `release/` die ZIP-Dateien der Erweiter
 | `node pruebas/lector.mjs` | Der Seiten-Reader in den schwierigen Fällen: Nichts bewegt sich, Klick, Links, Karussells, Akkordeons, live eintreffender Text, Shadow Trees und eine scrollende Box wie in einem Chat |
 | `node pruebas/lector-real.mjs` | Der Reader auf rund dreißig öffentlichen Websites, mit einem Screenshot von jeder. Mit `KK_LENGUA=en` auf englischen Websites |
 | `node pruebas/trazos-web.mjs` | Die Strichfolge mit echten Daten, die Zwischenablage im Tab, die Struktur von kopiertem und eingefügtem Text und eines importierten EPUB sowie die geteilte Ansicht |
+| `node pruebas/visor.mjs` | Der Betrachter der Lesehilfe mit einem Manga-EPUB, einem CBZ und einem PDF, die der Test selbst erzeugt: Import, Titelbilder, Seiten, Doppelseiten von rechts nach links, Zoom, Ansichten, Inhaltsverzeichnis, Miniaturansichten, gemerkte Seite und Löschen |
 | `node pruebas/ingles.mjs` | Englisch von Anfang bis Ende: die Sprache wählen, die Wörterbücher installieren, ein Video, eine Seite und zurück zum Japanischen, ohne dass sich etwas vermischt |
 | `node pruebas/ingles-whisper.mjs stimme.wav` | Whisper auf Englisch auf der GPU, mit simulierter Korrektur durch Claude |
 | `node pruebas/aleman.mjs` | Deutsch von Anfang bis Ende mit den echten Wörterbüchern: die Sprache wählen, sie installieren, Analyse, ein Video, eine Seite und zurück zum Japanischen |
@@ -289,7 +290,7 @@ Die Browsertests verwenden eine Kompilierung mit fester Kennung, die mit `KK_SAL
 
 ## Projektstand
 
-Version 0.6.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, mit dem Seiten-Reader auf 16 echten öffentlichen Websites und von Hand in einer echten Sitzung auf YouTube: automatische Untertitel mit Korrekturen von Claude, Erklärungen und der Liedtext eines Songs. Deutsch wurde mit den echten Wörterbüchern aus Wiktionary getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader, seine Transkription mit einer echten Aufnahme und von Hand auf YouTube: der Sprachwechsel im Video, eigene und automatische Untertitel und ihre Korrektur durch Claude.
+Version 0.7.0 ist die aktuelle. Die automatischen Tests decken die Hauptabläufe mit echtem Edge, mit Whisper auf einer echten GPU und mit Simulatoren für die Claude-API und AnkiConnect ab. Videoseiten liefern einem automatisierten Browser keine Untertitel, daher werden YouTube und Netflix auf Seiten getestet, die die Struktur ihres Players nachahmen. YouTube wurde zusätzlich von Hand mit einer echten Sitzung geprüft; eine längere Validierung steht noch aus. Der Seiten-Reader wurde auf rund dreißig echten öffentlichen Websites mit einem automatisierten Browser ausprobiert, ohne Anmeldung. Die Übersetzungen der Oberfläche und dieser Dokumentation wurden mit KI-Unterstützung geschrieben und noch nicht von Muttersprachlern geprüft. Englisch wurde mit echten Wörterbüchern und einer synthetischen Stimme auf der GPU getestet, auf Seiten, die YouTube nachahmen, mit dem Seiten-Reader auf 16 echten öffentlichen Websites und von Hand in einer echten Sitzung auf YouTube: automatische Untertitel mit Korrekturen von Claude, Erklärungen und der Liedtext eines Songs. Deutsch wurde mit den echten Wörterbüchern aus Wiktionary getestet, auf Seiten, die YouTube nachahmen, und mit dem Seiten-Reader, seine Transkription mit einer echten Aufnahme und von Hand auf YouTube: der Sprachwechsel im Video, eigene und automatische Untertitel und ihre Korrektur durch Claude.
 
 ## Datenschutz
 

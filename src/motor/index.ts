@@ -4,6 +4,7 @@ import { type Ajustes, completarAjustes, modeloParaTranscribir, type ModeloWhisp
 import type { ApiMotor, CambioPalabra, FiltroPalabras } from '../compartido/api';
 import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
+import { borrarArchivoDocumento } from '../compartido/documentos';
 import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
 import type { Linea } from '../nucleo/subtitulos';
@@ -426,7 +427,10 @@ const api: ApiMotor = {
     await db.biblioteca.put(e);
   },
   async bibliotecaEliminar(id) {
+    const e = await db.biblioteca.get(id);
     await db.biblioteca.delete(id);
+    // El archivo de un libro de páginas se guarda aparte: se va con él.
+    if (e?.documento) await borrarArchivoDocumento(id);
   },
   bibliotecaObtener: (id) => db.biblioteca.get(id),
 
