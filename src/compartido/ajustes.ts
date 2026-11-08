@@ -47,7 +47,7 @@ export type IdModo =
   | 'enfoque1d'
   | 'personalizado';
 
-export type TareaIA = 'explicar' | 'desglosar' | 'traducir' | 'generar' | 'subtitulos' | 'historia' | 'preguntar' | 'sentido' | 'analisis' | 'corregir' | 'profundo' | 'letra';
+export type TareaIA = 'explicar' | 'desglosar' | 'traducir' | 'generar' | 'subtitulos' | 'historia' | 'preguntar' | 'sentido' | 'analisis' | 'corregir' | 'profundo' | 'letra' | 'ocr';
 
 export const MODELOS = [
   { id: 'claude-sonnet-5-5', nombre: tm('Claude Sonnet 5.5') },
@@ -457,6 +457,8 @@ export const AJUSTES_INICIALES: Ajustes = {
     corregir: 'claude-sonnet-5-5',
     letra: 'claude-sonnet-5-5',
     profundo: 'claude-opus-5-5',
+    // Revisar una página con su imagen cuesta con Haiku 5.5 una décima de céntimo, y con Sonnet 5.5 unas veinte veces más.
+    ocr: 'claude-haiku-5-5',
   },
   esfuerzos: {
     explicar: 'medium',
@@ -471,6 +473,7 @@ export const AJUSTES_INICIALES: Ajustes = {
     corregir: 'medium',
     letra: 'high',
     profundo: 'high',
+    ocr: 'medium',
   },
   respaldoSeguridad: true,
   usarGuion: false,

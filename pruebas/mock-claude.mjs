@@ -77,6 +77,14 @@ function respuestaPara(cuerpo, idioma = 'es') {
     });
     return JSON.stringify({ ajuste });
   }
+  if (formato?.properties?.cambios) {
+    // La revisión del texto de una página con su imagen: cambia lo que un OCR suele leer mal y deja el resto tal cual.
+    // La última línea del mensaje acaba en la comilla que cierra el texto, no en un salto de línea.
+    const cambios = [...texto.matchAll(/(\d+): ([^\\"]+)/g)]
+      .filter((m) => /工ネルギー|イ才ン/.test(m[2]))
+      .map((m) => ({ i: Number(m[1]), t: m[2].replace('工ネルギー', 'エネルギー').replace('イ才ン', 'イオン') }));
+    return JSON.stringify({ cambios });
+  }
   if (formato?.properties?.correcciones) {
     // Corrige lo que una transcripción real falla, y deja el resto tal cual: solo devuelve lo que cambia.
     const correcciones = [...texto.matchAll(/(\d+): ([^\\]+)/g)]

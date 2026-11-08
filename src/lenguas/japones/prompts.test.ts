@@ -35,6 +35,9 @@ const HUELLAS: Record<string, string> = {
   "imagen": '3136d0eaba5a0a04',
   "glosa": 'c9025e0f4eaa0160',
   "revisarLectura": '981d5b5e0f94660f',
+  // De la 0.12.0: la revisión con Claude del texto que leyó el OCR de una página.
+  "revisionOcr": 'a5b5881b23e24bc0',
+  "esquemaRevisionOcr": '36cd9af3d7b00bcc',
   "relleno.español.explicar": '9280ab5ae34a3d5a',
   "relleno.español.desglosar": '197d31d390df624b',
   "relleno.español.traducir": '5ed1e178a815f450',
@@ -74,6 +77,8 @@ function huellasActuales(): Record<string, string> {
   tabla.imagen = huella(P.imagen);
   tabla.glosa = huella(P.glosa('español'));
   tabla.revisarLectura = huella(P.revisarLectura('español'));
+  tabla.revisionOcr = huella(P.revisionOcr);
+  tabla.esquemaRevisionOcr = huella(P.esquemaRevisionOcr);
   const variables = { palabra: '食べる', superficie: '食べた', lectura: 'たべた', frase: '猫が魚を食べた。', entorno: 'Título: prueba', traduccion: 'El gato comió pescado.', titulo: 'prueba', pregunta: '¿Por qué?', idioma: 'inglés' };
   for (const idioma of ['español', 'inglés']) {
     const a = { nivel: 'JLPT N3', idiomaExplicaciones: idioma };

@@ -16,10 +16,12 @@ export interface EdicionLinea {
   original: string;
   texto: string;
   creada: number;
+  /** Quién puso el texto: Claude, al revisar la página, o a mano si no lo dice. */
+  origen?: 'claude';
 }
 
-/** Una línea con lo editado encima: la clave de su edición y el texto que tenía antes. */
-export type LineaEditada<T extends LineaTexto = LineaTexto> = T & { edicion?: string; original?: string };
+/** Una línea con lo editado encima: la clave de su edición, el texto que tenía antes y quién la cambió. */
+export type LineaEditada<T extends LineaTexto = LineaTexto> = T & { edicion?: string; original?: string; origen?: 'claude' };
 
 /** Lo que se solapan dos cajas, de 0 a 1: su intersección entre su unión. */
 export function solape(a: Caja, b: Caja): number {
@@ -50,7 +52,7 @@ export function aplicarEdiciones<T extends LineaTexto>(lineas: T[], ediciones: E
     if (mejor < 0) continue;
     const l = salida[mejor];
     const original = l.original ?? l.texto;
-    salida[mejor] = { ...l, texto: e.texto, original, edicion: e.clave, cortes: e.texto.length === original.length ? l.cortes : undefined };
+    salida[mejor] = { ...l, texto: e.texto, original, edicion: e.clave, origen: e.origen, cortes: e.texto.length === original.length ? l.cortes : undefined };
   }
   return salida;
 }

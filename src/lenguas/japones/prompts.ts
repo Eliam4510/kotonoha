@@ -5,6 +5,7 @@
 import type { PromptPersonalizado } from '../../compartido/ajustes';
 import { ESQUEMA_ANALISIS, ESQUEMA_CORRECCIONES, ESQUEMA_SENTIDO } from '../esquemasClaude';
 import { ESQUEMA_LETRA, promptLetra } from '../promptLetra';
+import { ESQUEMA_REVISION_OCR, promptRevisionOcr } from '../promptOcr';
 import type { PromptsLengua, TareaPrompt } from '../tipos';
 
 const CRITERIO_LITERARIO = `El primer significado del diccionario suele ser el literal y a menudo no es el correcto aquí.
@@ -166,4 +167,11 @@ export const PROMPTS_JAPONES: PromptsLengua = {
   imagen: PROMPT_IMAGEN,
   glosa: promptGlosa,
   revisarLectura: promptRevisarLectura,
+  revisionOcr: promptRevisionOcr({
+    lengua: 'japonés',
+    confusiones:
+      'エ y 工, カ y 力, ロ y 口, ニ y 二, ハ y 八, タ y 夕, ト y 卜, ー y 一, へ y ヘ, las kana pequeñas y las grandes (っ y つ, ゃ y や, ョ y ヨ), los dos puntos y el círculo de ば y ぱ, y kanji parecidos (未 y 末, 土 y 士, 己 y 已)',
+    noTocar: '- El furigana, las lecturas pequeñas junto a los kanji: no es parte del texto. No lo añadas.\n- Cómo se escribe cada palabra en la página: en kanji, en hiragana o en katakana.',
+  }),
+  esquemaRevisionOcr: ESQUEMA_REVISION_OCR,
 };

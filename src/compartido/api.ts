@@ -20,6 +20,7 @@ import type {
   InfoDiccionario,
   LineaAnalizada,
   PalabraToken,
+  PeticionRevisionOcr,
   ProgresoInstalacion,
   ResultadoAudio,
   ResultadoBusqueda,
@@ -139,6 +140,8 @@ export interface ApiMotor {
   consumo(desde: number): Promise<FilaConsumo[]>;
   revisarLectura(c: ContextoIA, texto: string): Promise<{ lectura: string; lema: string; lectura_lema: string; motivo: string }>;
   corregirLectura(texto: string, c: { superficie: string; lectura: string; lema?: string; lectura_lema?: string }): Promise<void>;
+  /** Lo que Claude cambiaría del texto que leyó el OCR de una página, mirando su imagen: solo las líneas que no coinciden. */
+  revisarPaginaOcr(p: PeticionRevisionOcr): Promise<{ i: number; t: string }[]>;
 
   bibliotecaListar(): Promise<ElementoBiblioteca[]>;
   bibliotecaGuardar(e: ElementoBiblioteca): Promise<void>;

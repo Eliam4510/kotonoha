@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.11.0, along with how it has been verified.
+Status of each feature in version 0.12.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -114,6 +114,9 @@ Status of each feature in version 0.11.0, along with how it has been verified.
 | Process: read a whole book with OCR from its card, with progress, pause and "Text ready" at the end | Automated, and with a real volume |
 | Edit a line's text by hand, stored apart from what was read and with Restore | Automated |
 | Notes and bookmarks, as in a PDF reader: bookmark pages, highlight in four colours or underline a line, a word or a stretch, with a comment, and sticky notes on the page; in the "Notes and bookmarks" panel, everything by page, to go to, edit, remove or copy as text | Automated |
+| Search the book: in the PDF text and the OCR text, with edits, ignoring character width and the difference between hiragana and katakana, also a word split across two lines; results by page and marked on the page | Automated |
+| Text view: the page as text, in paragraphs with headings set apart, with the Clipboard's reading help (furigana, comprehension, read aloud, word panel and cards); each book remembers it | Automated, and the paragraphs with 16 real pages |
+| Review a page's text with Claude, using its image: only the changes that do not match, letter by letter, to choose which to apply, stored as edited lines | Simulator |
 | Tapping a line on the page opens its text with furigana and words to look up, with their word panel and card creation | Automated |
 | Each page is read only once and saved; its text also reaches screen readers | Automated |
 | Text EPUBs in the viewer, in their own format: chapters, CSS, ruby, illustrations and vertical writing, with the page reader on top, with colours, furigana and word panels | Automated, with a vertical EPUB with ruby, CSS and an illustration |

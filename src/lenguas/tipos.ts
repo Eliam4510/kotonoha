@@ -96,6 +96,11 @@ export interface EscrituraLengua {
   palabrasSeparadas?: boolean;
   /** Si los títulos de las portadas de la biblioteca se escriben en vertical. */
   portadaVertical: boolean;
+  /**
+   * Lo que abre un elemento de una lista o de un ejercicio al principio de un renglón y es propio de la lengua, además de
+   * lo que vale para todas ((1), 1., ①, una viñeta): en japonés, «・» o «問5».
+   */
+  marcaDeLista?: RegExp;
 }
 
 export interface SignosFrase {
@@ -341,6 +346,9 @@ export interface PromptsLengua {
   imagen: string;
   glosa(idioma: string): string;
   revisarLectura(idioma: string): string;
+  /** Revisa, con la imagen de la página delante, el texto que leyó el OCR de una página. */
+  revisionOcr: string;
+  esquemaRevisionOcr: unknown;
 }
 
 export interface TranscripcionLengua {

@@ -228,7 +228,7 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
           </button>
           {linea.edicion && (
             <>
-              <span class="ayuda" title={linea.original ? tr('Antes: {0}', linea.original) : undefined}>{tr('Editado')}</span>
+              <span class="ayuda" title={linea.original ? tr('Antes: {0}', linea.original) : undefined}>{linea.origen === 'claude' ? tr('Revisado con Claude') : tr('Editado')}</span>
               <button class="btn chico fantasma" data-tip={linea.original ? tr('Antes: {0}', linea.original) : undefined} onClick={() => void alRestaurar?.()}>
                 <Icono n="reiniciar" t={13} /> {tr('Restaurar')}
               </button>
