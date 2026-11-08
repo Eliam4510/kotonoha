@@ -4,10 +4,11 @@
 
 import { archivoDocumento } from '../compartido/documentos';
 import { tr } from '../compartido/i18n';
+import { LECTURA, lecturaMinima } from '../compartido/paginasOcr';
 import { motor } from '../compartido/rpc';
 import type { DocumentoBiblioteca, ElementoBiblioteca } from '../compartido/tipos';
 import type { LectorOcr, ModoOcr } from './ocr';
-import { type Paginador, paginadorDeZip } from './paginador';
+import { imagenParaOcr, type Paginador, paginadorDeZip } from './paginador';
 import { paginadorDePdf } from './pdf';
 
 export interface Avance {
@@ -18,8 +19,12 @@ export interface Avance {
 /** El modo con que se lee un libro: el elegido en el visor o, si no, el de su sentido de lectura, como hace el visor. */
 export const modoDe = (d: DocumentoBiblioteca): ModoOcr => d.ocr?.modo ?? (d.direccion === 'rtl' ? 'manga' : 'libro');
 
-/** Si un libro ya está leído entero con el OCR tal como se lee ahora: con el mismo modo y la misma elección del PDF. */
-export const estaProcesado = (d: DocumentoBiblioteca) => !!d.procesado && d.procesado.modo === modoDe(d) && d.procesado.textoPdf === (d.ocr?.textoPdf ?? true);
+/**
+ * Si un libro ya está leído entero con el OCR tal como se lee ahora: con el mismo modo, la misma elección del PDF y una
+ * lectura que siga valiendo para su formato.
+ */
+export const estaProcesado = (d: DocumentoBiblioteca) =>
+  !!d.procesado && d.procesado.modo === modoDe(d) && d.procesado.textoPdf === (d.ocr?.textoPdf ?? true) && (d.procesado.lectura ?? 0) >= lecturaMinima(d.formato);
 
 /**
  * Lee con el OCR todas las páginas del libro que aún no lo estén, en orden. Las páginas de un PDF que traen su propio
@@ -34,17 +39,18 @@ export async function procesarLibro(e: ElementoBiblioteca, lector: LectorOcr, al
   const p: Paginador = d.formato === 'pdf' ? await paginadorDePdf(archivo) : await paginadorDeZip(archivo, `${e.titulo}.${d.formato}`, d.direccion);
   const modo = modoDe(d);
   const textoPdf = d.ocr?.textoPdf ?? true;
+  const minima = lecturaMinima(d.formato);
   try {
     for (let n = 0; n < p.total; n++) {
       if (!seguir()) return false;
       const conTexto = p.textoPropio && textoPdf ? (await p.textoPropio(n).catch(() => [])).length > 0 : false;
-      if (!conTexto) await lector.leer(e.id, n, modo, async () => (await fetch((await p.imagen(n)).url)).blob(), n);
+      if (!conTexto) await lector.leer(e.id, n, modo, () => imagenParaOcr(p, n), n, minima);
       alAvanzar({ hechas: n + 1, total: p.total });
     }
     // Se guarda sobre lo último de la biblioteca: el visor puede haber guardado mientras tanto por qué página se va.
     const actual = (await motor.bibliotecaObtener(e.id)) ?? e;
     if (actual.documento) {
-      await motor.bibliotecaGuardar({ ...actual, documento: { ...actual.documento, paginas: p.total, ocr: { ...actual.documento.ocr, activo: true, modo }, procesado: { modo, textoPdf } } });
+      await motor.bibliotecaGuardar({ ...actual, documento: { ...actual.documento, paginas: p.total, ocr: { ...actual.documento.ocr, activo: true, modo }, procesado: { modo, textoPdf, lectura: LECTURA } } });
     }
     return true;
   } finally {

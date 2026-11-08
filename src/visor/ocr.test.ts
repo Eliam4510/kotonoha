@@ -1,18 +1,21 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { baseOcr, claveOcr } from '../compartido/paginasOcr';
+import { baseOcr, claveOcr, LECTURA } from '../compartido/paginasOcr';
 import { esCancelada, LectorOcr } from './ocr';
 
 // Un trabajador de mentira: anota el orden en que le llegan las páginas y contesta a cada una con su número, cuando se le
-// dice. Así se ve qué lee primero el lector y qué deja de leer.
+// dice, en una línea que ocupa la mitad de arriba a la izquierda de la imagen. Así se ve qué lee primero el lector, qué
+// deja de leer y dónde pone las líneas.
 const recibidas: number[] = [];
 let contestar: () => void = () => {};
+const MITAD = { x0: 0, y0: 0, x1: 0.5, y1: 0.5 };
 class TrabajadorFalso {
   onmessage: ((e: { data: unknown }) => void) | null = null;
   onerror: ((e: unknown) => void) | null = null;
   postMessage(p: { id: number; imagen: { n: number } }) {
     recibidas.push(p.imagen.n);
-    contestar = () => this.onmessage?.({ data: { tipo: 'lineas', id: p.id, lineas: [{ texto: String(p.imagen.n) }], ms: 1, dispositivo: 'prueba', fases: {} } });
+    const lineas = [{ texto: String(p.imagen.n), caja: MITAD, vertical: false }];
+    contestar = () => this.onmessage?.({ data: { tipo: 'lineas', id: p.id, lineas, ms: 1, dispositivo: 'prueba', fases: {} } });
   }
   terminate() {}
 }
@@ -23,7 +26,7 @@ Object.assign(globalThis, {
 });
 
 const espera = () => new Promise((ok) => setTimeout(ok, 20));
-const pagina = (n: number) => async () => new Blob([String(n)]);
+const pagina = (n: number) => async () => ({ imagen: new Blob([String(n)]) });
 /** Contesta a la página en curso y espera a que el lector pase a la siguiente. */
 const terminar = async () => {
   contestar();
@@ -69,6 +72,55 @@ describe('el lector del OCR', () => {
     await baseOcr().paginas.put({ clave: claveOcr('libro', 'libro', 4), libro: 'libro', lineas: [], creada: 1 });
     const l = new LectorOcr(() => {});
     expect(await l.leer('libro', 4, 'libro', pagina(4))).toEqual([]);
+    expect(recibidas).toEqual([]);
+  });
+
+  it('lo leído de una imagen que no es la página entera se pone en su sitio de la página', async () => {
+    const l = new LectorOcr(() => {});
+    // Un escaneo que ocupa la página menos un margen de una décima por cada lado.
+    const marco = { x0: 0.1, y0: 0.1, x1: 0.9, y1: 0.9 };
+    const leidas = l.leer('libro', 0, 'libro', async () => ({ imagen: new Blob(['0']), marco }));
+    await espera();
+    await terminar();
+    const [linea] = await leidas;
+    expect(linea.caja.x0).toBeCloseTo(0.1);
+    expect(linea.caja.y0).toBeCloseTo(0.1);
+    expect(linea.caja.x1).toBeCloseTo(0.5);
+    expect(linea.caja.y1).toBeCloseTo(0.5);
+    // Y así se guarda, con la lectura de hoy.
+    const fila = await baseOcr().paginas.get(claveOcr('libro', 'libro', 0));
+    expect(fila?.lineas[0].caja.x1).toBeCloseTo(0.5);
+    expect(fila?.lectura).toBe(LECTURA);
+  });
+
+  it('lo leído con una lectura anterior a la que pide el libro se vuelve a leer', async () => {
+    await baseOcr().paginas.bulkPut([
+      { clave: claveOcr('pdf', 'libro', 1), libro: 'pdf', lineas: [], creada: 1 },
+      { clave: claveOcr('pdf', 'libro', 2), libro: 'pdf', lineas: [], creada: 1, lectura: LECTURA },
+    ]);
+    const l = new LectorOcr(() => {});
+    // La 2 ya se leyó con la lectura de hoy: sale de la base. La 1 es de antes: se lee otra vez y se guarda encima.
+    expect(await l.leer('pdf', 2, 'libro', pagina(2), 0, 1)).toEqual([]);
+    const nueva = l.leer('pdf', 1, 'libro', pagina(1), 0, 1);
+    await espera();
+    await terminar();
+    expect((await nueva)[0].texto).toBe('1');
+    expect(recibidas).toEqual([1]);
+    expect((await baseOcr().paginas.get(claveOcr('pdf', 'libro', 1)))?.lectura).toBe(LECTURA);
+    // Sin pedir una lectura mínima (un CBZ, un EPUB), lo de antes vale.
+    await baseOcr().paginas.put({ clave: claveOcr('cbz', 'libro', 1), libro: 'cbz', lineas: [], creada: 1 });
+    expect(await l.leer('cbz', 1, 'libro', pagina(1))).toEqual([]);
+    expect(recibidas).toEqual([1]);
+  });
+
+  it('cerrado mientras prepara una imagen, no arranca el trabajador para leerla', async () => {
+    const l = new LectorOcr(() => {});
+    let soltar: () => void = () => {};
+    const lenta = l.leer('libro', 7, 'libro', () => new Promise((ok) => (soltar = () => ok({ imagen: new Blob(['7']) }))));
+    await espera();
+    l.cerrar();
+    soltar();
+    await expect(lenta).rejects.toSatisfy(esCancelada);
     expect(recibidas).toEqual([]);
   });
 

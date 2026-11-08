@@ -11,12 +11,24 @@ export interface FilaOcr {
   libro: string;
   lineas: LineaOcr[];
   creada: number;
+  /** Con qué lectura se leyó (LECTURA). Lo leído antes de la 0.9.6 no la lleva. */
+  lectura?: number;
 }
 
 /**
- * Cuando cambia lo que el OCR saca de una página, la base sube de versión y olvida lo leído antes: así cada página se
- * vuelve a leer con lo nuevo la próxima vez que se abra, en lugar de quedarse con lo de la versión anterior. Lo que se
- * editó a mano va en su propia tabla y no se olvida nunca: es del lector, no del OCR.
+ * La lectura de hoy, que se guarda con cada página leída. Sube cuando cambia lo que el OCR saca de una clase de libros y
+ * no de todos: lo de esa clase leído antes se vuelve a leer al abrir cada página, y lo demás se queda.
+ * 1: la 0.9.6, que en los PDF escaneados lee la imagen escaneada tal cual en vez de la página pintada.
+ */
+export const LECTURA = 1;
+
+/** Desde qué lectura vale lo leído de un libro de este formato. */
+export const lecturaMinima = (formato: string) => (formato === 'pdf' ? 1 : 0);
+
+/**
+ * Cuando cambia lo que el OCR saca de todas las páginas de un modo, la base sube de versión y olvida lo leído antes: así
+ * cada página se vuelve a leer con lo nuevo la próxima vez que se abra. Lo que se editó a mano va en su propia tabla y
+ * no se olvida nunca: es del lector, no del OCR.
  * 2: la 0.9.2 (manga por viñetas y sin marcas de agua; libros sin furigana impreso y a dos columnas).
  * 3: la 0.9.4 (la tabla de lo editado; lo leído no cambia).
  * 4: la 0.9.5 (el reconocedor de PP-OCRv6 en el modo Libro): se olvida lo leído en modo Libro; lo del manga sigue igual.

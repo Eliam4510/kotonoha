@@ -215,8 +215,11 @@ export interface DocumentoBiblioteca {
    * texto del PDF.
    */
   ocr?: { activo: boolean; modo: 'libro' | 'manga'; textoPdf?: boolean };
-  /** Si se leyó el libro entero con el OCR por adelantado, y cómo: con otro modo, o sin «Texto del PDF», no vale. */
-  procesado?: { modo: 'libro' | 'manga'; textoPdf: boolean };
+  /**
+   * Si se leyó el libro entero con el OCR por adelantado, y cómo: con otro modo, sin «Texto del PDF» o con una lectura
+   * anterior a la que pide su formato (paginasOcr.ts), no vale.
+   */
+  procesado?: { modo: 'libro' | 'manga'; textoPdf: boolean; lectura?: number };
 }
 
 export interface ElementoBiblioteca {
