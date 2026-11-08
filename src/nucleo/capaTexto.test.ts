@@ -1,5 +1,31 @@
 import { describe, expect, it } from 'vitest';
-import { cajaDeTramo, caracterEn, type LineaTexto, letraNormal, lineasDePdf, type TrozoPdf } from './capaTexto';
+import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, letraNormal, lineasDePdf, textoDePagina, type TrozoPdf } from './capaTexto';
+
+describe('el texto del PDF o el del OCR', () => {
+  const propias = ['del PDF'];
+  const ocr = ['del OCR'];
+  it('con «Texto del PDF», el del PDF donde lo hay y el OCR donde no', () => {
+    expect(textoDePagina(propias, ocr, { ocrActivo: true, textoPdf: true })).toEqual({ lineas: propias, propias: true });
+    expect(textoDePagina(null, ocr, { ocrActivo: true, textoPdf: true })).toEqual({ lineas: ocr, propias: false });
+    expect(leerConOcr(propias, true)).toBe(false);
+    expect(leerConOcr(null, true)).toBe(true);
+    // Aún sin mirar el texto de la página, no se gasta el OCR en ella.
+    expect(leerConOcr(undefined, true)).toBe(false);
+  });
+
+  it('sin «Texto del PDF», el OCR en todas las páginas, también las que traen texto (la capa de un OCR antiguo)', () => {
+    expect(textoDePagina(propias, ocr, { ocrActivo: true, textoPdf: false })).toEqual({ lineas: ocr, propias: false });
+    expect(leerConOcr(propias, false)).toBe(true);
+    expect(leerConOcr(undefined, false)).toBe(true);
+    // Mientras el OCR lee la página, no se muestra el texto del PDF que se ha pedido no usar.
+    expect(textoDePagina(propias, undefined, { ocrActivo: true, textoPdf: false })).toBeUndefined();
+  });
+
+  it('con el OCR apagado, siempre el del PDF', () => {
+    expect(textoDePagina(propias, ocr, { ocrActivo: false, textoPdf: false })).toEqual({ lineas: propias, propias: true });
+    expect(textoDePagina(null, ocr, { ocrActivo: false, textoPdf: true })).toBeUndefined();
+  });
+});
 
 const ANCHO = 600;
 const ALTO = 800;

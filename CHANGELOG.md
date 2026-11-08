@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.9.3 · 2026-11-08
+
+- **Texto del PDF.** En un PDF escaneado que trae la capa de texto de otro programa de OCR, a menudo con errores, se puede apagar **Texto del PDF** para que Kotonoha lea las páginas con su propio OCR. Cada libro lo recuerda.
+
 ## 0.9.2 · 2026-11-08
 
 - **Un OCR de manga más fino.** Lee bien los puntos suspensivos («……»), deja fuera las marcas de agua y los números de página, y sigue el orden de las viñetas. En 18 páginas de cinco series, el error baja del 4,3 % al 2,8 % y los textos falsos, de 11 a 4; en las tres páginas de referencia de un tomo en EPUB, del 2,5 % al 0,5 %.
@@ -73,6 +77,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.9.3 · 2026-11-08
+
+- **PDF text.** In a scanned PDF that carries another OCR program's text layer, often with errors, **PDF text** can be turned off so that Kotonoha reads the pages with its own OCR. Each book remembers it.
 
 ## 0.9.2 · 2026-11-08
 

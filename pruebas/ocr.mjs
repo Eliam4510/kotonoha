@@ -1,5 +1,6 @@
-// Prueba el reconocimiento de texto del visor con dos páginas hechas aquí: una de libro, con tres líneas horizontales, y
-// otra de manga, con un globo de texto vertical. Usa la GPU y descarga los modelos la primera vez (unos 200 MB).
+// Prueba el reconocimiento de texto del visor con páginas hechas aquí: una de libro, con tres líneas horizontales; otra de
+// manga, con un globo de texto vertical; y un PDF escaneado con la capa de texto de otro OCR, para «Texto del PDF». Usa la
+// GPU y descarga los modelos la primera vez (unos 200 MB).
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/ocr.mjs
 
 import { mkdirSync, rmSync } from 'node:fs';
@@ -49,6 +50,36 @@ const paginaManga = await sharp(
 const cbz = (titulo, manga, imagen) =>
   zipSync({ 'ComicInfo.xml': strToU8(`<ComicInfo><Title>${titulo}</Title><Manga>${manga ? 'YesAndRightToLeft' : 'No'}</Manga></ComicInfo>`), 'p1.jpg': new Uint8Array(imagen) });
 
+// Un escaneo con la capa de texto de otro programa de OCR: la página es la imagen del libro de prueba y su texto, invisible
+// (modo de pintado 3, como lo dejan esos programas), dice otra cosa. Con «Texto del PDF» se ve esa capa; sin él, lo que
+// Kotonoha lee en la imagen.
+const CAPA_VIEJA = 'Capa vieja de otro OCR';
+function pdfConCapa(jpeg, ancho, alto) {
+  const contenido = `q 600 0 0 800 0 0 cm /Im1 Do Q BT 3 Tr /F1 28 Tf 60 650 Td (${CAPA_VIEJA}) Tj ET`;
+  const objetos = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [5 0 R] /Count 1 >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    [`<< /Type /XObject /Subtype /Image /Width ${ancho} /Height ${alto} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`, jpeg, '\nendstream'],
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 600 800] /Contents 6 0 R /Resources << /Font << /F1 3 0 R >> /XObject << /Im1 4 0 R >> >> >>',
+    `<< /Length ${contenido.length} >>\nstream\n${contenido}\nendstream`,
+  ];
+  const partes = [Buffer.from('%PDF-1.4\n', 'latin1')];
+  let largo = partes[0].length;
+  const posiciones = objetos.map((o, i) => {
+    const posicion = largo;
+    for (const t of [`${i + 1} 0 obj\n`, ...(Array.isArray(o) ? o : [o]), '\nendobj\n']) {
+      const b = typeof t === 'string' ? Buffer.from(t, 'latin1') : t;
+      partes.push(b);
+      largo += b.length;
+    }
+    return posicion;
+  });
+  const indice = `xref\n0 ${objetos.length + 1}\n0000000000 65535 f \n${posiciones.map((p) => `${String(p).padStart(10, '0')} 00000 n \n`).join('')}`;
+  partes.push(Buffer.from(`${indice}trailer\n<< /Size ${objetos.length + 1} /Root 1 0 R >>\nstartxref\n${largo}\n%%EOF\n`, 'latin1'));
+  return Buffer.concat(partes);
+}
+
 // ---------- El navegador ----------
 
 const contexto = await chromium.launchPersistentContext(PERFIL, {
@@ -87,8 +118,9 @@ await app.waitForSelector(ARCHIVO, { state: 'attached' });
 await app.setInputFiles(ARCHIVO, [
   { name: 'libro-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Libro de prueba', false, paginaLibro)) },
   { name: 'manga-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Manga de prueba', true, paginaManga)) },
+  { name: 'capa-vieja.pdf', mimeType: 'application/pdf', buffer: pdfConCapa(paginaLibro, 1200, 1600) },
 ]);
-await app.waitForFunction(() => document.querySelectorAll('.ap-libro').length === 2, null, { timeout: 20000 });
+await app.waitForFunction(() => document.querySelectorAll('.ap-libro').length === 3, null, { timeout: 20000 });
 
 const abrir = async (titulo) => {
   // Con dos libros del mismo título se podría abrir uno viejo, con otras preferencias guardadas, y medir otra cosa.
@@ -180,6 +212,44 @@ if (manga.lineas) {
   comprobar(e < 0.15, 'El globo entero, con sus dos columnas en orden', `${(e * 100).toFixed(1)} %`);
   await v.screenshot({ path: join(CAPTURAS, 'manga.png') });
 }
+await v.close();
+
+// ---------- PDF con la capa de otro OCR ----------
+
+console.log('\n== PDF con la capa de otro OCR ==');
+/** Las líneas de la página cuando vienen de la capa del PDF («capa») o de lo que leyó Kotonoha («ocr»). */
+const lineasDesde = (pagina, origen, ms) =>
+  pagina
+    .waitForFunction(
+      ([o, capa]) => {
+        const l = [...document.querySelectorAll('.vs-linea')].map((b) => b.getAttribute('aria-label') ?? '');
+        return l.length && l.some((x) => x.includes(capa)) === (o === 'capa') ? l : null;
+      },
+      [origen, CAPA_VIEJA],
+      { timeout: ms, polling: 200 }
+    )
+    .then((h) => h.jsonValue())
+    .catch(() => null);
+const botonPdf = (pagina) => pagina.locator('.vs-modos button:has-text("Texto del PDF")');
+v = await abrir('capa-vieja');
+const capa = await lineasDesde(v, 'capa', 20000);
+comprobar(!!capa, 'Sin el OCR, el texto que trae el PDF', JSON.stringify(capa));
+await v.click('[aria-label="Leer el texto de las páginas"]');
+await botonPdf(v).waitFor({ timeout: 15000 }).catch(() => {});
+comprobar((await botonPdf(v).getAttribute('aria-pressed').catch(() => null)) === 'true', 'Con el OCR aparece «Texto del PDF», encendido');
+comprobar(!!(await lineasDesde(v, 'capa', 5000)), 'Y sigue a la vista el texto del PDF');
+await botonPdf(v).click();
+const propio = await lineasDesde(v, 'ocr', 120000);
+const ePdf = propio ? error(propio.join(''), LINEAS_LIBRO.join('')) : 1;
+comprobar(ePdf < 0.08, 'Apagado, Kotonoha lee la imagen con su OCR y no la capa vieja', `${(ePdf * 100).toFixed(1)} %`);
+await v.screenshot({ path: join(CAPTURAS, 'pdf-ocr-propio.png') });
+await v.waitForTimeout(900);
+await v.close();
+v = await abrir('capa-vieja');
+await botonPdf(v).waitFor({ timeout: 15000 }).catch(() => {});
+const recordado = await botonPdf(v).getAttribute('aria-pressed').catch(() => null);
+const otraVez = await lineasDesde(v, 'ocr', 20000);
+comprobar(recordado === 'false' && !!otraVez, 'Al volver a abrirlo, se acuerda de leerlo con el OCR', `${recordado}`);
 await v.close();
 
 if (errores.length) console.log('\nErrores en la página:', [...new Set(errores)].slice(0, 6));

@@ -195,6 +195,22 @@ export function caracterEn(l: LineaTexto, x: number, y: number): number {
   return bajo;
 }
 
+/**
+ * Qué texto se muestra en una página: el que trae el PDF, si lo trae y se quiere; si no, el del OCR, si está activo. Con
+ * «Texto del PDF» apagado y el OCR activo manda el OCR aunque la página traiga texto: en muchos escaneos ese texto es la
+ * capa de un OCR antiguo, con más errores que el de Kotonoha. Con el OCR apagado, el del PDF siempre.
+ */
+export function textoDePagina<T>(propias: T[] | null | undefined, ocr: T[] | undefined, o: { ocrActivo: boolean; textoPdf: boolean }): { lineas: T[]; propias: boolean } | undefined {
+  if (propias && (o.textoPdf || !o.ocrActivo)) return { lineas: propias, propias: true };
+  return o.ocrActivo && ocr ? { lineas: ocr, propias: false } : undefined;
+}
+
+/**
+ * Si una página de un PDF se lee con el OCR: si ya se sabe que no trae texto (null; undefined es que aún no se ha mirado),
+ * o si se prefiere el OCR a su texto.
+ */
+export const leerConOcr = (propias: unknown[] | null | undefined, textoPdf: boolean): boolean => !textoPdf || propias === null;
+
 /** La caja de un tramo del texto de la línea, para marcar en la página la palabra elegida. */
 export function cajaDeTramo(l: LineaTexto, inicio: number, fin: number): Caja {
   const a = posicion(l, inicio);

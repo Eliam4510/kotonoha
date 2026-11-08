@@ -64,7 +64,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/trazos-web.mjs` | El orden de los trazos con datos reales, el Portapapeles en su pestaña, la estructura de lo copiado y de lo pegado, un EPUB de texto en el visor y la vista dividida |
 | `node pruebas/visor.mjs` | El visor con un manga EPUB, un CBZ y un PDF hechos en la propia prueba: importar, portadas, páginas, doble página de derecha a izquierda, zoom, vistas, índice, miniaturas, memoria de la página y borrado |
 | `node pruebas/carpetas.mjs` | Una carpeta de imágenes hecha en la propia prueba: un libro por tomo, la portada delante aunque se llame cover.jpg, el ComicInfo.xml, imágenes sueltas, lo que no es imagen fuera y la doble página apaisada sola en el visor |
-| `node pruebas/ocr.mjs` | El OCR con una página de libro y otra de manga hechas en la propia prueba, con la GPU: el texto leído, el panel de la línea, la ficha y lo ya leído al volver |
+| `node pruebas/ocr.mjs` | El OCR con una página de libro y otra de manga hechas en la propia prueba, con la GPU: el texto leído, el panel de la línea, la ficha y lo ya leído al volver; y un PDF escaneado con la capa de otro OCR, con «Texto del PDF» encendido y apagado |
 | `node pruebas/libros-texto.mjs` | Un PDF japonés hecho por el navegador y un EPUB vertical con trampas: el texto del PDF palabra a palabra, también en vertical; el EPUB con su CSS, su ruby y el lector encima; que nada del libro se ejecute ni cargue nada de fuera; capítulos, enlaces, índice, zoom y memoria |
 | `node pruebas/ingles.mjs` | Estudiar inglés de principio a fin: elegir el idioma, instalar los diccionarios, un video, una página, y volver al japonés sin que se mezcle nada |
 | `node pruebas/aleman.mjs` | Estudiar alemán de principio a fin con los diccionarios reales |
@@ -195,7 +195,7 @@ Browser tests use a build with a fixed extension ID, created with `KK_SALIDA=.di
 | `node pruebas/lector.mjs` | The page reader on the hard cases: nothing moves, clicks, links, carousels, live text, shadow trees |
 | `node pruebas/visor.mjs` | The viewer with an EPUB manga, a CBZ and a PDF built by the test itself |
 | `node pruebas/carpetas.mjs` | An image folder built by the test itself: one book per volume, the cover first even when it is called cover.jpg, ComicInfo.xml, loose images, non-images left out and the landscape spread on its own in the viewer |
-| `node pruebas/ocr.mjs` | OCR on a book page and a manga page, on the GPU |
+| `node pruebas/ocr.mjs` | OCR on a book page and a manga page, on the GPU, and a scanned PDF with another OCR's layer, with PDF text on and off |
 | `node pruebas/libros-texto.mjs` | A Japanese PDF made by the browser and a vertical EPUB with traps: word taps in the PDF, the EPUB with its CSS and ruby, nothing from the book runs or loads anything from outside |
 | `node pruebas/trazos-web.mjs` | Stroke order, the Clipboard and its structure, a text EPUB in the viewer, split view |
 | `node pruebas/ingles.mjs`, `node pruebas/aleman.mjs` | Studying English and German end to end |
