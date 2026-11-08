@@ -25,6 +25,7 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planificación del repaso | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Lectura de archivos ZIP | MIT |
+| [pdf.js](https://github.com/mozilla/pdf.js), `pdfjs-dist` | Lectura de PDF en el visor, con los decodificadores JBIG2 de PDFium (BSD-3-Clause), OpenJPEG (BSD-2-Clause) y qcms (MIT) | Apache-2.0 |
 | [wink-nlp](https://github.com/winkjs/wink-nlp) | Análisis morfológico del inglés | MIT |
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | Modelo de inglés para wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Iconos | MIT |
@@ -90,6 +91,7 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Review scheduling | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Reading ZIP files | MIT |
+| [pdf.js](https://github.com/mozilla/pdf.js), `pdfjs-dist` | Reading PDFs in the viewer, with the JBIG2 decoder from PDFium (BSD-3-Clause), OpenJPEG (BSD-2-Clause) and qcms (MIT) | Apache-2.0 |
 | [wink-nlp](https://github.com/winkjs/wink-nlp) | Morphological analysis of English | MIT |
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | English model for wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Icons | MIT |

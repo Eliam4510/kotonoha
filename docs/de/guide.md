@@ -224,6 +224,8 @@ Nichts davon fügt dem Inhalt der Seite etwas hinzu. Die Farben verwenden die CS
 
 **Lesehilfe.** Speichert EPUB-Bücher, Texte und SRT-Untertitel samt Leseposition und der Struktur jedes Kapitels. Sie kann auch mit Claude Geschichten erzeugen, die zum eingestellten Niveau passen.
 
+**Betrachter.** EPUBs aus Bildern, etwa Manga und gescannte Bücher, CBZ-Dateien und PDFs öffnen sich im Betrachter, in einem eigenen Tab, wie in einem PDF-Reader. Er bietet Zoom (**Vergrößern**, **Verkleinern**, **An Breite anpassen** und **Ganze Seite**, auch mit Strg und dem Mausrad), drei Ansichten (**Einzelseite**, **Doppelseite** und **Fortlaufender Bildlauf**), **Miniaturansichten**, das **Inhaltsverzeichnis** des Buchs und **Vollbild**. Ein Buch, das eine Leserichtung von rechts nach links angibt, wie ein Manga, wird so angezeigt: Die linke Pfeiltaste blättert vor, und in der Doppelseite kann die Titelseite allein stehen, damit die Seitenpaare dem gedruckten Band entsprechen. Pfeiltasten, Pos1 und Ende blättern, und F schaltet das Vollbild ein. Die Datei wird unverändert im Speicher des Browsers abgelegt und stückweise gelesen, nie als Ganzes geladen, und der Betrachter merkt sich Seite, Ansicht und Zoom jedes Buchs. Bildseiten haben noch keinen Text zum Nachschlagen.
+
 **Lokaler Player.** Spielt eigene Dateien ab, mit den eingebetteten Untertiteln einer MKV-Datei und der Wahl der Audiospur, über ffmpeg.wasm.
 
 **Wörter und Bewertung.** Die Übersicht listet den Wortschatz nach Status, und die Niveaubewertung schätzt die anfangs bekannten Wörter.

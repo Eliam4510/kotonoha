@@ -19,6 +19,7 @@ const entradas = {
   app: 'src/app/index.tsx',
   popup: 'src/popup/index.tsx',
   lector: 'src/lector/index.tsx',
+  visor: 'src/visor/index.tsx',
   // El analizador del inglés, con su modelo: pesa varios megas y solo se carga si se estudia inglés.
   ingles: 'src/lenguas/ingles/wink.ts',
 };
@@ -59,7 +60,7 @@ async function estaticos() {
   const clavePrueba = process.env.KK_SALIDA ? { key: (await readFile('pruebas/clave-extension-pruebas.txt', 'utf8')).trim() } : {};
   await writeFile(join(SALIDA, 'manifest.json'), JSON.stringify({ ...manifiesto, ...clavePrueba }, null, 2));
 
-  for (const pagina of ['app', 'popup', 'motor', 'lector']) {
+  for (const pagina of ['app', 'popup', 'motor', 'lector', 'visor']) {
     await copyFile(`src/${pagina}/index.html`, join(SALIDA, `${pagina}.html`));
   }
   await cp('publico', SALIDA, { recursive: true });
@@ -83,6 +84,14 @@ async function estaticos() {
   await cp('node_modules/@ffmpeg/ffmpeg/dist/esm', join(SALIDA, 'ffmpeg'), { recursive: true, filter: (f) => !f.endsWith('.d.ts') });
   for (const archivo of ['ffmpeg-core.js', 'ffmpeg-core.wasm']) {
     await copyFile(`node_modules/@ffmpeg/core/dist/esm/${archivo}`, join(SALIDA, 'ffmpeg', archivo));
+  }
+
+  // pdf.js para el visor: su trabajador y lo que pide al leer un PDF (mapas de caracteres, fuentes, decodificadores).
+  await mkdir(join(SALIDA, 'pdfjs'), { recursive: true });
+  await copyFile('node_modules/pdfjs-dist/build/pdf.worker.min.mjs', join(SALIDA, 'pdfjs', 'pdf.worker.min.mjs'));
+  // QuickJS solo ejecuta los scripts de los formularios PDF, que el visor no activa: no se copia.
+  for (const carpeta of ['cmaps', 'standard_fonts', 'wasm', 'iccs']) {
+    await cp(`node_modules/pdfjs-dist/${carpeta}`, join(SALIDA, 'pdfjs', carpeta), { recursive: true, filter: (f) => !/quickjs/i.test(f) });
   }
 
   // Kuromoji se carga como script clásico y sus diccionarios se leen con rutas relativas al documento.

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.6.0, along with how it has been verified.
+Status of each feature in version 0.7.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -100,6 +100,10 @@ Status of each feature in version 0.6.0, along with how it has been verified.
 | Clipboard in a regular tab, also in split view next to the page being viewed | Automated, on Edge and Chrome |
 | Following the clipboard, without the tab having focus | Automated |
 | Reading assistant: EPUB, TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
+| Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
+| Right-to-left reading order taken from the book itself, with the cover on its own in a two-page spread | Automated |
+| Thumbnails, the book's contents, go to page, full screen and inverted colors | Automated |
+| Books are stored separately and read piece by piece: a PDF of hundreds of MB is never loaded whole. The viewer remembers each book's page, view and zoom | Automated, and with a real 347 MB PDF |
 | Stories generated for the user's level | Simulator |
 | Player for local files | Automated |
 | Embedded MKV subtitles and audio track selection, with ffmpeg.wasm | Automated |
@@ -206,6 +210,7 @@ Status of each feature in version 0.6.0, along with how it has been verified.
 | Platforms | Desktop Chrome and Edge. The local helper is prepared for Windows |
 | Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card carries the episode's official image, if the site offers one |
 | Audio with DRM | A protected site may withhold its sound from capture. After two silent sentences in a row in a video, the line is no longer replayed to record it |
+| Viewer | Image pages have no text to look up yet. A book with DRM does not open. Book files are not included in the backup: on another computer they have to be imported again |
 | Synchronization | No server: moving between computers is done with a backup |
 | Background music | Whisper can miss quiet conversation under loud music |
 | Song lyrics | Timing is per Whisper line, not per word. With very loud music Whisper may hear little, and then more verses get an estimated time |

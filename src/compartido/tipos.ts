@@ -186,6 +186,23 @@ export interface ContextoIA {
   guion?: string; // Texto completo del video o de la página
 }
 
+/** Un libro de páginas, que se lee en el visor: un EPUB de imágenes, un CBZ o un PDF. */
+export interface DocumentoBiblioteca {
+  formato: 'epub' | 'cbz' | 'pdf';
+  /** 0 mientras no se sepa: un PDF no se cuenta hasta abrirlo en el visor. */
+  paginas: number;
+  direccion: 'rtl' | 'ltr';
+  /** Lo que ocupa el archivo, que se guarda aparte, en el almacenamiento privado del navegador. */
+  tamano: number;
+  /** La primera página en pequeño, como imagen JPEG en una URL de datos. */
+  portada?: string;
+  vista?: 'una' | 'doble' | 'continua';
+  /** En doble página, si la portada va sola para que las parejas queden como en el libro. */
+  portadaSola?: boolean;
+  /** «ancho», «pagina» o un porcentaje. */
+  zoom?: 'ancho' | 'pagina' | number;
+}
+
 export interface ElementoBiblioteca {
   id: string;
   titulo: string;
@@ -196,6 +213,7 @@ export interface ElementoBiblioteca {
   abierto?: number;
   pagina?: number;
   comprension?: number;
+  documento?: DocumentoBiblioteca;
 }
 
 export interface TarjetaMemoria {

@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.6.0-A9E45B?style=flat-square" alt="버전 0.6.0">
+  <img src="https://img.shields.io/badge/%EB%B2%84%EC%A0%84-0.7.0-A9E45B?style=flat-square" alt="버전 0.7.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="지속적 통합"></a>
-  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-712-0ca30c?style=flat-square" alt="단위 테스트 712개">
+  <img src="https://img.shields.io/badge/%EB%8B%A8%EC%9C%84%20%ED%85%8C%EC%8A%A4%ED%8A%B8-737-0ca30c?style=flat-square" alt="단위 테스트 737개">
   <img src="https://img.shields.io/badge/%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4-6%EA%B0%9C%20%EC%96%B8%EC%96%B4-8FCBFF?style=flat-square" alt="인터페이스 6개 언어">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5~N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1~C2">
@@ -96,7 +96,7 @@ Kotonoha(言の葉, ‘말의 잎’)는 YouTube, Netflix 및 다른 플레이�
   <tr>
     <td valign="top"><b>완전한 앱</b><br>홈, 활용형을 이해하는 사전, 상태별 단어 탐색기, 수준 평가, 작업별 설정, 편집 가능한 프롬프트. 밝은 테마와 어두운 테마.</td>
     <td valign="top"><b>클릭 한 번으로 카드</b><br>영상의 오디오와 화면을 담아 AnkiConnect로 Anki에 보내거나 FSRS를 쓰는 내장 복습에 저장합니다.</td>
-    <td valign="top"><b>영상 그 너머</b><br>복사한 내용의 구조를 지키는 클립보드, EPUB 책을 위한 읽기 도우미, 수준에 맞춘 이야기, MKV 자막을 지원하는 내 파일 플레이어.</td>
+    <td valign="top"><b>영상 그 너머</b><br>복사한 내용의 구조를 지키는 클립보드, EPUB, CBZ, PDF 뷰어가 있는 읽기 도우미, 수준에 맞춘 이야기, MKV 자막을 지원하는 내 파일 플레이어.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/paginas.ko.png" alt="일본어 기사 위의 리더, 색상과 후리가나"></td>
@@ -263,6 +263,7 @@ npm run paquete
 | `node pruebas/lector.mjs` | 페이지 리더의 어려운 경우: 움직임 없음, 클릭, 링크, 캐러셀, 아코디언, 실시간 텍스트, 섀도 트리, 채팅 같은 스크롤 상자 |
 | `node pruebas/lector-real.mjs` | 약 30개 공개 사이트에서의 리더, 사이트별 스크린샷. `KK_LENGUA=en`이면 영어 사이트에서 실행합니다 |
 | `node pruebas/trazos-web.mjs` | 실제 데이터의 획순, 탭의 클립보드, 복사하거나 붙여 넣은 글과 가져온 EPUB의 구조, 분할 화면 |
+| `node pruebas/visor.mjs` | 테스트가 직접 만든 만화 EPUB, CBZ, PDF로 읽기 도우미 뷰어 확인: 가져오기, 표지, 페이지, 오른쪽에서 왼쪽 두 쪽 보기, 확대/축소, 보기, 목차, 미리보기, 페이지 기억, 삭제 |
 | `node pruebas/ingles.mjs` | 영어 공부의 처음부터 끝까지: 언어 선택, 사전 설치, 영상, 페이지, 그리고 아무것도 섞이지 않은 채 일본어로 돌아오기 |
 | `node pruebas/ingles-whisper.mjs voice.wav` | GPU에서 실행하는 영어 Whisper와 모의 Claude 수정 |
 | `node pruebas/aleman.mjs` | 실제 사전으로 처음부터 끝까지 독일어 공부: 언어 선택, 사전 설치, 분석, 영상, 페이지, 일본어로 돌아가기 |
@@ -289,7 +290,7 @@ npm run paquete
 
 ## 프로젝트 상태
 
-현재 버전은 0.6.0입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, YouTube 실제 세션에서도 직접 확인했습니다. Claude가 고친 자동 자막, 설명, 노래 가사입니다. 독일어는 Wiktionary의 실제 사전으로, YouTube를 흉내 낸 페이지와 페이지 리더에서 테스트했고, 전사는 실제 녹음으로 테스트했으며, YouTube에서도 직접 확인했습니다. 영상에서 언어 바꾸기, 영상 자체 자막과 자동 자막, Claude의 수정입니다.
+현재 버전은 0.7.0입니다. 자동 테스트는 실제 Edge, 실제 GPU의 Whisper, Claude API와 AnkiConnect 모의 서버로 주요 흐름을 다룹니다. 영상 사이트는 자동화된 브라우저에 자막을 제공하지 않으므로 YouTube와 Netflix는 플레이어 구조를 흉내 낸 페이지에서 테스트합니다. YouTube는 실제 세션으로 직접 확인했고, 장기 검증은 아직 남아 있습니다. 페이지 리더는 자동화된 브라우저로 로그인 없이 실제 공개 사이트 약 30곳에서 시험했습니다. 인터페이스와 이 문서의 번역은 AI의 도움으로 작성했으며 아직 원어민 검토를 받지 않았습니다. 영어는 실제 사전과 GPU에서의 합성 음성으로, YouTube를 흉내 낸 페이지에서 테스트했고, 페이지 리더는 실제 공개 사이트 16곳에서 테스트했으며, YouTube 실제 세션에서도 직접 확인했습니다. Claude가 고친 자동 자막, 설명, 노래 가사입니다. 독일어는 Wiktionary의 실제 사전으로, YouTube를 흉내 낸 페이지와 페이지 리더에서 테스트했고, 전사는 실제 녹음으로 테스트했으며, YouTube에서도 직접 확인했습니다. 영상에서 언어 바꾸기, 영상 자체 자막과 자동 자막, Claude의 수정입니다.
 
 ## 개인정보
 

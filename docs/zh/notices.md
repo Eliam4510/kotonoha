@@ -25,6 +25,7 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [lamejs](https://github.com/gideonstele/lamejs)，`@breezystack/lamejs` | MP3 编码 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 复习计划 | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | 读取 ZIP 文件 | MIT |
+| [pdf.js](https://github.com/mozilla/pdf.js)，`pdfjs-dist` | 在查看器中读取 PDF，包括 PDFium 的 JBIG2 解码器（BSD-3-Clause）、OpenJPEG（BSD-2-Clause）和 qcms（MIT） | Apache-2.0 |
 | [wink-nlp](https://github.com/winkjs/wink-nlp) | 英语形态分析 | MIT |
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | wink-nlp 的英语模型 | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | 图标 | MIT |

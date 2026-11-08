@@ -224,6 +224,8 @@ None of this adds anything to the page's content. Colors use the CSS Custom High
 
 **Reading assistant.** Stores EPUB books, texts and SRT subtitles, with the reading position and the structure of each chapter. It can also generate stories with Claude, matched to the configured level.
 
+**Viewer.** Image-based EPUBs, such as manga and scanned books, CBZ files and PDFs open in the viewer, in a tab of their own, as in a PDF reader. It has zoom (**Zoom in**, **Zoom out**, **Fit to width** and **Whole page**, also with Ctrl and the mouse wheel), three views (**Single page**, **Two-page spread** and **Continuous scrolling**), **Thumbnails**, the book's **Contents** and **Full screen**. A book that declares a right-to-left reading order, as manga does, is shown that way: the left arrow moves forward, and in a two-page spread the cover can stand on its own so that the pairs match the printed volume. The arrow keys, Home and End turn pages, and F toggles full screen. The file is stored as is in the browser's storage and read piece by piece, never loaded whole, and the viewer remembers each book's page, view and zoom. Image pages have no text to look up yet.
+
 **Local player.** Plays local files, with the embedded subtitles of an MKV and a choice of audio track, through ffmpeg.wasm.
 
 **Words and assessment.** The explorer lists vocabulary by status, and the level assessment estimates the initial known words.

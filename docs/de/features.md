@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.6.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.7.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -100,6 +100,10 @@ Stand jeder Funktion in Version 0.6.0 und die Art ihrer Überprüfung.
 | Zwischenablage in einem normalen Tab, auch in geteilter Ansicht neben der angezeigten Seite | Automatisch, in Edge und Chrome |
 | Zwischenablage folgen, ohne dass der Tab den Fokus hat | Automatisch |
 | Lesehilfe: EPUB, TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
+| Betrachter für Seitenbücher: EPUB aus Bildern, CBZ und PDF in einem eigenen Tab, mit Zoom, Anpassung an Breite oder Seite, Einzelseite, Doppelseite und fortlaufendem Bildlauf | Automatisch |
+| Leserichtung von rechts nach links aus dem Buch selbst, mit allein stehender Titelseite in der Doppelseite | Automatisch |
+| Miniaturansichten, Inhaltsverzeichnis des Buchs, Sprung zu einer Seite, Vollbild und umgekehrte Farben | Automatisch |
+| Bücher werden getrennt gespeichert und stückweise gelesen: Ein PDF mit Hunderten MB wird nie ganz geladen. Der Betrachter merkt sich Seite, Ansicht und Zoom jedes Buchs | Automatisch, und mit einem echten PDF von 347 MB |
 | Nach Niveau erzeugte Geschichten | Simulator |
 | Player für eigene Dateien | Automatisch |
 | In MKV eingebettete Untertitel und Wahl der Audiospur, mit ffmpeg.wasm | Automatisch |
@@ -206,6 +210,7 @@ Stand jeder Funktion in Version 0.6.0 und die Art ihrer Überprüfung.
 | Plattformen | Chrome und Edge auf dem Desktop. Der lokale Helfer ist für Windows vorbereitet |
 | Bild mit DRM | Bei Netflix und anderen geschützten Websites liefert der Browser das Einzelbild schwarz. Die Karte erhält das offizielle Bild der Folge, falls die Website eines anbietet |
 | Audio mit DRM | Eine geschützte Website kann ihren Ton der Aufnahme vorenthalten. Nach zwei stummen Sätzen in Folge in einem Video wird die Zeile nicht mehr zur Aufnahme erneut abgespielt |
+| Betrachter | Bildseiten haben noch keinen Text zum Nachschlagen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung: Auf einem anderen Computer müssen sie erneut importiert werden |
 | Synchronisierung | Ohne Server: Die Übertragung zwischen Computern erfolgt über die Sicherung |
 | Hintergrundmusik | Whisper kann leise Gespräche unter lauter Musik verlieren |
 | Liedtexte | Die Zeiten gelten je Whisper-Zeile, nicht je Wort. Bei sehr lauter Musik hört Whisper womöglich wenig, und dann erhalten mehr Verse eine geschätzte Zeit |

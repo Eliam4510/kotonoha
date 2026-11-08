@@ -1,0 +1,62 @@
+/* El visor de la Ayuda de lectura: barra arriba, lienzo con las páginas, panel lateral opcional y barra de páginas abajo. */
+.vs { display: flex; flex-direction: column; height: 100vh; background: var(--fondo); color: var(--texto); font-family: var(--letra, inherit); }
+
+.vs-barra { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 8px 14px; background: var(--superficie); border-bottom: 1px solid var(--borde); position: relative; z-index: 2; }
+.vs-grupo { display: flex; align-items: center; gap: 2px; }
+.vs-cabeza { gap: 8px; min-width: 0; flex: 1 1 220px; }
+.vs-titulo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.vs .btn-icono[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja-tinta); }
+.vs-pagina-actual { display: flex; align-items: center; gap: 6px; margin: 0 4px; font-size: 13px; color: var(--texto-2); }
+.vs-numero { width: 5.2em; padding: 3px 6px; text-align: center; font-size: 13px; }
+.vs-zoom { min-width: 4.6em; justify-content: center; font-size: 13px; }
+
+.vs-cuerpo { flex: 1; min-height: 0; display: flex; }
+.vs-panel { flex: none; width: 216px; overflow-y: auto; padding: 12px 10px; background: var(--superficie); border-inline-end: 1px solid var(--borde); }
+
+/* El lienzo centra las páginas cuando caben y deja desplazarse cuando no: «safe» evita que se corten por arriba. */
+.vs-lienzo { flex: 1; min-width: 0; overflow: auto; padding: 16px; display: flex; justify-content: safe center; align-items: safe center; outline: none; }
+.vs-lienzo[data-vista='continua'] { align-items: flex-start; }
+.vs-pliego { display: flex; flex: none; }
+.vs-pliego.rtl { flex-direction: row-reverse; }
+.vs-pagina { position: relative; flex: none; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 6px 24px rgba(0, 0, 0, 0.18); user-select: none; }
+.vs-pagina img { display: block; width: 100%; height: 100%; }
+/* En doble página, las dos hojas se tocan en el lomo, como en el libro impreso. */
+.vs-pliego .vs-pagina + .vs-pagina { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 6px 24px rgba(0, 0, 0, 0.18), inset 12px 0 18px -14px rgba(0, 0, 0, 0.35); }
+.vs-pliego.rtl .vs-pagina + .vs-pagina { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 6px 24px rgba(0, 0, 0, 0.18), inset -12px 0 18px -14px rgba(0, 0, 0, 0.35); }
+.vs-continua { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 0 auto; }
+.vs-reservada { background: var(--superficie-2); box-shadow: none; }
+.vs-lienzo.invertido .vs-pagina { background: #111; }
+.vs-lienzo.invertido .vs-pagina img { filter: invert(1) hue-rotate(180deg); }
+
+.vs-cargando { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(127, 127, 127, 0.12) 50%, transparent 70%) var(--superficie-2); background-size: 200% 100%; animation: vs-brillo 1.4s linear infinite; }
+@keyframes vs-brillo { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .vs-cargando { animation: none; } }
+.vs-fallo { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; text-align: center; color: var(--error); font-size: 13px; background: var(--superficie-2); }
+
+.vs-aviso { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 46ch; padding: 24px; text-align: center; color: var(--texto-2); }
+.vs-aviso b { color: var(--texto); font-size: 17px; }
+
+.vs-miniaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 8px; }
+.vs-miniatura { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px; border: none; border-radius: var(--r-2); background: none; color: var(--texto-3); font-size: 11.5px; cursor: pointer; }
+.vs-miniatura:hover { background: var(--superficie-2); }
+.vs-miniatura-hoja { display: block; width: 100%; background: var(--superficie-2); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); overflow: hidden; }
+.vs-miniatura-hoja img { display: block; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.vs-miniatura.actual { color: var(--hoja-tinta); font-weight: 700; }
+.vs-miniatura.actual .vs-miniatura-hoja { outline: 2px solid var(--hoja); outline-offset: 2px; }
+
+.vs-indice { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.vs-indice button { width: 100%; display: flex; justify-content: space-between; gap: 10px; padding: 7px 8px; border: none; border-radius: var(--r-2); background: none; color: var(--texto-2); font-size: 13px; text-align: start; cursor: pointer; }
+.vs-indice button:hover { background: var(--superficie-2); color: var(--texto); }
+.vs-indice button.actual { background: var(--hoja-suave); color: var(--hoja-tinta); font-weight: 700; }
+.vs-indice .num { color: var(--texto-3); }
+
+.vs-pie { flex: none; display: flex; align-items: center; gap: 14px; padding: 6px 16px; background: var(--superficie); border-top: 1px solid var(--borde); font-size: 12.5px; color: var(--texto-2); }
+.vs-pie input[type='range'] { flex: 1; min-width: 80px; accent-color: var(--hoja); }
+.vs-capitulo { max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vs-portada { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+@media (max-width: 720px) {
+  .vs-barra { gap: 4px 10px; padding: 6px 8px; }
+  .vs-panel { width: 150px; }
+  .vs-lienzo { padding: 8px; }
+}

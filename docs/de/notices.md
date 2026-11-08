@@ -25,6 +25,7 @@ Der Code von Kotonoha wird unter der [MIT-Lizenz](../../LICENSE) veröffentlicht
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3-Kodierung | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planung der Wiederholung | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Lesen von ZIP-Dateien | MIT |
+| [pdf.js](https://github.com/mozilla/pdf.js), `pdfjs-dist` | Lesen von PDFs im Betrachter, mit dem JBIG2-Decoder von PDFium (BSD-3-Clause), OpenJPEG (BSD-2-Clause) und qcms (MIT) | Apache-2.0 |
 | [wink-nlp](https://github.com/winkjs/wink-nlp) | Morphologische Analyse des Englischen | MIT |
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | Englisches Modell für wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Symbole | MIT |
