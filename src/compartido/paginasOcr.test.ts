@@ -19,6 +19,23 @@ describe('lo leído por el OCR', () => {
     expect(await baseOcr().paginas.count()).toBe(0);
   });
 
+  it('con el reconocedor nuevo del modo Libro se olvida lo leído en ese modo; el manga y lo editado siguen', async () => {
+    baseOcr().close();
+    await Dexie.delete('kotonoha-ocr');
+    // Como la dejó la 0.9.4: versión 3, con una página de cada modo y una línea editada.
+    const anterior = new Dexie('kotonoha-ocr');
+    anterior.version(3).stores({ paginas: 'clave, libro', ediciones: 'clave, libro' });
+    await anterior.table('paginas').bulkPut([
+      { clave: claveOcr('a', 'libro', 1), libro: 'a', lineas: [], creada: 1 },
+      { clave: claveOcr('a', 'manga', 1), libro: 'a', lineas: [], creada: 1 },
+    ]);
+    await anterior.table('ediciones').put({ clave: 'a:1:x', libro: 'a', pagina: 1, caja: { x0: 0, y0: 0, x1: 1, y1: 1 }, original: 'あ', texto: 'い', creada: 1 });
+    anterior.close();
+    await baseOcr().open();
+    expect((await baseOcr().paginas.toArray()).map((f) => f.clave)).toEqual([claveOcr('a', 'manga', 1)]);
+    expect(await edicionesDe('a')).toHaveLength(1);
+  });
+
   it('lo editado a mano se guarda aparte: sobrevive a lo leído y se va con el libro', async () => {
     const caja = { x0: 0, y0: 0, x1: 1, y1: 0.1 };
     await guardarEdicion({ clave: 'libro:0:a', libro: 'libro', pagina: 0, caja, original: 'まちがい', texto: 'まちがえ', creada: 1 });

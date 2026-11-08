@@ -19,6 +19,7 @@ export interface FilaOcr {
  * editó a mano va en su propia tabla y no se olvida nunca: es del lector, no del OCR.
  * 2: la 0.9.2 (manga por viñetas y sin marcas de agua; libros sin furigana impreso y a dos columnas).
  * 3: la 0.9.4 (la tabla de lo editado; lo leído no cambia).
+ * 4: la 0.9.5 (el reconocedor de PP-OCRv6 en el modo Libro): se olvida lo leído en modo Libro; lo del manga sigue igual.
  */
 class BaseOcr extends Dexie {
   paginas!: Table<FilaOcr, string>;
@@ -31,6 +32,9 @@ class BaseOcr extends Dexie {
       .stores({ paginas: 'clave, libro' })
       .upgrade((tx) => tx.table('paginas').clear());
     this.version(3).stores({ paginas: 'clave, libro', ediciones: 'clave, libro' });
+    this.version(4)
+      .stores({ paginas: 'clave, libro', ediciones: 'clave, libro' })
+      .upgrade((tx) => tx.table('paginas').filter((f: FilaOcr) => f.clave.includes(':libro:')).delete());
   }
 }
 

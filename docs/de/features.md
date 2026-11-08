@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.9.4 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.9.5 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -105,7 +105,7 @@ Stand jeder Funktion in Version 0.9.4 und die Art ihrer Überprüfung.
 | Leserichtung von rechts nach links aus dem Buch selbst, mit allein stehender Titelseite in der Doppelseite | Automatisch |
 | Miniaturansichten, Inhaltsverzeichnis des Buchs, Sprung zu einer Seite, Vollbild und umgekehrte Farben | Automatisch |
 | Bücher werden getrennt gespeichert und stückweise gelesen: Ein PDF mit Hunderten MB wird nie ganz geladen. Der Betrachter merkt sich Seite, Ansicht und Zoom jedes Buchs | Automatisch, und mit einem echten PDF von 347 MB |
-| Texterkennung (OCR) auf dem eigenen Computer mit der GPU: Modus Buch mit PP-OCRv5, der gedruckte Furigana weglässt und Spalte für Spalte liest, und Modus Manga mit einem Sprechblasen-Detektor und manga-ocr, in der Reihenfolge der Panels und ohne Wasserzeichen | Automatisch, und von Hand an echten Seiten gemessen: 2,8 % Zeichenfehler auf 18 Mangaseiten aus fünf Reihen und 0,5 % in einem Band als EPUB, 1 % in einem Lehrbuch und rund 2 % in einem gescannten Chemie-PDF mit Formeln und Tabellen |
+| Texterkennung (OCR) auf dem eigenen Computer mit der GPU: Modus Buch mit dem Detektor von PP-OCRv5 und der Erkennung von PP-OCRv6, der gedruckte Furigana weglässt und Spalte für Spalte liest, und Modus Manga mit einem Sprechblasen-Detektor und manga-ocr, in der Reihenfolge der Panels und ohne Wasserzeichen | Automatisch, und von Hand an echten Seiten gemessen: 2,8 % Zeichenfehler auf 18 Mangaseiten aus fünf Reihen und 0,5 % in einem Band als EPUB, 2,2 % in einem Lehrbuch und 3,9 % in einem gescannten Chemie-PDF, auf Seiten, wie der Betrachter sie zeichnet, mit Formeln und Tabellen |
 | PDF-Text: In einem PDF mit der Textebene eines anderen Texterkennungsprogramms zwischen diesem Text und der Texterkennung von Kotonoha wählen, für jedes Buch gespeichert | Automatisch, und mit einem echten Scan |
 | Die Texterkennung liest voraus: die nächsten Seiten (acht bei einem Manga, vier bei einem Buch), bevor man sie erreicht, und lässt übersprungene liegen | Automatisch |
 | Verarbeiten: ein ganzes Buch von seiner Karte aus mit der Texterkennung lesen, mit Fortschritt, Pause und „Text bereit“ am Ende | Automatisch, und mit einem echten Band |

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.9.4, along with how it has been verified.
+Status of each feature in version 0.9.5, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -105,7 +105,7 @@ Status of each feature in version 0.9.4, along with how it has been verified.
 | Right-to-left reading order taken from the book itself, with the cover on its own in a two-page spread | Automated |
 | Thumbnails, the book's contents, go to page, full screen and inverted colors | Automated |
 | Books are stored separately and read piece by piece: a PDF of hundreds of MB is never loaded whole. The viewer remembers each book's page, view and zoom | Automated, and with a real 347 MB PDF |
-| On-device text recognition (OCR) with the GPU: Book mode, with PP-OCRv5, which leaves printed furigana out and reads column by column, and Manga mode, with a bubble detector and manga-ocr, in panel order and without watermarks | Automated, and measured by hand on real pages: 2.8 % character error on 18 manga pages from five series and 0.5 % on a volume in EPUB, 1 % in a textbook and around 2 % in a scanned chemistry PDF with formulas and tables |
+| On-device text recognition (OCR) with the GPU: Book mode, with the PP-OCRv5 detector and the PP-OCRv6 recognizer, which leaves printed furigana out and reads column by column, and Manga mode, with a bubble detector and manga-ocr, in panel order and without watermarks | Automated, and measured by hand on real pages: 2.8 % character error on 18 manga pages from five series and 0.5 % on a volume in EPUB, 2.2 % in a textbook and 3.9 % in a scanned chemistry PDF, on pages as the viewer renders them, with formulas and tables |
 | PDF text: in a PDF with another OCR program's text layer, choose between that text and Kotonoha's OCR, remembered for each book | Automated, and with a real scan |
 | OCR reads ahead: the next pages (eight in a manga, four in a book) before you reach them, and drops the ones you skip | Automated |
 | Process: read a whole book with OCR from its card, with progress, pause and "Text ready" at the end | Automated, and with a real volume |
