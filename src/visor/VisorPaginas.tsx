@@ -10,7 +10,7 @@ import type { Ajustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
 import { motor } from '../compartido/rpc';
 import type { ElementoBiblioteca } from '../compartido/tipos';
-import { cajaDeTramo, caracterEn, type LineaTexto } from '../nucleo/capaTexto';
+import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
 import type { Direccion } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
@@ -154,6 +154,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // El texto de las páginas con el OCR: activo o no, con qué modelos, lo leído por página y por dónde va.
   const [ocr, fijarOcr] = useState(false);
   const [modoOcr, fijarModoOcr] = useState<ModoOcr>('libro');
+  // En un PDF con su propio texto, si se usa ese texto (lo normal) o el OCR lee también esas páginas.
+  const [textoPdf, fijarTextoPdf] = useState(true);
   const [lineas, fijarLineas] = useState<Map<number, LineaTexto[]>>(() => new Map());
   const [leyendo, fijarLeyendo] = useState(0);
   const [descarga, fijarDescarga] = useState<Descarga | null>(null);
@@ -187,6 +189,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       // Un manga se lee con los modelos de manga; lo demás, con los de libro impreso.
       fijarOcr(d.ocr?.activo ?? false);
       fijarModoOcr(d.ocr?.modo ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'manga' : 'libro'));
+      fijarTextoPdf(d.ocr?.textoPdf ?? true);
       // Un PDF no tiene portada hasta que se abre: se hace ahora con su primera página, para la estantería.
       if (!d.portada) {
         p.imagen(0)
@@ -247,11 +250,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     if (!doc.documento || !paginador) return;
     const t = setTimeout(() => {
       motor
-        .bibliotecaGuardar({ ...doc, pagina, abierto: Date.now(), documento: { ...doc.documento!, paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, ocr: { activo: ocr, modo: modoOcr } } })
+        .bibliotecaGuardar({ ...doc, pagina, abierto: Date.now(), documento: { ...doc.documento!, paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, ocr: { activo: ocr, modo: modoOcr, ...(textoPdf ? {} : { textoPdf }) } } })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(t);
-  }, [doc, paginador, pagina, vista, direccion, portadaSola, anchas, zoom, ocr, modoOcr]);
+  }, [doc, paginador, pagina, vista, direccion, portadaSola, anchas, zoom, ocr, modoOcr, textoPdf]);
 
   // Al pasar de página se vuelve arriba; en el desplazamiento continuo, se lleva la página a la vista.
   useEffect(() => {
@@ -341,11 +344,15 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   }, [paginador, sinMirar.join(',')]);
 
   // Con el OCR activo se leen las páginas a la vista y las del pliego siguiente, para pasar de página con el texto listo. En
-  // un PDF, solo las que no traen su texto, y después de mirarlo.
-  const porLeer = cercanas.filter((n) => !lineas.has(n) && (!paginador?.textoPropio || propias.get(n) === null));
+  // un PDF, solo las que no traen su texto, y después de mirarlo; o todas, si se ha quitado «Texto del PDF».
+  const porLeer = cercanas.filter((n) => !lineas.has(n) && (!paginador?.textoPropio || leerConOcr(propias.get(n), textoPdf)));
+  // Si alguna página del PDF trae su propio texto: entonces se puede elegir entre ese texto y el OCR.
+  const hayTextoPropio = [...propias.values()].some((l) => !!l?.length);
+  // Al cambiar de dónde sale el texto, la línea abierta solo sigue si es del texto del PDF y ese texto se sigue usando.
+  const cerrarSiCambia = (usaPdf: boolean) => fijarAbierta((x) => (x && usaPdf && propias.get(x.pagina) ? x : null));
   useEffect(() => {
     fijarLineas(new Map());
-    fijarAbierta((x) => (x && propias.get(x.pagina) ? x : null));
+    cerrarSiCambia(textoPdf);
   }, [modoOcr]);
   useEffect(() => {
     if (!ocr || !paginador || !porLeer.length) return;
@@ -366,13 +373,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     };
   }, [ocr, modoOcr, paginador, doc.id, porLeer.join(',')]);
 
-  /** Las líneas de una página: las del propio PDF si las trae; si no, las del OCR, si está activo. */
-  const textoDe = (n: number): { lineas: LineaTexto[]; propias: boolean } | undefined => {
-    const p = propias.get(n);
-    if (p) return { lineas: p, propias: true };
-    const l = ocr ? lineas.get(n) : undefined;
-    return l ? { lineas: l, propias: false } : undefined;
-  };
+  /** Las líneas de una página: las del propio PDF si las trae y se usan; si no, las del OCR, si está activo. */
+  const textoDe = (n: number): { lineas: LineaTexto[]; propias: boolean } | undefined => textoDePagina(propias.get(n), lineas.get(n), { ocrActivo: ocr, textoPdf });
   const lineasAbiertas = abierta ? textoDe(abierta.pagina)?.lineas : undefined;
   const moverLinea = (paso: number) => {
     if (!abierta || !lineasAbiertas) return;
@@ -499,12 +501,26 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                 activo={ocr}
                 alPulsar={() => {
                   fijarErrorOcr('');
-                  if (ocr) fijarAbierta((x) => (x && propias.get(x.pagina) ? x : null));
+                  cerrarSiCambia(textoPdf);
                   fijarOcr(!ocr);
                 }}
               />
               {ocr && (
                 <span class="vs-modos">
+                  {hayTextoPropio && (
+                    <button
+                      class="btn chico fantasma"
+                      aria-pressed={textoPdf}
+                      data-tip={tr('El texto que trae el PDF; apagado, Kotonoha lee todas las páginas')}
+                      onClick={() => {
+                        // Cambia de dónde sale el texto de las páginas que traen el suyo: la línea abierta en una de ellas se cierra.
+                        fijarAbierta((x) => (x && !propias.get(x.pagina) ? x : null));
+                        fijarTextoPdf(!textoPdf);
+                      }}
+                    >
+                      {tr('Texto del PDF')}
+                    </button>
+                  )}
                   <button class="btn chico fantasma" aria-pressed={modoOcr === 'libro'} data-tip={tr('Para libros impresos')} onClick={() => fijarModoOcr('libro')}>{tr('Libro')}</button>
                   <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para manga: globos y texto vertical')} onClick={() => fijarModoOcr('manga')}>{tr('Manga')}</button>
                 </span>

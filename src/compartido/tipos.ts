@@ -209,8 +209,12 @@ export interface DocumentoBiblioteca {
   anchas?: number[];
   /** «ancho», «pagina» o un porcentaje. En un EPUB de texto, siempre un porcentaje. */
   zoom?: 'ancho' | 'pagina' | number;
-  /** Si se lee el texto de las páginas con el OCR, y con qué modelos: los de libro impreso o los de manga. */
-  ocr?: { activo: boolean; modo: 'libro' | 'manga' };
+  /**
+   * Si se lee el texto de las páginas con el OCR, y con qué modelos: los de libro impreso o los de manga. En un PDF con su
+   * propio texto, textoPdf false hace que el OCR lea también esas páginas (la capa de un OCR antiguo); sin él, se usa el
+   * texto del PDF.
+   */
+  ocr?: { activo: boolean; modo: 'libro' | 'manga'; textoPdf?: boolean };
 }
 
 export interface ElementoBiblioteca {
