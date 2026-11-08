@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Ajustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
 import { alRecibirEvento, motor } from '../compartido/rpc';
-import type { PalabraToken } from '../compartido/tipos';
+import type { AnotacionLibro, ColorAnotacion, PalabraToken } from '../compartido/tipos';
 import { motorDe } from '../lenguas/motor';
 import { fraseConNegrita } from '../nucleo/frases';
 import { alinearSuperficies } from '../nucleo/lectorTexto';
@@ -16,8 +16,56 @@ import { enviarAlCreador } from '../ui/borrador';
 import { Ficha } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
+import { COLORES, EditorNota, resaltarEn } from './Anotaciones';
 
-export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover, alCerrar, alMarcar, alEditar, alRestaurar }: {
+/** El tramo del texto de la línea que se ha seleccionado en el panel, de palabra en palabra. */
+function tramoSeleccionado(raiz: HTMLElement, sitios: ({ inicio: number; fin: number } | null)[]): { inicio: number; fin: number } | null {
+  const s = window.getSelection();
+  if (!s || s.isCollapsed || !s.anchorNode || !s.focusNode || !raiz.contains(s.anchorNode) || !raiz.contains(s.focusNode)) return null;
+  const k = (n: Node) => Number((n instanceof Element ? n : n.parentElement)?.closest<HTMLElement>('[data-k]')?.dataset.k ?? NaN);
+  const a = k(s.anchorNode);
+  const b = k(s.focusNode);
+  if (Number.isNaN(a) || Number.isNaN(b)) return null;
+  const desde = sitios[Math.min(a, b)];
+  const hasta = sitios[Math.max(a, b)];
+  return desde && hasta && hasta.fin > desde.inicio ? { inicio: desde.inicio, fin: hasta.fin } : null;
+}
+
+/**
+ * Resaltar o subrayar la línea entera o solo un tramo: la palabra elegida o lo seleccionado arrastrando. Lo normal es la
+ * línea: tocar la página ya elige una palabra, y eso no debe cambiar lo que se resalta. Seleccionar arrastrando sí.
+ */
+function Resaltar({ linea, tramo, seleccionado, alResaltar }: { linea: string; tramo: { inicio: number; fin: number } | null; seleccionado: boolean; alResaltar: (estilo: 'fondo' | 'subrayado', color: ColorAnotacion, tramo: { inicio: number; fin: number } | null) => void }) {
+  const [soloTramo, fijarSoloTramo] = useState(false);
+  useEffect(() => fijarSoloTramo(seleccionado), [seleccionado, tramo?.inicio, tramo?.fin]);
+  const que = tramo ? linea.slice(tramo.inicio, tramo.fin) : '';
+  const elegido = soloTramo && tramo ? tramo : null;
+  return (
+    <div class="vs-resaltar">
+      <span class="ayuda vs-resaltar-que">
+        <Icono n="resaltar" t={13} /> {tr('Resaltar')}
+      </span>
+      {tramo && que !== linea ? (
+        <span class="segmentado vs-resaltar-objetivo" role="radiogroup" aria-label={tr('Qué resaltar')}>
+          <button role="radio" aria-checked={!elegido} class={elegido ? '' : 'activo'} onClick={() => fijarSoloTramo(false)}>{tr('La línea')}</button>
+          <button role="radio" aria-checked={!!elegido} class={elegido ? 'activo' : ''} lang={lengua.value.id} onClick={() => fijarSoloTramo(true)}>{tr('Solo «{0}»', que)}</button>
+        </span>
+      ) : (
+        <span class="ayuda vs-resaltar-linea">{tr('La línea entera; para resaltar solo una parte, elige una palabra o selecciónala arrastrando.')}</span>
+      )}
+      <span class="vs-resaltar-botones">
+        {COLORES.map((c) => (
+          <button key={c} class={`vs-color ${c}`} aria-label={resaltarEn(c)} data-tip={resaltarEn(c)} onClick={() => alResaltar('fondo', c, elegido)} />
+        ))}
+        <button class="btn chico fantasma" data-tip={tr('Una línea debajo, en lugar del fondo de color')} onClick={() => alResaltar('subrayado', 'rosa', elegido)}>
+          <Icono n="subrayar" t={13} /> {tr('Subrayar')}
+        </button>
+      </span>
+    </div>
+  );
+}
+
+export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover, alCerrar, alMarcar, alEditar, alRestaurar, resaltados = [], alResaltar, alGuardarAnotacion, alQuitarAnotacion }: {
   lineas: LineaEditada<LineaOcr>[];
   indice: number;
   /** La letra que se tocó en la página: su palabra se elige en cuanto la línea esté analizada. */
@@ -32,8 +80,22 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
   alEditar?: (texto: string) => Promise<void>;
   /** Vuelve al texto leído, sin lo editado. */
   alRestaurar?: () => Promise<void>;
+  /** Los resaltados de esta línea. */
+  resaltados?: AnotacionLibro[];
+  /** Resalta o subraya el tramo elegido, o la línea entera si no hay tramo. */
+  alResaltar?: (estilo: 'fondo' | 'subrayado', color: ColorAnotacion, tramo: { inicio: number; fin: number } | null) => void;
+  alGuardarAnotacion?: (a: AnotacionLibro) => void;
+  alQuitarAnotacion?: (id: string) => void;
 }) {
   const linea = lineas[indice];
+  // Lo seleccionado en el texto del panel, para resaltar solo eso; y el resaltado cuyo comentario se está escribiendo.
+  const [seleccion, fijarSeleccion] = useState<{ inicio: number; fin: number } | null>(null);
+  const [comentando, fijarComentando] = useState<string | null>(null);
+  const texto = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    fijarSeleccion(null);
+    fijarComentando(null);
+  }, [indice, linea.texto]);
   // Editar la línea: el texto que se está escribiendo, o null si no se está editando.
   const [borrador, fijarBorrador] = useState<string | null>(null);
   useEffect(() => fijarBorrador(null), [indice, linea.texto]);
@@ -124,14 +186,25 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
           </div>
         </div>
       ) : (
-      <p class="vs-linea-texto" lang={lengua.value.id}>
+      <p
+        ref={texto}
+        class="vs-linea-texto"
+        lang={lengua.value.id}
+        // Seleccionar con el ratón unas palabras deja elegido ese tramo para resaltarlo.
+        onMouseUp={() => texto.current && fijarSeleccion(tramoSeleccionado(texto.current, sitios))}
+        onKeyUp={() => texto.current && fijarSeleccion(tramoSeleccionado(texto.current, sitios))}
+      >
         {tokens.length
           ? tokens.map((p, k) =>
               p.esPalabra ? (
                 <span
                   key={k}
+                  data-k={k}
                   class={['pal', `est-${p.estado}`, p.rastreada ? 'rastreada' : '', p.patron && ajustes.colorAcento !== 'ninguno' ? `ac-${p.patron}` : '', elegida === k ? 'ap-elegida' : ''].join(' ')}
-                  onClick={() => fijarElegida(k)}
+                  onClick={() => {
+                    // Un clic suelto elige la palabra; al terminar de seleccionar varias, se queda la selección.
+                    if (window.getSelection()?.isCollapsed !== false) fijarElegida(k);
+                  }}
                 >
                   {p.furigana.map((s, j) =>
                     s.lectura && ajustes.furigana !== 'ninguna' ? (
@@ -142,7 +215,7 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
                   )}
                 </span>
               ) : (
-                <span key={k}>{lengua.value.escritura.pegarSignos(p.superficie)}</span>
+                <span key={k} data-k={k}>{lengua.value.escritura.pegarSignos(p.superficie)}</span>
               )
             )
           : linea.texto}
@@ -162,6 +235,40 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
             </>
           )}
         </div>
+      )}
+      {borrador === null && alResaltar && <Resaltar linea={linea.texto} tramo={seleccion ?? (elegida !== null ? sitios[elegida] : null)} seleccionado={!!seleccion} alResaltar={alResaltar} />}
+      {borrador === null && resaltados.length > 0 && (
+        <ul class="vs-resaltados-linea">
+          {resaltados.map((r) => (
+            <li key={r.id} class={`vs-resaltado-linea ${r.color ?? 'amarillo'} ${r.estilo ?? 'fondo'}`}>
+              <q lang={lengua.value.id}>{r.texto}</q>
+              {comentando === r.id ? (
+                <EditorNota
+                  inicial={r.nota ?? ''}
+                  etiqueta={tr('Escribe un comentario')}
+                  alGuardar={(nota) => {
+                    const { nota: _n, ...resto } = r;
+                    alGuardarAnotacion?.(nota ? { ...resto, nota } : resto);
+                    fijarComentando(null);
+                  }}
+                  alCancelar={() => fijarComentando(null)}
+                />
+              ) : (
+                <>
+                  {r.nota && <p class="vs-resaltado-comentario">{r.nota}</p>}
+                  <span class="vs-resaltado-acciones">
+                    <button class="btn chico fantasma" onClick={() => fijarComentando(r.id)}>
+                      <Icono n="lapiz" t={13} /> {r.nota ? tr('Editar el comentario') : tr('Comentar')}
+                    </button>
+                    <button class="btn chico fantasma" onClick={() => alQuitarAnotacion?.(r.id)}>
+                      <Icono n="basura" t={13} /> {r.estilo === 'subrayado' ? tr('Quitar el subrayado') : tr('Quitar el resaltado')}
+                    </button>
+                  </span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
       {palabra ? (
         <div class="vs-ficha">

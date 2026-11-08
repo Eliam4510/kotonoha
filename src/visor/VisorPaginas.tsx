@@ -9,13 +9,15 @@ import { Interruptor } from '../app/Piezas';
 import type { Ajustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
 import { motor } from '../compartido/rpc';
-import type { ElementoBiblioteca } from '../compartido/tipos';
+import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca } from '../compartido/tipos';
+import { nuevoResaltado, resaltadosDe } from '../nucleo/anotaciones';
 import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
 import { aplicarEdiciones, type EdicionLinea, type LineaEditada } from '../nucleo/ediciones';
 import { edicionesDe, guardarEdicion, lecturaMinima, quitarEdicion } from '../compartido/paginasOcr';
 import type { Direccion } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
+import { NotasDePagina, PanelNotas, Resaltados } from './Anotaciones';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
 import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
 import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
@@ -39,11 +41,21 @@ const ADELANTE: Record<ModoOcr, number> = { manga: 8, libro: 4 };
 
 const porciento = (c: Caja) => ({ left: `${c.x0 * 100}%`, top: `${c.y0 * 100}%`, width: `${(c.x1 - c.x0) * 100}%`, height: `${(c.y1 - c.y0) * 100}%` });
 
+/** Lo anotado en una página y lo que se puede hacer con sus notas. */
+interface PropsAnotaciones {
+  anotaciones?: AnotacionLibro[];
+  notaAbierta?: string | null;
+  alAbrirNota?: (id: string | null) => void;
+  alGuardarAnotacion?: (a: AnotacionLibro) => void;
+  alQuitarAnotacion?: (id: string) => void;
+}
+
 /**
  * Una página pintada a su escala. Mientras llega la imagen, ocupa ya su sitio para que nada salte. Con su texto, encima
  * van sus líneas: zonas que se pueden tocar, con el texto para los lectores de pantalla, y la palabra elegida marcada.
+ * Lo anotado va en dos capas: los resaltados debajo de las líneas y las notas encima.
  */
-function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, marca, alTocar }: {
+function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, marca, alTocar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
   paginador: Paginador;
   n: number;
   escala: number;
@@ -54,7 +66,7 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
   elegida?: number;
   marca?: Caja;
   alTocar?: (indice: number, caracter?: number) => void;
-}) {
+} & PropsAnotaciones) {
   const [imagen, fijarImagen] = useState<PaginaImagen | null>(null);
   const [fallo, fijarFallo] = useState('');
   useEffect(() => {
@@ -76,6 +88,7 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
   return (
     <div class="vs-pagina" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * escala)}px`, height: `${Math.round(t.alto * escala)}px` }}>
       {imagen ? <img src={imagen.url} alt={tr('Página {0}', n + 1)} draggable={false} /> : fallo ? <span class="vs-fallo">{fallo}</span> : <span class="vs-cargando" />}
+      {imagen && anotaciones && anotaciones.length > 0 && <Resaltados anotaciones={anotaciones} />}
       {imagen && lineas && (
         <div class="vs-texto">
           {lineas.map((l, i) => (
@@ -97,11 +110,14 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
           {marca && <span class="vs-marca" style={porciento(marca)} />}
         </div>
       )}
+      {imagen && anotaciones && anotaciones.length > 0 && (
+        <NotasDePagina anotaciones={anotaciones} abierta={notaAbierta ?? null} alAbrir={(id) => alAbrirNota?.(id)} alGuardar={(a) => alGuardarAnotacion?.(a)} alQuitar={(id) => alQuitarAnotacion?.(id)} />
+      )}
     </div>
   );
 }
 
-function Miniatura({ paginador, n, actual, alElegir }: { paginador: Paginador; n: number; actual: boolean; alElegir: () => void }) {
+function Miniatura({ paginador, n, actual, marcada, alElegir }: { paginador: Paginador; n: number; actual: boolean; marcada?: boolean; alElegir: () => void }) {
   const ref = useRef<HTMLButtonElement>(null);
   const [url, fijarUrl] = useState('');
   useEffect(() => {
@@ -125,7 +141,10 @@ function Miniatura({ paginador, n, actual, alElegir }: { paginador: Paginador; n
   const t = paginador.tamano(n) ?? PAGINA_SUPUESTA;
   return (
     <button ref={ref} class={`vs-miniatura ${actual ? 'actual' : ''}`} aria-label={tr('Página {0}', n + 1)} aria-current={actual ? 'page' : undefined} onClick={alElegir}>
-      <span class="vs-miniatura-hoja" style={{ aspectRatio: `${t.ancho} / ${t.alto}` }}>{url && <img src={url} alt="" draggable={false} />}</span>
+      <span class="vs-miniatura-hoja" style={{ aspectRatio: `${t.ancho} / ${t.alto}` }}>
+        {url && <img src={url} alt="" draggable={false} />}
+        {marcada && <span class="vs-cinta" title={tr('Página marcada')} />}
+      </span>
       <span class="num">{n + 1}</span>
     </button>
   );
@@ -150,7 +169,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // Las páginas apaisadas, que en doble página van solas: null mientras no se sepan.
   const [anchas, fijarAnchas] = useState<number[] | null>(null);
   const [zoom, fijarZoom] = useState<Zoom>('pagina');
-  const [panel, fijarPanel] = useState<'miniaturas' | 'indice' | null>(null);
+  const [panel, fijarPanel] = useState<'miniaturas' | 'indice' | 'notas' | null>(null);
   const [invertir, fijarInvertir] = useState(() => leerPreferencia('visorInvertir', false));
   const { lleno, alternar: pantallaCompleta } = usePantallaCompleta();
   const [hueco, fijarHueco] = useState<Medida>({ ancho: 800, alto: 600 });
@@ -170,6 +189,10 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const [errorOcr, fijarErrorOcr] = useState('');
   const [abierta, fijarAbierta] = useState<{ pagina: number; indice: number; caracter?: number } | null>(null);
   const [marca, fijarMarca] = useState<Marca | null>(null);
+  // Lo anotado en el libro: marcadores, resaltados y notas. Al añadir una nota, el siguiente toque en una página la pone ahí.
+  const [anotaciones, fijarAnotaciones] = useState<AnotacionLibro[]>([]);
+  const [colocando, fijarColocando] = useState(false);
+  const [notaAbierta, fijarNotaAbierta] = useState<string | null>(null);
   const lector = useRef<LectorOcr | null>(null);
   const lienzo = useRef<HTMLElement>(null);
   /** Si el último cambio de página vino del desplazamiento: entonces no hay que desplazar otra vez. */
@@ -199,6 +222,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       fijarModoOcr(d.ocr?.modo ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'manga' : 'libro'));
       fijarTextoPdf(d.ocr?.textoPdf ?? true);
       edicionesDe(inicial.id).then((l) => vivo && fijarEdiciones(l), () => {});
+      motor.anotacionesDe(inicial.id).then((l) => vivo && fijarAnotaciones(l), console.error);
       // Un libro sin portada (un PDF importado antes de que se hicieran al importarlo) la saca de su primera página.
       if (!d.portada) {
         p.imagen(0)
@@ -314,6 +338,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
         return;
       }
       if (e.altKey) return;
+      if (e.key === 'Escape' && colocando) {
+        fijarColocando(false);
+        e.preventDefault();
+        return;
+      }
       const continua = vista === 'continua';
       if (e.key === 'ArrowLeft' && !continua) haciaIzquierda();
       else if (e.key === 'ArrowRight' && !continua) haciaDerecha();
@@ -451,7 +480,51 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     if (!abierta) fijarMarca(null);
   }, [abierta]);
 
+  // ---------- Lo anotado ----------
+  // Se cambia a la vista al momento y se guarda detrás, en la base de la lengua, con los libros.
+  const guardarAnotacion = (a: AnotacionLibro) => {
+    fijarAnotaciones((l) => [...l.filter((x) => x.id !== a.id), a]);
+    motor.anotacionGuardar(a).catch(console.error);
+  };
+  const quitarAnotacion = (id: string) => {
+    fijarAnotaciones((l) => l.filter((x) => x.id !== id));
+    if (notaAbierta === id) fijarNotaAbierta(null);
+    motor.anotacionEliminar(id).catch(console.error);
+  };
+  const marcador = anotaciones.find((a) => a.tipo === 'marcador' && a.pagina === pagina);
+  const alternarMarcador = () => (marcador ? quitarAnotacion(marcador.id) : guardarAnotacion({ id: crypto.randomUUID(), libro: doc.id, tipo: 'marcador', pagina, creada: Date.now() }));
+  const propsAnotaciones = (n: number): PropsAnotaciones => ({
+    anotaciones: anotaciones.filter((a) => a.pagina === n),
+    notaAbierta,
+    alAbrirNota: fijarNotaAbierta,
+    alGuardarAnotacion: guardarAnotacion,
+    alQuitarAnotacion: quitarAnotacion,
+  });
+  /** Resalta o subraya un tramo de la línea abierta, o la línea entera. */
+  const resaltar = (estilo: 'fondo' | 'subrayado', color: ColorAnotacion, tramo: { inicio: number; fin: number } | null) => {
+    if (!abierta || !lineasAbiertas) return;
+    const linea = lineasAbiertas[abierta.indice];
+    const porLetra = !!textoDe(abierta.pagina)?.propias || modoOcr === 'libro';
+    guardarAnotacion(nuevoResaltado({ libro: doc.id, pagina: abierta.pagina, linea, tramo, porLetra, estilo, color }));
+  };
+
+  /** Con «Añadir una nota», un toque en una página pone ahí la nota y la abre para escribirla. */
+  const ponerNota = (e: MouseEvent) => {
+    const hoja = (e.target as HTMLElement | null)?.closest<HTMLElement>('.vs-pagina');
+    fijarColocando(false);
+    if (!hoja?.dataset.pagina) return;
+    const r = hoja.getBoundingClientRect();
+    const dentro = (v: number) => Math.min(0.97, Math.max(0, v));
+    const a: AnotacionLibro = { id: crypto.randomUUID(), libro: doc.id, tipo: 'nota', pagina: Number(hoja.dataset.pagina) - 1, punto: { x: dentro((e.clientX - r.left) / r.width), y: dentro((e.clientY - r.top) / r.height) }, creada: Date.now() };
+    guardarAnotacion(a);
+    fijarNotaAbierta(a.id);
+  };
+
   const pulsarLienzo = (e: MouseEvent) => {
+    if (colocando) {
+      ponerNota(e);
+      return;
+    }
     if (vista === 'continua' || !lienzo.current) return;
     const r = lienzo.current.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width;
@@ -485,7 +558,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             const e = escalaDe([medida(n)], hueco, zoom);
             const t = medida(n);
             return n >= cerca[0] && n <= cerca[1] ? (
-              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} />
+              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} {...propsAnotaciones(n)} />
             ) : (
               <div key={n} class="vs-pagina vs-reservada" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * e)}px`, height: `${Math.round(t.alto * e)}px` }} />
             );
@@ -495,7 +568,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     return (
       <div class={`vs-pliego ${rtl ? 'rtl' : ''}`}>
         {(lista[actual] ?? []).map((n) => (
-          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} />
+          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} {...propsAnotaciones(n)} />
         ))}
       </div>
     );
@@ -581,6 +654,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                 </span>
               )}
             </div>
+            <div class="vs-grupo" role="group" aria-label={tr('Anotaciones')}>
+              <Boton icono="marcador" etiqueta={marcador ? tr('Quitar el marcador de esta página') : tr('Marcar esta página')} activo={!!marcador} alPulsar={alternarMarcador} />
+              <Boton icono="nota-lapiz" etiqueta={colocando ? tr('Toca la página donde va la nota') : tr('Añadir una nota')} activo={colocando} alPulsar={() => fijarColocando(!colocando)} />
+              <Boton icono="nota" etiqueta={tr('Notas y marcadores')} activo={panel === 'notas'} alPulsar={() => fijarPanel(panel === 'notas' ? null : 'notas')} />
+            </div>
             <div class="vs-grupo">
               <Boton
                 icono="sentido"
@@ -615,7 +693,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           <aside class="vs-panel" aria-label={tr('Miniaturas')}>
             <div class="vs-miniaturas">
               {Array.from({ length: total }, (_, n) => (
-                <Miniatura key={n} paginador={paginador} n={n} actual={(lista[actual] ?? [pagina]).includes(n)} alElegir={() => irA(n)} />
+                <Miniatura key={n} paginador={paginador} n={n} actual={(lista[actual] ?? [pagina]).includes(n)} marcada={anotaciones.some((a) => a.tipo === 'marcador' && a.pagina === n)} alElegir={() => irA(n)} />
               ))}
             </div>
           </aside>
@@ -634,9 +712,12 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             </ol>
           </aside>
         )}
+        {paginador && panel === 'notas' && (
+          <PanelNotas titulo={doc.titulo} anotaciones={anotaciones} actual={lista[actual] ?? [pagina]} alIr={irA} alGuardar={guardarAnotacion} alQuitar={quitarAnotacion} />
+        )}
         <main
           ref={lienzo}
-          class={`vs-lienzo ${invertir ? 'invertido' : ''}`}
+          class={`vs-lienzo ${invertir ? 'invertido' : ''} ${colocando ? 'colocando' : ''}`}
           data-vista={vista}
           onClick={pulsarLienzo}
           onPointerDown={tocar}
@@ -661,6 +742,10 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             alMarcar={(t) => fijarMarca(t ? { pagina: abierta.pagina, indice: abierta.indice, ...t } : null)}
             alEditar={(texto) => editar(abierta.pagina, lineasAbiertas[abierta.indice], texto)}
             alRestaurar={() => restaurar(lineasAbiertas[abierta.indice])}
+            resaltados={resaltadosDe(anotaciones, abierta.pagina, lineasAbiertas[abierta.indice].caja)}
+            alResaltar={resaltar}
+            alGuardarAnotacion={guardarAnotacion}
+            alQuitarAnotacion={quitarAnotacion}
           />
         )}
         <Creador ajustes={a} />

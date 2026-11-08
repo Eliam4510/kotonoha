@@ -105,6 +105,8 @@ export const CATALOGO = {
   lapiz: 'pencil-simple',
   'nota-lapiz': 'note-pencil',
   nota: 'note',
+  resaltar: 'highlighter',
+  subrayar: 'text-underline',
   guardar: 'floppy-disk',
   subir: 'upload-simple',
   descargar: 'download-simple',

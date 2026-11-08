@@ -5,6 +5,7 @@ import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { DatosTrazos } from '../nucleo/trazos';
 import type {
+  AnotacionLibro,
   BorradorTarjeta,
   CambioBiblioteca,
   ColeccionBiblioteca,
@@ -149,6 +150,10 @@ export interface ApiMotor {
   coleccionGuardar(c: ColeccionBiblioteca): Promise<void>;
   /** Quita la colección; sus libros se quedan en la estantería, sueltos. */
   coleccionEliminar(id: string): Promise<void>;
+  /** Los marcadores, resaltados y notas de un libro. */
+  anotacionesDe(libro: string): Promise<AnotacionLibro[]>;
+  anotacionGuardar(a: AnotacionLibro): Promise<void>;
+  anotacionEliminar(id: string): Promise<void>;
 
   memoriaPendientes(limite: number): Promise<TarjetaMemoria[]>;
   memoriaResumen(): Promise<{ total: number; pendientes: number; nuevas: number }>;

@@ -2,6 +2,12 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.11.0 · 2026-11-08
+
+- **Notas y marcadores, como en un lector de PDF.** En los libros de páginas, **Marcar esta página** cuelga una cinta en la página, también en las miniaturas. Desde el panel de una línea se resalta en cuatro colores o se subraya la línea entera, una palabra o un tramo seleccionado, con un comentario si se quiere. **Añadir una nota** deja un papelito en el punto de la página que se toque.
+- **El panel «Notas y marcadores».** Reúne todo lo anotado por páginas: lleva a cada cosa, la edita o la quita, y **Copiar** lo pone en el portapapeles como texto con formato, para pegarlo en otra parte.
+- Los resaltados se guardan sobre la imagen de la página: siguen en su sitio aunque el OCR la vuelva a leer. Todo entra en la copia de seguridad y se va con el libro al eliminarlo.
+
 ## 0.10.0 · 2026-11-08
 
 - **Colecciones.** La estantería agrupa los libros en colecciones: una serie con sus tomos o los libros de un tema, con su tipo (manga, novela, estudio u otro), una descripción y su portada. Una carpeta con varios tomos entra ya como una colección, y un tomo nuevo de esa carpeta se añade a ella. Cada colección tiene su página, con sus libros en orden, el tomo por el que se va y un botón para seguir.
@@ -101,6 +107,12 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.11.0 · 2026-11-08
+
+- **Notes and bookmarks, as in a PDF reader.** In page books, **Bookmark this page** hangs a ribbon on the page, also in the thumbnails. From a line's panel, the whole line, a word or a selected stretch can be highlighted in four colours or underlined, with a comment if wanted. **Add a note** leaves a slip of paper on the spot of the page that is tapped.
+- **The "Notes and bookmarks" panel.** It gathers everything noted, by page: it leads to each item, edits it or removes it, and **Copy** puts it on the clipboard as formatted text, to paste elsewhere.
+- Highlights are stored on the page image: they stay in place even if OCR reads the page again. Everything is included in the backup and goes with the book when it is deleted.
 
 ## 0.10.0 · 2026-11-08
 

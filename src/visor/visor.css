@@ -83,6 +83,93 @@
 .vs-estado { margin-inline-start: auto; font-size: 12px; color: var(--texto-2); }
 .vs-estado.error { color: var(--error); }
 
+/* ---------- Lo anotado ----------
+   Los colores son de rotulador: se mezclan con la página (multiply), como la tinta sobre el papel. Son objetos de la
+   página, así que no cambian con el tema; con los colores invertidos, la página es oscura y se pintan sin mezclar. */
+.vs-pagina { --res-amarillo: 255, 212, 59; --res-verde: 105, 219, 124; --res-azul: 77, 171, 247; --res-rosa: 240, 101, 149; }
+.vs-resaltados, .vs-notas-pagina { position: absolute; inset: 0; pointer-events: none; }
+.vs-notas-pagina { z-index: 3; }
+.vs-resaltado { position: absolute; border-radius: 2px; --c: var(--res-amarillo); }
+.vs-resaltado.verde { --c: var(--res-verde); }
+.vs-resaltado.azul { --c: var(--res-azul); }
+.vs-resaltado.rosa { --c: var(--res-rosa); }
+.vs-resaltado.fondo { background: rgba(var(--c), 0.5); mix-blend-mode: multiply; }
+.vs-resaltado.subrayado { box-shadow: inset 0 -2.5px 0 rgb(var(--c)); }
+.vs-resaltado.subrayado.vertical { box-shadow: inset -2.5px 0 0 rgb(var(--c)); }
+.vs-lienzo.invertido .vs-resaltado.fondo { background: rgba(var(--c), 0.32); mix-blend-mode: normal; }
+
+/* La cinta del marcador, colgando del borde de arriba. */
+.vs-cinta { position: absolute; top: -3px; right: 9%; width: 18px; height: 30px; background: linear-gradient(90deg, #C23B2E, #E05040 55%, #C23B2E); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)); pointer-events: none; }
+.vs-miniatura-hoja { position: relative; }
+.vs-miniatura .vs-cinta { top: -2px; width: 10px; height: 16px; }
+
+/* Una nota suelta: un papelito sobre la página que se abre al tocarlo. */
+.vs-nota-pagina { position: absolute; width: 0; height: 0; pointer-events: auto; }
+.vs-nota-icono { position: absolute; left: -13px; top: -13px; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: none; border-radius: 4px 4px 4px 11px; background: #FFE27A; color: #6B5300; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.18); cursor: pointer; --ico-opacidad: 0.35; transition: transform 0.18s var(--resorte); }
+.vs-nota-icono:hover, .vs-nota-pagina.abierta .vs-nota-icono { transform: scale(1.12); }
+.vs-nota-pagina .vs-editor-nota { position: absolute; width: 260px; padding: 10px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-3); }
+.vs-nota-pagina.derecha .vs-editor-nota { left: 18px; }
+.vs-nota-pagina.izquierda .vs-editor-nota { right: 18px; }
+.vs-nota-pagina.abajo .vs-editor-nota { top: 4px; }
+.vs-nota-pagina.arriba .vs-editor-nota { bottom: 4px; }
+.vs-editor-nota { display: flex; flex-direction: column; gap: 8px; cursor: auto; }
+.vs-editor-nota textarea { width: 100%; resize: vertical; font-size: 14px; line-height: 1.5; }
+.vs-editor-nota-botones { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 4px; }
+/* Al añadir una nota, el siguiente toque en una página la pone ahí: las líneas no lo recogen. */
+.vs-lienzo.colocando .vs-pagina { cursor: crosshair; }
+.vs-lienzo.colocando .vs-texto { pointer-events: none; }
+
+/* En el panel de la línea: resaltar o subrayar, y lo ya resaltado, con su comentario. */
+.vs-resaltar { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--r-3); background: var(--superficie-2); }
+.vs-resaltar-que { display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 700; color: var(--texto-2); }
+.vs-resaltar-objetivo { align-self: flex-start; max-width: 100%; }
+.vs-resaltar-objetivo button { max-width: 14em; overflow: hidden; text-overflow: ellipsis; }
+.vs-resaltar-linea { margin: 0; font-size: 12px; line-height: 1.5; }
+.vs-resaltar-botones { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.vs-color { width: 24px; height: 24px; padding: 0; border: none; border-radius: 50%; background: rgb(var(--c)); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); cursor: pointer; transition: transform 0.16s var(--resorte); --c: 255, 212, 59; }
+.vs-color.verde { --c: 105, 219, 124; }
+.vs-color.azul { --c: 77, 171, 247; }
+.vs-color.rosa { --c: 240, 101, 149; }
+.vs-color:hover { transform: scale(1.15); }
+.vs-color:focus-visible { outline: 2px solid var(--hoja); outline-offset: 2px; }
+.vs-resaltar-botones .btn { margin-inline-start: auto; }
+.vs-resaltados-linea { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.vs-resaltado-linea { display: flex; flex-direction: column; gap: 4px; padding: 6px 0 6px 12px; border-inline-start: 3px solid rgb(var(--c)); --c: 255, 212, 59; }
+.vs-resaltado-linea.verde { --c: 105, 219, 124; }
+.vs-resaltado-linea.azul { --c: 77, 171, 247; }
+.vs-resaltado-linea.rosa { --c: 240, 101, 149; }
+.vs-resaltado-linea q { font-family: var(--letra-lengua); font-size: 15px; quotes: none; }
+.vs-resaltado-comentario { margin: 0; font-size: 13px; color: var(--texto-2); white-space: pre-wrap; }
+.vs-resaltado-acciones { display: flex; flex-wrap: wrap; gap: 2px; margin-inline-start: -8px; }
+
+/* El panel «Notas»: todo lo anotado del libro, por páginas. */
+.vs-panel-notas { width: 300px; display: flex; flex-direction: column; gap: 14px; padding: 12px; }
+.vs-notas-cab { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.vs-notas-cab .num { padding: 0 8px; border-radius: var(--r-pill); background: var(--superficie-3); font-size: 11.5px; font-weight: 700; color: var(--texto-2); }
+.vs-notas-cab .btn { margin-inline-start: auto; }
+.vs-notas-vacio { margin: 0; line-height: 1.6; }
+.vs-notas-grupo { display: flex; flex-direction: column; gap: 4px; }
+.vs-notas-grupo ul { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.vs-notas-pagina-ir { align-self: flex-start; padding: 2px 6px; margin-inline-start: -6px; border: none; border-radius: var(--r-1); background: none; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-3); cursor: pointer; }
+.vs-notas-pagina-ir:hover { background: var(--superficie-2); color: var(--texto); }
+.vs-notas-grupo.actual .vs-notas-pagina-ir { color: var(--hoja); }
+.vs-nota-item { position: relative; display: flex; align-items: flex-start; gap: 2px; border-radius: var(--r-2); --c: 255, 212, 59; }
+.vs-nota-item.verde { --c: 105, 219, 124; }
+.vs-nota-item.azul { --c: 77, 171, 247; }
+.vs-nota-item.rosa { --c: 240, 101, 149; }
+.vs-nota-item:hover { background: var(--superficie-2); }
+.vs-nota-item-ir { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 8px; padding: 7px 8px; border: none; background: none; text-align: start; color: var(--texto); font-size: 13px; line-height: 1.5; cursor: pointer; }
+.vs-nota-item-ir > .ico { flex: none; margin-top: 3px; color: var(--texto-3); }
+.vs-nota-item.marcador .vs-nota-item-ir > .ico { color: #D9483B; }
+.vs-nota-item.nota .vs-nota-item-ir > .ico { color: #B08A00; }
+.vs-nota-item.resaltado .vs-nota-item-ir > .ico { color: rgb(var(--c)); filter: brightness(0.85); }
+.vs-nota-item-texto { display: flex; flex-direction: column; gap: 4px; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.vs-nota-item-texto q { font-family: var(--letra-lengua); font-size: 14px; quotes: none; box-shadow: inset 0 -0.45em 0 rgba(var(--c), 0.45); }
+.vs-nota-comentario { font-size: 12.5px; color: var(--texto-2); }
+.vs-nota-item-acciones { display: flex; flex: none; opacity: 0; transition: opacity 0.14s; }
+.vs-nota-item:hover .vs-nota-item-acciones, .vs-nota-item:focus-within .vs-nota-item-acciones { opacity: 1; }
+.vs-nota-item .vs-editor-nota { flex: 1; padding: 6px 0; }
+
 .vs-pie { flex: none; display: flex; align-items: center; gap: 14px; padding: 6px 16px; background: var(--superficie); border-top: 1px solid var(--borde); font-size: 12.5px; color: var(--texto-2); }
 .vs-pie input[type='range'] { flex: 1; min-width: 80px; accent-color: var(--hoja); }
 .vs-capitulo { max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

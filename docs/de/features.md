@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.10.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.11.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -113,6 +113,7 @@ Stand jeder Funktion in Version 0.10.0 und die Art ihrer Überprüfung.
 | Die Texterkennung liest voraus: die nächsten Seiten (acht bei einem Manga, vier bei einem Buch), bevor man sie erreicht, und lässt übersprungene liegen | Automatisch |
 | Verarbeiten: ein ganzes Buch von seiner Karte aus mit der Texterkennung lesen, mit Fortschritt, Pause und „Text bereit“ am Ende | Automatisch, und mit einem echten Band |
 | Den Text einer Zeile von Hand bearbeiten, getrennt vom Gelesenen gespeichert und mit „Wiederherstellen“ | Automatisch |
+| Notizen und Lesezeichen wie in einem PDF-Reader: Seiten markieren, eine Zeile, ein Wort oder einen Abschnitt in vier Farben hervorheben oder unterstreichen, mit Kommentar, und Notizen auf der Seite; im Fenster „Notizen und Lesezeichen“ alles nach Seiten, zum Hinspringen, Bearbeiten, Entfernen oder Kopieren als Text | Automatisch |
 | Ein Tippen auf eine Zeile der Seite öffnet ihren Text mit Furigana und nachschlagbaren Wörtern, samt Wortfenster und Kartenerstellung | Automatisch |
 | Jede Seite wird nur einmal gelesen und gespeichert; ihr Text erreicht auch Bildschirmleser | Automatisch |
 | Text-EPUBs im Betrachter in ihrem eigenen Format: Kapitel, CSS, Ruby, Illustrationen und vertikale Schrift, mit dem Seiten-Reader darüber, mit Farben, Furigana und Wortfenstern | Automatisch, mit einem vertikalen EPUB mit Ruby, CSS und Illustration |
