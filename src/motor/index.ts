@@ -89,6 +89,7 @@ interface DatosDeLengua {
   palabras?: never[];
   biblioteca?: never[];
   colecciones?: never[];
+  anotaciones?: never[];
   memoria?: never[];
   generados?: never[];
   correcciones?: never[];
@@ -441,6 +442,7 @@ const api: ApiMotor = {
   async bibliotecaEliminar(id) {
     const e = await db.biblioteca.get(id);
     await db.biblioteca.delete(id);
+    await db.anotaciones.where('libro').equals(id).delete();
     // El archivo de un libro de páginas se guarda aparte, y lo que el OCR leyó de él también: se van con él.
     if (e?.documento) await Promise.all([borrarArchivoDocumento(id), olvidarOcr(id)]);
   },
@@ -456,6 +458,13 @@ const api: ApiMotor = {
         if (e.coleccion === id) delete e.coleccion;
       });
     });
+  },
+  anotacionesDe: (libro) => db.anotaciones.where('libro').equals(libro).toArray(),
+  async anotacionGuardar(a) {
+    await db.anotaciones.put(a);
+  },
+  async anotacionEliminar(id) {
+    await db.anotaciones.delete(id);
   },
 
   memoriaPendientes: (n) => memoria.pendientes(n),
@@ -475,6 +484,7 @@ const api: ApiMotor = {
         palabras: await base.palabras.toArray(),
         biblioteca: await base.biblioteca.toArray(),
         colecciones: await base.colecciones.toArray(),
+        anotaciones: await base.anotaciones.toArray(),
         memoria: await base.memoria.toArray(),
         // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
         generados: await base.generados.toArray(),
@@ -492,6 +502,7 @@ const api: ApiMotor = {
       if (datos.palabras) await base.palabras.bulkPut(datos.palabras);
       if (datos.biblioteca) await base.biblioteca.bulkPut(datos.biblioteca);
       if (datos.colecciones) await base.colecciones.bulkPut(datos.colecciones);
+      if (datos.anotaciones) await base.anotaciones.bulkPut(datos.anotaciones);
       if (datos.memoria) await base.memoria.bulkPut(datos.memoria);
       if (datos.generados) await base.generados.bulkPut(datos.generados);
       if (datos.correcciones) await base.correcciones.bulkPut(datos.correcciones);

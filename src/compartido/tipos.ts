@@ -1,6 +1,7 @@
 // Tipos compartidos entre el motor, el content script y la ventana de la app.
 
 import type { PuntoGramatica, SegmentoLectura, Transcripcion } from '../lenguas/tipos';
+import type { Caja } from '../nucleo/ocr';
 import type { Linea } from '../nucleo/subtitulos';
 
 export type EstadoPalabra = 'desconocida' | 'aprendiendo' | 'conocida' | 'ignorada';
@@ -250,6 +251,34 @@ export interface CambioBiblioteca {
   coleccion?: string | null;
   terminado?: number | null;
   documento?: Partial<DocumentoBiblioteca>;
+}
+
+export type ColorAnotacion = 'amarillo' | 'verde' | 'azul' | 'rosa';
+
+/**
+ * Lo que se anota en un libro de páginas, como en un lector de PDF: un marcador en una página, un resaltado o un subrayado
+ * de un tramo de una línea, con un comentario si se quiere, o una nota suelta en un punto de la página. Un resaltado guarda
+ * dónde está en la imagen de la página: así sigue en su sitio aunque el OCR vuelva a leerla.
+ */
+export interface AnotacionLibro {
+  id: string;
+  libro: string;
+  tipo: 'marcador' | 'resaltado' | 'nota';
+  pagina: number;
+  /** Resaltado: lo que ocupa en la página, en fracciones, y la caja de su línea entera. */
+  cajas?: Caja[];
+  linea?: Caja;
+  /** Resaltado: lo resaltado, tal cual se leía. */
+  texto?: string;
+  /** Resaltado: de fondo o subrayado, y si la línea va en vertical (el subrayado va entonces a su derecha). */
+  estilo?: 'fondo' | 'subrayado';
+  vertical?: boolean;
+  color?: ColorAnotacion;
+  /** Nota suelta: dónde está en la página, en fracciones. */
+  punto?: { x: number; y: number };
+  /** El texto de una nota, o el comentario de un resaltado. */
+  nota?: string;
+  creada: number;
 }
 
 /** Qué clase de colección es. En una de manga o de novelas, sus libros son tomos. */

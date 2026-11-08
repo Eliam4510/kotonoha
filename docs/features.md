@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.10.0, along with how it has been verified.
+Status of each feature in version 0.11.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -113,6 +113,7 @@ Status of each feature in version 0.10.0, along with how it has been verified.
 | OCR reads ahead: the next pages (eight in a manga, four in a book) before you reach them, and drops the ones you skip | Automated |
 | Process: read a whole book with OCR from its card, with progress, pause and "Text ready" at the end | Automated, and with a real volume |
 | Edit a line's text by hand, stored apart from what was read and with Restore | Automated |
+| Notes and bookmarks, as in a PDF reader: bookmark pages, highlight in four colours or underline a line, a word or a stretch, with a comment, and sticky notes on the page; in the "Notes and bookmarks" panel, everything by page, to go to, edit, remove or copy as text | Automated |
 | Tapping a line on the page opens its text with furigana and words to look up, with their word panel and card creation | Automated |
 | Each page is read only once and saved; its text also reaches screen readers | Automated |
 | Text EPUBs in the viewer, in their own format: chapters, CSS, ruby, illustrations and vertical writing, with the page reader on top, with colours, furigana and word panels | Automated, with a vertical EPUB with ruby, CSS and an illustration |
