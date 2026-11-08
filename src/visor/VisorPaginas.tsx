@@ -199,12 +199,14 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       fijarModoOcr(d.ocr?.modo ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'manga' : 'libro'));
       fijarTextoPdf(d.ocr?.textoPdf ?? true);
       edicionesDe(inicial.id).then((l) => vivo && fijarEdiciones(l), () => {});
-      // Un PDF no tiene portada hasta que se abre: se hace ahora con su primera página, para la estantería.
+      // Un libro sin portada (un PDF importado antes de que se hicieran al importarlo) la saca de su primera página.
       if (!d.portada) {
         p.imagen(0)
           .then(async (primera) => {
             const portada = await miniaturaDe(await (await fetch(primera.url)).blob());
-            if (vivo) fijarDoc((x) => (x.documento ? { ...x, documento: { ...x.documento, portada } } : x));
+            if (!vivo) return;
+            fijarDoc((x) => (x.documento ? { ...x, documento: { ...x.documento, portada } } : x));
+            await motor.bibliotecaCambiar(inicial.id, { documento: { portada } });
           })
           .catch(() => {});
       }
@@ -255,16 +257,36 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const haciaDerecha = () => (rtl ? anterior() : siguiente());
   const zoomPaso = (arriba: boolean) => fijarZoom(pasoDeZoom(escala * 100, arriba));
 
-  // Recuerda por dónde se va y cómo se lee cada libro.
+  // Recuerda por dónde se va y cómo se lee cada libro: solo eso, encima de lo último guardado, para no deshacer lo que se
+  // cambie en la estantería mientras el libro está abierto. Al ver la última página, el libro queda terminado.
+  const alFinal = !!paginador && (lista[actual] ?? [pagina]).includes(paginador.total - 1);
   useEffect(() => {
     if (!doc.documento || !paginador) return;
     const t = setTimeout(() => {
+      const terminar = alFinal && !doc.terminado;
+      if (terminar) fijarDoc((x) => ({ ...x, terminado: Date.now() }));
       motor
-        .bibliotecaGuardar({ ...doc, pagina, abierto: Date.now(), documento: { ...doc.documento!, paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, ocr: { activo: ocr, modo: modoOcr, ...(textoPdf ? {} : { textoPdf }) } } })
+        .bibliotecaCambiar(doc.id, {
+          pagina,
+          abierto: Date.now(),
+          ...(terminar ? { terminado: Date.now() } : {}),
+          documento: { paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, ocr: { activo: ocr, modo: modoOcr, ...(textoPdf ? {} : { textoPdf }) } },
+        })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(t);
-  }, [doc, paginador, pagina, vista, direccion, portadaSola, anchas, zoom, ocr, modoOcr, textoPdf]);
+  }, [doc.id, paginador, pagina, alFinal, vista, direccion, portadaSola, anchas, zoom, ocr, modoOcr, textoPdf]);
+
+  // La portada de la estantería, de la página que se está viendo.
+  const [portadaHecha, fijarPortadaHecha] = useState(false);
+  const usarComoPortada = async () => {
+    if (!paginador) return;
+    const portada = await miniaturaDe(await (await fetch((await paginador.imagen(pagina)).url)).blob());
+    fijarDoc((x) => (x.documento ? { ...x, documento: { ...x.documento, portada } } : x));
+    await motor.bibliotecaCambiar(doc.id, { documento: { portada } });
+    fijarPortadaHecha(true);
+    setTimeout(() => fijarPortadaHecha(false), 2500);
+  };
 
   // Al pasar de página se vuelve arriba; en el desplazamiento continuo, se lleva la página a la vista.
   useEffect(() => {
@@ -568,6 +590,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
               />
               <Boton icono="miniaturas" etiqueta={tr('Miniaturas')} activo={panel === 'miniaturas'} alPulsar={() => fijarPanel(panel === 'miniaturas' ? null : 'miniaturas')} />
               {paginador.indice.length > 0 && <Boton icono="indice" etiqueta={tr('Índice')} activo={panel === 'indice'} alPulsar={() => fijarPanel(panel === 'indice' ? null : 'indice')} />}
+              <Boton
+                icono={portadaHecha ? 'ok' : 'imagen'}
+                etiqueta={portadaHecha ? tr('Es la portada en la estantería') : tr('Usar esta página como portada')}
+                alPulsar={() => usarComoPortada().catch(console.error)}
+              />
               <Boton
                 icono="invertir"
                 etiqueta={tr('Invertir colores')}

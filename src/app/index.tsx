@@ -16,7 +16,8 @@ import { PantallaAjustes } from './Ajustes';
 import { Bienvenida } from './Bienvenida';
 import { Creador } from './Creador';
 import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navegar, refrescarAnki, useMedia } from './estadoApp';
-import { Biblioteca, Diccionario, Inicio, Lector, Memoria, Palabras } from './Pantallas';
+import { Biblioteca } from './Biblioteca';
+import { Diccionario, Inicio, Lector, Memoria, Palabras } from './Pantallas';
 import { ReproductorLocal } from './ReproductorLocal';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
 
@@ -199,7 +200,7 @@ function App() {
         {ruta === 'inicio' && <Inicio ajustes={a} />}
         {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} />}
         {ruta === 'lector' && <Lector ajustes={a} inicial={params.get('t') ?? ''} />}
-        {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} />}
+        {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
         {ruta === 'reproductor' && <ReproductorLocal a={a} />}
         {ruta === 'memoria' && <Memoria />}
         {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}

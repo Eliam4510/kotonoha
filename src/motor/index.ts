@@ -6,6 +6,7 @@ import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc'
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
 import { borrarArchivoDocumento } from '../compartido/documentos';
 import { olvidarOcr } from '../compartido/paginasOcr';
+import { aplicarCambio } from '../nucleo/estanteria';
 import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
 import type { Linea } from '../nucleo/subtitulos';
@@ -87,6 +88,7 @@ async function repararDiccionarios() {
 interface DatosDeLengua {
   palabras?: never[];
   biblioteca?: never[];
+  colecciones?: never[];
   memoria?: never[];
   generados?: never[];
   correcciones?: never[];
@@ -427,6 +429,15 @@ const api: ApiMotor = {
   async bibliotecaGuardar(e: ElementoBiblioteca) {
     await db.biblioteca.put(e);
   },
+  // Leer y escribir en la misma transacción: lo que otra pestaña guarde entre medias no se pierde.
+  bibliotecaCambiar: (id, cambio) =>
+    db.transaction('rw', db.biblioteca, async () => {
+      const e = await db.biblioteca.get(id);
+      if (!e) return undefined;
+      const nuevo = aplicarCambio(e, cambio);
+      await db.biblioteca.put(nuevo);
+      return nuevo;
+    }),
   async bibliotecaEliminar(id) {
     const e = await db.biblioteca.get(id);
     await db.biblioteca.delete(id);
@@ -434,6 +445,18 @@ const api: ApiMotor = {
     if (e?.documento) await Promise.all([borrarArchivoDocumento(id), olvidarOcr(id)]);
   },
   bibliotecaObtener: (id) => db.biblioteca.get(id),
+  coleccionesListar: () => db.colecciones.orderBy('creada').toArray(),
+  async coleccionGuardar(c) {
+    await db.colecciones.put(c);
+  },
+  async coleccionEliminar(id) {
+    await db.transaction('rw', db.colecciones, db.biblioteca, async () => {
+      await db.colecciones.delete(id);
+      await db.biblioteca.toCollection().modify((e) => {
+        if (e.coleccion === id) delete e.coleccion;
+      });
+    });
+  },
 
   memoriaPendientes: (n) => memoria.pendientes(n),
   memoriaResumen: () => memoria.resumen(),
@@ -451,6 +474,7 @@ const api: ApiMotor = {
       lenguas[id] = {
         palabras: await base.palabras.toArray(),
         biblioteca: await base.biblioteca.toArray(),
+        colecciones: await base.colecciones.toArray(),
         memoria: await base.memoria.toArray(),
         // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
         generados: await base.generados.toArray(),
@@ -467,6 +491,7 @@ const api: ApiMotor = {
       const base = baseDe(paqueteDe(id).id);
       if (datos.palabras) await base.palabras.bulkPut(datos.palabras);
       if (datos.biblioteca) await base.biblioteca.bulkPut(datos.biblioteca);
+      if (datos.colecciones) await base.colecciones.bulkPut(datos.colecciones);
       if (datos.memoria) await base.memoria.bulkPut(datos.memoria);
       if (datos.generados) await base.generados.bulkPut(datos.generados);
       if (datos.correcciones) await base.correcciones.bulkPut(datos.correcciones);

@@ -82,7 +82,7 @@ flowchart LR
 
 <img src="docs/img/libro-texto.ko.png" alt="루비, 색, 단어 패널이 표시된 세로쓰기 일본어 소설" width="100%">
 
-**읽기 도우미**는 PDF 리더처럼 완전한 뷰어입니다. 확대·축소, 두 쪽 보기, 연속 스크롤, 목차, 썸네일을 갖추고 책마다 읽던 페이지를 기억합니다. 소설 같은 텍스트 EPUB은 원래의 서식, 루비, 세로쓰기를 그대로 살리고, 그 위에 페이지 리더가 웹에서처럼 색, 후리가나, 단어 패널을 더합니다. 텍스트가 들어 있는 PDF는 곧바로 단어 단위로 읽을 수 있습니다. 이미지 폴더로 된 만화는 폴더를 고르기만 하면 들어오며, 권마다 책 한 권이 되고 표지가 맨 앞에, 컬러 두 쪽 그림은 통째로 보입니다.
+**읽기 도우미**는 PDF 리더처럼 완전한 뷰어입니다. 확대·축소, 두 쪽 보기, 연속 스크롤, 목차, 썸네일을 갖추고 책마다 읽던 페이지를 기억합니다. 소설 같은 텍스트 EPUB은 원래의 서식, 루비, 세로쓰기를 그대로 살리고, 그 위에 페이지 리더가 웹에서처럼 색, 후리가나, 단어 패널을 더합니다. 텍스트가 들어 있는 PDF는 곧바로 단어 단위로 읽을 수 있습니다. 이미지 폴더로 된 만화는 폴더를 고르기만 하면 들어오며, 권마다 책 한 권이 되고 표지가 맨 앞에, 컬러 두 쪽 그림은 통째로 보입니다. 책장은 시리즈와 그 권들처럼 책을 컬렉션으로 묶어 표지와 설명을 붙이고, 책과 컬렉션마다 얼마나 읽었는지 보여 줍니다.
 
 <img src="docs/img/ocr.ko.png" alt="문자를 인식한 스캔 페이지와 週末를 보여 주는 줄 패널" width="100%">
 
@@ -183,7 +183,7 @@ TypeScript, Preact, Dexie, esbuild를 쓰며, 음성과 OCR에는 WebGPU 위의 
 
 - 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io). 영어와 독일어는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org)를 거친 [Wiktionary](https://www.wiktionary.org).
 - 음성: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja, Parakeet과 [Transformers.js](https://github.com/huggingface/transformers.js).
-- 문자 인식: [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr), [말풍선 검출기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
+- 문자 인식: [PP-OCRv5와 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr), [말풍선 검출기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - 획순: Ulrich Apel의 [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0.
 - 아이콘: [Phosphor](https://phosphoricons.com). 글꼴: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic), [Nunito](https://fonts.google.com/specimen/Nunito).
 

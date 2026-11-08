@@ -9,7 +9,7 @@ import { type LineaTexto, lineasDePdf, type TrozoPdf } from '../nucleo/capaTexto
 import { escaneoDe, LADO_MAXIMO_OCR, recorteVisible, rgbaDe } from '../nucleo/escaneo';
 import type { Tamano } from '../nucleo/imagenes';
 import type { Direccion, EntradaIndice } from '../nucleo/libro';
-import { CachePaginas, type ImagenOcr, type Paginador } from './paginador';
+import { CachePaginas, type ImagenOcr, miniaturaDe, type Paginador } from './paginador';
 
 const base = () => chrome.runtime.getURL('pdfjs/');
 /** Puntos de PDF a píxeles de pantalla al 100 %, como en cualquier lector de PDF. */
@@ -207,4 +207,18 @@ export async function paginadorDePdf(archivo: Blob): Promise<Paginador> {
       tarea.destroy().catch(() => {});
     },
   };
+}
+
+/** Lo que la estantería guarda de un PDF al importarlo: cuántas páginas tiene, su sentido de lectura y su portada en pequeño. */
+export async function datosDePdf(archivo: Blob): Promise<{ paginas: number; direccion: Direccion; portada?: string }> {
+  const p = await paginadorDePdf(archivo);
+  try {
+    const portada = await p
+      .imagen(0)
+      .then(async (primera) => miniaturaDe(await (await fetch(primera.url)).blob()))
+      .catch(() => undefined);
+    return { paginas: p.total, direccion: p.direccion, ...(portada ? { portada } : {}) };
+  } finally {
+    p.cerrar();
+  }
 }

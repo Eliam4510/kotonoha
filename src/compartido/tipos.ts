@@ -233,6 +233,37 @@ export interface ElementoBiblioteca {
   pagina?: number;
   comprension?: number;
   documento?: DocumentoBiblioteca;
+  /** La colección en que está, si está en una. */
+  coleccion?: string;
+  /** Cuándo se terminó de leer: al llegar a la última página, o al marcarlo a mano. */
+  terminado?: number;
+}
+
+/**
+ * Un cambio de algunos campos de un elemento de la biblioteca, que se aplica sobre lo último guardado: así el visor, que
+ * guarda por dónde se va, no deshace lo que se cambió en la estantería mientras tanto. null quita el campo.
+ */
+export interface CambioBiblioteca {
+  titulo?: string;
+  pagina?: number;
+  abierto?: number;
+  coleccion?: string | null;
+  terminado?: number | null;
+  documento?: Partial<DocumentoBiblioteca>;
+}
+
+/** Qué clase de colección es. En una de manga o de novelas, sus libros son tomos. */
+export type TipoColeccion = 'manga' | 'novela' | 'estudio' | 'otro';
+
+/** Una colección de la estantería: una serie con sus tomos, o los libros de un tema. */
+export interface ColeccionBiblioteca {
+  id: string;
+  nombre: string;
+  tipo?: TipoColeccion;
+  descripcion?: string;
+  /** La portada elegida, en pequeño (JPEG en una URL de datos). Sin ella, la del primer libro que tenga portada. */
+  portada?: string;
+  creada: number;
 }
 
 export interface TarjetaMemoria {

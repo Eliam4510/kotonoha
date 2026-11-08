@@ -406,6 +406,89 @@ section .ap-botones { margin-top: 10px; }
 .ap-obi { position: absolute; left: 0; right: 0; bottom: 0; height: 21%; display: flex; align-items: center; gap: 5px; padding: 0 10%; font-size: 11px; font-weight: 700; color: var(--obi-tinta); background: var(--obi); box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.14); --ico-opacidad: 0.45; }
 .ap-obi-avance { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--obi-tinta); opacity: 0.8; border-radius: 0 2px 2px 0; }
 
+/* ---------- Colecciones y progreso de lectura ---------- */
+.ap-libro-estado { color: var(--texto-2); }
+.ap-libro-estado.terminado { display: flex; align-items: center; gap: 4px; color: var(--hoja); }
+.ap-libro-menu { position: absolute; top: 8px; right: 8px; z-index: 3; }
+.ap-libro-menu > .btn-icono { opacity: 0; transition: opacity 0.14s; }
+.ap-libro-tapa-marco:hover .ap-libro-menu > .btn-icono, .ap-libro-menu > .btn-icono:focus-visible, .ap-libro-menu.abierto > .btn-icono { opacity: 1; }
+.ap-menu-libro { position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; display: flex; flex-direction: column; min-width: 230px; padding: 6px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-3); animation: kk-aparecer 0.16s var(--salida); }
+.ap-menu-libro button { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 12px; border-radius: var(--r-2); font-size: 13px; font-weight: 600; color: var(--texto); text-align: left; }
+.ap-menu-libro button:hover, .ap-menu-libro button:focus-visible { background: var(--superficie-3); outline: none; }
+
+/* Una colección es una pila de tomos: otras dos tapas asoman por detrás de la primera. */
+.ap-pila { isolation: isolate; }
+.ap-pila::before, .ap-pila::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 4px 10px 10px 4px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 45%), #DCD2B6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), 0 6px 14px rgba(0, 0, 0, 0.14);
+  transition: transform 0.24s var(--resorte);
+}
+.ap-pila::before { transform: translate(10px, -9px) rotate(3deg); filter: brightness(0.84); }
+.ap-pila::after { transform: translate(5px, -5px) rotate(1.5deg); filter: brightness(0.93); }
+.ap-coleccion .ap-pila:hover::before { transform: translate(14px, -13px) rotate(4.5deg); }
+.ap-coleccion .ap-pila:hover::after { transform: translate(8px, -8px) rotate(2.4deg); }
+.ap-coleccion { padding-right: 10px; }
+
+.ap-estanteria-cab { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin: 32px 0 18px; }
+.ap-estanteria-cab .ap-seccion-titulo { margin: 0 auto 0 0; }
+.ap-estanteria-nada { padding: 28px 0; }
+
+.ap-en-curso .ap-seccion-titulo { margin-bottom: 12px; }
+.ap-en-curso-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.ap-en-curso-libro { display: flex; align-items: center; gap: 14px; padding: 10px 16px 10px 12px; text-align: left; transition: transform 0.2s var(--resorte), box-shadow 0.2s; }
+.ap-en-curso-libro:hover { transform: translateY(-2px); box-shadow: var(--brillo), var(--sombra-2); }
+.ap-en-curso-libro > .ico { flex: none; color: var(--texto-3); }
+.ap-en-curso-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ap-en-curso-texto b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; }
+.ap-en-curso-texto .ayuda { font-size: 12px; }
+.ap-en-curso-texto .barra-progreso { display: block; height: 4px; }
+.ap-en-curso-texto .barra-progreso > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--caramelo); }
+
+.ap-volver { margin: 2px 0 6px -8px; }
+.ap-vista-coleccion.arrastrando { outline: 2px dashed var(--hoja); outline-offset: -4px; border-radius: var(--r-4); }
+.ap-coleccion-cab { display: flex; align-items: flex-start; gap: 40px; padding: 22px 0 6px; }
+.ap-coleccion-tapa { position: relative; flex: none; width: 168px; margin-right: 10px; }
+.ap-coleccion-tapa .ap-tapa:hover { transform: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 10px 22px rgba(0, 0, 0, 0.2); }
+.ap-coleccion-datos { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.ap-coleccion-tipo { font-size: 11.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-3); }
+.ap-coleccion-datos h1 { font-size: 30px; line-height: 1.2; overflow-wrap: anywhere; }
+.ap-coleccion-descripcion { max-width: 64ch; color: var(--texto-2); line-height: 1.6; white-space: pre-wrap; }
+.ap-coleccion-avance { display: flex; flex-direction: column; gap: 6px; width: min(420px, 100%); margin-top: 4px; }
+.ap-coleccion-avance .barra-progreso { height: 6px; }
+.ap-coleccion-acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.ap-coleccion-seguir { max-width: 100%; }
+.ap-coleccion-seguir > span { min-width: 0; max-width: 36ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-vista-coleccion .ap-estanteria { margin-top: 34px; }
+@media (max-width: 720px) {
+  .ap-coleccion-cab { flex-direction: column; gap: 22px; }
+}
+
+.ap-dialogo { width: min(520px, 100%); max-height: calc(100vh - 48px); display: flex; flex-direction: column; gap: 14px; padding: 26px 26px 22px; }
+.ap-dialogo h2 { padding-right: 34px; font-size: 19px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-dialogo-form { display: flex; flex-direction: column; gap: 16px; }
+.ap-dialogo-campo { display: flex; flex-direction: column; gap: 6px; }
+.ap-dialogo-campo > span { font-size: 12.5px; font-weight: 700; color: var(--texto-2); }
+.ap-dialogo-campo .segmentado { align-self: flex-start; flex-wrap: wrap; }
+.ap-dialogo-botones { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.ap-dialogo-lista { display: flex; flex-direction: column; gap: 2px; max-height: 52vh; margin: 0; padding: 2px; overflow-y: auto; list-style: none; }
+.ap-dialogo-opcion { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 12px; border-radius: var(--r-3); text-align: left; cursor: pointer; transition: background 0.12s; }
+.ap-dialogo-opcion:hover { background: var(--superficie-2); }
+.ap-dialogo-opcion.elegida { background: var(--hoja-suave); }
+.ap-dialogo-opcion .ap-tapa.mini { width: 30px; }
+.ap-dialogo-opcion > .ico { flex: none; color: var(--hoja); }
+.ap-dialogo-opcion input[type='checkbox'] { flex: none; width: 16px; height: 16px; accent-color: var(--hoja); }
+.ap-dialogo-opcion.nueva { color: var(--hoja); }
+.ap-dialogo-opcion.nueva .hoja-icono { width: 30px; height: 30px; }
+.ap-dialogo-opcion-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ap-dialogo-opcion-texto b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; font-weight: 700; }
+.ap-dialogo-opcion-texto .ayuda { font-size: 12px; }
+.ap-portadas { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 12px; max-height: 46vh; padding: 6px 4px; overflow-y: auto; }
+.ap-portada-opcion { display: block; aspect-ratio: 5 / 7.2; overflow: hidden; border-radius: 3px 7px 7px 3px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 14px rgba(0, 0, 0, 0.16); transition: transform 0.2s var(--resorte), box-shadow 0.2s; }
+.ap-portada-opcion img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ap-portada-opcion:hover { transform: translateY(-3px); }
+.ap-portada-opcion.elegida { box-shadow: 0 0 0 3px var(--hoja), 0 6px 14px rgba(0, 0, 0, 0.2); }
+
 /* ---------- Reproductor local ---------- */
 .ap-local { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; animation: kk-fundido 0.3s var(--salida); }
 .ap-local.con-video { padding: 0; background: #000; }

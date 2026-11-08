@@ -19,6 +19,8 @@ export interface LibroDeImagenes<T> {
   paginas: { nombre: string; archivo: T }[];
   /** El ComicInfo.xml de la carpeta, si lo trae: dice el título y el sentido de lectura. */
   info?: T;
+  /** La carpeta de la que es uno de los tomos («Serie», o «Mangas/Serie»): la de su colección. */
+  carpeta?: string;
 }
 
 /** Lo que no es del libro: archivos y carpetas ocultos, y lo que deja macOS al comprimir. */
@@ -43,8 +45,11 @@ const unir = (arriba: string, nombre: string) => (arriba && EMPIEZA_POR_TOMO.tes
 const DOMINIO = /[\w-]+\.(?:com|net|org|app|io|to|me|info|cc|tv|xyz|site|online|club|top|biz|ws)(?![a-z])[\s_-]*/gi;
 const limpio = (titulo: string) => titulo.replace(DOMINIO, '').trim() || titulo;
 
+/** El nombre de una carpeta a partir de su ruta («Mangas/Mi serie» es «Mi serie»), sin la web de donde se bajó. */
+export const nombreDeCarpeta = (ruta: string) => limpio(ruta.slice(ruta.lastIndexOf('/') + 1));
+
 /** Orden natural sin distinguir «Mi_Serie_v02» de «Mi Serie v02»: así los tomos se importan en orden. */
-const porNombre = (a: string, b: string) => ordenNatural(a.replace(/[\s_]+/g, ' '), b.replace(/[\s_]+/g, ' '));
+export const porNombre = (a: string, b: string) => ordenNatural(a.replace(/[\s_]+/g, ' '), b.replace(/[\s_]+/g, ' '));
 
 /** Los archivos por su primera carpeta, en orden, con las rutas ya relativas a ella. */
 function agrupar<T>(lista: ArchivoEnCarpeta<T>[]): Map<string, ArchivoEnCarpeta<T>[]> {
@@ -58,14 +63,19 @@ function agrupar<T>(lista: ArchivoEnCarpeta<T>[]): Map<string, ArchivoEnCarpeta<
   return new Map([...grupos].sort(([a], [b]) => porNombre(a, b)));
 }
 
-/** Si las subcarpetas son tomos, cada uno su libro, o los capítulos de uno solo. Primero por sus nombres; si no dicen nada, por lo que traen. */
-function sonTomos<T>(subcarpetas: Map<string, ArchivoEnCarpeta<T>[]>): boolean {
+const esTomo = (nombre: string) => TOMO.test(nombre) && !CAPITULO.test(nombre);
+
+/**
+ * Si las subcarpetas son tomos, cada uno su libro, o los capítulos de uno solo. Primero por sus nombres; si no dicen nada,
+ * por lo que traen. «nombre» dice que se llaman como tomos: entonces la carpeta es una serie.
+ */
+function sonTomos<T>(subcarpetas: Map<string, ArchivoEnCarpeta<T>[]>): 'nombre' | 'paginas' | false {
   const nombres = [...subcarpetas.keys()];
-  const tomos = nombres.filter((n) => TOMO.test(n) && !CAPITULO.test(n)).length;
+  const tomos = nombres.filter(esTomo).length;
   const capitulos = nombres.filter((n) => CAPITULO.test(n)).length;
-  if (tomos !== capitulos) return tomos > capitulos;
+  if (tomos !== capitulos) return tomos > capitulos ? 'nombre' : false;
   const cuantas = [...subcarpetas.values()].map((l) => l.filter((a) => IMAGEN.test(a.ruta)).length).sort((a, b) => a - b);
-  return cuantas[Math.floor(cuantas.length / 2)] >= PAGINAS_DE_UN_TOMO;
+  return cuantas[Math.floor(cuantas.length / 2)] >= PAGINAS_DE_UN_TOMO ? 'paginas' : false;
 }
 
 function libro<T>(titulo: string, archivos: ArchivoEnCarpeta<T>[]): LibroDeImagenes<T> {
@@ -75,19 +85,28 @@ function libro<T>(titulo: string, archivos: ArchivoEnCarpeta<T>[]): LibroDeImage
   return { titulo: limpio(titulo), paginas: ordenDePaginas([...imagenes.keys()]).map((nombre) => ({ nombre, archivo: imagenes.get(nombre)! })), ...(info ? { info } : {}) };
 }
 
-/** Los libros de una carpeta, con las rutas ya relativas a ella. */
-function librosDeCarpeta<T>(titulo: string, archivos: ArchivoEnCarpeta<T>[]): LibroDeImagenes<T>[] {
+/** Los libros de una carpeta, con las rutas ya relativas a ella. `ruta` es la de la carpeta, desde lo elegido. */
+function librosDeCarpeta<T>(titulo: string, archivos: ArchivoEnCarpeta<T>[], ruta: string): LibroDeImagenes<T>[] {
   const directas = archivos.filter((a) => !a.ruta.includes('/') && IMAGEN.test(a.ruta)).length;
   const subcarpetas = agrupar(archivos.filter((a) => a.ruta.includes('/')));
   for (const [nombre, lista] of subcarpetas) if (!lista.some((a) => IMAGEN.test(a.ruta))) subcarpetas.delete(nombre);
   if (!subcarpetas.size) return directas ? [libro(titulo, archivos)] : [];
-  // Una carpeta que solo envuelve a otra («Tomo 4/サンプル（4）»): el libro es el de dentro.
+  // Una carpeta que solo envuelve a otra («Tomo 4/サンプル（4）»): el libro es el de dentro. Si la de dentro se llama como
+  // un tomo, esta es su serie, aunque solo traiga uno.
   if (!directas && subcarpetas.size === 1) {
     const [[nombre, lista]] = subcarpetas;
-    return librosDeCarpeta(unir(titulo, nombre), lista);
+    const dentro = librosDeCarpeta(unir(titulo, nombre), lista, `${ruta}/${nombre}`);
+    return esTomo(nombre) ? dentro.map((l) => ({ ...l, carpeta: ruta })) : dentro;
   }
-  // Tomos, cada uno su libro. Si al lado hay una o dos imágenes sueltas, son la portada de la serie y no de un tomo.
-  if (directas <= 2 && sonTomos(subcarpetas)) return [...subcarpetas].flatMap(([nombre, lista]) => librosDeCarpeta(unir(titulo, nombre), lista));
+  // Tomos, cada uno su libro. Si se llaman como tomos, esta carpeta es su serie, y la de todos los que salgan de dentro
+  // («Serie/v02-03/第02巻»); si solo se parecen por lo que traen, pueden ser series distintas, y cada una se queda la suya.
+  // Si al lado hay una o dos imágenes sueltas, son la portada de la serie y no de un tomo.
+  const tomos = directas <= 2 && sonTomos(subcarpetas);
+  if (tomos) {
+    return [...subcarpetas].flatMap(([nombre, lista]) =>
+      librosDeCarpeta(unir(titulo, nombre), lista, `${ruta}/${nombre}`).map((l) => (tomos === 'nombre' || !l.carpeta ? { ...l, carpeta: ruta } : l))
+    );
+  }
   return [libro(titulo, archivos)];
 }
 
@@ -108,7 +127,7 @@ function tituloDeSueltas(nombres: string[]): string {
 export function librosDeImagenes<T>(archivos: ArchivoEnCarpeta<T>[], titulo: string): LibroDeImagenes<T>[] {
   const utiles = archivos.filter((a) => !OCULTO.test(a.ruta) && (IMAGEN.test(a.ruta) || INFO.test(a.ruta)));
   const salida: LibroDeImagenes<T>[] = [];
-  for (const [nombre, lista] of agrupar(utiles.filter((a) => a.ruta.includes('/')))) salida.push(...librosDeCarpeta(nombre, lista));
+  for (const [nombre, lista] of agrupar(utiles.filter((a) => a.ruta.includes('/')))) salida.push(...librosDeCarpeta(nombre, lista, nombre));
   const sueltas = utiles.filter((a) => !a.ruta.includes('/') && IMAGEN.test(a.ruta));
   if (sueltas.length) salida.push(libro(tituloDeSueltas(sueltas.map((a) => a.ruta)) || titulo, sueltas));
   return salida;

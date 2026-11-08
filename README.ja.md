@@ -82,7 +82,7 @@ flowchart LR
 
 <img src="docs/img/libro-texto.ja.png" alt="『不思議の国のアリス』の EPUB に IPA と色分けが付き、consider の単語パネルが開いている" width="100%">
 
-**読書アシスト**は、PDF リーダーのような本格的なビューアーです。拡大・縮小、見開き、連続スクロール、目次、サムネイルに加え、本ごとに読んでいたページを覚えています。小説のようなテキストの EPUB は、元のレイアウトのまま表示され、その上にページリーダーが重なります。ウェブと同じように、色分け、発音記号、単語パネルが使えます。テキストを含む PDF は、そのまま単語ごとに読めます。画像フォルダーの漫画はフォルダーを選ぶだけで読み込め、巻ごとに1冊の本になり、表紙が先頭に、カラーの見開きはそのまま表示されます。
+**読書アシスト**は、PDF リーダーのような本格的なビューアーです。拡大・縮小、見開き、連続スクロール、目次、サムネイルに加え、本ごとに読んでいたページを覚えています。小説のようなテキストの EPUB は、元のレイアウトのまま表示され、その上にページリーダーが重なります。ウェブと同じように、色分け、発音記号、単語パネルが使えます。テキストを含む PDF は、そのまま単語ごとに読めます。画像フォルダーの漫画はフォルダーを選ぶだけで読み込め、巻ごとに1冊の本になり、表紙が先頭に、カラーの見開きはそのまま表示されます。本棚では、シリーズとその各巻のように本をコレクションにまとめて表紙と説明を付けられ、本ごと・コレクションごとにどこまで読んだかが分かります。
 
 <img src="docs/img/ocr.ja.png" alt="スキャンした英語のページから読み取った文字と、borrow を示す行パネル" width="100%">
 
@@ -179,7 +179,7 @@ TypeScript、Preact、Dexie、esbuild で作られ、音声と OCR には WebGPU
 
 - 辞書：英語とドイツ語は [Wiktionary](https://www.wiktionary.org)（[wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org) による整形）、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、英語の解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。日本語は [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium)、[JPDB](https://jpdb.io)。
 - 音声：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja、Parakeet と [Transformers.js](https://github.com/huggingface/transformers.js)。
-- 文字認識：[PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr)、[吹き出し検出モデル](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
+- 文字認識：[PP-OCRv5 と PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr)、[吹き出し検出モデル](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - アイコン：[Phosphor](https://phosphoricons.com)。フォント：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic)、[Nunito](https://fonts.google.com/specimen/Nunito)。
 
 名前は『古今和歌集』仮名序（905 年頃）に由来します。「やまとうたは、人の心を種として、万の言の葉とぞなれりける」。

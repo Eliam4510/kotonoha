@@ -82,7 +82,7 @@ On news sites, blogs, wikis or in a chat such as Claude’s, Japanese text gets 
 
 <img src="docs/img/libro-texto.en.png" alt="Vertical Japanese novel with ruby, colours and a word panel" width="100%">
 
-The **Reading assistant** is a complete viewer, like a PDF reader: zoom, two-page spreads, continuous scrolling, table of contents, thumbnails and the page where you left each book. A text EPUB, such as a novel, keeps its own formatting, ruby and vertical writing, with the page reader on top: colours, furigana and word panels, as on the web. A PDF that contains text can be read word by word right away. Manga that comes in image folders is imported by choosing the folder: each volume becomes a book, with its cover first and its colour spreads whole.
+The **Reading assistant** is a complete viewer, like a PDF reader: zoom, two-page spreads, continuous scrolling, table of contents, thumbnails and the page where you left each book. A text EPUB, such as a novel, keeps its own formatting, ruby and vertical writing, with the page reader on top: colours, furigana and word panels, as on the web. A PDF that contains text can be read word by word right away. Manga that comes in image folders is imported by choosing the folder: each volume becomes a book, with its cover first and its colour spreads whole. The shelf groups books into collections, such as a series with its volumes, each with its cover and a description, and shows how much of each book and each collection has been read.
 
 <img src="docs/img/ocr.en.png" alt="Scanned page with its recognised text and the line panel showing the word 週末" width="100%">
 
@@ -181,7 +181,7 @@ The code is released under the [MIT license](LICENSE). Third-party components, t
 
 - Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io); for English and German, [Wiktionary](https://www.wiktionary.org) through [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) and [kaikki.org](https://kaikki.org).
 - Speech: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja and Parakeet, with [Transformers.js](https://github.com/huggingface/transformers.js).
-- Text recognition: [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) and a [speech bubble detector](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
+- Text recognition: [PP-OCRv5 and PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) and a [speech bubble detector](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0.
 - Icons: [Phosphor](https://phosphoricons.com). Typefaces: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) and [Nunito](https://fonts.google.com/specimen/Nunito).
 

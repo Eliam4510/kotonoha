@@ -15,6 +15,9 @@ import { pasoDeZoom } from '../nucleo/paginas';
 import { fuenteDeArchivo, leerIndiceZip } from '../nucleo/zip';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
 
+/** Lo que hay que haber pasado del último capítulo para dar el libro por terminado: el final suele ser una página corta. */
+const FINAL_DEL_CAPITULO = 0.95;
+
 /** Qué capítulo se carga en el marco y dónde se abre. Cambiar `vez` lo vuelve a cargar aunque sea el mismo. */
 interface Carga {
   capitulo: number;
@@ -104,11 +107,17 @@ export function VisorTexto({ doc, archivo, ajustes: a }: { doc: ElementoBibliote
     return () => window.removeEventListener('message', oir);
   });
 
-  // Recuerda el capítulo, el punto dentro de él y cómo se lee.
+  // Recuerda el capítulo, el punto dentro de él y cómo se lee, encima de lo último guardado. Al llegar al final del
+  // último capítulo, el libro queda terminado.
+  const terminado = useRef(!!doc.terminado);
   useEffect(() => {
     if (!libro) return;
     const t = setTimeout(() => {
-      motor.bibliotecaGuardar({ ...doc, pagina: capitulo, abierto: Date.now(), documento: { ...d, paginas: libro.capitulos.length, posicion, zoom, horizontal } }).catch(console.error);
+      const terminar = !terminado.current && capitulo === libro.capitulos.length - 1 && posicion >= FINAL_DEL_CAPITULO;
+      if (terminar) terminado.current = true;
+      motor
+        .bibliotecaCambiar(doc.id, { pagina: capitulo, abierto: Date.now(), ...(terminar ? { terminado: Date.now() } : {}), documento: { paginas: libro.capitulos.length, posicion, zoom, horizontal } })
+        .catch(console.error);
     }, 600);
     return () => clearTimeout(t);
   }, [libro, capitulo, posicion, zoom, horizontal]);

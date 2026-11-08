@@ -4,7 +4,7 @@ import Dexie, { type Table } from 'dexie';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
-import type { ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
+import type { ColeccionBiblioteca, ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
 import type { FormaFlexionada, Transcripcion } from '../lenguas/tipos';
 import type { DatosTrazos } from '../nucleo/trazos';
 
@@ -121,6 +121,7 @@ class BaseKotonoha extends Dexie {
   consumo!: Table<FilaConsumo, number>;
   trazos!: Table<FilaTrazos, string>;
   formas!: Table<FilaForma, [string, string]>;
+  colecciones!: Table<ColeccionBiblioteca, string>;
 
   constructor(nombre: string) {
     super(nombre);
@@ -142,6 +143,8 @@ class BaseKotonoha extends Dexie {
     this.version(4).stores({ consumo: '++id, mes, t' });
     this.version(5).stores({ trazos: 'caracter' });
     this.version(6).stores({ formas: '[dic+forma], dic' });
+    // Las colecciones de la estantería (0.10.0); cada libro dice en cuál está.
+    this.version(7).stores({ colecciones: 'id, creada' });
   }
 }
 

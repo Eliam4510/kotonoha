@@ -86,7 +86,7 @@ En noticias, blogs, wikis o en un chat como el de Claude, el texto japonés reci
 
 <img src="docs/img/libro-texto.png" alt="Novela japonesa en vertical, con ruby, colores y la ficha de una palabra" width="100%">
 
-La **Ayuda de lectura** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras.
+La **Ayuda de lectura** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras. La estantería agrupa los libros en colecciones, como una serie con sus tomos, con su portada y una descripción, y muestra cuánto se ha leído de cada libro y de cada colección.
 
 <img src="docs/img/ocr.png" alt="Página escaneada con su texto reconocido y el panel de la línea con la ficha de 週末" width="100%">
 
@@ -187,7 +187,7 @@ El código se publica bajo la [licencia MIT](LICENSE). Los componentes de tercer
 
 - Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io); para el inglés y el alemán, [Wiktionary](https://www.wiktionary.org) mediante [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org).
 - Voz: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja y Parakeet, con [Transformers.js](https://github.com/huggingface/transformers.js).
-- Reconocimiento de texto: [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) y un [detector de globos de texto](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
+- Reconocimiento de texto: [PP-OCRv5 y PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) y un [detector de globos de texto](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0.
 - Iconos: [Phosphor](https://phosphoricons.com). Tipografía: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) y [Nunito](https://fonts.google.com/specimen/Nunito).
 

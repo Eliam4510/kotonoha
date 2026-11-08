@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.9.6, along with how it has been verified.
+Status of each feature in version 0.10.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -102,6 +102,9 @@ Status of each feature in version 0.9.6, along with how it has been verified.
 | Reading assistant: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
 | Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
 | Image folders as books: each folder, or each volume inside it, comes in as a book, with the cover first, a table of contents by chapter and landscape two-page spreads on their own | Automated, and with 40 real manga volumes |
+| Collections on the shelf: a series with its volumes or a topic, with its type, description and cover; a folder with several volumes comes in as a collection, and a new volume joins its own | Automated |
+| Reading progress: how much of each book and each collection has been read, "Finished" at the end or by hand, "Keep reading" and filters by state | Automated |
+| Covers: PDFs have theirs as soon as they are imported; each book's is chosen from a page in the viewer or an image, and each collection's from its books' covers or an image | Automated |
 | Right-to-left reading order taken from the book itself, with the cover on its own in a two-page spread | Automated |
 | Thumbnails, the book's contents, go to page, full screen and inverted colors | Automated |
 | Books are stored separately and read piece by piece: a PDF of hundreds of MB is never loaded whole. The viewer remembers each book's page, view and zoom | Automated, and with a real 347 MB PDF |
