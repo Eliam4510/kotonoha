@@ -44,6 +44,11 @@ let indice: IndicePagina;
 let pintor: Pintor | null = null;
 let anfitrion: HTMLElement;
 let montado = false;
+/**
+ * Dentro de un libro de la Ayuda de lectura, el lector está siempre encendido: no es un sitio que se pueda apagar, las
+ * tarjetas van al creador del visor y el texto puede ir en vertical, avanzando de lado.
+ */
+let enLibro = false;
 
 // ---------- Análisis ----------
 
@@ -88,14 +93,27 @@ async function analizarLote(lote: Bloque[]) {
   pintor?.pintarLote(listos);
 }
 
-/** Cuánto le falta a un bloque para estar a la vista. */
+/** Cuánto le falta a un bloque para estar a la vista, por arriba, por abajo o por un lado. */
 function distanciaAPantalla(b: Bloque): number {
   // Un contenedor con varios bloques puede medir páginas enteras: entonces hay que medir el bloque.
   const varios = (indice.porContenedor.get(b.contenedor)?.length ?? 0) > 1;
   const c = varios ? rangoDe(b, 0, b.texto.length)?.getBoundingClientRect() : b.contenedor.getBoundingClientRect();
   if (!c) return Infinity;
-  if (c.bottom < 0) return -c.bottom;
-  return c.top > innerHeight ? c.top - innerHeight : 0;
+  const vertical = c.bottom < 0 ? -c.bottom : c.top > innerHeight ? c.top - innerHeight : 0;
+  const lado = c.right < 0 ? -c.right : c.left > innerWidth ? c.left - innerWidth : 0;
+  return Math.max(vertical, lado);
+}
+
+/** Hacia dónde avanzan las líneas de un contenedor: hacia abajo, o de lado en un texto vertical. */
+const avanceDe = new WeakMap<Element, 'abajo' | 'izquierda' | 'derecha'>();
+function avance(contenedor: Element): 'abajo' | 'izquierda' | 'derecha' {
+  let a = avanceDe.get(contenedor);
+  if (!a) {
+    const modo = getComputedStyle(contenedor).writingMode;
+    a = modo === 'vertical-lr' || modo === 'sideways-lr' ? 'derecha' : modo.startsWith('vertical') || modo.startsWith('sideways') ? 'izquierda' : 'abajo';
+    avanceDe.set(contenedor, a);
+  }
+  return a;
 }
 
 /** Lo que se ve, primero. Por lotes pequeños: lo de la pantalla no tiene que esperar a todo lo de alrededor. */
@@ -193,22 +211,27 @@ function ponerCerca(b: Bloque, cerca: boolean) {
 function actualizarGrande(contenedor: Element) {
   const lista = indice.ordenados(contenedor);
   if (!lista.length) return;
-  const margen = innerHeight * MARGEN_CERCA;
   const caja = (b: Bloque) => rangoDe(b, 0, b.texto.length)?.getBoundingClientRect();
+  // Lo que ya quedó atrás y lo que aún está lejos, según hacia dónde avance el texto: en una novela vertical, de derecha
+  // a izquierda.
+  const sentido = avance(contenedor);
+  const margen = (sentido === 'abajo' ? innerHeight : innerWidth) * MARGEN_CERCA;
+  const atras = (c: DOMRect) => (sentido === 'abajo' ? c.bottom < -margen : sentido === 'izquierda' ? c.left > innerWidth + margen : c.right < -margen);
+  const lejos = (c: DOMRect) => (sentido === 'abajo' ? c.top > innerHeight + margen : sentido === 'izquierda' ? c.right < -margen : c.left > innerWidth + margen);
   let bajo = 0;
   let alto = lista.length - 1;
   while (bajo < alto) {
     const m = (bajo + alto) >> 1;
     const c = caja(lista[m]);
-    if (c && c.bottom >= -margen) alto = m;
+    if (c && !atras(c)) alto = m;
     else bajo = m + 1;
   }
   // Solo se mide lo que queda cerca: en una novela entera, medir cada línea a cada paso del scroll se notaría.
   const ahora = new Set<Bloque>();
   for (let i = bajo; i < lista.length; i++) {
     const c = caja(lista[i]);
-    if (c && c.top > innerHeight + margen) break;
-    if (c && c.bottom >= -margen) ahora.add(lista[i]);
+    if (c && lejos(c)) break;
+    if (c && !atras(c)) ahora.add(lista[i]);
   }
   for (const b of cercanosGrandes.get(contenedor) ?? []) if (!ahora.has(b)) ponerCerca(b, false);
   for (const b of ahora) ponerCerca(b, true);
@@ -432,7 +455,8 @@ async function crearTarjeta(c: Consulta) {
     const linea = { id: 0, inicio: 0, fin: 0, texto: c.frase, palabras: c.bloque.tokens?.filter((t) => t.inicio >= 0).map((t) => t.p) ?? [] };
     const b = await construirBorrador(c.token.p, linea, () => {}, false);
     b.fuente = document.title;
-    b.url = location.href;
+    // La dirección de la página de un libro no sirve fuera de este navegador: la fuente ya dice qué libro es.
+    if (!enLibro) b.url = location.href;
     await motor.crearTarjeta(b);
     avisar(tr('Tarjeta creada: {0}', c.token.p.lema), 'exito');
   } catch (e) {
@@ -477,14 +501,18 @@ function PopupWeb() {
         alCrear={() => crearTarjeta(c)}
         alEnviar={async (r) => {
           const { enviarAlCreador } = await import('../ui/borrador');
-          await enviarAlCreador({
-            palabra: r.lema,
-            lectura: lecturaDeTarjeta(r),
-            frase: c.frase,
-            definicion: [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>'),
-            fuente: document.title,
-            url: location.href,
-          });
+          // En un libro, el creador es el panel del visor, que ya está abierto.
+          await enviarAlCreador(
+            {
+              palabra: r.lema,
+              lectura: lecturaDeTarjeta(r),
+              frase: c.frase,
+              definicion: [...new Set(r.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>'),
+              fuente: document.title,
+              ...(enLibro ? {} : { url: location.href }),
+            },
+            !enLibro
+          );
         }}
       />
     </div>
@@ -497,20 +525,22 @@ function ControlLector() {
   const a = ajustesWeb.value;
   const [plegado, fijarPlegado] = useState(false);
   // Apagado solo en este sitio sigue a la vista: desde aquí mismo se vuelve a encender.
-  if (!a || !a.activo || !a.lectorActivo || !hayTexto.value || !a.lectorBoton || plegado) return null;
+  if (!a || (!enLibro && (!a.activo || !a.lectorActivo)) || !hayTexto.value || !a.lectorBoton || plegado) return null;
   const cambiar = (c: Partial<Ajustes>) => guardarAjustes(c).catch(console.error);
   const abierto = panelAbierto.value;
   return (
     <div class={`lector-control ${abierto ? 'abierto' : ''}`} style={{ pointerEvents: 'auto' }}>
       {abierto && (
         <div class="lector-panel" role="dialog" aria-label={tr('Lector de páginas')}>
-          <div class="lector-fila">
-            <b>{tr('Lector en esta página')}</b>
-            <button class={`interruptor ${!a.sitiosDesactivados.includes(location.hostname) ? 'on' : ''}`} role="switch" aria-checked={!a.sitiosDesactivados.includes(location.hostname)} aria-label={tr('Lector en esta página')} onClick={() => {
-              const fuera = a.sitiosDesactivados.includes(location.hostname);
-              cambiar({ sitiosDesactivados: fuera ? a.sitiosDesactivados.filter((s) => s !== location.hostname) : [...a.sitiosDesactivados, location.hostname] });
-            }} />
-          </div>
+          {!enLibro && (
+            <div class="lector-fila">
+              <b>{tr('Lector en esta página')}</b>
+              <button class={`interruptor ${!a.sitiosDesactivados.includes(location.hostname) ? 'on' : ''}`} role="switch" aria-checked={!a.sitiosDesactivados.includes(location.hostname)} aria-label={tr('Lector en esta página')} onClick={() => {
+                const fuera = a.sitiosDesactivados.includes(location.hostname);
+                cambiar({ sitiosDesactivados: fuera ? a.sitiosDesactivados.filter((s) => s !== location.hostname) : [...a.sitiosDesactivados, location.hostname] });
+              }} />
+            </div>
+          )}
           <div class="lector-fila">
             <b>{tr('Colores')}</b>
             <button class={`interruptor ${a.lectorColor ? 'on' : ''}`} role="switch" aria-checked={a.lectorColor} aria-label={tr('Colores')} onClick={() => cambiar({ lectorColor: !a.lectorColor })} />
@@ -593,7 +623,7 @@ function activarSeguimiento() {
 
   const activo = () => {
     const x = ajustesWeb.value;
-    return !!x && x.activo && x.lectorActivo && !x.sitiosDesactivados.includes(location.hostname);
+    return !!x && (enLibro || (x.activo && x.lectorActivo && !x.sitiosDesactivados.includes(location.hostname)));
   };
 
   document.addEventListener('pointerdown', (e) => {
@@ -821,7 +851,8 @@ function activarSeguimiento() {
 function encender() {
   const a = ajustesWeb.value!;
   pintor = new Pintor(a);
-  const margen = `${MARGEN_CERCA * 100}% 0px`;
+  // Un libro vertical avanza de lado: lo que viene después está a la izquierda, no debajo.
+  const margen = enLibro ? `${MARGEN_CERCA * 100}%` : `${MARGEN_CERCA * 100}% 0px`;
   observador = new IntersectionObserver(alCruzarse, { rootMargin: margen, scrollMargin: margen } as IntersectionObserverInit);
   aplicarEscaneo(document.body);
 }
@@ -864,7 +895,8 @@ function actualizarMedidas() {
   anfitrion.dataset.kkPendientes = String(pendientes.size);
 }
 
-export async function iniciarLectorWeb() {
+export async function iniciarLectorWeb(opciones: { libro?: boolean } = {}) {
+  enLibro = !!opciones.libro;
   const a = await leerAjustes();
   await fijarIdioma(a.idiomaInterfaz);
   ajustesWeb.value = a;
@@ -897,7 +929,7 @@ export async function iniciarLectorWeb() {
     pedirFuentes();
   });
 
-  const debeEstar = (x: Ajustes) => x.activo && x.lectorActivo && !x.sitiosDesactivados.includes(location.hostname);
+  const debeEstar = (x: Ajustes) => enLibro || (x.activo && x.lectorActivo && !x.sitiosDesactivados.includes(location.hostname));
 
   alCambiarAjustes((n) => {
     const antes = ajustesWeb.value;

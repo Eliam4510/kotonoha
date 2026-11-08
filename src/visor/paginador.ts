@@ -2,6 +2,7 @@
 // entrada; un PDF se pinta con pdf.js. El visor solo pide «la página n» y no sabe de formatos.
 
 import { tr } from '../compartido/i18n';
+import type { LineaTexto } from '../nucleo/capaTexto';
 import { type Tamano, tamanoDeImagen, tipoDeImagen } from '../nucleo/imagenes';
 import { type Direccion, type EntradaIndice, leerLibro } from '../nucleo/libro';
 import { fuenteDeArchivo, leerEntrada } from '../nucleo/zip';
@@ -18,6 +19,8 @@ export interface Paginador {
   /** El tamaño de una página si ya se conoce; si no, el de otra que sí, que en un libro suele ser el mismo. */
   tamano(n: number): Tamano | null;
   imagen(n: number): Promise<PaginaImagen>;
+  /** El texto que trae el propio archivo, por líneas, o ninguna si la página es una imagen. Solo los PDF lo tienen. */
+  textoPropio?(n: number): Promise<LineaTexto[]>;
   cerrar(): void;
 }
 

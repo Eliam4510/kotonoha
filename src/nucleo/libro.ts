@@ -1,6 +1,6 @@
-// Qué hay dentro de un libro de páginas: los EPUB hechos de imágenes (manga y libros escaneados) y los CBZ. Saca el
-// título, el idioma, el sentido de lectura, la imagen de cada página y el índice. Un EPUB de texto se reconoce aquí y se
-// importa por el camino del texto. Se lee con expresiones regulares para poder probarlo sin navegador.
+// Qué hay dentro de un libro: los EPUB hechos de imágenes (manga y libros escaneados), los CBZ y los EPUB de texto. Saca
+// el título, el idioma, el sentido de lectura, el índice y, según el libro, la imagen de cada página o el archivo de cada
+// capítulo. Se lee con expresiones regulares para poder probarlo sin navegador.
 
 import { type EntradaZip, type FuenteBytes, leerEntrada, leerIndiceZip, ordenNatural } from './zip';
 
@@ -39,8 +39,8 @@ export function atributos(etiqueta: string): Record<string, string> {
   return salida;
 }
 
-const etiquetas = (xml: string, nombre: string) => [...xml.matchAll(new RegExp(`<(?:[\\w-]+:)?${nombre}\\b[^>]*>`, 'gi'))].map((m) => m[0]);
-const contenido = (xml: string, nombre: string) =>
+export const etiquetas = (xml: string, nombre: string) => [...xml.matchAll(new RegExp(`<(?:[\\w-]+:)?${nombre}\\b[^>]*>`, 'gi'))].map((m) => m[0]);
+export const contenido = (xml: string, nombre: string) =>
   sinEntidades(new RegExp(`<(?:[\\w-]+:)?${nombre}\\b[^>]*>([\\s\\S]*?)</(?:[\\w-]+:)?${nombre}>`, 'i').exec(xml)?.[1]?.replace(/<[^>]+>/g, '').trim() ?? '');
 
 /** Une una ruta relativa con la carpeta de un archivo, resolviendo «..» y quitando el fragmento. */
@@ -80,43 +80,85 @@ async function leerTexto(f: FuenteBytes, indice: Map<string, EntradaZip>, ruta: 
   return e ? texto(await leerEntrada(f, e)) : null;
 }
 
-/** El índice del libro: el de EPUB 3 (nav) o el de EPUB 2 (NCX), con cada entrada en la página donde empieza. */
-async function leerIndiceDelLibro(f: FuenteBytes, indice: Map<string, EntradaZip>, opf: string, rutaOpf: string, paginaDe: Map<string, number>): Promise<EntradaIndice[]> {
+/** Una entrada del índice tal como la escribe el libro: el archivo al que lleva y, si lo dice, el punto dentro de él. */
+interface EntradaDeIndice {
+  titulo: string;
+  ruta: string;
+  fragmento?: string;
+}
+
+/** Los dos índices que puede traer un EPUB: el de EPUB 3 (nav) y el de EPUB 2 (NCX), por ese orden. */
+async function indicesDelLibro(f: FuenteBytes, indice: Map<string, EntradaZip>, opf: string, rutaOpf: string): Promise<EntradaDeIndice[][]> {
   const items = etiquetas(opf, 'item').map(atributos);
-  const salida: EntradaIndice[] = [];
-  const agregar = (titulo: string, href: string, desde: string) => {
-    const pagina = paginaDe.get(resolverRuta(desde, href));
-    if (titulo && pagina !== undefined) salida.push({ titulo, pagina });
+  const entrada = (titulo: string, href: string, desde: string): EntradaDeIndice[] => {
+    if (!titulo || !href) return [];
+    let fragmento = href.includes('#') ? href.slice(href.indexOf('#') + 1) : '';
+    try {
+      fragmento = decodeURIComponent(fragmento);
+    } catch {
+      // Un fragmento con un % suelto se queda como está.
+    }
+    return [{ titulo, ruta: resolverRuta(desde, href), ...(fragmento ? { fragmento } : {}) }];
   };
+  const salida: EntradaDeIndice[][] = [];
   const nav = items.find((i) => (i.properties ?? '').split(/\s+/).includes('nav'));
   if (nav?.href) {
     const ruta = resolverRuta(rutaOpf, nav.href);
     const xhtml = await leerTexto(f, indice, ruta);
     const toc = xhtml && (/<nav\b[^>]*epub:type\s*=\s*["']toc["'][^>]*>([\s\S]*?)<\/nav>/i.exec(xhtml)?.[1] ?? /<nav\b[^>]*>([\s\S]*?)<\/nav>/i.exec(xhtml)?.[1]);
-    for (const m of (toc ?? '').matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) agregar(sinEntidades(m[2].replace(/<[^>]+>/g, '')).trim(), atributos(m[1]).href ?? '', ruta);
-    if (salida.length) return salida;
+    salida.push([...(toc ?? '').matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)].flatMap((m) => entrada(sinEntidades(m[2].replace(/<[^>]+>/g, '')).trim(), atributos(m[1]).href ?? '', ruta)));
   }
   const ncx = items.find((i) => i['media-type'] === 'application/x-dtbncx+xml');
   if (ncx?.href) {
     const ruta = resolverRuta(rutaOpf, ncx.href);
     const xml = await leerTexto(f, indice, ruta);
-    for (const m of (xml ?? '').matchAll(/<navPoint\b[\s\S]*?<text>([\s\S]*?)<\/text>[\s\S]*?<content\b([^>]*)>/gi)) agregar(sinEntidades(m[1]).trim(), atributos(m[2]).src ?? '', ruta);
+    salida.push([...(xml ?? '').matchAll(/<navPoint\b[\s\S]*?<text>([\s\S]*?)<\/text>[\s\S]*?<content\b([^>]*)>/gi)].flatMap((m) => entrada(sinEntidades(m[1]).trim(), atributos(m[2]).src ?? '', ruta)));
   }
   return salida;
 }
+
+/** El primer índice del libro que lleva a alguna parte, con cada entrada traducida por `donde`. */
+async function indiceTraducido<T>(f: FuenteBytes, indice: Map<string, EntradaZip>, opf: string, rutaOpf: string, donde: (e: EntradaDeIndice) => T | undefined): Promise<T[]> {
+  for (const lista of await indicesDelLibro(f, indice, opf, rutaOpf)) {
+    const salida = lista.flatMap((e) => {
+      const t = donde(e);
+      return t === undefined ? [] : [t];
+    });
+    if (salida.length) return salida;
+  }
+  return [];
+}
+
+/** El índice de un libro de páginas, con cada entrada en la página donde empieza. */
+function leerIndiceDelLibro(f: FuenteBytes, indice: Map<string, EntradaZip>, opf: string, rutaOpf: string, paginaDe: Map<string, number>): Promise<EntradaIndice[]> {
+  return indiceTraducido(f, indice, opf, rutaOpf, (e) => {
+    const pagina = paginaDe.get(e.ruta);
+    return pagina === undefined ? undefined : { titulo: e.titulo, pagina };
+  });
+}
+
+/** El paquete del EPUB (el OPF) y dónde está, que es desde donde se resuelven sus rutas. */
+async function abrirOpf(f: FuenteBytes, indice: Map<string, EntradaZip>): Promise<{ opf: string; rutaOpf: string }> {
+  const contenedor = await leerTexto(f, indice, 'META-INF/container.xml');
+  const rutaOpf = contenedor ? atributos(etiquetas(contenedor, 'rootfile')[0] ?? '')['full-path'] : [...indice.keys()].find((n) => n.endsWith('.opf'));
+  const opf = rutaOpf ? await leerTexto(f, indice, rutaOpf) : null;
+  if (!rutaOpf || !opf) throw new Error('EPUB sin índice');
+  return { opf, rutaOpf };
+}
+
+const sentidoDelSpine = (opf: string) => {
+  const spine = atributos(etiquetas(opf, 'spine')[0] ?? '');
+  const declarado = spine['page-progression-direction'];
+  return declarado === 'rtl' || declarado === 'ltr' ? { direccion: declarado as Direccion, direccionDelArchivo: true } : { direccion: 'ltr' as Direccion, direccionDelArchivo: false };
+};
 
 /**
  * Un EPUB de páginas, o null si es de texto: entonces se importa como texto, con su estructura. Es de páginas si lo dice
  * su maquetación fija o si casi todas sus páginas son una sola imagen sin texto.
  */
 export async function leerEpub(f: FuenteBytes, indice: Map<string, EntradaZip>, nombre: string): Promise<LibroDePaginas | null> {
-  const contenedor = await leerTexto(f, indice, 'META-INF/container.xml');
-  const rutaOpf = contenedor ? atributos(etiquetas(contenedor, 'rootfile')[0] ?? '')['full-path'] : [...indice.keys()].find((n) => n.endsWith('.opf'));
-  const opf = rutaOpf ? await leerTexto(f, indice, rutaOpf) : null;
-  if (!rutaOpf || !opf) throw new Error('EPUB sin índice');
-
+  const { opf, rutaOpf } = await abrirOpf(f, indice);
   const items = new Map(etiquetas(opf, 'item').map((e) => atributos(e)).filter((a) => a.id && a.href).map((a) => [a.id, a]));
-  const spine = atributos(etiquetas(opf, 'spine')[0] ?? '');
   const orden = etiquetas(opf, 'itemref').map((e) => atributos(e).idref).filter(Boolean);
   const fija = /rendition:layout"?[^>]*>\s*pre-paginated/i.test(opf) || /name="fixed-layout"\s+content="true"/i.test(opf);
 
@@ -148,15 +190,67 @@ export async function leerEpub(f: FuenteBytes, indice: Map<string, EntradaZip>, 
 
   // Sin declarar, un EPUB va de izquierda a derecha, como dice la norma: los manga sí lo declaran, y un libro de texto
   // horizontal japonés, como los de preparación del JLPT, se lee así.
-  const direccionDelArchivo = spine['page-progression-direction'] === 'rtl' || spine['page-progression-direction'] === 'ltr';
   return {
     formato: 'epub',
     titulo: contenido(opf, 'title') || nombre,
     idioma: contenido(opf, 'language') || undefined,
-    direccion: direccionDelArchivo ? (spine['page-progression-direction'] as Direccion) : 'ltr',
-    direccionDelArchivo,
+    ...sentidoDelSpine(opf),
     paginas,
     indice: await leerIndiceDelLibro(f, indice, opf, rutaOpf, paginaDe),
+  };
+}
+
+/** Una entrada del índice de un EPUB de texto: el capítulo y, si lo dice, el punto dentro de él. */
+export interface EntradaCapitulo {
+  titulo: string;
+  capitulo: number;
+  fragmento?: string;
+}
+
+/** Un EPUB de texto, como una novela: se pinta capítulo a capítulo, con su propio formato. */
+export interface EpubDeTexto {
+  titulo: string;
+  idioma?: string;
+  direccion: Direccion;
+  direccionDelArchivo: boolean;
+  /** La ruta de cada capítulo dentro del ZIP, en el orden del libro. */
+  capitulos: string[];
+  indice: EntradaCapitulo[];
+  /** La ruta de la imagen de la portada, si el libro dice cuál es. */
+  portada?: string;
+}
+
+const DOCUMENTO = /\.(x?html?|xht)$/i;
+
+/** Lo que hace falta para leer un EPUB de texto: sus capítulos en orden, el índice y la portada. */
+export async function leerEpubDeTexto(f: FuenteBytes, indice: Map<string, EntradaZip>, nombre: string): Promise<EpubDeTexto> {
+  const { opf, rutaOpf } = await abrirOpf(f, indice);
+  const items = new Map(etiquetas(opf, 'item').map((e) => atributos(e)).filter((a) => a.id && a.href).map((a) => [a.id, a]));
+  const capitulos: string[] = [];
+  for (const ref of etiquetas(opf, 'itemref').map(atributos)) {
+    const item = items.get(ref.idref);
+    if (!item) continue;
+    const ruta = resolverRuta(rutaOpf, item.href);
+    if (indice.has(ruta) && (DOCUMENTO.test(ruta) || /html/i.test(item['media-type'] ?? '')) && !capitulos.includes(ruta)) capitulos.push(ruta);
+  }
+  if (!capitulos.length) throw new Error('EPUB sin capítulos');
+  const capituloDe = new Map(capitulos.map((r, i) => [r, i]));
+  const entradas = await indiceTraducido(f, indice, opf, rutaOpf, (e) => {
+    const capitulo = capituloDe.get(e.ruta);
+    return capitulo === undefined ? undefined : { titulo: e.titulo, capitulo, ...(e.fragmento ? { fragmento: e.fragmento } : {}) };
+  });
+  // La portada: la imagen marcada como tal en EPUB 3, o la que nombra el <meta name="cover"> de EPUB 2.
+  const todos = [...items.values()];
+  const meta = etiquetas(opf, 'meta').map(atributos).find((m) => m.name === 'cover')?.content;
+  const item = todos.find((i) => (i.properties ?? '').split(/\s+/).includes('cover-image')) ?? (meta ? items.get(meta) : undefined);
+  const portada = item ? resolverRuta(rutaOpf, item.href) : undefined;
+  return {
+    titulo: contenido(opf, 'title') || nombre,
+    idioma: contenido(opf, 'language') || undefined,
+    ...sentidoDelSpine(opf),
+    capitulos,
+    indice: entradas,
+    ...(portada && indice.has(portada) && IMAGEN.test(portada) ? { portada } : {}),
   };
 }
 

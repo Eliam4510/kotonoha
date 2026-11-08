@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.8.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.9.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -99,7 +99,7 @@ Estado de cada función en la versión 0.8.0, con la forma en que se ha verifica
 | Portapapeles: lo pegado o copiado conserva sus párrafos, saltos de línea, títulos, listas, citas, código, tablas y negritas, sin el furigana de la página de origen | Automática |
 | Portapapeles en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
 | Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
-| Ayuda de lectura: EPUB, TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
+| Ayuda de lectura: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
 | Sentido de derecha a izquierda tomado del propio libro, con la portada sola en doble página | Automática |
 | Miniaturas, índice del libro, ir a una página, pantalla completa y colores invertidos | Automática |
@@ -107,6 +107,11 @@ Estado de cada función en la versión 0.8.0, con la forma en que se ha verifica
 | Reconocimiento de texto (OCR) en el propio equipo, con la GPU: modo Libro, con PP-OCRv5, y modo Manga, con un detector de globos y manga-ocr | Automática, y medido a mano en páginas reales: menos de un 1 % de error por carácter en un manga, un 1 % en un libro de texto y entre un 3 y un 8 % en un PDF de química escaneado, con fórmulas y tablas |
 | Tocar una línea de la página abre su texto con furigana y palabras para consultar, con su ficha y la creación de tarjetas | Automática |
 | Cada página se lee una sola vez y se guarda; su texto también llega a los lectores de pantalla | Automática |
+| EPUB de texto en el visor, con su propio formato: capítulos, CSS, ruby, ilustraciones y escritura vertical, y el lector de páginas encima, con colores, furigana y fichas | Automática, con un EPUB vertical con ruby, CSS e ilustración |
+| Lo que trae un EPUB no se ejecuta ni carga nada de fuera: ni scripts, ni marcos, ni formularios, ni atributos on* | Automática, con un EPUB con trampas |
+| Índice, zoom, enlaces entre capítulos, texto vertical u horizontal a elegir y el punto exacto donde se dejó cada libro | Automática |
+| PDF con texto: el texto del propio archivo se lee al instante, sin OCR, también en columnas verticales, y los radicales Kangxi pasan al kanji que son | Automática, con un PDF japonés hecho por el navegador |
+| Tocar una palabra en la página abre su ficha directamente y la marca sobre la página, en los PDF con texto y en el modo Libro del OCR | Automática |
 | Relatos generados según el nivel | Simulador |
 | Reproductor de archivos propios | Automática |
 | Subtítulos incrustados en MKV y elección de pista de audio, con ffmpeg.wasm | Automática |
@@ -213,7 +218,7 @@ Estado de cada función en la versión 0.8.0, con la forma en que se ha verifica
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
-| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad: en otro equipo hay que volver a importarlos |
+| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad: en otro equipo hay que volver a importarlos Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra. |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
 | Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |

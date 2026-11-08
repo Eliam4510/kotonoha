@@ -186,11 +186,17 @@ export interface ContextoIA {
   guion?: string; // Texto completo del video o de la página
 }
 
-/** Un libro de páginas, que se lee en el visor: un EPUB de imágenes, un CBZ o un PDF. */
+/** Un libro que se lee en el visor: un EPUB de imágenes o de texto, un CBZ o un PDF. */
 export interface DocumentoBiblioteca {
   formato: 'epub' | 'cbz' | 'pdf';
-  /** 0 mientras no se sepa: un PDF no se cuenta hasta abrirlo en el visor. */
+  /** Un EPUB de texto, como una novela: se pinta con su propio formato, por capítulos, y no por páginas. */
+  texto?: boolean;
+  /** 0 mientras no se sepa: un PDF no se cuenta hasta abrirlo en el visor. En un EPUB de texto, sus capítulos. */
   paginas: number;
+  /** En un EPUB de texto, por dónde se va dentro del capítulo, de 0 a 1. */
+  posicion?: number;
+  /** En un EPUB de texto vertical, si se prefiere leerlo en horizontal. */
+  horizontal?: boolean;
   direccion: 'rtl' | 'ltr';
   /** Lo que ocupa el archivo, que se guarda aparte, en el almacenamiento privado del navegador. */
   tamano: number;
@@ -199,7 +205,7 @@ export interface DocumentoBiblioteca {
   vista?: 'una' | 'doble' | 'continua';
   /** En doble página, si la portada va sola para que las parejas queden como en el libro. */
   portadaSola?: boolean;
-  /** «ancho», «pagina» o un porcentaje. */
+  /** «ancho», «pagina» o un porcentaje. En un EPUB de texto, siempre un porcentaje. */
   zoom?: 'ancho' | 'pagina' | number;
   /** Si se lee el texto de las páginas con el OCR, y con qué modelos: los de libro impreso o los de manga. */
   ocr?: { activo: boolean; modo: 'libro' | 'manga' };

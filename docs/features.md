@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.8.0, along with how it has been verified.
+Status of each feature in version 0.9.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -99,7 +99,7 @@ Status of each feature in version 0.8.0, along with how it has been verified.
 | Clipboard: pasted or copied text keeps its paragraphs, line breaks, headings, lists, quotes, code, tables and bold, without the source page's furigana | Automated |
 | Clipboard in a regular tab, also in split view next to the page being viewed | Automated, on Edge and Chrome |
 | Following the clipboard, without the tab having focus | Automated |
-| Reading assistant: EPUB, TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
+| Reading assistant: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
 | Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
 | Right-to-left reading order taken from the book itself, with the cover on its own in a two-page spread | Automated |
 | Thumbnails, the book's contents, go to page, full screen and inverted colors | Automated |
@@ -107,6 +107,11 @@ Status of each feature in version 0.8.0, along with how it has been verified.
 | On-device text recognition (OCR) with the GPU: Book mode, with PP-OCRv5, and Manga mode, with a bubble detector and manga-ocr | Automated, and measured by hand on real pages: under 1 % character error in a manga, 1 % in a textbook and between 3 and 8 % in a scanned chemistry PDF with formulas and tables |
 | Tapping a line on the page opens its text with furigana and words to look up, with their word panel and card creation | Automated |
 | Each page is read only once and saved; its text also reaches screen readers | Automated |
+| Text EPUBs in the viewer, in their own format: chapters, CSS, ruby, illustrations and vertical writing, with the page reader on top, with colours, furigana and word panels | Automated, with a vertical EPUB with ruby, CSS and an illustration |
+| Nothing an EPUB contains runs or loads anything from outside: no scripts, frames, forms or on* attributes | Automated, with an EPUB full of traps |
+| Contents, zoom, links between chapters, vertical or horizontal text by choice and the exact spot where each book was left | Automated |
+| PDFs with text: the file’s own text is read at once, without OCR, vertical columns included, and Kangxi radicals become the kanji they stand for | Automated, with a Japanese PDF made by the browser |
+| Tapping a word on the page opens its word panel directly and marks it on the page, in PDFs with text and in the OCR’s Book mode | Automated |
 | Stories generated for the user's level | Simulator |
 | Player for local files | Automated |
 | Embedded MKV subtitles and audio track selection, with ffmpeg.wasm | Automated |
@@ -213,7 +218,7 @@ Status of each feature in version 0.8.0, along with how it has been verified.
 | Platforms | Desktop Chrome and Edge. The local helper is prepared for Windows |
 | Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card carries the episode's official image, if the site offers one |
 | Audio with DRM | A protected site may withhold its sound from capture. After two silent sentences in a row in a video, the line is no longer replayed to record it |
-| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the backup: on another computer they have to be imported again |
+| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the backup: on another computer they have to be imported again A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word. |
 | Synchronization | No server: moving between computers is done with a backup |
 | Background music | Whisper can miss quiet conversation under loud music |
 | Song lyrics | Timing is per Whisper line, not per word. With very loud music Whisper may hear little, and then more verses get an estimated time |

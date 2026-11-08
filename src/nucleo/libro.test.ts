@@ -1,7 +1,7 @@
 import { strToU8, zipSync, type Zippable } from 'fflate';
 import { describe, expect, it } from 'vitest';
-import { atributos, leerLibro, resolverRuta, sinEntidades } from './libro';
-import { fuenteDeBytes } from './zip';
+import { atributos, leerEpubDeTexto, leerLibro, resolverRuta, sinEntidades } from './libro';
+import { fuenteDeBytes, leerIndiceZip } from './zip';
 
 const CONTENEDOR = '<?xml version="1.0"?><container><rootfiles><rootfile full-path="item/standard.opf" media-type="application/oebps-package+xml"/></rootfiles></container>';
 const JPG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
@@ -67,6 +67,50 @@ describe('un EPUB de texto', () => {
     const datos = epub({ 'item/standard.opf': strToU8(opf), 'item/c1.xhtml': strToU8('<html><body><h1>第一章</h1><p>吾輩は猫である。名前はまだ無い。どこで生れたかとんと見当がつかぬ。</p><img src="ilustracion.jpg"/></body></html>'), 'item/ilustracion.jpg': JPG });
     const { libro } = await leerLibro(fuenteDeBytes(datos), 'novela.epub', 'rtl');
     expect(libro).toBeNull();
+  });
+
+  const capitulo = (titulo: string) => strToU8(`<html xmlns="http://www.w3.org/1999/xhtml"><body><h1 id="t">${titulo}</h1><p>本文です。</p></body></html>`);
+  const novela = (opf: string, extra: Zippable = {}) =>
+    epub({ 'item/standard.opf': strToU8(opf), 'item/text/c1.xhtml': capitulo('第一章'), 'item/text/c2.xhtml': capitulo('第二章'), 'item/img/tapa.jpg': JPG, ...extra });
+  const abrir = async (datos: Uint8Array) => {
+    const f = fuenteDeBytes(datos);
+    return leerEpubDeTexto(f, await leerIndiceZip(f), 'novela');
+  };
+
+  it('se lee por capítulos, en el orden del libro, con su índice y su portada', async () => {
+    const opf = `<package><metadata><dc:title>猫の本</dc:title><dc:language>ja</dc:language></metadata>
+      <manifest>
+        <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+        <item id="tapa" href="img/tapa.jpg" media-type="image/jpeg" properties="cover-image"/>
+        <item id="c1" href="text/c1.xhtml" media-type="application/xhtml+xml"/>
+        <item id="c2" href="text/c2.xhtml" media-type="application/xhtml+xml"/>
+      </manifest>
+      <spine page-progression-direction="rtl"><itemref idref="c1"/><itemref idref="c2"/></spine></package>`;
+    const datos = novela(opf, { 'item/nav.xhtml': strToU8('<nav epub:type="toc"><ol><li><a href="text/c1.xhtml">第一章</a></li><li><a href="text/c2.xhtml#t">第二章</a></li></ol></nav>') });
+    const libro = await abrir(datos);
+    expect(libro).toMatchObject({
+      titulo: '猫の本',
+      idioma: 'ja',
+      direccion: 'rtl',
+      direccionDelArchivo: true,
+      capitulos: ['item/text/c1.xhtml', 'item/text/c2.xhtml'],
+      indice: [{ titulo: '第一章', capitulo: 0 }, { titulo: '第二章', capitulo: 1, fragmento: 't' }],
+      portada: 'item/img/tapa.jpg',
+    });
+  });
+
+  it('con el índice de EPUB 2 y la portada de su <meta>', async () => {
+    const opf = `<package><metadata><dc:title>小説</dc:title><meta name="cover" content="tapa"/></metadata>
+      <manifest>
+        <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+        <item id="tapa" href="img/tapa.jpg" media-type="image/jpeg"/>
+        <item id="c1" href="text/c1.xhtml" media-type="application/xhtml+xml"/>
+        <item id="c2" href="text/c2.xhtml" media-type="application/xhtml+xml"/>
+      </manifest>
+      <spine toc="ncx"><itemref idref="c1"/><itemref idref="c2"/></spine></package>`;
+    const ncx = '<ncx><navMap><navPoint id="a"><navLabel><text>二</text></navLabel><content src="text/c2.xhtml"/></navPoint></navMap></ncx>';
+    const libro = await abrir(novela(opf, { 'item/toc.ncx': strToU8(ncx) }));
+    expect(libro).toMatchObject({ direccion: 'ltr', direccionDelArchivo: false, indice: [{ titulo: '二', capitulo: 1 }], portada: 'item/img/tapa.jpg' });
   });
 });
 

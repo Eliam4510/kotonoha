@@ -1,0 +1,69 @@
+name: Fallo · Bug report
+description: Algo no funciona como debería · Something does not work as it should
+labels: ["fallo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por avisar. No incluyas tu clave de Claude ni datos personales en el texto ni en las capturas.
+        Thank you for reporting. Please do not include your Claude key or personal data in the text or screenshots.
+  - type: input
+    id: version
+    attributes:
+      label: Versión de Kotonoha · Kotonoha version
+      description: Aparece en Ajustes y en chrome://extensions · Shown in Settings and in chrome://extensions
+      placeholder: "0.9.0"
+    validations:
+      required: true
+  - type: input
+    id: navegador
+    attributes:
+      label: Navegador y sistema · Browser and system
+      placeholder: "Chrome 142, Windows 11"
+    validations:
+      required: true
+  - type: dropdown
+    id: lengua
+    attributes:
+      label: Lengua que estudias · Language you study
+      options:
+        - Japonés · Japanese
+        - Inglés · English
+        - Alemán · German
+    validations:
+      required: true
+  - type: dropdown
+    id: donde
+    attributes:
+      label: Dónde ocurre · Where it happens
+      options:
+        - Subtítulos sobre un video · Subtitles over a video
+        - Lector de páginas web · Page reader
+        - Portapapeles · Clipboard
+        - Ayuda de lectura (visor de libros) · Reading assistant (book viewer)
+        - Ficha de palabra · Word panel
+        - Tarjetas o Anki · Cards or Anki
+        - Transcripción · Transcription
+        - Ajustes u otra pantalla · Settings or another screen
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo · Steps to reproduce
+      placeholder: |
+        1. Abrir… · Open…
+        2. Pulsar… · Click…
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperabas y qué pasó · What you expected and what happened
+    validations:
+      required: true
+  - type: textarea
+    id: capturas
+    attributes:
+      label: Capturas o errores de la consola · Screenshots or console errors
+      description: Opcional · Optional

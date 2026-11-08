@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Kotonoha</title>
+    <!-- Lo de Kotonoha va con :where(), sin peso: cualquier regla del libro manda sobre estas. -->
+    <style id="kk-base">
+      /* El navegador da a las páginas de una extensión una letra más pequeña y otra familia; un libro espera las de
+         siempre. Con el mismo peso que la del navegador, para ganarle, y menos que cualquier regla del libro, que va después. */
+      body { font-family: initial; font-size: medium; }
+      :where(html) { background: #fff; color: #111; }
+      :where(body) { margin: 0; line-height: 1.75; }
+      html.kk-horizontal :where(body) { box-sizing: border-box; max-width: 46em; margin-inline: auto; padding: 2.5em 2em 5em; }
+      html.kk-vertical :where(body) { box-sizing: border-box; padding: 2.5em; }
+      :where(img, svg) { max-width: 100%; }
+      html.kk-horizontal :where(img) { height: auto; }
+      html.kk-vertical :where(img, svg) { max-width: none; max-height: calc(100vh - 5em); }
+      html.kk-forzar-horizontal, html.kk-forzar-horizontal :where(*) { writing-mode: horizontal-tb !important; }
+      .kk-aviso { font: 15px/1.6 system-ui, sans-serif; color: #8a2a1e; padding: 2em; writing-mode: horizontal-tb; }
+    </style>
+    <script src="libro.js" defer></script>
+  </head>
+  <body></body>
+</html>

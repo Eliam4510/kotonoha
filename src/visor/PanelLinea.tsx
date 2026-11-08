@@ -1,45 +1,70 @@
-// El panel de una línea que el OCR leyó en la página: su texto con furigana y palabras que se pueden consultar, como un
-// subtítulo, y debajo la ficha de la palabra elegida. Las líneas de alrededor van como contexto para Claude.
+// El panel de una línea de la página, del propio PDF o leída por el OCR: su texto con furigana y palabras que se pueden
+// consultar, como un subtítulo, y debajo la ficha de la palabra elegida, que se marca también en la página. Las líneas de
+// alrededor van como contexto para Claude.
 
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Ajustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
 import { alRecibirEvento, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
 import { motorDe } from '../lenguas/motor';
 import { fraseConNegrita } from '../nucleo/frases';
+import { alinearSuperficies } from '../nucleo/lectorTexto';
 import type { LineaOcr } from '../nucleo/ocr';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
 
-export function PanelLinea({ lineas, indice, ajustes, titulo, alMover, alCerrar }: {
+export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover, alCerrar, alMarcar }: {
   lineas: LineaOcr[];
   indice: number;
+  /** La letra que se tocó en la página: su palabra se elige en cuanto la línea esté analizada. */
+  caracter?: number;
   ajustes: Ajustes;
   titulo: string;
   alMover: (paso: number) => void;
   alCerrar: () => void;
+  /** Dónde está, en el texto de la línea, la palabra elegida: para marcarla en la página. */
+  alMarcar?: (tramo: { inicio: number; fin: number } | null) => void;
 }) {
   const linea = lineas[indice];
-  const [tokens, fijarTokens] = useState<PalabraToken[]>([]);
+  // Lo analizado va con su texto: al cambiar de línea, el de la anterior no vale ni un momento.
+  const [analizado, fijarAnalizado] = useState<{ texto: string; tokens: PalabraToken[] } | null>(null);
+  const tokens = analizado?.texto === linea.texto ? analizado.tokens : [];
+  const sitios = useMemo(() => alinearSuperficies(linea.texto, tokens.map((t) => t.superficie)), [linea.texto, tokens]);
   const [elegida, fijarElegida] = useState<number | null>(null);
 
-  const analizar = () =>
+  const analizar = () => {
+    const texto = linea.texto;
     motor
-      .analizarTexto(linea.texto)
-      .then((t) => fijarTokens(t[0] ?? []))
+      .analizarTexto(texto)
+      .then((t) => fijarAnalizado({ texto, tokens: t[0] ?? [] }))
       .catch(console.error);
+  };
 
   useEffect(() => {
     fijarElegida(null);
-    fijarTokens([]);
     analizar();
     return alRecibirEvento((e) => {
       if (e.tipo === 'palabras' || e.tipo === 'palabrasRecargar') analizar();
     });
   }, [linea.texto]);
+
+  // La palabra tocada en la página se elige una sola vez: si después se elige otra aquí, volver a analizar no la cambia.
+  const aplicado = useRef('');
+  useEffect(() => {
+    const clave = `${linea.texto}|${caracter}`;
+    if (caracter === undefined || !tokens.length || aplicado.current === clave) return;
+    aplicado.current = clave;
+    const k = sitios.findIndex((s, i) => !!s && s.inicio <= caracter && caracter < s.fin && tokens[i].esPalabra);
+    if (k >= 0) fijarElegida(k);
+  }, [caracter, tokens, sitios]);
+
+  useEffect(() => {
+    const s = elegida !== null ? sitios[elegida] : null;
+    alMarcar?.(s ? { inicio: s.inicio, fin: s.fin } : null);
+  }, [elegida, sitios]);
 
   const palabra = elegida !== null ? tokens[elegida] : null;
   const antes = lineas.slice(Math.max(0, indice - 6), indice).map((l) => l.texto);

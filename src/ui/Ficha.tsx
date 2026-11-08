@@ -522,7 +522,7 @@ function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegi
     <div class={`sentido ${significado ? '' : 'cargando'}`}>
       <div class="sentido-cab">
         <span class="sentido-et"><Icono n="ia" t={14} /> {tr('En esta frase')}</span>
-        {uso && uso !== 'literal' && <span class="uso">{NOMBRES_USO[uso] ?? uso}</span>}
+        {uso && uso !== 'literal' && <span class="uso">{NOMBRES_USO[uso] ? tr(NOMBRES_USO[uso]) : uso}</span>}
       </div>
       {significado ? <b>{significado}</b> : <Esqueleto lineas={2} />}
       {s?.nota && <p>{s.nota}</p>}
