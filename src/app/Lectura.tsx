@@ -59,8 +59,10 @@ function tramosDeLista(nodos: NodoLista[]): NodoLista[][] {
   return tramos;
 }
 
-export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBarra, pie }: {
+export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tamano = 22, inicioBarra, pie }: {
   texto: string;
+  /** Los bloques ya hechos, en lugar de leerlos de `texto`: el texto de una página del visor, que no es Markdown. */
+  bloques?: Bloque[];
   ajustes: Ajustes;
   titulo?: string;
   tamano?: number;
@@ -69,7 +71,7 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
   /** Lo que va debajo del texto: paginación. */
   pie?: ComponentChildren;
 }) {
-  const bloques = useMemo(() => leerEstructura(texto), [texto]);
+  const bloques = useMemo(() => hechos ?? leerEstructura(texto), [hechos, texto]);
   const { frases, deLinea } = useMemo(() => frasesDeBloques(bloques, lengua.value.escritura.frase.partir), [bloques, lengua.value.id]);
   // Lo analizado va con las frases que se analizaron. Al abrir la pestaña, la lengua llega después que el texto: las frases
   // se vuelven a partir con sus reglas, y lo analizado con las de antes no debe pintarse en otro sitio.
@@ -321,7 +323,7 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
             ajustes={ajustes}
             gramatica={abierta.gramatica}
             // Contexto amplio: las frases alrededor y el texto entero para documentos no muy largos.
-            contexto={{ frase: abierta.frase, antes: abierta.antes, despues: abierta.despues, titulo, guion: texto.length < 60000 ? textoPlano(bloques) : undefined }}
+            contexto={{ frase: abierta.frase, antes: abierta.antes, despues: abierta.despues, titulo, guion: (hechos ? frases.join('').length : texto.length) < 60000 ? textoPlano(bloques) : undefined }}
             alCorregirLectura={analizar}
             alEnviar={(r) =>
               enviarAlCreador(

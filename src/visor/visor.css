@@ -170,6 +170,63 @@
 .vs-nota-item:hover .vs-nota-item-acciones, .vs-nota-item:focus-within .vs-nota-item-acciones { opacity: 1; }
 .vs-nota-item .vs-editor-nota { flex: 1; padding: 6px 0; }
 
+/* ---------- Buscar en el libro ----------
+   Lo encontrado se marca en naranja, para no confundirlo con la palabra elegida (verde) ni con lo resaltado. */
+.vs-hallados { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.vs-hallado { position: absolute; border-radius: 3px; background: rgba(255, 146, 43, 0.38); mix-blend-mode: multiply; box-shadow: 0 0 0 2px #E8590C; scroll-margin: 80px; }
+.vs-lienzo.invertido .vs-hallado { background: rgba(255, 146, 43, 0.3); mix-blend-mode: normal; }
+.vs-panel-buscar { width: 300px; display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+.vs-buscar-cab { display: flex; align-items: center; gap: 2px; }
+.vs-buscar-campo { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; margin-inline-end: 4px; }
+.vs-buscar-campo > .ico { position: absolute; inset-inline-start: 9px; color: var(--texto-3); pointer-events: none; }
+.vs-buscar-campo input { width: 100%; padding-inline-start: 30px; font-family: var(--letra-lengua); font-size: 15px; }
+.vs-buscar-estado, .vs-buscar-preparando, .vs-buscar-aviso { margin: 0; font-size: 12.5px; line-height: 1.5; }
+.vs-buscar-posicion { margin-inline-end: 8px; padding: 0 7px; border-radius: var(--r-pill); background: var(--superficie-3); font-weight: 700; color: var(--texto-2); }
+.vs-buscar-aviso { padding: 8px 10px; border-radius: var(--r-2); background: var(--superficie-2); }
+.vs-resultados { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.vs-resultados ul { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 0; padding: 0; list-style: none; }
+.vs-resultados-pagina { font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-3); }
+.vs-resultado { width: 100%; padding: 6px 8px; border: none; border-radius: var(--r-2); background: none; color: var(--texto-2); font-family: var(--letra-lengua); font-size: 14px; line-height: 1.6; text-align: start; overflow-wrap: anywhere; cursor: pointer; }
+.vs-resultado:hover { background: var(--superficie-2); color: var(--texto); }
+.vs-resultado.activo { background: var(--hoja-suave); color: var(--texto); box-shadow: inset 3px 0 0 var(--hoja); }
+.vs-resultado mark { padding: 0 1px; border-radius: 2px; background: rgba(255, 146, 43, 0.35); color: inherit; font-weight: 700; }
+
+/* ---------- La revisión con Claude ---------- */
+.vs-panel-revision { width: 320px; display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.vs-panel-titulo { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.vs-panel-titulo > .ico { color: var(--hoja); }
+.vs-panel-titulo .vs-cerrar { margin-inline-start: auto; }
+.vs-panel-revision > .ayuda { margin: 0; font-size: 12.5px; line-height: 1.55; }
+.vs-revision-pagina { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--borde); }
+.vs-revision-pagina h3 { margin: 0; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-3); }
+.vs-revision-pagina .ayuda { margin: 0; font-size: 13px; line-height: 1.55; }
+.vs-revisando { display: flex; align-items: center; gap: 8px; }
+.vs-girando { flex: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--borde-2); border-top-color: var(--hoja); animation: vs-girar 0.8s linear infinite; }
+@keyframes vs-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .vs-girando { animation-duration: 2.4s; } }
+.vs-revision-error { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; font-size: 13px; color: var(--error); }
+.vs-revision-error p { margin: 0; }
+.vs-propuestas { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.vs-propuesta { display: flex; align-items: flex-start; gap: 8px; padding: 6px 4px; border-radius: var(--r-2); }
+.vs-propuesta:hover { background: var(--superficie-2); }
+.vs-propuesta input { flex: none; margin-top: 6px; accent-color: var(--hoja); }
+.vs-propuesta-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 0; border: none; background: none; color: var(--texto); font-family: var(--letra-lengua); font-size: 15px; line-height: 1.6; text-align: start; overflow-wrap: anywhere; cursor: pointer; }
+.vs-propuesta-antes { color: var(--texto-3); }
+.vs-propuesta-antes del { text-decoration: line-through 2px; text-decoration-color: var(--error); color: var(--error); background: rgba(224, 49, 49, 0.1); border-radius: 2px; }
+.vs-propuesta-despues ins { text-decoration: none; color: var(--hoja); background: var(--hoja-suave); border-radius: 2px; font-weight: 700; }
+.vs-revision-acciones { display: flex; justify-content: flex-end; }
+.vs-revision-hecha { display: flex; align-items: flex-start; gap: 6px; }
+.vs-revision-hecha > .ico { flex: none; margin-top: 3px; color: var(--hoja); }
+
+/* ---------- La vista de texto ----------
+   El texto de la página con la ayuda de lectura del Portapapeles, en el lienzo, en lugar de la imagen. */
+.vs-lienzo-texto { display: block; padding: 18px 24px 0; }
+.vs-vista-texto { max-width: 1320px; margin: 0 auto; }
+.vs-vista-texto .ap-lectura-ficha { top: 0; height: calc(100vh - 150px); }
+.vs-vista-texto-vacia { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 16px; text-align: center; }
+.vs-vista-texto-vacia .ayuda { margin: 0; font-size: 14px; }
+.vs-vista-texto-leyendo { margin: 10px 0 0; text-align: center; }
+
 .vs-pie { flex: none; display: flex; align-items: center; gap: 14px; padding: 6px 16px; background: var(--superficie); border-top: 1px solid var(--borde); font-size: 12.5px; color: var(--texto-2); }
 .vs-pie input[type='range'] { flex: 1; min-width: 80px; accent-color: var(--hoja); }
 .vs-capitulo { max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

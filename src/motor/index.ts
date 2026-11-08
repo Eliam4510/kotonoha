@@ -401,6 +401,9 @@ const api: ApiMotor = {
   async corregirLectura(texto, c) {
     await guardarCorreccion(texto, c);
   },
+  async revisarPaginaOcr(p) {
+    return ia.revisarPaginaOcr(await aj(), p);
+  },
 
   async whisperMarca(ms, reproduciendo, velocidad, salto) {
     whisper.marcarVideo(ms, reproduciendo, velocidad, salto);

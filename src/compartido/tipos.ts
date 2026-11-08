@@ -187,6 +187,23 @@ export interface ContextoIA {
   guion?: string; // Texto completo del video o de la página
 }
 
+/** Una imagen para Claude, en base64. */
+export interface ImagenIA {
+  tipo: 'image/jpeg' | 'image/png' | 'image/webp';
+  datos: string;
+}
+
+/** Lo que se manda a Claude para revisar el texto que leyó el OCR de una página: sus líneas y la imagen de la página. */
+export interface PeticionRevisionOcr {
+  libro: string;
+  titulo?: string;
+  pagina: number;
+  /** Si cada línea es un globo de un manga y no un renglón. */
+  globos: boolean;
+  lineas: string[];
+  imagen: ImagenIA;
+}
+
 /** Un libro que se lee en el visor: un EPUB de imágenes o de texto, un CBZ o un PDF. */
 export interface DocumentoBiblioteca {
   formato: 'epub' | 'cbz' | 'pdf';
@@ -210,6 +227,8 @@ export interface DocumentoBiblioteca {
   anchas?: number[];
   /** «ancho», «pagina» o un porcentaje. En un EPUB de texto, siempre un porcentaje. */
   zoom?: 'ancho' | 'pagina' | number;
+  /** En un libro de páginas, si se lee como texto, en párrafos, en lugar de ver la imagen de cada página. */
+  vistaTexto?: boolean;
   /**
    * Si se lee el texto de las páginas con el OCR, y con qué modelos: los de libro impreso o los de manga. En un PDF con su
    * propio texto, textoPdf false hace que el OCR lea también esas páginas (la capa de un OCR antiguo); sin él, se usa el

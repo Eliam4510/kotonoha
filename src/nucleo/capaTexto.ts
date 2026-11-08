@@ -43,7 +43,8 @@ interface Grupo {
   caja: Caja;
 }
 
-const CJK = /[\p{scx=Han}\p{scx=Hiragana}\p{scx=Katakana}　-〿＀-￯]/u;
+/** Una letra de japonés o chino, o un signo de ancho completo: entre ellas no va espacio. */
+export const CJK = /[\p{scx=Han}\p{scx=Hiragana}\p{scx=Katakana}　-〿＀-￯]/u;
 
 /** Los signos que la fuente gira en vertical, con el signo que son: la norma los descompone en los de anchura normal. */
 const VERTICALES: Record<string, string> = {

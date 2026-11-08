@@ -2,6 +2,12 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.12.0 · 2026-11-08
+
+- **Buscar en el libro.** **Buscar en el libro**, o Ctrl+F, encuentra una palabra en todas las páginas con texto, el del PDF o el del OCR, sin distinguir anchos ni hiragana y katakana, y también partida entre dos renglones. Lo encontrado sale por páginas y queda marcado en la página; Intro pasa al siguiente.
+- **Vista de texto.** **Ver como texto** muestra la página como texto, en párrafos y con los títulos aparte, con la ayuda de lectura del Portapapeles: furigana, comprensión, lectura en voz alta y tarjetas. En un manga, cada globo es un párrafo.
+- **Revisar con Claude.** **Revisar el texto con Claude** compara el texto leído con la imagen de la página y propone solo lo que no coincide, letra a letra, para elegir qué aplicar. Lo aplicado queda como una línea editada, con «Restaurar». Usa Claude Haiku 5.5: menos de un céntimo de dólar por página.
+
 ## 0.11.0 · 2026-11-08
 
 - **Notas y marcadores, como en un lector de PDF.** En los libros de páginas, **Marcar esta página** cuelga una cinta en la página, también en las miniaturas. Desde el panel de una línea se resalta en cuatro colores o se subraya la línea entera, una palabra o un tramo seleccionado, con un comentario si se quiere. **Añadir una nota** deja un papelito en el punto de la página que se toque.
@@ -107,6 +113,12 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.12.0 · 2026-11-08
+
+- **Search the book.** **Search the book**, or Ctrl+F, finds a word on every page with text, from the PDF or from OCR, ignoring character width and the difference between hiragana and katakana, and also when it is split across two lines. Results are listed by page and marked on the page; Enter goes to the next one.
+- **Text view.** **View as text** shows the page as text, in paragraphs with headings set apart, with the Clipboard's reading help: furigana, comprehension, read aloud and cards. In a manga, each speech bubble is a paragraph.
+- **Review with Claude.** **Review the text with Claude** compares the text that was read with the page image and suggests only what does not match, letter by letter, so you can choose what to apply. Applied changes become edited lines, with "Restore". It uses Claude Haiku 5.5: less than one US cent per page.
 
 ## 0.11.0 · 2026-11-08
 

@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.11.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.12.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -114,6 +114,9 @@ Estado de cada función en la versión 0.11.0, con la forma en que se ha verific
 | Procesar: leer con el OCR un libro entero desde su tarjeta, con el avance, pausa y «Texto listo» al acabar | Automática, y con un tomo real |
 | Editar el texto de una línea a mano, guardado aparte de lo leído y con «Restaurar» | Automática |
 | Notas y marcadores, como en un lector de PDF: marcar páginas, resaltar en cuatro colores o subrayar una línea, una palabra o un tramo, con un comentario, y notas sueltas sobre la página; en el panel «Notas y marcadores», todo por páginas, para ir, editar, quitar o copiar como texto | Automática |
+| Buscar en el libro: en el texto del PDF y en el del OCR, con lo editado, sin distinguir anchos ni hiragana y katakana, también una palabra partida entre dos renglones; resultados por páginas y marcados en la página | Automática |
+| Vista de texto: la página como texto, en párrafos y con los títulos aparte, con la ayuda de lectura del Portapapeles (furigana, comprensión, lectura en voz alta, fichas y tarjetas); cada libro la recuerda | Automática, y los párrafos con 16 páginas reales |
+| Revisar con Claude el texto de una página, con su imagen: solo los cambios que no coinciden, letra a letra, para elegir cuáles aplicar, guardados como líneas editadas | Simulador |
 | Tocar una línea de la página abre su texto con furigana y palabras para consultar, con su ficha y la creación de tarjetas | Automática |
 | Cada página se lee una sola vez y se guarda; su texto también llega a los lectores de pantalla | Automática |
 | EPUB de texto en el visor, con su propio formato: capítulos, CSS, ruby, ilustraciones y escritura vertical, y el lector de páginas encima, con colores, furigana y fichas | Automática, con un EPUB vertical con ruby, CSS e ilustración |

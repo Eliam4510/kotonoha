@@ -2,11 +2,12 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { Ajustes, Esfuerzo, TareaIA } from '../compartido/ajustes';
-import type { ContextoIA, SentidoEnContexto } from '../compartido/tipos';
+import type { ContextoIA, ImagenIA, PeticionRevisionOcr, SentidoEnContexto } from '../compartido/tipos';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import { type Lote, ordenarPorCercania, partirEnLotes } from '../nucleo/lotes';
 import { claveDia, claveMes, costeDe, type UsoTokens } from '../nucleo/precios';
 import { type EntradaAjuste, mensajeAjuste } from '../nucleo/letra';
+import { mensajeRevision } from '../nucleo/revision';
 import type { Linea } from '../nucleo/subtitulos';
 import type { TareaPrompt } from '../lenguas/tipos';
 import { baseGeneral, db } from './db';
@@ -51,6 +52,8 @@ interface OpcionesPeticion {
   siempreGuion?: boolean;
   /** Los lotes seguidos de una misma tarea no necesitan que la caché dure una hora, que cuesta más. */
   cacheCorta?: boolean;
+  /** Una imagen que va delante del texto del mensaje: la página cuyo texto se revisa. */
+  imagen?: ImagenIA;
 }
 
 function construirParams(o: OpcionesPeticion) {
@@ -68,7 +71,17 @@ function construirParams(o: OpcionesPeticion) {
     model: o.a.modelos[tarea],
     max_tokens: o.maxTokens ?? 16000,
     system,
-    messages: [{ role: 'user' as const, content: o.usuario }],
+    messages: [
+      {
+        role: 'user' as const,
+        content: o.imagen
+          ? [
+              { type: 'image' as const, source: { type: 'base64' as const, media_type: o.imagen.tipo, data: o.imagen.datos } },
+              { type: 'text' as const, text: o.usuario },
+            ]
+          : o.usuario,
+      },
+    ],
     output_config: {
       effort: o.a.esfuerzos[tarea] as Esfuerzo,
       ...(o.formato ? { format: o.formato } : {}),
@@ -493,6 +506,23 @@ export async function ajustarLetra(a: Ajustes, lineas: Linea[], versos: string[]
   const usuario = mensajeAjuste(lineas, versos, titulo);
   const texto = await conCache({ a, tarea: 'letra', sistema: letra, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: esquemaLetra } }, false);
   return texto ? (JSON.parse(texto) as { ajuste: EntradaAjuste[] }).ajuste : [];
+}
+
+/**
+ * Revisa el texto que el OCR leyó de una página, con la imagen de la página delante: Claude solo devuelve lo que no
+ * coincide con ella. La respuesta se guarda, así que volver a revisar la misma página con el mismo texto no se paga.
+ */
+export async function revisarPaginaOcr(a: Ajustes, p: PeticionRevisionOcr): Promise<ParteTexto[]> {
+  const { revisionOcr, esquemaRevisionOcr } = motorLengua().prompts;
+  const usuario = mensajeRevision({ titulo: p.titulo, pagina: p.pagina, globos: p.globos, lineas: p.lineas });
+  const texto = await conCache(
+    { a, tarea: 'ocr', sistema: revisionOcr, usuario, imagen: p.imagen, titulo: p.titulo, maxTokens: 16000, formato: { type: 'json_schema', schema: esquemaRevisionOcr } },
+    false,
+    undefined,
+    undefined,
+    [a.esfuerzos.ocr, revisionOcr, p.libro, p.pagina, p.globos, p.lineas]
+  );
+  return texto ? ((JSON.parse(texto) as { cambios?: ParteTexto[] }).cambios ?? []) : [];
 }
 
 export interface EntradaAnalisis {

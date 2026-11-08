@@ -11,18 +11,26 @@ import { tr } from '../compartido/i18n';
 import { motor } from '../compartido/rpc';
 import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca } from '../compartido/tipos';
 import { nuevoResaltado, resaltadosDe } from '../nucleo/anotaciones';
+import type { Hallazgo } from '../nucleo/busqueda';
 import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
 import { aplicarEdiciones, type EdicionLinea, type LineaEditada } from '../nucleo/ediciones';
 import { edicionesDe, guardarEdicion, lecturaMinima, quitarEdicion } from '../compartido/paginasOcr';
 import type { Direccion } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
+import { cambiosValidos } from '../nucleo/revision';
+import { lengua } from '../ui/lengua';
 import { NotasDePagina, PanelNotas, Resaltados } from './Anotaciones';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
+import { imagenParaClaude } from './imagenClaude';
 import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
 import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
+import { PanelBuscar } from './PanelBuscar';
 import { PanelLinea } from './PanelLinea';
+import { PanelRevision, type PropuestaLinea } from './PanelRevision';
 import { paginadorDePdf } from './pdf';
+import { leerTextoLibro, type TextoDePagina } from './textoLibro';
+import { VistaTexto } from './VistaTexto';
 
 type Vista = 'una' | 'doble' | 'continua';
 type Zoom = 'ancho' | 'pagina' | number;
@@ -55,7 +63,7 @@ interface PropsAnotaciones {
  * van sus líneas: zonas que se pueden tocar, con el texto para los lectores de pantalla, y la palabra elegida marcada.
  * Lo anotado va en dos capas: los resaltados debajo de las líneas y las notas encima.
  */
-function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, marca, alTocar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
+function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, marca, hallado, alTocar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
   paginador: Paginador;
   n: number;
   escala: number;
@@ -65,10 +73,16 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
   porPalabra?: boolean;
   elegida?: number;
   marca?: Caja;
+  /** Lo encontrado al buscar en el libro, si está en esta página: se marca y se lleva a la vista. */
+  hallado?: Caja[];
   alTocar?: (indice: number, caracter?: number) => void;
 } & PropsAnotaciones) {
   const [imagen, fijarImagen] = useState<PaginaImagen | null>(null);
   const [fallo, fijarFallo] = useState('');
+  const primerHallado = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    primerHallado.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [hallado, !!imagen]);
   useEffect(() => {
     let vivo = true;
     fijarImagen(null);
@@ -108,6 +122,13 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
             />
           ))}
           {marca && <span class="vs-marca" style={porciento(marca)} />}
+        </div>
+      )}
+      {imagen && hallado && hallado.length > 0 && (
+        <div class="vs-hallados" aria-hidden="true">
+          {hallado.map((c, i) => (
+            <span key={i} ref={i === 0 ? primerHallado : undefined} class="vs-hallado" style={porciento(c)} />
+          ))}
         </div>
       )}
       {imagen && anotaciones && anotaciones.length > 0 && (
@@ -169,7 +190,9 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // Las páginas apaisadas, que en doble página van solas: null mientras no se sepan.
   const [anchas, fijarAnchas] = useState<number[] | null>(null);
   const [zoom, fijarZoom] = useState<Zoom>('pagina');
-  const [panel, fijarPanel] = useState<'miniaturas' | 'indice' | 'notas' | null>(null);
+  const [panel, fijarPanel] = useState<'miniaturas' | 'indice' | 'notas' | 'buscar' | 'revision' | null>(null);
+  // La vista de texto: el texto de las páginas en párrafos, con la ayuda de lectura, en lugar de su imagen.
+  const [vistaTexto, fijarVistaTexto] = useState(false);
   const [invertir, fijarInvertir] = useState(() => leerPreferencia('visorInvertir', false));
   const { lleno, alternar: pantallaCompleta } = usePantallaCompleta();
   const [hueco, fijarHueco] = useState<Medida>({ ancho: 800, alto: 600 });
@@ -193,6 +216,12 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const [anotaciones, fijarAnotaciones] = useState<AnotacionLibro[]>([]);
   const [colocando, fijarColocando] = useState(false);
   const [notaAbierta, fijarNotaAbierta] = useState<string | null>(null);
+  // Buscar en el libro: lo que se busca, el texto de todo el libro según se prepara y lo encontrado que se está viendo.
+  const [consulta, fijarConsulta] = useState('');
+  const [corpus, fijarCorpus] = useState<{ paginas: Map<number, TextoDePagina>; hechas: number } | null>(null);
+  const [hallado, fijarHallado] = useState<{ pagina: number; cajas: Caja[] } | null>(null);
+  // Las páginas cuyo texto se pidió revisar con Claude mientras está abierto su panel, la última primero.
+  const [revisadas, fijarRevisadas] = useState<number[]>([]);
   const lector = useRef<LectorOcr | null>(null);
   const lienzo = useRef<HTMLElement>(null);
   /** Si el último cambio de página vino del desplazamiento: entonces no hay que desplazar otra vez. */
@@ -217,6 +246,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       fijarAnchas(d.anchas ?? null);
       if (!d.anchas && p.anchas) p.anchas().then((l) => vivo && fijarAnchas(l)).catch(() => {});
       fijarZoom(d.zoom ?? 'pagina');
+      fijarVistaTexto(d.vistaTexto ?? false);
       // Un manga se lee con los modelos de manga; lo demás, con los de libro impreso.
       fijarOcr(d.ocr?.activo ?? false);
       fijarModoOcr(d.ocr?.modo ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'manga' : 'libro'));
@@ -294,12 +324,12 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           pagina,
           abierto: Date.now(),
           ...(terminar ? { terminado: Date.now() } : {}),
-          documento: { paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, ocr: { activo: ocr, modo: modoOcr, ...(textoPdf ? {} : { textoPdf }) } },
+          documento: { paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, vistaTexto, ocr: { activo: ocr, modo: modoOcr, ...(textoPdf ? {} : { textoPdf }) } },
         })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(t);
-  }, [doc.id, paginador, pagina, alFinal, vista, direccion, portadaSola, anchas, zoom, ocr, modoOcr, textoPdf]);
+  }, [doc.id, paginador, pagina, alFinal, vista, direccion, portadaSola, anchas, zoom, vistaTexto, ocr, modoOcr, textoPdf]);
 
   // La portada de la estantería, de la página que se está viendo.
   const [portadaHecha, fijarPortadaHecha] = useState(false);
@@ -327,6 +357,13 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
       if (!paginador) return;
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'f' || e.key === 'F')) {
+        // Como en un lector de PDF: buscar en el libro, que el buscador del navegador no ve el texto de las páginas.
+        e.preventDefault();
+        if (panel === 'buscar') document.querySelector<HTMLInputElement>('.vs-panel-buscar input')?.select();
+        else fijarPanel('buscar');
+        return;
+      }
       if ((e.target as HTMLElement | null)?.closest?.('input, textarea, select')) return;
       if (e.ctrlKey || e.metaKey) {
         // Como en un lector de PDF: el zoom del libro, no el de la pestaña.
@@ -343,7 +380,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
         e.preventDefault();
         return;
       }
-      const continua = vista === 'continua';
+      // En la vista de texto se pasa de página igual en todas las vistas: el texto no se desplaza de página en página.
+      const continua = vista === 'continua' && !vistaTexto;
       if (e.key === 'ArrowLeft' && !continua) haciaIzquierda();
       else if (e.key === 'ArrowRight' && !continua) haciaDerecha();
       else if (e.key === 'PageDown' || (e.key === ' ' && !continua && !e.shiftKey)) siguiente();
@@ -385,10 +423,16 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     return () => el.removeEventListener('scroll', medir);
   }, [vista, paginador, pagina, hueco, zoom]);
 
-  const aLaVista = vista === 'continua' ? Array.from({ length: Math.max(0, cerca[1] - cerca[0] + 1) }, (_, i) => cerca[0] + i) : (lista[actual] ?? []);
+  // En la vista de texto con desplazamiento continuo se lee la página actual: el texto no se desplaza de página en página.
+  const continuaTexto = vista === 'continua' && vistaTexto;
+  const aLaVista = continuaTexto ? [pagina] : vista === 'continua' ? Array.from({ length: Math.max(0, cerca[1] - cerca[0] + 1) }, (_, i) => cerca[0] + i) : (lista[actual] ?? []);
   // Las páginas que vienen después, en el orden de lectura: el OCR las lee antes de llegar, para que nunca haya que esperar.
   const adelante = ADELANTE[modoOcr];
-  const despues = vista === 'continua' ? Array.from({ length: Math.max(0, Math.min(adelante, total - 1 - cerca[1])) }, (_, i) => cerca[1] + 1 + i) : lista.slice(actual + 1, actual + 1 + adelante).flat();
+  const despues = continuaTexto
+    ? Array.from({ length: Math.max(0, Math.min(adelante, total - 1 - pagina)) }, (_, i) => pagina + 1 + i)
+    : vista === 'continua'
+      ? Array.from({ length: Math.max(0, Math.min(adelante, total - 1 - cerca[1])) }, (_, i) => cerca[1] + 1 + i)
+      : lista.slice(actual + 1, actual + 1 + adelante).flat();
   const cercanas = [...aLaVista, ...despues.slice(0, adelante)];
 
   // El texto del propio PDF: de las páginas a la vista y las que vienen. No cuesta nada y no hace falta pedirlo.
@@ -446,10 +490,19 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     return t && suyas.length ? { ...t, lineas: aplicarEdiciones(t.lineas, suyas) } : t;
   };
   /** Guarda el texto editado de una línea; si vuelve a ser el leído, la edición sobra y se quita. */
-  const editar = async (pagina: number, linea: LineaEditada, texto: string) => {
+  const editar = async (pagina: number, linea: LineaEditada, texto: string, origen?: 'claude') => {
     const original = linea.original ?? linea.texto;
     if (texto === original) return restaurar(linea);
-    const nueva: EdicionLinea = { clave: linea.edicion ?? `${doc.id}:${pagina}:${crypto.randomUUID()}`, libro: doc.id, pagina, caja: linea.caja, original, texto, creada: Date.now() };
+    const nueva: EdicionLinea = {
+      clave: linea.edicion ?? `${doc.id}:${pagina}:${crypto.randomUUID()}`,
+      libro: doc.id,
+      pagina,
+      caja: linea.caja,
+      original,
+      texto,
+      creada: Date.now(),
+      ...(origen ? { origen } : {}),
+    };
     await guardarEdicion(nueva);
     fijarEdiciones((l) => [...l.filter((e) => e.clave !== nueva.clave), nueva]);
   };
@@ -520,12 +573,92 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     fijarNotaAbierta(a.id);
   };
 
+  // ---------- Buscar en el libro ----------
+  // Con el panel abierto se prepara el texto de todas las páginas: lo leído con el OCR y el que trae el PDF.
+  useEffect(() => {
+    if (panel !== 'buscar' || !paginador) return;
+    const control = new AbortController();
+    leerTextoLibro({
+      paginador,
+      libro: doc.id,
+      modo: modoOcr,
+      minima: lecturaMinima(doc.documento?.formato ?? ''),
+      textoPdf,
+      ocrActivo: ocr,
+      propias,
+      senal: control.signal,
+      alAvanzar: (paginas, hechas, nuevas) => {
+        fijarCorpus({ paginas, hechas });
+        if (nuevas.size) {
+          fijarPropias((m) => {
+            const x = new Map(m);
+            for (const [n, l] of nuevas) if (!x.has(n)) x.set(n, l);
+            return x;
+          });
+        }
+      },
+    }).catch(console.error);
+    return () => control.abort();
+  }, [panel === 'buscar', paginador, doc.id, modoOcr, textoPdf, ocr]);
+  useEffect(() => {
+    if (panel !== 'buscar') fijarHallado(null);
+    if (panel !== 'revision') fijarRevisadas([]);
+  }, [panel]);
+  // Lo marcado era de lo que se buscaba antes.
+  useEffect(() => fijarHallado(null), [consulta]);
+
+  /** El texto en que se busca: el preparado y, encima, lo que el visor tiene más nuevo, con lo editado, como se ve. */
+  const buscable = useMemo(() => {
+    const salida = new Map<number, TextoDePagina>();
+    if (panel !== 'buscar' || !corpus) return salida;
+    for (const [n, t] of corpus.paginas) salida.set(n, t);
+    for (const n of new Set([...lineas.keys(), ...propias.keys()])) {
+      const t = textoDePagina<LineaTexto>(propias.get(n), lineas.get(n), { ocrActivo: ocr || !propias.get(n), textoPdf });
+      if (t) salida.set(n, t);
+    }
+    for (const [n, t] of salida) {
+      const suyas = ediciones.filter((e) => e.pagina === n);
+      if (suyas.length) salida.set(n, { ...t, lineas: aplicarEdiciones(t.lineas, suyas) });
+    }
+    return salida;
+  }, [panel, corpus, lineas, propias, ediciones, ocr, textoPdf]);
+
+  /** Lleva a lo encontrado y lo marca en su página. Si es texto del OCR y estaba apagado, se enciende para verlo. */
+  const elegirHallazgo = (h: Hallazgo) => {
+    const t = buscable.get(h.pagina);
+    if (!t) return;
+    const porLetra = t.propias || modoOcr === 'libro';
+    const cajas = h.tramos.map((x) => (porLetra ? cajaDeTramo(t.lineas[x.linea], x.inicio, x.fin) : t.lineas[x.linea].caja));
+    if (!ocr && !t.propias) fijarOcr(true);
+    fijarHallado({ pagina: h.pagina, cajas });
+    if (!(lista[actual] ?? []).includes(h.pagina) || vista === 'continua') irA(h.pagina);
+  };
+
+  // ---------- Revisar con Claude ----------
+  /** Las páginas a la vista que tienen texto: las que se pueden revisar. */
+  const conTexto = aLaVista.filter((n) => (textoDe(n)?.lineas.length ?? 0) > 0);
+  const revisarPagina = async (n: number): Promise<PropuestaLinea[]> => {
+    const t = textoDe(n);
+    if (!t?.lineas.length || !paginador) return [];
+    const suyas = t.lineas;
+    const imagen = await imagenParaClaude(await imagenParaOcr(paginador, n), suyas.map((l) => l.caja));
+    const cambios = await motor.revisarPaginaOcr({ libro: doc.id, titulo: doc.titulo, pagina: n, globos: !t.propias && modoOcr === 'manga', lineas: suyas.map((l) => l.texto), imagen });
+    return cambiosValidos(
+      suyas.map((l) => l.texto),
+      cambios
+    ).map((c) => ({ ...c, linea: suyas[c.indice] }));
+  };
+  const aplicarRevision = async (n: number, cambios: PropuestaLinea[]) => {
+    for (const c of cambios) await editar(n, c.linea, c.despues, 'claude');
+  };
+
   const pulsarLienzo = (e: MouseEvent) => {
     if (colocando) {
       ponerNota(e);
       return;
     }
-    if (vista === 'continua' || !lienzo.current) return;
+    // En la vista de texto, un toque es para el texto: consultar una palabra, no pasar de página.
+    if (vista === 'continua' || vistaTexto || !lienzo.current) return;
     const r = lienzo.current.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width;
     if (x < 0.3) haciaIzquierda();
@@ -551,6 +684,24 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const contenido = () => {
     if (error) return <AvisoError mensaje={error} />;
     if (!paginador) return <Abriendo />;
+    if (vistaTexto) {
+      return (
+        <VistaTexto
+          paginas={aLaVista}
+          textos={aLaVista.map(textoDe)}
+          globos={modoOcr === 'manga'}
+          leyendo={ocr && leyendoVista}
+          ocrActivo={ocr}
+          alLeer={() => {
+            fijarErrorOcr('');
+            fijarOcr(true);
+          }}
+          ajustes={a}
+          titulo={doc.titulo}
+        />
+      );
+    }
+    const halladoEn = (n: number) => (hallado?.pagina === n ? hallado.cajas : undefined);
     if (vista === 'continua')
       return (
         <div class="vs-continua">
@@ -558,7 +709,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             const e = escalaDe([medida(n)], hueco, zoom);
             const t = medida(n);
             return n >= cerca[0] && n <= cerca[1] ? (
-              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} {...propsAnotaciones(n)} />
+              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
             ) : (
               <div key={n} class="vs-pagina vs-reservada" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * e)}px`, height: `${Math.round(t.alto * e)}px` }} />
             );
@@ -568,7 +719,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     return (
       <div class={`vs-pliego ${rtl ? 'rtl' : ''}`}>
         {(lista[actual] ?? []).map((n) => (
-          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} {...propsAnotaciones(n)} />
+          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
         ))}
       </div>
     );
@@ -610,13 +761,15 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
               <Boton icono="siguiente" etiqueta={rtl ? tr('Página anterior') : tr('Página siguiente')} alPulsar={haciaDerecha} />
               <Boton icono="ultima" etiqueta={rtl ? tr('Primera página') : tr('Última página')} alPulsar={() => (rtl ? irA(0) : irA(total - 1))} />
             </div>
-            <div class="vs-grupo" role="group" aria-label={tr('Zoom')}>
-              <Boton icono="alejar" etiqueta={tr('Alejar')} alPulsar={() => zoomPaso(false)} />
-              <button class="btn chico fantasma vs-zoom num" data-tip={tr('Página completa')} onClick={() => fijarZoom('pagina')}>{porcentaje} %</button>
-              <Boton icono="acercar" etiqueta={tr('Acercar')} alPulsar={() => zoomPaso(true)} />
-              <Boton icono="ajustar-ancho" etiqueta={tr('Ajustar al ancho')} activo={zoom === 'ancho'} alPulsar={() => fijarZoom('ancho')} />
-              <Boton icono="ajustar-pagina" etiqueta={tr('Página completa')} activo={zoom === 'pagina'} alPulsar={() => fijarZoom('pagina')} />
-            </div>
+            {!vistaTexto && (
+              <div class="vs-grupo" role="group" aria-label={tr('Zoom')}>
+                <Boton icono="alejar" etiqueta={tr('Alejar')} alPulsar={() => zoomPaso(false)} />
+                <button class="btn chico fantasma vs-zoom num" data-tip={tr('Página completa')} onClick={() => fijarZoom('pagina')}>{porcentaje} %</button>
+                <Boton icono="acercar" etiqueta={tr('Acercar')} alPulsar={() => zoomPaso(true)} />
+                <Boton icono="ajustar-ancho" etiqueta={tr('Ajustar al ancho')} activo={zoom === 'ancho'} alPulsar={() => fijarZoom('ancho')} />
+                <Boton icono="ajustar-pagina" etiqueta={tr('Página completa')} activo={zoom === 'pagina'} alPulsar={() => fijarZoom('pagina')} />
+              </div>
+            )}
             <div class="vs-grupo" role="group" aria-label={tr('Vista')}>
               <Boton icono="una-pagina" etiqueta={tr('Una página')} activo={vista === 'una'} alPulsar={() => fijarVista('una')} />
               <Boton icono="doble-pagina" etiqueta={tr('Doble página')} activo={vista === 'doble'} alPulsar={() => fijarVista('doble')} />
@@ -653,10 +806,35 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                   <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para manga: globos y texto vertical')} onClick={() => fijarModoOcr('manga')}>{tr('Manga')}</button>
                 </span>
               )}
+              <Boton
+                icono="lector"
+                etiqueta={vistaTexto ? tr('Ver las páginas') : tr('Ver como texto')}
+                activo={vistaTexto}
+                alPulsar={() => {
+                  // Para leer como texto hace falta el texto: si la página no lo trae, lo lee el OCR.
+                  if (!vistaTexto && !ocr) {
+                    fijarErrorOcr('');
+                    fijarOcr(true);
+                  }
+                  fijarAbierta(null);
+                  fijarColocando(false);
+                  fijarVistaTexto(!vistaTexto);
+                }}
+              />
+              <Boton
+                icono="ia"
+                etiqueta={conTexto.length ? tr('Revisar el texto con Claude') : tr('Revisar el texto con Claude: la página aún no tiene texto')}
+                activo={panel === 'revision'}
+                deshabilitado={!conTexto.length}
+                alPulsar={() => {
+                  fijarRevisadas((r) => [...conTexto.filter((n) => !r.includes(n)), ...r]);
+                  fijarPanel('revision');
+                }}
+              />
             </div>
             <div class="vs-grupo" role="group" aria-label={tr('Anotaciones')}>
               <Boton icono="marcador" etiqueta={marcador ? tr('Quitar el marcador de esta página') : tr('Marcar esta página')} activo={!!marcador} alPulsar={alternarMarcador} />
-              <Boton icono="nota-lapiz" etiqueta={colocando ? tr('Toca la página donde va la nota') : tr('Añadir una nota')} activo={colocando} alPulsar={() => fijarColocando(!colocando)} />
+              {!vistaTexto && <Boton icono="nota-lapiz" etiqueta={colocando ? tr('Toca la página donde va la nota') : tr('Añadir una nota')} activo={colocando} alPulsar={() => fijarColocando(!colocando)} />}
               <Boton icono="nota" etiqueta={tr('Notas y marcadores')} activo={panel === 'notas'} alPulsar={() => fijarPanel(panel === 'notas' ? null : 'notas')} />
             </div>
             <div class="vs-grupo">
@@ -666,6 +844,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                 activo={rtl}
                 alPulsar={() => fijarDireccion(rtl ? 'ltr' : 'rtl')}
               />
+              <Boton icono="buscar" etiqueta={tr('Buscar en el libro')} activo={panel === 'buscar'} alPulsar={() => fijarPanel(panel === 'buscar' ? null : 'buscar')} />
               <Boton icono="miniaturas" etiqueta={tr('Miniaturas')} activo={panel === 'miniaturas'} alPulsar={() => fijarPanel(panel === 'miniaturas' ? null : 'miniaturas')} />
               {paginador.indice.length > 0 && <Boton icono="indice" etiqueta={tr('Índice')} activo={panel === 'indice'} alPulsar={() => fijarPanel(panel === 'indice' ? null : 'indice')} />}
               <Boton
@@ -715,9 +894,35 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
         {paginador && panel === 'notas' && (
           <PanelNotas titulo={doc.titulo} anotaciones={anotaciones} actual={lista[actual] ?? [pagina]} alIr={irA} alGuardar={guardarAnotacion} alQuitar={quitarAnotacion} />
         )}
+        {paginador && panel === 'buscar' && (
+          <PanelBuscar
+            paginas={buscable}
+            total={total}
+            hechas={corpus?.hechas ?? 0}
+            consulta={consulta}
+            alCambiarConsulta={fijarConsulta}
+            sinEspacios={!lengua.value.escritura.palabrasSeparadas}
+            ocrActivo={ocr}
+            alElegir={elegirHallazgo}
+            alCerrar={() => fijarPanel(null)}
+          />
+        )}
+        {paginador && panel === 'revision' && (
+          <PanelRevision
+            paginas={revisadas}
+            revisar={revisarPagina}
+            alAplicar={aplicarRevision}
+            alVerLinea={(n, indice) => {
+              if (!aLaVista.includes(n)) irA(n);
+              if (vistaTexto) fijarVistaTexto(false);
+              fijarAbierta({ pagina: n, indice });
+            }}
+            alCerrar={() => fijarPanel(null)}
+          />
+        )}
         <main
           ref={lienzo}
-          class={`vs-lienzo ${invertir ? 'invertido' : ''} ${colocando ? 'colocando' : ''}`}
+          class={`vs-lienzo ${invertir && !vistaTexto ? 'invertido' : ''} ${colocando ? 'colocando' : ''} ${vistaTexto ? 'vs-lienzo-texto' : ''}`}
           data-vista={vista}
           onClick={pulsarLienzo}
           onPointerDown={tocar}
@@ -730,7 +935,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
         >
           {contenido()}
         </main>
-        {abierta && lineasAbiertas?.[abierta.indice] && (
+        {!vistaTexto && abierta && lineasAbiertas?.[abierta.indice] && (
           <PanelLinea
             lineas={lineasAbiertas}
             indice={abierta.indice}

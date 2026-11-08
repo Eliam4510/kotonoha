@@ -25,6 +25,7 @@ const NOMBRES_TAREA: [TareaIA, string][] = [
   ['analisis', tm('Revisión de lecturas, sentidos y gramática')],
   ['corregir', tm('Corrección de subtítulos automáticos')],
   ['letra', tm('Ajuste de letras')],
+  ['ocr', tm('Revisión del texto de las páginas')],
   ['desglosar', tm('Desglose de frases')],
   ['traducir', tm('Traducción de frases')],
   ['subtitulos', tm('Traducción de subtítulos completos')],

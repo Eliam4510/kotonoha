@@ -5,6 +5,7 @@
 import type { PromptPersonalizado } from '../../compartido/ajustes';
 import { ESQUEMA_ANALISIS, ESQUEMA_CORRECCIONES, ESQUEMA_SENTIDO } from '../esquemasClaude';
 import { ESQUEMA_LETRA, promptLetra } from '../promptLetra';
+import { ESQUEMA_REVISION_OCR, promptRevisionOcr } from '../promptOcr';
 import type { PromptsLengua, TareaPrompt } from '../tipos';
 
 const CRITERIO_LITERARIO = `El primer significado del diccionario suele ser el literal y a menudo no es el correcto aquí.
@@ -162,4 +163,10 @@ export const PROMPTS_INGLES: PromptsLengua = {
   imagen: 'Devuelve solo dos o tres palabras en inglés útiles para buscar una imagen que ilustre el término dado, según su sentido en la frase. Sin comillas.',
   glosa: (idioma) => `Traduce el término inglés a ${idioma} con una o dos palabras, en forma de diccionario. Responde solo con la traducción.`,
   revisarLectura: (idioma) => `Eres un experto en pronunciación del inglés. Decide cómo se pronuncia esta palabra en esta frase, teniendo en cuenta el contexto: read, lead o tear suenan distinto según su sentido. Responde en ${idioma}.`,
+  revisionOcr: promptRevisionOcr({
+    lengua: 'inglés',
+    confusiones: 'rn y m, l, I y 1, O y 0, cl y d, vv y w, las ligaduras (fi, fl), y las comillas y los apóstrofos',
+    noTocar: '- La ortografía de la página, británica o estadounidense.',
+  }),
+  esquemaRevisionOcr: ESQUEMA_REVISION_OCR,
 };

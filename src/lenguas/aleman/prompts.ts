@@ -5,6 +5,7 @@
 import type { PromptPersonalizado } from '../../compartido/ajustes';
 import { ESQUEMA_ANALISIS, ESQUEMA_CORRECCIONES, ESQUEMA_SENTIDO } from '../esquemasClaude';
 import { ESQUEMA_LETRA, promptLetra } from '../promptLetra';
+import { ESQUEMA_REVISION_OCR, promptRevisionOcr } from '../promptOcr';
 import type { PromptsLengua, TareaPrompt } from '../tipos';
 
 const CRITERIO_LITERARIO = `El primer significado del diccionario suele ser el literal y a menudo no es el correcto aquí.
@@ -162,4 +163,10 @@ export const PROMPTS_ALEMAN: PromptsLengua = {
   imagen: 'Devuelve solo dos o tres palabras en inglés útiles para buscar una imagen que ilustre el término alemán dado, según su sentido en la frase. Sin comillas.',
   glosa: (idioma) => `Traduce el término alemán a ${idioma} con una o dos palabras, en forma de diccionario. Responde solo con la traducción.`,
   revisarLectura: (idioma) => `Eres un experto en pronunciación del alemán. Decide cómo se pronuncia esta palabra en esta frase, teniendo en cuenta el contexto: en «modern» o «übersetzen» el acento cambia según el sentido. Responde en ${idioma}.`,
+  revisionOcr: promptRevisionOcr({
+    lengua: 'alemán',
+    confusiones: 'ß y B, las diéresis que se pierden o que aparecen (ä, ö, ü), rn y m, l, I y 1, O y 0, y las comillas alemanas („“ y »«)',
+    noTocar: '- La ortografía de la página, aunque sea la anterior a la reforma (daß, muß).',
+  }),
+  esquemaRevisionOcr: ESQUEMA_REVISION_OCR,
 };
