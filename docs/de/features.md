@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.9.6 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.10.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -102,6 +102,9 @@ Stand jeder Funktion in Version 0.9.6 und die Art ihrer Überprüfung.
 | Lesehilfe: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
 | Betrachter für Seitenbücher: EPUB aus Bildern, CBZ und PDF in einem eigenen Tab, mit Zoom, Anpassung an Breite oder Seite, Einzelseite, Doppelseite und fortlaufendem Bildlauf | Automatisch |
 | Bilderordner als Bücher: Jeder Ordner, oder jeder Band darin, wird ein Buch, mit der Titelseite vorn, einem Inhaltsverzeichnis nach Kapiteln und querformatigen Doppelseiten für sich | Automatisch, und mit 40 echten Manga-Bänden |
+| Sammlungen im Regal: eine Reihe mit ihren Bänden oder ein Thema, mit Art, Beschreibung und Titelbild; ein Ordner mit mehreren Bänden kommt als Sammlung herein, und ein neuer Band kommt in seine | Automatisch |
+| Lesefortschritt: wie viel von jedem Buch und jeder Sammlung gelesen ist, „Gelesen“ am Ende oder von Hand, „Weiterlesen“ und Filter nach Stand | Automatisch |
+| Titelbilder: PDFs haben ihres schon beim Import; das jedes Buchs wird aus einer Seite im Betrachter oder einem Bild gewählt, das jeder Sammlung aus den Titelbildern ihrer Bücher oder einem Bild | Automatisch |
 | Leserichtung von rechts nach links aus dem Buch selbst, mit allein stehender Titelseite in der Doppelseite | Automatisch |
 | Miniaturansichten, Inhaltsverzeichnis des Buchs, Sprung zu einer Seite, Vollbild und umgekehrte Farben | Automatisch |
 | Bücher werden getrennt gespeichert und stückweise gelesen: Ein PDF mit Hunderten MB wird nie ganz geladen. Der Betrachter merkt sich Seite, Ansicht und Zoom jedes Buchs | Automatisch, und mit einem echten PDF von 347 MB |

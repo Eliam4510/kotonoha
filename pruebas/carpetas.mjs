@@ -1,7 +1,8 @@
 // Prueba la importación de carpetas de imágenes en la Ayuda de lectura con una carpeta hecha aquí mismo: una serie con
 // dos tomos (uno con la portada llamada cover.jpg, que el orden natural dejaría al final, y una doble página apaisada;
-// otro con su ComicInfo.xml), un archivo que no es imagen y unas imágenes sueltas. Comprueba la estantería, el orden de
-// las páginas, la doble página que va sola, el sentido de lectura y que cada libro se guarda como un CBZ.
+// otro con su ComicInfo.xml), un archivo que no es imagen y unas imágenes sueltas. Comprueba que los tomos entran en una
+// colección con el nombre de la serie, el orden de las páginas, la doble página que va sola, el sentido de lectura y que
+// cada libro se guarda como un CBZ.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/carpetas.mjs
 
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -93,9 +94,30 @@ await app.waitForSelector('input[type=file][aria-label="Importar una carpeta"]',
 comprobar(await app.locator('button.ap-elegir-carpeta').isVisible(), 'Hay un botón para elegir una carpeta de imágenes');
 comprobar(await app.evaluate(() => document.querySelector('input[aria-label="Importar una carpeta"]')?.webkitdirectory === true), 'Su selector elige carpetas');
 await app.setInputFiles('input[type=file][aria-label="Importar una carpeta"]', CARPETA);
+const serie = await esperar(app, () => {
+  const c = [...document.querySelectorAll('.ap-coleccion')].find((x) => x.querySelector('h3')?.textContent === 'Serie de prueba');
+  return c && !document.querySelector('.ap-importando') ? { faja: c.querySelector('.ap-obi .num')?.textContent, portada: !!c.querySelector('.ap-tapa-imagen') } : null;
+});
+comprobar(serie?.faja === '2 libros' && serie.portada, 'Los dos tomos entran juntos, en una colección con el nombre de la carpeta y la portada del primero', JSON.stringify(serie));
+const aviso = await app.evaluate(() => document.querySelector('.ap-mensaje:not(.error)')?.textContent ?? '');
+comprobar(aviso.includes('Nueva colección «Serie de prueba», con 2 libros.'), 'Y lo dice', aviso);
+comprobar(await app.evaluate(() => ![...document.querySelectorAll('.ap-libro:not(.ap-coleccion) h3')].some((h) => h.textContent?.startsWith('Serie de prueba'))), 'Los tomos no se repiten sueltos en la estantería');
+
+// ---------- Imágenes sueltas ----------
+
+console.log('\n== Imágenes sueltas ==');
+await app.setInputFiles('input[type=file][aria-label="Importar archivos"]', SUELTAS);
+const suelta = await esperar(app, () => [...document.querySelectorAll('.ap-libro')].find((x) => x.querySelector('h3')?.textContent === 'Suelta')?.querySelector('.ap-obi .num')?.textContent);
+comprobar(suelta === '2 páginas', 'Las imágenes sueltas son un libro con el nombre que comparten, fuera de toda colección', suelta);
+
+// ---------- Los tomos, dentro de su colección ----------
+
+console.log('\n== La colección ==');
+await app.locator('button.ap-tapa[aria-label="Abrir la colección Serie de prueba"]').click();
+await app.waitForSelector('.ap-vista-coleccion', { timeout: 10000 });
 const libros = await esperar(app, async () => {
   const l = [...document.querySelectorAll('.ap-libro')];
-  return l.length === 2 && l.every((x) => x.querySelector('.ap-tapa-imagen')) && !document.querySelector('.ap-importando') ? true : null;
+  return l.length === 2 && l.every((x) => x.querySelector('.ap-tapa-imagen')) ? true : null;
 });
 const estante = await estanteria(app);
 comprobar(!!libros, 'Los dos tomos entran en la estantería, cada uno con su portada', JSON.stringify(estante));
@@ -110,15 +132,9 @@ const guardados = await app.evaluate(async () => {
   for await (const h of d.values()) salida.push((await h.getFile()).size);
   return salida;
 });
-comprobar(guardados.length === 2 && guardados.every((t) => t > 1000), 'Cada tomo se guarda como un solo archivo', JSON.stringify(guardados));
-await app.screenshot({ path: join(CAPTURAS, 'estanteria.png') });
-
-// ---------- Imágenes sueltas ----------
-
-console.log('\n== Imágenes sueltas ==');
-await app.setInputFiles('input[type=file][aria-label="Importar archivos"]', SUELTAS);
-const suelta = await esperar(app, () => [...document.querySelectorAll('.ap-libro')].find((x) => x.querySelector('h3')?.textContent === 'Suelta')?.querySelector('.ap-obi .num')?.textContent);
-comprobar(suelta === '2 páginas', 'Las imágenes sueltas son un libro con el nombre que comparten', suelta);
+// Los dos tomos y las imágenes sueltas.
+comprobar(guardados.length === 3 && guardados.every((t) => t > 1000), 'Cada libro de imágenes se guarda como un solo archivo', JSON.stringify(guardados));
+await app.screenshot({ path: join(CAPTURAS, 'coleccion.png') });
 
 // ---------- El visor ----------
 

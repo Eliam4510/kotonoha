@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.9.6, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.10.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -102,6 +102,9 @@ Estado de cada función en la versión 0.9.6, con la forma en que se ha verifica
 | Ayuda de lectura: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
 | Carpetas de imágenes como libros: cada carpeta, o cada tomo dentro de ella, entra como un libro, con la portada delante, el índice por capítulos y las dobles páginas apaisadas solas | Automática, y con 40 tomos reales de manga |
+| Colecciones en la estantería: una serie con sus tomos o un tema, con su tipo, su descripción y su portada; una carpeta con varios tomos entra ya como una colección, y un tomo nuevo se añade a la suya | Automática |
+| Progreso de lectura: cuánto se lleva de cada libro y de cada colección, «Terminado» al llegar al final o a mano, «Seguir leyendo» y filtros por estado | Automática |
+| Portadas: los PDF la traen desde que se importan; la de cada libro se elige con una página del visor o una imagen, y la de cada colección, entre las de sus libros o una imagen | Automática |
 | Sentido de derecha a izquierda tomado del propio libro, con la portada sola en doble página | Automática |
 | Miniaturas, índice del libro, ir a una página, pantalla completa y colores invertidos | Automática |
 | Los libros se guardan aparte y se leen a trozos: un PDF de cientos de MB no se carga entero. El visor recuerda la página, la vista y el zoom de cada uno | Automática, y con un PDF real de 347 MB |

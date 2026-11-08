@@ -6,6 +6,8 @@ import type { Linea } from '../nucleo/subtitulos';
 import type { DatosTrazos } from '../nucleo/trazos';
 import type {
   BorradorTarjeta,
+  CambioBiblioteca,
+  ColeccionBiblioteca,
   ContextoIA,
   ElementoBiblioteca,
   EstadisticasPalabras,
@@ -139,8 +141,14 @@ export interface ApiMotor {
 
   bibliotecaListar(): Promise<ElementoBiblioteca[]>;
   bibliotecaGuardar(e: ElementoBiblioteca): Promise<void>;
+  /** Cambia unos campos sobre lo último guardado (ver CambioBiblioteca) y devuelve cómo queda. */
+  bibliotecaCambiar(id: string, cambio: CambioBiblioteca): Promise<ElementoBiblioteca | undefined>;
   bibliotecaEliminar(id: string): Promise<void>;
   bibliotecaObtener(id: string): Promise<ElementoBiblioteca | undefined>;
+  coleccionesListar(): Promise<ColeccionBiblioteca[]>;
+  coleccionGuardar(c: ColeccionBiblioteca): Promise<void>;
+  /** Quita la colección; sus libros se quedan en la estantería, sueltos. */
+  coleccionEliminar(id: string): Promise<void>;
 
   memoriaPendientes(limite: number): Promise<TarjetaMemoria[]>;
   memoriaResumen(): Promise<{ total: number; pendientes: number; nuevas: number }>;

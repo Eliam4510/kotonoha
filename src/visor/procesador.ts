@@ -48,10 +48,8 @@ export async function procesarLibro(e: ElementoBiblioteca, lector: LectorOcr, al
       alAvanzar({ hechas: n + 1, total: p.total });
     }
     // Se guarda sobre lo último de la biblioteca: el visor puede haber guardado mientras tanto por qué página se va.
-    const actual = (await motor.bibliotecaObtener(e.id)) ?? e;
-    if (actual.documento) {
-      await motor.bibliotecaGuardar({ ...actual, documento: { ...actual.documento, paginas: p.total, ocr: { ...actual.documento.ocr, activo: true, modo }, procesado: { modo, textoPdf, lectura: LECTURA } } });
-    }
+    const ocr = (await motor.bibliotecaObtener(e.id))?.documento?.ocr ?? d.ocr;
+    await motor.bibliotecaCambiar(e.id, { documento: { paginas: p.total, ocr: { ...ocr, activo: true, modo }, procesado: { modo, textoPdf, lectura: LECTURA } } });
     return true;
   } finally {
     p.cerrar();

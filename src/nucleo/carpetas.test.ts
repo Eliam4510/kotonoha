@@ -20,6 +20,21 @@ describe('las carpetas de imágenes como libros', () => {
     expect(resumen(l)).toEqual(['MiSerie 14巻 (200)', 'MiSerie 15巻 (210)']);
   });
 
+  it('cada tomo sabe de qué carpeta es, para juntarlos en su colección; un libro suelto, no', () => {
+    const tomos = librosDeImagenes(rutas(...paginas('Mangas/MiSerie/14巻', 200), ...paginas('Mangas/MiSerie/15巻', 210)), '');
+    expect(tomos.map((t) => t.carpeta)).toEqual(['Mangas/MiSerie', 'Mangas/MiSerie']);
+    expect(librosDeImagenes(rutas(...paginas('14巻', 3)), '')[0].carpeta).toBeUndefined();
+    // Un tomo nuevo, solo en la carpeta de su serie: también es de ella.
+    expect(librosDeImagenes(rutas(...paginas('MiSerie/16巻', 3)), '')[0].carpeta).toBe('MiSerie');
+  });
+
+  it('los tomos de una serie son de la serie, aunque vengan en subcarpetas; cada serie de una biblioteca, de la suya', () => {
+    const serie = librosDeImagenes(rutas(...paginas('Ejemplo vol 01-03/Ejemplo v01', 200), ...paginas('Ejemplo vol 01-03/Ejemplo v02-03/第02巻', 190), ...paginas('Ejemplo vol 01-03/Ejemplo v02-03/第03巻', 180)), '');
+    expect(serie.map((t) => t.carpeta)).toEqual(['Ejemplo vol 01-03', 'Ejemplo vol 01-03', 'Ejemplo vol 01-03']);
+    const biblioteca = librosDeImagenes(rutas(...paginas('Mangas/Una/第01巻', 150), ...paginas('Mangas/Una/第02巻', 150), ...paginas('Mangas/Otra/第01巻', 150), ...paginas('Mangas/Otra/第02巻', 150)), '');
+    expect(biblioteca.map((t) => t.carpeta)).toEqual(['Mangas/Otra', 'Mangas/Otra', 'Mangas/Una', 'Mangas/Una']);
+  });
+
   it('salta las carpetas que solo envuelven a otras y se queda con el nombre más concreto', () => {
     const l = librosDeImagenes(
       rutas(

@@ -1,10 +1,11 @@
-// Pantallas de la ventana de la app: inicio, diccionario, lector, biblioteca, memoria y palabras.
+// Pantallas de la ventana de la app: inicio, diccionario, lector, memoria y palabras. La Ayuda de lectura está en
+// Biblioteca.tsx.
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { type Card, fsrs, type Grade } from 'ts-fsrs';
 import type { Ajustes } from '../compartido/ajustes';
 import type { EstadoMotor } from '../compartido/api';
-import { alRecibirEvento, flujoMotor, fondo, motor } from '../compartido/rpc';
+import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { alCambiarTextoLector, guardarTextoLector, leerTextoLector } from '../compartido/textoLector';
 import type {
   ElementoBiblioteca,
@@ -15,16 +16,8 @@ import type {
   ResultadoBusqueda,
   TarjetaMemoria,
 } from '../compartido/tipos';
-import { guardarArchivoDocumento } from '../compartido/documentos';
-import { estructuraDeHtml, estructuraDeNodo, type NodoHtml, normalizarTextoPlano, textoConEstructura } from '../nucleo/estructura';
-import { librosDeImagenes } from '../nucleo/carpetas';
-import { IMAGEN, leerEpubDeTexto, leerLibro } from '../nucleo/libro';
-import { fuenteDeArchivo, LIMITE_ZIP, leerEntrada } from '../nucleo/zip';
-import { type ArchivoImportado, archivosElegidos, archivosSoltados, cbzDe, tamanoDe } from './importacion';
-import { descargaOcr, pausar, procesar, procesos } from './procesos';
-import { estaProcesado } from '../visor/procesador';
-import { datosDeZip, miniaturaDe } from '../visor/paginador';
-import { analizarSubtitulos } from '../nucleo/subtitulos';
+import { normalizarTextoPlano, textoConEstructura } from '../nucleo/estructura';
+import { SeguirLeyendo } from './Biblioteca';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
@@ -53,9 +46,6 @@ const NIVELES_LECTURA = [tm('Principiante'), tm('Intermedio'), tm('Avanzado')];
 
 /** La cita del prólogo del Kokin Wakashū explica el nombre de Kotonoha: es japonés se estudie lo que se estudie. */
 const LENGUA_DE_LA_MARCA = 'ja';
-
-/** El idioma de un título: el que se estudia si está escrito en él. */
-const langDe = (titulo: string) => (lengua.value.escritura.tieneTexto(titulo) ? lengua.value.id : undefined);
 
 const ATAJOS: [string, string[]][] = [
   [tm('Crear tarjeta de la frase'), ['Q']],
@@ -141,27 +131,6 @@ function PrimerosPasos({ estado, anki, instalando, alInstalar }: { estado: Estad
   );
 }
 
-function SeguirLeyendo({ e }: { e: ElementoBiblioteca }) {
-  const total = paginasDe(e);
-  const pagina = Math.min((e.pagina ?? 0) + 1, total);
-  return (
-    <section class="tarjeta ap-seguir ap-c12" aria-label={tr('Seguir leyendo')}>
-      <span class={`ap-tapa mini ${claseTono(e)} ${e.documento?.portada ? 'con-portada' : ''}`} aria-hidden="true"><Portada e={e} /><span class="ap-obi" /></span>
-      <div class="ap-seguir-texto">
-        <span class="ayuda">{tr('Sigue leyendo')}</span>
-        <b lang={langDe(e.titulo)}>{e.titulo}</b>
-      </div>
-      {total > 1 && (
-        <div class="ap-seguir-avance">
-          <span class="ayuda num">{tr('Página {0} de {1}', pagina, total)}</span>
-          <div class="barra-progreso"><div style={{ width: `${(pagina / total) * 100}%` }} /></div>
-        </div>
-      )}
-      <button class="btn" onClick={() => navegar(`biblioteca?abrir=${encodeURIComponent(e.id)}`)}>{tr('Continuar')} <Icono n="flecha" t={15} /></button>
-    </section>
-  );
-}
-
 export function Inicio({ ajustes }: { ajustes: Ajustes }) {
   const [estado, fijarEstado] = useState<EstadoMotor | null>(null);
   const anki = estadoAnki.value?.conectado ?? null;
@@ -177,7 +146,8 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
     motor.estadisticasPalabras().then(fijarPalabras).catch(console.error);
     refrescarAnki();
     motor.memoriaResumen().then(fijarResumen).catch(() => {});
-    motor.bibliotecaListar().then((l) => fijarUltimoLibro(l.filter((e) => e.abierto).sort((x, y) => (y.abierto ?? 0) - (x.abierto ?? 0))[0] ?? null)).catch(() => {});
+    // Lo último que se abrió y aún no se ha terminado.
+    motor.bibliotecaListar().then((l) => fijarUltimoLibro(l.filter((e) => e.abierto && !e.terminado).sort((x, y) => (y.abierto ?? 0) - (x.abierto ?? 0))[0] ?? null)).catch(() => {});
   };
   useEffect(() => {
     cargar();
@@ -549,412 +519,6 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
   );
 }
 
-// ---------- Biblioteca ----------
-
-const TAM_PAGINA = 2500;
-
-/** Parte el texto en páginas: entre párrafos si se puede, y si no, al final de una línea. */
-function paginas(texto: string): string[] {
-  const salida: string[] = [];
-  let i = 0;
-  while (i < texto.length) {
-    let fin = Math.min(i + TAM_PAGINA, texto.length);
-    if (fin < texto.length) {
-      const parrafo = texto.lastIndexOf('\n\n', fin);
-      const linea = texto.lastIndexOf('\n', fin);
-      if (parrafo > i + TAM_PAGINA / 2) fin = parrafo + 2;
-      else if (linea > i + TAM_PAGINA / 2) fin = linea + 1;
-    }
-    salida.push(texto.slice(i, fin));
-    i = fin;
-  }
-  return salida.length ? salida : [''];
-}
-
-async function textoDeArchivo(f: File): Promise<string> {
-  const crudo = await f.text();
-  if (/\.(srt|vtt|ass|ssa)$/i.test(f.name)) return analizarSubtitulos(crudo).map((l) => l.texto).join('\n');
-  if (/\.html?$/i.test(f.name)) return estructuraDeHtml(crudo);
-  if (/\.epub$/i.test(f.name)) return textoDeEpub(await f.arrayBuffer());
-  return crudo;
-}
-
-async function textoDeEpub(datos: ArrayBuffer): Promise<string> {
-  const { unzipSync, strFromU8 } = await import('fflate');
-  const archivos = unzipSync(new Uint8Array(datos));
-  const opf = Object.keys(archivos).find((n) => n.endsWith('.opf'));
-  if (!opf) throw new Error(tr('EPUB sin índice'));
-  const doc = new DOMParser().parseFromString(strFromU8(archivos[opf]), 'application/xml');
-  const base = opf.includes('/') ? opf.slice(0, opf.lastIndexOf('/') + 1) : '';
-  const items = new Map([...doc.querySelectorAll('manifest > item')].map((i) => [i.getAttribute('id'), i.getAttribute('href')]));
-  const partes: string[] = [];
-  for (const r of doc.querySelectorAll('spine > itemref')) {
-    const href = items.get(r.getAttribute('idref'));
-    const a = href ? archivos[base + decodeURI(href)] : undefined;
-    if (!a) continue;
-    // Cada capítulo con su estructura: títulos, párrafos y listas, sin el furigana del libro.
-    const html = new DOMParser().parseFromString(strFromU8(a), 'text/html');
-    const t = html.body ? estructuraDeNodo(html.body as unknown as NodoHtml).trim() : '';
-    if (t) partes.push(t);
-  }
-  return partes.join('\n\n');
-}
-
-const TONOS_PORTADA = 5;
-
-/** El tono de la portada sale del título, para que cada libro conserve siempre el suyo. */
-function tonoDe(titulo: string): number {
-  let h = 0;
-  for (const c of titulo) h = (h * 31 + c.codePointAt(0)!) >>> 0;
-  return h % TONOS_PORTADA;
-}
-
-const claseTono = (e: ElementoBiblioteca) => (e.origen === 'historia' ? 'claude' : `tono-${tonoDe(e.titulo)}`);
-const paginasDe = (e: ElementoBiblioteca) => Math.max(1, e.documento ? e.documento.paginas : Math.ceil(e.texto.length / TAM_PAGINA));
-const megas = (bytes: number) => `${numero(Math.max(0.1, Math.round(bytes / 1e5) / 10))} MB`;
-
-/** La portada de verdad de un libro de páginas, encima de la tapa dibujada. */
-const Portada = ({ e }: { e: ElementoBiblioteca }) => (e.documento?.portada ? <img class="ap-tapa-imagen" src={e.documento.portada} alt="" draggable={false} /> : null);
-
-/**
- * Un libro (EPUB, CBZ o PDF) se guarda tal cual, aparte, y se lee en el visor: un EPUB de texto, con su propio formato y
- * capítulo a capítulo; lo demás, por páginas. Devuelve false si no es un libro, o si un EPUB de texto no se puede leer
- * así: entonces sigue el camino del texto.
- */
-async function importarDocumento(f: File): Promise<boolean> {
-  const formato = /\.pdf$/i.test(f.name) ? 'pdf' : /\.cbz$/i.test(f.name) ? 'cbz' : /\.epub$/i.test(f.name) ? 'epub' : null;
-  if (!formato) return false;
-  let titulo = f.name.replace(/\.[^.]+$/, '');
-  let paginas = 0;
-  let direccion: 'rtl' | 'ltr' = 'ltr';
-  let portada: string | undefined;
-  let anchas: number[] | undefined;
-  let texto = false;
-  if (formato !== 'pdf') {
-    const fuente = fuenteDeArchivo(f);
-    // Un CBZ no dice su sentido si no trae ComicInfo: en japonés, lo normal es el manga, de derecha a izquierda.
-    const { libro, indice } = await leerLibro(fuente, f.name, lengua.value.id === 'ja' ? 'rtl' : 'ltr');
-    if (libro) {
-      titulo = libro.titulo;
-      paginas = libro.paginas.length;
-      direccion = libro.direccion;
-      ({ portada, anchas } = await datosDeZip(f, f.name).catch(() => ({ portada: undefined, anchas: undefined })));
-    } else {
-      const novela = await leerEpubDeTexto(fuente, indice, titulo).catch(() => null);
-      if (!novela) return false;
-      texto = true;
-      titulo = novela.titulo;
-      paginas = novela.capitulos.length;
-      direccion = novela.direccion;
-      const tapa = novela.portada ? indice.get(novela.portada) : undefined;
-      if (tapa) portada = await leerEntrada(fuente, tapa).then((b) => miniaturaDe(new Blob([b as BlobPart]))).catch(() => undefined);
-    }
-  }
-  const id = crypto.randomUUID();
-  await guardarArchivoDocumento(id, f);
-  await motor.bibliotecaGuardar({ id, titulo, texto: '', origen: 'archivo', creado: Date.now(), documento: { formato, ...(texto ? { texto } : {}), paginas, direccion, tamano: f.size, portada, ...(anchas ? { anchas } : {}) } });
-  return true;
-}
-
-const NOMBRE_ORIGEN: Record<ElementoBiblioteca['origen'], string> = {
-  historia: tm('Relato de Claude'),
-  archivo: 'Archivo',
-  pegado: tm('Texto pegado'),
-};
-
-function Libro({ e, alAbrir, alEliminar, alCambiar }: { e: ElementoBiblioteca; alAbrir: () => void; alEliminar: () => void; alCambiar: () => void }) {
-  const total = paginasDe(e);
-  const pagina = Math.min((e.pagina ?? 0) + 1, total);
-  const empezado = (e.pagina ?? 0) > 0;
-  const titulo = langDe(e.titulo);
-  const claude = e.origen === 'historia';
-  return (
-    <article class="ap-libro">
-      <div class="ap-libro-tapa-marco">
-        <button class={`ap-tapa ${claseTono(e)} ${titulo && lengua.value.escritura.portadaVertical ? 'vertical' : 'horizontal'} ${e.documento?.portada ? 'con-portada' : ''}`} aria-label={tr('Leer {0}', e.titulo)} onClick={alAbrir}>
-          <Portada e={e} />
-          <span class="ap-tapa-titulo" lang={titulo}>{e.titulo}</span>
-          <span class="ap-obi">
-            {claude ? <Icono n="ia" t={13} /> : <Icono n={e.documento ? 'libro' : 'hoja'} t={13} />}
-            <span class="num">
-              {e.documento && !e.documento.paginas
-                ? e.documento.formato.toUpperCase()
-                : e.documento?.texto
-                  ? empezado
-                    ? tr('Cap. {0} de {1}', pagina, total)
-                    : total === 1
-                      ? tr('Lectura breve')
-                      : tr('{0} capítulos', total)
-                  : empezado
-                    ? tr('Pág. {0} de {1}', pagina, total)
-                    : total === 1
-                      ? tr('Lectura breve')
-                      : tr('{0} páginas', total)}
-            </span>
-            {empezado && <i class="ap-obi-avance" style={{ width: `${(pagina / total) * 100}%` }} />}
-          </span>
-        </button>
-        <button class="btn-icono chico relleno ap-libro-quitar" aria-label={tr('Eliminar {0}', e.titulo)} data-tip={tr('Eliminar')} onClick={alEliminar}><Icono n="basura" t={14} /></button>
-      </div>
-      <h3 title={e.titulo} lang={titulo}>{e.titulo}</h3>
-      {e.documento ? (
-        <p class="ayuda">{`${e.documento.formato.toUpperCase()} · ${megas(e.documento.tamano)}`}</p>
-      ) : (
-        <p class="ayuda" title={tr('{0} caracteres', numero(e.texto.length))}>{tr(NOMBRE_ORIGEN[e.origen])}</p>
-      )}
-      {e.documento && !e.documento.texto && <ProcesoLibro e={e} alCambiar={alCambiar} />}
-    </article>
-  );
-}
-
-/**
- * Leer el libro entero con el OCR por adelantado, desde su tarjeta: el botón, el avance mientras se lee, la pausa y, al
- * acabar, que el texto ya está listo.
- */
-function ProcesoLibro({ e, alCambiar }: { e: ElementoBiblioteca; alCambiar: () => void }) {
-  const p = procesos.value[e.id];
-  if (p?.estado === 'listo' || (!p && estaProcesado(e.documento!))) {
-    return (
-      <p class="ayuda ap-proceso listo" title={tr('Todas las páginas están leídas con el OCR: al abrirlo, el texto ya está')}>
-        <Icono n="check" t={12} /> {tr('Texto listo')}
-      </p>
-    );
-  }
-  if (p?.estado === 'procesando' || p?.estado === 'en-cola') {
-    const d = descargaOcr.value;
-    const texto =
-      p.estado === 'en-cola'
-        ? tr('En cola')
-        : d
-          ? tr('Descargando el reconocimiento de texto: {0} %', Math.round((100 * d.cargado) / Math.max(1, d.total)))
-          : p.total
-            ? tr('Procesando {0} de {1}', numero(p.hechas), numero(p.total))
-            : tr('Procesando…');
-    return (
-      <div class="ap-proceso" role="status">
-        <span class="ayuda num">{texto}</span>
-        <button class="btn-icono chico" aria-label={tr('Pausar')} data-tip={tr('Pausar')} onClick={() => pausar(e.id)}>
-          <Icono n="pausa" t={12} />
-        </button>
-        <i class="ap-proceso-barra">
-          <i style={{ width: `${p.total ? (100 * p.hechas) / p.total : 0}%` }} />
-        </i>
-      </div>
-    );
-  }
-  return (
-    <div class="ap-proceso">
-      {p?.estado === 'en-pausa' && <span class="ayuda num">{tr('En pausa: {0} de {1}', numero(p.hechas), numero(p.total))}</span>}
-      {p?.estado === 'error' && <span class="ayuda ap-proceso-error" title={p.error}>{p.error}</span>}
-      <button class="btn chico fantasma ap-procesar" data-tip={tr('Lee ahora con el OCR todas las páginas, para que al leer no haya que esperar')} onClick={() => procesar(e, alCambiar)}>
-        <Icono n="rayo" t={13} /> {p?.estado === 'en-pausa' ? tr('Seguir') : p?.estado === 'error' ? tr('Reintentar') : tr('Procesar')}
-      </button>
-    </div>
-  );
-}
-
-
-export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: string }) {
-  const [lista, fijarLista] = useState<ElementoBiblioteca[]>([]);
-  const [cargada, fijarCargada] = useState(false);
-  const [abierto, fijarAbierto] = useState<ElementoBiblioteca | null>(null);
-  const [pagina, fijarPagina] = useState(0);
-  const [tema, fijarTema] = useState('');
-  const [relato, fijarRelato] = useState('');
-  const [generando, fijarGenerando] = useState(false);
-  const [error, fijarError] = useState('');
-  const [arrastrando, fijarArrastrando] = useState(false);
-  const [progreso, fijarProgreso] = useState('');
-  const entrada = useRef<HTMLInputElement>(null);
-  const carpeta = useRef<HTMLInputElement>(null);
-
-  const cargar = () => motor.bibliotecaListar().then((l) => { fijarLista(l); fijarCargada(true); return l; }).catch(console.error);
-
-  const abrirLibro = (e: ElementoBiblioteca) => {
-    // Un libro de páginas se lee en el visor, en su propia pestaña; él guarda por dónde se va.
-    if (e.documento) {
-      fondo.abrirVisor(e.id).catch((x) => fijarError(x instanceof Error ? x.message : String(x)));
-      return;
-    }
-    fijarPagina(e.pagina ?? 0);
-    fijarAbierto(e);
-    motor.bibliotecaGuardar({ ...e, abierto: Date.now() }).catch(console.error);
-  };
-
-  useEffect(() => {
-    cargar().then((l) => {
-      const pedido = abrir ? l?.find((e) => e.id === abrir) : undefined;
-      if (pedido) abrirLibro(pedido);
-    });
-  }, []);
-
-  const importar = async (lista: ArchivoImportado[]) => {
-    fijarError('');
-    const errores: string[] = [];
-    const fallo = (nombre: string, e: unknown) => {
-      errores.push(`${nombre}: ${e instanceof Error ? e.message : e}`);
-      fijarError(errores.join('\n'));
-    };
-    const imagenes = lista.filter((a) => IMAGEN.test(a.ruta) || /(^|\/)ComicInfo\.xml$/i.test(a.ruta));
-    // De una carpeta solo entran sus libros: un léame o unas notas que vengan con el manga no son lecturas.
-    const resto = lista.filter((a) => !imagenes.includes(a) && (!a.ruta.includes('/') || /\.(epub|pdf|cbz)$/i.test(a.ruta)));
-    for (const { archivo: f } of resto) {
-      fijarProgreso(tr('Importando «{0}»…', f.name));
-      try {
-        if (!(await importarDocumento(f))) await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo: f.name.replace(/\.[^.]+$/, ''), texto: await textoDeArchivo(f), origen: 'archivo', creado: Date.now() });
-        await cargar();
-      } catch (e) {
-        fallo(f.name, e);
-      }
-    }
-    // Las imágenes, en libros: uno por carpeta o por tomo, cada uno guardado como un CBZ.
-    for (const libro of librosDeImagenes(imagenes, tr('Imágenes'))) {
-      try {
-        if (tamanoDe(libro) >= LIMITE_ZIP) throw new Error(tr('pasa de 4 GB; impórtalo por tomos.'));
-        const cbz = await cbzDe(libro, (n, total) => (n % 10 === 0 || n === total) && fijarProgreso(tr('Preparando «{0}»: {1} de {2} páginas', libro.titulo, n, total)));
-        fijarProgreso(tr('Guardando «{0}»…', libro.titulo));
-        await importarDocumento(cbz);
-        await cargar();
-      } catch (e) {
-        fallo(libro.titulo, e);
-      }
-    }
-    fijarProgreso('');
-    cargar();
-  };
-
-  const generar = async () => {
-    fijarGenerando(true);
-    fijarRelato('');
-    fijarError('');
-    try {
-      const { filas } = await motor.listarPalabras({ estado: 'aprendiendo', limite: 15 });
-      const texto = await flujoMotor('historia', [tema, filas.map((f) => f.lema).join(lengua.value.escritura.separadorLista)], fijarRelato);
-      const titulo = texto.split('\n')[0].slice(0, 40) || tema;
-      await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo, texto, origen: 'historia', creado: Date.now() });
-      fijarTema('');
-      cargar();
-    } catch (e) {
-      fijarError(e instanceof Error ? e.message : String(e));
-    } finally {
-      fijarGenerando(false);
-    }
-  };
-
-  if (abierto) {
-    const pags = paginas(abierto.texto);
-    const irA = (n: number) => {
-      fijarPagina(n);
-      motor.bibliotecaGuardar({ ...abierto, pagina: n, abierto: Date.now() });
-      document.querySelector('.ap-principal')?.scrollTo(0, 0);
-    };
-    return (
-      <div class="ap-lienzo ancho">
-        <TextoInteractivo
-          key={pagina}
-          texto={pags[pagina]}
-          ajustes={ajustes}
-          titulo={abierto.titulo}
-          inicioBarra={
-            <>
-              <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Ayuda de lectura')}</button>
-              <b class="ap-lectura-titulo" lang={lengua.value.id}>{abierto.titulo}</b>
-            </>
-          }
-          pie={
-            pags.length > 1 ? (
-              <nav class="ap-paginacion" aria-label={tr('Páginas')}>
-                <button class="btn" disabled={pagina === 0} onClick={() => irA(pagina - 1)}><Icono n="flecha-izq" t={15} /> {tr('Anterior')}</button>
-                <div class="ap-paginacion-centro">
-                  <span class="ayuda num">{tr('Página {0} de {1}', pagina + 1, pags.length)}</span>
-                  <div class="barra-progreso"><div style={{ width: `${((pagina + 1) / pags.length) * 100}%` }} /></div>
-                </div>
-                <button class="btn" disabled={pagina >= pags.length - 1} onClick={() => irA(pagina + 1)}>{tr('Siguiente')} <Icono n="flecha" t={15} /></button>
-              </nav>
-            ) : undefined
-          }
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      class="ap-lienzo ap-biblioteca"
-      onDragOver={(e) => { e.preventDefault(); fijarArrastrando(true); }}
-      onDragLeave={(e) => { if (e.currentTarget === e.target) fijarArrastrando(false); }}
-      onDrop={(e) => { e.preventDefault(); fijarArrastrando(false); archivosSoltados(e.dataTransfer).then(importar).catch((x) => fijarError(String(x))); }}
-    >
-      <Cabecera titulo={tr('Ayuda de lectura')} sub={tr('Tus libros, textos y subtítulos, listos para leer con diccionario y Claude.')} />
-
-      <div class="ap-biblioteca-entrada">
-        <div class="ap-entrada-libros">
-          <button class={`ap-soltar ${arrastrando ? 'activo' : ''}`} onClick={() => entrada.current?.click()}>
-            <span class="hoja-icono"><Icono n="subir" t={22} /></span>
-            <b>{tr('Importa un libro o unos subtítulos')}</b>
-            <span class="ayuda">{tr('Arrástralos aquí o haz clic para elegirlos')}</span>
-            <span class="ap-formatos">{['EPUB', 'PDF', 'CBZ', 'JPG', 'PNG', 'TXT', 'HTML', 'SRT', 'VTT', 'ASS'].map((f) => <i key={f}>{f}</i>)}</span>
-          </button>
-          <button class="btn chico fantasma ap-elegir-carpeta" data-tip={tr('Cada carpeta de imágenes, o cada tomo dentro de ella, entra como un libro')} onClick={() => carpeta.current?.click()}>
-            <Icono n="carpeta" t={15} /> {tr('Elegir una carpeta de imágenes')}
-          </button>
-        </div>
-        <input ref={entrada} type="file" multiple hidden aria-label={tr('Importar archivos')} accept=".txt,.html,.htm,.epub,.pdf,.cbz,.srt,.vtt,.ass,.ssa,.md,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp" onChange={(e) => { importar(archivosElegidos(e.currentTarget.files)); e.currentTarget.value = ''; }} />
-        {/* Con webkitdirectory, el selector elige carpetas y cada archivo trae su ruta dentro de la elegida. */}
-        <input ref={carpeta} type="file" multiple hidden aria-label={tr('Importar una carpeta')} {...({ webkitdirectory: true } as Record<string, unknown>)} onChange={(e) => { importar(archivosElegidos(e.currentTarget.files)); e.currentTarget.value = ''; }} />
-
-        <section class="ap-claude" aria-labelledby="ap-t-relato">
-          <div class="ap-tarjeta-cab">
-            <span class="hoja-icono chica ia"><Icono n="ia" t={18} /></span>
-            <h2 id="ap-t-relato">{tr('Pide un relato a Claude')}</h2>
-          </div>
-          <p class="ayuda ap-tarjeta-ayuda">{tr('Escrito para tu nivel ({0}) y con las palabras que estás aprendiendo.', ajustes.nivel)}</p>
-          <form class="ap-claude-form" onSubmit={(e) => { e.preventDefault(); if (tema.trim() && !generando) generar(); }}>
-            <input class="campo" aria-label={tr('Tema del relato')} placeholder={tr(lengua.value.textos.temaRelato)} value={tema} onInput={(e) => fijarTema(e.currentTarget.value)} />
-            <button class="btn ia" type="submit" disabled={!tema.trim() || generando}><Icono n={generando ? 'espera' : 'ia'} t={16} /> {generando ? tr('Escribiendo…') : tr('Escribir')}</button>
-          </form>
-          {generando ? (
-            <div class="ap-claude-relato" lang={lengua.value.id} aria-live="polite">
-              {relato ? <p class="panel-ia-texto">{relato}</p> : <><span class="esqueleto" style={{ width: '92%' }} /><span class="esqueleto" style={{ width: '78%' }} /><span class="esqueleto" style={{ width: '85%' }} /></>}
-            </div>
-          ) : (
-            <div class="ap-claude-ideas">
-              {lengua.value.ideasRelato.map((i) => <button key={i} class="chip" onClick={() => fijarTema(tr(i))}>{tr(i)}</button>)}
-            </div>
-          )}
-        </section>
-      </div>
-
-      {progreso && (
-        <p class="ayuda ap-importando" role="status">
-          <Icono n="espera" t={14} /> {progreso}
-        </p>
-      )}
-      {error && <Mensaje error>{error}</Mensaje>}
-
-      {cargada && lista.length === 0 ? (
-        <Vacio icono="biblioteca" titulo={tr('Tu estantería está vacía')}>
-          <p>{tr('Importa tu primer libro o pide un relato a Claude. Te recordamos por qué página ibas.')}</p>
-        </Vacio>
-      ) : (
-        <>
-          <h2 class="ap-seccion-titulo">{tr('Tus lecturas')} <span class="ap-cuenta num">{lista.length}</span></h2>
-          <div class="ap-estanteria">
-            {lista.map((e) => (
-              <Libro
-                key={e.id}
-                e={e}
-                alAbrir={() => abrirLibro(e)}
-                alEliminar={async () => { pausar(e.id); await motor.bibliotecaEliminar(e.id); cargar(); }}
-                alCambiar={cargar}
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 // ---------- Memoria ----------
 

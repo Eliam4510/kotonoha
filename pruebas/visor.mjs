@@ -123,7 +123,7 @@ comprobar(!!estante, 'Los tres libros entran en la estantería', JSON.stringify(
 const libro = (t) => estante?.find((x) => x.titulo?.includes(t));
 comprobar(libro('テスト漫画')?.faja === '5 páginas' && libro('テスト漫画')?.portada, 'El EPUB, con su título, sus páginas y su portada', JSON.stringify(libro('テスト漫画')));
 comprobar(libro('Tomo de prueba')?.faja === '4 páginas' && libro('Tomo de prueba')?.portada, 'El CBZ, con el título de su ComicInfo', JSON.stringify(libro('Tomo de prueba')));
-comprobar(libro('apuntes')?.faja === 'PDF' && /^PDF ·/.test(libro('apuntes')?.formato ?? ''), 'El PDF, a la espera de abrirlo para contar sus páginas', JSON.stringify(libro('apuntes')));
+comprobar(libro('apuntes')?.faja === '3 páginas' && libro('apuntes')?.portada && /^PDF ·/.test(libro('apuntes')?.formato ?? ''), 'El PDF, con su portada y sus páginas desde que se importa', JSON.stringify(libro('apuntes')));
 await app.screenshot({ path: join(CAPTURAS, 'estanteria.png') });
 
 const abrir = async (titulo) => {

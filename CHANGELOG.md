@@ -2,6 +2,13 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.10.0 · 2026-11-08
+
+- **Colecciones.** La estantería agrupa los libros en colecciones: una serie con sus tomos o los libros de un tema, con su tipo (manga, novela, estudio u otro), una descripción y su portada. Una carpeta con varios tomos entra ya como una colección, y un tomo nuevo de esa carpeta se añade a ella. Cada colección tiene su página, con sus libros en orden, el tomo por el que se va y un botón para seguir.
+- **Progreso de lectura.** Cada libro muestra cuánto se ha leído y queda terminado al llegar a su última página, o a mano; también se puede volver a empezar. «Seguir leyendo», arriba de la estantería, lleva a lo que se está leyendo, y los filtros muestran lo que se lee, lo que está sin empezar y lo terminado.
+- **Portadas.** Un PDF trae su portada y su número de páginas desde que se importa, también los importados antes. La portada de cada libro se puede cambiar por una imagen o, en el visor, con «Usar esta página como portada».
+- La estantería se actualiza al volver del visor, y el visor ya no deshace lo que se cambia en ella mientras un libro está abierto.
+
 ## 0.9.6 · 2026-11-08
 
 - **Los PDF escaneados, leídos de su imagen.** En un PDF escaneado, el OCR lee ahora la imagen escaneada tal cual, a su resolución, en lugar de la página pintada en pantalla, que se reescalaba y se guardaba en JPEG. En dos libros de química escaneados, el error baja del 3,9 % al 0,2 % a 180 ppp y del 3,7 % al 1,2 % a 144 ppp. Se usa cuando la página es solo el escaneo, con o sin la capa invisible de otro OCR; si hay algo más encima, se lee la página pintada, como antes.
@@ -94,6 +101,13 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.10.0 · 2026-11-08
+
+- **Collections.** The shelf groups books into collections: a series with its volumes or the books on a topic, with a type (manga, novel, study or other), a description and a cover. A folder with several volumes comes in as a collection, and a new volume from that folder is added to it. Each collection has its own page, with its books in order, the volume being read and a button to carry on.
+- **Reading progress.** Each book shows how much has been read and is marked finished when its last page is reached, or by hand; it can also be started over. "Keep reading", at the top of the shelf, leads to what is being read, and the filters show what is being read, what has not been started and what is finished.
+- **Covers.** A PDF has its cover and page count as soon as it is imported, including those imported earlier. Each book's cover can be replaced with an image or, in the viewer, with "Use this page as the cover".
+- The shelf refreshes when you come back from the viewer, and the viewer no longer undoes changes made on the shelf while a book is open.
 
 ## 0.9.6 · 2026-11-08
 
