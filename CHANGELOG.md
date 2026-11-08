@@ -6,6 +6,7 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 
 - **Un OCR de manga más fino.** Lee bien los puntos suspensivos («……»), deja fuera las marcas de agua y los números de página, y sigue el orden de las viñetas. En 18 páginas de cinco series, el error baja del 4,3 % al 2,8 % y los textos falsos, de 11 a 4; en las tres páginas de referencia de un tomo en EPUB, del 2,5 % al 0,5 %.
 - **Libros de estudio y a dos columnas.** El furigana impreso ya no se cuela como texto aunque lo lleve casi cada kanji, y una página a dos columnas se lee columna a columna.
+- Las páginas que el OCR ya había leído se vuelven a leer con lo nuevo la próxima vez que se abren.
 
 ## 0.9.1 · 2026-11-08
 
@@ -77,6 +78,7 @@ A summary of each release. The full notes, with what was tested and the packages
 
 - **Sharper manga OCR.** It reads ellipses («……») properly, leaves watermarks and page numbers out and follows the order of the panels. On 18 pages from five series, the error drops from 4.3 % to 2.8 % and false text from 11 to 4; on the three reference pages of a volume in EPUB, from 2.5 % to 0.5 %.
 - **Study books and two columns.** Printed furigana no longer slips in as text even when nearly every kanji carries it, and a two-column page is read column by column.
+- Pages the OCR had already read are read again with the new version the next time they are opened.
 
 ## 0.9.1 · 2026-11-08
 

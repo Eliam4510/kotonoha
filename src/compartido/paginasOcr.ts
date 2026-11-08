@@ -12,12 +12,20 @@ export interface FilaOcr {
   creada: number;
 }
 
+/**
+ * Cuando cambia lo que el OCR saca de una página, la base sube de versión y olvida lo leído antes: así cada página se
+ * vuelve a leer con lo nuevo la próxima vez que se abra, en lugar de quedarse con lo de la versión anterior.
+ * 2: la 0.9.2 (manga por viñetas y sin marcas de agua; libros sin furigana impreso y a dos columnas).
+ */
 class BaseOcr extends Dexie {
   paginas!: Table<FilaOcr, string>;
 
   constructor() {
     super('kotonoha-ocr');
     this.version(1).stores({ paginas: 'clave, libro' });
+    this.version(2)
+      .stores({ paginas: 'clave, libro' })
+      .upgrade((tx) => tx.table('paginas').clear());
   }
 }
 
