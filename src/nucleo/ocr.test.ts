@@ -1,0 +1,109 @@
+import { describe, expect, it } from 'vitest';
+import { aTensor, bloquesDeDetector, type Caja, cajasDeMapa, decodificarCtc, esVertical, type LineaOcr, medidaDeDeteccion, ordenarLineas, ordenManga, quitarFurigana, siguienteToken, textoDeMangaOcr } from './ocr';
+
+const linea = (texto: string, x0: number, y0: number, x1: number, y1: number, vertical = false): LineaOcr => ({ texto, vertical, caja: { x0, y0, x1, y1 } });
+
+describe('preparar la imagen', () => {
+  it('RGBA a CHW, en BGR para PaddleOCR', () => {
+    const t = aTensor([255, 0, 0, 255, 0, 0, 255, 255], 2, 1, (v) => v, true);
+    // El primer canal es el azul: 0 en el píxel rojo y 1 en el azul.
+    expect([...t]).toEqual([0, 1, 0, 0, 1, 0]);
+  });
+
+  it('la entrada del detector, en múltiplos de 32 y sin pasar del límite', () => {
+    expect(medidaDeDeteccion(1358, 1920)).toEqual({ w: 1344, h: 1920 });
+    expect(medidaDeDeteccion(3000, 1000, 960)).toEqual({ w: 960, h: 320 });
+  });
+});
+
+describe('las cajas del detector DB', () => {
+  it('cada mancha del mapa es una caja, ensanchada y llevada a la imagen original', () => {
+    const W = 20;
+    const H = 10;
+    const mapa = new Float32Array(W * H);
+    const pintar = (x0: number, y0: number, x1: number, y1: number) => {
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) mapa[y * W + x] = 0.9;
+    };
+    pintar(2, 2, 9, 4);
+    pintar(12, 6, 17, 8);
+    const cajas = cajasDeMapa(mapa, W, H, 200, 100);
+    expect(cajas).toHaveLength(2);
+    // La primera mancha va de x 2 a 9: en la original, de 20 a 100, algo más ancha por la expansión.
+    expect(cajas[0].x0).toBeLessThan(20);
+    expect(cajas[0].x1).toBeGreaterThan(100);
+  });
+
+  it('una mancha floja no es texto', () => {
+    const mapa = new Float32Array(100).fill(0.35);
+    expect(cajasDeMapa(mapa, 10, 10, 10, 10)).toEqual([]);
+  });
+});
+
+describe('la salida CTC', () => {
+  it('junta los repetidos, salta los blancos y el último índice es un espacio', () => {
+    const dic = ['a', 'b'];
+    // Clases: 0 blanco, 1 «a», 2 «b», 3 espacio.
+    const pasos = [1, 1, 0, 1, 2, 3, 2];
+    const probs = pasos.flatMap((k) => [0, 1, 2, 3].map((c) => (c === k ? 1 : 0)));
+    expect(decodificarCtc(probs, pasos.length, 4, dic)).toBe('aab b');
+  });
+});
+
+describe('el furigana impreso', () => {
+  it('se quita el kana pequeño pegado a una línea, y se queda lo demás', () => {
+    const lineas = [
+      linea('母親は節水をしている。', 100, 100, 600, 140),
+      linea('ははおや せっすい', 100, 142, 260, 158),
+      linea('災害のため、水が止まってしまった。', 100, 200, 650, 240),
+      linea('注', 700, 300, 716, 316),
+    ];
+    expect(quitarFurigana(lineas).map((l) => l.texto)).toEqual(['母親は節水をしている。', '災害のため、水が止まってしまった。', '注']);
+  });
+});
+
+describe('el orden de lectura', () => {
+  it('una página horizontal, por renglones', () => {
+    const lineas = [linea('b', 300, 100, 400, 130), linea('c', 100, 200, 400, 230), linea('a', 100, 102, 280, 128)];
+    expect(ordenarLineas(lineas).map((l) => l.texto)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('una página vertical, por columnas de derecha a izquierda', () => {
+    const lineas = [linea('izquierda', 100, 50, 130, 400, true), linea('derecha', 300, 50, 330, 400, true), linea('centro', 200, 50, 230, 400, true)];
+    expect(ordenarLineas(lineas).map((l) => l.texto)).toEqual(['derecha', 'centro', 'izquierda']);
+  });
+
+  it('un manga, por franjas y de derecha a izquierda', () => {
+    const bloque = (t: string, x0: number, y0: number, x1: number, y1: number) => ({ t, caja: { x0, y0, x1, y1 } });
+    const orden = ordenManga([bloque('abajo', 100, 700, 200, 900), bloque('izq', 100, 100, 200, 300), bloque('der', 600, 120, 700, 330)]);
+    expect(orden.map((b) => b.t)).toEqual(['der', 'izq', 'abajo']);
+  });
+
+  it('una caja alta es una columna vertical', () => {
+    expect(esVertical({ x0: 0, y0: 0, x1: 30, y1: 200 })).toBe(true);
+    expect(esVertical({ x0: 0, y0: 0, x1: 300, y1: 30 })).toBe(false);
+  });
+});
+
+describe('el detector de globos', () => {
+  it('deja el texto, quita los globos, lo flojo y lo repetido', () => {
+    const etiquetas = [1, 0, 2, 1, 1];
+    const cajas = [10, 10, 110, 210, 0, 0, 500, 500, 300, 50, 360, 150, 12, 12, 108, 205, 400, 400, 420, 420];
+    const puntos = [0.9, 0.95, 0.8, 0.85, 0.2];
+    const salida: Caja[] = bloquesDeDetector(etiquetas, cajas, puntos, 800, 1200);
+    expect(salida).toEqual([{ x0: 10, y0: 10, x1: 110, y1: 210 }, { x0: 300, y0: 50, x1: 360, y1: 150 }]);
+  });
+});
+
+describe('manga-ocr', () => {
+  it('no repite trigramas', () => {
+    // Vocabulario de 3; el mejor siempre sería el 2, pero «1 2» ya fue seguido de «2».
+    const logits = [0, 0.5, 1];
+    expect(siguienteToken(logits, 0, 3, [1, 2, 2, 1, 2])).toBe(1);
+    expect(siguienteToken(logits, 0, 3, [1, 2])).toBe(2);
+  });
+
+  it('del vocabulario al texto, sin especiales y con los puntos suspensivos enteros', () => {
+    const vocab = ['[PAD]', '[UNK]', '[CLS]', '[SEP]', '[MASK]', 'あ', '.', '…'];
+    expect(textoDeMangaOcr([2, 5, 6, 6, 6, 3], vocab)).toBe('あ…');
+  });
+});

@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.7.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.8.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -104,6 +104,9 @@ Stand jeder Funktion in Version 0.7.0 und die Art ihrer Überprüfung.
 | Leserichtung von rechts nach links aus dem Buch selbst, mit allein stehender Titelseite in der Doppelseite | Automatisch |
 | Miniaturansichten, Inhaltsverzeichnis des Buchs, Sprung zu einer Seite, Vollbild und umgekehrte Farben | Automatisch |
 | Bücher werden getrennt gespeichert und stückweise gelesen: Ein PDF mit Hunderten MB wird nie ganz geladen. Der Betrachter merkt sich Seite, Ansicht und Zoom jedes Buchs | Automatisch, und mit einem echten PDF von 347 MB |
+| Texterkennung (OCR) auf dem eigenen Computer mit der GPU: Modus Buch mit PP-OCRv5 und Modus Manga mit einem Sprechblasen-Detektor und manga-ocr | Automatisch, und von Hand an echten Seiten gemessen: unter 1 % Zeichenfehler in einem Manga, 1 % in einem Lehrbuch und zwischen 3 und 8 % in einem gescannten Chemie-PDF mit Formeln und Tabellen |
+| Ein Tippen auf eine Zeile der Seite öffnet ihren Text mit Furigana und nachschlagbaren Wörtern, samt Wortfenster und Kartenerstellung | Automatisch |
+| Jede Seite wird nur einmal gelesen und gespeichert; ihr Text erreicht auch Bildschirmleser | Automatisch |
 | Nach Niveau erzeugte Geschichten | Simulator |
 | Player für eigene Dateien | Automatisch |
 | In MKV eingebettete Untertitel und Wahl der Audiospur, mit ffmpeg.wasm | Automatisch |
@@ -210,7 +213,7 @@ Stand jeder Funktion in Version 0.7.0 und die Art ihrer Überprüfung.
 | Plattformen | Chrome und Edge auf dem Desktop. Der lokale Helfer ist für Windows vorbereitet |
 | Bild mit DRM | Bei Netflix und anderen geschützten Websites liefert der Browser das Einzelbild schwarz. Die Karte erhält das offizielle Bild der Folge, falls die Website eines anbietet |
 | Audio mit DRM | Eine geschützte Website kann ihren Ton der Aufnahme vorenthalten. Nach zwei stummen Sätzen in Folge in einem Video wird die Zeile nicht mehr zur Aufnahme erneut abgespielt |
-| Betrachter | Bildseiten haben noch keinen Text zum Nachschlagen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung: Auf einem anderen Computer müssen sie erneut importiert werden |
+| Betrachter | Die Texterkennung kann ähnliche Zeichen verwechseln (エ und 工, ー und 一), gelegentlich eines auslassen und die Indizes von Formeln verlieren; das Originalbild bleibt immer sichtbar. Der Modus Buch ist mit horizontalem Text gemessen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung: Auf einem anderen Computer müssen sie erneut importiert werden |
 | Synchronisierung | Ohne Server: Die Übertragung zwischen Computern erfolgt über die Sicherung |
 | Hintergrundmusik | Whisper kann leise Gespräche unter lauter Musik verlieren |
 | Liedtexte | Die Zeiten gelten je Whisper-Zeile, nicht je Wort. Bei sehr lauter Musik hört Whisper womöglich wenig, und dann erhalten mehr Verse eine geschätzte Zeit |

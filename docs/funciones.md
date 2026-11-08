@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.7.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.8.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -104,6 +104,9 @@ Estado de cada función en la versión 0.7.0, con la forma en que se ha verifica
 | Sentido de derecha a izquierda tomado del propio libro, con la portada sola en doble página | Automática |
 | Miniaturas, índice del libro, ir a una página, pantalla completa y colores invertidos | Automática |
 | Los libros se guardan aparte y se leen a trozos: un PDF de cientos de MB no se carga entero. El visor recuerda la página, la vista y el zoom de cada uno | Automática, y con un PDF real de 347 MB |
+| Reconocimiento de texto (OCR) en el propio equipo, con la GPU: modo Libro, con PP-OCRv5, y modo Manga, con un detector de globos y manga-ocr | Automática, y medido a mano en páginas reales: menos de un 1 % de error por carácter en un manga, un 1 % en un libro de texto y entre un 3 y un 8 % en un PDF de química escaneado, con fórmulas y tablas |
+| Tocar una línea de la página abre su texto con furigana y palabras para consultar, con su ficha y la creación de tarjetas | Automática |
+| Cada página se lee una sola vez y se guarda; su texto también llega a los lectores de pantalla | Automática |
 | Relatos generados según el nivel | Simulador |
 | Reproductor de archivos propios | Automática |
 | Subtítulos incrustados en MKV y elección de pista de audio, con ffmpeg.wasm | Automática |
@@ -210,7 +213,7 @@ Estado de cada función en la versión 0.7.0, con la forma en que se ha verifica
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
-| Visor | Las páginas de imagen aún no tienen texto que consultar. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad: en otro equipo hay que volver a importarlos |
+| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad: en otro equipo hay que volver a importarlos |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
 | Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |

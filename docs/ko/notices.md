@@ -20,6 +20,8 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | 전사 모델, 사용 시 다운로드 | MIT |
 | [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0), Third Intelligence 제작, [Sanami의 ONNX 변환](https://huggingface.co/Sanami/haas-ja-onnx) | 일본어 전사 모델, 사용할 때 다운로드 | Apache-2.0 |
 | [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), NVIDIA 제작, [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx)와 [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx)의 ONNX 변환 | 영어와 독일어 전사 모델, 사용할 때 다운로드 | CC-BY-4.0 |
+| [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), PaddlePaddle 제작, [nakamura196의 ONNX 변환](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | 책의 문자 인식, 사용할 때 내려받음 | Apache-2.0 |
+| [manga-ocr](https://github.com/kha-white/manga-ocr), kha-white 제작, [onnx-community의 ONNX 변환](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), 그리고 [ogkalu의 말풍선 감지기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 만화의 문자 인식, 사용할 때 내려받음 | Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | 내 파일 읽기 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg 코어, 컴파일 시 복사 | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 인코딩 | LGPL-3.0 |

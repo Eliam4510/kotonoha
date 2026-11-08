@@ -46,7 +46,8 @@ const opciones = {
 // Whisper va aparte, como módulo: pesa mucho y se carga solo si se usa.
 const opcionesWhisper = {
   ...opciones,
-  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts' },
+  // El OCR del visor también va aparte: carga sus modelos solo si se pide el texto de un libro.
+  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts', ocr: 'src/visor/ocrTrabajador.ts' },
   format: 'esm',
   sourcemap: false,
   minify: true,

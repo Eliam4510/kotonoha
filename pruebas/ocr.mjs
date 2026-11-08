@@ -1,0 +1,189 @@
+// Prueba el reconocimiento de texto del visor con dos páginas hechas aquí: una de libro, con tres líneas horizontales, y
+// otra de manga, con un globo de texto vertical. Usa la GPU y descarga los modelos la primera vez (unos 200 MB).
+// Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/ocr.mjs
+
+import { mkdirSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { join, resolve } from 'node:path';
+import { strToU8, zipSync } from 'fflate';
+import { chromium } from 'playwright';
+import { recargarExtension } from './extension.mjs';
+
+const RAIZ = resolve(import.meta.dirname, '..');
+const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
+const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-ocr-prueba'));
+const CAPTURAS = join(RAIZ, 'capturas-e2e', 'ocr');
+mkdirSync(CAPTURAS, { recursive: true });
+// El perfil se conserva entre ejecuciones: así los modelos solo se descargan la primera vez.
+const sharp = createRequire(join(RAIZ, 'package.json'))('sharp');
+
+let fallos = 0;
+const comprobar = (cond, texto, extra = '') => {
+  console.log(`${cond ? 'ok   ' : 'FALLO'} ${texto}${extra !== '' ? ` (${extra})` : ''}`);
+  if (!cond) fallos++;
+};
+
+// ---------- Las páginas ----------
+
+const LETRA = "'Yu Gothic','Meiryo','MS Gothic',sans-serif";
+const LINEAS_LIBRO = ['今日は図書館で本を読みます。', '天気がいいので散歩しました。', '明日は友達と映画を見ます。'];
+const paginaLibro = await sharp(
+  Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600"><rect width="100%" height="100%" fill="#fff"/>${LINEAS_LIBRO.map((l, i) => `<text x="120" y="${300 + i * 110}" font-size="56" font-family="${LETRA}" fill="#111">${l}</text>`).join('')}</svg>`
+  )
+)
+  .jpeg({ quality: 92 })
+  .toBuffer();
+
+// El manga: un globo blanco sobre una trama gris, con dos columnas verticales que se leen de derecha a izquierda.
+const COLUMNAS = ['まって！', 'いっしょに行こう'];
+const columna = (texto, x) => [...texto].map((c, i) => `<text x="${x}" y="${330 + i * 62}" font-size="54" font-family="${LETRA}" text-anchor="middle" fill="#111">${c}</text>`).join('');
+const paginaManga = await sharp(
+  Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="844" height="1200"><rect width="100%" height="100%" fill="#9a9a9a"/><ellipse cx="420" cy="520" rx="210" ry="330" fill="#fff" stroke="#111" stroke-width="5"/>${columna(COLUMNAS[0], 470)}${columna(COLUMNAS[1], 390)}</svg>`
+  )
+)
+  .jpeg({ quality: 92 })
+  .toBuffer();
+
+const cbz = (titulo, manga, imagen) =>
+  zipSync({ 'ComicInfo.xml': strToU8(`<ComicInfo><Title>${titulo}</Title><Manga>${manga ? 'YesAndRightToLeft' : 'No'}</Manga></ComicInfo>`), 'p1.jpg': new Uint8Array(imagen) });
+
+// ---------- El navegador ----------
+
+const contexto = await chromium.launchPersistentContext(PERFIL, {
+  channel: process.env.KK_CANAL ?? 'msedge',
+  headless: true,
+  viewport: { width: 1400, height: 900 },
+  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, '--enable-unsafe-webgpu', '--enable-gpu', '--ignore-gpu-blocklist'],
+});
+const sw = await recargarExtension(contexto);
+const id = new URL(sw.url()).host;
+for (const pg of contexto.pages()) if (pg.url().includes('app.html')) await pg.close();
+await sw.evaluate(async () => {
+  const d = await chrome.storage.local.get('ajustes');
+  await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), bienvenidaVista: true, idiomaInterfaz: 'es', idiomaObjetivo: 'ja', destino: 'memoria', ankiPuerto: 1 } });
+});
+const errores = [];
+const app = await contexto.newPage();
+app.on('pageerror', (e) => errores.push(e.message));
+await app.goto(`chrome-extension://${id}/app.html#/biblioteca`);
+// De una ejecución anterior quedan los libros, con el OCR ya encendido, y lo leído: se quita todo para medir de nuevo. La
+// estantería llega después de abrir la página: hasta ver sus libros o el aviso de que está vacía, no hay nada que contar.
+await app.evaluate(async () => {
+  await new Promise((ok) => {
+    const q = indexedDB.deleteDatabase('kotonoha-ocr');
+    q.onsuccess = q.onerror = q.onblocked = () => ok(true);
+  });
+});
+await app.waitForSelector('.ap-libro, .ap-vacio', { timeout: 15000 });
+const libros = () => app.locator('.ap-libro').count();
+for (let n = await libros(); n > 0; n = await libros()) {
+  await app.locator('.ap-libro-quitar').first().click({ force: true });
+  await app.waitForFunction((antes) => document.querySelectorAll('.ap-libro').length < antes, n, { timeout: 15000 });
+}
+const ARCHIVO = 'input[type=file][aria-label="Importar archivos"]';
+await app.waitForSelector(ARCHIVO, { state: 'attached' });
+await app.setInputFiles(ARCHIVO, [
+  { name: 'libro-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Libro de prueba', false, paginaLibro)) },
+  { name: 'manga-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Manga de prueba', true, paginaManga)) },
+]);
+await app.waitForFunction(() => document.querySelectorAll('.ap-libro').length === 2, null, { timeout: 20000 });
+
+const abrir = async (titulo) => {
+  // Con dos libros del mismo título se podría abrir uno viejo, con otras preferencias guardadas, y medir otra cosa.
+  const tapas = app.locator(`button.ap-tapa[aria-label*="${titulo}"]`);
+  const iguales = await tapas.count();
+  if (iguales !== 1) throw new Error(`En la estantería hay ${iguales} libros «${titulo}»`);
+  const nueva = contexto.waitForEvent('page', { timeout: 15000 });
+  await tapas.click();
+  const v = await nueva;
+  v.on('pageerror', (e) => errores.push(e.message));
+  await v.waitForSelector('.vs-pagina img', { timeout: 20000 });
+  return v;
+};
+const lineasDe = (v, ms) =>
+  v
+    .waitForFunction(() => {
+      const fallo = document.querySelector('.vs-estado.error')?.textContent;
+      if (fallo) return { fallo };
+      // Una página leída pinta su capa de texto aunque no haya encontrado nada: así un cero no espera hasta el final.
+      const l = [...document.querySelectorAll('.vs-linea')].map((b) => b.getAttribute('aria-label'));
+      return l.length || document.querySelector('.vs-texto') ? { lineas: l } : null;
+    }, null, { timeout: ms, polling: 200 })
+    .then((h) => h.jsonValue())
+    .catch(() => ({ fallo: 'sin texto a tiempo' }));
+const normal = (s) => s.normalize('NFKC').replace(/\s+/g, '');
+function distancia(a, b) {
+  const x = Array.from(a);
+  const y = Array.from(b);
+  let fila = Array.from({ length: y.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= x.length; i++) {
+    const nueva = [i];
+    for (let j = 1; j <= y.length; j++) nueva[j] = Math.min(fila[j] + 1, nueva[j - 1] + 1, fila[j - 1] + (x[i - 1] === y[j - 1] ? 0 : 1));
+    fila = nueva;
+  }
+  return fila[y.length];
+}
+const error = (leido, esperado) => distancia(normal(leido), normal(esperado)) / [...normal(esperado)].length;
+
+// ---------- Libro ----------
+
+console.log('\n== Libro impreso ==');
+let v = await abrir('Libro de prueba');
+comprobar(await v.evaluate(() => !document.querySelector('.vs-linea')), 'Sin pedirlo, no se lee el texto');
+await v.click('[aria-label="Leer el texto de las páginas"]');
+const modo = () => v.evaluate(() => document.querySelector('.vs-modos button[aria-pressed="true"]')?.textContent ?? 'sin modos a la vista');
+const modoLibro = await modo();
+comprobar(modoLibro === 'Libro', 'Un libro de izquierda a derecha se lee en modo libro', modoLibro === 'Libro' ? '' : modoLibro);
+const t0 = Date.now();
+const libro = await lineasDe(v, 300000);
+console.log(`  primera lectura, con la descarga de los modelos si hace falta: ${Date.now() - t0} ms`);
+comprobar(!libro.fallo, 'Lee el texto de la página', libro.fallo ?? '');
+if (libro.lineas) {
+  console.log('  leído:', JSON.stringify(libro.lineas));
+  comprobar(libro.lineas.length === 3, 'Una zona por renglón', String(libro.lineas.length));
+  const e = error(libro.lineas.join(''), LINEAS_LIBRO.join(''));
+  comprobar(e < 0.08, 'Con menos de un 8 % de error por carácter', `${(e * 100).toFixed(1)} %`);
+  await v.locator('.vs-linea').nth(1).click();
+  const panel = await v.waitForSelector('.vs-panel-linea .pal', { timeout: 15000 }).then(() => true).catch(() => false);
+  comprobar(panel, 'Tocar un renglón abre su texto con las palabras para consultar');
+  await v.locator('.vs-panel-linea .pal').first().click();
+  const ficha = await v.waitForSelector('.vs-panel-linea .vs-ficha .ficha', { timeout: 15000 }).then(() => true).catch(() => false);
+  comprobar(ficha, 'Y una palabra abre su ficha');
+  await v.screenshot({ path: join(CAPTURAS, 'libro.png') });
+  await v.click('.vs-panel-linea [aria-label="Cerrar"]');
+}
+await v.waitForTimeout(900);
+await v.close();
+
+v = await abrir('Libro de prueba');
+const t1 = Date.now();
+const deNuevo = await lineasDe(v, 20000);
+comprobar((deNuevo.lineas?.length ?? 0) > 0 && Date.now() - t1 < 3000, 'Al volver a abrirlo, el texto sale de lo ya leído, enseguida', `${Date.now() - t1} ms`);
+await v.close();
+
+// ---------- Manga ----------
+
+console.log('\n== Manga ==');
+v = await abrir('Manga de prueba');
+await v.click('[aria-label="Leer el texto de las páginas"]');
+const modoManga = await modo();
+comprobar(modoManga === 'Manga', 'Un manga se lee en modo manga', modoManga === 'Manga' ? '' : modoManga);
+const t2 = Date.now();
+const manga = await lineasDe(v, 300000);
+console.log(`  primera lectura, con la descarga de los modelos si hace falta: ${Date.now() - t2} ms`);
+comprobar(!manga.fallo, 'Lee el texto del globo', manga.fallo ?? '');
+if (manga.lineas) {
+  console.log('  leído:', JSON.stringify(manga.lineas));
+  const e = error(manga.lineas.join(''), COLUMNAS.join(''));
+  comprobar(e < 0.15, 'El globo entero, con sus dos columnas en orden', `${(e * 100).toFixed(1)} %`);
+  await v.screenshot({ path: join(CAPTURAS, 'manga.png') });
+}
+await v.close();
+
+if (errores.length) console.log('\nErrores en la página:', [...new Set(errores)].slice(0, 6));
+comprobar(errores.length === 0, 'Sin errores en las páginas');
+console.log(`\n${fallos ? `${fallos} comprobaciones fallaron` : 'Todas las comprobaciones pasaron'}`);
+await contexto.close();
+process.exit(fallos ? 1 : 0);

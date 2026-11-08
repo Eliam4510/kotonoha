@@ -93,7 +93,8 @@ export async function paginadorDePdf(archivo: Blob): Promise<Paginador> {
         lienzo.height = Math.ceil(viewport.height);
         await pagina.render({ canvas: lienzo, viewport }).promise;
         pagina.cleanup();
-        const blob = await new Promise<Blob>((ok, mal) => lienzo.toBlob((b) => (b ? ok(b) : mal(new Error('toBlob'))), 'image/jpeg', 0.9));
+        // JPEG de calidad alta: en PNG cada página ocuparía varios MB en memoria y el OCR no lee mejor.
+        const blob = await new Promise<Blob>((ok, mal) => lienzo.toBlob((b) => (b ? ok(b) : mal(new Error('toBlob'))), 'image/jpeg', 0.94));
         const t = { ancho: Math.round(natural.width), alto: Math.round(natural.height) };
         tamanos.set(n, t);
         return { url: URL.createObjectURL(blob), ...t };
