@@ -28,6 +28,8 @@ const comprobar = (cond, texto, extra = '') => {
 
 const LETRA = "'Yu Gothic','Meiryo','MS Gothic',sans-serif";
 const LINEAS_LIBRO = ['今日は図書館で本を読みます。', '天気がいいので散歩しました。', '明日は友達と映画を見ます。'];
+/** El texto que se escribe a mano en la segunda línea, con «Editar». */
+const EDITADA = '天気が良いので散歩した。';
 const paginaLibro = await sharp(
   Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600"><rect width="100%" height="100%" fill="#fff"/>${LINEAS_LIBRO.map((l, i) => `<text x="120" y="${300 + i * 110}" font-size="56" font-family="${LETRA}" fill="#111">${l}</text>`).join('')}</svg>`
@@ -49,6 +51,30 @@ const paginaManga = await sharp(
 
 const cbz = (titulo, manga, imagen) =>
   zipSync({ 'ComicInfo.xml': strToU8(`<ComicInfo><Title>${titulo}</Title><Manga>${manga ? 'YesAndRightToLeft' : 'No'}</Manga></ComicInfo>`), 'p1.jpg': new Uint8Array(imagen) });
+/** Un CBZ de varias páginas, todas con la misma imagen: para ver qué páginas lee el OCR y cuándo. */
+const cbzDePaginas = (titulo, manga, imagen, n) =>
+  zipSync({
+    'ComicInfo.xml': strToU8(`<ComicInfo><Title>${titulo}</Title><Manga>${manga ? 'YesAndRightToLeft' : 'No'}</Manga></ComicInfo>`),
+    ...Object.fromEntries(Array.from({ length: n }, (_, i) => [`p${String(i + 1).padStart(2, '0')}.jpg`, new Uint8Array(imagen)])),
+  });
+/** Cuántas páginas de un libro tiene ya leídas el OCR, mirando su base desde una página de la extensión. */
+const leidasDe = (pg, libro) =>
+  pg.evaluate(
+    (id) =>
+      new Promise((ok) => {
+        const q = indexedDB.open('kotonoha-ocr');
+        q.onerror = () => ok(-1);
+        q.onsuccess = () => {
+          const db = q.result;
+          const c = db.transaction('paginas').objectStore('paginas').index('libro').count(id);
+          c.onsuccess = () => (ok(c.result), db.close());
+          c.onerror = () => (ok(-1), db.close());
+        };
+      }),
+    libro
+  );
+const libroDe = (pg) => decodeURIComponent(new URL(pg.url()).hash.slice(1));
+const indicador = (pg) => pg.evaluate(() => document.querySelector('.vs-numero')?.value ?? '');
 
 // Un escaneo con la capa de texto de otro programa de OCR: la página es la imagen del libro de prueba y su texto, invisible
 // (modo de pintado 3, como lo dejan esos programas), dice otra cosa. Con «Texto del PDF» se ve esa capa; sin él, lo que
@@ -119,8 +145,10 @@ await app.setInputFiles(ARCHIVO, [
   { name: 'libro-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Libro de prueba', false, paginaLibro)) },
   { name: 'manga-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Manga de prueba', true, paginaManga)) },
   { name: 'capa-vieja.pdf', mimeType: 'application/pdf', buffer: pdfConCapa(paginaLibro, 1200, 1600) },
+  { name: 'manga-largo.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbzDePaginas('Manga largo', true, paginaManga, 9)) },
+  { name: 'libro-procesar.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbzDePaginas('Libro para procesar', false, paginaLibro, 3)) },
 ]);
-await app.waitForFunction(() => document.querySelectorAll('.ap-libro').length === 3, null, { timeout: 20000 });
+await app.waitForFunction(() => document.querySelectorAll('.ap-libro').length === 5, null, { timeout: 20000 });
 
 const abrir = async (titulo) => {
   // Con dos libros del mismo título se podría abrir uno viejo, con otras preferencias guardadas, y medir otra cosa.
@@ -184,6 +212,17 @@ if (libro.lineas) {
   const ficha = await v.waitForSelector('.vs-panel-linea .vs-ficha .ficha', { timeout: 15000 }).then(() => true).catch(() => false);
   comprobar(ficha, 'Y una palabra abre su ficha');
   await v.screenshot({ path: join(CAPTURAS, 'libro.png') });
+  // Editar: la línea se cambia a mano, y se ve así en la página.
+  await v.click('.vs-panel-linea button:has-text("Editar")');
+  await v.fill('.vs-editar-campo', EDITADA);
+  await v.click('.vs-editar-botones button:has-text("Guardar")');
+  const editada = await v
+    .waitForFunction((t) => [...document.querySelectorAll('.vs-linea')].some((b) => b.getAttribute('aria-label') === t), EDITADA, { timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  comprobar(editada, 'Editar cambia el texto de la línea en la página');
+  comprobar(!!(await v.$('.vs-linea-acciones button:has-text("Restaurar")')), 'Y la línea editada se puede restaurar');
+  await v.screenshot({ path: join(CAPTURAS, 'libro-editado.png') });
   await v.click('.vs-panel-linea [aria-label="Cerrar"]');
 }
 await v.waitForTimeout(900);
@@ -193,6 +232,15 @@ v = await abrir('Libro de prueba');
 const t1 = Date.now();
 const deNuevo = await lineasDe(v, 20000);
 comprobar((deNuevo.lineas?.length ?? 0) > 0 && Date.now() - t1 < 3000, 'Al volver a abrirlo, el texto sale de lo ya leído, enseguida', `${Date.now() - t1} ms`);
+comprobar((deNuevo.lineas ?? []).includes(EDITADA), 'Y con lo editado', JSON.stringify(deNuevo.lineas));
+await v.locator('.vs-linea').nth(1).click();
+await v.click('.vs-linea-acciones button:has-text("Restaurar")');
+const restaurada = await v
+  .waitForFunction((t) => [...document.querySelectorAll('.vs-linea')].map((b) => b.getAttribute('aria-label')).join('').includes(t), LINEAS_LIBRO[1].slice(0, 4), { timeout: 5000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(restaurada, 'Restaurar vuelve al texto leído');
+await v.waitForTimeout(500);
 await v.close();
 
 // ---------- Manga ----------
@@ -250,6 +298,47 @@ await botonPdf(v).waitFor({ timeout: 15000 }).catch(() => {});
 const recordado = await botonPdf(v).getAttribute('aria-pressed').catch(() => null);
 const otraVez = await lineasDesde(v, 'ocr', 20000);
 comprobar(recordado === 'false' && !!otraVez, 'Al volver a abrirlo, se acuerda de leerlo con el OCR', `${recordado}`);
+await v.close();
+
+// ---------- Leer por delante ----------
+
+console.log('\n== Las páginas siguientes se leen antes de llegar ==');
+v = await abrir('Manga largo');
+await v.click('[aria-label="Leer el texto de las páginas"]');
+const idManga = libroDe(v);
+const primeraPagina = await lineasDe(v, 120000);
+comprobar(!primeraPagina.fallo, 'Lee la página a la vista', primeraPagina.fallo ?? '');
+let adelantadas = 0;
+for (let espera = 0; espera < 60 && adelantadas < 9; espera++) {
+  adelantadas = await leidasDe(v, idManga);
+  await v.waitForTimeout(500);
+}
+comprobar(adelantadas >= 9, 'Sin pasar de página, el OCR ya ha leído las ocho siguientes', `${adelantadas} de 9`);
+comprobar((await indicador(v)) === '1', 'Y sigue en la primera', await indicador(v));
+comprobar(await v.evaluate(() => !document.querySelector('.vs-estado:not(.error)')), 'Lo que se lee por delante no se anuncia como espera');
+await v.keyboard.press('ArrowLeft');
+const t3 = Date.now();
+const siguiente = await lineasDe(v, 20000);
+comprobar((siguiente.lineas?.length ?? 0) > 0 && Date.now() - t3 < 1500, 'Al pasar de página, su texto ya está', `${Date.now() - t3} ms`);
+await v.close();
+
+// ---------- Procesar el libro entero desde la estantería ----------
+
+console.log('\n== Procesar el libro entero ==');
+const tarjeta = app.locator('.ap-libro', { has: app.locator('h3', { hasText: 'Libro para procesar' }) });
+await tarjeta.locator('button.ap-procesar').click();
+const listo = await tarjeta
+  .locator('.ap-proceso.listo')
+  .waitFor({ timeout: 180000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(listo, 'Desde su tarjeta, el libro entero se lee con el OCR y queda listo', await tarjeta.locator('.ap-proceso').textContent().catch(() => ''));
+await app.screenshot({ path: join(CAPTURAS, 'procesado.png') });
+v = await abrir('Libro para procesar');
+comprobar((await leidasDe(v, libroDe(v))) === 3, 'Con sus tres páginas leídas');
+const t4 = Date.now();
+const yaLeido = await lineasDe(v, 15000);
+comprobar((yaLeido.lineas?.length ?? 0) === 3 && Date.now() - t4 < 2000, 'Al abrirlo, el OCR ya está encendido y el texto, a la vista', `${yaLeido.lineas?.length} líneas, ${Date.now() - t4} ms`);
 await v.close();
 
 if (errores.length) console.log('\nErrores en la página:', [...new Set(errores)].slice(0, 6));

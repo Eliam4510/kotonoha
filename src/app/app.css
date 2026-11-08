@@ -363,6 +363,13 @@ section .ap-botones { margin-top: 10px; }
 .ap-libro { min-width: 0; }
 .ap-libro h3 { margin-top: 10px; font-size: 13.5px; font-weight: 700; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ap-libro .ayuda { margin-top: 1px; font-size: 12px; }
+.ap-proceso { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 2px 6px; min-height: 26px; margin-top: 4px; }
+.ap-proceso .ayuda { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-proceso.listo { display: flex; gap: 4px; min-height: 0; color: var(--hoja); }
+.ap-procesar { margin-left: -8px; }
+.ap-proceso-barra { position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; border-radius: 2px; background: var(--superficie-3); overflow: hidden; }
+.ap-proceso-barra > i { display: block; height: 100%; background: var(--hoja); transition: width 0.3s; }
+.ap-proceso-error { color: var(--error); max-width: 100%; }
 .ap-libro-tapa-marco { position: relative; }
 .ap-libro-quitar { position: absolute; top: 8px; left: 8px; opacity: 0; transition: opacity 0.14s, transform 0.18s var(--resorte); }
 .ap-libro-tapa-marco:hover .ap-libro-quitar, .ap-libro-quitar:focus-visible { opacity: 1; }

@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.9.3 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.9.4 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -107,6 +107,9 @@ Stand jeder Funktion in Version 0.9.3 und die Art ihrer Überprüfung.
 | Bücher werden getrennt gespeichert und stückweise gelesen: Ein PDF mit Hunderten MB wird nie ganz geladen. Der Betrachter merkt sich Seite, Ansicht und Zoom jedes Buchs | Automatisch, und mit einem echten PDF von 347 MB |
 | Texterkennung (OCR) auf dem eigenen Computer mit der GPU: Modus Buch mit PP-OCRv5, der gedruckte Furigana weglässt und Spalte für Spalte liest, und Modus Manga mit einem Sprechblasen-Detektor und manga-ocr, in der Reihenfolge der Panels und ohne Wasserzeichen | Automatisch, und von Hand an echten Seiten gemessen: 2,8 % Zeichenfehler auf 18 Mangaseiten aus fünf Reihen und 0,5 % in einem Band als EPUB, 1 % in einem Lehrbuch und rund 2 % in einem gescannten Chemie-PDF mit Formeln und Tabellen |
 | PDF-Text: In einem PDF mit der Textebene eines anderen Texterkennungsprogramms zwischen diesem Text und der Texterkennung von Kotonoha wählen, für jedes Buch gespeichert | Automatisch, und mit einem echten Scan |
+| Die Texterkennung liest voraus: die nächsten Seiten (acht bei einem Manga, vier bei einem Buch), bevor man sie erreicht, und lässt übersprungene liegen | Automatisch |
+| Verarbeiten: ein ganzes Buch von seiner Karte aus mit der Texterkennung lesen, mit Fortschritt, Pause und „Text bereit“ am Ende | Automatisch, und mit einem echten Band |
+| Den Text einer Zeile von Hand bearbeiten, getrennt vom Gelesenen gespeichert und mit „Wiederherstellen“ | Automatisch |
 | Ein Tippen auf eine Zeile der Seite öffnet ihren Text mit Furigana und nachschlagbaren Wörtern, samt Wortfenster und Kartenerstellung | Automatisch |
 | Jede Seite wird nur einmal gelesen und gespeichert; ihr Text erreicht auch Bildschirmleser | Automatisch |
 | Text-EPUBs im Betrachter in ihrem eigenen Format: Kapitel, CSS, Ruby, Illustrationen und vertikale Schrift, mit dem Seiten-Reader darüber, mit Farben, Furigana und Wortfenstern | Automatisch, mit einem vertikalen EPUB mit Ruby, CSS und Illustration |
