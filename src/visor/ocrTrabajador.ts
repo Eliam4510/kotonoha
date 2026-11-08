@@ -1,7 +1,9 @@
 // El reconocimiento de texto (OCR) del visor, en un trabajador: la página no se congela mientras lee. Dos juegos de modelos,
 // medidos con libros reales antes de elegirlos. Para libros impresos, PP-OCRv5 (21 MB): entre un 1 y un 4 % de error por
 // carácter, en un segundo por página. Para el manga, un detector de globos y manga-ocr (178 MB), que lee el texto vertical
-// y no confunde el furigana: menos de un 1 % en tres páginas de un tomo, en un segundo y medio por página.
+// y no confunde el furigana: menos de un 1 % en tres páginas de un tomo, en un segundo y medio por página. Sobre lo que
+// leen los modelos, el manga deja repetir los signos («……»), quita las marcas de agua y lo suelto dudoso, y ordena los
+// globos por viñetas; en 18 páginas de cinco series, en el navegador, de 4,3 % a 2,8 % de error y de 11 falsos a 4.
 //
 // manga-ocr va con el codificador en q4f16 y el decodificador en fp32: las versiones int8 hacen que ONNX mande a la CPU
 // las operaciones con enteros, y en un solo hilo tardaban entre 10 y 30 s por página; las fp16 y q4f16 del decodificador
@@ -15,14 +17,17 @@ import {
   type Caja,
   cajasDeMapa,
   decodificarCtc,
+  esRuidoManga,
   esVertical,
+  idsRepetibles,
   type LineaOcr,
   medidaDeDeteccion,
   ordenarLineas,
-  ordenManga,
+  ordenMangaPorVinetas,
   quitarFurigana,
   siguienteToken,
   textoDeMangaOcr,
+  vinetasDeImagen,
 } from '../nucleo/ocr';
 
 export type ModoOcr = 'libro' | 'manga';
@@ -53,6 +58,8 @@ const TRAMO_ANCHO = 16;
 const ANCHO_MAXIMO = 3200;
 const LADO_MANGA_OCR = 224;
 const LADO_GLOBOS = 640;
+/** El ancho de la miniatura en grises en la que se buscan las viñetas: de sobra para ver los canales entre ellas. */
+const ANCHO_VINETAS = 360;
 const MAXIMO_TOKENS = 160;
 /**
  * En la GPU, cada forma nueva de un tensor obliga a compilar otra vez. Los globos van siempre en lotes de este tamaño,
@@ -95,6 +102,8 @@ interface ModelosManga {
   codificador: ort.InferenceSession;
   decodificador: ort.InferenceSession;
   vocabulario: string[];
+  /** Los signos que pueden repetirse más allá de la regla de los trigramas («……», «ーーー»). */
+  repetibles: Set<number>;
 }
 
 let libro: Promise<ModelosLibro> | null = null;
@@ -124,12 +133,14 @@ function cargarManga(): Promise<ModelosManga> {
       descargar(o.repositorio, o.revision, o.decodificador),
       descargar(v.repositorio, v.revision, v.archivo),
     ]);
+    const lista = new TextDecoder().decode(vocabulario).split(/\r?\n/);
     return {
       globos: await sesion(globos, true),
       codificador: await sesion(codificador, true),
       // En la GPU, con formas fijas: lotes de LOTE_MANGA y largos por tramos, para compilar una vez y no en cada paso.
       decodificador: await sesion(decodificador, true),
-      vocabulario: new TextDecoder().decode(vocabulario).split(/\r?\n/),
+      vocabulario: lista,
+      repetibles: idsRepetibles(lista),
     };
   })().catch((e) => {
     manga = null;
@@ -258,16 +269,28 @@ async function leerManga(imagen: ImageBitmap): Promise<LineaOcr[]> {
   const lineas: LineaOcr[] = [];
   for (let inicio = 0; inicio < bloques.length; inicio += LOTE_MANGA) {
     const grupo = bloques.slice(inicio, inicio + LOTE_MANGA);
-    const textos = await leerGlobos(m, imagen, grupo);
-    grupo.forEach((caja, b) => {
-      if (textos[b]) lineas.push({ caja: fraccion(caja, w, h), texto: textos[b], vertical: esVertical(caja) });
+    const leidos = await leerGlobos(m, imagen, grupo);
+    grupo.forEach((bloque, b) => {
+      const { texto, confianza } = leidos[b];
+      // Fuera las marcas de agua, los números de página y lo suelto que se lee con poca seguridad.
+      if (texto && !esRuidoManga(texto, bloque.etiqueta, confianza)) lineas.push({ caja: fraccion(bloque, w, h), texto, vertical: esVertical(bloque) });
     });
   }
-  return ordenManga(lineas);
+  // El orden de lectura va por viñetas, buscadas en una miniatura en grises de la página.
+  const alto = Math.max(1, Math.round((h * ANCHO_VINETAS) / w));
+  const px = pixeles(imagen, { x0: 0, y0: 0, x1: w, y1: h }, ANCHO_VINETAS, alto);
+  const gris = new Uint8Array(ANCHO_VINETAS * alto);
+  for (let i = 0; i < gris.length; i++) gris[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+  const orden = ordenMangaPorVinetas(lineas, vinetasDeImagen(gris, ANCHO_VINETAS, alto));
+  fase('orden');
+  return orden;
 }
 
-/** Lee hasta LOTE_MANGA globos a la vez, con formas fijas para que la GPU no compile en cada página ni en cada paso. */
-async function leerGlobos(m: ModelosManga, imagen: ImageBitmap, grupo: Caja[]): Promise<string[]> {
+/**
+ * Lee hasta LOTE_MANGA globos a la vez, con formas fijas para que la GPU no compile en cada página ni en cada paso. Con
+ * cada texto va su confianza: la media de la probabilidad de cada token elegido.
+ */
+async function leerGlobos(m: ModelosManga, imagen: ImageBitmap, grupo: Caja[]): Promise<{ texto: string; confianza: number }[]> {
   // Como manga-ocr: cada recorte en grises, a 224 × 224 y en [-1, 1]. Los huecos del lote quedan en negro.
   const lado = LADO_MANGA_OCR * LADO_MANGA_OCR;
   const lote = new Float32Array(LOTE_MANGA * 3 * lado);
@@ -285,6 +308,7 @@ async function leerGlobos(m: ModelosManga, imagen: ImageBitmap, grupo: Caja[]): 
   // Voraz y por lotes: cada paso avanza todos los globos a la vez. La secuencia va rellena hasta el tramo en curso: la
   // atención es causal, así que lo que va detrás no cambia lo que sale en la última posición real.
   const ids = Array.from({ length: LOTE_MANGA }, () => [2]);
+  const probabilidades = Array.from({ length: LOTE_MANGA }, () => [] as number[]);
   const fin = Array.from({ length: LOTE_MANGA }, (_, b) => b >= grupo.length);
   const nombreOculto = m.decodificador.inputNames.find((n) => /encoder_hidden_states/.test(n)) ?? 'encoder_hidden_states';
   const paraDecodificador = adaptar(m.decodificador, nombreOculto, oculto);
@@ -307,15 +331,31 @@ async function leerGlobos(m: ModelosManga, imagen: ImageBitmap, grupo: Caja[]): 
         ids[b].push(0);
         continue;
       }
-      const siguiente = siguienteToken(datos, (b * tramo + largo - 1) * V, V, ids[b]);
+      const base = (b * tramo + largo - 1) * V;
+      const siguiente = siguienteToken(datos, base, V, ids[b], m.repetibles);
       if (siguiente === 3 || siguiente < 0) {
         fin[b] = true;
         ids[b].push(0);
-      } else ids[b].push(siguiente);
+      } else {
+        ids[b].push(siguiente);
+        probabilidades[b].push(probabilidad(datos, base, V, siguiente));
+      }
     }
   }
   fase('decodificador');
-  return grupo.map((_, b) => textoDeMangaOcr(ids[b].slice(1), m.vocabulario));
+  return grupo.map((_, b) => ({
+    texto: textoDeMangaOcr(ids[b].slice(1), m.vocabulario),
+    confianza: probabilidades[b].length ? probabilidades[b].reduce((s, p) => s + p, 0) / probabilidades[b].length : 0,
+  }));
+}
+
+/** La probabilidad de un token entre los logits de un paso (softmax). */
+function probabilidad(logits: ArrayLike<number>, base: number, V: number, token: number): number {
+  let maximo = -Infinity;
+  for (let v = 0; v < V; v++) if (logits[base + v] > maximo) maximo = logits[base + v];
+  let suma = 0;
+  for (let v = 0; v < V; v++) suma += Math.exp(logits[base + v] - maximo);
+  return Math.exp(logits[base + token] - maximo) / suma;
 }
 
 self.onmessage = async (e: MessageEvent<PedidoOcr>) => {

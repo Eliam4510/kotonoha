@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.9.1, along with how it has been verified.
+Status of each feature in version 0.9.2, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -105,7 +105,7 @@ Status of each feature in version 0.9.1, along with how it has been verified.
 | Right-to-left reading order taken from the book itself, with the cover on its own in a two-page spread | Automated |
 | Thumbnails, the book's contents, go to page, full screen and inverted colors | Automated |
 | Books are stored separately and read piece by piece: a PDF of hundreds of MB is never loaded whole. The viewer remembers each book's page, view and zoom | Automated, and with a real 347 MB PDF |
-| On-device text recognition (OCR) with the GPU: Book mode, with PP-OCRv5, and Manga mode, with a bubble detector and manga-ocr | Automated, and measured by hand on real pages: under 1 % character error in a manga, 1 % in a textbook and between 3 and 8 % in a scanned chemistry PDF with formulas and tables |
+| On-device text recognition (OCR) with the GPU: Book mode, with PP-OCRv5, which leaves printed furigana out and reads column by column, and Manga mode, with a bubble detector and manga-ocr, in panel order and without watermarks | Automated, and measured by hand on real pages: 2.8 % character error on 18 manga pages from five series and 0.5 % on a volume in EPUB, 1 % in a textbook and around 2 % in a scanned chemistry PDF with formulas and tables |
 | Tapping a line on the page opens its text with furigana and words to look up, with their word panel and card creation | Automated |
 | Each page is read only once and saved; its text also reaches screen readers | Automated |
 | Text EPUBs in the viewer, in their own format: chapters, CSS, ruby, illustrations and vertical writing, with the page reader on top, with colours, furigana and word panels | Automated, with a vertical EPUB with ruby, CSS and an illustration |
