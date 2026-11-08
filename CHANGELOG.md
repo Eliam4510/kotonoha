@@ -2,6 +2,12 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.9.4 · 2026-11-08
+
+- **Leer sin esperas.** El OCR lee las páginas siguientes antes de llegar a ellas (ocho en un manga, cuatro en un libro), así que al pasar de página su texto ya está. Si se salta a otra parte del libro, lo que se dejó atrás deja de leerse y va primero lo que se ve.
+- **Procesar.** Desde la tarjeta de cada libro, en la Ayuda de lectura, se lee el libro entero con el OCR de una vez, con el avance a la vista y pausa. Al acabar queda con «Texto listo» y el OCR encendido.
+- **Editar.** En el panel de una línea se puede escribir su texto a mano, por ejemplo si salió con un kanji cambiado. Lo editado se guarda aparte, sobrevive aunque la página se vuelva a leer y se puede restaurar.
+
 ## 0.9.3 · 2026-11-08
 
 - **Texto del PDF.** En un PDF escaneado que trae la capa de texto de otro programa de OCR, a menudo con errores, se puede apagar **Texto del PDF** para que Kotonoha lea las páginas con su propio OCR. Cada libro lo recuerda.
@@ -77,6 +83,12 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.9.4 · 2026-11-08
+
+- **Reading without waiting.** OCR reads the next pages before you reach them (eight in a manga, four in a book), so when you turn the page its text is already there. If you jump elsewhere in the book, what was left behind stops being read and what you see comes first.
+- **Process.** From each book's card in the Reading assistant, the whole book is read with OCR at once, with progress in view and a pause. When it finishes, the book shows "Text ready" and has OCR turned on.
+- **Edit.** In a line's panel, its text can be typed by hand, for instance when it came out with a wrong kanji. The edit is stored separately, survives the page being read again and can be restored.
 
 ## 0.9.3 · 2026-11-08
 

@@ -75,6 +75,11 @@
 .vs-linea-texto { margin: 0; font-family: var(--letra-lengua); font-size: 22px; font-weight: 500; line-height: 2.2; }
 .vs-ficha { min-height: 0; }
 .vs-pista { margin: 0; }
+.vs-linea-acciones { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; margin: -6px 0 0 -8px; }
+.vs-linea-acciones .ayuda { margin: 0; }
+.vs-editar { display: flex; flex-direction: column; gap: 8px; }
+.vs-editar-campo { width: 100%; resize: vertical; font-family: var(--letra-lengua); font-size: 20px; line-height: 1.6; }
+.vs-editar-botones { display: flex; justify-content: flex-end; gap: 6px; }
 .vs-estado { margin-inline-start: auto; font-size: 12px; color: var(--texto-2); }
 .vs-estado.error { color: var(--error); }
 

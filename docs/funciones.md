@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.9.3, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.9.4, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -107,6 +107,9 @@ Estado de cada función en la versión 0.9.3, con la forma en que se ha verifica
 | Los libros se guardan aparte y se leen a trozos: un PDF de cientos de MB no se carga entero. El visor recuerda la página, la vista y el zoom de cada uno | Automática, y con un PDF real de 347 MB |
 | Reconocimiento de texto (OCR) en el propio equipo, con la GPU: modo Libro, con PP-OCRv5, que deja fuera el furigana impreso y lee columna a columna, y modo Manga, con un detector de globos y manga-ocr, en el orden de las viñetas y sin marcas de agua | Automática, y medido a mano en páginas reales: un 2,8 % de error por carácter en 18 páginas de manga de cinco series y un 0,5 % en un tomo en EPUB, un 1 % en un libro de texto y en torno a un 2 % en un PDF de química escaneado, con fórmulas y tablas |
 | Texto del PDF: en un PDF con la capa de texto de otro programa de OCR, elegir entre ese texto y el OCR de Kotonoha, y que cada libro lo recuerde | Automática, y con un escaneo real |
+| El OCR lee por delante: las páginas siguientes (ocho en un manga, cuatro en un libro) antes de llegar, y deja de lado las que se saltan | Automática |
+| Procesar: leer con el OCR un libro entero desde su tarjeta, con el avance, pausa y «Texto listo» al acabar | Automática, y con un tomo real |
+| Editar el texto de una línea a mano, guardado aparte de lo leído y con «Restaurar» | Automática |
 | Tocar una línea de la página abre su texto con furigana y palabras para consultar, con su ficha y la creación de tarjetas | Automática |
 | Cada página se lee una sola vez y se guarda; su texto también llega a los lectores de pantalla | Automática |
 | EPUB de texto en el visor, con su propio formato: capítulos, CSS, ruby, ilustraciones y escritura vertical, y el lector de páginas encima, con colores, furigana y fichas | Automática, con un EPUB vertical con ruby, CSS e ilustración |

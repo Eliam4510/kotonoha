@@ -10,14 +10,15 @@ import type { PalabraToken } from '../compartido/tipos';
 import { motorDe } from '../lenguas/motor';
 import { fraseConNegrita } from '../nucleo/frases';
 import { alinearSuperficies } from '../nucleo/lectorTexto';
+import type { LineaEditada } from '../nucleo/ediciones';
 import type { LineaOcr } from '../nucleo/ocr';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
 
-export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover, alCerrar, alMarcar }: {
-  lineas: LineaOcr[];
+export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover, alCerrar, alMarcar, alEditar, alRestaurar }: {
+  lineas: LineaEditada<LineaOcr>[];
   indice: number;
   /** La letra que se tocó en la página: su palabra se elige en cuanto la línea esté analizada. */
   caracter?: number;
@@ -27,8 +28,20 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
   alCerrar: () => void;
   /** Dónde está, en el texto de la línea, la palabra elegida: para marcarla en la página. */
   alMarcar?: (tramo: { inicio: number; fin: number } | null) => void;
+  /** Guarda el texto escrito a mano para la línea. */
+  alEditar?: (texto: string) => Promise<void>;
+  /** Vuelve al texto leído, sin lo editado. */
+  alRestaurar?: () => Promise<void>;
 }) {
   const linea = lineas[indice];
+  // Editar la línea: el texto que se está escribiendo, o null si no se está editando.
+  const [borrador, fijarBorrador] = useState<string | null>(null);
+  useEffect(() => fijarBorrador(null), [indice, linea.texto]);
+  const guardar = async () => {
+    const texto = (borrador ?? '').replace(/\s*\n\s*/g, '').trim();
+    if (texto && alEditar) await alEditar(texto);
+    fijarBorrador(null);
+  };
   // Lo analizado va con su texto: al cambiar de línea, el de la anterior no vale ni un momento.
   const [analizado, fijarAnalizado] = useState<{ texto: string; tokens: PalabraToken[] } | null>(null);
   const tokens = analizado?.texto === linea.texto ? analizado.tokens : [];
@@ -78,6 +91,39 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
         <button class="btn-icono chico" aria-label={tr('Línea siguiente')} data-tip={tr('Línea siguiente')} disabled={indice >= lineas.length - 1} onClick={() => alMover(1)}><Icono n="flecha-abajo" t={15} /></button>
         <button class="btn-icono chico vs-cerrar" aria-label={tr('Cerrar')} onClick={alCerrar}><Icono n="cerrar" t={15} /></button>
       </div>
+      {borrador !== null ? (
+        <div class="vs-editar">
+          <textarea
+            class="campo vs-editar-campo"
+            lang={lengua.value.id}
+            aria-label={tr('Texto de la línea')}
+            value={borrador}
+            rows={Math.min(5, Math.max(2, Math.ceil(borrador.length / 18)))}
+            ref={(el) => {
+              // Al abrirse, el cursor ya está dentro y el texto elegido, para escribir encima sin más.
+              if (el && !el.dataset.listo) {
+                el.dataset.listo = '1';
+                el.focus();
+                el.select();
+              }
+            }}
+            onInput={(e) => fijarBorrador(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+                e.preventDefault();
+                void guardar();
+              } else if (e.key === 'Escape') {
+                e.stopPropagation();
+                fijarBorrador(null);
+              }
+            }}
+          />
+          <div class="vs-editar-botones">
+            <button class="btn chico fantasma" onClick={() => fijarBorrador(null)}>{tr('Cancelar')}</button>
+            <button class="btn chico primario" onClick={() => void guardar()} disabled={!borrador.trim()}>{tr('Guardar')}</button>
+          </div>
+        </div>
+      ) : (
       <p class="vs-linea-texto" lang={lengua.value.id}>
         {tokens.length
           ? tokens.map((p, k) =>
@@ -101,6 +147,22 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
             )
           : linea.texto}
       </p>
+      )}
+      {borrador === null && alEditar && (
+        <div class="vs-linea-acciones">
+          <button class="btn chico fantasma" data-tip={tr('Cambia el texto de esta línea a mano')} onClick={() => fijarBorrador(linea.texto)}>
+            <Icono n="lapiz" t={13} /> {tr('Editar')}
+          </button>
+          {linea.edicion && (
+            <>
+              <span class="ayuda" title={linea.original ? tr('Antes: {0}', linea.original) : undefined}>{tr('Editado')}</span>
+              <button class="btn chico fantasma" data-tip={linea.original ? tr('Antes: {0}', linea.original) : undefined} onClick={() => void alRestaurar?.()}>
+                <Icono n="reiniciar" t={13} /> {tr('Restaurar')}
+              </button>
+            </>
+          )}
+        </div>
+      )}
       {palabra ? (
         <div class="vs-ficha">
           <Ficha

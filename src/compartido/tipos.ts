@@ -215,6 +215,8 @@ export interface DocumentoBiblioteca {
    * texto del PDF.
    */
   ocr?: { activo: boolean; modo: 'libro' | 'manga'; textoPdf?: boolean };
+  /** Si se leyó el libro entero con el OCR por adelantado, y cómo: con otro modo, o sin «Texto del PDF», no vale. */
+  procesado?: { modo: 'libro' | 'manga'; textoPdf: boolean };
 }
 
 export interface ElementoBiblioteca {

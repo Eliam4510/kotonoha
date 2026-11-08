@@ -21,6 +21,8 @@ import { librosDeImagenes } from '../nucleo/carpetas';
 import { IMAGEN, leerEpubDeTexto, leerLibro } from '../nucleo/libro';
 import { fuenteDeArchivo, LIMITE_ZIP, leerEntrada } from '../nucleo/zip';
 import { type ArchivoImportado, archivosElegidos, archivosSoltados, cbzDe, tamanoDe } from './importacion';
+import { descargaOcr, pausar, procesar, procesos } from './procesos';
+import { estaProcesado } from '../visor/procesador';
 import { datosDeZip, miniaturaDe } from '../visor/paginador';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { enviarAlCreador } from '../ui/borrador';
@@ -660,7 +662,7 @@ const NOMBRE_ORIGEN: Record<ElementoBiblioteca['origen'], string> = {
   pegado: tm('Texto pegado'),
 };
 
-function Libro({ e, alAbrir, alEliminar }: { e: ElementoBiblioteca; alAbrir: () => void; alEliminar: () => void }) {
+function Libro({ e, alAbrir, alEliminar, alCambiar }: { e: ElementoBiblioteca; alAbrir: () => void; alEliminar: () => void; alCambiar: () => void }) {
   const total = paginasDe(e);
   const pagina = Math.min((e.pagina ?? 0) + 1, total);
   const empezado = (e.pagina ?? 0) > 0;
@@ -700,7 +702,54 @@ function Libro({ e, alAbrir, alEliminar }: { e: ElementoBiblioteca; alAbrir: () 
       ) : (
         <p class="ayuda" title={tr('{0} caracteres', numero(e.texto.length))}>{tr(NOMBRE_ORIGEN[e.origen])}</p>
       )}
+      {e.documento && !e.documento.texto && <ProcesoLibro e={e} alCambiar={alCambiar} />}
     </article>
+  );
+}
+
+/**
+ * Leer el libro entero con el OCR por adelantado, desde su tarjeta: el botón, el avance mientras se lee, la pausa y, al
+ * acabar, que el texto ya está listo.
+ */
+function ProcesoLibro({ e, alCambiar }: { e: ElementoBiblioteca; alCambiar: () => void }) {
+  const p = procesos.value[e.id];
+  if (p?.estado === 'listo' || (!p && estaProcesado(e.documento!))) {
+    return (
+      <p class="ayuda ap-proceso listo" title={tr('Todas las páginas están leídas con el OCR: al abrirlo, el texto ya está')}>
+        <Icono n="check" t={12} /> {tr('Texto listo')}
+      </p>
+    );
+  }
+  if (p?.estado === 'procesando' || p?.estado === 'en-cola') {
+    const d = descargaOcr.value;
+    const texto =
+      p.estado === 'en-cola'
+        ? tr('En cola')
+        : d
+          ? tr('Descargando el reconocimiento de texto: {0} %', Math.round((100 * d.cargado) / Math.max(1, d.total)))
+          : p.total
+            ? tr('Procesando {0} de {1}', numero(p.hechas), numero(p.total))
+            : tr('Procesando…');
+    return (
+      <div class="ap-proceso" role="status">
+        <span class="ayuda num">{texto}</span>
+        <button class="btn-icono chico" aria-label={tr('Pausar')} data-tip={tr('Pausar')} onClick={() => pausar(e.id)}>
+          <Icono n="pausa" t={12} />
+        </button>
+        <i class="ap-proceso-barra">
+          <i style={{ width: `${p.total ? (100 * p.hechas) / p.total : 0}%` }} />
+        </i>
+      </div>
+    );
+  }
+  return (
+    <div class="ap-proceso">
+      {p?.estado === 'en-pausa' && <span class="ayuda num">{tr('En pausa: {0} de {1}', numero(p.hechas), numero(p.total))}</span>}
+      {p?.estado === 'error' && <span class="ayuda ap-proceso-error" title={p.error}>{p.error}</span>}
+      <button class="btn chico fantasma ap-procesar" data-tip={tr('Lee ahora con el OCR todas las páginas, para que al leer no haya que esperar')} onClick={() => procesar(e, alCambiar)}>
+        <Icono n="rayo" t={13} /> {p?.estado === 'en-pausa' ? tr('Seguir') : p?.estado === 'error' ? tr('Reintentar') : tr('Procesar')}
+      </button>
+    </div>
   );
 }
 
@@ -896,7 +945,8 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
                 key={e.id}
                 e={e}
                 alAbrir={() => abrirLibro(e)}
-                alEliminar={async () => { await motor.bibliotecaEliminar(e.id); cargar(); }}
+                alEliminar={async () => { pausar(e.id); await motor.bibliotecaEliminar(e.id); cargar(); }}
+                alCambiar={cargar}
               />
             ))}
           </div>

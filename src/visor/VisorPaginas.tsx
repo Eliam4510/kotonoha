@@ -11,11 +11,13 @@ import { tr } from '../compartido/i18n';
 import { motor } from '../compartido/rpc';
 import type { ElementoBiblioteca } from '../compartido/tipos';
 import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
+import { aplicarEdiciones, type EdicionLinea, type LineaEditada } from '../nucleo/ediciones';
+import { edicionesDe, guardarEdicion, quitarEdicion } from '../compartido/paginasOcr';
 import type { Direccion } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
-import { type Descarga, LectorOcr, type ModoOcr } from './ocr';
+import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
 import { miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
 import { PanelLinea } from './PanelLinea';
 import { paginadorDePdf } from './pdf';
@@ -29,6 +31,11 @@ const PAGINA_SUPUESTA: Medida = { ancho: 844, alto: 1200 };
 const MARGEN = 16;
 /** Cuántas páginas antes y después de las visibles se pintan en el desplazamiento continuo. */
 const ALREDEDOR = 2;
+/**
+ * Cuántas páginas lee el OCR por delante de las que se ven. Una página de manga se lee en segundo y medio y se mira en
+ * bastante más, así que ocho bastan para no esperar nunca al pasar de página; un libro se lee más despacio.
+ */
+const ADELANTE: Record<ModoOcr, number> = { manga: 8, libro: 4 };
 
 const porciento = (c: Caja) => ({ left: `${c.x0 * 100}%`, top: `${c.y0 * 100}%`, width: `${(c.x1 - c.x0) * 100}%`, height: `${(c.y1 - c.y0) * 100}%` });
 
@@ -157,7 +164,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // En un PDF con su propio texto, si se usa ese texto (lo normal) o el OCR lee también esas páginas.
   const [textoPdf, fijarTextoPdf] = useState(true);
   const [lineas, fijarLineas] = useState<Map<number, LineaTexto[]>>(() => new Map());
-  const [leyendo, fijarLeyendo] = useState(0);
+  // Lo editado a mano en el libro: va encima de lo leído, en la línea que ocupe el mismo sitio.
+  const [ediciones, fijarEdiciones] = useState<EdicionLinea[]>([]);
   const [descarga, fijarDescarga] = useState<Descarga | null>(null);
   const [errorOcr, fijarErrorOcr] = useState('');
   const [abierta, fijarAbierta] = useState<{ pagina: number; indice: number; caracter?: number } | null>(null);
@@ -190,6 +198,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       fijarOcr(d.ocr?.activo ?? false);
       fijarModoOcr(d.ocr?.modo ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'manga' : 'libro'));
       fijarTextoPdf(d.ocr?.textoPdf ?? true);
+      edicionesDe(inicial.id).then((l) => vivo && fijarEdiciones(l), () => {});
       // Un PDF no tiene portada hasta que se abre: se hace ahora con su primera página, para la estantería.
       if (!d.portada) {
         p.imagen(0)
@@ -325,9 +334,12 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   }, [vista, paginador, pagina, hueco, zoom]);
 
   const aLaVista = vista === 'continua' ? Array.from({ length: Math.max(0, cerca[1] - cerca[0] + 1) }, (_, i) => cerca[0] + i) : (lista[actual] ?? []);
-  const cercanas = [...aLaVista, ...(vista === 'continua' ? [] : (lista[actual + 1] ?? []))];
+  // Las páginas que vienen después, en el orden de lectura: el OCR las lee antes de llegar, para que nunca haya que esperar.
+  const adelante = ADELANTE[modoOcr];
+  const despues = vista === 'continua' ? Array.from({ length: Math.max(0, Math.min(adelante, total - 1 - cerca[1])) }, (_, i) => cerca[1] + 1 + i) : lista.slice(actual + 1, actual + 1 + adelante).flat();
+  const cercanas = [...aLaVista, ...despues.slice(0, adelante)];
 
-  // El texto del propio PDF: de las páginas a la vista y las del pliego siguiente. No cuesta nada y no hace falta pedirlo.
+  // El texto del propio PDF: de las páginas a la vista y las que vienen. No cuesta nada y no hace falta pedirlo.
   const sinMirar = paginador?.textoPropio ? cercanas.filter((n) => !propias.has(n)) : [];
   useEffect(() => {
     if (!paginador?.textoPropio || !sinMirar.length) return;
@@ -343,9 +355,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     };
   }, [paginador, sinMirar.join(',')]);
 
-  // Con el OCR activo se leen las páginas a la vista y las del pliego siguiente, para pasar de página con el texto listo. En
+  // Con el OCR activo se leen las páginas a la vista y, detrás, las siguientes, para pasar de página con el texto listo. En
   // un PDF, solo las que no traen su texto, y después de mirarlo; o todas, si se ha quitado «Texto del PDF».
   const porLeer = cercanas.filter((n) => !lineas.has(n) && (!paginador?.textoPropio || leerConOcr(propias.get(n), textoPdf)));
+  // Lo que se avisa abajo: que falta el texto de una página a la vista. Lo que se adelanta no hace esperar a nadie.
+  const leyendoVista = aLaVista.some((n) => porLeer.includes(n));
   // Si alguna página del PDF trae su propio texto: entonces se puede elegir entre ese texto y el OCR.
   const hayTextoPropio = [...propias.values()].some((l) => !!l?.length);
   // Al cambiar de dónde sale el texto, la línea abierta solo sigue si es del texto del PDF y ese texto se sigue usando.
@@ -355,26 +369,43 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     cerrarSiCambia(textoPdf);
   }, [modoOcr]);
   useEffect(() => {
-    if (!ocr || !paginador || !porLeer.length) return;
-    lector.current ??= new LectorOcr((d) => fijarDescarga(d.cargado >= d.total ? null : d));
+    if (!ocr || !paginador) return;
+    const l = (lector.current ??= new LectorOcr((d) => fijarDescarga(d.cargado >= d.total ? null : d)));
+    // Lo que se ha dejado atrás antes de su turno ya no se lee: primero va lo que se ve, y luego lo que viene, por orden.
+    l.soloEstas(doc.id, modoOcr, porLeer);
     let vivo = true;
-    for (const n of porLeer) {
-      fijarLeyendo((x) => x + 1);
-      lector.current
-        .leer(doc.id, n, modoOcr, async () => (await fetch((await paginador.imagen(n)).url)).blob())
-        .then((l) => {
-          if (vivo) fijarLineas((m) => new Map(m).set(n, l));
+    porLeer.forEach((n, prioridad) => {
+      l.leer(doc.id, n, modoOcr, async () => (await fetch((await paginador.imagen(n)).url)).blob(), prioridad)
+        .then((lineasLeidas) => {
+          if (vivo) fijarLineas((m) => new Map(m).set(n, lineasLeidas));
         })
-        .catch((e) => vivo && fijarErrorOcr(e instanceof Error ? e.message : String(e)))
-        .finally(() => fijarLeyendo((x) => Math.max(0, x - 1)));
-    }
+        .catch((e) => vivo && !esCancelada(e) && fijarErrorOcr(e instanceof Error ? e.message : String(e)));
+    });
     return () => {
       vivo = false;
     };
   }, [ocr, modoOcr, paginador, doc.id, porLeer.join(',')]);
 
-  /** Las líneas de una página: las del propio PDF si las trae y se usan; si no, las del OCR, si está activo. */
-  const textoDe = (n: number): { lineas: LineaTexto[]; propias: boolean } | undefined => textoDePagina(propias.get(n), lineas.get(n), { ocrActivo: ocr, textoPdf });
+  /** Las líneas de una página: las del propio PDF si las trae y se usan; si no, las del OCR, si está activo. Con lo editado encima. */
+  const textoDe = (n: number): { lineas: LineaEditada[]; propias: boolean } | undefined => {
+    const t = textoDePagina(propias.get(n), lineas.get(n), { ocrActivo: ocr, textoPdf });
+    const suyas = t ? ediciones.filter((e) => e.pagina === n) : [];
+    return t && suyas.length ? { ...t, lineas: aplicarEdiciones(t.lineas, suyas) } : t;
+  };
+  /** Guarda el texto editado de una línea; si vuelve a ser el leído, la edición sobra y se quita. */
+  const editar = async (pagina: number, linea: LineaEditada, texto: string) => {
+    const original = linea.original ?? linea.texto;
+    if (texto === original) return restaurar(linea);
+    const nueva: EdicionLinea = { clave: linea.edicion ?? `${doc.id}:${pagina}:${crypto.randomUUID()}`, libro: doc.id, pagina, caja: linea.caja, original, texto, creada: Date.now() };
+    await guardarEdicion(nueva);
+    fijarEdiciones((l) => [...l.filter((e) => e.clave !== nueva.clave), nueva]);
+  };
+  const restaurar = async (linea: LineaEditada) => {
+    const clave = linea.edicion;
+    if (!clave) return;
+    await quitarEdicion(clave);
+    fijarEdiciones((l) => l.filter((e) => e.clave !== clave));
+  };
   const lineasAbiertas = abierta ? textoDe(abierta.pagina)?.lineas : undefined;
   const moverLinea = (paso: number) => {
     if (!abierta || !lineasAbiertas) return;
@@ -599,6 +630,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             alMover={moverLinea}
             alCerrar={() => fijarAbierta(null)}
             alMarcar={(t) => fijarMarca(t ? { pagina: abierta.pagina, indice: abierta.indice, ...t } : null)}
+            alEditar={(texto) => editar(abierta.pagina, lineasAbiertas[abierta.indice], texto)}
+            alRestaurar={() => restaurar(lineasAbiertas[abierta.indice])}
           />
         )}
         <Creador ajustes={a} />
@@ -608,7 +641,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
         <footer class="vs-pie">
           <input type="range" min={1} max={total} step={1} value={pagina + 1} dir={rtl ? 'rtl' : 'ltr'} aria-label={tr('Página')} onInput={(e) => irA(Number(e.currentTarget.value) - 1)} />
           {capitulo && <span class="vs-capitulo" title={capitulo.titulo}>{capitulo.titulo}</span>}
-          {ocr && (descarga || leyendo > 0 || errorOcr) && (
+          {ocr && (descarga || leyendoVista || errorOcr) && (
             <span class={`vs-estado ${errorOcr ? 'error' : ''}`} role="status">
               {errorOcr
                 ? errorOcr
