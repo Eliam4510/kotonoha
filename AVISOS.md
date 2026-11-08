@@ -20,6 +20,8 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | Modelo de transcripción, descargado al usarlo | MIT |
 | [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0), de Third Intelligence, en la [conversión a ONNX de Sanami](https://huggingface.co/Sanami/haas-ja-onnx) | Modelo de transcripción del japonés, descargado al usarlo | Apache-2.0 |
 | [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), de NVIDIA, en la conversión a ONNX de [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) y [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) | Modelo de transcripción del inglés y del alemán, descargado al usarlo | CC-BY-4.0 |
+| [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), de PaddlePaddle, en la [conversión a ONNX de nakamura196](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | Reconocimiento de texto de los libros, descargado al usarlo | Apache-2.0 |
+| [manga-ocr](https://github.com/kha-white/manga-ocr), de kha-white, en la [conversión a ONNX de onnx-community](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), y el [detector de globos de ogkalu](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | Reconocimiento de texto del manga, descargado al usarlo | Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lectura de archivos propios | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | Núcleo de FFmpeg, copiado al compilar | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
@@ -86,6 +88,8 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | Transcription model, downloaded on use | MIT |
 | [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0), by Third Intelligence, in [Sanami's ONNX conversion](https://huggingface.co/Sanami/haas-ja-onnx) | Japanese transcription model, downloaded on use | Apache-2.0 |
 | [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), by NVIDIA, in the ONNX conversion by [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) and [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) | English and German transcription model, downloaded on use | CC-BY-4.0 |
+| [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), by PaddlePaddle, in the [ONNX conversion by nakamura196](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | Text recognition for books, downloaded when used | Apache-2.0 |
+| [manga-ocr](https://github.com/kha-white/manga-ocr), by kha-white, in the [ONNX conversion by onnx-community](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), and the [bubble detector by ogkalu](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | Text recognition for manga, downloaded when used | Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Reading local files | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg core, copied at build time | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |

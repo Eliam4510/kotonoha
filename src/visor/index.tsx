@@ -18,10 +18,14 @@ import overlay from '../contenido/overlay.css';
 import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
 import { Icono, type NombreIcono } from '../ui/iconos';
-import { aplicarLengua } from '../ui/lengua';
+import { aplicarLengua, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { useTema } from '../ui/tema';
+import { Creador } from '../app/Creador';
+import type { LineaOcr } from '../nucleo/ocr';
+import { type Descarga, LectorOcr, type ModoOcr } from './ocr';
 import { miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
+import { PanelLinea } from './PanelLinea';
 import { paginadorDePdf } from './pdf';
 import visorCss from './visor.css';
 
@@ -43,8 +47,19 @@ function Boton({ icono, etiqueta, activo, alPulsar, deshabilitado }: { icono: No
   );
 }
 
-/** Una página pintada a su escala. Mientras llega la imagen, ocupa ya su sitio para que nada salte. */
-function Pagina({ paginador, n, escala, alCargar }: { paginador: Paginador; n: number; escala: number; alCargar?: () => void }) {
+/**
+ * Una página pintada a su escala. Mientras llega la imagen, ocupa ya su sitio para que nada salte. Con el OCR, encima
+ * van sus líneas: zonas que se pueden tocar, con el texto leído para los lectores de pantalla.
+ */
+function Pagina({ paginador, n, escala, alCargar, lineas, elegida, alTocar }: {
+  paginador: Paginador;
+  n: number;
+  escala: number;
+  alCargar?: () => void;
+  lineas?: LineaOcr[];
+  elegida?: number;
+  alTocar?: (indice: number) => void;
+}) {
   const [imagen, fijarImagen] = useState<PaginaImagen | null>(null);
   const [fallo, fijarFallo] = useState('');
   useEffect(() => {
@@ -66,6 +81,22 @@ function Pagina({ paginador, n, escala, alCargar }: { paginador: Paginador; n: n
   return (
     <div class="vs-pagina" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * escala)}px`, height: `${Math.round(t.alto * escala)}px` }}>
       {imagen ? <img src={imagen.url} alt={tr('Página {0}', n + 1)} draggable={false} /> : fallo ? <span class="vs-fallo">{fallo}</span> : <span class="vs-cargando" />}
+      {imagen && lineas && (
+        <div class="vs-texto">
+          {lineas.map((l, i) => (
+            <button
+              key={i}
+              class={`vs-linea ${elegida === i ? 'elegida' : ''}`}
+              style={{ left: `${l.caja.x0 * 100}%`, top: `${l.caja.y0 * 100}%`, width: `${(l.caja.x1 - l.caja.x0) * 100}%`, height: `${(l.caja.y1 - l.caja.y0) * 100}%` }}
+              aria-label={l.texto}
+              onClick={(e) => {
+                e.stopPropagation();
+                alTocar?.(i);
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -120,6 +151,15 @@ function Visor({ id }: { id: string }) {
   const [hueco, fijarHueco] = useState<Medida>({ ancho: 800, alto: 600 });
   const [escrito, fijarEscrito] = useState<string | null>(null);
   const [, refrescar] = useState(0);
+  // El texto de las páginas, con el OCR: activo o no, con qué modelos, lo leído por página y por dónde va.
+  const [ocr, fijarOcr] = useState(false);
+  const [modoOcr, fijarModoOcr] = useState<ModoOcr>('libro');
+  const [lineas, fijarLineas] = useState<Map<number, LineaOcr[]>>(() => new Map());
+  const [leyendo, fijarLeyendo] = useState(0);
+  const [descarga, fijarDescarga] = useState<Descarga | null>(null);
+  const [errorOcr, fijarErrorOcr] = useState('');
+  const [abierta, fijarAbierta] = useState<{ pagina: number; indice: number } | null>(null);
+  const lector = useRef<LectorOcr | null>(null);
   const lienzo = useRef<HTMLElement>(null);
   /** Si el último cambio de página vino del desplazamiento: entonces no hay que desplazar otra vez. */
   const desdeDesplazamiento = useRef(false);
@@ -164,6 +204,9 @@ function Visor({ id }: { id: string }) {
       fijarVista(d.vista ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'doble' : 'una'));
       fijarPortadaSola(d.portadaSola ?? true);
       fijarZoom(d.zoom ?? 'pagina');
+      // Un manga se lee con los modelos de manga; lo demás, con los de libro impreso.
+      fijarOcr(d.ocr?.activo ?? false);
+      fijarModoOcr(d.ocr?.modo ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'manga' : 'libro'));
       // Un PDF no tiene portada hasta que se abre: se hace ahora con su primera página, para la estantería.
       if (!d.portada) {
         p.imagen(0)
@@ -177,6 +220,7 @@ function Visor({ id }: { id: string }) {
     return () => {
       vivo = false;
       abierto?.cerrar();
+      lector.current?.cerrar();
     };
   }, [id]);
 
@@ -229,11 +273,11 @@ function Visor({ id }: { id: string }) {
     if (!doc?.documento || !paginador) return;
     const t = setTimeout(() => {
       motor
-        .bibliotecaGuardar({ ...doc, pagina, abierto: Date.now(), documento: { ...doc.documento!, paginas: paginador.total, vista, direccion, portadaSola, zoom } })
+        .bibliotecaGuardar({ ...doc, pagina, abierto: Date.now(), documento: { ...doc.documento!, paginas: paginador.total, vista, direccion, portadaSola, zoom, ocr: { activo: ocr, modo: modoOcr } } })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(t);
-  }, [doc, paginador, pagina, vista, direccion, portadaSola, zoom]);
+  }, [doc, paginador, pagina, vista, direccion, portadaSola, zoom, ocr, modoOcr]);
 
   // Al pasar de página se vuelve arriba; en el desplazamiento continuo, se lleva la página a la vista.
   useEffect(() => {
@@ -302,6 +346,40 @@ function Visor({ id }: { id: string }) {
     return () => el.removeEventListener('scroll', medir);
   }, [vista, paginador, pagina, hueco, zoom]);
 
+  // Con el OCR activo se leen las páginas a la vista y las del pliego siguiente, para pasar de página con el texto listo.
+  const aLaVista = vista === 'continua' ? Array.from({ length: Math.max(0, cerca[1] - cerca[0] + 1) }, (_, i) => cerca[0] + i) : (lista[actual] ?? []);
+  const porLeer = [...aLaVista, ...(vista === 'continua' ? [] : (lista[actual + 1] ?? []))].filter((n) => !lineas.has(n));
+  useEffect(() => {
+    fijarLineas(new Map());
+    fijarAbierta(null);
+  }, [modoOcr]);
+  useEffect(() => {
+    if (!ocr || !paginador || !doc || !porLeer.length) return;
+    lector.current ??= new LectorOcr((d) => fijarDescarga(d.cargado >= d.total ? null : d));
+    let vivo = true;
+    for (const n of porLeer) {
+      fijarLeyendo((x) => x + 1);
+      lector.current
+        .leer(doc.id, n, modoOcr, async () => (await fetch((await paginador.imagen(n)).url)).blob())
+        .then((l) => {
+          if (vivo) fijarLineas((m) => new Map(m).set(n, l));
+        })
+        .catch((e) => vivo && fijarErrorOcr(e instanceof Error ? e.message : String(e)))
+        .finally(() => fijarLeyendo((x) => Math.max(0, x - 1)));
+    }
+    return () => {
+      vivo = false;
+    };
+  }, [ocr, modoOcr, paginador, doc?.id, porLeer.join(',')]);
+
+  const lineasAbiertas = abierta ? lineas.get(abierta.pagina) : undefined;
+  const moverLinea = (paso: number) => {
+    if (!abierta || !lineasAbiertas) return;
+    fijarAbierta({ pagina: abierta.pagina, indice: Math.max(0, Math.min(lineasAbiertas.length - 1, abierta.indice + paso)) });
+  };
+  const propsTexto = (n: number) =>
+    ocr ? { lineas: lineas.get(n), elegida: abierta?.pagina === n ? abierta.indice : undefined, alTocar: (i: number) => fijarAbierta({ pagina: n, indice: i }) } : {};
+
   const pulsarLienzo = (e: MouseEvent) => {
     if (vista === 'continua' || !lienzo.current) return;
     const r = lienzo.current.getBoundingClientRect();
@@ -350,7 +428,7 @@ function Visor({ id }: { id: string }) {
             const e = escalaDe([medida(n)], hueco, zoom);
             const t = medida(n);
             return n >= cerca[0] && n <= cerca[1] ? (
-              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} />
+              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} />
             ) : (
               <div key={n} class="vs-pagina vs-reservada" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * e)}px`, height: `${Math.round(t.alto * e)}px` }} />
             );
@@ -360,14 +438,14 @@ function Visor({ id }: { id: string }) {
     return (
       <div class={`vs-pliego ${rtl ? 'rtl' : ''}`}>
         {(lista[actual] ?? []).map((n) => (
-          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} />
+          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} {...propsTexto(n)} />
         ))}
       </div>
     );
   };
 
   return (
-    <div class="kk-raiz vs" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro') }}>
+    <div class="kk-raiz vs" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
       <style>{base + overlay + appCss + visorCss}</style>
       <header class="vs-barra">
         <div class="vs-grupo vs-cabeza">
@@ -417,6 +495,24 @@ function Visor({ id }: { id: string }) {
               <Boton icono="una-pagina" etiqueta={tr('Una página')} activo={vista === 'una'} alPulsar={() => fijarVista('una')} />
               <Boton icono="doble-pagina" etiqueta={tr('Doble página')} activo={vista === 'doble'} alPulsar={() => fijarVista('doble')} />
               <Boton icono="continua" etiqueta={tr('Desplazamiento continuo')} activo={vista === 'continua'} alPulsar={() => fijarVista('continua')} />
+            </div>
+            <div class="vs-grupo" role="group" aria-label={tr('Texto de la página')}>
+              <Boton
+                icono="texto"
+                etiqueta={tr('Leer el texto de las páginas')}
+                activo={ocr}
+                alPulsar={() => {
+                  fijarErrorOcr('');
+                  if (ocr) fijarAbierta(null);
+                  fijarOcr(!ocr);
+                }}
+              />
+              {ocr && (
+                <span class="vs-modos">
+                  <button class="btn chico fantasma" aria-pressed={modoOcr === 'libro'} data-tip={tr('Para libros impresos')} onClick={() => fijarModoOcr('libro')}>{tr('Libro')}</button>
+                  <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para manga: globos y texto vertical')} onClick={() => fijarModoOcr('manga')}>{tr('Manga')}</button>
+                </span>
+              )}
             </div>
             <div class="vs-grupo">
               <Boton
@@ -481,12 +577,25 @@ function Visor({ id }: { id: string }) {
         >
           {contenido()}
         </main>
+        {doc && abierta && lineasAbiertas?.[abierta.indice] && (
+          <PanelLinea lineas={lineasAbiertas} indice={abierta.indice} ajustes={a} titulo={doc.titulo} alMover={moverLinea} alCerrar={() => fijarAbierta(null)} />
+        )}
+        <Creador ajustes={a} />
       </div>
 
       {paginador && total > 1 && (
         <footer class="vs-pie">
           <input type="range" min={1} max={total} step={1} value={pagina + 1} dir={rtl ? 'rtl' : 'ltr'} aria-label={tr('Página')} onInput={(e) => irA(Number(e.currentTarget.value) - 1)} />
           {capitulo && <span class="vs-capitulo" title={capitulo.titulo}>{capitulo.titulo}</span>}
+          {ocr && (descarga || leyendo > 0 || errorOcr) && (
+            <span class={`vs-estado ${errorOcr ? 'error' : ''}`} role="status">
+              {errorOcr
+                ? errorOcr
+                : descarga
+                  ? tr('Descargando el reconocimiento de texto: {0} %', Math.round((100 * descarga.cargado) / Math.max(1, descarga.total)))
+                  : tr('Leyendo el texto de la página…')}
+            </span>
+          )}
           {vista === 'doble' && (
             <label class="vs-portada">
               <span>{tr('Portada sola')}</span>

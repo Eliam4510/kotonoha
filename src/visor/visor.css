@@ -50,6 +50,25 @@
 .vs-indice button.actual { background: var(--hoja-suave); color: var(--hoja-tinta); font-weight: 700; }
 .vs-indice .num { color: var(--texto-3); }
 
+/* El texto leído por el OCR: cada línea es una zona que se puede tocar, invisible hasta pasar por encima. */
+.vs-texto { position: absolute; inset: 0; }
+.vs-linea { position: absolute; padding: 0; border: none; border-radius: 3px; background: transparent; cursor: pointer; }
+.vs-linea:hover { background: rgba(110, 180, 60, 0.14); box-shadow: 0 0 0 1.5px var(--hoja); }
+.vs-linea.elegida { background: rgba(110, 180, 60, 0.2); box-shadow: 0 0 0 2px var(--hoja); }
+.vs-linea:focus-visible { outline: 2px solid var(--hoja); outline-offset: 1px; }
+.vs-modos { display: flex; gap: 2px; margin-inline-start: 4px; }
+.vs-modos .btn[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja-tinta); }
+
+/* El panel de la línea, a la derecha: su texto con furigana y, debajo, la ficha de la palabra. */
+.vs-panel-linea { width: 380px; display: flex; flex-direction: column; gap: 12px; border-inline-end: none; border-inline-start: 1px solid var(--borde); }
+.vs-panel-cab { display: flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--texto-3); }
+.vs-panel-cab .vs-cerrar { margin-inline-start: auto; }
+.vs-linea-texto { margin: 0; font-family: var(--letra-lengua); font-size: 22px; font-weight: 500; line-height: 2.2; }
+.vs-ficha { min-height: 0; }
+.vs-pista { margin: 0; }
+.vs-estado { margin-inline-start: auto; font-size: 12px; color: var(--texto-2); }
+.vs-estado.error { color: var(--error); }
+
 .vs-pie { flex: none; display: flex; align-items: center; gap: 14px; padding: 6px 16px; background: var(--superficie); border-top: 1px solid var(--borde); font-size: 12.5px; color: var(--texto-2); }
 .vs-pie input[type='range'] { flex: 1; min-width: 80px; accent-color: var(--hoja); }
 .vs-capitulo { max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

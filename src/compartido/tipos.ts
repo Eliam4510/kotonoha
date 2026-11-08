@@ -201,6 +201,8 @@ export interface DocumentoBiblioteca {
   portadaSola?: boolean;
   /** «ancho», «pagina» o un porcentaje. */
   zoom?: 'ancho' | 'pagina' | number;
+  /** Si se lee el texto de las páginas con el OCR, y con qué modelos: los de libro impreso o los de manga. */
+  ocr?: { activo: boolean; modo: 'libro' | 'manga' };
 }
 
 export interface ElementoBiblioteca {

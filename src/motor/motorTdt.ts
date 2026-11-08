@@ -4,15 +4,15 @@
 
 import * as ort from 'onnxruntime-web/webgpu';
 import type { ConfigTdt } from '../compartido/ajustes';
-import { CACHE_MODELOS } from '../compartido/modelosGuardados';
 import { crearMel, decodificarTokens, type Mel, parsearLista, parsearPiezas, type TokenConTiempo } from '../nucleo/tdt';
+import { type AvanceDescarga, leerModelo as leerArchivo } from './modelos';
+
+export type { AvanceDescarga };
 
 /** Cada marco del codificador son 8 de audio, de 10 ms cada uno. */
 const SEGUNDOS_POR_MARCO = 0.08;
 /** Tope de tokens en un mismo marco: evita que el decodificador se quede dando vueltas. */
 const MAXIMO_POR_MARCO = 10;
-
-export type AvanceDescarga = (p: { archivo: string; cargado: number; total: number; estado: 'progress' | 'done' }) => void;
 
 type TipoReal = 'float32' | 'float16';
 
@@ -28,37 +28,6 @@ interface Cargado {
 }
 
 let cargado: Cargado | null = null;
-
-/** Lo descarga una vez y lo deja en la caché. La descarga se guarda mientras llega: si se corta, no queda nada a medias. */
-async function leerArchivo(url: string, archivo: string, avance: AvanceDescarga): Promise<Uint8Array> {
-  const cache = await caches.open(CACHE_MODELOS);
-  const guardado = await cache.match(url);
-  if (guardado) return new Uint8Array(await guardado.arrayBuffer());
-  const r = await fetch(url);
-  if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}: ${archivo}`);
-  const total = Number(r.headers.get('content-length') ?? 0);
-  const [paraLeer, paraGuardar] = r.body.tee();
-  const guardar = cache.put(url, new Response(paraGuardar, { headers: { 'content-type': 'application/octet-stream', ...(total ? { 'content-length': String(total) } : {}) } }));
-  const trozos: Uint8Array[] = [];
-  let leidos = 0;
-  const lector = paraLeer.getReader();
-  for (;;) {
-    const { done, value } = await lector.read();
-    if (done) break;
-    trozos.push(value);
-    leidos += value.length;
-    avance({ archivo, cargado: leidos, total: total || leidos, estado: 'progress' });
-  }
-  await guardar;
-  avance({ archivo, cargado: leidos, total: total || leidos, estado: 'done' });
-  const salida = new Uint8Array(leidos);
-  let p = 0;
-  for (const t of trozos) {
-    salida.set(t, p);
-    p += t.length;
-  }
-  return salida;
-}
 
 export async function liberarTdt() {
   const c = cargado;

@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/versi%C3%B3n-0.7.0-A9E45B?style=flat-square" alt="Versión 0.7.0">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-0.8.0-A9E45B?style=flat-square" alt="Versión 0.8.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Integración continua"></a>
-  <img src="https://img.shields.io/badge/pruebas%20unitarias-737-0ca30c?style=flat-square" alt="737 pruebas unitarias">
+  <img src="https://img.shields.io/badge/pruebas%20unitarias-750-0ca30c?style=flat-square" alt="750 pruebas unitarias">
   <img src="https://img.shields.io/badge/interfaz-6%20idiomas-8FCBFF?style=flat-square" alt="Interfaz en 6 idiomas">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 a N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 a C2">
@@ -96,7 +96,7 @@ El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Jap�
   <tr>
     <td valign="top"><b>Aplicación completa</b><br>Inicio, diccionario con formas conjugadas, explorador de palabras por estado, evaluación de nivel, ajustes por tarea y prompts editables. Tema claro y oscuro.</td>
     <td valign="top"><b>Tarjetas de un clic</b><br>Con el audio y el fotograma del video, directas a Anki mediante AnkiConnect o al repaso integrado con FSRS.</td>
-    <td valign="top"><b>Más allá del video</b><br>Portapapeles que conserva la estructura de lo copiado, Ayuda de lectura con un visor de EPUB, CBZ y PDF, relatos a medida del nivel y reproductor de archivos propios con subtítulos de MKV.</td>
+    <td valign="top"><b>Más allá del video</b><br>Portapapeles que conserva la estructura de lo copiado, Ayuda de lectura con un visor de EPUB, CBZ y PDF que reconoce el texto de las páginas, relatos a medida del nivel y reproductor de archivos propios con subtítulos de MKV.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/paginas.png" alt="Lector sobre un artículo japonés, con colores y furigana"></td>
@@ -264,6 +264,7 @@ El último compila y deja en `release/` los ZIP de la extensión y del ayudante,
 | `node pruebas/lector-real.mjs` | El lector en una treintena de sitios públicos, con una captura de cada uno. Con `KK_LENGUA=en`, en sitios en inglés |
 | `node pruebas/trazos-web.mjs` | El orden de los trazos con datos reales, el Portapapeles en su pestaña, la estructura de lo copiado, de lo pegado y de un EPUB importado, y la vista dividida |
 | `node pruebas/visor.mjs` | El visor de la Ayuda de lectura con un manga EPUB, un CBZ y un PDF hechos en la propia prueba: importar, portadas, páginas, doble página de derecha a izquierda, zoom, vistas, índice, miniaturas, memoria de la página y borrado |
+| `node pruebas/ocr.mjs` | El reconocimiento de texto con una página de libro y otra de manga hechas en la propia prueba, con la GPU: el texto leído, el panel de la línea, la ficha y lo ya leído al volver |
 | `node pruebas/ingles.mjs` | Estudiar inglés de principio a fin: elegir el idioma, instalar los diccionarios, un video, una página, y volver al japonés sin que se mezcle nada |
 | `node pruebas/ingles-whisper.mjs voz.wav` | Whisper en inglés en la GPU, con la corrección de Claude simulada |
 | `node pruebas/aleman.mjs` | Estudiar alemán de principio a fin con los diccionarios reales: elegir el idioma, instalarlos, analizar, un video, una página, y volver al japonés |
@@ -290,7 +291,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 
 ## Estado del proyecto
 
-La versión 0.7.0 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, con el lector de páginas en 16 sitios públicos reales, y a mano con una sesión real en YouTube: subtítulos automáticos corregidos por Claude, explicaciones y la letra de una canción. El alemán se ha probado con los diccionarios reales de Wiktionary, sobre páginas que imitan a YouTube y con el lector de páginas, su transcripción con una grabación real, y a mano en YouTube: el cambio de idioma desde el video, los subtítulos propios y los automáticos, y su corrección con Claude.
+La versión 0.8.0 es la vigente. Las pruebas automáticas cubren los flujos principales con Edge real, con Whisper en una GPU real y con simuladores de la API de Claude y de AnkiConnect. Los sitios de video no sirven subtítulos a un navegador automatizado, de modo que YouTube y Netflix se prueban con páginas que imitan la estructura de su reproductor. YouTube se ha comprobado además a mano con una sesión real, y queda pendiente una validación prolongada. El lector de páginas se ha probado en una treintena de sitios públicos reales con un navegador automatizado, sin iniciar sesión. Las traducciones de la interfaz se escribieron con ayuda de IA y aún no han tenido una revisión nativa. El inglés se ha probado con diccionarios reales y con una voz sintética en la GPU, sobre páginas que imitan a YouTube, con el lector de páginas en 16 sitios públicos reales, y a mano con una sesión real en YouTube: subtítulos automáticos corregidos por Claude, explicaciones y la letra de una canción. El alemán se ha probado con los diccionarios reales de Wiktionary, sobre páginas que imitan a YouTube y con el lector de páginas, su transcripción con una grabación real, y a mano en YouTube: el cambio de idioma desde el video, los subtítulos propios y los automáticos, y su corrección con Claude.
 
 ## Privacidad
 

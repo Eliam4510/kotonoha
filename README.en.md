@@ -20,9 +20,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.7.0-A9E45B?style=flat-square" alt="Version 0.7.0">
+  <img src="https://img.shields.io/badge/version-0.8.0-A9E45B?style=flat-square" alt="Version 0.8.0">
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="Continuous integration"></a>
-  <img src="https://img.shields.io/badge/unit%20tests-737-0ca30c?style=flat-square" alt="737 unit tests">
+  <img src="https://img.shields.io/badge/unit%20tests-750-0ca30c?style=flat-square" alt="750 unit tests">
   <img src="https://img.shields.io/badge/interface-6%20languages-8FCBFF?style=flat-square" alt="Interface in 6 languages">
   <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 to N1">
   <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 to C2">
@@ -98,7 +98,7 @@ The interface is available in Spanish, English, German, Chinese, Korean and Japa
   <tr>
     <td valign="top"><b>A complete application</b><br>Home, a dictionary that understands conjugated forms, a word explorer by status, level assessment, per-task settings and editable prompts. Light and dark themes.</td>
     <td valign="top"><b>One-click flashcards</b><br>With the audio and frame from the video, straight to Anki through AnkiConnect or to the built-in FSRS review.</td>
-    <td valign="top"><b>Beyond video</b><br>A Clipboard that keeps the structure of what is copied, a Reading assistant with a viewer for EPUB, CBZ and PDF, stories matched to the user's level and a local file player with MKV subtitles.</td>
+    <td valign="top"><b>Beyond video</b><br>A Clipboard that keeps the structure of what is copied, a Reading assistant with a viewer for EPUB, CBZ and PDF that recognizes the text on the pages, stories matched to the user's level and a local file player with MKV subtitles.</td>
   </tr>
   <tr>
     <td width="33%" align="center"><img src="docs/img/paginas.en.png" alt="Reader on a Japanese article, with colors and furigana"></td>
@@ -266,6 +266,7 @@ The last one builds and leaves the extension and helper ZIP files in `release/`,
 | `node pruebas/lector-real.mjs` | The reader on about thirty public sites, with a screenshot of each. With `KK_LENGUA=en`, on English sites |
 | `node pruebas/trazos-web.mjs` | Stroke order with real data, the Clipboard in its tab, the structure of copied text, pasted text and an imported EPUB, and split view |
 | `node pruebas/visor.mjs` | The Reading assistant viewer with a manga EPUB, a CBZ and a PDF built by the test itself: importing, covers, pages, right-to-left two-page spreads, zoom, views, contents, thumbnails, remembering the page and deleting |
+| `node pruebas/ocr.mjs` | Text recognition with a book page and a manga page built by the test itself, with the GPU: the text read, the line panel, the word panel and the saved text when reopening |
 | `node pruebas/ingles.mjs` | Studying English from start to finish: choosing the language, installing the dictionaries, a video, a page, and going back to Japanese with nothing mixed up |
 | `node pruebas/ingles-whisper.mjs voice.wav` | Whisper in English on the GPU, with Claude's correction simulated |
 | `node pruebas/aleman.mjs` | Studying German from start to finish with the real dictionaries: choosing the language, installing them, analysis, a video, a page, and back to Japanese |
@@ -292,7 +293,7 @@ Browser tests use a build with a fixed identifier, created with `KK_SALIDA=.dist
 
 ## Project status
 
-Version 0.7.0 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while extended validation is still pending. The page reader has been tried on about thirty real public sites with an automated browser, without signing in. The interface translations were written with AI assistance and have not yet had a native review. English has been tested with real dictionaries and a synthetic voice on the GPU, on pages that imitate YouTube, with the page reader on 16 real public sites, and by hand with a real session on YouTube: automatic captions corrected by Claude, explanations and the lyrics of a song. German has been tested with the real Wiktionary dictionaries, on pages that imitate YouTube and with the page reader, its transcription with a real recording, and by hand on YouTube: switching language from the video, the video's own and automatic subtitles, and their correction by Claude.
+Version 0.8.0 is the current one. Automated tests cover the main flows with a real Edge, with Whisper on a real GPU and with simulators for the Claude API and AnkiConnect. Video sites do not serve subtitles to an automated browser, so YouTube and Netflix are tested on pages imitating their player's structure. YouTube has also been checked by hand with a real session, while extended validation is still pending. The page reader has been tried on about thirty real public sites with an automated browser, without signing in. The interface translations were written with AI assistance and have not yet had a native review. English has been tested with real dictionaries and a synthetic voice on the GPU, on pages that imitate YouTube, with the page reader on 16 real public sites, and by hand with a real session on YouTube: automatic captions corrected by Claude, explanations and the lyrics of a song. German has been tested with the real Wiktionary dictionaries, on pages that imitate YouTube and with the page reader, its transcription with a real recording, and by hand on YouTube: switching language from the video, the video's own and automatic subtitles, and their correction by Claude.
 
 ## Privacy
 

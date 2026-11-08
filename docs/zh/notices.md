@@ -20,6 +20,8 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo) | 转录模型，使用时下载 | MIT |
 | [Haas-ja-v1.0](https://huggingface.co/third-intelligence/Haas-ja-v1.0)，Third Intelligence 出品，使用 [Sanami 的 ONNX 转换版](https://huggingface.co/Sanami/haas-ja-onnx) | 日语转录模型，使用时下载 | Apache-2.0 |
 | [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)，NVIDIA 出品，使用 [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) 和 [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) 的 ONNX 转换版 | 英语和德语转录模型，使用时下载 | CC-BY-4.0 |
+| [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR)，PaddlePaddle 出品，使用 [nakamura196 的 ONNX 转换](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | 书籍的文字识别，使用时下载 | Apache-2.0 |
+| [manga-ocr](https://github.com/kha-white/manga-ocr)，kha-white 出品，使用 [onnx-community 的 ONNX 转换](https://huggingface.co/onnx-community/manga-ocr-base-ONNX)，以及 [ogkalu 的对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 漫画的文字识别，使用时下载 | Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/ffmpeg` | 读取本地文件 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/core` | FFmpeg 核心，编译时复制 | GPL-2.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs)，`@breezystack/lamejs` | MP3 编码 | LGPL-3.0 |
