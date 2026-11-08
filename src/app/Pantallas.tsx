@@ -17,9 +17,9 @@ import type {
 } from '../compartido/tipos';
 import { guardarArchivoDocumento } from '../compartido/documentos';
 import { estructuraDeHtml, estructuraDeNodo, type NodoHtml, normalizarTextoPlano, textoConEstructura } from '../nucleo/estructura';
-import { leerLibro } from '../nucleo/libro';
-import { fuenteDeArchivo } from '../nucleo/zip';
-import { portadaDeZip } from '../visor/paginador';
+import { leerEpubDeTexto, leerLibro } from '../nucleo/libro';
+import { fuenteDeArchivo, leerEntrada } from '../nucleo/zip';
+import { miniaturaDe, portadaDeZip } from '../visor/paginador';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
@@ -613,8 +613,9 @@ const megas = (bytes: number) => `${numero(Math.max(0.1, Math.round(bytes / 1e5)
 const Portada = ({ e }: { e: ElementoBiblioteca }) => (e.documento?.portada ? <img class="ap-tapa-imagen" src={e.documento.portada} alt="" draggable={false} /> : null);
 
 /**
- * Un libro de páginas (EPUB de imágenes, CBZ o PDF) se guarda tal cual, aparte, y se lee en el visor. Devuelve false si
- * no lo es, como un EPUB de texto, que sigue el camino del texto.
+ * Un libro (EPUB, CBZ o PDF) se guarda tal cual, aparte, y se lee en el visor: un EPUB de texto, con su propio formato y
+ * capítulo a capítulo; lo demás, por páginas. Devuelve false si no es un libro, o si un EPUB de texto no se puede leer
+ * así: entonces sigue el camino del texto.
  */
 async function importarDocumento(f: File): Promise<boolean> {
   const formato = /\.pdf$/i.test(f.name) ? 'pdf' : /\.cbz$/i.test(f.name) ? 'cbz' : /\.epub$/i.test(f.name) ? 'epub' : null;
@@ -623,18 +624,30 @@ async function importarDocumento(f: File): Promise<boolean> {
   let paginas = 0;
   let direccion: 'rtl' | 'ltr' = 'ltr';
   let portada: string | undefined;
+  let texto = false;
   if (formato !== 'pdf') {
+    const fuente = fuenteDeArchivo(f);
     // Un CBZ no dice su sentido si no trae ComicInfo: en japonés, lo normal es el manga, de derecha a izquierda.
-    const { libro } = await leerLibro(fuenteDeArchivo(f), f.name, lengua.value.id === 'ja' ? 'rtl' : 'ltr');
-    if (!libro) return false;
-    titulo = libro.titulo;
-    paginas = libro.paginas.length;
-    direccion = libro.direccion;
-    portada = await portadaDeZip(f, f.name).catch(() => undefined);
+    const { libro, indice } = await leerLibro(fuente, f.name, lengua.value.id === 'ja' ? 'rtl' : 'ltr');
+    if (libro) {
+      titulo = libro.titulo;
+      paginas = libro.paginas.length;
+      direccion = libro.direccion;
+      portada = await portadaDeZip(f, f.name).catch(() => undefined);
+    } else {
+      const novela = await leerEpubDeTexto(fuente, indice, titulo).catch(() => null);
+      if (!novela) return false;
+      texto = true;
+      titulo = novela.titulo;
+      paginas = novela.capitulos.length;
+      direccion = novela.direccion;
+      const tapa = novela.portada ? indice.get(novela.portada) : undefined;
+      if (tapa) portada = await leerEntrada(fuente, tapa).then((b) => miniaturaDe(new Blob([b as BlobPart]))).catch(() => undefined);
+    }
   }
   const id = crypto.randomUUID();
   await guardarArchivoDocumento(id, f);
-  await motor.bibliotecaGuardar({ id, titulo, texto: '', origen: 'archivo', creado: Date.now(), documento: { formato, paginas, direccion, tamano: f.size, portada } });
+  await motor.bibliotecaGuardar({ id, titulo, texto: '', origen: 'archivo', creado: Date.now(), documento: { formato, ...(texto ? { texto } : {}), paginas, direccion, tamano: f.size, portada } });
   return true;
 }
 
@@ -661,11 +674,17 @@ function Libro({ e, alAbrir, alEliminar }: { e: ElementoBiblioteca; alAbrir: () 
             <span class="num">
               {e.documento && !e.documento.paginas
                 ? e.documento.formato.toUpperCase()
-                : empezado
-                  ? tr('Pág. {0} de {1}', pagina, total)
-                  : total === 1
-                    ? tr('Lectura breve')
-                    : tr('{0} páginas', total)}
+                : e.documento?.texto
+                  ? empezado
+                    ? tr('Cap. {0} de {1}', pagina, total)
+                    : total === 1
+                      ? tr('Lectura breve')
+                      : tr('{0} capítulos', total)
+                  : empezado
+                    ? tr('Pág. {0} de {1}', pagina, total)
+                    : total === 1
+                      ? tr('Lectura breve')
+                      : tr('{0} páginas', total)}
             </span>
             {empezado && <i class="ap-obi-avance" style={{ width: `${(pagina / total) * 100}%` }} />}
           </span>

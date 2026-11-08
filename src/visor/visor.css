@@ -5,7 +5,8 @@
 .vs-grupo { display: flex; align-items: center; gap: 2px; }
 .vs-cabeza { gap: 8px; min-width: 0; flex: 1 1 220px; }
 .vs-titulo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-.vs .btn-icono[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja-tinta); }
+/* Como los botones activos del resto de la app: --hoja-tinta es para texto sobre el verde lima y en el tema oscuro no se ve. */
+.vs .btn-icono[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja); --ico-opacidad: 0.4; }
 .vs-pagina-actual { display: flex; align-items: center; gap: 6px; margin: 0 4px; font-size: 13px; color: var(--texto-2); }
 .vs-numero { width: 5.2em; padding: 3px 6px; text-align: center; font-size: 13px; }
 .vs-zoom { min-width: 4.6em; justify-content: center; font-size: 13px; }
@@ -56,8 +57,16 @@
 .vs-linea:hover { background: rgba(110, 180, 60, 0.14); box-shadow: 0 0 0 1.5px var(--hoja); }
 .vs-linea.elegida { background: rgba(110, 180, 60, 0.2); box-shadow: 0 0 0 2px var(--hoja); }
 .vs-linea:focus-visible { outline: 2px solid var(--hoja); outline-offset: 1px; }
+/* La palabra elegida en el panel, marcada en la página. */
+.vs-marca { position: absolute; pointer-events: none; border-radius: 3px; background: rgba(110, 180, 60, 0.3); box-shadow: 0 0 0 2px var(--hoja); }
+
+/* Un EPUB de texto: el capítulo va en un marco que ocupa todo el lienzo; el zoom agranda el marco entero. */
+.vs-lienzo-libro { position: relative; padding: 0; overflow: hidden; display: block; }
+.vs-lienzo-libro > .vs-aviso { height: 100%; justify-content: center; }
+.vs-libro { position: absolute; left: 0; top: 0; border: 0; background: #fff; transform-origin: 0 0; }
+.vs-lienzo.invertido .vs-libro { filter: invert(1) hue-rotate(180deg); }
 .vs-modos { display: flex; gap: 2px; margin-inline-start: 4px; }
-.vs-modos .btn[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja-tinta); }
+.vs-modos .btn[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja); }
 
 /* El panel de la línea, a la derecha: su texto con furigana y, debajo, la ficha de la palabra. */
 .vs-panel-linea { width: 380px; display: flex; flex-direction: column; gap: 12px; border-inline-end: none; border-inline-start: 1px solid var(--borde); }

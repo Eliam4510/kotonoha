@@ -1,8 +1,10 @@
 // Los PDF del visor, pintados con pdf.js. Se leen a trozos desde el archivo guardado, sin cargarlo entero: un libro
 // escaneado puede pasar de 300 MB. Cada página se pinta con el doble de resolución de su tamaño natural, para que se vea
-// nítida en pantallas densas y con algo de zoom, y la imagen se guarda en la caché del paginador como las demás.
+// nítida en pantallas densas y con algo de zoom, y la imagen se guarda en la caché del paginador como las demás. Si el
+// PDF trae su texto, se lee de él, sin OCR: cada trozo con su posición, para saber qué palabra se toca.
 
-import { getDocument, GlobalWorkerOptions, PDFDataRangeTransport, type PDFDocumentProxy } from 'pdfjs-dist';
+import { getDocument, GlobalWorkerOptions, PDFDataRangeTransport, type PDFDocumentProxy, Util } from 'pdfjs-dist';
+import { type LineaTexto, lineasDePdf, type TrozoPdf } from '../nucleo/capaTexto';
 import type { Tamano } from '../nucleo/imagenes';
 import type { Direccion, EntradaIndice } from '../nucleo/libro';
 import { CachePaginas, type Paginador } from './paginador';
@@ -77,6 +79,22 @@ export async function paginadorDePdf(archivo: Blob): Promise<Paginador> {
   const declarada = (await doc.getViewerPreferences().catch(() => null))?.get('Direction') as string | undefined;
   const direccion: Direccion = declarada === 'R2L' ? 'rtl' : 'ltr';
   const cache = new CachePaginas();
+  const textos = new Map<number, Promise<LineaTexto[]>>();
+  const leerTexto = async (n: number): Promise<LineaTexto[]> => {
+    const pagina = await doc.getPage(n + 1);
+    const vista = pagina.getViewport({ scale: 1 });
+    const contenido = await pagina.getTextContent();
+    const trozos: TrozoPdf[] = [];
+    for (const it of contenido.items) {
+      if (!('str' in it) || !it.str) continue;
+      const estilo = contenido.styles[it.fontName];
+      const vertical = !!estilo?.vertical;
+      // La parte de la letra sobre la línea base; si la fuente no la dice bien, la de casi todas.
+      const ascenso = estilo && estilo.ascent > 0 && estilo.ascent < 1.5 && estilo.descent <= 0 ? estilo.ascent / (estilo.ascent - estilo.descent) : 0.8;
+      trozos.push({ texto: it.str, tx: Util.transform(vista.transform, it.transform), avance: vertical ? it.height : it.width, vertical, ascenso });
+    }
+    return lineasDePdf(trozos, vista.width, vista.height);
+  };
   return {
     total: doc.numPages,
     indice: await indiceDe(doc),
@@ -99,6 +117,15 @@ export async function paginadorDePdf(archivo: Blob): Promise<Paginador> {
         tamanos.set(n, t);
         return { url: URL.createObjectURL(blob), ...t };
       }),
+    textoPropio: (n) => {
+      let t = textos.get(n);
+      if (!t) {
+        t = leerTexto(n);
+        textos.set(n, t);
+        t.catch(() => textos.delete(n));
+      }
+      return t;
+    },
     cerrar: () => {
       cache.vaciar();
       tarea.destroy().catch(() => {});

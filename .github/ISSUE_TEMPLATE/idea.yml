@@ -1,0 +1,26 @@
+name: Idea · Feature request
+description: Una función nueva o una mejora · A new feature or an improvement
+labels: ["idea"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qué quieres conseguir · What you want to achieve
+      description: Cuéntalo como una situación de estudio real · Describe it as a real study situation
+      placeholder: "Cuando leo un manga, quiero… · When I read a manga, I want to…"
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Cómo te imaginas que funcione · How you imagine it working
+  - type: dropdown
+    id: lengua
+    attributes:
+      label: Para qué lengua · For which language
+      multiple: true
+      options:
+        - Japonés · Japanese
+        - Inglés · English
+        - Alemán · German
+        - Otra · Another one

@@ -349,7 +349,8 @@ const pegado = await app.evaluate((html) => {
 comprobar(pegado.includes('## 見出し') && pegado.includes('- 一つ目\n- 二つ目'), 'Pegar en el cuadro de texto conserva la estructura', JSON.stringify(pegado.slice(-40)));
 comprobar(/。\n\n## 見出し/.test(pegado), 'Y lo que trae bloques empieza en su propio párrafo', JSON.stringify(pegado.slice(-40)));
 
-// Un EPUB de texto con un título, dos párrafos y su propio furigana, importado en la Ayuda de lectura.
+// Un EPUB de texto con un título, dos párrafos y su propio furigana, importado en la Ayuda de lectura: se abre en el
+// visor con su propio formato. Lo demás de los EPUB de texto lo prueba pruebas/libros-texto.mjs.
 console.log('\n== Libro EPUB con su estructura ==');
 const EPUB = zipSync({
   mimetype: [strToU8('application/epub+zip'), { level: 0 }],
@@ -362,14 +363,21 @@ await app.reload();
 const archivoLibro = 'input[type=file][aria-label="Importar archivos"]';
 await app.waitForSelector(archivoLibro, { state: 'attached', timeout: 10000 });
 await app.setInputFiles(archivoLibro, { name: 'prueba-estructura.epub', mimeType: 'application/epub+zip', buffer: Buffer.from(EPUB) });
-await app.locator('button.ap-tapa[aria-label*="prueba-estructura"]').first().click({ timeout: 10000 });
-const libro = await esperar(app, `(${leerPapel})()?.titulos.length ? (${leerPapel})() : null`, undefined, 15000);
-comprobar(!!libro && libro.titulos.includes('第一章'), 'Un EPUB importado conserva sus títulos', JSON.stringify(libro?.titulos));
-comprobar(!!libro && libro.texto.includes('春が来ました。花が咲きました。'), 'Un salto de línea del código del libro no parte la frase japonesa', libro?.texto.slice(0, 40));
-comprobar(!!libro && libro.texto.includes('本気で嬉しい') && !libro.texto.includes('マジ'), 'Y sus párrafos, sin el furigana del libro', libro?.texto.slice(0, 60));
-const parrafosLibro = await app.evaluate(() => document.querySelectorAll('.ap-papel .ap-p').length);
-comprobar(parrafosLibro >= 2, 'Cada párrafo del libro va en el suyo', String(parrafosLibro));
-await app.screenshot({ path: join(CAPTURAS, 'libro-estructura.png') });
+const pestanaLibro = contexto.waitForEvent('page', { timeout: 15000 });
+await app.locator('button.ap-tapa[aria-label*="prueba"]').first().click({ timeout: 10000 });
+const visorLibro = await pestanaLibro;
+let marcoLibro = null;
+for (let i = 0; i < 150 && !marcoLibro; i++) {
+  marcoLibro = visorLibro.frames().find((x) => x.url().includes('/libro.html') && !x.isDetached()) ?? null;
+  if (marcoLibro && !(await marcoLibro.evaluate(() => /kk-(horizontal|vertical)/.test(document.documentElement.className)).catch(() => false))) marcoLibro = null;
+  await visorLibro.waitForTimeout(100);
+}
+const libro = await marcoLibro?.evaluate(() => ({ titulos: [...document.querySelectorAll('h1')].map((h) => h.textContent), parrafos: document.querySelectorAll('p').length, ruby: document.querySelector('ruby rt')?.textContent }));
+comprobar(!!libro && libro.titulos.includes('第一章'), 'Un EPUB de texto se abre en el visor, con sus títulos', JSON.stringify(libro?.titulos));
+comprobar(!!libro && libro.parrafos >= 2, 'Cada párrafo del libro va en el suyo', String(libro?.parrafos));
+comprobar(libro?.ruby === 'マジ', 'Y el furigana que trae el libro se ve como ruby', libro?.ruby);
+await visorLibro.screenshot({ path: join(CAPTURAS, 'libro-estructura.png') });
+await visorLibro.close();
 
 // ---------- Vista dividida ----------
 

@@ -3,7 +3,20 @@
 
 import { createServer } from 'node:http';
 
-function respuestaPara(cuerpo) {
+/**
+ * Lo que se lee en las capturas de la documentación, en cada idioma de la interfaz: el sentido de 食べる en la frase del
+ * sueño y su traducción. Las pruebas usan el español, que es lo de siempre.
+ */
+const TEXTOS = {
+  es: { sentido: 'absorber, hacer suyo', nota: 'En esta frase, «comer» las estrellas es una imagen de hacerlas parte de uno mismo, no de comer de verdad.', traduccion: 'Soñé que devoraba estrellas rojas y azules' },
+  en: { sentido: 'to absorb, to make one’s own', nota: 'Here “eating” the stars is an image of making them part of oneself, not of eating them for real.', traduccion: 'I dreamed I devoured red and blue stars' },
+  de: { sentido: 'in sich aufnehmen, sich zu eigen machen', nota: 'Hier ist das „Essen“ der Sterne ein Bild dafür, sie sich zu eigen zu machen, nicht wörtliches Essen.', traduccion: 'Ich träumte, ich verschlänge rote und blaue Sterne' },
+  zh: { sentido: '吸收，化为己有', nota: '这里“吃”星星是一种意象，指把星星化为自己的一部分，并不是真的吃。', traduccion: '我梦见自己吞下了红色和蓝色的星星' },
+  ko: { sentido: '흡수하다, 제 것으로 만들다', nota: '여기서 별을 ‘먹는다’는 것은 별을 자기 일부로 만든다는 비유이지, 실제로 먹는다는 뜻이 아닙니다.', traduccion: '빨간 별과 파란 별을 삼키는 꿈을 꿨다' },
+};
+
+function respuestaPara(cuerpo, idioma = 'es') {
+  const t = TEXTOS[idioma] ?? TEXTOS.es;
   const formato = cuerpo.output_config?.format?.schema;
   const texto = JSON.stringify(cuerpo.messages ?? '');
   const sistema = JSON.stringify(cuerpo.system ?? '');
@@ -11,7 +24,7 @@ function respuestaPara(cuerpo) {
     return JSON.stringify({ significado: 'rojas, del color del fuego', uso: 'literal', nota: 'Aquí describe el color de las estrellas del sueño: es el sentido habitual de la palabra.', definicion: 0 });
   }
   if (formato?.properties?.significado) {
-    return JSON.stringify({ significado: 'absorber, hacer suyo', uso: 'figurado', nota: 'En esta frase, «comer» las estrellas es una imagen de hacerlas parte de uno mismo, no de comer de verdad.', definicion: 0 });
+    return JSON.stringify({ significado: t.sentido, uso: 'figurado', nota: t.nota, definicion: 0 });
   }
   if (formato?.properties?.lectura_lema || formato?.properties?.motivo) {
     return JSON.stringify({ lectura: 'あと', lema: '後', lectura_lema: 'あと', motivo: 'Aquí significa «después de»: 授業の後.' });
@@ -22,7 +35,7 @@ function respuestaPara(cuerpo) {
       lineas: lineas.map(({ i, t }) => ({
         i,
         lecturas: t.includes('授業の後') ? [{ superficie: '後', lectura: 'あと', lema: '後', lectura_lema: 'あと' }] : [],
-        sentidos: t.includes('星を食べる') ? [{ superficie: '食べる', significado: 'absorber, hacer suyo', uso: 'poetico' }] : [],
+        sentidos: t.includes('星を食べる') ? [{ superficie: '食べる', significado: TEXTOS[idioma]?.sentido ?? TEXTOS.es.sentido, uso: 'poetico' }] : [],
         gramatica: t.includes('続けると思います')
           ? [{ fragmento: 'と思います', patron: '〜と思う', nivel: 'N4', significado: 'Creo que…' }]
           : t.includes('ことができます')
@@ -86,7 +99,7 @@ function respuestaPara(cuerpo) {
   if (sistema.includes('desglosa frases')) {
     return '## 赤い星と青い\nSignificado: una estrella roja y una azul\nExplicación: と une los dos nombres, y el adjetivo 青い modifica al sustantivo que sigue.\n\n## 星を\nSignificado: a las estrellas\nExplicación: を marca el objeto directo de la acción.\n\n## 食べる\nSignificado: las devora, las hace suyas\nExplicación: Forma de diccionario del verbo. En la letra tiene un sentido figurado, no literal.';
   }
-  if (sistema.includes('traductor profesional')) return 'Soñé que devoraba estrellas rojas y azules';
+  if (sistema.includes('traductor profesional')) return t.traduccion;
   if (sistema.includes('gramática inglesa')) return 'Aquí used to habla de un hábito del pasado que ya no se da. Se forma con used to más el verbo en infinitivo. No se confunde con be used to, que significa estar acostumbrado.';
   if (sistema.includes('gramática japonesa')) return 'Aquí 〜と思う presenta lo que dice el hablante como su opinión o intención, y suaviza la afirmación. Se forma con la forma simple del verbo más と思う. Se confunde con 〜と考える, más reflexivo y formal.\n\n明日は雨だと思う。 Creo que mañana lloverá.';
   if (sistema.includes('autor de lecturas')) return '猫の散歩\n\n京都に猫がいました。猫は毎日、川の近くを歩きました。ある日、猫は小さな花を見つけました。';
@@ -97,8 +110,8 @@ function respuestaPara(cuerpo) {
 
 export function iniciarMock() {
   const peticiones = [];
-  // Para ver el avance: cada lote de traducción tarda esto.
-  const control = { retardoLineas: 0, retardoFlujo: 0 };
+  // Para ver el avance: cada lote de traducción tarda esto. `idioma` es el de las respuestas de las capturas.
+  const control = { retardoLineas: 0, retardoFlujo: 0, idioma: 'es' };
   const servidor = createServer((req, res) => {
     const cors = {
       'access-control-allow-origin': '*',
@@ -114,7 +127,7 @@ export function iniciarMock() {
     req.on('end', async () => {
       const cuerpo = JSON.parse(datos || '{}');
       peticiones.push({ url: req.url, cabeceras: req.headers, cuerpo });
-      const texto = respuestaPara(cuerpo);
+      const texto = respuestaPara(cuerpo, control.idioma);
       // Para ver en las capturas la revisión de Claude en marcha.
       if (process.env.KK_MOCK_RETARDO_ANALISIS && cuerpo.output_config?.format?.schema?.properties?.lineas?.items?.properties?.lecturas) {
         await new Promise((r) => setTimeout(r, Number(process.env.KK_MOCK_RETARDO_ANALISIS)));

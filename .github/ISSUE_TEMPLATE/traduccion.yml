@@ -1,0 +1,38 @@
+name: Traducción · Translation
+description: Un texto de la interfaz o de la documentación que suena raro o está mal · A text in the interface or docs that sounds wrong
+labels: ["traducción"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Las traducciones se escribieron con ayuda de IA. Las correcciones de hablantes nativos son especialmente valiosas.
+        The translations were written with the help of AI. Corrections from native speakers are especially valuable.
+  - type: dropdown
+    id: idioma
+    attributes:
+      label: Idioma · Language
+      options:
+        - English
+        - Deutsch
+        - 简体中文
+        - 한국어
+        - 日本語
+        - Español
+    validations:
+      required: true
+  - type: input
+    id: donde
+    attributes:
+      label: Dónde aparece · Where it appears
+      placeholder: "Ajustes > Diccionarios · Settings > Dictionaries"
+    validations:
+      required: true
+  - type: textarea
+    id: correccion
+    attributes:
+      label: Texto actual y propuesta · Current text and suggestion
+      placeholder: |
+        Ahora · Now:
+        Mejor · Better:
+    validations:
+      required: true

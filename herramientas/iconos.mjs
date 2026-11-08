@@ -37,6 +37,7 @@ export const CATALOGO = {
   ultima: 'caret-line-right',
   invertir: 'circle-half',
   sentido: 'arrows-left-right',
+  'texto-vertical': 'text-columns',
   video: 'monitor-play',
   pelicula: 'film-strip',
   claqueta: 'film-slate',

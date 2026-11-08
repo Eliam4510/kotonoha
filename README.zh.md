@@ -1,13 +1,18 @@
 <p align="center">
-  <img src="docs/img/banner.zh.png" alt="Kotonoha：交互式字幕、词典、卡片和 Claude 讲解，用于学习日语、英语和德语" width="100%">
+  <img src="docs/img/banner.zh.png" alt="Kotonoha：交互式字幕、词典、卡片和 Claude 讲解，学习日语、英语和德语" width="100%">
+</p>
+
+<h3 align="center">用你每天在看、在读的内容学日语和英语。</h3>
+
+<p align="center">
+  视频上的交互式字幕，能结合句子理解每个词的单词面板，书籍、PDF 和漫画的阅读助手，以及可导入 Anki 的记忆卡片。全部在浏览器里完成，免费且开源。
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Chrome%20%C2%B7%20Edge-Manifest%20V3-A9E45B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome 和 Edge，Manifest V3">
-  <img src="https://img.shields.io/badge/TypeScript-Preact-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=101218" alt="TypeScript 和 Preact">
-  <img src="https://img.shields.io/badge/Claude-Sonnet%20%C2%B7%20Opus-BCA9FF?style=for-the-badge&logo=claude&logoColor=white&labelColor=101218" alt="Claude API">
-  <img src="https://img.shields.io/badge/Whisper-WebGPU-8FCBFF?style=for-the-badge&labelColor=101218" alt="基于 WebGPU 的 Whisper">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-MIT-A9E45B?style=for-the-badge&labelColor=101218" alt="MIT 许可证"></a>
+  <a href="https://github.com/Eliam4510/kotonoha/releases/latest"><img src="https://img.shields.io/github/v/release/Eliam4510/kotonoha?style=for-the-badge&label=%E7%89%88%E6%9C%AC&color=A9E45B&labelColor=101218" alt="最新版本"></a>
+  <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Eliam4510/kotonoha/ci.yml?style=for-the-badge&label=%E6%B5%8B%E8%AF%95&labelColor=101218" alt="持续集成"></a>
+  <img src="https://img.shields.io/badge/Chrome%20%C2%B7%20Edge-Manifest%20V3-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome 和 Edge，Manifest V3">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF-MIT-BCA9FF?style=for-the-badge&labelColor=101218" alt="MIT 许可"></a>
 </p>
 
 <p align="center">
@@ -20,205 +25,137 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-0.8.0-A9E45B?style=flat-square" alt="版本 0.8.0">
-  <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml/badge.svg" alt="持续集成"></a>
-  <img src="https://img.shields.io/badge/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95-750-0ca30c?style=flat-square" alt="750 个单元测试">
-  <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-6%20%E7%A7%8D%E8%AF%AD%E8%A8%80-8FCBFF?style=flat-square" alt="界面支持 6 种语言">
-  <img src="https://img.shields.io/badge/JLPT-N5%E2%80%93N1-BCA9FF?style=flat-square" alt="JLPT N5 至 N1">
-  <img src="https://img.shields.io/badge/CEFR-A1%E2%80%93C2-BCA9FF?style=flat-square" alt="CEFR A1 至 C2">
-</p>
-
-<p align="center">
-  <b>一款通过真实视频和文章学习日语、英语和德语的浏览器扩展。</b>
-</p>
-
-<p align="center">
+  <a href="https://github.com/Eliam4510/kotonoha/releases/latest"><b>下载</b></a> ·
   <a href="#安装">安装</a> ·
   <a href="docs/zh/guide.md">使用指南</a> ·
-  <a href="docs/zh/features.md">功能</a> ·
-  <a href="docs/zh/architecture.md">架构</a> ·
-  <a href="docs/zh/costs.md">费用</a> ·
-  <a href="docs/zh/notices.md">声明</a>
+  <a href="docs/zh/features.md">全部功能</a> ·
+  <a href="CHANGELOG.md">更新内容</a> ·
+  <a href="CONTRIBUTING.md">参与贡献</a>
 </p>
 
-<p align="center">
-  <img src="docs/img/demo.gif" alt="Kotonoha 交互式字幕和单词面板的演示" width="760">
-</p>
+## Kotonoha 是什么
 
-## 简介
+Kotonoha（言の葉，“言语之叶”）是一款适用于 Chrome 和 Edge 的扩展，把你本来就在看、在读的内容变成学习材料：YouTube 和 Netflix 上的剧集与视频、文章、聊天、书籍和漫画。每个词都会显示读音和你的掌握程度，点一下就会打开单词面板，里面有释义、它在这句话里的具体含义，以及一个生成卡片的按钮。
 
-Kotonoha（言の葉，意为“言语之叶”）在 YouTube、Netflix 和其他播放器上叠加交互式字幕。每个单词都显示注音、音调重音和掌握程度，鼠标悬停即可打开词典条目，不产生任何费用。一个按钮可以询问 Claude 这个词在这句话中的含义。扩展还提供词典、为 Anki 或内置复习功能制作卡片，以及通过 Claude API 生成的结合上下文的解释。在任何网页上，它都能为日语文本着色、添加注音，并通过单击查词，也适用于 Claude 这样的聊天页面，不会破坏页面。它也支持文本、EPUB 书籍和本地视频文件。界面提供西班牙语、英语、德语、中文、韩语和日语。
-
-从 0.4.0 版开始也可以学习英语：单词面板给出美式和英式的 IPA 发音，即使短语动词被拆开也能找到，并指出每个不规则形式来自哪个词。词典来自 Wiktionary，以界面语言提供。每种语言都保存自己的单词、词典、卡片和设置，单击即可切换。
-
-从 0.5.0 版开始也可以学习德语：单词面板指出每个变位或变格形式来自哪个词，例如 *ging* 来自 *gehen*，*Häuser* 来自 *Haus*；即使可分动词的前缀位于句末也能找到；并给出 IPA 发音。德语词典同样来自 Wiktionary，德语口语由 Parakeet 转录。
-
-名字出自《古今和歌集》的序文（约 905 年）：日本的诗歌以人心为种子，从中生出万千言语之叶。
-
-## 功能
+一切都在你自己的电脑上运行。词典、文本分析、语音转写和书页上的文字识别都不会离开浏览器。只有当你请求讲解或翻译时，才会用到 Anthropic 的 Claude，每次请求都会记录费用。
 
 <table>
-  <tr>
-    <td width="33%" align="center"><img src="docs/img/subtitulos.png" alt="视频上的交互式字幕"></td>
-    <td width="33%" align="center"><img src="docs/img/ficha.png" alt="显示句中含义的单词面板"></td>
-    <td width="33%" align="center"><img src="docs/img/navegador.png" alt="带更正行的字幕导航"></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>真正用来阅读的字幕</b><br>注音、按音调重音着色、按学习状态加下划线，以及 JLPT 语法点，并为每个视频估算理解度。</td>
-    <td valign="top"><b>词典优先，Claude 按需</b><br>单词面板以词典打开。一个按钮可以询问 Claude 这个词在这句话中的真正含义，包括比喻和文学用法。视频播放时，它还会检查注音读音。</td>
-    <td valign="top"><b>字幕导航</b><br>所有行一览无余，支持筛选、书签、多选，以及用一个或两个标记同步。已更正的行保留原文。</td>
-  </tr>
-  <tr>
-    <td width="33%" align="center"><img src="docs/img/traduccion.png" alt="正在用 Claude 翻译字幕"></td>
-    <td width="33%" align="center"><img src="docs/img/pistas.png" alt="选择、导入和导出字幕轨"></td>
-    <td width="33%" align="center"><img src="docs/img/transcripcion.png" alt="Whisper 转录设置"></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>用 Claude 翻译和更正</b><br>翻译成辅助语言，从正在观看的部分开始。以标题和全文作为上下文，自动更正生成字幕中的同音词，无需询问。</td>
-    <td valign="top"><b>SRT 导入导出</b><br>在任何网站都能导入和导出 SRT、VTT、ASS 和 TTML。导入的内容按标题保存；即使其他地区不提供，Netflix 的日语字幕也会保留。</td>
-    <td valign="top"><b>本地转录</b><br>日语口语用 Haas-ja，英语和德语口语用 Parakeet，歌曲用 Whisper，通过 WebGPU 在显卡上运行，音频不会离开电脑：30 分钟的视频用 Haas-ja 或 Parakeet 约需 1 分钟，用 Whisper 约需 5 分钟，桌面不卡顿。它分段工作并适当休息，驱动程序重启后也能恢复。粘贴歌词后，Claude 会把它放到 Whisper 的时间上。</td>
-  </tr>
-  <tr>
-    <td width="33%" align="center"><img src="docs/img/gasto.png" alt="本月 Claude 费用，按天、模型和任务显示"></td>
-    <td width="33%" align="center"><img src="docs/img/guardada.png" alt="来自已保存内容的 Claude 回答，无费用"></td>
-    <td width="33%" align="center"><img src="docs/img/mover.png" alt="拖到视频其他位置的字幕"></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>费用一目了然</b><br>首页显示本月 Claude 费用，包括按天和模型的图表、任务分布以及每次请求的日志和 token 数。<a href="docs/zh/costs.md">费用研究</a>提供了实测数据。</td>
-    <td valign="top"><b>绝不重复付费</b><br>每个回答都按单词和句子保存。在单词之间来回切换不产生费用，中断的回答会继续完成并保存，而不会丢失。</td>
-    <td valign="top"><b>字幕想放哪就放哪</b><br>可以从任意位置拖到喜欢的高度和位置，有吸附到中央和原位的磁性效果。换行不闪烁，页面滚动时跟随视频。</td>
-  </tr>
-  <tr>
-    <td width="33%" align="center"><img src="docs/img/inicio.png" alt="应用首页"></td>
-    <td width="33%" align="center"><img src="docs/img/memoria.png" alt="内置卡片复习"></td>
-    <td width="33%" align="center"><img src="docs/img/lector.png" alt="带注音和音调重音的剪贴板"></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>完整的应用</b><br>首页、支持活用形的词典、按状态浏览单词、水平评估、按任务设置和可编辑的提示词。明暗主题。</td>
-    <td valign="top"><b>一键制卡</b><br>带视频的音频和画面，直接通过 AnkiConnect 发送到 Anki，或保存到使用 FSRS 的内置复习。</td>
-    <td valign="top"><b>不止于视频</b><br>保留复制内容结构的剪贴板、带 EPUB、CBZ 和 PDF 查看器并能识别页面文字的阅读助手、按水平生成的故事，以及支持 MKV 字幕的本地文件播放器。</td>
-  </tr>
-  <tr>
-    <td width="33%" align="center"><img src="docs/img/paginas.zh.png" alt="日语文章上的阅读器，带颜色和注音"></td>
-    <td width="33%" align="center"><img src="docs/img/trazos.zh.png" alt="单词面板中单词的笔顺"></td>
-    <td width="33%" align="center"><img src="docs/img/lector-web.zh.png" alt="普通浏览器标签页中的剪贴板"></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>任何页面，不破坏布局</b><br>在新闻、文章和博客的日语上显示颜色和注音。单击单词打开单词面板；在链接和按钮上，鼠标停留即可。不向页面内容添加任何东西：唯一可能改动的是注音放不下处的行距，而且可以关闭。</td>
-    <td valign="top"><b>怎么写</b><br>单词面板展示单词中每个汉字的笔画，逐笔循环播放并标有序号。可以暂停和逐笔查看。每个汉字只下载一次，然后保存在本地。</td>
-    <td valign="top"><b>标签页中的剪贴板</b><br>剪贴板也可以在普通标签页中打开，用于浏览器的分屏视图，甚至可以直接放在正在查看的页面旁边。它可以跟随系统剪贴板：复制的内容会连同段落、标题、列表和表格一起显示在那里。</td>
-  </tr>
-  <tr>
-    <td width="33%" align="center"><img src="docs/img/bienvenida.zh.png" alt="带语言选择的欢迎页"></td>
-    <td width="33%" align="center"><img src="docs/img/personalizar.zh.png" alt="外观、颜色和阅读器设置"></td>
-    <td width="33%" align="center"><img src="docs/img/atajos.zh.png" alt="键盘快捷键设置"></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>六种语言</b><br>界面提供西班牙语、英语、德语、中文、韩语和日语。欢迎页询问语言和水平，并给出合适的建议。Claude 的解释还可以使用葡萄牙语和法语。</td>
-    <td valign="top"><b>按需调整</b><br>色盲友好和高对比度配色、假名或罗马字读音、每月费用上限，以及不启用的网站。从零基础到 N1。</td>
-    <td valign="top"><b>自选快捷键</b><br>视频上的快捷键都可以更改，适用于任何键盘布局，也可在开启日语输入时使用。</td>
-  </tr>
-  <tr>
-    <td width="33%" align="center"><img src="docs/img/ingles-subtitulos.zh.png" alt="视频上英语单词的单词面板"></td>
-    <td width="33%" align="center"><img src="docs/img/ingles-pagina.zh.png" alt="英语文章上的阅读器，单词面板中显示短语动词"></td>
-    <td width="33%" align="center"><img src="docs/img/ingles-idioma.zh.png" alt="欢迎页中选择要学习的语言"></td>
-  </tr>
-  <tr>
-    <td valign="top"><b>也能学英语</b><br>美式和英式的 IPA 发音、A1 到 C2 的语法，以及界面语言的 Wiktionary 词典。Whisper、Claude 和卡片的用法与日语相同。</td>
-    <td valign="top"><b>短语动词</b><br>即使句子写的是 <i>picked it up</i>，面板也能找到 <i>pick up</i>，并说明 <i>went</i> 来自哪个词。因为英语几乎无处不在，网页阅读器默认关闭，可在扩展菜单中开启。</td>
-    <td valign="top"><b>每种语言各自独立</b><br>可在欢迎页、设置或扩展菜单中选择。每种语言都保存自己的单词、词典、卡片和设置，切换回来时一切如旧。</td>
-  </tr>
+  <tr><td><b>看</b></td><td>在 YouTube、Netflix、Disney+、Crunchyroll、Prime Video 和本地文件中，字幕带有振假名、音调重音和每个词的学习状态。</td></tr>
+  <tr><td><b>读</b></td><td>任意网页、你复制的内容，以及 EPUB、PDF 和漫画书籍，扫描版也可以。</td></tr>
+  <tr><td><b>记</b></td><td>一键生成卡片，附带场景的音频和画面，可送往 Anki 或内置复习。</td></tr>
+  <tr><td><b>语言</b></td><td>可以学习日语、英语或德语。界面提供简体中文、英语、西班牙语、德语、韩语和日语。</td></tr>
 </table>
 
-完整列表以及每项功能的验证方式见 [docs/zh/features.md](docs/zh/features.md)。
+## 用 Kotonoha 学习的方式
+
+```mermaid
+flowchart LR
+  A["看视频<br/>或读文章"] --> B["点一个<br/>词"]
+  B --> C["单词面板结合句子<br/>解释它"]
+  C --> D["生成一张带音频<br/>和画面的卡片"]
+  D --> E["在 Anki 或<br/>Kotonoha 中复习"]
+  E -.->|"词变成已知<br/>不再高亮"| A
+```
+
+每个标记为已知的词都会在所有地方停止高亮，每个视频或文本的理解度也会随之提高。
+
+## 功能一览
+
+### 真正能读懂的字幕
+
+<img src="docs/img/ficha.zh.png" alt="视频上 食べる 的单词面板，显示它在句中的含义" width="100%">
+
+字幕显示在播放器上方，带有振假名、按音调重音区分的颜色，以及表示每个词学习状态的下划线：未知、学习中或已知。鼠标悬停即可打开带词典的单词面板，不产生任何费用。Claude 会补充这个词在这句话里的含义，即使是比喻或诗意的用法，比如图中的 食べる。
+
+- 按 `Q` 用这句话、它的音频和视频画面生成卡片，直接送往 Anki 或内置复习。
+- `A` 和 `D` 在台词之间移动，`S` 重复当前台词。字幕导航（`G`）列出全部台词，支持筛选和书签。
+- 字幕可以翻译成你的语言，自动生成的字幕会结合标题和整个剧本进行纠正。
+- 没有字幕的视频可以在你自己的电脑上用显卡转写：30 分钟的视频大约一分钟完成。
+
+### 任意网页
+
+<img src="docs/img/paginas.zh.png" alt="带颜色、振假名和单词面板的日语文章" width="100%">
+
+在新闻、博客、百科或 Claude 这样的聊天页面里，日语文本同样会有颜色和振假名，点击一个词就能打开它的单词面板。网页内容不会被改动：链接和按钮照常工作，用 React 构建的网站也察觉不到。已在约三十个真实网站上测试。
+
+### 书籍、PDF 和漫画
+
+<img src="docs/img/libro-texto.zh.png" alt="竖排的日语小说，带注音、颜色和单词面板" width="100%">
+
+**阅读助手**是一个完整的阅读器，就像 PDF 阅读器一样：缩放、双页、连续滚动、目录、缩略图，并记住每本书读到的页码。像小说这样的文字版 EPUB 会保留原有的排版、注音和竖排，上面叠加网页阅读器：颜色、振假名和单词面板，和在网页上一样。带文字的 PDF 可以直接逐词阅读。
+
+<img src="docs/img/ocr.zh.png" alt="扫描页面上识别出的文字，以及显示 週末 的行面板" width="100%">
+
+图片形式的页面，比如漫画、扫描书和许多 PDF，会在你自己的电脑上用显卡进行文字识别（OCR）。有印刷书籍模式，也有漫画模式；漫画模式能读取竖排对话框，而不会把振假名混进正文。在页面上点一个词，就会打开带振假名的那一行和它的单词面板。每一页只识别一次，并会保存下来。
+
+### 保留结构的复制内容
+
+<img src="docs/img/lector-web.zh.png" alt="在标签页中打开的剪贴板，带段落、振假名和理解度" width="100%">
+
+**剪贴板**会收集你在任何地方复制的内容，并保留段落、标题、列表和表格，加上分析和振假名后显示出来。它可以在普通标签页中打开，也可以在浏览器的分屏视图里放在正在阅读的网页旁边，还能朗读文本。
+
+### 每个汉字怎么写
+
+<img src="docs/img/trazos.zh.png" alt="单词面板中一个词的笔顺" width="100%">
+
+单词面板会逐笔、循环演示词中每个汉字的笔顺，并标出笔画编号。
+
+### 也能学英语
+
+<img src="docs/img/ingles-subtitulos.zh.png" alt="视频上一个英语单词的单词面板，显示 IPA 发音" width="100%">
+
+学习英语时，单词面板会给出美式和英式的 IPA 发音，即使短语动词被拆开（如 *picked it up*）也能找到，并说明每个不规则形式来自哪个词。词典来自 Wiktionary，释义为中文。每种语言分别保存自己的单词、卡片和设置，一键即可切换。
+
+### 还有
+
+- **费用一目了然。** 主页显示本月 Claude 的花费，按天、模型和任务分类，并可设置每月上限。不会重复付费：每个回答都会保存。[费用研究](docs/zh/costs.md)给出了实测数据。
+- **内置复习。** 采用 FSRS 算法，适合不用 Anki 的人。
+- **本地文件。** 可以播放电脑上的视频，并读取 MKV 中的字幕。
+- **按需定制。** 色盲友好和高对比度配色、假名或罗马字读音、可修改的快捷键，以及可以停用的网站。
+
+## 不用 Claude 能做什么，用 Claude 又能多做什么
+
+Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需要语言模型的功能。
+
+| 无需密钥，免费 | 使用 Claude 密钥，按用量付费 |
+|---|---|
+| 带振假名、音调重音和学习状态的字幕 | 一个词在句子里的含义 |
+| 词典、单词面板、笔顺和发音 | 单词、句子和语法讲解 |
+| 网页阅读器、剪贴板和带 OCR 的阅读助手 | 字幕翻译和纠正 |
+| 在本机进行语音转写 | 检查振假名读音 |
+| Anki 卡片和内置复习 | 按你的水平写的故事 |
+
+正常使用每月只需几美分。密钥只保存在浏览器中。
 
 ## 安装
 
 要求：Chrome 或 Edge 120 及以上版本。
 
-### 编译版本
+1. 从[最新版本](https://github.com/Eliam4510/kotonoha/releases/latest)下载 `kotonoha-<版本>-extension.zip`，解压到一个固定的位置。
+2. 打开 `chrome://extensions` 或 `edge://extensions`，开启**开发者模式**。
+3. 点击**加载已解压的扩展程序**，选择 `kotonoha` 文件夹。
 
-1. 从 [Releases](https://github.com/Eliam4510/kotonoha/releases/latest) 下载 `kotonoha-<版本>-extension.zip`。
-2. 解压到固定位置，会生成 `kotonoha` 文件夹。浏览器根据这个路径生成扩展的标识符，并以此保存数据：移动它就等于从头开始。
-3. 打开 `chrome://extensions` 或 `edge://extensions`。
-4. 开启开发者模式。
-5. 点击“加载已解压的扩展程序”，选择 `kotonoha` 文件夹。
-
-更新时，只需把新版本解压到同一位置覆盖旧版本：扩展会检测到并在一分钟内自动重新加载，除非有任务正在进行。打开的标签页会提示需要重新加载。
-
-如果已经在使用从其他文件夹加载的副本，不要同时加载这一份：两者会作用于相同的页面。
-
-### 从源代码
-
-另外需要 Node.js 22 及以上版本。
-
-```bash
-git clone https://github.com/Eliam4510/kotonoha.git
-```
-
-```bash
-cd kotonoha
-```
-
-```bash
-npm install
-```
-
-```bash
-npm run build
-```
-
-然后按上述步骤加载 `dist` 文件夹。重新编译时，扩展会检测到变化并自动重新加载。0.1.1 之前的版本做不到这一点，需要点击一次“重新加载”。
-
-## 入门
-
-首次使用时会打开欢迎页，询问语言、要学习的语言和水平，并建议：
-
-1. 安装词典。日语：所用语言的 JMdict，如果还没有则使用英语版，以及音调重音和频率。英语和德语：所用语言的 Wiktionary，以及发音和频率；德语另加德英词典，可查出每个形式来自哪个词。
-2. 添加 Claude API 密钥，它只保存在浏览器中。这是可选的：没有它，字幕、词典、颜色、卡片和 Whisper 也能使用。
-3. 选择卡片保存到哪里：内置复习，或通过 AnkiConnect 插件发送到 Anki。
-
-这些都可以跳过，之后可在扩展窗口（`Alt+Shift+K`）的**设置**中更改。
-
-之后，打开带所学语言字幕的视频时会出现 Kotonoha 工具栏。任何含日语文本的页面都会显示颜色和注音；英语和德语则需要先在扩展菜单中开启阅读器。其余内容见[使用指南](docs/zh/guide.md)。
-
-### 转录网络视频的助手
-
-这是可选的。没有它，网络视频只能在播放时转录。有了它，无需播放即可完整转录。它是一个使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 和 FFmpeg 的本地程序，只有扩展可以调用。在 Windows 上需要 Python 和 FFmpeg，并且绝不用于 Netflix。
-
-```bash
-powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
-```
-
-使用编译版本时，它单独提供下载：`kotonoha-<版本>-ayudante.zip`。其中的 `LEEME.txt` 说明了安装方法，需要用 `-Extension` 指定扩展的标识符。
+首次启动时，欢迎页面会询问你的语言、想学的语言和水平，并安装词典。更新时，只需把新版本解压覆盖旧版本：扩展会自动重新加载。[使用指南](docs/zh/guide.md)介绍了每项功能，[CONTRIBUTING.md](CONTRIBUTING.md) 介绍了如何从源代码构建。
 
 ## 主要快捷键
 
 | 快捷键 | 操作 |
 |---|---|
-| `Q`、`Alt+Q` | 一键制卡 |
+| `Q` | 用这句话创建卡片 |
 | `E` | 发送到制卡器 |
-| `N` | 转到下一个未知词 |
-| `1` 至 `4` | 标记单词：未知、追踪、已知、忽略 |
-| `A`、`D` | 上一句和下一句 |
-| `S` | 重复句子 |
+| `1` 到 `4` | 标记单词：未知、追踪、已知、忽略 |
+| `A`、`D` 和 `S` | 上一句、下一句和重复 |
 | `G` | 字幕导航 |
-| `Alt+Shift+M` | 允许音频捕获 |
-| 单击单词 | 查询它，适用于任何含所学语言文本的页面 |
+| `Alt+Shift+K` | 打开 Kotonoha 窗口 |
 
-## 转录性能
+视频上的所有快捷键都可以修改，并适用于任何键盘布局。
 
-使用 16 GB 的 Radeon RX 9060 XT、16 GB 内存、60 Hz 的 4K 显示器和真实视频测得。
+## 隐私
 
-| 指标 | 结果 |
-|---|---|
-| 自动模式下的速度 | 30 分钟视频用 Haas-ja 或 Parakeet 约需 1 分钟，用 Whisper Turbo 约需 5 分钟，为实时的 6.1 至 6.4 倍 |
-| 126 个真实句子的字符错误率 | 8.8% |
-| 连续两小时音频 | 19.7 分钟，驱动程序未重启，内存未增长 |
-| 转录时桌面的流畅度 | 第 99 百分位为 17.5 毫秒，没有超过 33 毫秒的帧 |
-| 转录时播放 1080p 视频 | 749 帧中丢失 0 帧 |
-
-完整表格（包括模型之间的准确度比较）见 [docs/zh/architecture.md](docs/zh/architecture.md#参考测量)。
+- 数据和 Claude 密钥只保存在浏览器中。没有自己的服务器，也不收集使用统计。
+- 转写的音频和识别的页面不会离开你的电脑。
+- Claude 只会收到每次请求所需的内容：句子、字幕文本和标题。
+- 词典和模型只下载一次，来自 GitHub 和 Hugging Face。[声明](docs/zh/notices.md)列出了每个来源。
 
 ## 架构
 
@@ -226,89 +163,30 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 flowchart LR
   P["适配器<br/>YouTube、Netflix、通用"] <--> C["视频上的界面<br/>Shadow DOM"]
   C <--> M["离屏引擎<br/>分词器、词典、<br/>IndexedDB、Whisper"]
-  A["应用窗口"] <--> M
-  M --> G["GPU<br/>WebGPU"]
+  A["应用和阅读器"] <--> M
+  M --> G["GPU<br/>WebGPU：语音和 OCR"]
   M --> CL["Claude API"]
   M --> AN["Anki"]
   S["Service Worker"] <--> M
   S <-->|Native Messaging| H["本地助手<br/>yt-dlp 和 FFmpeg"]
 ```
 
-各部分的细节和技术决策见 [docs/zh/architecture.md](docs/zh/architecture.md)。
-
-## 开发
-
-```bash
-npm run dev
-```
-
-```bash
-npm test
-```
-
-```bash
-npm run typecheck
-```
-
-```bash
-npm run paquete
-```
-
-最后一条命令会编译，并在 `release/` 中生成扩展和助手的 ZIP 文件及其 SHA-256 校验和，可直接发布。
-
-| 测试 | 检查内容 |
-|---|---|
-| `npm test` | `src/nucleo` 中的纯逻辑，以及翻译表是否完整 |
-| `node herramientas/idiomas.mjs` | 每种语言缺少或多余的内容 |
-| `node pruebas/lector.mjs` | 网页阅读器的疑难情况：没有任何移动、单击、链接、轮播、折叠面板、实时到达的文本、Shadow DOM 以及聊天那样的滚动框 |
-| `node pruebas/lector-real.mjs` | 阅读器在约三十个公开网站上的表现，每个都有截图。使用 `KK_LENGUA=en` 时，在英语网站上运行 |
-| `node pruebas/trazos-web.mjs` | 真实数据的笔顺、标签页中的剪贴板、复制和粘贴的文本以及导入的 EPUB 的结构，以及分屏视图 |
-| `node pruebas/visor.mjs` | 阅读助手的查看器，使用测试自己生成的漫画 EPUB、CBZ 和 PDF：导入、封面、翻页、从右向左的双页、缩放、视图、目录、缩略图、记住页码和删除 |
-| `node pruebas/ocr.mjs` | 使用测试自己生成的一页书和一页漫画，用 GPU 进行文字识别：识别出的文字、行面板、单词面板，以及重新打开时已保存的文字 |
-| `node pruebas/ingles.mjs` | 从头到尾学习英语：选择语言、安装词典、一个视频、一个网页，再回到日语，互不混淆 |
-| `node pruebas/ingles-whisper.mjs voice.wav` | GPU 上的英语 Whisper，并模拟 Claude 的更正 |
-| `node pruebas/aleman.mjs` | 用真实词典从头到尾学习德语：选择语言、安装词典、分析、一个视频、一个网页，再回到日语 |
-| `node pruebas/letra.mjs voice.wav` | 把歌词放到转录的时间上：使用自动字幕轨；如果提供语音样本，则使用 GPU 上的 Whisper |
-| `node pruebas/modelos-guardados.mjs` | 已保存模型列表：每个模型占用的空间，以及删除一个模型不会破坏与其共享文件的另一个模型 |
-| `node pruebas/modelos-voz.mjs voice.wav` | 哪个模型转录什么：日语口语用 Haas-ja，歌曲用 Whisper Turbo，以及手动选择 |
-| `node pruebas/ingles-grande.mjs` | 在干净的配置文件上测试最大的词典：安装、带着它启动、查询和删除。下载约 110 MB |
-| `node pruebas/e2e.mjs` | 在 Edge 中端到端测试扩展 |
-| `node pruebas/subtitulos.mjs` | 翻译、更正、导出和导入，在模仿 Netflix 和 YouTube 的页面上，使用模拟的 Claude API |
-| `node pruebas/experiencia.mjs` | 视频上能感知到的内容，逐帧检查：闪烁、抖动和拖动。还会统计对 Claude 的请求并检查费用记录 |
-| `node pruebas/capturas.mjs` | 遍历所有界面并保存截图 |
-| `node pruebas/tarjetas.mjs audio.wav` | 模拟的 Anki、记忆库和录音 |
-| `node pruebas/sin-gpu.mjs` | 没有硬件加速时界面的开销：处理器和丢帧 |
-| `node pruebas/captura-real.mjs` | 使用真实标签页捕获的制卡器：音频来自哪一段，图像中显示什么。需要可见的浏览器，音量很低 |
-| `node pruebas/medios.mjs audio.wav` | ffmpeg.wasm 处理多音轨 MKV |
-| `node pruebas/ayudante.mjs video.mp4` | 本地助手，从本机下载 |
-| `node pruebas/ayudante-navegador.mjs video.mp4` | 助手的完整流程，从面板到 GPU 上的 Whisper |
-| `node pruebas/whisper-comparar.mjs corpus` | 用真实句子比较模型的准确度 |
-| `node pruebas/whisper-carga.mjs video.mp4 pruebas/sonda-escritorio.ps1 turbo 0.75 9999` | 真实速度和桌面流畅度 |
-| `node pruebas/whisper-larga.mjs turbo 120 60 audio.pcm` | 连续两小时，检测性能下降 |
-| `node pruebas/whisper-recuperacion.mjs audio.pcm` | GPU 丢失：等待、继续，第二次失败时停止 |
-
-浏览器测试使用具有固定标识符的编译版本，通过 `KK_SALIDA=.dist-subs node build.mjs` 创建。测试视频通过 `node pruebas/fixtures/generar-video.mjs` 生成。
+使用 TypeScript、Preact、Dexie 和 esbuild，并通过 WebGPU 上的 ONNX Runtime 和 Transformers.js 处理语音和 OCR。各部分的细节、技术决策和性能测量见 [docs/zh/architecture.md](docs/zh/architecture.md)。超过 750 个单元测试覆盖核心逻辑，端到端测试在真实的 Edge 和 GPU 上覆盖主要流程；[CONTRIBUTING.md](CONTRIBUTING.md) 说明了如何运行。
 
 ## 项目状态
 
-当前版本是 0.8.0。自动测试覆盖了主要流程，使用真实的 Edge、真实 GPU 上的 Whisper，以及 Claude API 和 AnkiConnect 的模拟器。视频网站不向自动化浏览器提供字幕，因此 YouTube 和 Netflix 在模仿其播放器结构的页面上测试。YouTube 还通过真实会话手动检查过，长时间验证尚待完成。网页阅读器已用自动化浏览器在约三十个真实的公开网站上试用，未登录。界面和本文档的翻译借助 AI 完成，尚未经过母语者审校。 英语已使用真实词典和 GPU 上的合成语音，在模仿 YouTube 的页面上测试过，网页阅读器也在 16 个真实的公开网站上测试过，并在 YouTube 的真实会话中手动测试过：由 Claude 修正的自动字幕、讲解和一首歌的歌词。德语已使用 Wiktionary 的真实词典，在模仿 YouTube 的页面上和网页阅读器中测试过，转录用一段真实录音测试过，并在 YouTube 上手动测试过：在视频中切换语言、视频自带字幕和自动字幕，以及 Claude 的更正。
+每个版本都附带测试和六种语言的文档；[更新内容](CHANGELOG.md)对每个版本做了总结。YouTube 和英语还在真实会话中手动检查过。界面翻译借助 AI 完成，尚未经过母语者审校，欢迎指正。
 
-## 隐私
+## 许可与致谢
 
-- Claude API 密钥和所有数据只保存在浏览器中。
-- Whisper 转录的音频不会离开电脑。卡片的音频和画面也不会，除非发送到 Anki。
-- 只向 Claude API 发送每项任务所需的文本：句子、字幕脚本和视频标题。如果粘贴了歌词，也包括歌词。
-- 单词的音频和图片搜索直接发送到 JapanesePod101、Wikimedia Commons 和 Openverse，每个汉字的笔画从 jsDelivr 获取。
-- 词典只下载一次：日语词典以及英语和德语频率表来自 GitHub，英语和德语词典来自 Hugging Face。英语和德语单词的音频来自 Wikimedia Commons 和 Lingua Libre。
-- **跟随剪贴板**只在选项开启且标签页可见时读取，读取的内容不会离开电脑。
-- 扩展没有自己的服务器，也不收集使用统计。
+代码以 [MIT 许可](LICENSE)发布。第三方组件、使用时下载的数据以及负责任使用的条件详见[声明](docs/zh/notices.md)。
 
-## 许可证和致谢
-
-代码以 [MIT 许可证](LICENSE)发布。第三方组件、使用时下载的数据以及负责任使用的条件详见 [docs/zh/notices.md](docs/zh/notices.md)。
-
-- 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)，Yomitan 格式。
-- 英语和德语：释义和发音来自 [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理；频率来自 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)；英语分析使用 [wink-nlp](https://github.com/winkjs/wink-nlp)。
-- 转录：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)，使用 [Transformers.js](https://github.com/huggingface/transformers.js)。
+- 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)；英语和德语使用 [Wiktionary](https://www.wiktionary.org)，经 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理。
+- 语音：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja 和 Parakeet，借助 [Transformers.js](https://github.com/huggingface/transformers.js)。
+- 文字识别：[PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr) 和[对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0。
 - 图标：[Phosphor](https://phosphoricons.com)。字体：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) 和 [Nunito](https://fonts.google.com/specimen/Nunito)。
+
+名字出自《古今和歌集》假名序（约 905 年）：和歌以人心为种子，生出万千言语之叶。
+
+独立项目，与文中提到的任何服务均无关联。

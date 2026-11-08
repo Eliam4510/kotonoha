@@ -71,7 +71,11 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
 }) {
   const bloques = useMemo(() => leerEstructura(texto), [texto]);
   const { frases, deLinea } = useMemo(() => frasesDeBloques(bloques, lengua.value.escritura.frase.partir), [bloques, lengua.value.id]);
-  const [tokens, fijarTokens] = useState<PalabraToken[][]>([]);
+  // Lo analizado va con las frases que se analizaron. Al abrir la pestaña, la lengua llega después que el texto: las frases
+  // se vuelven a partir con sus reglas, y lo analizado con las de antes no debe pintarse en otro sitio.
+  const clave = frases.join('\n');
+  const [analizado, fijarAnalizado] = useState<{ clave: string; tokens: PalabraToken[][] }>({ clave: '', tokens: [] });
+  const tokens = analizado.clave === clave ? analizado.tokens : [];
   const [abierta, fijarAbierta] = useState<Abierta | null>(null);
   const [actual, fijarActual] = useState(-1);
   const [sonando, fijarSonando] = useState(false);
@@ -79,13 +83,17 @@ export function TextoInteractivo({ texto, ajustes, titulo, tamano = 22, inicioBa
   const audio = useRef<HTMLAudioElement | null>(null);
   const parar = useRef(false);
 
-  const analizar = () => motor.analizarTexto(frases.join('\n')).then(fijarTokens).catch(console.error);
+  const analizar = () =>
+    motor
+      .analizarTexto(clave)
+      .then((t) => fijarAnalizado({ clave, tokens: t }))
+      .catch(console.error);
   useEffect(() => {
     analizar();
     return alRecibirEvento((e) => {
       if (e.tipo === 'palabras' || e.tipo === 'palabrasRecargar') analizar();
     });
-  }, [texto]);
+  }, [clave]);
 
   useEffect(() => {
     if (!abierta) return;
