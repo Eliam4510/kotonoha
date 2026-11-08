@@ -2,6 +2,12 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.9.6 · 2026-11-08
+
+- **Los PDF escaneados, leídos de su imagen.** En un PDF escaneado, el OCR lee ahora la imagen escaneada tal cual, a su resolución, en lugar de la página pintada en pantalla, que se reescalaba y se guardaba en JPEG. En dos libros de química escaneados, el error baja del 3,9 % al 0,2 % a 180 ppp y del 3,7 % al 1,2 % a 144 ppp. Se usa cuando la página es solo el escaneo, con o sin la capa invisible de otro OCR; si hay algo más encima, se lee la página pintada, como antes.
+- Para buscar las líneas, las páginas pequeñas se amplían a la escala de una página pintada; el texto se lee de los píxeles originales.
+- Lo leído de los PDF se vuelve a leer al abrir cada página, y un PDF ya procesado vuelve a ofrecer **Procesar**. Lo de los EPUB y CBZ y lo editado a mano se conservan.
+
 ## 0.9.5 · 2026-11-08
 
 - **Un OCR de libros más fino.** El modo Libro lee con el reconocedor de PP-OCRv6, que salió en junio de 2026, y conserva el detector de antes, que parte mejor las líneas. En las páginas de referencia, el error baja casi un tercio en el visor (del 4,7 % al 3,4 %), a la misma velocidad. Recupera kanji sueltos que antes se perdían, como el 水 de «塩は水に溶ける», y respeta la puntuación de los libros de ciencias. Se comparó también con PP-OCRv6 medium, que apenas mejora y tarda el triple, y con NDLOCR-Lite, que se quedó en un 6 %.
@@ -88,6 +94,12 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.9.6 · 2026-11-08
+
+- **Scanned PDFs, read from their image.** In a scanned PDF, OCR now reads the scanned image as it is, at its own resolution, instead of the page as drawn on screen, which was rescaled and stored as JPEG. In two scanned chemistry books, the error drops from 3.9 % to 0.2 % at 180 ppi and from 3.7 % to 1.2 % at 144 ppi. This applies when the page is just the scan, with or without the invisible layer of another OCR; if there is anything else on top, the drawn page is read, as before.
+- To find the lines, small pages are enlarged to the scale of a drawn page; the text is read from the original pixels.
+- What was read in PDFs is read again when each page is opened, and an already processed PDF offers **Process** again. EPUB and CBZ pages and hand edits are kept.
 
 ## 0.9.5 · 2026-11-08
 

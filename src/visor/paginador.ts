@@ -5,10 +5,18 @@ import { tr } from '../compartido/i18n';
 import type { LineaTexto } from '../nucleo/capaTexto';
 import { type Tamano, tamanoDeImagen, tipoDeImagen } from '../nucleo/imagenes';
 import { type Direccion, type EntradaIndice, leerLibro } from '../nucleo/libro';
+import type { Caja } from '../nucleo/ocr';
 import { fuenteDeArchivo, leerEntrada, leerPrincipio } from '../nucleo/zip';
 
 export interface PaginaImagen extends Tamano {
   url: string;
+}
+
+/** Lo que lee el OCR de una página: una imagen y, si no es la página entera, dónde está en ella. */
+export interface ImagenOcr {
+  imagen: Blob | ImageBitmap;
+  /** Dónde está la imagen en la página, en fracciones de 0 a 1. Sin él, la imagen es la página entera. */
+  marco?: Caja;
 }
 
 export interface Paginador {
@@ -19,11 +27,25 @@ export interface Paginador {
   /** El tamaño de una página si ya se conoce; si no, el de otra que sí, que en un libro suele ser el mismo. */
   tamano(n: number): Tamano | null;
   imagen(n: number): Promise<PaginaImagen>;
+  /**
+   * Lo que conviene leer con el OCR, si no es la página tal como se ve: en un PDF escaneado, la imagen escaneada tal cual.
+   * Null si la página no es solo eso.
+   */
+  imagenOcr?(n: number): Promise<ImagenOcr | null>;
   /** El texto que trae el propio archivo, por líneas, o ninguna si la página es una imagen. Solo los PDF lo tienen. */
   textoPropio?(n: number): Promise<LineaTexto[]>;
   /** Las páginas apaisadas: una doble página escaneada de una pieza, que en doble página va sola. Solo en los ZIP. */
   anchas?(): Promise<number[]>;
   cerrar(): void;
+}
+
+/** Lo que lee el OCR de una página: lo que dé el paginador para eso o, si no da nada, la página tal como se ve. */
+export async function imagenParaOcr(p: Paginador, n: number): Promise<ImagenOcr> {
+  const propia = await p.imagenOcr?.(n).catch((e) => {
+    console.debug('Kotonoha OCR: se lee la página pintada', e);
+    return null;
+  });
+  return propia ?? { imagen: await (await fetch((await p.imagen(n)).url)).blob() };
 }
 
 /** Lo que se lee de cada imagen para saber su tamaño: la cabecera suele caber en mucho menos. */

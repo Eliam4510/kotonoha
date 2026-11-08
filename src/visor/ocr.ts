@@ -3,9 +3,11 @@
 // vista, luego las siguientes en el orden de lectura), y las que se dejan atrás antes de su turno se cancelan: así el
 // trabajador nunca se queda leyendo páginas que ya no hacen falta mientras la de delante espera.
 
-import { baseOcr, claveOcr } from '../compartido/paginasOcr';
+import { baseOcr, claveOcr, LECTURA } from '../compartido/paginasOcr';
+import { lineasEnMarco } from '../nucleo/escaneo';
 import type { LineaOcr } from '../nucleo/ocr';
 import type { ModoOcr, PedidoOcr, RespuestaOcr } from './ocrTrabajador';
+import type { ImagenOcr } from './paginador';
 
 export type { ModoOcr };
 
@@ -28,7 +30,7 @@ interface Tarea {
   /** Para desempatar: la que llegó antes. */
   orden: number;
   enMarcha: boolean;
-  imagen: () => Promise<Blob>;
+  imagen: () => Promise<ImagenOcr>;
   ok: (l: LineaOcr[]) => void;
   mal: (e: Error) => void;
   promesa: Promise<LineaOcr[]>;
@@ -42,6 +44,7 @@ export class LectorOcr {
   private tareas = new Map<string, Tarea>();
   private esperando: Tarea[] = [];
   private ocupado = false;
+  private cerrado = false;
   private llegadas = 0;
 
   constructor(private alDescargar: (d: Descarga) => void) {}
@@ -71,10 +74,10 @@ export class LectorOcr {
   }
 
   /**
-   * Lo leído de una página: de la base si ya se leyó; si no, del trabajador, cuando le llegue su turno. Si ya estaba
-   * pedida, se queda con la prioridad más urgente de las dos.
+   * Lo leído de una página: de la base si ya se leyó, con la lectura `minima` o una posterior; si no, del trabajador,
+   * cuando le llegue su turno. Si ya estaba pedida, se queda con la prioridad más urgente de las dos.
    */
-  leer(libro: string, pagina: number, modo: ModoOcr, imagen: () => Promise<Blob>, prioridad = 0): Promise<LineaOcr[]> {
+  leer(libro: string, pagina: number, modo: ModoOcr, imagen: () => Promise<ImagenOcr>, prioridad = 0, minima = 0): Promise<LineaOcr[]> {
     const clave = claveOcr(libro, modo, pagina);
     const ya = this.tareas.get(clave);
     if (ya) {
@@ -95,7 +98,7 @@ export class LectorOcr {
       .then(
         (guardada) => {
           if (this.tareas.get(clave) !== tarea) return;
-          if (guardada) {
+          if (guardada && (guardada.lectura ?? 0) >= minima) {
             this.tareas.delete(clave);
             ok(guardada.lineas);
             return;
@@ -130,14 +133,23 @@ export class LectorOcr {
     const t = this.esperando.shift()!;
     t.enMarcha = true;
     try {
-      const bitmap = await createImageBitmap(await t.imagen());
+      const { imagen, marco } = await t.imagen();
+      const bitmap = imagen instanceof Blob ? await createImageBitmap(imagen) : imagen;
+      // Si se cerró mientras se preparaba la imagen, no se arranca otro trabajador para nada.
+      if (this.cerrado) {
+        bitmap.close?.();
+        throw cancelada();
+      }
+      console.debug('Kotonoha OCR: lee', marco ? 'el escaneo' : 'la página', `${bitmap.width}×${bitmap.height}`);
       const id = this.siguienteId++;
-      const lineas = await new Promise<LineaOcr[]>((ok, mal) => {
+      const leidas = await new Promise<LineaOcr[]>((ok, mal) => {
         this.pendientes.set(id, { ok, mal });
         const pedido: PedidoOcr = { tipo: 'leer', id, modo: t.modo, imagen: bitmap };
         this.trabajadorListo().postMessage(pedido, [bitmap]);
       });
-      await baseOcr().paginas.put({ clave: t.clave, libro: t.libro, lineas, creada: Date.now() });
+      // Si se leyó solo la imagen escaneada, sus líneas se ponen donde está ella en la página.
+      const lineas = marco ? lineasEnMarco(leidas, marco) : leidas;
+      await baseOcr().paginas.put({ clave: t.clave, libro: t.libro, lineas, creada: Date.now(), lectura: LECTURA });
       t.ok(lineas);
     } catch (e) {
       t.mal(e instanceof Error ? e : new Error(String(e)));
@@ -149,6 +161,7 @@ export class LectorOcr {
   }
 
   cerrar() {
+    this.cerrado = true;
     for (const t of this.tareas.values()) if (!t.enMarcha) t.mal(cancelada());
     this.tareas.clear();
     this.esperando = [];

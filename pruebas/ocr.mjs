@@ -1,6 +1,7 @@
 // Prueba el reconocimiento de texto del visor con páginas hechas aquí: una de libro, con tres líneas horizontales; otra de
-// manga, con un globo de texto vertical; y un PDF escaneado con la capa de texto de otro OCR, para «Texto del PDF». Usa la
-// GPU y descarga los modelos la primera vez (unos 200 MB).
+// manga, con un globo de texto vertical; un PDF escaneado con la capa de texto de otro OCR, para «Texto del PDF»; y otro
+// con márgenes, para ver que el OCR lee la imagen escaneada tal cual y pone las líneas en su sitio. Usa la GPU y descarga
+// los modelos la primera vez (unos 200 MB).
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/ocr.mjs
 
 import { mkdirSync, rmSync } from 'node:fs';
@@ -74,14 +75,33 @@ const leidasDe = (pg, libro) =>
     libro
   );
 const libroDe = (pg) => decodeURIComponent(new URL(pg.url()).hash.slice(1));
+/** Lo que el OCR guardó de una página, mirando su base desde una página de la extensión. */
+const filaOcr = (pg, clave) =>
+  pg.evaluate(
+    (k) =>
+      new Promise((ok) => {
+        const q = indexedDB.open('kotonoha-ocr');
+        q.onerror = () => ok(null);
+        q.onsuccess = () => {
+          const db = q.result;
+          const g = db.transaction('paginas').objectStore('paginas').get(k);
+          g.onsuccess = () => (ok(g.result ?? null), db.close());
+          g.onerror = () => (ok(null), db.close());
+        };
+      }),
+    clave
+  );
 const indicador = (pg) => pg.evaluate(() => document.querySelector('.vs-numero')?.value ?? '');
 
 // Un escaneo con la capa de texto de otro programa de OCR: la página es la imagen del libro de prueba y su texto, invisible
 // (modo de pintado 3, como lo dejan esos programas), dice otra cosa. Con «Texto del PDF» se ve esa capa; sin él, lo que
 // Kotonoha lee en la imagen.
 const CAPA_VIEJA = 'Capa vieja de otro OCR';
-function pdfConCapa(jpeg, ancho, alto) {
-  const contenido = `q 600 0 0 800 0 0 cm /Im1 Do Q BT 3 Tr /F1 28 Tf 60 650 Td (${CAPA_VIEJA}) Tj ET`;
+const pdfConCapa = (jpeg, ancho, alto) => pdfEscaneado(jpeg, ancho, alto, `q 600 0 0 800 0 0 cm /Im1 Do Q BT 3 Tr /F1 28 Tf 60 650 Td (${CAPA_VIEJA}) Tj ET`);
+// Un escaneo que no llena la página: la imagen va con un margen de una décima por cada lado, dentro de un recorte.
+const pdfConMargen = (jpeg, ancho, alto) => pdfEscaneado(jpeg, ancho, alto, '0 0 600 800 re W n q 480 0 0 640 60 80 cm /Im1 Do Q');
+/** Un PDF de una página de 600 × 800 puntos con una imagen JPEG, pintada como diga `contenido`. */
+function pdfEscaneado(jpeg, ancho, alto, contenido) {
   const objetos = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Kids [5 0 R] /Count 1 >>',
@@ -145,10 +165,11 @@ await app.setInputFiles(ARCHIVO, [
   { name: 'libro-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Libro de prueba', false, paginaLibro)) },
   { name: 'manga-ocr.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbz('Manga de prueba', true, paginaManga)) },
   { name: 'capa-vieja.pdf', mimeType: 'application/pdf', buffer: pdfConCapa(paginaLibro, 1200, 1600) },
+  { name: 'escaneo-con-margen.pdf', mimeType: 'application/pdf', buffer: pdfConMargen(paginaLibro, 1200, 1600) },
   { name: 'manga-largo.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbzDePaginas('Manga largo', true, paginaManga, 9)) },
   { name: 'libro-procesar.cbz', mimeType: 'application/zip', buffer: Buffer.from(cbzDePaginas('Libro para procesar', false, paginaLibro, 3)) },
 ]);
-await app.waitForFunction(() => document.querySelectorAll('.ap-libro').length === 5, null, { timeout: 20000 });
+await app.waitForFunction(() => document.querySelectorAll('.ap-libro').length === 6, null, { timeout: 20000 });
 
 const abrir = async (titulo) => {
   // Con dos libros del mismo título se podría abrir uno viejo, con otras preferencias guardadas, y medir otra cosa.
@@ -191,6 +212,7 @@ const error = (leido, esperado) => distancia(normal(leido), normal(esperado)) / 
 
 console.log('\n== Libro impreso ==');
 let v = await abrir('Libro de prueba');
+const idLibro = libroDe(v);
 comprobar(await v.evaluate(() => !document.querySelector('.vs-linea')), 'Sin pedirlo, no se lee el texto');
 await v.click('[aria-label="Leer el texto de las páginas"]');
 const modo = () => v.evaluate(() => document.querySelector('.vs-modos button[aria-pressed="true"]')?.textContent ?? 'sin modos a la vista');
@@ -298,6 +320,36 @@ await botonPdf(v).waitFor({ timeout: 15000 }).catch(() => {});
 const recordado = await botonPdf(v).getAttribute('aria-pressed').catch(() => null);
 const otraVez = await lineasDesde(v, 'ocr', 20000);
 comprobar(recordado === 'false' && !!otraVez, 'Al volver a abrirlo, se acuerda de leerlo con el OCR', `${recordado}`);
+await v.close();
+
+// ---------- PDF escaneado: el OCR lee el escaneo tal cual ----------
+
+console.log('\n== PDF escaneado: el OCR lee la imagen escaneada, no la página pintada ==');
+v = await abrir('escaneo-con-margen');
+const avisos = [];
+v.on('console', (m) => avisos.push(m.text()));
+await v.click('[aria-label="Leer el texto de las páginas"]');
+const escaneado = await lineasDe(v, 120000);
+const eEscaneo = escaneado.lineas ? error(escaneado.lineas.join(''), LINEAS_LIBRO.join('')) : 1;
+comprobar(eEscaneo < 0.08, 'Lee el texto del escaneo', `${(eEscaneo * 100).toFixed(1)} %`);
+// La imagen del PDF mide 1200 × 1600; la página pintada por el visor, 1600 × 2134.
+comprobar(
+  avisos.some((t) => t.includes('el escaneo') && t.includes('1200×1600')),
+  'Lee la imagen escaneada a su tamaño, sin pintar la página',
+  avisos.filter((t) => t.startsWith('Kotonoha OCR: lee')).join(' | ')
+);
+const filaPdf = await filaOcr(v, `${libroDe(v)}:libro:0`);
+const filaCbz = await filaOcr(v, `${idLibro}:libro:0`);
+comprobar(filaPdf?.lectura === 1, 'Y lo guarda con la lectura nueva', String(filaPdf?.lectura));
+// La misma imagen en el CBZ ocupa la página entera: aquí, cada línea tiene que caer en el mismo sitio de la imagen, que
+// empieza a una décima del borde y ocupa ocho.
+const enSuSitio =
+  !!filaPdf &&
+  !!filaCbz &&
+  filaPdf.lineas.length === filaCbz.lineas.length &&
+  filaPdf.lineas.every((l, i) => ['x0', 'y0', 'x1', 'y1'].every((k) => Math.abs(l.caja[k] - (0.1 + 0.8 * filaCbz.lineas[i].caja[k])) < 0.01));
+comprobar(enSuSitio, 'Cada línea cae en su sitio de la página, dentro del margen', JSON.stringify(filaPdf?.lineas.map((l) => l.caja)));
+await v.screenshot({ path: join(CAPTURAS, 'pdf-escaneo-margen.png') });
 await v.close();
 
 // ---------- Leer por delante ----------

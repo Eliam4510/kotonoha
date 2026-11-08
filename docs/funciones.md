@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.9.5, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.9.6, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -105,7 +105,7 @@ Estado de cada función en la versión 0.9.5, con la forma en que se ha verifica
 | Sentido de derecha a izquierda tomado del propio libro, con la portada sola en doble página | Automática |
 | Miniaturas, índice del libro, ir a una página, pantalla completa y colores invertidos | Automática |
 | Los libros se guardan aparte y se leen a trozos: un PDF de cientos de MB no se carga entero. El visor recuerda la página, la vista y el zoom de cada uno | Automática, y con un PDF real de 347 MB |
-| Reconocimiento de texto (OCR) en el propio equipo, con la GPU: modo Libro, con el detector de PP-OCRv5 y el reconocedor de PP-OCRv6, que deja fuera el furigana impreso y lee columna a columna, y modo Manga, con un detector de globos y manga-ocr, en el orden de las viñetas y sin marcas de agua | Automática, y medido a mano en páginas reales: un 2,8 % de error por carácter en 18 páginas de manga de cinco series y un 0,5 % en un tomo en EPUB, un 2,2 % en un libro de texto y un 3,9 % en un PDF de química escaneado, en las páginas como las pinta el visor, con fórmulas y tablas |
+| Reconocimiento de texto (OCR) en el propio equipo, con la GPU: modo Libro, con el detector de PP-OCRv5 y el reconocedor de PP-OCRv6, que deja fuera el furigana impreso y lee columna a columna, y modo Manga, con un detector de globos y manga-ocr, en el orden de las viñetas y sin marcas de agua | Automática, y medido a mano en páginas reales: un 2,8 % de error por carácter en 18 páginas de manga de cinco series y un 0,5 % en un tomo en EPUB, un 2,2 % en un libro de texto y, en PDF de química escaneados, con fórmulas y tablas, un 0,2 % a 180 ppp y un 1,2 % a 144 ppp, leyendo la imagen escaneada tal cual |
 | Texto del PDF: en un PDF con la capa de texto de otro programa de OCR, elegir entre ese texto y el OCR de Kotonoha, y que cada libro lo recuerde | Automática, y con un escaneo real |
 | El OCR lee por delante: las páginas siguientes (ocho en un manga, cuatro en un libro) antes de llegar, y deja de lado las que se saltan | Automática |
 | Procesar: leer con el OCR un libro entero desde su tarjeta, con el avance, pausa y «Texto listo» al acabar | Automática, y con un tomo real |

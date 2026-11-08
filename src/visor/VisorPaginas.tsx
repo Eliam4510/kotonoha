@@ -12,13 +12,13 @@ import { motor } from '../compartido/rpc';
 import type { ElementoBiblioteca } from '../compartido/tipos';
 import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
 import { aplicarEdiciones, type EdicionLinea, type LineaEditada } from '../nucleo/ediciones';
-import { edicionesDe, guardarEdicion, quitarEdicion } from '../compartido/paginasOcr';
+import { edicionesDe, guardarEdicion, lecturaMinima, quitarEdicion } from '../compartido/paginasOcr';
 import type { Direccion } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
 import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
-import { miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
+import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
 import { PanelLinea } from './PanelLinea';
 import { paginadorDePdf } from './pdf';
 
@@ -213,6 +213,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       vivo = false;
       abierto?.cerrar();
       lector.current?.cerrar();
+      lector.current = null;
     };
   }, [inicial.id]);
 
@@ -374,8 +375,9 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     // Lo que se ha dejado atrás antes de su turno ya no se lee: primero va lo que se ve, y luego lo que viene, por orden.
     l.soloEstas(doc.id, modoOcr, porLeer);
     let vivo = true;
+    const minima = lecturaMinima(doc.documento?.formato ?? '');
     porLeer.forEach((n, prioridad) => {
-      l.leer(doc.id, n, modoOcr, async () => (await fetch((await paginador.imagen(n)).url)).blob(), prioridad)
+      l.leer(doc.id, n, modoOcr, () => imagenParaOcr(paginador, n), prioridad, minima)
         .then((lineasLeidas) => {
           if (vivo) fijarLineas((m) => new Map(m).set(n, lineasLeidas));
         })

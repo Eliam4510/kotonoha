@@ -29,9 +29,11 @@ describe('preparar la imagen', () => {
     expect([...t]).toEqual([0, 1, 0, 0, 1, 0]);
   });
 
-  it('la entrada del detector, en múltiplos de 32 y sin pasar del límite', () => {
+  it('la entrada del detector, en múltiplos de 32 y con el lado mayor en el límite', () => {
     expect(medidaDeDeteccion(1358, 1920)).toEqual({ w: 1344, h: 1920 });
     expect(medidaDeDeteccion(3000, 1000, 960)).toEqual({ w: 960, h: 320 });
+    // Un escaneo a 144 ppp se amplía hasta el límite.
+    expect(medidaDeDeteccion(1082, 1536)).toEqual({ w: 1344, h: 1920 });
   });
 });
 
