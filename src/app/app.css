@@ -75,6 +75,7 @@
 .ap-apretado { display: inline-flex; align-items: center; gap: 2px; }
 .ap-mensaje { display: flex; align-items: flex-start; gap: 8px; margin: 12px 0 0; padding: 9px 12px; border-radius: var(--r-2); font-size: 13px; font-weight: 600; color: var(--hoja); background: var(--hoja-suave); animation: kk-aparecer 0.2s var(--salida); }
 .ap-mensaje .ico { margin-top: 2px; }
+.ap-mensaje > span { white-space: pre-line; }
 .ap-mensaje.error { color: var(--error); background: var(--error-suave); }
 .ap-vacio { padding: 56px 24px; animation: kk-aparecer 0.3s var(--salida); }
 .ap-anillo .pista { stroke: var(--superficie-4); }
@@ -344,6 +345,10 @@ section .ap-botones { margin-top: 10px; }
 .ap-soltar .ap-formatos { margin-top: 8px; }
 .ap-soltar:hover { border-color: var(--texto-3); background: var(--superficie); }
 .ap-soltar.activo { border-color: var(--hoja); background: var(--hoja-suave); transform: scale(1.01); }
+.ap-entrada-libros { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ap-entrada-libros .ap-soltar { flex: 1; }
+.ap-elegir-carpeta { align-self: center; }
+.ap-importando { display: flex; align-items: center; gap: 6px; margin: 12px 2px 0; }
 .ap-claude { padding: 20px 22px; border-radius: var(--r-4); background: linear-gradient(150deg, var(--fuji-suave), transparent 80%), var(--superficie); box-shadow: inset 0 0 0 1px var(--fuji-media), var(--sombra-1); }
 .ap-claude-form { display: flex; gap: 8px; }
 .ap-claude-form .campo { flex: 1; min-width: 0; }

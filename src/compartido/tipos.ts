@@ -205,6 +205,8 @@ export interface DocumentoBiblioteca {
   vista?: 'una' | 'doble' | 'continua';
   /** En doble página, si la portada va sola para que las parejas queden como en el libro. */
   portadaSola?: boolean;
+  /** Las páginas apaisadas (una doble página escaneada de una pieza), que en doble página van solas. Solo en los ZIP. */
+  anchas?: number[];
   /** «ancho», «pagina» o un porcentaje. En un EPUB de texto, siempre un porcentaje. */
   zoom?: 'ancho' | 'pagina' | number;
   /** Si se lee el texto de las páginas con el OCR, y con qué modelos: los de libro impreso o los de manga. */

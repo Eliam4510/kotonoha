@@ -140,6 +140,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const [vista, fijarVista] = useState<Vista>('una');
   const [direccion, fijarDireccion] = useState<Direccion>('ltr');
   const [portadaSola, fijarPortadaSola] = useState(true);
+  // Las páginas apaisadas, que en doble página van solas: null mientras no se sepan.
+  const [anchas, fijarAnchas] = useState<number[] | null>(null);
   const [zoom, fijarZoom] = useState<Zoom>('pagina');
   const [panel, fijarPanel] = useState<'miniaturas' | 'indice' | null>(null);
   const [invertir, fijarInvertir] = useState(() => leerPreferencia('visorInvertir', false));
@@ -178,6 +180,9 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       // Un manga se lee a doble página, como el tomo impreso; un libro de texto, de una en una.
       fijarVista(d.vista ?? ((d.direccion ?? p.direccion) === 'rtl' ? 'doble' : 'una'));
       fijarPortadaSola(d.portadaSola ?? true);
+      // Un libro importado antes de saberse sus páginas apaisadas las mide ahora, una vez, por la cabecera de cada imagen.
+      fijarAnchas(d.anchas ?? null);
+      if (!d.anchas && p.anchas) p.anchas().then((l) => vivo && fijarAnchas(l)).catch(() => {});
       fijarZoom(d.zoom ?? 'pagina');
       // Un manga se lee con los modelos de manga; lo demás, con los de libro impreso.
       fijarOcr(d.ocr?.activo ?? false);
@@ -212,7 +217,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
 
   const total = paginador?.total ?? 0;
   const rtl = direccion === 'rtl';
-  const lista = useMemo(() => pliegos(total, vista === 'doble', portadaSola), [total, vista, portadaSola]);
+  const lista = useMemo(() => pliegos(total, vista === 'doble', portadaSola, new Set(anchas ?? [])), [total, vista, portadaSola, anchas]);
   const actual = pliegoDe(lista, pagina);
   const medida = (n: number) => paginador?.tamano(n) ?? PAGINA_SUPUESTA;
   const escala = paginador ? escalaDe((lista[actual] ?? [pagina]).map(medida), hueco, zoom) : 1;
@@ -242,11 +247,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     if (!doc.documento || !paginador) return;
     const t = setTimeout(() => {
       motor
-        .bibliotecaGuardar({ ...doc, pagina, abierto: Date.now(), documento: { ...doc.documento!, paginas: paginador.total, vista, direccion, portadaSola, zoom, ocr: { activo: ocr, modo: modoOcr } } })
+        .bibliotecaGuardar({ ...doc, pagina, abierto: Date.now(), documento: { ...doc.documento!, paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, ocr: { activo: ocr, modo: modoOcr } } })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(t);
-  }, [doc, paginador, pagina, vista, direccion, portadaSola, zoom, ocr, modoOcr]);
+  }, [doc, paginador, pagina, vista, direccion, portadaSola, anchas, zoom, ocr, modoOcr]);
 
   // Al pasar de página se vuelve arriba; en el desplazamiento continuo, se lleva la página a la vista.
   useEffect(() => {

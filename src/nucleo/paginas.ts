@@ -1,7 +1,7 @@
 // Las cuentas del visor que no dependen de la pantalla: qué páginas se ven juntas y a qué zoom se pasa.
 
 /** Las páginas que se ven juntas. En doble página, con la portada sola, las parejas quedan como en el libro impreso. */
-export function pliegos(total: number, doble: boolean, portadaSola: boolean): number[][] {
+export function pliegos(total: number, doble: boolean, portadaSola: boolean, anchas: ReadonlySet<number> = new Set()): number[][] {
   if (!doble) return Array.from({ length: total }, (_, i) => [i]);
   const salida: number[][] = [];
   let i = 0;
@@ -9,7 +9,12 @@ export function pliegos(total: number, doble: boolean, portadaSola: boolean): nu
     salida.push([0]);
     i = 1;
   }
-  for (; i < total; i += 2) salida.push(i + 1 < total ? [i, i + 1] : [i]);
+  // Una página apaisada ya es una doble página entera, escaneada de una pieza: va sola, y la pareja empieza tras ella.
+  while (i < total) {
+    const pareja = i + 1 < total && !anchas.has(i) && !anchas.has(i + 1);
+    salida.push(pareja ? [i, i + 1] : [i]);
+    i += pareja ? 2 : 1;
+  }
   return salida;
 }
 

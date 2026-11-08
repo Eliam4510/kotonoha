@@ -41,7 +41,7 @@ It runs on your own computer. The dictionary, the text analysis, speech transcri
 
 <table>
   <tr><td><b>Watch</b></td><td>Subtitles with furigana, pitch accent and the state of every word on YouTube, Netflix, Disney+, Crunchyroll, Prime Video and your own files.</td></tr>
-  <tr><td><b>Read</b></td><td>Any web page, whatever you copy, and EPUB, PDF and manga books, scanned ones included.</td></tr>
+  <tr><td><b>Read</b></td><td>Any web page, whatever you copy, and EPUB, PDF and manga books, scanned ones and image folders included.</td></tr>
   <tr><td><b>Remember</b></td><td>One-click flashcards with the audio and image of the scene, for Anki or the built-in review.</td></tr>
   <tr><td><b>Languages</b></td><td>Study Japanese, English or German. The interface is in English, Spanish, German, Chinese, Korean and Japanese.</td></tr>
 </table>
@@ -82,7 +82,7 @@ On news sites, blogs, wikis or in a chat such as Claude’s, Japanese text gets 
 
 <img src="docs/img/libro-texto.en.png" alt="Vertical Japanese novel with ruby, colours and a word panel" width="100%">
 
-The **Reading assistant** is a complete viewer, like a PDF reader: zoom, two-page spreads, continuous scrolling, table of contents, thumbnails and the page where you left each book. A text EPUB, such as a novel, keeps its own formatting, ruby and vertical writing, with the page reader on top: colours, furigana and word panels, as on the web. A PDF that contains text can be read word by word right away.
+The **Reading assistant** is a complete viewer, like a PDF reader: zoom, two-page spreads, continuous scrolling, table of contents, thumbnails and the page where you left each book. A text EPUB, such as a novel, keeps its own formatting, ruby and vertical writing, with the page reader on top: colours, furigana and word panels, as on the web. A PDF that contains text can be read word by word right away. Manga that comes in image folders is imported by choosing the folder: each volume becomes a book, with its cover first and its colour spreads whole.
 
 <img src="docs/img/ocr.en.png" alt="Scanned page with its recognised text and the line panel showing the word 週末" width="100%">
 

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.9.0, along with how it has been verified.
+Status of each feature in version 0.9.1, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -101,6 +101,7 @@ Status of each feature in version 0.9.0, along with how it has been verified.
 | Following the clipboard, without the tab having focus | Automated |
 | Reading assistant: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
 | Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
+| Image folders as books: each folder, or each volume inside it, comes in as a book, with the cover first, a table of contents by chapter and landscape two-page spreads on their own | Automated, and with 40 real manga volumes |
 | Right-to-left reading order taken from the book itself, with the cover on its own in a two-page spread | Automated |
 | Thumbnails, the book's contents, go to page, full screen and inverted colors | Automated |
 | Books are stored separately and read piece by piece: a PDF of hundreds of MB is never loaded whole. The viewer remembers each book's page, view and zoom | Automated, and with a real 347 MB PDF |

@@ -1,6 +1,6 @@
 import { strToU8, zipSync, type Zippable } from 'fflate';
 import { describe, expect, it } from 'vitest';
-import { atributos, leerEpubDeTexto, leerLibro, resolverRuta, sinEntidades } from './libro';
+import { atributos, leerEpubDeTexto, leerLibro, ordenDePaginas, resolverRuta, sinEntidades } from './libro';
 import { fuenteDeBytes, leerIndiceZip } from './zip';
 
 const CONTENEDOR = '<?xml version="1.0"?><container><rootfiles><rootfile full-path="item/standard.opf" media-type="application/oebps-package+xml"/></rootfiles></container>';
@@ -130,6 +130,27 @@ describe('un CBZ', () => {
   it('sin ComicInfo, usa el sentido por defecto y el nombre del archivo', async () => {
     const { libro } = await leerLibro(fuenteDeBytes(zipSync({ 'a.png': JPG })), 'mi tomo.cbz', 'rtl');
     expect(libro).toMatchObject({ titulo: 'mi tomo', direccion: 'rtl', direccionDelArchivo: false });
+  });
+
+  it('pone la portada delante aunque el orden natural la deje al final', async () => {
+    const { libro } = await leerLibro(fuenteDeBytes(zipSync({ '00002.jpg': JPG, 'cover.jpg': JPG, '00001.jpg': JPG })), '14巻.cbz', 'rtl');
+    expect(libro?.paginas).toEqual(['cover.jpg', '00001.jpg', '00002.jpg']);
+    expect(libro?.indice).toEqual([]);
+  });
+
+  it('con una carpeta por capítulo, cada una es una entrada del índice, y la portada de un capítulo abre su capítulo', async () => {
+    const { libro } = await leerLibro(fuenteDeBytes(zipSync({ '第2話/001.jpg': JPG, '第1話/cover.jpg': JPG, '第1話/001.jpg': JPG, '第10話/001.jpg': JPG, 'cover.jpg': JPG })), 'tomo.cbz', 'rtl');
+    expect(libro?.paginas).toEqual(['cover.jpg', '第1話/cover.jpg', '第1話/001.jpg', '第2話/001.jpg', '第10話/001.jpg']);
+    expect(libro?.indice).toEqual([{ titulo: '第1話', pagina: 1 }, { titulo: '第2話', pagina: 3 }, { titulo: '第10話', pagina: 4 }]);
+  });
+});
+
+describe('el orden de las páginas', () => {
+  it('reconoce las portadas por su nombre, pero no la contraportada', () => {
+    expect(ordenDePaginas(['p_001.jpg', 'cover_000.jpg'])).toEqual(['cover_000.jpg', 'p_001.jpg']);
+    expect(ordenDePaginas(['001.jpg', '00_cover.png', '表紙.jpg'])).toEqual(['00_cover.png', '表紙.jpg', '001.jpg']);
+    expect(ordenDePaginas(['001.jpg', 'back_cover.jpg'])).toEqual(['001.jpg', 'back_cover.jpg']);
+    expect(ordenDePaginas(['_02.jpg', '0001.jpg', '_01.jpg'])).toEqual(['_01.jpg', '_02.jpg', '0001.jpg']);
   });
 });
 

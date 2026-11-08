@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.9.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.9.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -101,6 +101,7 @@ Estado de cada función en la versión 0.9.0, con la forma en que se ha verifica
 | Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
 | Ayuda de lectura: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
+| Carpetas de imágenes como libros: cada carpeta, o cada tomo dentro de ella, entra como un libro, con la portada delante, el índice por capítulos y las dobles páginas apaisadas solas | Automática, y con 40 tomos reales de manga |
 | Sentido de derecha a izquierda tomado del propio libro, con la portada sola en doble página | Automática |
 | Miniaturas, índice del libro, ir a una página, pantalla completa y colores invertidos | Automática |
 | Los libros se guardan aparte y se leen a trozos: un PDF de cientos de MB no se carga entero. El visor recuerda la página, la vista y el zoom de cada uno | Automática, y con un PDF real de 347 MB |

@@ -17,9 +17,11 @@ import type {
 } from '../compartido/tipos';
 import { guardarArchivoDocumento } from '../compartido/documentos';
 import { estructuraDeHtml, estructuraDeNodo, type NodoHtml, normalizarTextoPlano, textoConEstructura } from '../nucleo/estructura';
-import { leerEpubDeTexto, leerLibro } from '../nucleo/libro';
-import { fuenteDeArchivo, leerEntrada } from '../nucleo/zip';
-import { miniaturaDe, portadaDeZip } from '../visor/paginador';
+import { librosDeImagenes } from '../nucleo/carpetas';
+import { IMAGEN, leerEpubDeTexto, leerLibro } from '../nucleo/libro';
+import { fuenteDeArchivo, LIMITE_ZIP, leerEntrada } from '../nucleo/zip';
+import { type ArchivoImportado, archivosElegidos, archivosSoltados, cbzDe, tamanoDe } from './importacion';
+import { datosDeZip, miniaturaDe } from '../visor/paginador';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
@@ -624,6 +626,7 @@ async function importarDocumento(f: File): Promise<boolean> {
   let paginas = 0;
   let direccion: 'rtl' | 'ltr' = 'ltr';
   let portada: string | undefined;
+  let anchas: number[] | undefined;
   let texto = false;
   if (formato !== 'pdf') {
     const fuente = fuenteDeArchivo(f);
@@ -633,7 +636,7 @@ async function importarDocumento(f: File): Promise<boolean> {
       titulo = libro.titulo;
       paginas = libro.paginas.length;
       direccion = libro.direccion;
-      portada = await portadaDeZip(f, f.name).catch(() => undefined);
+      ({ portada, anchas } = await datosDeZip(f, f.name).catch(() => ({ portada: undefined, anchas: undefined })));
     } else {
       const novela = await leerEpubDeTexto(fuente, indice, titulo).catch(() => null);
       if (!novela) return false;
@@ -647,7 +650,7 @@ async function importarDocumento(f: File): Promise<boolean> {
   }
   const id = crypto.randomUUID();
   await guardarArchivoDocumento(id, f);
-  await motor.bibliotecaGuardar({ id, titulo, texto: '', origen: 'archivo', creado: Date.now(), documento: { formato, ...(texto ? { texto } : {}), paginas, direccion, tamano: f.size, portada } });
+  await motor.bibliotecaGuardar({ id, titulo, texto: '', origen: 'archivo', creado: Date.now(), documento: { formato, ...(texto ? { texto } : {}), paginas, direccion, tamano: f.size, portada, ...(anchas ? { anchas } : {}) } });
   return true;
 }
 
@@ -712,7 +715,9 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
   const [generando, fijarGenerando] = useState(false);
   const [error, fijarError] = useState('');
   const [arrastrando, fijarArrastrando] = useState(false);
+  const [progreso, fijarProgreso] = useState('');
   const entrada = useRef<HTMLInputElement>(null);
+  const carpeta = useRef<HTMLInputElement>(null);
 
   const cargar = () => motor.bibliotecaListar().then((l) => { fijarLista(l); fijarCargada(true); return l; }).catch(console.error);
 
@@ -734,16 +739,38 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
     });
   }, []);
 
-  const importar = async (archivos: FileList | null | undefined) => {
+  const importar = async (lista: ArchivoImportado[]) => {
     fijarError('');
-    for (const f of [...(archivos ?? [])]) {
+    const errores: string[] = [];
+    const fallo = (nombre: string, e: unknown) => {
+      errores.push(`${nombre}: ${e instanceof Error ? e.message : e}`);
+      fijarError(errores.join('\n'));
+    };
+    const imagenes = lista.filter((a) => IMAGEN.test(a.ruta) || /(^|\/)ComicInfo\.xml$/i.test(a.ruta));
+    // De una carpeta solo entran sus libros: un léame o unas notas que vengan con el manga no son lecturas.
+    const resto = lista.filter((a) => !imagenes.includes(a) && (!a.ruta.includes('/') || /\.(epub|pdf|cbz)$/i.test(a.ruta)));
+    for (const { archivo: f } of resto) {
+      fijarProgreso(tr('Importando «{0}»…', f.name));
       try {
-        if (await importarDocumento(f)) continue;
-        await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo: f.name.replace(/\.[^.]+$/, ''), texto: await textoDeArchivo(f), origen: 'archivo', creado: Date.now() });
+        if (!(await importarDocumento(f))) await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo: f.name.replace(/\.[^.]+$/, ''), texto: await textoDeArchivo(f), origen: 'archivo', creado: Date.now() });
+        await cargar();
       } catch (e) {
-        fijarError(`${f.name}: ${e instanceof Error ? e.message : e}`);
+        fallo(f.name, e);
       }
     }
+    // Las imágenes, en libros: uno por carpeta o por tomo, cada uno guardado como un CBZ.
+    for (const libro of librosDeImagenes(imagenes, tr('Imágenes'))) {
+      try {
+        if (tamanoDe(libro) >= LIMITE_ZIP) throw new Error(tr('pasa de 4 GB; impórtalo por tomos.'));
+        const cbz = await cbzDe(libro, (n, total) => (n % 10 === 0 || n === total) && fijarProgreso(tr('Preparando «{0}»: {1} de {2} páginas', libro.titulo, n, total)));
+        fijarProgreso(tr('Guardando «{0}»…', libro.titulo));
+        await importarDocumento(cbz);
+        await cargar();
+      } catch (e) {
+        fallo(libro.titulo, e);
+      }
+    }
+    fijarProgreso('');
     cargar();
   };
 
@@ -807,18 +834,25 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
       class="ap-lienzo ap-biblioteca"
       onDragOver={(e) => { e.preventDefault(); fijarArrastrando(true); }}
       onDragLeave={(e) => { if (e.currentTarget === e.target) fijarArrastrando(false); }}
-      onDrop={(e) => { e.preventDefault(); fijarArrastrando(false); importar(e.dataTransfer?.files); }}
+      onDrop={(e) => { e.preventDefault(); fijarArrastrando(false); archivosSoltados(e.dataTransfer).then(importar).catch((x) => fijarError(String(x))); }}
     >
       <Cabecera titulo={tr('Ayuda de lectura')} sub={tr('Tus libros, textos y subtítulos, listos para leer con diccionario y Claude.')} />
 
       <div class="ap-biblioteca-entrada">
-        <button class={`ap-soltar ${arrastrando ? 'activo' : ''}`} onClick={() => entrada.current?.click()}>
-          <span class="hoja-icono"><Icono n="subir" t={22} /></span>
-          <b>{tr('Importa un libro o unos subtítulos')}</b>
-          <span class="ayuda">{tr('Arrástralos aquí o haz clic para elegirlos')}</span>
-          <span class="ap-formatos">{['EPUB', 'PDF', 'CBZ', 'TXT', 'HTML', 'SRT', 'VTT', 'ASS'].map((f) => <i key={f}>{f}</i>)}</span>
-        </button>
-        <input ref={entrada} type="file" multiple hidden aria-label={tr('Importar archivos')} accept=".txt,.html,.htm,.epub,.pdf,.cbz,.srt,.vtt,.ass,.ssa,.md" onChange={(e) => importar(e.currentTarget.files)} />
+        <div class="ap-entrada-libros">
+          <button class={`ap-soltar ${arrastrando ? 'activo' : ''}`} onClick={() => entrada.current?.click()}>
+            <span class="hoja-icono"><Icono n="subir" t={22} /></span>
+            <b>{tr('Importa un libro o unos subtítulos')}</b>
+            <span class="ayuda">{tr('Arrástralos aquí o haz clic para elegirlos')}</span>
+            <span class="ap-formatos">{['EPUB', 'PDF', 'CBZ', 'JPG', 'PNG', 'TXT', 'HTML', 'SRT', 'VTT', 'ASS'].map((f) => <i key={f}>{f}</i>)}</span>
+          </button>
+          <button class="btn chico fantasma ap-elegir-carpeta" data-tip={tr('Cada carpeta de imágenes, o cada tomo dentro de ella, entra como un libro')} onClick={() => carpeta.current?.click()}>
+            <Icono n="carpeta" t={15} /> {tr('Elegir una carpeta de imágenes')}
+          </button>
+        </div>
+        <input ref={entrada} type="file" multiple hidden aria-label={tr('Importar archivos')} accept=".txt,.html,.htm,.epub,.pdf,.cbz,.srt,.vtt,.ass,.ssa,.md,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp" onChange={(e) => { importar(archivosElegidos(e.currentTarget.files)); e.currentTarget.value = ''; }} />
+        {/* Con webkitdirectory, el selector elige carpetas y cada archivo trae su ruta dentro de la elegida. */}
+        <input ref={carpeta} type="file" multiple hidden aria-label={tr('Importar una carpeta')} {...({ webkitdirectory: true } as Record<string, unknown>)} onChange={(e) => { importar(archivosElegidos(e.currentTarget.files)); e.currentTarget.value = ''; }} />
 
         <section class="ap-claude" aria-labelledby="ap-t-relato">
           <div class="ap-tarjeta-cab">
@@ -842,6 +876,11 @@ export function Biblioteca({ ajustes, abrir }: { ajustes: Ajustes; abrir?: strin
         </section>
       </div>
 
+      {progreso && (
+        <p class="ayuda ap-importando" role="status">
+          <Icono n="espera" t={14} /> {progreso}
+        </p>
+      )}
       {error && <Mensaje error>{error}</Mensaje>}
 
       {cargada && lista.length === 0 ? (
