@@ -2,7 +2,7 @@
 
 import { type ComponentChildren, Fragment, type JSX } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { Ajustes } from '../compartido/ajustes';
+import { type Ajustes, hayVozSintetica } from '../compartido/ajustes';
 import { alRecibirEvento, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
 import { type Bloque, type ElementoLista, type FraseDeLinea, frasesDeBloques, type Linea, leerEstructura, textoPlano } from '../nucleo/estructura';
@@ -127,18 +127,21 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
   const decir = async (i: number): Promise<void> => {
     const f = frases[i];
     if (!f?.trim()) return;
-    if (ajustes.azureClave) {
-      const datos = await motor.vozFrase(f, ajustes.vocesFrase[0]);
-      await new Promise<void>((ok) => {
-        const a = new Audio(`data:audio/mpeg;base64,${datos}`);
-        audio.current = a;
-        a.onended = () => ok();
-        a.onerror = () => ok();
-        a.play().catch(() => ok());
-      });
-    } else {
-      await decirConNavegador(f);
+    if (hayVozSintetica(ajustes)) {
+      // La voz local o la de Azure; si no contestan (el programa cerrado), la del navegador.
+      const datos = await motor.vozFrase(f, ajustes.vocesFrase[0]).catch(() => null);
+      if (datos) {
+        await new Promise<void>((ok) => {
+          const a = new Audio(`data:audio/mpeg;base64,${datos}`);
+          audio.current = a;
+          a.onended = () => ok();
+          a.onerror = () => ok();
+          a.play().catch(() => ok());
+        });
+        return;
+      }
     }
+    await decirConNavegador(f);
   };
 
   const reproducirDesde = async (i: number) => {

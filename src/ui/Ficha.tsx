@@ -2,7 +2,7 @@
 // Se usa en la ventana emergente sobre el video, en el lector y en el diccionario de la app.
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { Ajustes, PestanaDiccionario } from '../compartido/ajustes';
+import { type Ajustes, hayVozSintetica, type PestanaDiccionario, vozLocalActiva } from '../compartido/ajustes';
 import { type FlujoCancelable, flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
@@ -289,13 +289,17 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
   }, [lema, lectura]);
 
   const tocarVoz = async (voz: string, texto: string) => {
-    try {
-      fijarError('');
-      if (ajustes.azureClave) await reproducirBase64(await motor.vozFrase(texto, voz));
-      else await decirConNavegador(texto);
-    } catch (e) {
-      fijarError(e instanceof Error ? e.message : String(e));
+    fijarError('');
+    if (hayVozSintetica(ajustes)) {
+      try {
+        await reproducirBase64(await motor.vozFrase(texto, voz));
+        return;
+      } catch (e) {
+        // Se dice por qué (la voz local cerrada, Azure sin cuota) y se lee igual, con la voz del navegador.
+        fijarError(e instanceof Error ? e.message : String(e));
+      }
     }
+    await decirConNavegador(texto).catch(() => {});
   };
 
   return (
@@ -325,7 +329,12 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
       {frase && (
         <>
           <div class="subtitulo-def">{tr('Frase')}</div>
-          {ajustes.azureClave ? (
+          {vozLocalActiva(ajustes) ? (
+            <div class="fila-audio">
+              <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con la voz local')} onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
+              <span class="fila-audio-nombre">{tr('Voz local')}</span>
+            </div>
+          ) : ajustes.azureClave ? (
             ajustes.vocesFrase.map((v) => (
               <div class="fila-audio" key={v}>
                 <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con {0}', v)} onClick={() => tocarVoz(v, frase)}><Icono n="reproducir" t={14} /></button>
@@ -335,7 +344,7 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
           ) : (
             <div class="fila-audio">
               <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con la voz del sistema')} onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
-              <span class="fila-audio-nombre">{tr('Voz del sistema')} <small class="ayuda">{tr('· Configura Azure en Ajustes para voces neuronales')}</small></span>
+              <span class="fila-audio-nombre">{tr('Voz del sistema')} <small class="ayuda">{tr('· Configura una voz local o Azure en Ajustes para voces más naturales')}</small></span>
             </div>
           )}
         </>

@@ -23,6 +23,7 @@ import { fijarLengua, lengua, motorLengua } from './lengua';
 import { rellenar } from './prompts';
 import { PAQUETES, paqueteDe } from '../lenguas';
 import * as medios from './medios';
+import * as vozLocal from './vozLocal';
 import * as memoria from './memoria';
 import * as whisper from './whisper';
 import { fijarIdioma, tr } from '../compartido/i18n';
@@ -132,8 +133,8 @@ const api: ApiMotor = {
   async analizarLineas(lineas, fuente) {
     return analisis.analizarLineas(lineas, await aj(), fuente);
   },
-  async analizarTexto(texto) {
-    return analisis.analizarTexto(texto, await aj());
+  async analizarTexto(texto, opciones) {
+    return analisis.analizarTexto(texto, await aj(), opciones);
   },
 
   buscar: (lema, lectura) => analisis.buscar(lema, lectura),
@@ -370,8 +371,18 @@ const api: ApiMotor = {
 
   audiosPalabra: (l, r) => motorLengua().audios(l, r),
   async vozFrase(t, v) {
-    return medios.vozAzure(await aj(), t, v);
+    const a = await aj();
+    if (vozLocal.usarVozLocal(a)) {
+      try {
+        return await vozLocal.leer(a, t);
+      } catch (e) {
+        // Sin el programa abierto, Azure si hay clave; si no, quien llama usa la voz del navegador.
+        if (!a.azureClave) throw e;
+      }
+    }
+    return medios.vozAzure(a, t, v);
   },
+  motoresVoz: (u) => vozLocal.buscarMotores(u),
   descargarMedio: (u) => medios.descargarMedio(u),
   imagenes: (c) => medios.buscarImagenes(c),
   async consultaImagen(l, f) {

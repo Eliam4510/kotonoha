@@ -1,5 +1,6 @@
 // Contratos de las llamadas entre contextos.
 
+import type { OpcionesAnalisis } from '../lenguas/tipos';
 import type { Ajustes } from './ajustes';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
@@ -39,6 +40,14 @@ export interface InfoAyudante {
   ffmpeg: boolean;
 }
 
+/** Un motor de voz local con la API de VOICEVOX que contesta en este equipo. */
+export interface MotorVozLocal {
+  url: string;
+  nombre: string;
+  version: string;
+  voces: { nombre: string; estilos: { nombre: string; id: number }[] }[];
+}
+
 export interface EstadoMotor {
   tokenizadorListo: boolean;
   diccionarios: InfoDiccionario[];
@@ -74,7 +83,8 @@ export interface ApiMotor {
   probarIA(): Promise<string>;
 
   analizarLineas(lineas: Linea[], fuente?: { titulo?: string; url?: string; idVideo?: string }): Promise<LineaAnalizada[]>;
-  analizarTexto(texto: string): Promise<PalabraToken[][]>;
+  /** Con `expresiones: false`, las expresiones con partícula quedan en sus palabras: para practicar el acento. */
+  analizarTexto(texto: string, opciones?: OpcionesAnalisis): Promise<PalabraToken[][]>;
 
   buscar(lema: string, lectura?: string): Promise<ResultadoBusqueda>;
   /** Cómo se escribe un carácter, trazo a trazo. Sin datos, null. */
@@ -126,7 +136,13 @@ export interface ApiMotor {
   recortarImagen(dataUrl: string, rect: { x: number; y: number; w: number; h: number; anchoVentana: number }): Promise<{ url: string; negra: boolean }>;
 
   audiosPalabra(lema: string, lectura: string): Promise<ResultadoAudio[]>;
+  /**
+   * La frase leída en MP3 (base64): con la voz local si está activa y se encuentra, y si no, con la de Azure. `voz` es la
+   * de Azure.
+   */
   vozFrase(texto: string, voz: string): Promise<string>;
+  /** Los motores de voz local que contestan: el de `url` o, sin ella, los de los puertos de AivisSpeech y VOICEVOX. */
+  motoresVoz(url?: string): Promise<MotorVozLocal[]>;
   descargarMedio(url: string): Promise<{ datos: string; tipo: string }>;
   imagenes(consulta: string): Promise<ResultadoImagen[]>;
   consultaImagen(lema: string, frase?: string): Promise<string>;

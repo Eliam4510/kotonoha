@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.14.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.15.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -86,6 +86,7 @@ Stand jeder Funktion in Version 0.14.0 und die Art ihrer Überprüfung.
 | Audio des Wortes: JapanesePod101 und Lingua Libre | Automatisch |
 | Neuronale Azure-Stimmen mit eigenem Schlüssel | Ausstehend |
 | Stimme des Browsers ohne Azure-Schlüssel: die beste, die er anbietet („Natural“ in Edge, Google in Chrome), oder eine andere aus den Einstellungen, je Sprache | Automatisch |
+| Lokale japanische Stimme mit AivisSpeech oder VOICEVOX: wird automatisch gefunden, Stimme und Stil wählbar, liest mit dem Akzent aus dem Wörterbuch und speichert die Audios zwischen; für Vorlesen, Übung, Wortkarte und Karten | Automatisch, mit einer simulierten Engine und mit AivisSpeech 1.2.0 auf dem Rechner: stimmt in 37 von 37 Akzentphrasen mit dem Wörterbuch überein und liest einen Satz in 0,6 s auf der CPU |
 | Bilder von Openverse | Automatisch |
 | Erstellen mehrerer Karten aus ausgewählten Zeilen | Simulator |
 | Bekannte Wörter aus Anki-Stapeln | Simulator |

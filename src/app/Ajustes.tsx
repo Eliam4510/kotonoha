@@ -1,9 +1,9 @@
 // Pantalla de ajustes de la ventana de la app.
 
-import type { InfoAyudante } from '../compartido/api';
+import type { InfoAyudante, MotorVozLocal } from '../compartido/api';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { type Ajustes, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
+import { type Ajustes, type AjustesVozLocal, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
 import { borrarArchivosSueltos, borrarModeloGuardado, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
@@ -850,11 +850,88 @@ function VozDelNavegador({ a, cambiar }: PropsSeccion) {
   );
 }
 
+/** Dónde se descarga AivisSpeech: el programa de voz local que se recomienda. */
+const URL_AIVISSPEECH = 'https://aivis-project.com/';
+
+/**
+ * La voz japonesa local: AivisSpeech o VOICEVOX en este equipo. Kotonoha los busca solo; se activa, se elige la voz y se
+ * prueba aquí. Lee con el acento del diccionario, gratis y sin que nada salga del equipo.
+ */
+function VozLocal({ a, cambiar }: PropsSeccion) {
+  const [motores, fijarMotores] = useState<MotorVozLocal[] | null>(null);
+  const [probando, fijarProbando] = useState(false);
+  const [error, fijarError] = useState('');
+  // Solo vale la última búsqueda: una anterior, con otra dirección, puede contestar después.
+  const busqueda = useRef(0);
+  const buscar = () => {
+    const esta = ++busqueda.current;
+    fijarMotores(null);
+    motor
+      .motoresVoz(a.vozLocal.url)
+      .catch(() => [])
+      .then((m) => esta === busqueda.current && fijarMotores(m));
+  };
+  useEffect(buscar, [a.vozLocal.url]);
+  const hallado = motores?.[0];
+  const estilos = hallado?.voces.flatMap((v) => v.estilos.map((e) => ({ id: e.id, nombre: `${v.nombre} · ${e.nombre}` }))) ?? [];
+  const fijar = (cambios: Partial<AjustesVozLocal>) => cambiar({ vozLocal: { ...a.vozLocal, ...cambios } });
+  const ejemplo = lengua.value.ejemplos.texto.split(lengua.value.escritura.frase.partir).find((f) => f.trim()) ?? lengua.value.ejemplos.palabra;
+  const probar = async () => {
+    fijarProbando(true);
+    fijarError('');
+    try {
+      await new Audio(`data:audio/mpeg;base64,${await motor.vozFrase(ejemplo, a.vocesFrase[0])}`).play();
+    } catch (e) {
+      fijarError(e instanceof Error ? e.message : String(e));
+    } finally {
+      fijarProbando(false);
+    }
+  };
+  const estado = !motores
+    ? tr('Buscando AivisSpeech o VOICEVOX en este equipo…')
+    : hallado
+      ? tr('{0} {1}, en {2}. Lee las frases con el acento del diccionario, sin que nada salga del equipo.', hallado.nombre, hallado.version, hallado.url)
+      : tr('No se encontró ninguna. Instala AivisSpeech, que es gratis, y ábrelo: Kotonoha lo encuentra solo.');
+  return (
+    <>
+      <Opcion titulo={tr('Voz local')} ayuda={estado}>
+        <span class="ap-acciones-fila">
+          <Interruptor etiqueta={tr('Leer las frases con la voz local')} on={a.vozLocal.activa} alCambiar={(v) => fijar({ activa: v })} />
+          {motores && !hallado && (
+            <a class="btn chico fantasma" href={URL_AIVISSPEECH} target="_blank" rel="noreferrer"><Icono n="externo" t={14} /> {tr('Descargar AivisSpeech')}</a>
+          )}
+          <button class="btn chico fantasma" disabled={!motores} onClick={buscar}><Icono n="recargar" t={14} /> {tr('Buscar otra vez')}</button>
+        </span>
+      </Opcion>
+      {hallado && (
+        <Opcion titulo={tr('Voz y estilo')}>
+          <span class="ap-acciones-fila">
+            <select class="campo ap-campo-medio" aria-label={tr('Voz y estilo')} value={a.vozLocal.estilo ?? estilos[0]?.id ?? ''} onChange={(e) => fijar({ estilo: Number(e.currentTarget.value) })}>
+              {estilos.map((e) => (
+                <option key={e.id} value={e.id}>{e.nombre}</option>
+              ))}
+            </select>
+            <button class="btn chico fantasma" aria-label={tr('Probar la voz local')} disabled={!a.vozLocal.activa || probando} onClick={() => void probar()}><Icono n="reproducir" t={14} /> {probando ? tr('Preparando…') : tr('Probar')}</button>
+          </span>
+          {error && <span class="texto-error">{error}</span>}
+        </Opcion>
+      )}
+      <Opcion titulo={tr('Acento del diccionario')} ayuda={tr('Antes de leer, corrige el acento de cada palabra con el del diccionario de acento: la voz dice lo que el diccionario dice, no lo que adivina.')}>
+        <Interruptor etiqueta={tr('Acento del diccionario')} on={a.vozLocal.acentoDiccionario} alCambiar={(v) => fijar({ acentoDiccionario: v })} />
+      </Opcion>
+      <Opcion titulo={tr('Dirección de la voz local')} ayuda={tr('Vacía, se busca en los puertos de AivisSpeech (10101) y de VOICEVOX (50021).')}>
+        <input class="campo ap-campo-medio" aria-label={tr('Dirección de la voz local')} placeholder="http://127.0.0.1:10101" value={a.vozLocal.url} onChange={(e) => fijar({ url: e.currentTarget.value.trim() })} />
+      </Opcion>
+    </>
+  );
+}
+
 function SeccionVoces({ a, cambiar }: PropsSeccion) {
   const VOCES = lengua.value.voces.map((v) => [v.id, tr(v.nombre)]);
   return (
     <Seccion id="voces" icono="voz" titulo={tr('Voces')} descripcion={tr('Para frases sin audio del video. Azure Speech ofrece medio millón de caracteres gratis al mes con tu propia cuenta. Sin clave se usa la voz del navegador, que no se puede guardar en tarjetas.')}>
       <div class="ap-grupo">
+        {lengua.value.id === 'ja' && <VozLocal a={a} cambiar={cambiar} />}
         <VozDelNavegador a={a} cambiar={cambiar} />
         <Opcion titulo={tr('Clave de Azure Speech')}>
           <input class="campo ap-campo-medio" type="password" autocomplete="off" aria-label={tr('Clave de Azure Speech')} placeholder={tr('Clave')} value={a.azureClave} onInput={(e) => cambiar({ azureClave: e.currentTarget.value.trim() })} />

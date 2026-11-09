@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.14.0, along with how it has been verified.
+Status of each feature in version 0.15.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -86,6 +86,7 @@ Status of each feature in version 0.14.0, along with how it has been verified.
 | Word audio: JapanesePod101 and Lingua Libre | Automated |
 | Azure neural voices, with a personal key | Pending |
 | Browser voice without an Azure key: the best one it offers (Edge's “Natural” voices, Google's in Chrome) or another chosen in Settings, per language | Automated |
+| Local Japanese voice with AivisSpeech or VOICEVOX: found automatically, voice and style chosen, reads with the dictionary’s accent and caches its audio; used for read aloud, the practice, the word panel and cards | Automated, with a simulated engine and with AivisSpeech 1.2.0 on the computer: it agrees with the dictionary in 37 of 37 accent phrases and reads a sentence in 0.6 s on the CPU |
 | Images from Openverse | Automated |
 | Creating several cards from selected lines | Simulator |
 | Known words from Anki decks | Simulator |

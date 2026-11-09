@@ -321,6 +321,11 @@ const CAIDA_EN_DOS = 2.5;
 const CAIDA_CLARA = 2.5;
 const CAIDA_CLARA_EN_DOS = 3.5;
 /**
+ * Hacia la última mora delante de una pausa el tono baja por la entonación, a veces casi cinco semitonos (最近、 leído por
+ * un estudiante): para contar como error, tiene que bajar mucho más.
+ */
+const CAIDA_FINAL_CLARA = 6;
+/**
  * El pico de la mora del núcleo a veces se retrasa hasta la siguiente, sobre todo al principio de la frase: la caída llega
  * una mora tarde. Se da por buena si la mora del núcleo ya sonaba alta, a menos de esto de la siguiente; si quedaba muy por
  * debajo, lo que se oye es una subida y luego la caída, es decir, el núcleo en otro sitio.
@@ -357,11 +362,21 @@ export function caidaOida(valores: (number | null)[]): number | null {
 /**
  * Si el tono de estas moras cuadra con el núcleo en `n` (0, sin núcleo). Sin núcleo, no puede haber una caída clara. Con
  * núcleo, el tono tiene que caer tras él, o una mora más tarde si el pico se retrasó; y antes no puede caer de verdad.
+ *
+ * Con `final`, delante de una pausa o del final, la última mora lleva el tono de final de frase, que baja siempre: una caída
+ * hacia ella solo cuenta como error si es muy grande, pero sí vale como la caída esperada si el núcleo está justo antes
+ * (〜ました, 橋を。). Si tras el núcleo no hay ninguna mora con voz (la す de 〜ます), la caída no se oye: basta con que no
+ * caiga antes.
  */
-export function cuadraConNucleo(valores: (number | null)[], n: number): boolean {
+export function cuadraConNucleo(valores: (number | null)[], n: number, final = false): boolean {
   const d = bajadas(valores);
-  if (n === 0) return d.every((x, j) => x < CAIDA_CLARA && !(x > 0 && d[j + 1] > 0 && x + d[j + 1] >= CAIDA_CLARA_EN_DOS));
+  const ultimaBajada = (j: number) => final && j === d.length - 1;
+  const clara = (j: number) =>
+    d[j] >= (ultimaBajada(j) ? CAIDA_FINAL_CLARA : CAIDA_CLARA) ||
+    (d[j] > 0 && d[j + 1] > 0 && !ultimaBajada(j + 1) && d[j] + d[j + 1] >= CAIDA_CLARA_EN_DOS);
+  if (n === 0) return !d.some((_, j) => clara(j));
   const j = n - 1;
+  if (valores.slice(n).every((v) => v === null)) return !d.slice(0, j).some((_, k) => clara(k));
   const enSuSitio = d[j] >= CAIDA_MINIMA || (d[j] > 0 && d[j + 1] > 0 && d[j] + d[j + 1] >= CAIDA_EN_DOS);
   const nucleo = valores[j];
   const siguiente = valores[j + 1];
@@ -388,21 +403,23 @@ export interface Juicio {
 const OIDA_MINIMA = 0.75;
 
 /**
- * Si el tono cae donde debe. En la última frase no cuenta la última mora: ahí manda la entonación de la frase entera.
- * Una caída que no se puede oír (tras la última mora que cuenta) vale como «no cae»: sin nada detrás, una palabra con el
- * núcleo al final suena igual que una sin núcleo.
+ * Si el tono cae donde debe. Delante de una pausa o del final (`ultima`), la última mora lleva la entonación de la frase:
+ * su bajada no cuenta como error ni se dice como la caída de la palabra, pero sí vale como la caída esperada cuando el
+ * núcleo está justo antes. Un núcleo tras la última mora no se puede oír: sin nada detrás, una palabra con el núcleo al
+ * final suena igual que una sin núcleo.
  */
 export function juzgarFrase(frase: FraseAcentual, valores: (number | null)[], oida: number, ultima: boolean): Juicio {
   if (oida < OIDA_MINIMA) return { veredicto: 'no-oida', caida: null, esperado: null };
-  const cuentan = ultima && valores.length > 2 ? valores.slice(0, -1) : valores;
-  const caida = caidaOida(cuentan);
+  // Lo que se dice como caída de la palabra: sin la bajada de final de frase.
+  const sinFinal = ultima && valores.length > 2 ? valores.slice(0, -1) : valores;
+  const caida = caidaOida(sinFinal);
   if (!frase.nucleos) return { veredicto: 'sin-juzgar', caida, esperado: null };
-  const posibles = [...new Set(frase.nucleos.map((n) => (n >= cuentan.length ? 0 : n)))];
+  const posibles = [...new Set(frase.nucleos.map((n) => (n >= valores.length ? 0 : n)))];
   if (caida === null) return { veredicto: 'sin-datos', caida, esperado: posibles[0] };
-  const bueno = posibles.find((n) => cuadraConNucleo(cuentan, n));
+  const bueno = posibles.find((n) => cuadraConNucleo(valores, n, ultima));
   if (bueno !== undefined) return { veredicto: 'bien', caida, esperado: bueno };
   // Si cae donde debe pero ya cayó antes, lo que hay que contar es la caída de antes.
-  const antes = caida === posibles[0] ? bajadas(cuentan).findIndex((x) => x >= CAIDA_CLARA) : -1;
+  const antes = caida === posibles[0] ? bajadas(sinFinal).findIndex((x) => x >= CAIDA_CLARA) : -1;
   return { veredicto: 'revisar', caida: antes >= 0 && antes + 1 < caida ? antes + 1 : caida, esperado: posibles[0] };
 }
 

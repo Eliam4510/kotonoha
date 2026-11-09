@@ -313,6 +313,8 @@ export interface Ajustes {
   vocesFrase: string[];
   /** La voz del navegador con que se lee sin clave de Azure. Vacía, la mejor que haya para la lengua. */
   vozNavegador: string;
+  /** La voz japonesa local: un motor con la API de VOICEVOX (AivisSpeech, VOICEVOX) en este equipo. */
+  vozLocal: AjustesVozLocal;
 
   // Apariencia
   /** Idioma de la interfaz. En automático sigue al del navegador. */
@@ -323,6 +325,26 @@ export interface Ajustes {
   /** Mirar una vez al día en GitHub si hay una versión nueva, y avisar. */
   avisarVersiones: boolean;
 }
+
+export interface AjustesVozLocal {
+  /** Leer las frases con ella en lugar de Azure o del navegador. */
+  activa: boolean;
+  /** Dónde escucha el motor; vacío, se busca en los puertos de AivisSpeech y de VOICEVOX. */
+  url: string;
+  /** El estilo de voz (su identificador en el motor); null, el primero que tenga. */
+  estilo: number | null;
+  /** Corregir el acento de cada palabra con el del diccionario antes de leer. */
+  acentoDiccionario: boolean;
+}
+
+/**
+ * Si hay una voz sintética para las frases: la local, que es japonesa, o la de Azure. Sin ninguna, se lee con la del
+ * navegador.
+ */
+export const hayVozSintetica = (a: Ajustes): boolean => !!a.azureClave || vozLocalActiva(a);
+
+/** Si las frases se leen con la voz local: solo al estudiar japonés, que es lo que hablan AivisSpeech y VOICEVOX. */
+export const vozLocalActiva = (a: Ajustes): boolean => a.vozLocal.activa && a.idiomaObjetivo === 'ja';
 
 /** Lo que cada lengua recuerda por su cuenta: el nivel en japonés no es el nivel en inglés. */
 export const CLAVES_POR_LENGUA = ['nivel', 'diccionarioPestana', 'formatoLectura', 'furigana', 'lectorFurigana', 'lectorActivo', 'colorAcento', 'particulasConocidas', 'vocesFrase', 'vozNavegador', 'prompts', 'ankiMazo', 'whisperModelo'] as const;
@@ -493,6 +515,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   azureRegion: '',
   vocesFrase: PAQUETE_INICIAL.vocesIniciales,
   vozNavegador: '',
+  vozLocal: { activa: false, url: '', estilo: null, acentoDiccionario: true },
 
   idiomaInterfaz: 'auto',
   estiloFrecuencia: 'numero',
@@ -539,6 +562,7 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
   salida.prellenado = { ...AJUSTES_INICIALES.prellenado, ...(guardados?.prellenado ?? {}) };
   salida.modelos = { ...AJUSTES_INICIALES.modelos, ...(guardados?.modelos ?? {}) };
   salida.esfuerzos = { ...AJUSTES_INICIALES.esfuerzos, ...(guardados?.esfuerzos ?? {}) };
+  salida.vozLocal = { ...AJUSTES_INICIALES.vozLocal, ...(guardados?.vozLocal ?? {}) };
   // Un modelo que ya no existe (Kotoba se retiró al comparar con videos reales) pasa al de siempre.
   if (salida.whisperModelo !== 'auto' && !MODELOS_WHISPER[salida.whisperModelo]) salida.whisperModelo = AJUSTES_INICIALES.whisperModelo;
   // Quien ya usaba la extensión no tiene por qué pasar por el asistente de bienvenida.

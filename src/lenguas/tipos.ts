@@ -315,6 +315,15 @@ export interface PaqueteLengua {
 
 // ---------- Lo pesado: el motor ----------
 
+/** Cómo partir un texto, cuando no se quiere lo de siempre. */
+export interface OpcionesAnalisis {
+  /**
+   * Con `false`, las expresiones del diccionario con una partícula dentro (雨が降る) quedan en sus palabras: para practicar
+   * el acento, cada palabra lleva el suyo. Los compuestos sin partícula (お茶) se unen igual.
+   */
+  expresiones?: boolean;
+}
+
 export interface Analizador {
   listo(): boolean;
   /** Se llama antes de analizar nada, y las veces que haga falta: puede tardar la primera. */
@@ -324,7 +333,7 @@ export interface Analizador {
    * `existe` dice si un término está en los diccionarios, para unir compuestos, y `consultas`, lo demás que se sabe de
    * ellos: de qué palabra sale cada forma y cuánto se usa.
    */
-  analizar(texto: string, existe?: (termino: string) => boolean, consultas?: ConsultasAnalisis): TokenUnido[];
+  analizar(texto: string, existe?: (termino: string) => boolean, consultas?: ConsultasAnalisis, opciones?: OpcionesAnalisis): TokenUnido[];
   /** La lectura de una forma de diccionario: una palabra flexionada no trae la de su lema. */
   lecturaDeLema(lema: string): string;
   /** Si sin la lista de términos solo se pierde algo menor: entonces se analiza sin esperar a que se cargue. */

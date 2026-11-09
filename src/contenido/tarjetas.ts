@@ -8,6 +8,7 @@ import { borradorVacio, enviarAlCreador } from '../ui/borrador';
 import { actualizarCaptura, empezarGrabacionLinea, pausar, reproducir, saltar, terminarGrabacionLinea } from './controlador';
 import { ajustes, avisar, comoActivarCaptura, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
 import type { Control } from './puente';
+import { hayVozSintetica } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
 
 let control: Control;
@@ -315,7 +316,7 @@ export async function construirBorrador(p: PalabraToken | null, l: LineaAnalizad
       if (pre.audioFraseVideo && !audioProtegido()) avisar(tr('Sin audio del video: {0} en esta pestaña para activar la captura.', comoActivarCaptura()), undefined, undefined, 6000);
     }
   }
-  if (!b.audioFrase.length && pre.audioFraseVoz && a.azureClave && b.frase) {
+  if (!b.audioFrase.length && pre.audioFraseVoz && hayVozSintetica(a) && b.frase) {
     tareas.push(
       motor.vozFrase(l?.texto ?? b.frase, a.vocesFrase[0]).then((d) => {
         b.audioFrase = [{ id: 'voz', nombre: `kotonoha_voz_${Date.now()}.mp3`, tipo: 'audio/mpeg', datos: d, etiqueta: tr('Voz') }];

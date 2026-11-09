@@ -118,7 +118,7 @@ export async function terminarClip(): Promise<{ datos: string; tipo: string; seg
   return { datos: bytesABase64(mp3), tipo: 'audio/mpeg', segundos: (hasta - desde) / audio.sampleRate, pico };
 }
 
-function aMp3(canales: Float32Array[], frecuencia: number): Uint8Array {
+export function aMp3(canales: Float32Array[], frecuencia: number): Uint8Array {
   const codificador = new Mp3Encoder(canales.length, frecuencia, 128);
   const aEntero = (f: Float32Array) => {
     const s = new Int16Array(f.length);

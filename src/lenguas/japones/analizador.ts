@@ -31,7 +31,7 @@ export const ANALIZADOR: Analizador = {
     });
     return cargando;
   },
-  analizar: (texto, existe) => unirTokens(tokenizador!.tokenize(texto), existe),
+  analizar: (texto, existe, _consultas, opciones) => unirTokens(tokenizador!.tokenize(texto), existe, opciones),
   // Un verbo conjugado no trae la lectura del lema: se tokeniza aparte.
   lecturaDeLema: (lema) =>
     tokenizador!
