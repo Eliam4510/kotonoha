@@ -134,11 +134,15 @@ La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y
 
 La pantalla **JLPT** reúne el vocabulario, los kanji y la gramática de cada nivel, de N5 a N1, y dice cuánto se conoce ya de cada uno, a partir de las palabras marcadas mientras se ve y se lee. Las que ya se saben se marcan de una vez, cada kanji enseña sus trazos y las palabras que lo llevan, y cada punto de gramática, las frases vistas en que apareció.
 
-### Un diccionario para explorar
+### Un diccionario completo
 
-<img src="docs/img/diccionario.png" alt="Diccionario con la palabra 話す: su kanji, las palabras que significan lo mismo y las que se leen igual" width="100%">
+<img src="docs/img/diccionario.png" alt="La página del diccionario con 話す: la lista de resultados, la palabra con sus sentidos y, al lado, su kanji, las que significan lo mismo y las que se leen igual" width="100%">
 
-El diccionario busca también por significado, como «perro» → 犬, y encuentra la gramática por su forma o por su sentido. Debajo de cada palabra están sus kanji con su nivel; **Significan lo mismo**, con las de uso común del mismo significado, como 喋る o 会話 para 話す, y las que se leen igual, como 離す y 放す. Claude explica en qué se diferencian cuando se le pide. La portada reúne onomatopeyas, refranes, expresiones de cuatro kanji y palabras literarias, coloquiales y respetuosas.
+El diccionario usa toda la ventana: a un lado, la lista de resultados; en el centro, la palabra en grande, con la lectura encima y cada sentido con su clase de palabra, y al otro lado sus kanji, sus opuestos, las de uso común que significan lo mismo, como 喋る o 会話 para 話す, y las que se leen igual. Debajo van las frases de tus videos donde apareció, con el minuto y un botón para volver a ese momento. Busca también por significado, como «perro» → 犬, y encuentra la gramática por su forma o por su sentido. La portada reúne onomatopeyas, refranes, expresiones de cuatro kanji y palabras literarias, coloquiales y respetuosas. El tamaño y la letra se cambian desde la propia página.
+
+<img src="docs/img/kanji.png" alt="La página del kanji 愛: cómo se escribe, sus lecturas, sus piezas y las palabras que lo llevan" width="100%">
+
+Un kanji suelto tiene su propia página: cómo se escribe, trazo a trazo; su significado y sus lecturas; sus piezas, con el radical y la que le da el sonido; las palabras que ya conoces con él y las más usadas que lo llevan, y cómo se ve impreso y a mano.
 
 ### Inglés y alemán
 

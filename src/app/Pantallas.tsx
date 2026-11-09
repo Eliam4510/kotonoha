@@ -12,25 +12,22 @@ import type {
   EstadoPalabra,
   FilaPalabra,
   ProgresoInstalacion,
-  PuntoEncontrado,
-  ResultadoBusqueda,
   TarjetaMemoria,
 } from '../compartido/tipos';
 import { AvisoVersion } from './AvisoVersion';
-import { CategoriaDiccionario, Explorar, MasDeLaPalabra, ResultadosGramatica, ResultadosSignificado } from './DiccionarioMas';
-import type { EntradaBreve } from '../nucleo/explorar';
+import { CategoriaDiccionario } from './DiccionarioMas';
+import { PaginaDiccionario } from './Diccionario';
 import { SeguirLeyendo } from './Biblioteca';
 import { TarjetaInmersion } from './Inmersion';
 import { SelectorLengua } from './SelectorLengua';
-import { enviarAlCreador } from '../ui/borrador';
-import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
+import { NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { TarjetaGasto } from './Gasto';
-import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navegar, refrescarAnki } from './estadoApp';
+import { creadorAbierto, estadoAnki, navegar, refrescarAnki } from './estadoApp';
 import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
-import { lecturaDeTarjeta, lengua } from '../ui/lengua';
+import { lengua } from '../ui/lengua';
 
 // ---------- Inicio ----------
 
@@ -310,121 +307,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 
 export function Diccionario({ ajustes, consulta, categoria }: { ajustes: Ajustes; consulta: string; categoria?: string }) {
   if (categoria) return <CategoriaDiccionario id={categoria} ajustes={ajustes} />;
-  return <BuscarEnDiccionario ajustes={ajustes} consulta={consulta} />;
-}
-
-function BuscarEnDiccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta: string }) {
-  const [texto, fijarTexto] = useState(consulta);
-  const [resultados, fijarResultados] = useState<ResultadoBusqueda[] | null>(null);
-  const [buscado, fijarBuscado] = useState('');
-  const [frase, fijarFrase] = useState('');
-  const [cargando, fijarCargando] = useState(false);
-  const [recientes, fijarRecientes] = useState<string[]>(() => leerPreferencia('busquedas', []));
-  const [hayDics, fijarHayDics] = useState(true);
-  const [porSignificado, fijarPorSignificado] = useState<EntradaBreve[]>([]);
-  const [gramatica, fijarGramatica] = useState<PuntoEncontrado[]>([]);
-  const [preparando, fijarPreparando] = useState(false);
-
-  const buscar = async (t: string) => {
-    const limpio = t.trim();
-    if (!limpio) return;
-    fijarCargando(true);
-    const paquete = lengua.value;
-    // Lo escrito sin la escritura de la lengua es un significado: «perro» busca 犬. Solo donde la escritura lo distingue.
-    const significado = paquete.lectura.distingue && !paquete.escritura.tieneTexto(limpio);
-    fijarPreparando(significado);
-    try {
-      const [palabras, sentido, puntos] = await Promise.all([
-        motor.buscarLibre(limpio),
-        significado ? motor.buscarPorSignificado(limpio).catch(() => []) : Promise.resolve([]),
-        paquete.listasNivel ? motor.buscarGramatica(paquete.listasNivel.carpeta, limpio, idiomaActual()).catch(() => []) : Promise.resolve([]),
-      ]);
-      fijarResultados(palabras);
-      fijarPorSignificado(sentido);
-      fijarGramatica(puntos);
-      fijarBuscado(limpio);
-      const nuevas = [limpio, ...recientes.filter((x) => x !== limpio)].slice(0, 8);
-      fijarRecientes(nuevas);
-      guardarPreferencia('busquedas', nuevas);
-    } finally {
-      fijarCargando(false);
-      fijarPreparando(false);
-    }
-  };
-  useEffect(() => {
-    motor.estado().then((e) => fijarHayDics(e.diccionarios.some((d) => d.tipo === 'terminos'))).catch(() => {});
-  }, []);
-  useEffect(() => {
-    if (consulta) {
-      fijarTexto(consulta);
-      buscar(consulta);
-    }
-  }, [consulta]);
-
-  const inicial = resultados === null;
-  const atajos = recientes.length ? recientes : lengua.value.ejemplos.sugerencias;
-
-  return (
-    <div class={`ap-lienzo ap-diccionario ${inicial ? 'inicial' : ''}`}>
-      {inicial && (
-        <div class="ap-dic-portada">
-          <span class="hoja-icono"><Icono n="diccionario" t={24} /></span>
-          <h1>{tr('¿Qué palabra buscas?')}</h1>
-          <p>{tr(lengua.value.textos.buscarAyuda)}</p>
-        </div>
-      )}
-      <form class="ap-buscador" role="search" onSubmit={(e) => { e.preventDefault(); buscar(texto); }}>
-        <Icono n="buscar" t={20} />
-        <input lang={lengua.value.id} aria-label={tr('Buscar en el diccionario')} placeholder={lengua.value.ejemplos.busqueda} value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} autoFocus />
-        <button class="btn primario" type="submit" disabled={!texto.trim() || cargando}>{cargando ? tr('Buscando…') : tr('Buscar')}</button>
-      </form>
-      <label class="ap-contexto">
-        <Icono n="ia" t={15} />
-        <input lang={lengua.value.id} aria-label={tr('Frase de contexto opcional')} placeholder={tr('Opcional: la frase donde la viste, para que Claude la explique en contexto')} value={frase} onInput={(e) => fijarFrase(e.currentTarget.value)} />
-      </label>
-
-      {inicial && (
-        <div class="ap-dic-atajos">
-          <span class="ayuda">{recientes.length ? tr('Búsquedas recientes') : tr('Prueba con')}</span>
-          {atajos.map((r) => (
-            <button key={r} class="chip" lang={lengua.value.id} onClick={() => { fijarTexto(r); buscar(r); }}>{r}</button>
-          ))}
-        </div>
-      )}
-      {inicial && <Explorar />}
-      {cargando && preparando && <p class="ayuda ap-dic-preparando"><span class="giro" /> {tr('Preparando el diccionario para buscar por significado: la primera vez tarda unos segundos.')}</p>}
-
-      {!cargando && <ResultadosGramatica key={buscado} puntos={gramatica} />}
-      {!cargando && <ResultadosSignificado buscado={buscado} entradas={porSignificado} />}
-
-      {resultados && resultados.length > 0 && (
-        <h2 class="ap-seccion-titulo">
-          {resultados.length === 1 ? tr('1 resultado') : tr('{0} resultados', resultados.length)} · <span lang={lengua.value.id}>{buscado}</span>
-        </h2>
-      )}
-      {resultados?.length === 0 && !porSignificado.length && !gramatica.length && (
-        <Vacio icono="buscar" titulo={hayDics ? tr('Sin resultados') : tr('Aún no hay diccionarios')}>
-          <p>{hayDics ? tr('No hay nada para «{0}». Comprueba la escritura o busca solo la raíz de la palabra.', buscado) : tr('Instálalos en Ajustes para poder buscar.')}</p>
-          {!hayDics && <button class="btn primario" onClick={() => navegar('ajustes')}>{tr('Ir a Ajustes')}</button>}
-        </Vacio>
-      )}
-      <div class="ap-resultados">
-        {resultados?.map((r) => (
-          <div class="ap-resultado" key={r.clave}>
-            <Ficha
-              lema={r.lema}
-              lectura={r.lectura}
-              ajustes={ajustes}
-              contexto={{ frase: frase || undefined }}
-              pestanaInicial={frase ? 'ninguna' : 'audio'}
-              alEnviar={(x) => enviarAlCreador({ palabra: x.lema, lectura: lecturaDeTarjeta(x), frase, definicion: [...new Set(x.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>') }, false)}
-            />
-            <MasDeLaPalabra r={r} frase={frase} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  return <PaginaDiccionario ajustes={ajustes} consulta={consulta} />;
 }
 
 // ---------- Memoria ----------

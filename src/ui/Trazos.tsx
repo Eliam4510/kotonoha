@@ -104,7 +104,8 @@ function Conocidas({ palabra }: { palabra: string }) {
   );
 }
 
-export function PanelTrazos({ palabra }: { palabra: string }) {
+/** `solo`: sin las palabras conocidas ni el crédito, para la página de un carácter, que los enseña a su manera. */
+export function PanelTrazos({ palabra, solo }: { palabra: string; solo?: boolean }) {
   const fuente = lengua.value.trazos;
   const caracteres = useMemo(() => fuente?.caracteres(palabra) ?? [], [palabra, fuente]);
   const [cargados, fijarCargados] = useState<Cargado[] | null>(null);
@@ -177,7 +178,7 @@ export function PanelTrazos({ palabra }: { palabra: string }) {
 
   return (
     <div class="trazos">
-      <div class={`trazos-lienzos ${cargados.length <= 2 ? 'grandes' : ''}`}>
+      <div class={`trazos-lienzos ${solo ? 'enormes' : cargados.length <= 2 ? 'grandes' : ''}`}>
         {cargados.map((k, i) => (
           <Lienzo key={k.caracter} k={k} hechos={hechos[i]} dibujando={sonando && i === activo} duracion={DURACION / velocidad} ultimo={!sonando && hechos[i] > 0 && (i === activo - 1 || i === activo || (activo === -1 && i === cargados.length - 1))} />
         ))}
@@ -194,8 +195,8 @@ export function PanelTrazos({ palabra }: { palabra: string }) {
           </div>
         </div>
       )}
-      <Conocidas palabra={palabra} />
-      {fuente && <p class="trazos-credito"><a href={fuente.credito.url} target="_blank" rel="noreferrer noopener">{fuente.credito.nombre}</a>{` · ${fuente.credito.licencia}`}</p>}
+      {!solo && <Conocidas palabra={palabra} />}
+      {fuente && !solo && <p class="trazos-credito"><a href={fuente.credito.url} target="_blank" rel="noreferrer noopener">{fuente.credito.nombre}</a>{` · ${fuente.credito.licencia}`}</p>}
     </div>
   );
 }

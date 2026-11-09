@@ -386,6 +386,21 @@ export async function ejemplos(lema: string): Promise<FraseEjemplo[]> {
     .map((f) => ({ texto: f.texto, fuente: f.fuente, url: f.url, inicio: f.inicio }));
 }
 
+/** Frases ya vistas que llevan un carácter, las más recientes primero: el kanji en lo que has visto tú. */
+export async function frasesConCaracter(caracter: string, limite = 12): Promise<FraseEjemplo[]> {
+  const filas = await db.frases
+    .orderBy('creada')
+    .reverse()
+    .filter((f) => f.texto.includes(caracter))
+    .limit(limite * 3)
+    .toArray();
+  // Las cortas se leen mejor; entre las recientes, se prefieren ellas.
+  return filas
+    .sort((a, b) => Math.min(a.texto.length, 60) - Math.min(b.texto.length, 60))
+    .slice(0, limite)
+    .map((f) => ({ texto: f.texto, fuente: f.fuente, url: f.url, inicio: f.inicio }));
+}
+
 // ---------- Búsqueda en diccionarios ----------
 
 export async function buscar(lema: string, lecturaPedida?: string): Promise<ResultadoBusqueda> {
@@ -404,7 +419,8 @@ export async function buscar(lema: string, lecturaPedida?: string): Promise<Resu
   const lecturaFinal = (lecturas.distingue ? lectura || filas.sort((a, b) => b.puntuacion - a.puntuacion)[0]?.lectura : lema) || (escritura.tieneTexto(lema) ? lecturas.normalizar(lema) : '');
   const conLectura = filas.filter((f) => f.lectura === lecturaFinal);
   const elegidas = (conLectura.length ? conLectura : filas)
-    .filter((f) => ordenDic.has(f.dic))
+    // La fila con las grafías de la palabra (日本, にほん★, にっぽん★) que añade Yomitan a JMdict no es una definición.
+    .filter((f) => ordenDic.has(f.dic) && !f.tags?.split(' ').includes('forms'))
     .sort((a, b) => ordenDic.get(a.dic)! - ordenDic.get(b.dic)! || b.puntuacion - a.puntuacion);
 
   const entradas: EntradaDiccionario[] = elegidas.map((f) => ({

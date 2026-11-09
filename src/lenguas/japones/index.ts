@@ -8,6 +8,8 @@ import { fonemasDeMoras, morasEspeciales } from './fonemas';
 import { frasesAcentuales } from './practica';
 import { alinearFurigana, kataAHira, lecturaVisible, nombreFlexion, patronAcento, pegarSignos, separarMoras, tieneJapones } from './tokens';
 import { caracteresConTrazos, kanjiDe } from './trazos';
+import { referenciaEnGlosa } from './referencias';
+import { etiquetaDiccionario } from './etiquetas';
 
 function saludo(hora: number, nombre: string): string {
   const base = hora >= 5 && hora < 11 ? 'おはようございます' : hora >= 11 && hora < 18 ? 'こんにちは' : 'こんばんは';
@@ -121,6 +123,29 @@ export const JAPONES: PaqueteLengua = {
     { id: 'coloquiales', nombre: tm('Coloquiales y jerga'), descripcion: tm('Lo que se oye en la calle, en el anime y en los chats.'), etiquetas: ['col', 'sl'], icono: 'chat' },
     { id: 'respetuosas', nombre: tm('Lenguaje respetuoso'), descripcion: tm('El keigo: formas honoríficas, humildes y corteses.'), etiquetas: ['hon', 'hum', 'pol'], icono: 'corona' },
   ],
+  paginaCaracter: {
+    es: (texto) => [...texto.trim()].length === 1 && kanjiDe(texto.trim()).length === 1,
+    nombre: tm('Kanji'),
+    lecturas: {
+      on: { nombre: tm("On'yomi"), ayuda: tm('La lectura que llegó de China, en katakana. Es la que suele llevar en las palabras de dos o más kanji.') },
+      kun: { nombre: tm("Kun'yomi"), ayuda: tm('La lectura japonesa, en hiragana. Suele ir con el kanji solo o con okurigana, el kana que lo sigue (lo que va tras el punto).') },
+    },
+    formas: tm('El mismo kanji en letra impresa, de libro y a mano. La de escribir a mano es la de los libros de texto japoneses: sigue los trazos de verdad.'),
+    preguntaOrigen: tm('¿De dónde viene el kanji {0}? Explica sus piezas y qué aporta cada una, su origen y, si lo hay, un truco para recordarlo. Sé breve.'),
+    enlaces: [
+      { nombre: 'Jisho', url: (c) => `https://jisho.org/search/${encodeURIComponent(`${c} #kanji`)}` },
+      { nombre: tm('Wiktionary'), url: (c) => `https://${idiomaActual()}.wiktionary.org/wiki/${encodeURIComponent(c)}` },
+      // GlyphWiki enseña sus formas antiguas y sus variantes.
+      { nombre: 'GlyphWiki', url: (c) => `https://glyphwiki.org/wiki/u${c.codePointAt(0)!.toString(16)}` },
+    ],
+  },
+  referenciaEnGlosa,
+  etiquetaDiccionario,
+  letras: {
+    gotica: "'BIZ UDPGothic', 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic UI', Meiryo, sans-serif",
+    libro: "'BIZ UDPMincho Medium', 'BIZ UDPMincho', 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif",
+    escuela: "'UD Digi Kyokasho NK-R', 'UD Digi Kyokasho NK', 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho N', 'HGKyokashotai', 'BIZ UDPMincho Medium', 'Yu Mincho', serif",
+  },
   principiante: { valor: 'principiante absoluto', nombre: tm('Empiezo desde cero'), ayuda: tm('Aún no leo kana'), lectura: 'todas' },
   // Vocabulario que suele asociarse a cada nivel del JLPT. Son cifras orientativas, no oficiales.
   niveles: [

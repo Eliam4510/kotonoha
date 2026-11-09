@@ -9,7 +9,13 @@ export async function trazosDe(caracter: string): Promise<DatosTrazos | null> {
   const fuente = motorLengua().trazos;
   if (!fuente) return null;
   const guardado = await db.trazos.get(caracter);
-  if (guardado) return guardado.datos;
+  // Lo guardado antes de que se leyeran las piezas se vuelve a pedir una vez; sin conexión, sirve como está.
+  if (guardado && (!guardado.datos || guardado.datos.componentes)) return guardado.datos;
+  if (guardado) return (await descargar(caracter, fuente).catch(() => null)) ?? guardado.datos;
+  return descargar(caracter, fuente);
+}
+
+async function descargar(caracter: string, fuente: NonNullable<ReturnType<typeof motorLengua>['trazos']>): Promise<DatosTrazos | null> {
   const r = await fetch(fuente.url(caracter));
   // Lo que la fuente no tiene tampoco lo tendrá mañana: se recuerda, para no volver a preguntar.
   if (r.status === 404) {

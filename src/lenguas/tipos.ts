@@ -250,6 +250,29 @@ export interface EjemplosLengua {
   letra: string;
 }
 
+/** Una palabra a la que remite una definición: su opuesta, o la que hay que ver con ella. */
+export interface ReferenciaGlosa {
+  tipo: 'opuesto' | 'ver';
+  termino: string;
+  lectura?: string;
+}
+
+/** La página propia de un carácter suelto, como un kanji: sus rótulos, cómo se llaman sus lecturas y dónde consultarlo. */
+export interface PaginaCaracterLengua {
+  /** Si lo buscado es un carácter suelto con página propia. */
+  es(texto: string): boolean;
+  /** Cómo se llama esa clase de carácter, como «Kanji». */
+  nombre: string;
+  /** Los nombres de sus dos clases de lecturas, en el orden de las listas (on y kun), con lo que conviene saber de cada una. */
+  lecturas: { on: { nombre: string; ayuda: string }; kun: { nombre: string; ayuda: string } };
+  /** Lo que se dice al enseñarlo en las letras impresa, de libro y a mano. */
+  formas: string;
+  /** La pregunta a Claude por su origen y por un truco para recordarlo. `{0}` es el carácter. */
+  preguntaOrigen: string;
+  /** Páginas donde consultarlo, como carácter y no como palabra. */
+  enlaces: { nombre: string; url(caracter: string): string }[];
+}
+
 /** Una página donde consultar una palabra. Con sus entradas de diccionario puede abrir justo la acepción. */
 export interface EnlaceLengua {
   nombre: string;
@@ -377,6 +400,17 @@ export interface PaqueteLengua {
   comoSuena?: { analizar(frase: string): TrozoHablado[]; fenomenos: Record<string, { nombre: string; explicacion: string }> };
   /** Categorías para explorar el diccionario, por las etiquetas de sus entradas: en JMdict, «on-mim» son las onomatopeyas. */
   categoriasDiccionario?: CategoriaDiccionario[];
+  /** La página de un carácter suelto, al buscarlo. Sin ella, buscar un carácter es buscar una palabra. */
+  paginaCaracter?: PaginaCaracterLengua;
+  /** Las referencias metidas entre las definiciones (sus opuestos, las que hay que ver). Sin esto, todo es definición. */
+  referenciaEnGlosa?(glosa: string): ReferenciaGlosa | null;
+  /** El nombre de una etiqueta del diccionario (clase de palabra, registro, campo) para enseñarla sobre su sentido. */
+  etiquetaDiccionario?(etiqueta: string): string | undefined;
+  /**
+   * Las letras que se pueden elegir para el diccionario, como valores de CSS: una gótica de lectura fácil, una de libro y,
+   * si la lengua la tiene, la de escribir a mano que se enseña en la escuela.
+   */
+  letras?: { gotica: string; libro: string; escuela?: string };
   /** Para quien empieza desde cero: va antes de los niveles. */
   principiante: NivelLengua;
   niveles: NivelLengua[];

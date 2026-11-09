@@ -130,11 +130,15 @@ Das Wortfenster zeigt die Strichfolge jedes Kanji im Wort, Strich für Strich un
 
 Die Ansicht **JLPT** vereint Wortschatz, Kanji und Grammatik jeder Stufe von N5 bis N1 und zeigt, wie viel davon du schon kennst, anhand der beim Sehen und Lesen markierten Wörter. Bekannte Wörter werden auf einmal markiert, jedes Kanji zeigt seine Striche und die Wörter, die es enthalten, und jeder Grammatikpunkt die gesehenen Sätze, in denen er vorkam.
 
-### Ein Wörterbuch zum Erkunden
+### Ein vollständiges Wörterbuch
 
-<img src="docs/img/diccionario.de.png" alt="Wörterbuch mit dem Wort 話す: sein Kanji, Wörter gleicher Bedeutung und gleich gelesene Wörter" width="100%">
+<img src="docs/img/diccionario.de.png" alt="Die Wörterbuchseite mit 話す: die Ergebnisliste, das Wort mit seinen Bedeutungen und daneben sein Kanji, Wörter gleicher Bedeutung und gleich gelesene Wörter" width="100%">
 
-Das Wörterbuch sucht auch nach Bedeutung, etwa „Hund“ → 犬, und findet Grammatik nach Form oder Sinn. Unter jedem Wort stehen seine Kanji mit Stufe; **Gleiche Bedeutung** mit den gebräuchlichen Wörtern derselben Bedeutung, etwa 喋る oder 会話 für 話す; und die gleich gelesenen, etwa 離す und 放す. Auf Wunsch erklärt Claude die Unterschiede. Die Startseite versammelt Lautmalereien, Sprichwörter, Ausdrücke aus vier Kanji sowie literarische, umgangssprachliche und höfliche Wörter.
+Das Wörterbuch nutzt das ganze Fenster: auf der einen Seite die Ergebnisliste; in der Mitte das Wort, groß, mit der Lesung darüber und jeder Bedeutung mit ihrer Wortart; auf der anderen Seite seine Kanji, seine Gegenteile, die gebräuchlichen Wörter gleicher Bedeutung, etwa 喋る oder 会話 für 話す, und die gleich gelesenen. Darunter stehen die Sätze aus deinen Videos, in denen es vorkam, mit der Minute und einem Knopf, um zu dieser Stelle zurückzukehren. Es sucht auch nach Bedeutung, etwa „Hund“ → 犬, und findet Grammatik nach Form oder Sinn. Die Startseite versammelt Lautmalereien, Sprichwörter, Ausdrücke aus vier Kanji sowie literarische, umgangssprachliche und höfliche Wörter. Größe und Schrift lassen sich auf der Seite selbst ändern.
+
+<img src="docs/img/kanji.de.png" alt="Die Seite des Kanji 愛: wie es geschrieben wird, seine Lesungen, seine Bestandteile und die Wörter, die es enthalten" width="100%">
+
+Ein einzelnes Kanji hat seine eigene Seite: wie es geschrieben wird, Strich für Strich; seine Bedeutung und Lesungen; seine Bestandteile, mit dem Radikal und dem Teil, der den Laut gibt; die Wörter, die du damit schon kennst, und die häufigsten, die es enthalten; und wie es gedruckt und von Hand aussieht.
 
 ### Auch Englisch
 

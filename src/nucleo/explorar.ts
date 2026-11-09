@@ -1,7 +1,7 @@
 // Lo que el diccionario hace además de buscar una palabra: buscar por significado («perro» → 犬), buscar un punto de
 // gramática por su forma o por lo que significa, y ordenar las listas de una categoría (onomatopeyas, refranes…).
 
-import type { GramaticaNivel } from '../compartido/tipos';
+import type { EstadoPalabra, GramaticaNivel } from '../compartido/tipos';
 
 /** En minúsculas y sin tildes: «Canción» y «cancion» son lo mismo al buscar. */
 export const sinAcentos = (s: string): string => s.normalize('NFD').replace(/\p{M}+/gu, '').toLowerCase();
@@ -37,6 +37,8 @@ export interface EntradaBreve {
   sentidos?: { dic: number; glosas: string[] }[];
   /** Sus categorías gramaticales (verbo, adjetivo, nombre, adverbio), de las etiquetas del diccionario. */
   clases?: string[];
+  /** Lo que se sabe de ella, en las listas que lo enseñan: así se ve de un vistazo cuáles ya conoces. */
+  estado?: EstadoPalabra;
 }
 
 /**

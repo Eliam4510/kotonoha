@@ -195,6 +195,7 @@ const api: ApiMotor = {
   },
   compuestos: (palabras) => analisis.compuestos(palabras),
   ejemplos: (lema) => analisis.ejemplos(lema),
+  frasesConCaracter: (caracter, limite) => analisis.frasesConCaracter(caracter, limite),
 
   async cambiarPalabras(cambios: CambioPalabra[]) {
     const ahora = Date.now();
@@ -244,7 +245,7 @@ const api: ApiMotor = {
     return { conocidas, aprendiendo, ignoradas, rastreadas };
   },
 
-  async palabrasConCaracteres(caracteres, excluir) {
+  async palabrasConCaracteres(caracteres, excluir, limite = PALABRAS_POR_CARACTER) {
     // Primero las conocidas, y de cada grupo las más recientes: son las que más ayudan a recordar el carácter.
     const filas = await db.palabras.where('estado').anyOf(['conocida', 'aprendiendo']).toArray();
     const salida: Record<string, PalabraConocida[]> = {};
@@ -252,7 +253,7 @@ const api: ApiMotor = {
       salida[c] = filas
         .filter((f) => f.lema !== excluir && f.lema.includes(c))
         .sort((a, b) => (a.estado === b.estado ? b.actualizada - a.actualizada : a.estado === 'conocida' ? -1 : 1))
-        .slice(0, PALABRAS_POR_CARACTER)
+        .slice(0, limite)
         .map((f) => ({ lema: f.lema, lectura: f.lectura, estado: f.estado }));
     }
     return salida;
@@ -282,6 +283,9 @@ const api: ApiMotor = {
   cuentaCategorias: () => explorar.cuentaCategorias(),
   homofonos: (lectura, excluir) => explorar.homofonos(lectura, excluir),
   sinonimos: (lema, lectura) => explorar.sinonimos(lema, lectura),
+  resultadosDeBusqueda: (texto, limite) => explorar.resultadosDeBusqueda(texto, limite),
+  palabrasConCaracter: (caracter, limite) => explorar.palabrasConCaracter(caracter, limite),
+  entradasDe: (pares) => explorar.entradasDe(pares),
 
   async estadosGramatica(estudio) {
     const filas = await baseDeEstudio(estudio).gramatica.toArray();

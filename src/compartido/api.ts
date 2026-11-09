@@ -119,12 +119,14 @@ export interface ApiMotor {
   buscarLibre(texto: string): Promise<ResultadoBusqueda[]>;
   compuestos(palabras: string[]): Promise<ResultadoBusqueda[]>;
   ejemplos(lema: string): Promise<FraseEjemplo[]>;
+  /** Frases ya vistas que llevan un carácter, las más recientes primero. */
+  frasesConCaracter(caracter: string, limite?: number): Promise<FraseEjemplo[]>;
 
   cambiarPalabras(cambios: CambioPalabra[]): Promise<void>;
   anadirConocidas(texto: string): Promise<number>;
   estadisticasPalabras(): Promise<EstadisticasPalabras>;
   /** Las palabras conocidas o en aprendizaje que llevan cada carácter, sin la propia palabra: «Kanji que ya conoces». */
-  palabrasConCaracteres(caracteres: string[], excluir: string): Promise<Record<string, PalabraConocida[]>>;
+  palabrasConCaracteres(caracteres: string[], excluir: string, limite?: number): Promise<Record<string, PalabraConocida[]>>;
   /** Suma tiempo de inmersión: un video que se escucha o un texto que se lee en la lengua que se estudia. */
   sumarInmersion(tipo: TipoInmersion, fuente: string, titulo: string, segundos: number, estudio?: string): Promise<void>;
   resumenInmersion(): Promise<ResumenInmersion>;
@@ -165,6 +167,12 @@ export interface ApiMotor {
   homofonos(lectura: string, excluir: string): Promise<EntradaBreve[]>;
   /** Las palabras de uso común que significan lo mismo que una. */
   sinonimos(lema: string, lectura: string): Promise<EntradaBreve[]>;
+  /** La lista de resultados del diccionario: lo que es justo lo buscado y lo que empieza por ello. */
+  resultadosDeBusqueda(texto: string, limite?: number): Promise<EntradaBreve[]>;
+  /** Las palabras de uso común que llevan un carácter, las más usadas primero, y cuántas hay. */
+  palabrasConCaracter(caracter: string, limite?: number): Promise<{ filas: EntradaBreve[]; total: number }>;
+  /** Unas palabras concretas en breve, con la glosa del primer diccionario: los opuestos de una, por ejemplo. */
+  entradasDe(pares: { termino: string; lectura?: string }[]): Promise<EntradaBreve[]>;
   muestraEvaluacion(): Promise<{ lema: string; lectura: string; rango: number }[]>;
   aplicarEvaluacion(rangoEstimado: number): Promise<number>;
   importarConocidasAnki(consulta: string, campo: string): Promise<number>;
@@ -287,6 +295,10 @@ export interface ApiFondo {
   difundir(evento: EventoDifundido): Promise<void>;
   inyectarPagina(): Promise<void>;
   miPestana(): Promise<number | undefined>;
+  /** Vuelve al momento de un video: a su pestaña si está abierta, o lo abre. */
+  abrirMomento(url: string, ms: number): Promise<void>;
+  /** El momento al que debe saltar esta pestaña, si se abrió para volver a él. */
+  momentoPendiente(): Promise<number | null>;
   estadoUso(): Promise<'active' | 'idle' | 'locked'>;
   /** Mira ya si cambiaron los archivos de la copia y, si nada está en marcha, recarga la extensión. */
   comprobarActualizacion(): Promise<void>;
@@ -301,4 +313,5 @@ export type EventoDifundido =
   | { tipo: 'captura'; activa: boolean }
   | { tipo: 'capturaFallida'; motivo: string }
   | { tipo: 'comando'; comando: string }
+  | { tipo: 'saltar'; ms: number }
   | { tipo: 'borrador'; borrador: Partial<BorradorTarjeta> };

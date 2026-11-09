@@ -1,7 +1,8 @@
-// La imagen del diccionario del README en cada idioma de la interfaz que estudia japonés (en el README japonés se estudia
-// inglés, que no tiene sinónimos ni categorías de JMdict): la ficha de 話す con su kanji, las palabras que significan lo
-// mismo y las que se leen igual. Como en pruebas/capturas/readme.mjs, con los diccionarios que tendría quien lee cada
-// README: el suyo y, de respaldo, el inglés. La ventana es más alta que la de las demás para que quepa todo.
+// Las imágenes del diccionario del README en cada idioma de la interfaz que estudia japonés (en el README japonés se
+// estudia inglés, que no tiene sinónimos ni categorías de JMdict): la página de はなす, con la lista de resultados, 話す
+// con sus sentidos, las frases donde se vio con su minuto y, al lado, su kanji, las que significan lo mismo y las que se
+// leen igual; y la página del kanji 愛. Como en pruebas/capturas/readme.mjs, con los diccionarios que tendría quien lee
+// cada README: el suyo y, de respaldo, el inglés. Las frases de ejemplo se añaden para la imagen y se borran al acabar.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/capturas/diccionario.mjs [es de en zh ko]
 
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
@@ -16,7 +17,10 @@ const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-readme'));
 const IMAGENES = join(RAIZ, 'docs', 'img');
 // En este orden, los tres últimos comparten diccionarios y no hay que cambiarlos.
 const IDIOMAS = process.argv.slice(2).length ? process.argv.slice(2) : ['es', 'de', 'en', 'zh', 'ko'];
-const PALABRA = '話す';
+const BUSQUEDA = 'はなす';
+const KANJI = '愛';
+/** Las frases de ejemplo llevan esta fuente: con ella se borran al acabar. */
+const FUENTE = '日本語の会話';
 
 if (!existsSync(PERFIL) && existsSync(join(RAIZ, '.perfil-base', 'Default/IndexedDB'))) {
   cpSync(join(RAIZ, '.perfil-base', 'Default/IndexedDB'), join(PERFIL, 'Default/IndexedDB'), { recursive: true });
@@ -25,7 +29,7 @@ mkdirSync(IMAGENES, { recursive: true });
 const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
-  viewport: { width: 1440, height: 1120 },
+  viewport: { width: 1600, height: 1000 },
   args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 const sw = await recargarExtension(contexto);
@@ -34,7 +38,7 @@ const previo = await sw.evaluate(async () => chrome.storage.local.get(['ajustes'
 const fijar = (idioma) =>
   sw.evaluate(async (idioma) => {
     const d = await chrome.storage.local.get('ajustes');
-    await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), idiomaInterfaz: idioma, idiomaObjetivo: 'ja', bienvenidaVista: true, tema: 'oscuro', avisarVersiones: false } });
+    await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), idiomaInterfaz: idioma, idiomaObjetivo: 'ja', bienvenidaVista: true, tema: 'oscuro', avisarVersiones: false, guardarHistorial: true, diccionarioAncho: 'completo', diccionarioTamano: 100, diccionarioLetra: 'gotica' } });
   }, idioma);
 
 const p = await contexto.newPage();
@@ -65,23 +69,65 @@ async function diccionarios(terminos) {
   await motor('ordenarDiccionarios', [...terminos, ...resto]).catch(() => {});
 }
 
+/** Borra las frases de ejemplo de la base del japonés. */
+const borrarFrases = () =>
+  p.evaluate(
+    (fuente) =>
+      new Promise((ok) => {
+        const r = indexedDB.open('kikitori');
+        r.onsuccess = () => {
+          const t = r.result.transaction('frases', 'readwrite');
+          t.objectStore('frases').openCursor().onsuccess = (e) => {
+            const c = e.target.result;
+            if (!c) return;
+            if (c.value.fuente === fuente) c.delete();
+            c.continue();
+          };
+          t.oncomplete = () => {
+            r.result.close();
+            ok(true);
+          };
+        };
+        r.onerror = () => ok(false);
+      }),
+    FUENTE
+  );
+
+const guardar = async (nombre, idioma) => {
+  await p.mouse.move(5, 5);
+  await p.waitForTimeout(1200);
+  const archivo = join(IMAGENES, idioma === 'es' ? `${nombre}.png` : `${nombre}.${idioma}.png`);
+  await sharp(await p.screenshot()).png({ palette: true, quality: 92, effort: 10 }).toFile(archivo);
+  console.log('imagen:', archivo.slice(RAIZ.length + 1));
+};
+
 for (const idioma of IDIOMAS) {
   // Primero los ajustes: el catálogo de diccionarios es el de la lengua que se estudia.
   await fijar(idioma);
   await p.waitForTimeout(500);
   await diccionarios(idioma === 'es' ? ['jmdict-es', 'jmdict-en'] : idioma === 'de' ? ['jmdict-de', 'jmdict-en'] : ['jmdict-en']);
-  await p.goto(`chrome-extension://${id}/app.html#/diccionario?q=${encodeURIComponent(PALABRA)}`);
+  await borrarFrases();
+  await motor('analizarLineas', [{ id: 'a', inicio: 754_000, fin: 757_000, texto: '友達と話すのが好きです。' }, { id: 'b', inicio: 1_261_000, fin: 1_264_000, texto: '先生とゆっくり話してみました。' }], { titulo: FUENTE, url: 'https://www.youtube.com/watch?v=kotonohaReadme', idVideo: 'kotonohaReadme' });
+
+  await p.goto(`chrome-extension://${id}/app.html#/diccionario?q=${encodeURIComponent(BUSQUEDA)}`);
   await p.reload();
-  const resultado = p.locator('.ap-resultado').first();
-  await resultado.waitFor({ timeout: 30000 });
+  await p.locator('.dic-ficha .ficha-palabra').waitFor({ timeout: 30000 });
   // El índice de los sinónimos se hace la primera vez con cada juego de diccionarios: unos segundos.
-  await resultado.locator('.ap-sinonimos .chip').first().waitFor({ timeout: 90000 });
-  await resultado.locator('.ap-homofonos .chip').first().waitFor({ timeout: 15000 });
-  await p.mouse.move(5, 5);
-  await p.waitForTimeout(1200);
-  const archivo = join(IMAGENES, idioma === 'es' ? 'diccionario.png' : `diccionario.${idioma}.png`);
-  await sharp(await p.screenshot()).png({ palette: true, quality: 92, effort: 10 }).toFile(archivo);
-  console.log('imagen:', archivo.slice(RAIZ.length + 1));
+  await p.locator('.dic-seccion', { hasText: /./ }).locator('.dic-tarjeta').first().waitFor({ timeout: 90000 });
+  await p.locator('.dic-lateral .dic-tarjeta-esqueleto').first().waitFor({ state: 'detached', timeout: 90000 }).catch(() => {});
+  await p.locator('.dic-frase rt').first().waitFor({ timeout: 15000 }).catch(() => {});
+  await guardar('diccionario', idioma);
+
+  // Con menos movimiento, los trazos salen ya dibujados, con sus números: el kanji entero en la imagen.
+  await p.emulateMedia({ reducedMotion: 'reduce' });
+  await p.goto(`chrome-extension://${id}/app.html#/diccionario?q=${encodeURIComponent(KANJI)}`);
+  await p.reload();
+  await p.locator('.dic-caracter').waitFor({ timeout: 30000 });
+  await p.locator('.dic-pieza').first().waitFor({ timeout: 30000 }).catch(() => {});
+  await p.locator('.dic-caracter .dic-tarjeta').first().waitFor({ timeout: 90000 });
+  await guardar('kanji', idioma);
+  await p.emulateMedia({ reducedMotion: 'no-preference' });
+  await borrarFrases();
 }
 
 await sw.evaluate(async (previo) => chrome.storage.local.set({ ajustes: previo.ajustes }), previo);

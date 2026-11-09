@@ -5,6 +5,7 @@ import { CLAVES_PROVEEDORES } from '../compartido/proveedores';
 import { type ApiFondo, type EventoDifundido, HOST_AYUDANTE, PUERTO_AYUDANTE } from '../compartido/api';
 import { atender, motor, type ConRemitente } from '../compartido/rpc';
 import { fijarIdioma, tr } from '../compartido/i18n';
+import { claveDeVideo, urlEnMomento } from '../nucleo/momento';
 
 const RUTA_MOTOR = 'motor.html';
 let creando: Promise<void> | null = null;
@@ -82,6 +83,37 @@ async function abrirApp(ruta = 'inicio'): Promise<void> {
     return;
   }
   await chrome.windows.create({ url, type: 'popup', width: 1280, height: 900 });
+}
+
+const MOMENTOS = 'momentosPendientes';
+type Pendientes = Record<string, { ms: number; clave: string }>;
+
+/**
+ * Vuelve al momento de un video donde apareció una frase. Si el video está abierto en alguna pestaña, la trae y salta
+ * ahí; si no, lo abre en una ventana normal y, cuando la extensión arranca en esa pestaña, salta al momento.
+ */
+async function abrirMomento(url: string, ms: number): Promise<void> {
+  const clave = claveDeVideo(url);
+  if (!clave) return;
+  const abierta = (await chrome.tabs.query({})).find((t) => t.url && claveDeVideo(t.url) === clave);
+  if (abierta?.id !== undefined) {
+    await chrome.tabs.update(abierta.id, { active: true });
+    if (abierta.windowId !== undefined) await chrome.windows.update(abierta.windowId, { focused: true });
+    await chrome.tabs.sendMessage(abierta.id, { evento: { tipo: 'saltar', ms } satisfies EventoDifundido }).catch(() => {});
+    return;
+  }
+  const destino = urlEnMomento(url, ms);
+  const ventana = await chrome.windows.getLastFocused({ windowTypes: ['normal'] }).catch(() => null);
+  let id: number | undefined;
+  if (ventana?.id !== undefined) {
+    id = (await chrome.tabs.create({ windowId: ventana.id, url: destino, active: true })).id;
+    await chrome.windows.update(ventana.id, { focused: true });
+  } else {
+    id = (await chrome.windows.create({ url: destino, type: 'normal' }))?.tabs?.[0]?.id;
+  }
+  if (id === undefined) return;
+  const d = await chrome.storage.session.get(MOMENTOS);
+  await chrome.storage.session.set({ [MOMENTOS]: { ...((d[MOMENTOS] as Pendientes | undefined) ?? {}), [id]: { ms, clave } } });
 }
 
 /**
@@ -204,6 +236,21 @@ const api: ApiFondo & { _: never } = {
   },
   async miPestana(this: ConRemitente) {
     return this.remitente?.tab?.id;
+  },
+  abrirMomento,
+  /** El momento al que debe saltar la pestaña que pregunta, si la abrió «Volver al momento». Se entrega una sola vez. */
+  async momentoPendiente(this: ConRemitente) {
+    const id = this.remitente?.tab?.id;
+    if (id === undefined) return null;
+    const d = await chrome.storage.session.get(MOMENTOS);
+    const pendientes = (d[MOMENTOS] as Pendientes | undefined) ?? {};
+    const p = pendientes[id];
+    if (!p) return null;
+    delete pendientes[id];
+    await chrome.storage.session.set({ [MOMENTOS]: pendientes });
+    // Si en esa pestaña ya hay otro video, el momento no es suyo.
+    const url = this.remitente?.tab?.url;
+    return url && claveDeVideo(url) === p.clave ? p.ms : null;
   },
   _: undefined as never,
 };

@@ -6,6 +6,7 @@ import { type Ajustes, hayVozSintetica, type PestanaDiccionario, vozLocalActiva,
 import { type FlujoCancelable, flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
+import { claveDeVideo, momentoLegible } from '../nucleo/momento';
 import type { PuntoGramatica } from '../lenguas/tipos';
 import { enviarAlCreador } from './borrador';
 import { type Compartida, compartir, PanelCompartir } from './Compartir';
@@ -421,6 +422,22 @@ function PanelImagenes({ lema, frase, enviar, primeraGlosa }: { lema: string; fr
   );
 }
 
+/** Si la frase es de un video al que se puede volver: tiene su dirección y el momento en que sonó. */
+export const momentoDe = (f: FraseEjemplo) => (f.url && typeof f.inicio === 'number' && claveDeVideo(f.url) ? { url: f.url, ms: f.inicio } : null);
+
+/** Vuelve al momento del video donde sonó una frase: a su pestaña si sigue abierta, o la abre. */
+export function BotonMomento({ f, corto }: { f: FraseEjemplo; corto?: boolean }) {
+  const m = momentoDe(f);
+  if (!m) return null;
+  const texto = tr('Volver a {0}', momentoLegible(m.ms));
+  const abrir = () => fondo.abrirMomento(m.url, m.ms).catch(() => {});
+  return corto ? (
+    <button class="btn-icono chico btn-momento" data-tip={texto} data-tip-lado="izq" aria-label={texto} onClick={abrir}><Icono n="reproducir" t={14} /></button>
+  ) : (
+    <button class="btn chico btn-momento" onClick={abrir}><Icono n="reproducir" t={13} /> {texto}</button>
+  );
+}
+
 function PanelEjemplos({ lema, enviar }: { lema: string; enviar: boolean }) {
   const [filas, fijarFilas] = useState<FraseEjemplo[] | null>(null);
   useEffect(() => {
@@ -439,11 +456,70 @@ function PanelEjemplos({ lema, enviar }: { lema: string; enviar: boolean }) {
         <div class="ejemplo" key={i}>
           <div class="ejemplo-texto">
             <span lang={lengua.value.id}>{f.texto}</span>
-            {f.fuente && <small>{f.fuente}</small>}
+            {(f.fuente || momentoDe(f)) && <small>{f.fuente}{momentoDe(f) && <>{f.fuente ? ' · ' : ''}<span class="num">{momentoLegible(f.inicio!)}</span></>}</small>}
           </div>
+          <BotonMomento f={f} corto />
           {enviar && <button class="btn fantasma chico" onClick={() => enviarAlCreador({ ejemplos: f.texto })}>{tr('Enviar')}</button>}
         </div>
       ))}
+    </div>
+  );
+}
+
+const SENTIDOS_POR_DICCIONARIO = 6;
+
+/**
+ * En la página del diccionario: los sentidos de cada diccionario, con sus glosas juntas («hablar; conversar») y encima
+ * su clase de palabra y cómo se usa, solo cuando cambian respecto al sentido anterior.
+ */
+function Sentidos({ r, elegida, verTodas, alVerTodas, enviar }: { r: ResultadoBusqueda; elegida?: string; verTodas: boolean; alVerTodas: () => void; enviar: boolean }) {
+  const paquete = lengua.value;
+  const refDe = paquete.referenciaEnGlosa;
+  const grupos: { dic: string; titulo: string; sentidos: { glosas: string[]; etiquetas: string[] }[] }[] = [];
+  for (const e of r.entradas) {
+    const glosas = e.glosas.filter((g) => !refDe?.(g));
+    if (!glosas.length) continue;
+    let g = grupos.find((x) => x.dic === e.dic);
+    if (!g) grupos.push((g = { dic: e.dic, titulo: e.dicTitulo, sentidos: [] }));
+    const etiquetas = [...new Set((e.tags ?? '').split(' ').flatMap((t) => paquete.etiquetaDiccionario?.(t) ?? []))];
+    g.sentidos.push({ glosas, etiquetas });
+  }
+  const hayMas = grupos.some((g) => g.sentidos.length > SENTIDOS_POR_DICCIONARIO);
+  return (
+    <div class="sentidos">
+      {grupos.map((g) => {
+        let previas = '';
+        return (
+          <section key={g.dic} class="sentidos-dic">
+            {grupos.length > 1 && <h4 class="sentidos-dic-titulo">{tr(g.titulo)}</h4>}
+            <ol class="lista-sentidos">
+              {(verTodas ? g.sentidos : g.sentidos.slice(0, SENTIDOS_POR_DICCIONARIO)).map((x, i) => {
+                const clave = x.etiquetas.join('|');
+                const etiquetasNuevas = clave !== previas;
+                previas = clave;
+                // Unidas, las glosas que acaban en punto («Correr.», «Mover.») lo pierden: «Correr; Mover».
+                const texto = x.glosas.length > 1 ? x.glosas.map((g) => g.replace(/\.\s*$/, '')).join('; ') : x.glosas[0];
+                return (
+                  <li key={i} class={elegida && x.glosas.includes(elegida) ? 'elegida' : ''}>
+                    {etiquetasNuevas && x.etiquetas.length > 0 && <div class="sentido-etiquetas">{x.etiquetas.map((t) => <span key={t}>{tr(t)}</span>)}</div>}
+                    <div class="sentido-fila">
+                      <span class="sentido-num num" aria-hidden="true">{i + 1}</span>
+                      <span class="def-texto">{texto}</span>
+                      {enviar && <button class="def-enviar" aria-label={tr('Enviar «{0}» al creador', texto)} title={tr('Enviar al creador de tarjetas')} onClick={() => enviarAlCreador({ definicion: texto })}><Icono n="enviar" t={13} /></button>}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        );
+      })}
+      {hayMas && (
+        <button class="btn fantasma chico ver-mas" onClick={alVerTodas}>
+          {verTodas ? tr('Ver menos') : tr('Ver todos los sentidos')}
+          <Icono n={verTodas ? 'arriba' : 'abajo'} t={12} />
+        </button>
+      )}
     </div>
   );
 }
@@ -473,6 +549,13 @@ export interface PropsFicha {
   /** Estado conocido por quien abre la ficha: si cambia fuera, por ejemplo con el teclado, se refleja aquí. */
   estado?: EstadoPalabra;
   rastreada?: boolean;
+  /**
+   * En la página del diccionario: más grande, sin límite de alto, con las pestañas junto a lo que abren y sin las
+   * referencias (opuestos, «ver también»), que la página enseña aparte.
+   */
+  vista?: 'pagina';
+  /** Se llama con la entrada del diccionario cuando llega: la página del diccionario la usa a su lado. */
+  alCargar?: (r: ResultadoBusqueda) => void;
 }
 
 interface SentidoVisible {
@@ -677,6 +760,7 @@ export function Ficha(p: PropsFicha) {
         fijarR(x);
         fijarBuscada(claveBusqueda);
         fijarCargando(false);
+        p.alCargar?.(x);
       }
     });
     if (p.compuestos && p.ajustes.busquedaCompuesta) {
@@ -777,7 +861,14 @@ export function Ficha(p: PropsFicha) {
     : definicionesUnicas;
   const tieneFrase = !!p.contexto.frase;
   const enviar = !!p.alEnviar;
-  const defsVisibles = verTodas ? defsOrdenadas : defsOrdenadas.slice(0, 5);
+  const pagina = p.vista === 'pagina';
+  // Las referencias metidas entre las definiciones («antonym: …», «see: …») no son significados: van aparte.
+  const refDe = lengua.value.referenciaEnGlosa;
+  const referencias = refDe ? definicionesUnicas.flatMap((g) => refDe(g) ?? []).filter((x, i, xs) => xs.findIndex((y) => y.tipo === x.tipo && y.termino === x.termino) === i) : [];
+  const defsSignificado = refDe ? defsOrdenadas.filter((g) => !refDe(g)) : defsOrdenadas;
+  // En la página van los sentidos enteros (Sentidos); aquí, la lista breve de siempre.
+  const cuantasDefs = 5;
+  const defsVisibles = verTodas ? defsSignificado : defsSignificado.slice(0, cuantasDefs);
 
   // Compartir como imagen: la palabra o el patrón, lo que significa aquí y la frase donde apareció.
   // El título es la fuente (el video, el libro) salvo cuando es una línea del propio texto, como la primera de una nota.
@@ -883,19 +974,35 @@ export function Ficha(p: PropsFicha) {
             <button class="enlace" onClick={() => fondo.abrirApp('ajustes')}>{tr('Abrir Ajustes')}</button>
           </div>
         ) : <div class="ayuda">{tr('Sin entrada en los diccionarios instalados. Puedes preguntarle a Claude con «Explicar».')}</div>)}
-        <ol class="lista-defs">
+        {pagina && <Sentidos r={r} elegida={elegida >= 0 ? definicionesUnicas[elegida] : undefined} verTodas={verTodas} alVerTodas={() => fijarVerTodas(!verTodas)} enviar={enviar} />}
+        {!pagina && <ol class="lista-defs">
           {defsVisibles.map((g, i) => (
             <li key={g} class={i === 0 && elegida >= 0 ? 'elegida' : ''} title={i === 0 && elegida >= 0 ? tr('Claude la señala como la más cercana en esta frase') : undefined}>
               <span class="def-texto">{g}</span>
               {enviar && <button class="def-enviar" aria-label={tr('Enviar «{0}» al creador', g)} title={tr('Enviar al creador de tarjetas')} onClick={() => enviarAlCreador({ definicion: g })}><Icono n="enviar" t={13} /></button>}
             </li>
           ))}
-        </ol>
-        {defsOrdenadas.length > 5 && (
+        </ol>}
+        {!pagina && defsSignificado.length > cuantasDefs && (
           <button class="btn fantasma chico ver-mas" onClick={() => fijarVerTodas(!verTodas)}>
-            {verTodas ? tr('Ver menos') : tr('Ver {0} más', defsOrdenadas.length - 5)}
+            {verTodas ? tr('Ver menos') : tr('Ver {0} más', defsSignificado.length - cuantasDefs)}
             <Icono n={verTodas ? 'arriba' : 'abajo'} t={12} />
           </button>
+        )}
+        {!pagina && referencias.length > 0 && (
+          <div class="ficha-refs">
+            {(['opuesto', 'ver'] as const).map((tipo) => {
+              const xs = referencias.filter((x) => x.tipo === tipo);
+              return xs.length ? (
+                <span key={tipo} class="ficha-ref">
+                  <b>{tipo === 'opuesto' ? tr('Opuesto') : tr('Ver también')}</b>
+                  {xs.map((x) => (
+                    <button key={x.termino} class="enlace" lang={lengua.value.id} onClick={() => fondo.abrirApp(`diccionario?q=${encodeURIComponent(x.termino)}`)}>{x.termino}</button>
+                  ))}
+                </span>
+              ) : null;
+            })}
+          </div>
         )}
         {extras.length > 0 && (
           <>
@@ -988,8 +1095,16 @@ export function Ficha(p: PropsFicha) {
     </button>
   );
 
+  const dock = (
+    <div key="dock" class="ficha-dock" role="tablist" aria-label={tr('Más sobre esta palabra')}>
+      {iaDock.map(botonPestana)}
+      <span class="dock-sep" aria-hidden="true" />
+      {otrasDock.map(botonPestana)}
+    </div>
+  );
+
   return (
-    <div class="ficha">
+    <div class={`ficha ${pagina ? 'ficha-pagina' : ''}`}>
       <div class="ficha-cab">
         <div class="ficha-titulo">
           <div class="ficha-izq">
@@ -1066,17 +1181,13 @@ export function Ficha(p: PropsFicha) {
           {(bloque, boton) => (
             <>
               {bloque}
-              {p.ajustes.ordenContenido.map((b) => (b === 'definiciones' ? <>{bloques[b]}{boton}</> : bloques[b]))}
+              {p.ajustes.ordenContenido.map((b) => (b === 'definiciones' ? <>{bloques[b]}{boton}</> : b === 'pestanas' && pagina ? <>{dock}{bloques[b]}</> : bloques[b]))}
             </>
           )}
         </ConSentido>
       </div>
 
-      <div class="ficha-dock" role="tablist" aria-label={tr('Más sobre esta palabra')}>
-        {iaDock.map(botonPestana)}
-        <span class="dock-sep" aria-hidden="true" />
-        {otrasDock.map(botonPestana)}
-      </div>
+      {!pagina && dock}
 
       {(p.alCrear || p.alEnviar) && (
         <div class="ficha-pie">

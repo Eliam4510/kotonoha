@@ -2,6 +2,16 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.28.0 · 2026-11-09
+
+- **Un diccionario completo, a toda la ventana.** La página del diccionario usa todo el ancho: la lista de resultados a la izquierda, la palabra en el centro y, a la derecha, sus kanji, sus opuestos, las que significan lo mismo y las que se leen igual. Con menos ancho pasa a dos columnas y, en una ventana estrecha, a una. Las palabras se leen mucho mejor: más grandes, con una letra gótica de lectura fácil y la lectura siempre encima. Cada sentido junta sus glosas y lleva encima su clase de palabra (verbo godan, transitivo, coloquial), separado por diccionario, y la página abre sin ninguna pestaña: ni audio ni Claude hasta que se piden.
+- **Listas en tarjetas.** Resultados, sinónimos, homófonos, opuestos, onomatopeyas y las demás categorías salen como tarjetas grandes, con la lectura encima, el significado debajo, una estrella si es de uso común y un punto si ya la conoces o la estás aprendiendo. Escrita en kana, la búsqueda separa las palabras que se leen así (のむ da 飲む y 呑む); con kanji, da también las que empiezan por ella (日本 da 日本語 y 日本人).
+- **Opuestos y «ver también».** Las referencias de JMdict en inglés ya no se mezclan con las definiciones: salen aparte, como palabras que se pueden abrir, con su significado en el primer diccionario. 上手 tiene a 下手 como opuesto.
+- **Donde la has visto, con su minuto.** Bajo la palabra, las frases de tus videos y textos en que apareció, con la lectura encima y la palabra resaltada aunque vaya conjugada. Las de un video llevan el minuto y **Volver a 12:34**: trae la pestaña del video si sigue abierta, o lo abre, y salta a ese momento. También en la pestaña **Ejemplos** de la ficha sobre el video.
+- **La página de un kanji.** Buscar un kanji suelto, como 愛, abre su página: sus trazos en grande, lo que significa, su nivel y sus lecturas, sus piezas de KanjiVG con el radical y la parte que le da el sonido, las palabras que ya conoces con él, las de uso común que lo llevan, dónde lo has visto, cómo se ve impreso, en letra de libro y a mano, y **Origen y cómo recordarlo**, con Claude. Si también es palabra, **Palabra** lo abre como tal.
+- **Tamaño, ancho y letra.** Junto al buscador se cambian el tamaño de las palabras y el ancho; en **Ajustes, Diccionarios, Página del diccionario**, también la letra: gótica, redondeada, de libro o la de escribir a mano de los libros de texto.
+- La ficha ya no enseña como definición la fila de grafías de JMdict (日本にほん★にっぽん★).
+
 ## 0.27.7 · 2026-11-09
 
 - **La Ayuda de lectura se llama ahora Biblioteca.** Es el nombre que ya usaban el Cuaderno («Guardar en la biblioteca») y las copias de seguridad. Cambia en la barra lateral, el menú de la extensión, el visor y los mensajes, en los seis idiomas de la interfaz, en la documentación y en sus imágenes.
@@ -227,6 +237,16 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.28.0 · 2026-11-09
+
+- **A complete dictionary, across the whole window.** The dictionary page uses the full width: the results list on the left, the word in the center and, on the right, its kanji, its opposites, the words with the same meaning and the words read the same way. With less width it switches to two columns and, in a narrow window, to one. Words are much easier to read: larger, in an easy-to-read sans typeface, with the reading always above. Each sense groups its glosses and shows its part of speech above them (godan verb, transitive, colloquial), separately for each dictionary, and the page opens with no tab open: no audio and no Claude until you ask.
+- **Lists as cards.** Results, synonyms, homophones, opposites, onomatopoeia and the other categories are large cards, with the reading above, the meaning below, a star if the word is common and a dot if you already know it or are learning it. Written in kana, a search separates the words read that way (のむ gives 飲む and 呑む); with kanji, it also gives the words that start with it (日本 gives 日本語 and 日本人).
+- **Opposites and “see also”.** The references in JMdict in English no longer mix with the definitions: they appear separately, as words you can open, with their meaning in your first dictionary. 上手 has 下手 as its opposite.
+- **Where you've seen it, with the minute.** Below the word, the sentences from your videos and texts where it appeared, with the reading above and the word highlighted even when conjugated. Those from a video show the minute and **Back to 12:34**: it brings up the video's tab if it is still open, or opens it, and jumps to that moment. Also in the **Examples** tab of the word panel over the video.
+- **A kanji's own page.** Looking up a single kanji, such as 愛, opens its page: its strokes in large size, what it means, its level and readings, its KanjiVG components with the radical and the part that gives the sound, the words you already know with it, the common words that contain it, where you have seen it, how it looks in print, book and handwritten type, and **Origin and how to remember it**, with Claude. If it is also a word, **Word** opens it as such.
+- **Size, width and typeface.** Next to the search box you change the size of the words and the width; in **Settings, Dictionaries, Dictionary page**, the typeface too: sans, rounded, book, or the handwritten type of textbooks.
+- The word panel no longer shows JMdict's spellings row as a definition (日本にほん★にっぽん★).
 
 ## 0.27.7 · 2026-11-09
 
