@@ -39,6 +39,14 @@ describe('detección de gramática sin IA', () => {
     expect(patrones('ここで写真を撮ってはいけません')).toContain('〜てはいけない');
   });
 
+  it('〜ので es «porque», no el explicativo のです, のでしょう, のである o のではない', () => {
+    for (const f of ['どうしたのですか。', '行ったのです。', 'そうなのでしょうか。', '捨てられたのである。', '知らないのではないか。']) expect(patrones(f)).not.toContain('〜ので');
+    for (const f of ['雨が降ったので、行かなかった。', '疲れたのでもう寝る。', '高いので買わない。', '静かなので好きだ。']) expect(patrones(f)).toContain('〜ので');
+    // Y 〜のに no es のには (の + には): «para el frío», no «a pesar de».
+    expect(patrones('寒いのには困った')).not.toContain('〜のに');
+    expect(patrones('知ってるのに、黙っていた')).toContain('〜のに');
+  });
+
   it('palabras que se parecen a un patrón y no lo son', () => {
     // La interjección なるほど no es 〜ほど; sí lo es cuando sigue a un adjetivo o a に.
     expect(patrones('なるほど、そういうことか')).not.toContain('〜ほど');
