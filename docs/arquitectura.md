@@ -206,6 +206,17 @@ La memoria no crece con el tiempo, y el ritmo se mantiene. La memoria de video i
 
 **Recuperación.** Destruir el dispositivo WebGPU produce el mismo evento que un reinicio del controlador. Whisper retoma el trabajo a los 27 s, sin perder ni desordenar lo transcrito, y al segundo fallo se detiene con un aviso.
 
+### Moras de la práctica del acento
+
+narabas, un wav2vec2 que da cada 20 ms la probabilidad de cada fonema del japonés, se probó de dos maneras con pares mínimos (おばあさん y おばさん, きって y きて…) dichos por dos voces de AivisSpeech:
+
+- **Alinear la lectura esperada**, con el alineamiento forzado de narabas, y medir lo que dura cada mora especial. Una mora que faltaba recibía igualmente su trozo de tiempo, y la duración no la separaba bien de una dicha. Tampoco mejoró el juicio del tono: con las moras alineadas no acertó más que repartiendo cada palabra a partes iguales (61 de 76 veredictos), así que el tono se juzga como antes.
+- **Lo que oye por su cuenta**, el fonema más probable de cada marco, comparado con la lectura por la distancia de edición. Es lo que se usa: vio 17 de 22 moras que faltaban y 10 de 10 de más, sin avisos en 22 de 24 frases bien dichas. La っ delante de s, sh, z, j, h o f no se juzga: el modelo no da su símbolo ni dicha bien.
+
+En la GPU oye lo mismo que ONNX Runtime en el procesador, fonema a fonema. Antes de usarla, el trabajador la comprueba con una señal fija; con Kokoro, la misma GPU daba valores imposibles.
+
+PASQA, un modelo que puntúa la pronunciación de una frase entera, quedó fuera: convertirlo exige una versión concreta de Python, de PyTorch y de s3prl, y no se pudo medir.
+
 ### Coste del lector de páginas
 
 Tiempo del hilo principal, con todas las palabras desconocidas y furigana en todas: el peor caso. Medido en Edge a 1366×860 con `Performance.getMetrics`, con el lector ya cargado.

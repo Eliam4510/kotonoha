@@ -61,7 +61,7 @@ const ajustar = (cambios) =>
     const d = await chrome.storage.local.get('ajustes');
     await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), ...cambios } });
   }, cambios);
-await ajustar({ idiomaInterfaz: 'es', idiomaObjetivo: 'ja', whisperModelo: 'auto', bienvenidaVista: true, tema: 'oscuro', avisarVersiones: false });
+await ajustar({ idiomaInterfaz: 'es', idiomaObjetivo: 'ja', whisperModelo: 'auto', bienvenidaVista: true, tema: 'oscuro', avisarVersiones: false, practicaMoras: false });
 
 const p = await contexto.newPage();
 const errores = [];

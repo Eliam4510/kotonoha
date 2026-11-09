@@ -329,6 +329,8 @@ export interface Ajustes {
   guardarHistorial: boolean;
   /** Mirar una vez al día en GitHub si hay una versión nueva, y avisar. */
   avisarVersiones: boolean;
+  /** En la práctica del acento, comprobar también las っ, las ん y las vocales largas con narabas (1,26 GB la primera vez). */
+  practicaMoras: boolean;
 }
 
 export interface AjustesVozLocal {
@@ -539,6 +541,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   frecuenciaMaxRecomendada: 20000,
   guardarHistorial: true,
   avisarVersiones: true,
+  practicaMoras: false,
 };
 
 const CLAVE = 'ajustes';

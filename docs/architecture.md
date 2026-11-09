@@ -206,6 +206,17 @@ Memory does not grow over time, and the pace holds. Video memory includes the wh
 
 **Recovery.** Destroying the WebGPU device produces the same event as a driver restart. Whisper resumes work after 27 s, without losing or reordering what was transcribed, and on a second failure it stops with a notice.
 
+### Morae in pitch accent practice
+
+narabas, a wav2vec2 that gives the probability of each Japanese phoneme every 20 ms, was tried in two ways with minimal pairs (おばあさん and おばさん, きって and きて…) said by two AivisSpeech voices:
+
+- **Aligning the expected reading**, with narabas’ forced alignment, and measuring how long each special mora lasts. A missing mora still received its slice of time, and duration did not separate it well from one that was said. Nor did it improve the pitch verdicts: with aligned morae it was right no more often than splitting each word into equal parts (61 of 76 verdicts), so pitch is judged as before.
+- **What it hears on its own**, the most likely phoneme in each frame, compared with the reading by edit distance. This is what is used: it caught 17 of 22 missing morae and 10 of 10 extra ones, with no warnings on 22 of 24 sentences said correctly. A っ before s, sh, z, j, h or f is not judged: the model does not output its symbol even when it is said.
+
+On the GPU it hears the same as ONNX Runtime on the processor, phoneme by phoneme. Before using it, the worker checks it with a fixed signal; with Kokoro, the same GPU gave impossible values.
+
+PASQA, a model that scores the pronunciation of a whole sentence, was left out: converting it requires specific versions of Python, PyTorch and s3prl, and it could not be measured.
+
 ### Cost of the page reader
 
 Main thread time, with every word unknown and furigana on all of them: the worst case. Measured in Edge at 1366×860 with `Performance.getMetrics`, with the reader already loaded.

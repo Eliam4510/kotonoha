@@ -24,6 +24,7 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx), PaddlePaddle 제작 | 책의 문자 인식, 사용할 때 내려받음. 사전은 확장 프로그램에 포함(`modelos/`) | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr), kha-white 제작, [onnx-community의 ONNX 변환](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), 그리고 [ogkalu의 말풍선 감지기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 만화의 문자 인식, 사용할 때 내려받음 | Apache-2.0 |
 | [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), hexgrad 제작, [onnx-community의 ONNX 변환](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX), 그리고 [Thorsten 목소리](https://huggingface.co/rhasspy/piper-voices)의 [Piper](https://github.com/rhasspy/piper) | 영어와 독일어 신경망 음성, 사용할 때 내려받음 | Apache-2.0와 MIT; Thorsten 목소리는 CC0 데이터셋으로 학습 |
+| [narabas](https://github.com/darashi/narabas), darashi 제작, ReazonSpeech 말뭉치로 학습한 [모델](https://github.com/darashi/narabas-models/releases/tag/v0) 포함 | 고저 악센트 연습에서 모라를 확인하는 일본어 음소 모델. 도구 자체와 마찬가지로 사용할 때 작성자의 배포에서 내려받으며, Kotonoha는 재배포하지 않음 | 도구는 MIT; 모델은 별도 라이선스 없이 공개됨 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | 내 파일 읽기 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg 코어, 컴파일 시 복사 | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize)와 [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | 신경망 음성의 음소, 컴파일 시 영어와 독일어 사전만 넣어 복사 | MIT와 GPL-3.0-or-later |

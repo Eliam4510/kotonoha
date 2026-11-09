@@ -411,7 +411,7 @@ export interface FuenteMuestras {
  * Lee el audio por partes para no tener una película entera en memoria.
  * Con `pcmCrudo` la URL ya trae las muestras, extraídas con ffmpeg: es la vía para archivos grandes.
  */
-async function abrirAudio(url: string, pcmCrudo: boolean): Promise<FuenteMuestras | null> {
+export async function abrirAudio(url: string, pcmCrudo: boolean): Promise<FuenteMuestras | null> {
   const respuesta = await fetch(url);
   if (pcmCrudo) {
     const blob = await respuesta.blob();

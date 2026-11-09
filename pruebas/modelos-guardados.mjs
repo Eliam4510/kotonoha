@@ -109,6 +109,20 @@ comprobar((await quedan()).length === 0, 'Al borrar el último no queda nada', (
 comprobar(!(await p.locator('#transcripcion').innerText()).includes('Modelos guardados'), 'Y la lista desaparece');
 comprobar((await tarjeta('Whisper Turbo ligero')).includes('MB'), 'La tarjeta vuelve a ofrecer la descarga');
 
+// narabas, el modelo de las moras de la práctica, va en su propia caché: también se lista y se borra.
+await p.evaluate(async () => {
+  const cache = await caches.open('kotonoha-modelo-moras');
+  await cache.put('https://github.com/darashi/narabas-models/releases/download/v0/narabas-v0.onnx', new Response('x', { headers: { 'content-length': '1262530407' } }));
+});
+await abrir();
+lista = await filas();
+comprobar(lista.length === 1 && lista[0].includes('narabas, para las moras de la práctica del acento') && lista[0].includes('1,3 GB'), 'El modelo de las moras de la práctica, con su tamaño', lista.join(' | '));
+comprobar(!(await p.locator('#transcripcion').innerText()).includes('Archivos sueltos'), 'Sin tomarlo por un resto de otro modelo');
+await p.locator('button[aria-label="Borrar: narabas"]').click();
+await p.waitForTimeout(500);
+comprobar(!(await p.evaluate(() => caches.has('kotonoha-modelo-moras'))), 'Borrarlo quita su caché');
+comprobar(!(await p.locator('#transcripcion').innerText()).includes('Modelos guardados'), 'Y la lista vuelve a desaparecer');
+
 // Otro idioma de la interfaz.
 await sw.evaluate(async () => {
   const d = await chrome.storage.local.get('ajustes');

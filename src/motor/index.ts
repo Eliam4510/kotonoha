@@ -24,6 +24,7 @@ import { rellenar } from './prompts';
 import { PAQUETES, paqueteDe } from '../lenguas';
 import * as medios from './medios';
 import * as vozLocal from './vozLocal';
+import * as narabas from './narabas';
 import * as vozNeuronal from './vozNeuronal';
 import * as compatible from './compatible';
 import * as memoria from './memoria';
@@ -649,6 +650,8 @@ atenderFlujos({
   },
   // La práctica del acento: los tokens de la grabación, cada uno con el instante en que empieza, en JSON.
   transcribirPractica: async (emitir, senal, url: string) => JSON.stringify(await whisper.tokensDeGrabacion(url, (e) => emitir(`${JSON.stringify(e)}\n`), senal)),
+  // Y los fonemas que oye narabas en ella, para ver si faltan o sobran っ, ん o vocales largas, en JSON.
+  oirFonemas: async (emitir, senal, url: string) => JSON.stringify(await narabas.fonemasDeGrabacion(url, (e) => emitir(`${JSON.stringify(e)}\n`), senal)),
   // El dictado del Portapapeles: la grabación entera, con el modelo de voz de los ajustes. El resultado es el texto.
   transcribirDictado: async (emitir, senal, url: string) => whisper.transcribirGrabacion(url, await modeloPorOmision(), (e) => emitir(`${JSON.stringify(e)}\n`), senal),
 });

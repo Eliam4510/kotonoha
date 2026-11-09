@@ -24,6 +24,7 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx)，PaddlePaddle 出品 | 书籍的文字识别，使用时下载；字典随扩展程序附带（`modelos/`） | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr)，kha-white 出品，使用 [onnx-community 的 ONNX 转换](https://huggingface.co/onnx-community/manga-ocr-base-ONNX)，以及 [ogkalu 的对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 漫画的文字识别，使用时下载 | Apache-2.0 |
 | [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)，hexgrad 出品，使用 [onnx-community 的 ONNX 转换](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)，以及带 [Thorsten 声音](https://huggingface.co/rhasspy/piper-voices)的 [Piper](https://github.com/rhasspy/piper) | 英语和德语的神经网络语音，使用时下载 | Apache-2.0 和 MIT；Thorsten 的声音用 CC0 数据集训练 |
+| [narabas](https://github.com/darashi/narabas)，darashi 出品，及其用 ReazonSpeech 语料库训练的[模型](https://github.com/darashi/narabas-models/releases/tag/v0) | 日语音素模型，用于在音调重音练习中检查音拍；使用时从作者的发布下载，与该工具本身的做法相同；Kotonoha 不再分发 | 工具为 MIT；模型发布时未附带自己的许可证 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/ffmpeg` | 读取本地文件 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/core` | FFmpeg 核心，编译时复制 | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) 与 [eSpeak NG](https://github.com/espeak-ng/espeak-ng)，`@diffusionstudio/piper-wasm` | 神经网络语音的音素，编译时复制，只含英语和德语词典 | MIT 和 GPL-3.0-or-later |

@@ -102,7 +102,7 @@ El **Portapapeles** recoge lo que se copia en cualquier sitio y lo muestra con s
 
 <img src="docs/img/practica.png" alt="Práctica del acento tonal: la curva del tono de la voz sobre el acento esperado de cada palabra" width="100%">
 
-**Practicar** enseña el acento de cada palabra de la frase. Se lee en voz alta y Kotonoha pone la curva del tono de la voz sobre la esperada, dice en qué palabras cae el tono en otro sitio y señala las pausas largas. El tono se mide en el navegador y la grabación se transcribe en el equipo, sin salir de él. Con AivisSpeech o VOICEVOX abiertos, la voz modelo lee cada frase con el acento del diccionario, gratis y también sin salir del equipo.
+**Practicar** enseña el acento de cada palabra de la frase. Se lee en voz alta y Kotonoha pone la curva del tono de la voz sobre la esperada, dice en qué palabras cae el tono en otro sitio, señala las pausas largas y, si se quiere, las っ, ん y vocales largas que faltan o sobran. El tono se mide en el navegador y la grabación se transcribe en el equipo, sin salir de él. Con AivisSpeech o VOICEVOX abiertos, la voz modelo lee cada frase con el acento del diccionario, gratis y también sin salir del equipo.
 
 ### Cómo se escribe cada kanji
 
