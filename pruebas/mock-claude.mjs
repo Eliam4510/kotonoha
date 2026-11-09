@@ -23,6 +23,10 @@ function respuestaPara(cuerpo, idioma = 'es') {
   if (formato?.properties?.significado && texto.includes('Palabra: 赤い')) {
     return JSON.stringify({ significado: 'rojas, del color del fuego', uso: 'literal', nota: 'Aquí describe el color de las estrellas del sueño: es el sentido habitual de la palabra.', definicion: 0 });
   }
+  // La tarjeta para compartir del README japonés, que presenta el inglés.
+  if (formato?.properties?.significado && idioma === 'ja' && texto.includes('Palabra: tired')) {
+    return JSON.stringify({ significado: 'うんざりして、飽きて', uso: 'expresion', nota: 'ここでは体の疲れではなく、何もせずに座っていることにうんざりしている気持ちです。tired of で「〜に飽きる」。', definicion: 0 });
+  }
   if (formato?.properties?.significado) {
     return JSON.stringify({ significado: t.sentido, uso: 'figurado', nota: t.nota, definicion: 0 });
   }

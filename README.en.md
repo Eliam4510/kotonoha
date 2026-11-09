@@ -106,6 +106,12 @@ The **Notebook** is a full-width page to write and paste text in the language yo
 
 The word panel shows the stroke order of every kanji in the word, one stroke at a time and on a loop, with their numbers, and below, the words you already know with the same kanji.
 
+### Share what you find
+
+<img src="docs/img/tarjeta.en.png" alt="Card for the word 食べる with what it means in the sentence, ready to paste into a chat" width="520">
+
+**Share as image**, on the word panel, turns a word or a grammar point into a card with what it means in that sentence and the sentence it appeared in, and leaves it on the clipboard to paste into any chat with Ctrl+V. It comes in ink or paper, like the themes.
+
 ### German too
 
 The same tools work for German: the word panel tells you which word each conjugated or declined form comes from, such as *ging* from *gehen* or *Häuser* from *Haus*, finds separable verbs even when the particle sits at the end of the sentence, and gives the pronunciation in IPA. Its dictionaries come from Wiktionary, and German speech is transcribed by Parakeet. Speakers of other languages can study English the same way. Comics are read balloon by balloon, from left to right, and sentences are spoken by neural voices on your own computer: Kokoro in English and Piper in German. Each language keeps its own words, cards and settings, and switching takes one click.

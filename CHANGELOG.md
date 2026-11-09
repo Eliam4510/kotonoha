@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.22.0 · 2026-11-09
+
+- **Compartir como imagen.** La ficha tiene un botón **Compartir como imagen**, junto a la frecuencia, que dibuja una tarjeta con la palabra, su furigana y su acento, lo que significa en esa frase (o lo que dice el diccionario), la frase donde apareció con la palabra resaltada y el título del video o del libro, y la copia al portapapeles al momento, lista para pegarla en un chat con Ctrl+V. Cada punto de **Gramática en esta frase** tiene el mismo botón. La tarjeta sale en **Tinta** o en **Papel** y se puede guardar como PNG.
+
 ## 0.21.0 · 2026-11-09
 
 - **El Cuaderno.** El Portapapeles pasa a ser un cuaderno: una página a todo lo ancho, sin la hoja que lo encogía, con **Editar** y **Leer** en la misma página. Al editar se escribe con formato, como en un procesador de notas: títulos, subtítulos, listas con subpuntos, citas, código y negritas, con botones y con los atajos de costumbre (`# `, `- `, `・`, `1. `, `> `, Tab, Ctrl+B). **Organizar** le pide a Claude que estructure un texto pegado de corrido sin cambiar sus palabras, y Ctrl+Z lo deshace. Lo escrito se guarda solo; **Guardar en la biblioteca** lo lleva a la biblioteca, donde se sigue guardando, y **Editar en el Cuaderno** vuelve a abrir un texto de la biblioteca.
@@ -167,6 +171,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.22.0 · 2026-11-09
+
+- **Share as image.** The word panel has a **Share as image** button, next to the frequency, that draws a card with the word, its furigana and pitch accent, what it means in that sentence (or what the dictionary says), the sentence it appeared in with the word highlighted and the title of the video or book, and copies it to the clipboard at once, ready to paste into a chat with Ctrl+V. Each point under **Grammar in this sentence** has the same button. The card comes in **Ink** or **Paper** and can be saved as a PNG.
 
 ## 0.21.0 · 2026-11-09
 

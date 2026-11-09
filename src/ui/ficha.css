@@ -277,6 +277,25 @@ button.chip-gram:active { transform: scale(0.96); }
 .corregir-fila .campo { flex: 1 1 auto; width: 60px; min-width: 60px; min-height: 30px; height: 30px; padding: 0 12px; border-radius: var(--r-pill); font-size: 13px; }
 .corregir-estado { display: block; margin-top: 8px; }
 
+/* Compartir como imagen: la tarjeta recién copiada, a la vista */
+.compartir { margin-bottom: 12px; padding: 10px 12px 12px 14px; border-radius: var(--r-3); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); animation: kk-aparecer 0.2s var(--salida); }
+.ficha-patron .compartir { margin: 2px 0 0; }
+.compartir-cab { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; }
+.compartir-cab b { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.compartir-vista { display: flex; justify-content: center; border-radius: var(--r-2); overflow: hidden; background: var(--superficie-3); }
+.compartir-vista img { display: block; width: 100%; height: auto; max-height: 340px; object-fit: contain; }
+.compartir-vista .esqueleto { display: block; width: 100%; height: 180px; border-radius: 0; }
+.compartir-estado { display: flex; align-items: center; gap: 7px; min-height: 22px; margin: 9px 0 8px; font-size: 12.5px; font-weight: 600; color: var(--texto-2); }
+.compartir-estado.copiada { color: var(--exito); }
+.compartir-estado.sin-copiar { color: var(--aviso); }
+.compartir-estado.error { color: var(--error); }
+.compartir-estado .giro { width: 13px; height: 13px; }
+.compartir-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.compartir-acciones .segmentado button { height: 26px; padding: 0 10px; font-size: 12px; }
+.compartir-hueco { flex: 1; }
+.ficha-patron-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.ficha-patron-cab .ayuda { padding-top: 4px; }
+
 /* Indicador de actividad pequeño */
 .giro { display: inline-block; width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--superficie-4); border-top-color: var(--hoja); animation: kk-giro 0.7s linear infinite; }
 @keyframes kk-giro { to { transform: rotate(360deg); } }

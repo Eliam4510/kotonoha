@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.21.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.22.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -27,6 +27,7 @@ Estado de cada función en la versión 0.21.0, con la forma en que se ha verific
 | Ficha de palabra: definiciones, estado, frecuencia, audio, imágenes, ejemplos y enlaces | Automática |
 | Orden de los trazos de cada kanji, animado y en bucle, con pausa y avance de uno en uno | Automática, con datos reales de KanjiVG |
 | Kanji que ya conoces: junto a los trazos, las palabras conocidas o en aprendizaje con cada kanji de la palabra, las conocidas primero | Automática, con palabras sembradas en la base |
+| Compartir como imagen: la tarjeta de la palabra (furigana, acento, lo que significa en la frase o el diccionario, la frase con la palabra resaltada) o de un punto de gramática, copiada al portapapeles al pulsar; Tinta o Papel; Guardar imagen | Automática, con un Claude simulado, leyendo el portapapeles |
 | La ficha abre con el diccionario, sin ninguna petición a Claude | Simulador y sesión real |
 | Qué significa en esta frase, explicar, desglosar y traducir con Claude, a petición | Simulador, y sesión real para el significado en la frase |
 | Cada respuesta se guarda: la misma palabra en la misma frase no se vuelve a pedir | Simulador y sesión real |

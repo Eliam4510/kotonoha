@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.21.0, along with how it has been verified.
+Status of each feature in version 0.22.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -27,6 +27,7 @@ Status of each feature in version 0.21.0, along with how it has been verified.
 | Word panel: definitions, status, frequency, audio, images, examples and links | Automated |
 | Stroke order of each kanji, animated and looping, with pause and step by step | Automated, with real KanjiVG data |
 | Kanji you already know: next to the strokes, the known or learning words with each kanji of the word, known ones first | Automated, with words seeded in the database |
+| Share as image: a card for the word (furigana, pitch accent, what it means in the sentence or the dictionary, the sentence with the word highlighted) or for a grammar point, copied to the clipboard on click; Ink or Paper; Save image | Automated, with a simulated Claude, reading the clipboard |
 | The word panel opens with the dictionary, with no request to Claude | Simulator and real session |
 | Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator, and real session for the meaning in the sentence |
 | Every answer is stored: the same word in the same sentence is never requested again | Simulator and real session |

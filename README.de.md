@@ -106,6 +106,12 @@ Das **Notizbuch** ist eine Seite über die ganze Breite, um Text in der Lernspra
 
 Das Wortfenster zeigt die Strichfolge jedes Kanji im Wort, Strich für Strich und in Schleife, mit ihren Nummern, und darunter die Wörter, die du mit demselben Kanji schon kennst.
 
+### Teilen, was man findet
+
+<img src="docs/img/tarjeta.de.png" alt="Karte des Wortes 食べる mit seiner Bedeutung im Satz, bereit zum Einfügen in einen Chat" width="520">
+
+**Als Bild teilen** im Wortfenster macht aus einem Wort oder einem Grammatikpunkt eine Karte mit seiner Bedeutung in diesem Satz und dem Satz, in dem es vorkam, und legt sie in die Zwischenablage, um sie mit Strg+V in jeden Chat einzufügen. Es gibt sie in Tinte oder Papier, wie die Designs.
+
 ### Auch Englisch
 
 <img src="docs/img/ingles-subtitulos.de.png" alt="Wortfenster zu einem englischen Wort über einem Video, mit der Aussprache in IPA" width="100%">

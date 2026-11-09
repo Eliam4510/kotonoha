@@ -110,6 +110,12 @@ El **Cuaderno** es una página a todo lo ancho para escribir y pegar texto en la
 
 La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y en bucle, con sus números, y debajo, las palabras que ya conoces con ese mismo kanji.
 
+### Para compartir lo que encuentras
+
+<img src="docs/img/tarjeta.png" alt="Tarjeta de la palabra 食べる con lo que significa en la frase, lista para pegar en un chat" width="520">
+
+**Compartir como imagen**, en la ficha, convierte una palabra o un punto de gramática en una tarjeta con lo que significa en esa frase y la frase donde apareció, y la deja en el portapapeles para pegarla en cualquier chat con Ctrl+V. Sale en tinta o en papel, como los temas.
+
 ### Inglés y alemán
 
 <img src="docs/img/ingles-subtitulos.png" alt="Ficha de una palabra inglesa sobre un video, con la pronunciación en IPA" width="100%">
