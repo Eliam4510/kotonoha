@@ -131,7 +131,7 @@ Kotonoha funktioniert ohne jeden Schlüssel. Ein optionaler Claude-Schlüssel er
 | Transkription auf dem eigenen Rechner | Prüfung der Furigana-Lesungen |
 | Karten für Anki und eingebaute Wiederholung | Geschichten passend zum Niveau |
 
-Normale Nutzung kostet wenige Cent im Monat. Der Schlüssel wird nur im Browser gespeichert.
+Normale Nutzung kostet wenige Cent im Monat. Der Schlüssel wird nur im Browser gespeichert. Aufgabe für Aufgabe lassen sich statt Claude auch OpenRouter, DeepSeek, OpenAI oder ein Modell auf dem eigenen Rechner mit LM Studio oder Ollama nutzen.
 
 ## Installation
 

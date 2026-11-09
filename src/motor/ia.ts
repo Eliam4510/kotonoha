@@ -14,6 +14,9 @@ import { baseGeneral, db } from './db';
 import { tr } from '../compartido/i18n';
 import { lengua, motorLengua } from './lengua';
 import { rellenar, type VariablesPrompt } from './prompts';
+import * as compatible from './compatible';
+import { separarModelo, valorDeModelo } from '../compartido/proveedores';
+import { usoDeCompatible } from '../nucleo/compatible';
 
 let claveApi = '';
 let urlBase: string | undefined;
@@ -127,9 +130,32 @@ function anotarConsumo(tarea: string, modelo: string, u: UsoApi | undefined, tit
   const escritura1h = u.cache_creation?.ephemeral_1h_input_tokens ?? 0;
   const escritura5m = u.cache_creation?.ephemeral_5m_input_tokens ?? Math.max(0, (u.cache_creation_input_tokens ?? 0) - escritura1h);
   const uso: UsoTokens = { entrada: u.input_tokens ?? 0, salida: u.output_tokens ?? 0, cacheEscritura5m: escritura5m, cacheEscritura1h: escritura1h, cacheLectura: u.cache_read_input_tokens ?? 0 };
+  anotarUso(tarea, modelo, uso, costeDe(modelo, uso), titulo);
+}
+
+function anotarUso(tarea: string, modelo: string, uso: UsoTokens, coste: number, titulo?: string) {
   const t = Date.now();
   gastadoCache = null;
-  baseGeneral.consumo.add({ ...uso, t, dia: claveDia(t), mes: claveMes(t), tarea, modelo, coste: costeDe(modelo, uso), titulo }).catch((e) => console.warn('Kotonoha: no se pudo anotar el gasto', e));
+  baseGeneral.consumo.add({ ...uso, t, dia: claveDia(t), mes: claveMes(t), tarea, modelo, coste, titulo }).catch((e) => console.warn('Kotonoha: no se pudo anotar el gasto', e));
+}
+
+/**
+ * Una petición a otro proveedor, con la API de OpenAI. Lo que se manda es lo mismo que a Claude; el guion va dentro de las
+ * instrucciones, porque la caché de prompts de Claude no existe allí. El coste es el que dice el proveedor (OpenRouter lo
+ * dice); los demás, y los modelos del propio equipo, cuentan cero.
+ */
+async function ejecutarCompatible(o: OpcionesPeticion, id: string, modelo: string, tarea: TareaIA, emitir?: (t: string) => void, senal?: AbortSignal): Promise<string> {
+  const p = o.a.proveedores.find((x) => x.id === id);
+  if (!p) throw new Error(tr('El proveedor de esta tarea ya no está en Ajustes: elige otro modelo para ella.'));
+  const sistema = (o.a.usarGuion || o.siempreGuion) && o.guion ? `${o.sistema}\n\n${o.titulo ? `Título: ${o.titulo}\n` : ''}Texto completo, como contexto:\n${o.guion}` : o.sistema;
+  try {
+    const r = await compatible.pedir(p, { modelo, sistema, usuario: o.usuario, imagen: o.imagen, maxTokens: o.maxTokens ?? 16000, esquema: o.formato?.schema }, emitir, senal);
+    anotarUso(tarea, valorDeModelo(id, r.modelo ?? modelo), usoDeCompatible(r.uso), r.uso?.cost ?? 0, o.titulo);
+    return r.texto;
+  } catch (e) {
+    if (senal?.aborted) return '';
+    throw e instanceof Error ? e : new Error(String(e));
+  }
 }
 
 /** Lo gastado este mes, para no pasar del tope. Se recuerda un momento: se pregunta en cada petición. */
@@ -151,6 +177,8 @@ async function comprobarTope(a: Ajustes) {
 
 async function ejecutar(o: OpcionesPeticion, emitir?: (t: string) => void, senal?: AbortSignal): Promise<string> {
   await comprobarTope(o.a);
+  const { proveedor, modelo } = separarModelo(o.a.modelos[o.profundo ? 'profundo' : o.tarea]);
+  if (proveedor) return ejecutarCompatible(o, proveedor, modelo, o.profundo ? 'profundo' : o.tarea, emitir, senal);
   try {
     const flujo = abrirFlujo(o, senal);
     if (emitir) (flujo as unknown as { on(e: 'text', fn: (d: string) => void): void }).on('text', (d) => emitir(d));
@@ -570,6 +598,15 @@ export async function analisisProfundo(
     hechas += hasta - desde;
     await alTrozo(r, desde, hasta, hechas, entradas.length);
   });
+}
+
+/** Una petición mínima a un modelo de otro proveedor: dice si la clave y el modelo funcionan. */
+export async function probarProveedor(a: Ajustes, id: string, modelo: string): Promise<string> {
+  const p = a.proveedores.find((x) => x.id === id);
+  if (!p) throw new Error(tr('El proveedor de esta tarea ya no está en Ajustes: elige otro modelo para ella.'));
+  const r = await compatible.pedir(p, { modelo, sistema: 'Eres una prueba de conexión.', usuario: 'Responde únicamente con la palabra 接続.', maxTokens: 200 });
+  anotarUso('conexion', valorDeModelo(id, r.modelo ?? modelo), usoDeCompatible(r.uso), r.uso?.cost ?? 0);
+  return `${r.texto.trim()} (${r.modelo ?? modelo})`;
 }
 
 export async function probarConexion(a: Ajustes): Promise<string> {

@@ -760,6 +760,17 @@ section .ap-botones { margin-top: 10px; }
 .ap-clave-form .campo { flex: 1; min-width: 0; }
 .ap-clave-form .campo:focus { border-color: var(--fuji); box-shadow: 0 0 0 3px var(--fuji-suave); }
 .ap-clave-form .btn { height: 40px; }
+/* Otros proveedores de IA: una tarjeta como la de la clave de Claude por cada uno. */
+.ap-proveedor { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.ap-proveedor .ap-clave-estado { flex-wrap: wrap; margin-bottom: 0; }
+.ap-proveedor .ap-clave-estado .ayuda { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-proveedor-quitar { margin-left: auto; }
+.ap-proveedor-campos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ap-proveedor-campos .campo { flex: 1 1 200px; min-width: 0; }
+.ap-proveedor-casilla { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-2); }
+.ap-proveedor-modelos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ap-proveedor-modelo { display: inline-flex; align-items: center; gap: 2px; padding-right: 2px; font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 12px; }
+.ap-proveedores-anadir { flex-wrap: wrap; }
 .ap-clave .ap-botones { margin-top: 10px; }
 
 .ap-prompts { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }

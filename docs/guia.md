@@ -28,11 +28,14 @@ La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere e
 |---|---|---|
 | Diccionarios | Ajustes, Diccionarios | JMdict en español, inglés o alemán, acento tonal de Kanjium y frecuencia de JPDB. Se descargan una vez y quedan en el navegador |
 | Clave de la API de Claude | Ajustes, Claude | Explicaciones, revisión de lecturas, traducción y corrección. Se guarda solo en el navegador |
+| Otros proveedores de IA | Ajustes, Otros proveedores de IA | OpenRouter, DeepSeek u OpenAI con su clave, o LM Studio y Ollama en el propio equipo, para las tareas que se elijan. Claude sigue siendo el de siempre |
 | Idioma y nivel | Ajustes, Idioma y nivel | Idioma de la interfaz, y por separado el de las explicaciones y las traducciones. El nivel adapta las explicaciones y decide cuánto furigana se ve al principio |
 | Idioma que estudias | **Inicio** y la barra lateral, Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés, inglés o alemán. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
 La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
+
+**Otros proveedores de IA.** En **Ajustes, Otros proveedores de IA** se añaden OpenRouter, DeepSeek u OpenAI, con su clave, o LM Studio y Ollama en el propio equipo, sin clave. **Ver sus modelos** busca los que ofrece cada uno y **Probar la conexión** le hace una petición mínima. Después, en **Modelo y esfuerzo por tarea**, cada tarea puede usar uno de sus modelos. Las respuestas con estructura se piden con su esquema JSON y, si el proveedor no lo admite, como DeepSeek, en modo JSON con el esquema en las instrucciones; si no admite tantos tokens de respuesta, se piden menos. El gasto se anota con el coste que dice el proveedor (OpenRouter lo dice), y los modelos del propio equipo cuentan cero. Las claves se guardan aparte, como la de Claude, y nunca llegan a las páginas. Las instrucciones están afinadas para Claude: con otros modelos, las respuestas pueden salir peores. Ollama solo atiende a las extensiones si se arranca con `OLLAMA_ORIGINS=chrome-extension://*`.
 
 ### Adaptarla
 

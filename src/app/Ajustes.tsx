@@ -3,7 +3,7 @@
 import type { InfoAyudante, MotorVozLocal } from '../compartido/api';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { type Ajustes, type AjustesVozLocal, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
+import { AJUSTES_INICIALES, type Ajustes, type AjustesVozLocal, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
 import { borrarArchivosSueltos, borrarModeloGuardado, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
@@ -21,6 +21,7 @@ import { estudiarLengua, lengua } from '../ui/lengua';
 import { buscarVersionNueva, type VersionPublicada } from '../compartido/actualizaciones';
 import { ordenInstalarAyudante, URL_ULTIMA_VERSION, versionInstalada } from '../compartido/proyecto';
 import { nombreCorto } from '../nucleo/voces';
+import { CLAVES_PROVEEDORES, idParaProveedor, type ProveedorConocido, type ProveedorIA, PROVEEDORES_CONOCIDOS, separarModelo, valorDeModelo } from '../compartido/proveedores';
 import { decirConNavegador, vocesDeLaLengua } from '../ui/vozNavegador';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
@@ -311,9 +312,17 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
             <div class="ap-opcion-texto"><b>{tr(n)}</b></div>
             <div class="ap-opcion-control">
               <select class="selector" aria-label={tr('Modelo para {0}', tr(n))} value={a.modelos[t]} onChange={(e) => cambiar({ modelos: { ...a.modelos, [t]: e.currentTarget.value } })}>
-                {MODELOS.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                <optgroup label="Claude">
+                  {MODELOS.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                </optgroup>
+                {a.proveedores.filter((p) => p.modelos.length).map((p) => (
+                  <optgroup key={p.id} label={p.nombre}>
+                    {p.modelos.map((m) => <option key={m} value={valorDeModelo(p.id, m)}>{m}</option>)}
+                  </optgroup>
+                ))}
               </select>
-              <select class="selector" aria-label={tr('Esfuerzo para {0}', tr(n))} value={a.esfuerzos[t]} onChange={(e) => cambiar({ esfuerzos: { ...a.esfuerzos, [t]: e.currentTarget.value as Esfuerzo } })}>
+              {/* El esfuerzo es de Claude: los otros proveedores no lo entienden igual. */}
+              <select class="selector" aria-label={tr('Esfuerzo para {0}', tr(n))} disabled={separarModelo(a.modelos[t]).proveedor !== null} value={a.esfuerzos[t]} onChange={(e) => cambiar({ esfuerzos: { ...a.esfuerzos, [t]: e.currentTarget.value as Esfuerzo } })}>
                 <option value="low">{tr('Bajo')}</option>
                 <option value="medium">{tr('Medio')}</option>
                 <option value="high">{tr('Alto')}</option>
@@ -321,6 +330,164 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
             </div>
           </div>
         ))}
+      </div>
+    </Seccion>
+  );
+}
+
+/** Un proveedor añadido: su dirección, su clave (que solo se escribe, nunca se enseña), sus modelos y una prueba. */
+function TarjetaProveedor({ p, guardada, alGuardarClave, alQuitarClave, alCambiar, alQuitar }: {
+  p: ProveedorIA;
+  guardada: boolean;
+  alGuardarClave: (clave: string) => Promise<void>;
+  alQuitarClave: () => Promise<void>;
+  alCambiar: (cambios: Partial<ProveedorIA>) => void;
+  alQuitar: () => void;
+}) {
+  const conocido = PROVEEDORES_CONOCIDOS.find((c) => c.id === p.id);
+  const [clave, fijarClave] = useState('');
+  const [disponibles, fijarDisponibles] = useState<string[] | null>(null);
+  const [nuevo, fijarNuevo] = useState('');
+  const [mensaje, fijarMensaje] = useState<{ texto: string; error?: boolean } | null>(null);
+  const [ocupado, fijarOcupado] = useState(false);
+  const conMensaje = async (fn: () => Promise<string>) => {
+    fijarOcupado(true);
+    fijarMensaje(null);
+    try {
+      fijarMensaje({ texto: await fn() });
+    } catch (e) {
+      fijarMensaje({ texto: e instanceof Error ? e.message : String(e), error: true });
+    } finally {
+      fijarOcupado(false);
+    }
+  };
+  const anadirModelo = () => {
+    const m = nuevo.trim();
+    if (m && !p.modelos.includes(m)) alCambiar({ modelos: [...p.modelos, m] });
+    fijarNuevo('');
+  };
+  const listaId = `modelos-${p.id}`;
+  return (
+    <div class={`ap-clave ap-proveedor ${guardada || !p.conClave ? 'guardada' : ''}`} aria-label={p.nombre} role="group">
+      <div class="ap-clave-estado">
+        <span class={`ap-punto ${guardada || !p.conClave ? 'ia' : ''}`} />
+        <b>{p.nombre}</b>
+        <span class="ayuda">{p.url}</span>
+        <button class="btn fantasma chico ap-proveedor-quitar" onClick={alQuitar}>{tr('Quitar')}</button>
+      </div>
+      {!conocido && (
+        <div class="ap-proveedor-campos">
+          <input class="campo" aria-label={tr('Nombre del proveedor')} value={p.nombre} onChange={(e) => alCambiar({ nombre: e.currentTarget.value.trim() || p.nombre })} />
+          <input class="campo" aria-label={tr('Dirección de su API')} placeholder="https://…/v1" value={p.url} onChange={(e) => alCambiar({ url: e.currentTarget.value.trim() })} />
+          <label class="ap-proveedor-casilla"><input type="checkbox" checked={p.conClave} onChange={(e) => alCambiar({ conClave: e.currentTarget.checked })} /> {tr('Pide clave')}</label>
+        </div>
+      )}
+      {p.conClave && (
+        <form class="ap-clave-form" onSubmit={async (e) => {
+          e.preventDefault();
+          if (!clave.trim()) return;
+          await alGuardarClave(clave.trim());
+          fijarClave('');
+          fijarMensaje({ texto: tr('Clave guardada.') });
+        }}>
+          <input class="campo" type="password" autocomplete="off" aria-label={tr('Clave de {0}', p.nombre)} placeholder={guardada ? tr('Escribe otra para cambiarla') : tr('Clave')} value={clave} onInput={(e) => fijarClave(e.currentTarget.value)} />
+          <button class="btn primario" type="submit" disabled={!clave.trim()}>{tr('Guardar')}</button>
+          {conocido?.dondeClave && !guardada && <a class="btn fantasma chico" href={conocido.dondeClave} target="_blank" rel="noreferrer noopener">{tr('Conseguir una clave')} <Icono n="externo" t={13} /></a>}
+        </form>
+      )}
+      <div class="ap-proveedor-modelos">
+        <span class="ayuda">{tr('Modelos que se ofrecen en cada tarea:')}</span>
+        {p.modelos.map((m) => (
+          <span class="chip ap-proveedor-modelo" key={m}>
+            {m}
+            <button class="btn-icono chico" aria-label={tr('Quitar {0}', m)} onClick={() => alCambiar({ modelos: p.modelos.filter((x) => x !== m) })}><Icono n="cerrar" t={12} /></button>
+          </span>
+        ))}
+        {!p.modelos.length && <span class="ayuda">{tr('Ninguno todavía.')}</span>}
+      </div>
+      <form class="ap-clave-form" onSubmit={(e) => {
+        e.preventDefault();
+        anadirModelo();
+      }}>
+        <input class="campo" list={listaId} aria-label={tr('Modelo que añadir')} placeholder={tr('Nombre del modelo')} value={nuevo} onInput={(e) => fijarNuevo(e.currentTarget.value)} />
+        <datalist id={listaId}>{disponibles?.map((m) => <option key={m} value={m} />)}</datalist>
+        <button class="btn" type="submit" disabled={!nuevo.trim()}>{tr('Añadir')}</button>
+      </form>
+      <div class="ap-botones">
+        <button class="btn chico" disabled={ocupado} onClick={() => conMensaje(async () => {
+          const lista = await motor.modelosProveedor(p.id);
+          fijarDisponibles(lista);
+          return tr('{0} modelos disponibles: escribe el nombre de uno para añadirlo.', lista.length);
+        })}><Icono n="lista" t={14} /> {tr('Ver sus modelos')}</button>
+        <button class="btn chico ia" disabled={ocupado || !p.modelos.length || (p.conClave && !guardada)} onClick={() => conMensaje(async () => tr('Conectado: {0}', await motor.probarProveedor(p.id, p.modelos[0])))}>
+          <Icono n={ocupado ? 'espera' : 'conectado'} t={14} /> {tr('Probar la conexión')}
+        </button>
+        {p.conClave && guardada && <button class="btn fantasma chico" onClick={async () => {
+          await alQuitarClave();
+          fijarMensaje({ texto: tr('Clave eliminada.') });
+        }}>{tr('Eliminar la clave')}</button>}
+      </div>
+      {conocido?.nota === 'OLLAMA_ORIGINS' && <p class="ayuda">{tr('Ollama solo atiende a las extensiones si se arranca con la variable OLLAMA_ORIGINS=chrome-extension://*.')}</p>}
+      {mensaje && <Mensaje error={mensaje.error}>{mensaje.texto}</Mensaje>}
+    </div>
+  );
+}
+
+/**
+ * Otros proveedores de IA con la API de OpenAI. Se añade uno, se le pone la clave y los modelos, y en «Modelo y esfuerzo por
+ * tarea» se elige qué tareas hace. Claude sigue siendo el de siempre.
+ */
+function SeccionProveedores({ a, cambiar }: PropsSeccion) {
+  const [conClave, fijarConClave] = useState<Record<string, boolean>>({});
+  const leerClaves = () =>
+    chrome.storage.local.get(CLAVES_PROVEEDORES).then((d) => fijarConClave(Object.fromEntries(Object.entries((d[CLAVES_PROVEEDORES] ?? {}) as Record<string, string>).map(([k, v]) => [k, !!v]))));
+  useEffect(() => {
+    void leerClaves();
+  }, []);
+  const claves = async (fn: (c: Record<string, string>) => Record<string, string>) => {
+    const d = await chrome.storage.local.get(CLAVES_PROVEEDORES);
+    await chrome.storage.local.set({ [CLAVES_PROVEEDORES]: fn({ ...((d[CLAVES_PROVEEDORES] ?? {}) as Record<string, string>) }) });
+    await leerClaves();
+  };
+  const anadir = (c: ProveedorConocido | null) => {
+    const usados = a.proveedores.map((p) => p.id);
+    const nuevo: ProveedorIA = c
+      ? { id: c.id, nombre: c.nombre, url: c.url, modelos: c.sugeridos, esquemas: c.esquemas, conClave: c.conClave }
+      : { id: idParaProveedor(tr('Otro proveedor'), usados), nombre: tr('Otro proveedor'), url: '', modelos: [], esquemas: 'auto', conClave: true };
+    cambiar({ proveedores: [...a.proveedores, nuevo] });
+  };
+  const quitar = (id: string) => {
+    // Las tareas que lo usaban vuelven a su modelo de Claude de siempre.
+    const modelos = { ...a.modelos };
+    for (const t of Object.keys(modelos) as TareaIA[]) if (separarModelo(modelos[t]).proveedor === id) modelos[t] = AJUSTES_INICIALES.modelos[t];
+    cambiar({ proveedores: a.proveedores.filter((p) => p.id !== id), modelos });
+    void claves((c) => {
+      delete c[id];
+      return c;
+    });
+  };
+  const porAnadir = PROVEEDORES_CONOCIDOS.filter((c) => !a.proveedores.some((p) => p.id === c.id));
+  return (
+    <Seccion id="proveedores" icono="ia" ia titulo={tr('Otros proveedores de IA')} descripcion={tr('OpenRouter, DeepSeek, OpenAI, o LM Studio y Ollama en este equipo: todos hablan la misma API. Añade uno, pon su clave y sus modelos, y elige en «Modelo y esfuerzo por tarea» qué tareas hace. Las instrucciones están afinadas para Claude, que sigue siendo el de siempre.')}>
+      {a.proveedores.map((p) => (
+        <TarjetaProveedor
+          key={p.id}
+          p={p}
+          guardada={!!conClave[p.id]}
+          alGuardarClave={(clave) => claves((c) => ({ ...c, [p.id]: clave }))}
+          alQuitarClave={() => claves((c) => {
+            delete c[p.id];
+            return c;
+          })}
+          alCambiar={(cambios) => cambiar({ proveedores: a.proveedores.map((x) => (x.id === p.id ? { ...x, ...cambios } : x)) })}
+          alQuitar={() => quitar(p.id)}
+        />
+      ))}
+      <div class="ap-botones ap-proveedores-anadir">
+        {porAnadir.map((c) => (
+          <button key={c.id} class="btn chico" onClick={() => anadir(c)}><Icono n="mas" t={14} /> {c.nombre}</button>
+        ))}
+        <button class="btn chico fantasma" onClick={() => anadir(null)}><Icono n="mas" t={14} /> {tr('Otro compatible con OpenAI')}</button>
       </div>
     </Seccion>
   );
@@ -1106,6 +1273,7 @@ const SECCIONES: { id: string; nombre: string; icono: NombreIcono }[] = [
   { id: 'lector', nombre: tm('Lector de páginas'), icono: 'lector' },
   { id: 'atajos', nombre: tm('Atajos de teclado'), icono: 'teclado' },
   { id: 'claude', nombre: tm('Claude'), icono: 'ia' },
+  { id: 'proveedores', nombre: tm('Otros proveedores de IA'), icono: 'ia' },
   { id: 'diccionarios', nombre: tm('Diccionarios'), icono: 'diccionario' },
   { id: 'transcripcion', nombre: tm('Transcripción'), icono: 'ondas' },
   { id: 'anki', nombre: tm('Tarjetas y Anki'), icono: 'tarjetas' },
@@ -1162,6 +1330,7 @@ export function PantallaAjustes({ a }: { a: Ajustes }) {
           <SeccionLector a={a} cambiar={cambiar} />
           <SeccionAtajos a={a} cambiar={cambiar} />
           <SeccionClaude a={a} cambiar={cambiar} />
+          <SeccionProveedores a={a} cambiar={cambiar} />
           <SeccionDiccionarios a={a} cambiar={cambiar} />
           <SeccionTranscripcion a={a} cambiar={cambiar} />
           <SeccionAnki a={a} cambiar={cambiar} />

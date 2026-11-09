@@ -81,6 +81,10 @@ export interface ApiMotor {
   sinAceleracion(): Promise<boolean>;
   fijarClaveIA(clave: string, urlBase?: string): Promise<void>;
   probarIA(): Promise<string>;
+  /** Los modelos que ofrece un proveedor de los ajustes. */
+  modelosProveedor(id: string): Promise<string[]>;
+  /** Una petición mínima a un modelo de un proveedor, para ver que la clave y el modelo funcionan. */
+  probarProveedor(id: string, modelo: string): Promise<string>;
 
   analizarLineas(lineas: Linea[], fuente?: { titulo?: string; url?: string; idVideo?: string }): Promise<LineaAnalizada[]>;
   /** Con `expresiones: false`, las expresiones con partícula quedan en sus palabras: para practicar el acento. */
@@ -204,6 +208,8 @@ export interface ApiFondo {
   abrirVisor(id: string): Promise<void>;
   claveIA(): Promise<string | null>;
   urlBaseIA(): Promise<string | null>;
+  /** Las claves de los otros proveedores de IA, por su identificador. Solo para el motor. */
+  clavesProveedores(): Promise<Record<string, string>>;
   ajustesCompletos(): Promise<unknown>;
   capturaVisible(): Promise<string>;
   /** Deja a la vista solo el video de la pestaña que lo pide, para capturarla. */

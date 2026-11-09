@@ -28,11 +28,14 @@ Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und
 |---|---|---|
 | Wörterbücher | Einstellungen, Wörterbücher | JMdict auf Spanisch, Englisch oder Deutsch, Tonhöhenakzent von Kanjium und Häufigkeit von JPDB. Sie werden einmal heruntergeladen und bleiben im Browser |
 | Claude-API-Schlüssel | Einstellungen, Claude | Erklärungen, Prüfung der Lesungen, Übersetzung und Korrektur. Er wird nur im Browser gespeichert |
+| Andere KI-Anbieter | Einstellungen, Andere KI-Anbieter | OpenRouter, DeepSeek oder OpenAI mit ihrem Schlüssel, oder LM Studio und Ollama auf dem Rechner selbst, für die gewählten Aufgaben. Claude bleibt der Standard |
 | Sprache und Niveau | Einstellungen, Sprache und Niveau | Sprache der Oberfläche und, getrennt davon, die der Erklärungen und Übersetzungen. Das Niveau passt die Erklärungen an und bestimmt, wie viele Furigana anfangs sichtbar sind |
 | Sprache, die du lernst | **Start** und die Seitenleiste, Einstellungen, Sprache und Niveau, das Menü der Erweiterung oder **Videoeinstellungen, Untertitel** direkt im Video | Japanisch, Englisch oder Deutsch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
 | Anki | Einstellungen, Karten und Anki | Optional. Erfordert ein geöffnetes Anki mit dem Add-on AnkiConnect |
 
 Die Erweiterung funktioniert ohne Claude-Schlüssel: Untertitel, Wörterbuch, Furigana, Farben, Karten und Whisper benötigen ihn nicht.
+
+**Andere KI-Anbieter.** Unter **Einstellungen, Andere KI-Anbieter** werden OpenRouter, DeepSeek oder OpenAI mit ihrem Schlüssel hinzugefügt, oder LM Studio und Ollama auf dem Rechner selbst, ohne Schlüssel. **Seine Modelle anzeigen** listet auf, was jeder anbietet, und **Verbindung testen** schickt ihm eine minimale Anfrage. Danach kann unter **Modell und Aufwand pro Aufgabe** jede Aufgabe eines ihrer Modelle nutzen. Strukturierte Antworten werden mit ihrem JSON-Schema angefordert und, wenn der Anbieter es nicht unterstützt wie DeepSeek, im JSON-Modus mit dem Schema in den Anweisungen; erlaubt er nicht so viele Antwort-Tokens, werden weniger angefordert. Die Ausgaben werden mit den Kosten erfasst, die der Anbieter meldet (OpenRouter tut das); Modelle auf dem Rechner selbst zählen null. Die Schlüssel werden getrennt gespeichert, wie der von Claude, und erreichen nie die Seiten. Die Anweisungen sind auf Claude abgestimmt: Mit anderen Modellen können die Antworten schlechter ausfallen. Ollama antwortet Erweiterungen nur, wenn es mit `OLLAMA_ORIGINS=chrome-extension://*` gestartet wird.
 
 ### Anpassen
 

@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.15.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.16.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -172,6 +172,7 @@ Estado de cada función en la versión 0.15.0, con la forma en que se ha verific
 | Paletas de color: habitual, para daltonismo y de alto contraste | Automática |
 | Atajos de teclado a elegir, que funcionan con cualquier distribución de teclado | Automática |
 | Tope de gasto mensual en Claude | Simulador |
+| Otros proveedores de IA con la API de OpenAI (OpenRouter, DeepSeek, OpenAI, LM Studio, Ollama): sus modelos en cada tarea, la clave aparte, respuestas en flujo, esquema JSON o modo JSON, menos tokens si no admiten tantos, y el gasto con el coste que dicen | Proveedor simulado, que se comporta como DeepSeek |
 
 ## Inglés
 
