@@ -106,6 +106,12 @@ Das **Notizbuch** ist eine Seite über die ganze Breite, um Text in der Lernspra
 
 Der **Diktat**-Modus blendet die Zeile beim Abspielen aus, pausiert an ihrem Ende und fragt, was du gehört hast. Beim Prüfen wird jeder Teil grün, wenn du ihn verstanden hast, gelb, wenn nur halb, oder unterstrichen, wenn er fehlte, mit einer Bewertung der Zeile. Im Japanischen wird die Lesung verglichen, Kana zu tippen genügt also. **Mit deiner Stimme nachsprechen** öffnet die Akzentübung mit genau dieser Zeile, und `P` tut das mit jedem Untertitel.
 
+### Grammatik, die du schon kannst
+
+<img src="docs/img/gramatica.de.png" alt="Die Blase zu 〜ことができる über einem Video, als Am Lernen markiert, mit Erklärung und wo es vorkam" width="100%">
+
+Unter jedem Untertitel stehen die Grammatikpunkte der Zeile mit ihrer JLPT-Stufe. Ein Tippen öffnet die Blase: was der Punkt bedeutet, Claudes Erklärung für genau diese Zeile und wo du ihn schon gesehen hast. Jeder Punkt wird als **Neu**, **Am Lernen** oder **Gelernt** markiert; was du lernst, bekommt einen gelben Strich, und Gelerntes wird nicht mehr hervorgehoben. Bereits Bekanntes lässt sich aus Anki importieren, und **Multiple-Choice-Karte** bereitet eine Karte mit drei leicht verwechselbaren Antworten vor.
+
 ### Wie jedes Kanji geschrieben wird
 
 <img src="docs/img/trazos.de.png" alt="Strichfolge eines Wortes im Wortfenster" width="100%">
@@ -138,7 +144,6 @@ Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache i
 
 ### Außerdem
 
-- **Grammatik, die du schon kannst.** Jeder Punkt wird als neu, im Lernen oder gelernt markiert; gelernte Punkte werden unter Untertiteln nicht mehr markiert, jeder Punkt merkt sich, in welchen Videos er vorkam, und lässt sich aus Anki importieren oder in eine Multiple-Choice-Karte verwandeln.
 - **Wie Englisch wirklich klingt.** Das Wortfenster zeigt den Satz so, wie er beim zusammenhängenden Sprechen klingt: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, mit Erklärung zu jedem Fall.
 - **Immersionsstunden.** Die Startseite zählt die Zeit, in der du die Lernsprache hörst und liest, mit deiner Serie von Tagen in Folge.
 - **Die Kosten im Blick.** Die Startseite zeigt, was Claude in diesem Monat gekostet hat, nach Tagen, Modellen und Aufgaben, mit einem Monatslimit. Nichts wird zweimal bezahlt: Jede Antwort wird gespeichert. Die [Kostenstudie](docs/de/costs.md) nennt gemessene Zahlen.

@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.4 · 2026-11-09
+
+- **Menos gramática de más bajo los subtítulos.** La regla de 〜ておく tomaba 「できます」 («poder») y 〜てくる (持ってきます) por 〜ておく, y ponía un chip falso bajo muchísimas frases. Ahora pide la お de verdad.
+- El README enseña la gramática con estados y el Dictado, con sus imágenes en cada idioma de la interfaz que presenta el japonés.
+
 ## 0.27.3 · 2026-11-09
 
 - **La ficha del Cuaderno, entera.** En el Cuaderno, la ficha de una palabra empieza debajo de la cabecera y, con la altura de la ventana, su parte de abajo, con **Enviar al creador**, quedaba fuera hasta desplazar la página. Ahora cabe entera.
@@ -209,6 +214,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.4 · 2026-11-09
+
+- **Less extra grammar under subtitles.** The 〜ておく rule took できます (“can”) and 〜てくる (持ってきます) for 〜ておく, putting a false chip under a great many lines. It now requires the actual お.
+- The README shows grammar with states and Dictation, with their images in every interface language that presents Japanese.
 
 ## 0.27.3 · 2026-11-09
 

@@ -24,7 +24,7 @@ export const REGLAS: ReglaGramatica[] = [
 
   // N4
   { patron: '〜てしまう', nivel: 'N4', significado: tm('Acabar haciendo algo, a menudo con pesar, o terminarlo del todo'), re: new RegExp(`${TE}しま[うっいわえお]|ちゃ[うっいわえお]|じゃ[うっいわえお]`) },
-  { patron: '〜ておく', nivel: 'N4', significado: tm('Hacer algo de antemano'), re: new RegExp(`${TE}(?:お|)[くいかきけこ](?:ます|た|て|う|な|ね|よ|。|$)|とく(?![ぁ-ん])|といて|どいて`) },
+  { patron: '〜ておく', nivel: 'N4', significado: tm('Hacer algo de antemano'), re: new RegExp(`${TE}お[くいかきけこ](?:ます|た|て|う|な|ね|よ|ば|。|$)|とく(?![ぁ-ん])|といて|どいて`) },
   { patron: '〜てみる', nivel: 'N4', significado: tm('Intentar hacer algo para ver qué pasa'), re: new RegExp(`${TE}み(?:る|た|て|ます|ました|よう|ない|たい)`) },
   { patron: '〜てもいい', nivel: 'N4', significado: tm('Se puede hacer, hay permiso'), re: new RegExp(`${TE}も(?:いい|良い|よい|よく|大丈夫|構わ)`) },
   { patron: '〜てはいけない', nivel: 'N4', significado: tm('No se debe hacer'), re: /(?:ては|では|ちゃ|じゃ)(?:いけ|だめ|ダメ|なら)/ },
