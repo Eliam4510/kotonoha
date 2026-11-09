@@ -8,7 +8,7 @@ import { tr } from '../compartido/i18n';
 
 /** Voz neuronal de Azure con tu propia clave (el nivel gratuito incluye 0,5 M de caracteres al mes). */
 export async function vozAzure(a: Ajustes, texto: string, voz: string): Promise<string> {
-  if (!a.azureClave || !a.azureRegion) throw new Error(tr('Configura Azure Speech en Ajustes para usar voces sintéticas.'));
+  if (!a.azureClave || !a.azureRegion) throw new Error(tr('Configura una voz local o Azure Speech en Ajustes para leer la frase.'));
   const escapado = texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const r = await fetch(`https://${a.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`, {
     method: 'POST',

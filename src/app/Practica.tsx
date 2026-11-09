@@ -3,7 +3,7 @@
 // el equipo: el tono se mide aquí mismo (nucleo/tono.ts) y la transcripción la hace el modelo de voz en el motor.
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { Ajustes } from '../compartido/ajustes';
+import { type Ajustes, hayVozSintetica } from '../compartido/ajustes';
 import { numero, tm, tr } from '../compartido/i18n';
 import { type FlujoCancelable, flujoMotor, lectorJson, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
@@ -127,7 +127,7 @@ async function analizar(
 
   const reconocido = tokens.map((t) => t.texto).join('');
   if (!reconocido.trim()) throw new Error(tr('No se reconoció nada en la grabación. Prueba a leer más alto o más cerca del micrófono.'));
-  const palabras = (await motor.analizarTexto(reconocido)).flat();
+  const palabras = (await motor.analizarTexto(reconocido, { expresiones: false })).flat();
   const crudos = tramosDeFrases(frases, kanaConTiempo(tokens, palabras, finVoz), finVoz);
   if (!crudos) throw new Error(tr('En la grabación no se reconoce esta frase. Escúchala y vuelve a probar.'));
   const tramos = tramosConVoz(frases, crudos, curva);
@@ -239,7 +239,20 @@ function GraficaTono({ r, frases }: { r: Resultado; frases: FraseAcentual[] }) {
 
 /** El panel de práctica de una frase, al lado del texto. */
 export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string; palabras: PalabraToken[]; ajustes: Ajustes; alCerrar: () => void }) {
-  const frases = useMemo(() => lengua.value.acento?.practica?.frases(palabras) ?? [], [palabras]);
+  // El texto viene partido para leer: 雨が降る es una expresión que se consulta entera. Para el acento, cada palabra lleva el
+  // suyo, así que la frase se vuelve a partir sin las expresiones con partícula.
+  const [sueltas, fijarSueltas] = useState<PalabraToken[] | null>(null);
+  useEffect(() => {
+    let vigente = true;
+    motor
+      .analizarTexto(frase, { expresiones: false })
+      .then((l) => vigente && fijarSueltas(l.flat()))
+      .catch(() => {});
+    return () => {
+      vigente = false;
+    };
+  }, [frase]);
+  const frases = useMemo(() => lengua.value.acento?.practica?.frases(sueltas ?? palabras) ?? [], [sueltas, palabras]);
   // Qué decir si falta el diccionario de acento: lo dice el paquete de la lengua, con el nombre de su diccionario.
   const dicAcento = motorDe(lengua.value.id).diccionarios.find((d) => d.tipo === 'acento');
   const textoAviso = lengua.value.acento?.practica?.sinDiccionario;
@@ -338,11 +351,13 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
     return () => clearInterval(reloj);
   }, [grabando]);
 
+  // La voz modelo: la local, que lee con el acento del diccionario, o la de Azure; si no hay, la del navegador.
   const oirFrase = async () => {
     reproduccion.current?.pause();
     try {
-      if (ajustes.azureClave) {
-        const a = new Audio(`data:audio/mpeg;base64,${await motor.vozFrase(frase, ajustes.vocesFrase[0])}`);
+      const datos = hayVozSintetica(ajustes) ? await motor.vozFrase(frase, ajustes.vocesFrase[0]).catch(() => null) : null;
+      if (datos) {
+        const a = new Audio(`data:audio/mpeg;base64,${datos}`);
         reproduccion.current = a;
         await a.play();
       } else await decirConNavegador(frase);

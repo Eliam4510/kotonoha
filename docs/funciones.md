@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.14.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.15.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -86,6 +86,7 @@ Estado de cada función en la versión 0.14.0, con la forma en que se ha verific
 | Audio de la palabra: JapanesePod101 y Lingua Libre | Automática |
 | Voces neuronales de Azure, con clave propia | Pendiente |
 | Voz del navegador sin clave de Azure: la mejor que ofrezca (las «Natural» de Edge, las de Google en Chrome) u otra elegida en Ajustes, por idioma | Automática |
+| Voz japonesa local con AivisSpeech o VOICEVOX: se encuentra sola, se elige la voz y el estilo, lee con el acento del diccionario y guarda los audios en una caché; sirve para leer en voz alta, la práctica, la ficha y las tarjetas | Automática, con un motor simulado y con AivisSpeech 1.2.0 en el equipo: coincide con el diccionario en 37 de 37 frases acentuales y lee una frase en 0,6 s con el procesador |
 | Imágenes de Openverse | Automática |
 | Creación de varias tarjetas desde líneas seleccionadas | Simulador |
 | Palabras conocidas a partir de los mazos de Anki | Simulador |

@@ -12,7 +12,7 @@ import type {
 } from '../compartido/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 import { type AnalisisLinea, aplicarLecturas } from '../nucleo/analisisProfundo';
-import type { ConsultasAnalisis, FormaFlexionada, PuntoGramatica, TokenUnido, Transcripcion } from '../lenguas/tipos';
+import type { ConsultasAnalisis, FormaFlexionada, OpcionesAnalisis, PuntoGramatica, TokenUnido, Transcripcion } from '../lenguas/tipos';
 import { db, type FilaPalabraDb, type FilaTermino } from './db';
 import { listaDiccionarios } from './diccionarios';
 import { lengua, motorLengua } from './lengua';
@@ -137,12 +137,14 @@ export function olvidarLengua() {
 const cacheTokens = new Map<string, TokenUnido[]>();
 const cacheLecturaLema = new Map<string, string>();
 
-function tokensDe(texto: string): TokenUnido[] {
-  let r = cacheTokens.get(texto);
+function tokensDe(texto: string, opciones?: OpcionesAnalisis): TokenUnido[] {
+  // Partido de otra manera, va aparte en la caché.
+  const clave = opciones?.expresiones === false ? `\u0000${texto}` : texto;
+  let r = cacheTokens.get(clave);
   if (!r) {
-    r = motorLengua().analizador.analizar(texto, terminos ? (x) => terminos!.has(x) : undefined, consultas);
+    r = motorLengua().analizador.analizar(texto, terminos ? (x) => terminos!.has(x) : undefined, consultas, opciones);
     if (cacheTokens.size > 20000) cacheTokens.clear();
-    cacheTokens.set(texto, r);
+    cacheTokens.set(clave, r);
   }
   return r;
 }
@@ -335,9 +337,9 @@ export async function analizarLineas(
   return salida;
 }
 
-export async function analizarTexto(texto: string, a: Ajustes): Promise<PalabraToken[][]> {
+export async function analizarTexto(texto: string, a: Ajustes, opciones?: OpcionesAnalisis): Promise<PalabraToken[][]> {
   await preparar();
-  return enriquecer(texto.split(/\r?\n/).map((l) => tokensDe(l)), a);
+  return enriquecer(texto.split(/\r?\n/).map((l) => tokensDe(l, opciones)), a);
 }
 
 /** Texto para el análisis profundo: cada línea con las palabras y lecturas que calculó el analizador. */

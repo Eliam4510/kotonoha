@@ -99,12 +99,26 @@ describe('el veredicto', () => {
     expect(juzgarFrase(frase('あいうえ', 4, [3]), [4, 1.4, 1.4, -7], 1, false)).toEqual({ veredicto: 'revisar', caida: 1, esperado: 3 });
   });
 
-  it('al final de la frase no cuenta la última mora, y sin nada detrás odaka y heiban suenan igual', () => {
-    // 橋を al final: sin la を no se oye si el tono cae antes de ella.
+  it('al final de la frase, la bajada hacia la última mora no es un error, pero sí vale como la caída esperada', () => {
+    // 橋を al final: la caída antes de を se oye y es la suya.
     const hashi = frase('はしを', 2, [2]);
-    expect(juzgarFrase(hashi, [-2, 2, -3], 1, true)).toMatchObject({ veredicto: 'bien', esperado: 0 });
+    expect(juzgarFrase(hashi, [-2, 2, -3], 1, true)).toMatchObject({ veredicto: 'bien', esperado: 2 });
+    // Un heiban al final baja igual por la entonación: no se señala.
     const heiban = frase('あめが', 2, [0]);
-    expect(juzgarFrase(heiban, [-2, 2, -3], 1, true).veredicto).toBe('bien');
+    expect(juzgarFrase(heiban, [-2, 2, -3], 1, true)).toMatchObject({ veredicto: 'bien', caida: 0 });
+    // 〜ました: la た del final es la única mora baja que se oye tras la ま.
+    const tabemashita = frase('たべました', 5, [3]);
+    expect(juzgarFrase(tabemashita, [-0.7, 0.7, 2.2, 3.2, -0.1], 1, true).veredicto).toBe('bien');
+    // Odaka al final, sin nada detrás: no se oye; basta con que no caiga antes.
+    expect(juzgarFrase(frase('はし', 2, [2]), [-2, 2], 1, true)).toMatchObject({ veredicto: 'bien', esperado: 0 });
+    expect(juzgarFrase(frase('はし', 2, [2]), [3, -2], 1, true).veredicto).toBe('bien');
+    expect(juzgarFrase(frase('はし', 2, [2]), [4, -3], 1, true).veredicto).toBe('revisar');
+  });
+
+  it('〜ます al final, con la す sin voz: la caída no se oye, y basta con que no caiga antes', () => {
+    const tabemasu = frase('たべます', 4, [3]);
+    expect(juzgarFrase(tabemasu, [-1, 1, 1.2, null], 1, true).veredicto).toBe('bien');
+    expect(juzgarFrase(tabemasu, [3, -1, -1.2, null], 1, true).veredicto).toBe('revisar');
   });
 
   it('lo que no se reconoció, lo que no se sabe y lo que no tiene datos', () => {

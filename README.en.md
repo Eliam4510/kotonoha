@@ -98,7 +98,7 @@ The **Clipboard** collects what you copy anywhere and shows it with its paragrap
 
 <img src="docs/img/practica.en.png" alt="Pitch accent practice: the pitch curve of the voice over each word’s expected accent" width="100%">
 
-**Practice** shows the accent of each word in the sentence. You read it aloud and Kotonoha lays the pitch curve of your voice over the expected one, says which words have the fall in the wrong place and points out long pauses. The pitch is measured in the browser and the recording is transcribed on your computer, without leaving it.
+**Practice** shows the accent of each word in the sentence. You read it aloud and Kotonoha lays the pitch curve of your voice over the expected one, says which words have the fall in the wrong place and points out long pauses. The pitch is measured in the browser and the recording is transcribed on your computer, without leaving it. With AivisSpeech or VOICEVOX open, the model voice reads each sentence with the dictionary’s accent, for free and also without leaving your computer.
 
 ### How each kanji is written
 

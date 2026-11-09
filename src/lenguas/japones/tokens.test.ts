@@ -99,6 +99,13 @@ describe('unión de tokens con Kuromoji real', () => {
     expect(p[0]).toMatchObject({ superficie: '読み始めた', lema: '読み始める' });
   });
 
+  it('sin expresiones, las que llevan una partícula dentro quedan en sus palabras, y los compuestos no', () => {
+    const existe = (t: string) => t === '雨が降る' || t === '泥だらけ';
+    expect(palabras('雨が降っています', existe)[0]).toMatchObject({ superficie: '雨が降っています', lema: '雨が降る' });
+    const sueltas = unirTokens(tokenizador.tokenize('雨が降っています。泥だらけで'), existe, { expresiones: false });
+    expect(sueltas.filter((x) => x.esPalabra).map((x) => x.superficie)).toEqual(['雨', 'が', '降っています', '泥だらけ', 'で']);
+  });
+
   it('mantiene la frase íntegra', () => {
     const frase = '一日でも休むと、ペースが遅れてしまうので、できるだけ毎日やるようにしています。';
     expect(palabras(frase).map((x) => x.superficie).join('')).toBe(frase);

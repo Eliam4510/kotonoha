@@ -1,7 +1,7 @@
 // Unión de tokens de Kuromoji en palabras y cálculo de furigana. Lógica pura.
 
 import { tm, tr } from '../../compartido/i18n';
-import type { SegmentoLectura, TokenUnido } from '../tipos';
+import type { OpcionesAnalisis, SegmentoLectura, TokenUnido } from '../tipos';
 
 /** Token tal como lo entrega Kuromoji (diccionario IPADIC). */
 export interface TokenCrudo {
@@ -145,7 +145,7 @@ const CAT_NO_PALABRA = new Set(['記号', 'BOS/EOS']);
  * 1. Compuestos que existen en el diccionario (泥 + だらけ, お + 茶).
  * 2. Conjugaciones con su verbo o adjetivo (咲い + た, 食べ + て + いる).
  */
-export function unirTokens(crudos: TokenCrudo[], existe?: (termino: string) => boolean): TokenUnido[] {
+export function unirTokens(crudos: TokenCrudo[], existe?: (termino: string) => boolean, opciones?: OpcionesAnalisis): TokenUnido[] {
   const salida: TokenUnido[] = [];
   let i = 0;
   while (i < crudos.length) {
@@ -165,6 +165,8 @@ export function unirTokens(crudos: TokenCrudo[], existe?: (termino: string) => b
         const terminaEnFuncion = ultimo.pos === '助詞' || ultimo.pos === '助動詞';
         const empiezaEnContenido = cabeza.pos !== '助詞' && cabeza.pos !== '接続詞';
         if (terminaEnFuncion && empiezaEnContenido) continue;
+        // 雨 + が + 降る es una expresión del diccionario, pero cada palabra tiene su acento.
+        if (opciones?.expresiones === false && trozo.slice(1, -1).some((t) => t.pos === '助詞')) continue;
         const conLemaFinal =
           trozo.slice(0, -1).map((t) => t.surface_form).join('') + (definido(ultimo.basic_form) || ultimo.surface_form);
         if (existe(superficie)) {

@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.15.0 · 2026-11-08
+
+- **Voz japonesa local.** Con AivisSpeech o VOICEVOX abiertos en el equipo, Kotonoha lee las frases con ellos: en voz alta, en la práctica, en la ficha y en el audio de las tarjetas. Los encuentra solo, se elige la voz en **Ajustes, Voces** y lee con el acento del diccionario, que corrige antes de leer. Los audios quedan en una caché. Medido en el equipo de desarrollo: AivisSpeech coincide con el diccionario en 37 de 37 frases acentuales y lee una frase en 0,6 s con el procesador.
+- **Práctica del acento.** Señala menos errores que no lo son: la caída hacia la última mora antes de una pausa ya vale como la del núcleo (〜ました, 橋を。), y las expresiones del diccionario con partícula (雨が降る) se juzgan palabra por palabra.
+
 ## 0.14.0 · 2026-11-08
 
 - **Practicar el acento tonal.** En el Portapapeles, los textos de la Ayuda de lectura y la vista de texto, **Practicar** enseña el acento de cada palabra de la frase, graba cómo se lee y pone la curva del tono de la voz sobre la esperada, con un veredicto por palabra (**Bien**, **Revisar**, **Sin juzgar**) y las pausas largas. El tono se mide en el navegador y la grabación se transcribe en el equipo con Haas-ja; no se guarda ni sale del equipo.
@@ -129,6 +134,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.15.0 · 2026-11-08
+
+- **Local Japanese voice.** With AivisSpeech or VOICEVOX open on the computer, Kotonoha reads sentences with them: read aloud, the practice, the word panel and card audio. It finds them on its own, the voice is chosen in **Settings, Voices**, and it reads with the dictionary’s accent, corrected before reading. The audio is cached. Measured on the development computer: AivisSpeech agrees with the dictionary in 37 of 37 accent phrases and reads a sentence in 0.6 s on the CPU.
+- **Pitch accent practice.** It flags fewer errors that are not errors: the fall into the last mora before a pause now counts as the nucleus fall (〜ました, 橋を。), and dictionary expressions with a particle inside (雨が降る) are judged word by word.
 
 ## 0.14.0 · 2026-11-08
 
