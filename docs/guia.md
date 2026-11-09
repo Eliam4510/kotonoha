@@ -73,10 +73,13 @@ Al abrir un video con subtítulos en japonés aparece una barra flotante en la p
 | Escucha preparada | Pausa antes de cada frase y muestra la traducción |
 | Lectura intensiva | Pausa antes de cada frase para leerla y después escucharla |
 | Escucha intensiva | Oculta los subtítulos hasta que se pronuncia la frase, y después pausa y los muestra |
+| Dictado | Oculta los subtítulos y pausa al final de cada frase para escribir lo oído; después marca lo acertado |
 | Híbrido intensivo | Pausa después de cada frase, con los subtítulos visibles |
 | Mostrar al pausar | Solo muestra subtítulos con el video en pausa |
 | Enfoque 1D | Se detiene en las frases con una sola palabra desconocida |
 | Personalizado | Permite ajustar pausas y velos |
+
+**Dictado y Repetir con tu voz.** En el modo **Dictado**, al acabar cada frase el video se para y, donde iría el subtítulo, se escribe lo que se ha oído. **Comprobar** enseña la frase con cada palabra en verde si se acertó, en amarillo si a medias y subrayada si no, y la nota. En japonés cuenta cómo se lee: se puede escribir en kana, y si una palabra con kanji admite otra lectura del diccionario que encaja con lo escrito (後 como あと), vale. **Oír otra vez** repite la frase y **Seguir**, o Enter, continúa. **Repetir con tu voz**, en el resultado, o la tecla `P` sobre cualquier subtítulo, abre la práctica del acento con esa frase en la ventana de Kotonoha: se escucha en el video con `S`, se dice igual y se compara la entonación.
 
 Las escenas sin diálogo pueden acelerarse o saltarse desde el panel de video.
 

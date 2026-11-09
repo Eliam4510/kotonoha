@@ -126,6 +126,7 @@ The same tools work for German: the word panel tells you which word each conjuga
 
 - **A dictionary to explore.** Search by meaning (“dog” → 犬), find grammar by its form or its meaning, see the kanji and homophones of each word, and browse onomatopoeia, proverbs, four-kanji expressions and more.
 - **Grammar you already know.** Each point is marked as new, learning or known; known points are no longer flagged under subtitles, each point remembers the videos it appeared in, and it can be imported from Anki or turned into a multiple-choice card.
+- **Dictation and Repeat in your voice.** Dictation mode hides the line, pauses at the end and compares what you type with what was said; with `P`, any subtitle can be practised out loud.
 - **Immersion hours.** Home counts the time you spend listening to and reading the language you study, with your streak of days in a row.
 - **Costs in plain sight.** The home screen shows what Claude has cost this month, by day, model and task, with a monthly cap. Nothing is paid for twice: every answer is saved. The [cost study](docs/costs.md) gives measured figures.
 - **Built-in review.** With the FSRS algorithm, for those who do not use Anki.

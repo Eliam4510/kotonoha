@@ -228,7 +228,7 @@ function AcentoEsperado({ frases, marcadas }: { frases: FraseAcentual[]; marcada
             </svg>
             <span class="ap-practica-moras">
               {f.moras.map((m, j) => (
-                <span key={j} class={marcadas?.has(desde + j) ? 'revisar' : undefined} style={{ width: `${ANCHO}px` }}>{m}</span>
+                <span key={j} class={[marcadas?.has(desde + j) && 'revisar', [...m].length > 1 && 'doble'].filter(Boolean).join(' ') || undefined} style={{ width: `${ANCHO}px` }}>{m}</span>
               ))}
             </span>
           </span>
@@ -481,7 +481,8 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
         <button class="btn-icono chico" aria-label={tr('Cerrar la práctica')} onClick={alCerrar}><Icono n="cerrar" t={15} /></button>
       </div>
       <p class="ap-practica-frase-texto" lang="ja">{frase}</p>
-      {frases.length ? <AcentoEsperado frases={frases} marcadas={marcadas} /> : <p class="ayuda">{tr('Esta frase no tiene palabras que practicar.')}</p>}
+      {/* Mientras se parte la frase, «no tiene palabras» sería falso: aún no se sabe. */}
+      {frases.length ? <AcentoEsperado frases={frases} marcadas={marcadas} /> : sueltas === null && !palabras.length ? <span class="giro" aria-label={tr('Cargando…')} /> : <p class="ayuda">{tr('Esta frase no tiene palabras que practicar.')}</p>}
       {sinDiccionario && aviso && (
         <div class="ap-practica-aviso" role="note">
           <Icono n="info" t={15} />

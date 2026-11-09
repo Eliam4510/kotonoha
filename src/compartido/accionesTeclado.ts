@@ -40,6 +40,7 @@ export const ACCIONES_TECLADO: AccionTeclado[] = [
   accion('ocultarTodo', SUBS, tm('Mostrar u ocultar todo'), 'r'),
   accion('navegador', SUBS, tm('Navegador de subtítulos'), 'g'),
   accion('copiar', SUBS, tm('Copiar el subtítulo'), 'c'),
+  accion('practicar', SUBS, tm('Repetir el subtítulo con tu voz'), 'p'),
   accion('fijarBarra', BARRA, tm('Fijar o soltar la barra'), 'alt+x'),
   accion('verBarra', BARRA, tm('Mostrarla mientras se mantiene'), 'alt+v'),
   accion('traductor', BARRA, tm('Abrir el traductor'), 'alt+t'),

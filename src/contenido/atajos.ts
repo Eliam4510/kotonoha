@@ -295,6 +295,13 @@ export function instalarAtajos(): void {
         case 'g':
           cambiarAjuste({ navegadorAbierto: !a.navegadorAbierto });
           return hecho();
+        case 'p':
+          // Repetir con tu voz: la práctica del acento con este subtítulo, en la ventana de Kotonoha.
+          if (linea && lengua.value.acento?.practica) {
+            fondo.abrirApp(`practicar?t=${encodeURIComponent(linea.texto)}`);
+            return hecho();
+          }
+          return;
         case 'c':
           if (linea) {
             navigator.clipboard.writeText(linea.texto).catch(() => {});

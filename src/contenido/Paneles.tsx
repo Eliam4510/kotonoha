@@ -188,7 +188,7 @@ const PESTANAS_VIDEO: [PestanaVideo, string, NombreIcono][] = [
   ['interaccion', tm('Interacción'), 'cursor'],
 ];
 
-const MODOS_ORDEN: IdModo[] = ['normal', 'escuchaPreparada', 'lecturaIntensiva', 'escuchaIntensiva', 'hibridoIntensivo', 'alPausar', 'enfoque1d', 'personalizado'];
+const MODOS_ORDEN: IdModo[] = ['normal', 'escuchaPreparada', 'lecturaIntensiva', 'escuchaIntensiva', 'dictado', 'hibridoIntensivo', 'alPausar', 'enfoque1d', 'personalizado'];
 
 const ICONO_MODO: Record<IdModo, NombreIcono> = {
   normal: 'reproducir',
@@ -198,6 +198,7 @@ const ICONO_MODO: Record<IdModo, NombreIcono> = {
   hibridoIntensivo: 'intercambiar',
   alPausar: 'pausa',
   enfoque1d: 'objetivo',
+  dictado: 'teclado',
   personalizado: 'controles',
 };
 

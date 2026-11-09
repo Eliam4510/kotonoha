@@ -20,6 +20,7 @@ import { Biblioteca } from './Biblioteca';
 import { Cuaderno } from './Cuaderno';
 import { Diccionario, Inicio, Memoria, Palabras } from './Pantallas';
 import { Niveles } from './Niveles';
+import { PracticarFrase } from './PracticarFrase';
 import { ReproductorLocal } from './ReproductorLocal';
 import { MenuLengua } from './SelectorLengua';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
@@ -216,6 +217,7 @@ function App() {
         {ruta === 'memoria' && <Memoria />}
         {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}
         {ruta === 'niveles' && <Niveles ajustes={a} />}
+        {ruta === 'practicar' && <PracticarFrase frase={params.get('t') ?? ''} ajustes={a} />}
         {ruta === 'ajustes' && <PantallaAjustes a={a} />}
       </main>
       <Creador ajustes={a} />

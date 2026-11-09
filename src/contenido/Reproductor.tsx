@@ -74,6 +74,8 @@ import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas
 import { numero, tm, tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
 import { BotonesEstadoGramatica, BotonOpcionMultiple, VistoEn } from '../ui/EstadoGramatica';
+import { EjercicioDictado } from './Dictado';
+import { reproducir } from './controlador';
 import { estadoGramatica, gramaticaPorSaber } from '../ui/gramatica';
 
 export const ANCHO_NAVEGADOR = 380;
@@ -359,6 +361,15 @@ function Subtitulos() {
   return (
     <div class="zona-subs" ref={zona} style={estiloZona}>
       {moviendoSubs.value && guiaSubs.value.centrado && <div class="subs-guia" aria-hidden="true" />}
+      {/* En el modo Dictado, al pararse al final de una frase, en su lugar se escribe lo que se ha oído. */}
+      {a.modo === 'dictado' && lineaActual && pausado.value && tipoPausa.value === 'auto' && (
+        <div class="dictado-zona">
+          <EjercicioDictado l={lineaActual} alRepetir={() => {
+            irALinea(lineaActual);
+            reproducir().catch(() => {});
+          }} />
+        </div>
+      )}
       {v && (
         <div
           class={`subs-bloque ${a.sombra ? 'con-sombra' : ''} ${hay ? '' : 'saliendo'} ${moviendoSubs.value ? 'arrastrando' : ''}`}
