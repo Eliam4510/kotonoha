@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.16.0 · 2026-11-08
+
+- **Otros proveedores de IA.** Además de Claude, OpenRouter, DeepSeek y OpenAI con su clave, y LM Studio y Ollama en el propio equipo: se añaden en **Ajustes, Otros proveedores de IA**, con sus modelos y una prueba de conexión, y en **Modelo y esfuerzo por tarea** cada tarea elige el suyo. Las respuestas llegan en flujo; las que piden estructura van con su esquema JSON o, si el proveedor no lo admite, en modo JSON. El gasto se anota con el coste que dice el proveedor. Claude sigue siendo el de siempre.
+
 ## 0.15.0 · 2026-11-08
 
 - **Voz japonesa local.** Con AivisSpeech o VOICEVOX abiertos en el equipo, Kotonoha lee las frases con ellos: en voz alta, en la práctica, en la ficha y en el audio de las tarjetas. Los encuentra solo, se elige la voz en **Ajustes, Voces** y lee con el acento del diccionario, que corrige antes de leer. Los audios quedan en una caché. Medido en el equipo de desarrollo: AivisSpeech coincide con el diccionario en 37 de 37 frases acentuales y lee una frase en 0,6 s con el procesador.
@@ -134,6 +138,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.16.0 · 2026-11-08
+
+- **Other AI providers.** Besides Claude: OpenRouter, DeepSeek and OpenAI with their key, and LM Studio and Ollama on the computer itself. They are added in **Settings, Other AI providers**, with their models and a connection test, and each task picks its own in **Model and effort per task**. Answers are streamed; those that need structure go with their JSON schema or, if the provider does not support it, in JSON mode. Spending is recorded with the cost the provider reports. Claude remains the default.
 
 ## 0.15.0 · 2026-11-08
 

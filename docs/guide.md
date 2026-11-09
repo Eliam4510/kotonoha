@@ -28,11 +28,14 @@ The first time, a welcome screen asks for the language, the one to study and the
 |---|---|---|
 | Dictionaries | Settings, Dictionaries | JMdict in Spanish, English or German, Kanjium pitch accent and JPDB frequency. They are downloaded once and stay in the browser |
 | Claude API key | Settings, Claude | Explanations, reading review, translation and correction. It is stored only in the browser |
+| Other AI providers | Settings, Other AI providers | OpenRouter, DeepSeek or OpenAI with their key, or LM Studio and Ollama on the computer itself, for the tasks chosen. Claude remains the default |
 | Language and level | Settings, Language and level | The interface language and, separately, that of explanations and translations. The level adapts the explanations and decides how much furigana is shown at first |
 | Language you're studying | **Home** and the sidebar, Settings, Language and level, the extension menu, or **Video settings, Subtitles** on the video itself | Japanese, English or German. Each keeps its own words, dictionaries, cards and settings |
 | Anki | Settings, Cards and Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
 
 The extension works without a Claude key: subtitles, the dictionary, furigana, colors, flashcards and Whisper do not need one.
+
+**Other AI providers.** In **Settings, Other AI providers**, add OpenRouter, DeepSeek or OpenAI, with their key, or LM Studio and Ollama on the computer itself, without one. **See its models** lists what each one offers, and **Test the connection** sends it a minimal request. Then, in **Model and effort per task**, each task can use one of their models. Structured answers are requested with their JSON schema and, if the provider does not support it, as DeepSeek does not, in JSON mode with the schema in the instructions; if it does not allow that many answer tokens, fewer are requested. Spending is recorded with the cost the provider reports (OpenRouter does), and models on the computer itself count as zero. Keys are stored separately, like Claude’s, and never reach the pages. The instructions are tuned for Claude: with other models, answers may be worse. Ollama only answers extensions if it is started with `OLLAMA_ORIGINS=chrome-extension://*`.
 
 ### Making it yours
 

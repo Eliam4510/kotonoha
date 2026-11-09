@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.15.0, along with how it has been verified.
+Status of each feature in version 0.16.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -172,6 +172,7 @@ Status of each feature in version 0.15.0, along with how it has been verified.
 | Color palettes: usual, for color blindness and high contrast | Automated |
 | Keyboard shortcuts of your choice, working with any keyboard layout | Automated |
 | Monthly spending limit for Claude | Simulator |
+| Other AI providers with the OpenAI API (OpenRouter, DeepSeek, OpenAI, LM Studio, Ollama): their models per task, the key stored separately, streamed answers, JSON schema or JSON mode, fewer tokens if they do not allow as many, and spending with the cost they report | Simulated provider that behaves like DeepSeek |
 
 ## English
 

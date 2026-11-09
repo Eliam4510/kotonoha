@@ -135,7 +135,7 @@ Kotonoha funciona sin ninguna clave. La de Claude, opcional, añade lo que neces
 | Transcripción de audio en el propio equipo | Revisión de las lecturas del furigana |
 | Tarjetas para Anki y repaso integrado | Relatos a la medida del nivel |
 
-El uso normal cuesta céntimos al mes. La clave se guarda solo en el navegador.
+El uso normal cuesta céntimos al mes. La clave se guarda solo en el navegador. Tarea por tarea, en lugar de Claude puede usarse OpenRouter, DeepSeek, OpenAI o un modelo del propio equipo con LM Studio u Ollama.
 
 ## Instalación
 

@@ -1,6 +1,7 @@
 import type { IdPaleta } from '../ui/paletas';
 import { PAQUETE_INICIAL, paqueteDe } from '../lenguas';
 import { lenguaDe, lenguasExplicacion, lenguasTraduccion, type PreferenciaIdioma, resolverIdioma, tm } from './i18n';
+import type { ProveedorIA } from './proveedores';
 // Ajustes del usuario, guardados en chrome.storage.local.
 
 export type ModoLectura = 'ninguna' | 'todas' | 'desconocidas' | 'alPasar';
@@ -315,6 +316,8 @@ export interface Ajustes {
   vozNavegador: string;
   /** La voz japonesa local: un motor con la API de VOICEVOX (AivisSpeech, VOICEVOX) en este equipo. */
   vozLocal: AjustesVozLocal;
+  /** Otros proveedores de IA, con la API de OpenAI; sus claves se guardan aparte. */
+  proveedores: ProveedorIA[];
 
   // Apariencia
   /** Idioma de la interfaz. En automático sigue al del navegador. */
@@ -516,6 +519,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   vocesFrase: PAQUETE_INICIAL.vocesIniciales,
   vozNavegador: '',
   vozLocal: { activa: false, url: '', estilo: null, acentoDiccionario: true },
+  proveedores: [],
 
   idiomaInterfaz: 'auto',
   estiloFrecuencia: 'numero',

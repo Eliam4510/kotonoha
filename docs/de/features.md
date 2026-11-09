@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.15.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.16.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -172,6 +172,7 @@ Stand jeder Funktion in Version 0.15.0 und die Art ihrer Überprüfung.
 | Farbpaletten: üblich, für Farbenblindheit und mit hohem Kontrast | Automatisch |
 | Frei wählbare Tastenkürzel, die mit jeder Tastaturbelegung funktionieren | Automatisch |
 | Monatliches Kostenlimit für Claude | Simulator |
+| Andere KI-Anbieter mit der OpenAI-API (OpenRouter, DeepSeek, OpenAI, LM Studio, Ollama): ihre Modelle pro Aufgabe, der Schlüssel getrennt gespeichert, gestreamte Antworten, JSON-Schema oder JSON-Modus, weniger Tokens, wenn sie nicht so viele erlauben, und Ausgaben mit den gemeldeten Kosten | Simulierter Anbieter, der sich wie DeepSeek verhält |
 
 ## Englisch
 

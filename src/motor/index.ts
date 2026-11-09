@@ -24,6 +24,7 @@ import { rellenar } from './prompts';
 import { PAQUETES, paqueteDe } from '../lenguas';
 import * as medios from './medios';
 import * as vozLocal from './vozLocal';
+import * as compatible from './compatible';
 import * as memoria from './memoria';
 import * as whisper from './whisper';
 import { fijarIdioma, tr } from '../compartido/i18n';
@@ -119,7 +120,8 @@ const api: ApiMotor = {
       tokenizadorListo: analisis.analizadorListo(),
       diccionarios: await dics.listaDiccionarios(),
       terminosCargados: analisis.totalTerminos(),
-      claveIA: ia.hayClave(),
+      // Con otro proveedor de IA en los ajustes, la IA también se puede usar sin la clave de Claude.
+      claveIA: ia.hayClave() || (await aj()).proveedores.length > 0,
       capturaActiva: grabacion.capturaActiva(),
     };
   },
@@ -128,6 +130,14 @@ const api: ApiMotor = {
   },
   async probarIA() {
     return ia.probarConexion(await aj());
+  },
+  async modelosProveedor(id) {
+    const p = (await aj()).proveedores.find((x) => x.id === id);
+    if (!p) throw new Error(tr('El proveedor de esta tarea ya no está en Ajustes: elige otro modelo para ella.'));
+    return compatible.modelos(p);
+  },
+  async probarProveedor(id, modelo) {
+    return ia.probarProveedor(await aj(), id, modelo);
   },
 
   async analizarLineas(lineas, fuente) {

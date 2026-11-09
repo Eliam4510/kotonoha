@@ -27,6 +27,9 @@ const PRECIOS: Record<string, PrecioModelo> = {
 
 /** La API puede responder con el nombre del modelo y su fecha: basta con el principio. */
 export function precioDe(modelo: string): PrecioModelo {
+  // Un modelo de otro proveedor («openrouter::deepseek/deepseek-chat»): su coste lo dice el proveedor al responder.
+  const otro = modelo.indexOf('::');
+  if (otro >= 0) return { nombre: modelo.slice(otro + 2), entrada: 0, salida: 0, escritura5m: 0, escritura1h: 0, lectura: 0 };
   const clave = Object.keys(PRECIOS).find((k) => modelo.startsWith(k));
   return clave ? PRECIOS[clave] : { ...PRECIOS['claude-sonnet-5-5'], nombre: modelo };
 }

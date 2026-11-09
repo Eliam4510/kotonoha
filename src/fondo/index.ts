@@ -1,6 +1,7 @@
 // Service worker: comandos, captura y difusión de eventos. No guarda estado: Chrome puede detenerlo.
 
 import { alCambiarAjustes, CLAVE_API, leerAjustes } from '../compartido/ajustes';
+import { CLAVES_PROVEEDORES } from '../compartido/proveedores';
 import { type ApiFondo, type EventoDifundido, HOST_AYUDANTE, PUERTO_AYUDANTE } from '../compartido/api';
 import { atender, motor, type ConRemitente } from '../compartido/rpc';
 import { fijarIdioma, tr } from '../compartido/i18n';
@@ -140,6 +141,10 @@ const api: ApiFondo & { _: never } = {
   async claveIA() {
     const d = await chrome.storage.local.get(CLAVE_API);
     return (d[CLAVE_API] as string | undefined) ?? null;
+  },
+  async clavesProveedores() {
+    const d = await chrome.storage.local.get(CLAVES_PROVEEDORES);
+    return (d[CLAVES_PROVEEDORES] as Record<string, string> | undefined) ?? {};
   },
   // Solo para las pruebas automáticas: permite apuntar a un servidor falso de la API.
   async urlBaseIA() {

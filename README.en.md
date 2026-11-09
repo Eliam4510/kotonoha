@@ -129,7 +129,7 @@ Kotonoha works without any key. An optional Claude key adds what needs a languag
 | On-device speech transcription | Review of furigana readings |
 | Cards for Anki and the built-in review | Stories written for your level |
 
-Normal use costs cents a month. The key is stored only in your browser.
+Normal use costs cents a month. The key is stored only in your browser. Task by task, OpenRouter, DeepSeek, OpenAI or a model on your own computer through LM Studio or Ollama can be used instead of Claude.
 
 ## Installation
 
