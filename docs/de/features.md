@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.17.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.18.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -192,6 +192,9 @@ Stand jeder Funktion in Version 0.17.0 und die Art ihrer Überprüfung.
 | Grammatik von A1 bis C2: 51 Regeln, von Claude bestätigt | Simulator |
 | Seiten-Reader, anfangs ausgeschaltet, der Seiten in anderen Sprachen in Ruhe lässt | Automatisch und auf 16 echten öffentlichen Websites |
 | Parakeet und Whisper auf Englisch, mit lesbar getrennten Zeilen | Automatisch, mit einer synthetischen Stimme, und in einer echten Sitzung |
+| Comics im **Comic**-Modus des Betrachters: jede Sprechblase mit der Bucherkennung, nach Panels von links nach rechts | Automatisch: 0,4 % Zeichenfehler auf Testseiten und 12 % auf einer echten, handgeletterten Seite von 1922 |
+| Buch-OCR auf Englisch | Gemessen: 1,5 % Zeichenfehler bei einem echten Scan aus dem 19. Jahrhundert, fast alles in der Kopfzeile |
+| Neuronale Stimme im Browser: Kokoro, mit sechs Stimmen | Automatisch; Whisper Turbo versteht ihre Sätze fehlerfrei |
 | Eigene Anweisungen an Claude für Englisch | Simulator |
 | Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
 | Neuronale Azure-Stimmen auf Englisch | Ausstehend |
@@ -211,6 +214,9 @@ Stand jeder Funktion in Version 0.17.0 und die Art ihrer Überprüfung.
 | Grammatik von A1 bis C2: 24 Regeln, von Claude bestätigt | Automatisch |
 | Seiten-Reader, anfangs ausgeschaltet | Automatisch |
 | Parakeet für Sprache und Whisper Turbo für Lieder | Automatisch, mit einer echten Aufnahme |
+| Comics im **Comic**-Modus, mit ä, ö, ü und ß | Automatisch: 0,4 % Fehler auf Testseiten |
+| Buch-OCR auf Deutsch, in moderner Schrift; Fraktur wird nicht gelesen | Gemessen: 0,03 % Fehler auf Testseiten in vier Schriften und 75 % auf einer Fraktur-Seite von 1919 |
+| Neuronale Stimme im Browser: Piper, mit der Stimme von Thorsten | Automatisch; Whisper Turbo versteht ihre Sätze fehlerfrei |
 | Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
 
 ## Gestaltungsgrundsätze

@@ -24,6 +24,7 @@ import { rellenar } from './prompts';
 import { PAQUETES, paqueteDe } from '../lenguas';
 import * as medios from './medios';
 import * as vozLocal from './vozLocal';
+import * as vozNeuronal from './vozNeuronal';
 import * as compatible from './compatible';
 import * as memoria from './memoria';
 import * as whisper from './whisper';
@@ -382,6 +383,14 @@ const api: ApiMotor = {
   audiosPalabra: (l, r) => motorLengua().audios(l, r),
   async vozFrase(t, v) {
     const a = await aj();
+    if (vozNeuronal.usarVozNeuronal(a)) {
+      try {
+        return await vozNeuronal.leer(a, t);
+      } catch (e) {
+        // Si falla y hay clave de Azure, Azure; si no, quien llama usa la voz del navegador.
+        if (!a.azureClave) throw e;
+      }
+    }
     if (vozLocal.usarVozLocal(a)) {
       try {
         return await vozLocal.leer(a, t);

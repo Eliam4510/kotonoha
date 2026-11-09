@@ -316,6 +316,8 @@ export interface Ajustes {
   vozNavegador: string;
   /** La voz japonesa local: un motor con la API de VOICEVOX (AivisSpeech, VOICEVOX) en este equipo. */
   vozLocal: AjustesVozLocal;
+  /** Las voces neuronales en el propio navegador: Kokoro para el inglés y Piper para el alemán. */
+  vozNeuronal: AjustesVozNeuronal;
   /** Otros proveedores de IA, con la API de OpenAI; sus claves se guardan aparte. */
   proveedores: ProveedorIA[];
 
@@ -340,11 +342,21 @@ export interface AjustesVozLocal {
   acentoDiccionario: boolean;
 }
 
+export interface AjustesVozNeuronal {
+  /** Leer las frases del inglés y del alemán con ellas, en lugar de Azure o del navegador. */
+  activa: boolean;
+  /** La voz de Kokoro para el inglés, como «af_heart»: la letra dice el acento (a, americano; b, británico) y la segunda, si es de mujer o de hombre. */
+  vozIngles: string;
+}
+
 /**
- * Si hay una voz sintética para las frases: la local, que es japonesa, o la de Azure. Sin ninguna, se lee con la del
- * navegador.
+ * Si hay una voz sintética para las frases: la local, que es japonesa, las neuronales del inglés y del alemán, o la de
+ * Azure. Sin ninguna, se lee con la del navegador.
  */
-export const hayVozSintetica = (a: Ajustes): boolean => !!a.azureClave || vozLocalActiva(a);
+export const hayVozSintetica = (a: Ajustes): boolean => !!a.azureClave || vozLocalActiva(a) || vozNeuronalActiva(a);
+
+/** Si las frases se leen con una voz neuronal del navegador: al estudiar inglés (Kokoro) o alemán (Piper). */
+export const vozNeuronalActiva = (a: Ajustes): boolean => a.vozNeuronal.activa && (a.idiomaObjetivo === 'en' || a.idiomaObjetivo === 'de');
 
 /** Si las frases se leen con la voz local: solo al estudiar japonés, que es lo que hablan AivisSpeech y VOICEVOX. */
 export const vozLocalActiva = (a: Ajustes): boolean => a.vozLocal.activa && a.idiomaObjetivo === 'ja';
@@ -519,6 +531,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   vocesFrase: PAQUETE_INICIAL.vocesIniciales,
   vozNavegador: '',
   vozLocal: { activa: false, url: '', estilo: null, acentoDiccionario: true },
+  vozNeuronal: { activa: false, vozIngles: 'af_heart' },
   proveedores: [],
 
   idiomaInterfaz: 'auto',
@@ -567,6 +580,7 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
   salida.modelos = { ...AJUSTES_INICIALES.modelos, ...(guardados?.modelos ?? {}) };
   salida.esfuerzos = { ...AJUSTES_INICIALES.esfuerzos, ...(guardados?.esfuerzos ?? {}) };
   salida.vozLocal = { ...AJUSTES_INICIALES.vozLocal, ...(guardados?.vozLocal ?? {}) };
+  salida.vozNeuronal = { ...AJUSTES_INICIALES.vozNeuronal, ...(guardados?.vozNeuronal ?? {}) };
   // Un modelo que ya no existe (Kotoba se retiró al comparar con videos reales) pasa al de siempre.
   if (salida.whisperModelo !== 'auto' && !MODELOS_WHISPER[salida.whisperModelo]) salida.whisperModelo = AJUSTES_INICIALES.whisperModelo;
   // Quien ya usaba la extensión no tiene por qué pasar por el asistente de bienvenida.

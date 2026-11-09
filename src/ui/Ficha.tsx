@@ -2,7 +2,7 @@
 // Se usa en la ventana emergente sobre el video, en el lector y en el diccionario de la app.
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { type Ajustes, hayVozSintetica, type PestanaDiccionario, vozLocalActiva } from '../compartido/ajustes';
+import { type Ajustes, hayVozSintetica, type PestanaDiccionario, vozLocalActiva, vozNeuronalActiva } from '../compartido/ajustes';
 import { type FlujoCancelable, flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
@@ -333,6 +333,11 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
             <div class="fila-audio">
               <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con la voz local')} onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
               <span class="fila-audio-nombre">{tr('Voz local')}</span>
+            </div>
+          ) : vozNeuronalActiva(ajustes) ? (
+            <div class="fila-audio">
+              <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con la voz neuronal')} onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
+              <span class="fila-audio-nombre">{ajustes.idiomaObjetivo === 'de' ? 'Piper · Thorsten' : 'Kokoro'}</span>
             </div>
           ) : ajustes.azureClave ? (
             ajustes.vocesFrase.map((v) => (

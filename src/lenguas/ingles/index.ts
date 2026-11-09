@@ -56,6 +56,7 @@ export const INGLES: PaqueteLengua = {
     pegarSignos,
     palabrasSeparadas: true,
     portadaVertical: false,
+    globos: 'lector',
   },
   lectura: {
     distingue: false,

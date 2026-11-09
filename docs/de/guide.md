@@ -280,6 +280,9 @@ Alles, was diese Anleitung erklärt, funktioniert genauso, mit diesen Unterschie
 | Grammatik | Punkte von A1 bis C2, mit derselben Bestätigung durch Claude |
 | Seiten-Reader | Anfangs ausgeschaltet, weil Englisch auf fast jeder Seite vorkommt. Er wird im Menü der Erweiterung oder unter **Einstellungen, Seiten-Reader** eingeschaltet |
 | Striche und Korrektur der Lesungen | Nicht verfügbar |
+| Comics | Im Betrachter liest der Modus **Comic** (im Japanischen **Manga**) jede Sprechblase mit der Bucherkennung, in der Reihenfolge der Panels und von links nach rechts. Gemessen: 0,4 % Zeichenfehler auf Testseiten und 12 % auf einer handgeletterten *Krazy Kat*-Seite von 1922 |
+| Buch-OCR | Gemessen an einem echten Scan aus dem 19. Jahrhundert: 1,5 % Zeichenfehler, fast alles in der Kopfzeile |
+| Stimme der Sätze | In **Einstellungen, Stimmen** liest **Neuronale Stimme im Browser** die Sätze mit Kokoro, auf dem eigenen Rechner und ohne Schlüssel, mit sechs Stimmen aus den USA und dem Vereinigten Königreich. Beim ersten Mal werden 92 MB heruntergeladen; jeder neue Satz dauert auf dem Prozessor ein paar Sekunden und wird danach gespeichert |
 
 ## Deutsch lernen
 
@@ -295,6 +298,9 @@ Es wird wie Englisch gewählt, und alles funktioniert gleich, mit diesen Untersc
 | Transkription | Parakeet für Sprache und Whisper Turbo für Lieder. Bei einer echten Aufnahme schrieb Parakeet mit Großschreibung und Satzzeichen, in weniger als der Hälfte der Zeit von Whisper |
 | Seiten-Reader | Er ist anfangs aus. Er wird im Menü der Erweiterung oder unter **Einstellungen, Seiten-Reader** eingeschaltet |
 | Strichfolge und Lesungskorrektur | Nicht verfügbar |
+| Comics | Der Modus **Comic**, wie im Englischen, mit ä, ö, ü und ß: 0,4 % Fehler auf Testseiten |
+| Buch-OCR | Liest moderne Schrift gut: 0,03 % Fehler auf Testseiten in vier Schriften. Die Fraktur alter Bücher wird nicht gelesen: Auf einer Seite von 1919 verfehlte sie drei von vier Buchstaben |
+| Stimme der Sätze | **Neuronale Stimme im Browser** liest die Sätze mit Piper, mit der Stimme von Thorsten, auf dem eigenen Rechner und ohne Schlüssel. Beim ersten Mal werden 63 MB heruntergeladen, und ein Satz ist in weniger als einer Sekunde gelesen |
 
 ## Kosten für Claude
 

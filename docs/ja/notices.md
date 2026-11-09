@@ -23,8 +23,10 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR)、PaddlePaddle 製、[nakamura196 による ONNX 変換](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | 本の文字行の検出。使うときにダウンロード | Apache-2.0 |
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx)、PaddlePaddle 製 | 本の文字認識。使うときにダウンロード。辞書は拡張機能に同梱（`modelos/`） | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr)、kha-white 製、[onnx-community による ONNX 変換](https://huggingface.co/onnx-community/manga-ocr-base-ONNX)、および [ogkalu の吹き出し検出器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 漫画の文字認識。使うときにダウンロード | Apache-2.0 |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)、hexgrad 製、[onnx-community による ONNX 変換](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)、および [Thorsten の声](https://huggingface.co/rhasspy/piper-voices)の [Piper](https://github.com/rhasspy/piper) | 英語とドイツ語のニューラル音声、使うときにダウンロード | Apache-2.0 と MIT。Thorsten の声は CC0 のデータセットで学習 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/ffmpeg` | 手元のファイルの読み取り | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/core` | FFmpeg のコア、コンパイル時にコピー | GPL-2.0-or-later |
+| [piper-phonemize](https://github.com/rhasspy/piper-phonemize) と [eSpeak NG](https://github.com/espeak-ng/espeak-ng)、`@diffusionstudio/piper-wasm` | ニューラル音声の音素、コンパイル時に英語とドイツ語の辞書だけを入れてコピー | MIT と GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs)、`@breezystack/lamejs` | MP3 のエンコード | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 復習の計画 | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | ZIP ファイルの読み取り | MIT |
@@ -34,7 +36,7 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | [Phosphor Icons](https://phosphoricons.com) | アイコン | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) と [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | フォント | OFL-1.1 |
 
-このリポジトリのコードに第三者のバイナリは含まれません。インストール時に npm から取得します。`dist` フォルダと各バージョンのコンパイル済みパッケージには `@ffmpeg/core` と `lamejs` が含まれ、`licencias` フォルダにすべてのコンポーネントの文書と告知があります。
+このリポジトリのコードに第三者のバイナリは含まれません。インストール時に npm から取得します。`dist` フォルダと各バージョンのコンパイル済みパッケージには `@ffmpeg/core`、`lamejs`、eSpeak NG が含まれ、`licencias` フォルダにすべてのコンポーネントの文書と告知があります。
 
 対応するソースコードは [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10)（ライブラリとともに [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) をコンパイル）と [lamejs](https://github.com/gideonstele/lamejs) にあります。これらのパッケージを再配布する場合は、そのソースコードの提供を含め、GPL と LGPL に従う必要があります。
 

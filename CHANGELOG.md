@@ -2,6 +2,12 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.18.0 · 2026-11-09
+
+- **Cómics en inglés y alemán.** En el visor, el modo **Cómic** lee cada globo con el reconocedor de libros, en el orden de las viñetas y de izquierda a derecha; antes, el modo Manga solo sabía japonés. Medido: un 0,4 % de error por carácter en páginas de prueba en los dos idiomas y un 12 % en una página real de 1922 rotulada a mano.
+- **OCR medido en inglés y alemán.** Un 1,5 % de error en un escaneo real del siglo XIX en inglés y un 0,03 % en páginas de prueba en alemán. La letra gótica (Fraktur) no se lee.
+- **Voces neuronales en el navegador.** Kokoro lee el inglés, con seis voces, y Piper el alemán, con la voz de Thorsten, en el propio equipo y sin clave. Whisper Turbo entendió sin errores las frases de prueba de las dos.
+
 ## 0.17.0 · 2026-11-09
 
 - **Ayudante sin Python.** El ayudante local está escrito en PowerShell, que viene con Windows, y usa el `yt-dlp.exe` oficial con QuickJS para YouTube. `Instalar.cmd` se ejecuta con un doble clic: copia el ayudante a su sitio, baja yt-dlp y QuickJS comprobando su SHA-256, encuentra Kotonoha en Chrome, Edge, Brave y Chromium, y, si no hay ninguna copia, instala también la extensión con un identificador fijo. FFmpeg ya no hace falta: sin él, la extensión convierte el audio con su propio FFmpeg.
@@ -145,6 +151,12 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.18.0 · 2026-11-09
+
+- **Comics in English and German.** In the viewer, **Comic** mode reads each speech balloon with the book recognizer, in panel order and from left to right; Manga mode only knew Japanese. Measured: 0.4 % character error on test pages in both languages and 12 % on a real hand-lettered 1922 page.
+- **OCR measured in English and German.** 1.5 % error on a real 19th-century English scan and 0.03 % on German test pages. Blackletter (Fraktur) is not read.
+- **Neural voices in the browser.** Kokoro reads English, with six voices, and Piper reads German, in Thorsten’s voice, on your own computer and with no key. Whisper Turbo understood the test sentences of both without errors.
 
 ## 0.17.0 · 2026-11-09
 

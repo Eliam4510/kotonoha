@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.17.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.18.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -192,6 +192,9 @@ Estado de cada función en la versión 0.17.0, con la forma en que se ha verific
 | Gramática de A1 a C2: 51 reglas, confirmadas por Claude | Simulador |
 | Lector de páginas, apagado al empezar, que deja en paz las páginas en otro idioma | Automática, y en 16 sitios públicos reales |
 | Parakeet y Whisper en inglés, con las líneas partidas para leerlas | Automática, con una voz sintética, y en una sesión real |
+| Cómics con el modo **Cómic** del visor: cada globo con el reconocedor de libros, por viñetas de izquierda a derecha | Automática: 0,4 % de error por carácter en páginas de prueba, y un 12 % en una página real de 1922 rotulada a mano |
+| OCR de libros en inglés | Medida: 1,5 % de error por carácter en un escaneo real del siglo XIX, casi todo en la cabecera |
+| Voz neuronal en el navegador: Kokoro, con seis voces | Automática; Whisper Turbo entiende sus frases sin errores |
 | Instrucciones a Claude propias del inglés | Simulador |
 | Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
 | Voces neuronales de Azure en inglés | Pendiente |
@@ -211,6 +214,9 @@ Estado de cada función en la versión 0.17.0, con la forma en que se ha verific
 | Gramática de A1 a C2: 24 reglas, confirmadas por Claude | Automática |
 | Lector de páginas, apagado al empezar | Automática |
 | Parakeet para la voz y Whisper Turbo para las canciones | Automática, con una grabación real |
+| Cómics con el modo **Cómic**, con ä, ö, ü y ß | Automática: 0,4 % de error en páginas de prueba |
+| OCR de libros en alemán, con letra moderna; la gótica (Fraktur) no se lee | Medida: 0,03 % de error en páginas de prueba con cuatro tipografías, y un 75 % en una página en Fraktur de 1919 |
+| Voz neuronal en el navegador: Piper, con la voz de Thorsten | Automática; Whisper Turbo entiende sus frases sin errores |
 | Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
 
 ## Criterios de diseño

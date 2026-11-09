@@ -23,8 +23,10 @@ Der Code von Kotonoha wird unter der [MIT-Lizenz](../../LICENSE) veröffentlicht
 | [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), von PaddlePaddle, in der [ONNX-Umwandlung von nakamura196](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | Erkennung der Textzeilen in Büchern, bei Gebrauch heruntergeladen | Apache-2.0 |
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx), von PaddlePaddle | Texterkennung für Bücher, bei Gebrauch heruntergeladen; das Wörterbuch liegt in der Erweiterung (`modelos/`) | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr), von kha-white, in der [ONNX-Umwandlung von onnx-community](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), und der [Sprechblasen-Detektor von ogkalu](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | Texterkennung für Manga, bei Gebrauch heruntergeladen | Apache-2.0 |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), von hexgrad, in der [ONNX-Umwandlung von onnx-community](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX), und [Piper](https://github.com/rhasspy/piper) mit der [Stimme von Thorsten](https://huggingface.co/rhasspy/piper-voices) | Neuronale Stimmen für Englisch und Deutsch, bei Gebrauch heruntergeladen | Apache-2.0 und MIT; Thorstens Stimme wurde mit einem CC0-Datensatz trainiert |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lesen eigener Dateien | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg-Kern, beim Kompilieren kopiert | GPL-2.0-or-later |
+| [piper-phonemize](https://github.com/rhasspy/piper-phonemize) mit [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | Phoneme der neuronalen Stimmen, beim Kompilieren nur mit den Wörterbüchern für Englisch und Deutsch kopiert | MIT und GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3-Kodierung | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planung der Wiederholung | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Lesen von ZIP-Dateien | MIT |
@@ -34,7 +36,7 @@ Der Code von Kotonoha wird unter der [MIT-Lizenz](../../LICENSE) veröffentlicht
 | [Phosphor Icons](https://phosphoricons.com) | Symbole | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) und [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Schrift | OFL-1.1 |
 
-Der Code dieses Repositorys enthält keine Binärdateien von Dritten: Sie stammen bei der Installation von npm. Der Ordner `dist` und die kompilierten Pakete jeder Version enthalten `@ffmpeg/core` und `lamejs` und führen in ihrem Ordner `licencias` die Texte und Hinweise aller Komponenten.
+Der Code dieses Repositorys enthält keine Binärdateien von Dritten: Sie stammen bei der Installation von npm. Der Ordner `dist` und die kompilierten Pakete jeder Version enthalten `@ffmpeg/core`, `lamejs` und eSpeak NG und führen in ihrem Ordner `licencias` die Texte und Hinweise aller Komponenten.
 
 Der zugehörige Quellcode befindet sich unter [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10), das [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) mit seinen Bibliotheken kompiliert, und unter [lamejs](https://github.com/gideonstele/lamejs). Wer diese Pakete weiterverbreitet, muss GPL und LGPL einhalten, einschließlich des Angebots dieses Quellcodes.
 

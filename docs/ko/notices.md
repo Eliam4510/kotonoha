@@ -23,8 +23,10 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), PaddlePaddle 제작, [nakamura196의 ONNX 변환](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | 책의 글줄 감지, 사용할 때 내려받음 | Apache-2.0 |
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx), PaddlePaddle 제작 | 책의 문자 인식, 사용할 때 내려받음. 사전은 확장 프로그램에 포함(`modelos/`) | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr), kha-white 제작, [onnx-community의 ONNX 변환](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), 그리고 [ogkalu의 말풍선 감지기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 만화의 문자 인식, 사용할 때 내려받음 | Apache-2.0 |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), hexgrad 제작, [onnx-community의 ONNX 변환](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX), 그리고 [Thorsten 목소리](https://huggingface.co/rhasspy/piper-voices)의 [Piper](https://github.com/rhasspy/piper) | 영어와 독일어 신경망 음성, 사용할 때 내려받음 | Apache-2.0와 MIT; Thorsten 목소리는 CC0 데이터셋으로 학습 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | 내 파일 읽기 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg 코어, 컴파일 시 복사 | GPL-2.0-or-later |
+| [piper-phonemize](https://github.com/rhasspy/piper-phonemize)와 [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | 신경망 음성의 음소, 컴파일 시 영어와 독일어 사전만 넣어 복사 | MIT와 GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 인코딩 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 복습 일정 | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | ZIP 파일 읽기 | MIT |
@@ -34,7 +36,7 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | [Phosphor Icons](https://phosphoricons.com) | 아이콘 | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito)와 [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | 글꼴 | OFL-1.1 |
 
-이 저장소의 코드에는 서드파티 바이너리가 없습니다. 설치할 때 npm에서 가져옵니다. `dist` 폴더와 각 버전의 컴파일된 패키지에는 `@ffmpeg/core`와 `lamejs`가 들어 있으며, `licencias` 폴더에 모든 구성 요소의 텍스트와 고지가 있습니다.
+이 저장소의 코드에는 서드파티 바이너리가 없습니다. 설치할 때 npm에서 가져옵니다. `dist` 폴더와 각 버전의 컴파일된 패키지에는 `@ffmpeg/core`, `lamejs`, eSpeak NG가 들어 있으며, `licencias` 폴더에 모든 구성 요소의 텍스트와 고지가 있습니다.
 
 해당 소스 코드는 [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10)([FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4)를 라이브러리와 함께 컴파일)과 [lamejs](https://github.com/gideonstele/lamejs)에 있습니다. 이 패키지를 재배포하는 사람은 해당 소스 코드 제공을 포함해 GPL과 LGPL을 준수해야 합니다.
 

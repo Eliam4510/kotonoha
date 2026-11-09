@@ -36,6 +36,7 @@ export const JAPONES: PaqueteLengua = {
     comillar: (texto) => `「${texto}」`,
     pegarSignos,
     portadaVertical: true,
+    globos: 'manga-ocr',
     // El punto medio de las listas, los ejercicios numerados, los apartados con katakana o con números escritos en kanji, y
     // quien habla en un diálogo («母親：»), cuyo texto sigue debajo con sangría.
     marcaDeLista: /^\s*(?:・|問\s*[0-9０-９]+|[(（][ア-ン一二三四五六七八九十][)）]|[^\s：]{1,6}：)/,

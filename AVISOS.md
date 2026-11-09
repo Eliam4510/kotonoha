@@ -23,8 +23,10 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), de PaddlePaddle, en la [conversión a ONNX de nakamura196](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | Detección de las líneas de texto de los libros, descargada al usarla | Apache-2.0 |
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx), de PaddlePaddle | Reconocimiento del texto de los libros, descargado al usarlo; su diccionario va en la extensión (`modelos/`) | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr), de kha-white, en la [conversión a ONNX de onnx-community](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), y el [detector de globos de ogkalu](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | Reconocimiento de texto del manga, descargado al usarlo | Apache-2.0 |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), de hexgrad, en la [conversión a ONNX de onnx-community](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX), y [Piper](https://github.com/rhasspy/piper) con la [voz de Thorsten](https://huggingface.co/rhasspy/piper-voices) | Voces neuronales del inglés y del alemán, descargadas al usarlas | Apache-2.0 y MIT; la voz de Thorsten se entrenó con un conjunto de datos CC0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lectura de archivos propios | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | Núcleo de FFmpeg, copiado al compilar | GPL-2.0-or-later |
+| [piper-phonemize](https://github.com/rhasspy/piper-phonemize) con [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | Fonemas de las voces neuronales, copiado al compilar con solo los diccionarios del inglés y del alemán | MIT y GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planificación del repaso | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Lectura de archivos ZIP | MIT |
@@ -34,9 +36,9 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [Phosphor Icons](https://phosphoricons.com) | Iconos | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) y [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Tipografía | OFL-1.1 |
 
-El código de este repositorio no incluye binarios de terceros: se obtienen de npm al instalar. La carpeta `dist` y los paquetes compilados de cada versión sí contienen `@ffmpeg/core` y `lamejs`, y llevan en su carpeta `licencias` los textos y avisos de todos los componentes.
+El código de este repositorio no incluye binarios de terceros: se obtienen de npm al instalar. La carpeta `dist` y los paquetes compilados de cada versión sí contienen `@ffmpeg/core`, `lamejs` y eSpeak NG, y llevan en su carpeta `licencias` los textos y avisos de todos los componentes.
 
-El código fuente correspondiente está en [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10), que compila [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) con sus bibliotecas, y en [lamejs](https://github.com/gideonstele/lamejs). Quien redistribuya estos paquetes debe respetar la GPL y la LGPL, lo que incluye ofrecer ese código fuente.
+El código fuente correspondiente está en [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10), que compila [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) con sus bibliotecas, y en [lamejs](https://github.com/gideonstele/lamejs). El de eSpeak NG, en la [versión de rhasspy](https://github.com/rhasspy/espeak-ng) que compila [piper-wasm](https://github.com/diffusion-studio/piper-wasm). Quien redistribuya estos paquetes debe respetar la GPL y la LGPL, lo que incluye ofrecer ese código fuente.
 
 ### Datos descargados al usar la extensión
 
@@ -92,8 +94,10 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR), by PaddlePaddle, in the [ONNX conversion by nakamura196](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | Detection of text lines in books, downloaded when used | Apache-2.0 |
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx), by PaddlePaddle | Text recognition for books, downloaded when used; its dictionary ships with the extension (`modelos/`) | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr), by kha-white, in the [ONNX conversion by onnx-community](https://huggingface.co/onnx-community/manga-ocr-base-ONNX), and the [bubble detector by ogkalu](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | Text recognition for manga, downloaded when used | Apache-2.0 |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), by hexgrad, in the [ONNX conversion by onnx-community](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX), and [Piper](https://github.com/rhasspy/piper) with [Thorsten’s voice](https://huggingface.co/rhasspy/piper-voices) | Neural voices for English and German, downloaded when used | Apache-2.0 and MIT; Thorsten’s voice was trained on a CC0 dataset |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Reading local files | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg core, copied at build time | GPL-2.0-or-later |
+| [piper-phonemize](https://github.com/rhasspy/piper-phonemize) with [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | Phonemes for the neural voices, copied at build time with only the English and German dictionaries | MIT and GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Review scheduling | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | Reading ZIP files | MIT |
@@ -103,9 +107,9 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [Phosphor Icons](https://phosphoricons.com) | Icons | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) and [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Typography | OFL-1.1 |
 
-The code in this repository contains no third-party binaries: they come from npm on install. The `dist` folder and the compiled packages of each version do contain `@ffmpeg/core` and `lamejs`, and carry the texts and notices of every component in their `licencias` folder.
+The code in this repository contains no third-party binaries: they come from npm on install. The `dist` folder and the compiled packages of each version do contain `@ffmpeg/core`, `lamejs` and eSpeak NG, and carry the texts and notices of every component in their `licencias` folder.
 
-The corresponding source code is at [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10), which builds [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) with its libraries, and at [lamejs](https://github.com/gideonstele/lamejs). Anyone redistributing these packages must comply with the GPL and LGPL, which includes offering that source code.
+The corresponding source code is at [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10), which builds [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4) with its libraries, and at [lamejs](https://github.com/gideonstele/lamejs). eSpeak NG’s is in the [rhasspy version](https://github.com/rhasspy/espeak-ng) that [piper-wasm](https://github.com/diffusion-studio/piper-wasm) builds. Anyone redistributing these packages must comply with the GPL and LGPL, which includes offering that source code.
 
 ### Data downloaded while using the extension
 
