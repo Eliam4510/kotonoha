@@ -56,7 +56,7 @@ Ninguno de estos datos forma parte del repositorio. La extensión los descarga b
 
 ### Programas externos
 
-El ayudante local utiliza [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) y [FFmpeg](https://ffmpeg.org) (LGPL o GPL, según la compilación). No se incluyen ni en este repositorio ni en sus paquetes: se usan los instalados en el equipo.
+El ayudante local utiliza [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) y [QuickJS-NG](https://github.com/quickjs-ng/quickjs) (MIT), que su instalador descarga de sus páginas oficiales en GitHub comprobando su SHA-256, y [FFmpeg](https://ffmpeg.org) (LGPL o GPL, según la compilación) si está instalado en el equipo. Ninguno se incluye en este repositorio ni en sus paquetes.
 
 ### Uso responsable
 
@@ -125,7 +125,7 @@ None of this data is part of the repository. The extension downloads it on deman
 
 ### External programs
 
-The local helper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) and [FFmpeg](https://ffmpeg.org) (LGPL or GPL, depending on the build). They are included neither in this repository nor in its packages: the ones installed on the computer are used.
+The local helper uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) and [QuickJS-NG](https://github.com/quickjs-ng/quickjs) (MIT), which its installer downloads from their official GitHub pages checking their SHA-256, and [FFmpeg](https://ffmpeg.org) (LGPL or GPL, depending on the build) if it is installed on the computer. None of them is included in this repository or its packages.
 
 ### Responsible use
 

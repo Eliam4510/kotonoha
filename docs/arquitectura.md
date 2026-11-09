@@ -43,7 +43,7 @@ flowchart TB
   App <-->|RPC y puertos| Motor
   App <--> SW
   SW <--> Motor
-  SW <-->|Native Messaging| AY["Ayudante local<br/>yt-dlp y FFmpeg"]
+  SW <-->|Native Messaging| AY["Ayudante local<br/>PowerShell y yt-dlp"]
   WH <--> GPU
   IA --> CL["API de Claude"]
   ANKI --> AN["Anki"]
@@ -58,7 +58,7 @@ flowchart TB
 | **Service worker** | APIs que nadie más puede usar: comandos, `tabCapture`, `captureVisibleTab`, `connectNative` | Chrome lo detiene si está inactivo, así que no guarda estado |
 | **Motor (offscreen)** | Tokenizador, base de datos, Claude, Anki y grabación | Es lo pesado y de larga duración. Un documento offscreen no se detiene a mitad de una respuesta |
 | **Trabajador de Whisper** | Cargar el modelo y transcribir en la GPU | Es muy pesado y bloquearía el motor. Se empaqueta aparte y solo se carga si se usa |
-| **Ayudante local** | Descargar el audio de un video de internet | Una extensión no puede hacerlo sola. Solo la extensión puede llamarlo, y solo acepta direcciones http o https |
+| **Ayudante local** | Descargar el audio de un video de internet y actualizar la extensión | Una extensión no puede hacerlo sola. Solo la extensión puede llamarlo, y solo acepta direcciones http o https |
 | **Ventana de la aplicación** | Pantallas de gestión y reproductor local | Es una página normal de la extensión, que usa el mismo motor por RPC |
 | **Núcleo (`src/nucleo`)** | Lógica pura: analizadores, modos, estadísticas, sincronía, transcripción y lotes | Sin dependencias del navegador, se prueba con Vitest |
 | **Paquetes de lengua (`src/lenguas`)** | Todo lo que depende de la lengua que se estudia | El resto del programa solo conoce su interfaz |
@@ -97,7 +97,7 @@ Claude no transcribe audio, así que esta parte se ejecuta en el equipo local.
 | Fuente | Cómo llega el audio | Velocidad |
 |---|---|---|
 | Archivo propio | ffmpeg.wasm extrae la pista elegida en la ventana de la aplicación. El archivo se monta sin copiarlo, de modo que sirve para películas enteras | La que permita la GPU |
-| Video de internet, con el ayudante | yt-dlp baja el audio y FFmpeg lo convierte a un archivo temporal, que el motor lee por partes a través del service worker | La que permita la GPU |
+| Video de internet, con el ayudante | yt-dlp baja el audio a una carpeta temporal. Con FFmpeg en el equipo, el ayudante lo convierte y el motor lee las muestras por partes a través del service worker; sin él, el motor recibe el archivo y lo convierte con ffmpeg.wasm | La que permita la GPU |
 | Video de internet, sin el ayudante | Captura de la pestaña durante la reproducción. El reproductor informa cuatro veces por segundo del tiempo del video, lo que traduce muestras a tiempo de video aunque haya pausas o saltos | Tiempo real |
 
 Netflix queda fuera a propósito: casi siempre trae subtítulos, y su audio no se puede procesar por adelantado.
@@ -134,7 +134,7 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 | Diccionarios | Formato Yomitan: JMdict en español e inglés, acento de Kanjium, frecuencia de JPDB | Formato abierto, que también permite importar otros desde archivo |
 | IA | SDK oficial `@anthropic-ai/sdk` desde el motor | La clave nunca llega a los scripts que corren en páginas |
 | Transcripción | Whisper large-v3-turbo con Transformers.js y WebGPU, con el codificador en 16 bits y el decodificador cuantizado | El más preciso de los comparados, y sin instalar nada |
-| Audio de videos de internet | yt-dlp y FFmpeg en un programa local, por Native Messaging | Es la única forma de procesarlo sin esperar a reproducirlo. Baja a un archivo temporal en lugar de transmitir, de modo que se lee al ritmo de la GPU y nada se atasca |
+| Audio de videos de internet | yt-dlp en un programa local en PowerShell, por Native Messaging, y FFmpeg si está instalado | Es la única forma de procesarlo sin esperar a reproducirlo. Baja a un archivo temporal en lugar de transmitir, de modo que se lee al ritmo de la GPU y nada se atasca |
 | Archivos propios | ffmpeg.wasm | Subtítulos incrustados y pistas de audio de MKV, sin programas externos |
 | Tarjetas | AnkiConnect y un repaso interno con FSRS | Integración con Anki, o repaso dentro de la aplicación |
 | Audio de tarjetas | `tabCapture` y `MediaRecorder`, exportado a MP3 | Funciona en cualquier sitio sin descargar el video |

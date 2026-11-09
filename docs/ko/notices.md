@@ -56,7 +56,7 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 
 ## 외부 프로그램
 
-로컬 도우미는 [yt-dlp](https://github.com/yt-dlp/yt-dlp)(Unlicense)와 [FFmpeg](https://ffmpeg.org)(빌드에 따라 LGPL 또는 GPL)를 사용합니다. 이 저장소나 패키지에 포함되지 않으며, 컴퓨터에 설치된 것을 사용합니다.
+로컬 도우미는 [yt-dlp](https://github.com/yt-dlp/yt-dlp)(Unlicense)와 [QuickJS-NG](https://github.com/quickjs-ng/quickjs)(MIT)를 사용하며, 설치 프로그램이 GitHub의 공식 페이지에서 내려받아 SHA-256을 확인합니다. 컴퓨터에 [FFmpeg](https://ffmpeg.org)(빌드에 따라 LGPL 또는 GPL)가 설치되어 있으면 그것도 사용합니다. 어느 것도 이 저장소나 패키지에 포함되지 않습니다.
 
 ## 책임 있는 사용
 

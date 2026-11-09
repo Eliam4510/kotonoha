@@ -35,9 +35,15 @@ export const PUERTO_AYUDANTE = 'kotonoha-ayudante';
 export const HOST_AYUDANTE = 'com.kotonoha.ayudante';
 
 export interface InfoAyudante {
+  /** 1 es el ayudante de Python; 2, el de PowerShell, que no necesita nada más. */
   version: number;
   ytdlp: string | null;
+  /** Con FFmpeg el ayudante convierte el audio; sin él lo convierte la extensión, algo más despacio. */
   ffmpeg: boolean;
+  /** Con qué resuelve yt-dlp el desafío de YouTube: «quickjs», «deno» o «node». */
+  js?: string | null;
+  /** Si sabe actualizar la extensión. */
+  actualizar?: boolean;
 }
 
 /** Un motor de voz local con la API de VOICEVOX que contesta en este equipo. */
@@ -226,6 +232,8 @@ export interface ApiFondo {
   inyectarPagina(): Promise<void>;
   miPestana(): Promise<number | undefined>;
   estadoUso(): Promise<'active' | 'idle' | 'locked'>;
+  /** Mira ya si cambiaron los archivos de la copia y, si nada está en marcha, recarga la extensión. */
+  comprobarActualizacion(): Promise<void>;
 }
 
 export type EventoDifundido =

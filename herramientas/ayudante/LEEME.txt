@@ -1,58 +1,105 @@
 Ayudante local de Kotonoha
 ==========================
 
-Permite transcribir un video de internet entero sin reproducirlo. Descarga el audio
-con yt-dlp y FFmpeg en una carpeta temporal, que se borra al terminar o al cancelar.
-Solo la extensión puede llamarlo, y solo acepta direcciones http o https.
+Permite transcribir un video de internet entero sin reproducirlo, y actualizar Kotonoha
+desde la propia extensión. Solo para Windows; no hace falta instalar Python ni FFmpeg.
 
-Debe usarse únicamente con contenido que se tenga derecho a descargar, respetando
-las condiciones de cada sitio.
-
-Requisitos: Windows, Python 3 y FFmpeg. El instalador añade yt-dlp si falta.
-FFmpeg se instala con:  winget install Gyan.FFmpeg
+Descarga el audio con yt-dlp en una carpeta temporal, que se borra al terminar o al
+cancelar. Solo la extensión puede llamarlo, y solo acepta direcciones http o https. Debe
+usarse únicamente con contenido que se tenga derecho a descargar, respetando las
+condiciones de cada sitio.
 
 Instalación
 -----------
-1. Descomprimir esta carpeta en un sitio definitivo: el navegador la usa cada vez.
-2. Abrir chrome://extensions o edge://extensions y copiar el identificador de Kotonoha.
-3. Ejecutar, desde esta carpeta:
+1. Descomprimir el zip en cualquier carpeta.
+2. Hacer doble clic en Instalar.cmd. Windows puede preguntar si se quiere ejecutar:
+   el script es este mismo, en texto, y se puede leer antes.
+
+El instalador:
+- Copia el ayudante a %LOCALAPPDATA%\Kotonoha\ayudante. La carpeta descomprimida ya no
+  hace falta después.
+- Baja yt-dlp y QuickJS (con el que yt-dlp resuelve el desafío de YouTube) de sus páginas
+  oficiales en GitHub, y comprueba el SHA-256 de cada uno con el que publica GitHub.
+- Busca Kotonoha en Chrome, Edge, Brave y Chromium, y registra el ayudante para cada
+  copia que encuentra, con una clave por usuario en HKCU, sin permisos de administrador.
+- Si no encuentra ninguna, ofrece instalar la extensión en %LOCALAPPDATA%\Kotonoha\extension
+  con un identificador fijo, y explica cómo cargarla en el navegador.
+
+Si FFmpeg está instalado, el ayudante convierte el audio con él, algo más deprisa. Si no,
+lo convierte la propia extensión.
+
+yt-dlp se pone al día solo una vez por semana: YouTube cambia a menudo.
+
+El estado se comprueba en Kotonoha, Ajustes, Transcripción, «Comprobar».
+
+Si no encuentra la copia
+------------------------
+Su identificador sale en chrome://extensions o edge://extensions. Desde esta carpeta:
 
    powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension IDENTIFICADOR
 
-4. Recargar la extensión. El estado se comprueba en Ajustes, Transcripción.
-
-El instalador añade una clave por usuario en HKCU, sin permisos de administrador.
+Actualizar Kotonoha
+-------------------
+Cuando hay una versión nueva, Inicio y Ajustes, Versión, ofrecen «Actualizar ahora». El
+ayudante descarga el paquete de GitHub, comprueba su SHA-256 con el SHA256SUMS.txt de la
+versión y lo copia sobre la carpeta de la extensión. Conserva la clave del manifiesto, así
+que el identificador y los datos no cambian. La extensión se recarga sola.
 
 Desinstalación
 --------------
-   powershell -ExecutionPolicy Bypass -File instalar.ps1 -Quitar
+Doble clic en Desinstalar.cmd. Quita el registro y la carpeta del ayudante; la extensión y
+sus datos no se tocan.
 
 
 Kotonoha local helper
 =====================
 
-Lets a whole online video be transcribed without playing it. It downloads the audio
-with yt-dlp and FFmpeg to a temporary folder, which is deleted when it finishes or is
-cancelled. Only the extension can call it, and it only accepts http or https addresses.
+Lets a whole online video be transcribed without playing it, and lets Kotonoha update
+itself from the extension. Windows only; neither Python nor FFmpeg is needed.
 
-It should only be used with content the user has the right to download, in accordance
-with each site's terms.
-
-Requirements: Windows, Python 3 and FFmpeg. The installer adds yt-dlp if it is missing.
-FFmpeg can be installed with:  winget install Gyan.FFmpeg
+It downloads the audio with yt-dlp to a temporary folder, which is deleted when it
+finishes or is cancelled. Only the extension can call it, and it only accepts http or
+https addresses. It should only be used with content the user has the right to download,
+in accordance with each site's terms.
 
 Installation
 ------------
-1. Unzip this folder somewhere permanent: the browser uses it every time.
-2. Open chrome://extensions or edge://extensions and copy the Kotonoha ID.
-3. Run, from this folder:
+1. Unzip the file into any folder.
+2. Double-click Instalar.cmd. Windows may ask whether to run it: the script is this same
+   one, in plain text, and can be read first.
+
+The installer:
+- Copies the helper to %LOCALAPPDATA%\Kotonoha\ayudante. The unzipped folder is no longer
+  needed afterwards.
+- Downloads yt-dlp and QuickJS (which yt-dlp uses to solve the YouTube challenge) from
+  their official GitHub pages, and checks the SHA-256 of each against the one GitHub
+  publishes.
+- Looks for Kotonoha in Chrome, Edge, Brave and Chromium, and registers the helper for
+  every copy it finds, with a per-user key in HKCU, without administrator rights.
+- If it finds none, it offers to install the extension in %LOCALAPPDATA%\Kotonoha\extension
+  with a fixed ID, and explains how to load it in the browser.
+
+If FFmpeg is installed, the helper converts the audio with it, somewhat faster. If not,
+the extension converts it itself.
+
+yt-dlp updates itself once a week: YouTube changes often.
+
+The status can be checked in Kotonoha, Settings, Transcription, "Check".
+
+If it does not find the copy
+----------------------------
+Its ID appears in chrome://extensions or edge://extensions. From this folder:
 
    powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
 
-4. Reload the extension. The status can be checked in Settings, Transcription.
-
-The installer adds a per-user key in HKCU, without administrator rights.
+Updating Kotonoha
+-----------------
+When there is a new version, Home and Settings, Version, offer "Update now". The helper
+downloads the package from GitHub, checks its SHA-256 against the version's
+SHA256SUMS.txt and copies it over the extension's folder. It keeps the manifest key, so
+the ID and the data do not change. The extension reloads itself.
 
 Uninstalling
 ------------
-   powershell -ExecutionPolicy Bypass -File instalar.ps1 -Quitar
+Double-click Desinstalar.cmd. It removes the registration and the helper's folder; the
+extension and its data are not touched.

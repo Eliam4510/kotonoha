@@ -529,7 +529,9 @@ const api: ApiMotor = {
         correcciones: await base.correcciones.toArray(),
       };
     }
-    return JSON.stringify({ version: 2, ajustes, lenguas, consumo: await baseGeneral.consumo.toArray() });
+    // Las claves de API no van en la copia: un archivo así acaba en cualquier sitio. Se vuelven a escribir al restaurar.
+    const { azureClave: _clave, ...sinClaves } = ajustes;
+    return JSON.stringify({ version: 2, ajustes: sinClaves, lenguas, consumo: await baseGeneral.consumo.toArray() });
   },
   async importarDatos(json) {
     const d = JSON.parse(json) as DatosDeLengua & { lengua?: string; lenguas?: Record<string, DatosDeLengua>; consumo?: never[]; ajustes?: Partial<Ajustes> };

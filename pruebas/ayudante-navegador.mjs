@@ -1,12 +1,13 @@
-// Prueba el camino completo del ayudante desde el panel: extensión, puente del service worker, Python,
-// yt-dlp, ffmpeg, Whisper en la GPU y los subtítulos en pantalla. No toca el registro ni sale a internet:
-// lo único simulado es `connectNative`, que aquí lanza el mismo programa y le pasa los mismos mensajes,
-// y el video se descarga de un servidor en este mismo equipo.
+// Prueba el camino completo del ayudante desde el panel: extensión, puente del service worker, el ayudante de
+// PowerShell con su lanzador .cmd, yt-dlp, la conversión (con FFmpeg en el ayudante o, con KK_SIN_FFMPEG=1, con el
+// FFmpeg de la extensión), Whisper en la GPU y los subtítulos en pantalla. No toca el registro ni sale a internet: lo
+// único simulado es `connectNative`, que aquí lanza el mismo programa y le pasa los mismos mensajes, y el video se
+// descarga de un servidor en este mismo equipo.
 //
-// Uso: KK_SALIDA=.dist-whisper node build.mjs && node pruebas/ayudante-navegador.mjs video.mp4 [segundos]
+// Uso: KK_SALIDA=.dist-whisper node build.mjs && KK_HERRAMIENTAS=carpeta-con-yt-dlp-y-qjs node pruebas/ayudante-navegador.mjs video.mp4 [segundos]
 
+import { copyFileSync, createReadStream, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { execFileSync, spawn } from 'node:child_process';
-import { createReadStream, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -17,10 +18,23 @@ import { iniciarMock } from './mock-claude.mjs';
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-whisper'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-whisper'));
-const SALIDA = join(RAIZ, 'capturas-e2e', 'ayudante');
-const AYUDANTE = join(RAIZ, 'herramientas', 'ayudante', 'kotonoha_ayudante.py');
+const SIN_FFMPEG = !!process.env.KK_SIN_FFMPEG;
+const SALIDA = join(RAIZ, 'capturas-e2e', SIN_FFMPEG ? 'ayudante-sin-ffmpeg' : 'ayudante');
 const [video, segundosTexto = '150'] = process.argv.slice(2);
 mkdirSync(SALIDA, { recursive: true });
+
+// El ayudante, preparado por su instalador en una carpeta temporal y sin tocar el registro.
+const trabajo = mkdtempSync(join(tmpdir(), 'kkprueba-navegador-'));
+const carpetaAyudante = join(trabajo, 'ayudante');
+{
+  const herramientas = process.env.KK_HERRAMIENTAS;
+  execFileSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', join(RAIZ, 'herramientas', 'ayudante', 'instalar.ps1'), '-Carpeta', carpetaAyudante, '-SinRegistro', '-SinExtension', ...(herramientas ? ['-SinDescargas'] : [])]);
+  if (herramientas) {
+    copyFileSync(join(herramientas, 'yt-dlp.exe'), join(carpetaAyudante, 'yt-dlp.exe'));
+    copyFileSync(join(herramientas, 'qjs.exe'), join(carpetaAyudante, 'qjs.exe'));
+    writeFileSync(join(carpetaAyudante, 'yt-dlp.comprobado'), new Date().toISOString());
+  }
+}
 
 let fallos = 0;
 const comprobar = (cond, texto, extra = '') => {
@@ -69,7 +83,10 @@ const puente = createServer((peticion, respuesta) => {
   const id = Number(u.searchParams.get('id'));
   if (u.pathname === '/abrir') {
     const n = ++contador;
-    const p = spawn('python', ['-u', AYUDANTE], { stdio: ['pipe', 'pipe', 'inherit'] });
+    const p = spawn('cmd.exe', ['/d', '/c', join(carpetaAyudante, 'kotonoha_ayudante.cmd'), 'chrome-extension://pldipbgollbhkjjigkgnojdjpfhanhhf/', '--parent-window=0'], {
+      stdio: ['pipe', 'pipe', 'inherit'],
+      env: { ...process.env, ...(SIN_FFMPEG ? { KOTONOHA_SIN_FFMPEG: '1' } : {}) },
+    });
     const estado = { p, cola: [], fin: false, avisar: null, bufer: Buffer.alloc(0) };
     p.stdout.on('data', (d) => {
       estado.bufer = Buffer.concat([estado.bufer, d]);
@@ -221,7 +238,7 @@ await p.screenshot({ path: join(SALIDA, 'panel-con-ayudante.png') });
 
 const t0 = Date.now();
 await pulsar(p, 'Transcribir el video');
-const bajando = await hasta(p, (r) => /Bajando el audio|Preparando|Transcribiendo/.test(r.querySelector('.panel-generar .progreso-linea')?.textContent ?? ''), undefined, 15000);
+const bajando = await hasta(p, (r) => /Bajando el audio|Extrayendo el audio|Preparando|Transcribiendo/.test(r.querySelector('.panel-generar .progreso-linea')?.textContent ?? ''), undefined, 15000);
 comprobar(!!bajando, 'Muestra el avance en el panel', String(await enOverlay(p, (r) => r.querySelector('.panel-generar .progreso-linea')?.textContent ?? '')).slice(0, 60));
 
 const primeras = await hasta(p, (r) => r.querySelectorAll('.nav-linea').length > 0, undefined, 120000);
@@ -261,7 +278,7 @@ await sw.evaluate(async () => {
   await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), whisperCorregir: false } });
 });
 await pulsar(p, 'Transcribir el video');
-await hasta(p, (r) => /Transcribiendo|Preparando|Bajando/.test(r.querySelector('.panel-generar .progreso-linea')?.textContent ?? ''), undefined, 15000);
+await hasta(p, (r) => /Transcribiendo|Preparando|Bajando|Extrayendo/.test(r.querySelector('.panel-generar .progreso-linea')?.textContent ?? ''), undefined, 15000);
 await p.waitForTimeout(2500);
 await enOverlay(p, (r) => [...r.querySelectorAll('.panel-generar .progreso-linea button')].find((x) => x.textContent.includes('Detener'))?.click());
 await hasta(p, (r) => !r.querySelector('.panel-generar .progreso-linea'), undefined, 20000);
@@ -278,5 +295,6 @@ await sw.evaluate(async () => {
 await contexto.close();
 sitio.close();
 puente.close();
+rmSync(trabajo, { recursive: true, force: true });
 console.log(`\n${fallos ? `${fallos} comprobaciones fallaron` : 'Todas las comprobaciones pasaron'}`);
 process.exit(fallos ? 1 : 0);

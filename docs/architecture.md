@@ -43,7 +43,7 @@ flowchart TB
   App <-->|RPC and ports| Motor
   App <--> SW
   SW <--> Motor
-  SW <-->|Native Messaging| AY["Local helper<br/>yt-dlp and FFmpeg"]
+  SW <-->|Native Messaging| AY["Local helper<br/>PowerShell and yt-dlp"]
   WH <--> GPU
   IA --> CL["Claude API"]
   ANKI --> AN["Anki"]
@@ -58,7 +58,7 @@ flowchart TB
 | **Service worker** | APIs nothing else can use: commands, `tabCapture`, `captureVisibleTab`, `connectNative` | Chrome stops it when idle, so it holds no state |
 | **Engine (offscreen)** | Tokenizer, database, Claude, Anki and recording | The heavy, long-running work. An offscreen document does not stop halfway through a response |
 | **Whisper worker** | Loading the model and transcribing on the GPU | Very heavy, and it would block the engine. It is bundled separately and loaded only when used |
-| **Local helper** | Downloading the audio of an online video | An extension cannot do this alone. Only the extension can call it, and it only accepts http or https addresses |
+| **Local helper** | Downloading the audio of an online video and updating the extension | An extension cannot do this alone. Only the extension can call it, and it only accepts http or https addresses |
 | **Application window** | Management screens and local player | A regular extension page that uses the same engine over RPC |
 | **Core (`src/nucleo`)** | Pure logic: parsers, modes, statistics, synchronization, transcription and batches | No browser dependencies, tested with Vitest |
 | **Language packages (`src/lenguas`)** | Everything that depends on the language being studied | The rest of the program only knows their interface |
@@ -97,7 +97,7 @@ Claude does not transcribe audio, so this part runs on the local computer.
 | Source | How the audio arrives | Speed |
 |---|---|---|
 | Local file | ffmpeg.wasm extracts the chosen track in the application window. The file is mounted without copying, so it works for whole films | Whatever the GPU allows |
-| Online video, with the helper | yt-dlp downloads the audio and FFmpeg converts it to a temporary file, which the engine reads in parts through the service worker | Whatever the GPU allows |
+| Online video, with the helper | yt-dlp downloads the audio to a temporary folder. With FFmpeg on the computer, the helper converts it and the engine reads the samples in parts through the service worker; without it, the engine receives the file and converts it with ffmpeg.wasm | Whatever the GPU allows |
 | Online video, without the helper | Tab capture during playback. The player reports the video time four times per second, which maps samples to video time despite pauses or seeks | Real time |
 
 Netflix is left out on purpose: it almost always has subtitles, and its audio cannot be processed in advance.
@@ -134,7 +134,7 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 | Dictionaries | Yomitan format: JMdict in Spanish and English, Kanjium accent, JPDB frequency | An open format, which also allows importing others from a file |
 | AI | Official `@anthropic-ai/sdk` from the engine | The key never reaches scripts running in pages |
 | Transcription | Whisper large-v3-turbo with Transformers.js and WebGPU, with a 16-bit encoder and a quantized decoder | The most accurate of those compared, with nothing to install |
-| Audio from online videos | yt-dlp and FFmpeg in a local program, over Native Messaging | The only way to process it without waiting for playback. It downloads to a temporary file instead of streaming, so it is read at the GPU's pace and nothing stalls |
+| Audio from online videos | yt-dlp in a local PowerShell program, over Native Messaging, and FFmpeg if installed | The only way to process it without waiting for playback. It downloads to a temporary file instead of streaming, so it is read at the GPU's pace and nothing stalls |
 | Local files | ffmpeg.wasm | Embedded subtitles and MKV audio tracks, without external programs |
 | Flashcards | AnkiConnect and a built-in FSRS review | Integration with Anki, or review inside the application |
 | Card audio | `tabCapture` and `MediaRecorder`, exported to MP3 | Works on any site without downloading the video |

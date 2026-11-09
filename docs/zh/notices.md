@@ -56,7 +56,7 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 
 ## 外部程序
 
-本地助手使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp)（Unlicense）和 [FFmpeg](https://ffmpeg.org)（LGPL 或 GPL，取决于编译方式）。它们不包含在本仓库及其软件包中：使用的是电脑上已安装的版本。
+本地助手使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp)（Unlicense）和 [QuickJS-NG](https://github.com/quickjs-ng/quickjs)（MIT），由其安装程序从它们在 GitHub 上的官方页面下载并校验 SHA-256；如果电脑上装有 [FFmpeg](https://ffmpeg.org)（LGPL 或 GPL，取决于编译方式），也会使用它。它们都不包含在本仓库及其软件包中。
 
 ## 负责任的使用
 

@@ -85,8 +85,10 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/sin-gpu.mjs` | Cuánto cuesta la interfaz sin aceleración por hardware |
 | `node pruebas/captura-real.mjs` | El creador de tarjetas con la captura real de una pestaña. Necesita un navegador visible |
 | `node pruebas/medios.mjs audio.wav` | ffmpeg.wasm con un MKV de varias pistas |
-| `node pruebas/ayudante.mjs video.mp4` | El ayudante local, con descarga desde el propio equipo |
-| `node pruebas/ayudante-navegador.mjs video.mp4` | Todo el camino del ayudante, desde el panel hasta Whisper en la GPU |
+| `node pruebas/ayudante.mjs [video.mp4]` | El ayudante de PowerShell sin tocar el registro: el instalador, los dos modos de conversión, cancelar, los errores y la actualización de la extensión, con descargas desde el propio equipo |
+| `node pruebas/actualizar.mjs` | **Actualizar ahora** de punta a punta, con el ayudante registrado y una versión servida desde el propio equipo |
+| `node pruebas/copia-completa.mjs` | La copia completa de ida y vuelta, sin diálogos |
+| `node pruebas/ayudante-navegador.mjs video.mp4` | Todo el camino del ayudante, desde el panel hasta Whisper en la GPU; con `KK_SIN_FFMPEG=1`, convirtiendo en la extensión |
 | `node pruebas/whisper-comparar.mjs corpus` | Precisión de los modelos con frases reales |
 | `node pruebas/whisper-carga.mjs video.mp4 pruebas/sonda-escritorio.ps1 turbo 0.75 9999` | Velocidad real y fluidez del escritorio |
 | `node pruebas/whisper-larga.mjs turbo 120 60 audio.pcm` | Dos horas seguidas, para detectar degradación |

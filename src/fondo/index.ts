@@ -154,6 +154,8 @@ const api: ApiFondo & { _: never } = {
   ajustesCompletos: () => leerAjustes(),
   // Sin tocar teclado ni ratón durante dos minutos se considera que no estás usando el equipo.
   estadoUso: () => chrome.idle.queryState(120),
+  // Tras actualizar los archivos de la copia, para no esperar a la próxima comprobación de la alarma.
+  comprobarActualizacion: () => (esCopiaLocal() ? comprobarCompilacion() : Promise.resolve()),
   async capturaVisible(this: ConRemitente) {
     // La ventana de quien pide la captura: la que tenga el foco puede ser otra, como la del creador de tarjetas.
     const remitente = this.remitente;

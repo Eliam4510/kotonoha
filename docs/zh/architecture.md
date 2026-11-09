@@ -43,7 +43,7 @@ flowchart TB
   App <-->|RPC 和端口| Motor
   App <--> SW
   SW <--> Motor
-  SW <-->|Native Messaging| AY["本地助手<br/>yt-dlp 和 FFmpeg"]
+  SW <-->|Native Messaging| AY["本地助手<br/>PowerShell 和 yt-dlp"]
   WH <--> GPU
   IA --> CL["Claude API"]
   ANKI --> AN["Anki"]
@@ -58,7 +58,7 @@ flowchart TB
 | **Service Worker** | 其他部分无法使用的 API：命令、`tabCapture`、`captureVisibleTab`、`connectNative` | Chrome 会在其闲置时停止它，因此不保存状态 |
 | **引擎（离屏）** | 分词器、数据库、Claude、Anki 和录音 | 这些是繁重且长时间运行的工作。离屏文档不会在回答中途被停止 |
 | **Whisper Worker** | 加载模型并在 GPU 上转录 | 非常繁重，会阻塞引擎。单独打包，只在使用时加载 |
-| **本地助手** | 下载网络视频的音频 | 扩展无法独自完成。只有扩展可以调用它，且只接受 http 或 https 地址 |
+| **本地助手** | 下载网络视频的音频，并更新扩展 | 扩展无法独自完成。只有扩展可以调用它，且只接受 http 或 https 地址 |
 | **应用窗口** | 管理页面和本地播放器 | 普通的扩展页面，通过 RPC 使用同一个引擎 |
 | **核心（`src/nucleo`）** | 纯逻辑：解析器、模式、统计、同步、转录和批次 | 不依赖浏览器，用 Vitest 测试 |
 | **语言包（`src/lenguas`）** | 所有取决于所学语言的内容 | 程序的其余部分只了解其接口 |
@@ -97,7 +97,7 @@ Claude 不转录音频，因此这部分在本机运行。
 | 来源 | 音频如何到达 | 速度 |
 |---|---|---|
 | 本地文件 | ffmpeg.wasm 在应用窗口中提取所选音轨。文件无需复制即可挂载，因此适用于整部电影 | GPU 允许的速度 |
-| 网络视频，使用助手 | yt-dlp 下载音频，FFmpeg 转换为临时文件，引擎通过 Service Worker 分块读取 | GPU 允许的速度 |
+| 网络视频，使用助手 | yt-dlp 把音频下载到临时文件夹。电脑上有 FFmpeg 时由助手转换，引擎通过 Service Worker 分块读取样本；没有时引擎收到文件，用 ffmpeg.wasm 转换 | GPU 允许的速度 |
 | 网络视频，不使用助手 | 播放时捕获标签页。播放器每秒报告四次视频时间，即使有暂停或跳转，也能把采样换算为视频时间 | 实时 |
 
 Netflix 被有意排除在外：它几乎都有字幕，其音频也无法提前处理。
@@ -134,7 +134,7 @@ Netflix 被有意排除在外：它几乎都有字幕，其音频也无法提前
 | 词典 | Yomitan 格式：西班牙语和英语的 JMdict、Kanjium 的重音、JPDB 的频率 | 开放格式，也可以从文件导入其他词典 |
 | AI | 从引擎调用官方 SDK `@anthropic-ai/sdk` | 密钥绝不会到达在页面上运行的脚本 |
 | 转录 | Whisper large-v3-turbo，使用 Transformers.js 和 WebGPU，16 位编码器和量化解码器 | 比较过的模型中最准确，且无需安装任何东西 |
-| 网络视频的音频 | 本地程序中的 yt-dlp 和 FFmpeg，通过 Native Messaging | 这是无需等待播放就能处理的唯一方法。下载到临时文件而不是流式传输，因此按 GPU 的节奏读取，不会堵塞 |
+| 网络视频的音频 | 用 PowerShell 写的本地程序中的 yt-dlp，通过 Native Messaging；有 FFmpeg 时也用它 | 这是无需等待播放就能处理的唯一方法。下载到临时文件而不是流式传输，因此按 GPU 的节奏读取，不会堵塞 |
 | 本地文件 | ffmpeg.wasm | MKV 内嵌字幕和音轨，无需外部程序 |
 | 卡片 | AnkiConnect 和使用 FSRS 的内置复习 | 与 Anki 集成，或在应用内复习 |
 | 卡片音频 | `tabCapture` 和 `MediaRecorder`，导出为 MP3 | 适用于任何网站，无需下载视频 |

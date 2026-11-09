@@ -56,7 +56,7 @@ Keine dieser Daten gehört zum Repository. Die Erweiterung lädt sie bei Bedarf 
 
 ## Externe Programme
 
-Der lokale Helfer verwendet [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) und [FFmpeg](https://ffmpeg.org) (LGPL oder GPL, je nach Kompilierung). Sie sind weder in diesem Repository noch in seinen Paketen enthalten: Verwendet werden die auf dem Computer installierten.
+Der lokale Helfer verwendet [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense) und [QuickJS-NG](https://github.com/quickjs-ng/quickjs) (MIT), die sein Installationsprogramm von ihren offiziellen GitHub-Seiten herunterlädt und anhand ihrer SHA-256 prüft, sowie [FFmpeg](https://ffmpeg.org) (LGPL oder GPL, je nach Kompilierung), falls es auf dem Computer installiert ist. Keines davon ist in diesem Repository oder seinen Paketen enthalten.
 
 ## Verantwortungsvolle Nutzung
 

@@ -10,9 +10,14 @@ capturas-e2e/
 # Videos de prueba que no son del proyecto
 /*.mp4
 
-# Los genera herramientas/ayudante/instalar.ps1 con las rutas de cada equipo
+# Los genera herramientas/ayudante/instalar.ps1 con las rutas de cada equipo, o los baja de sus páginas oficiales
 herramientas/ayudante/kotonoha_ayudante.bat
+herramientas/ayudante/kotonoha_ayudante.cmd
 herramientas/ayudante/com.kotonoha.ayudante.json
+herramientas/ayudante/yt-dlp.exe
+herramientas/ayudante/qjs.exe
+herramientas/ayudante/yt-dlp.comprobado
+herramientas/ayudante/*.descarga
 
 # Lo crea pruebas/fixtures/generar-video.mjs
 pruebas/fixtures/*.webm
@@ -22,3 +27,6 @@ pruebas/fixtures/still.jpg
 # Archivos de trabajo de las traducciones: los genera herramientas/idiomas.mjs
 idiomas/fuente.tsv
 idiomas/trabajo/
+
+# Clave privada de la extensión: fija el identificador en Chrome Web Store. Nunca se sube.
+.claves/

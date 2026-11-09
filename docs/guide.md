@@ -168,21 +168,27 @@ Whisper gets the timing right, but in a song it misses many words. If someone ha
 
 ### Local helper
 
-An extension cannot download the audio of a video by itself. The helper is a small local program that does so with [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg. It requires Python, and its installer adds yt-dlp if missing. It is downloaded from the latest version's page, as `kotonoha-X.Y.Z-ayudante.zip`, and unzipped into a folder that will not be moved. Inside that folder, run once the command shown under **Settings, Transcription**, which already includes the extension's ID:
+An extension cannot download the audio of a video by itself. The helper is a small local program written in PowerShell, which comes with Windows: neither Python nor FFmpeg needs to be installed. It downloads the audio with [yt-dlp](https://github.com/yt-dlp/yt-dlp) and also updates the extension (see **New versions**, under [Data and backups](#data-and-backups)). It is downloaded from the latest version's page, as `kotonoha-X.Y.Z-ayudante.zip`, unzipped into any folder, and started by double-clicking `Instalar.cmd`. The installer:
+
+- copies the helper to `%LOCALAPPDATA%\Kotonoha\ayudante`, so the unzipped folder is no longer needed;
+- downloads yt-dlp and QuickJS, which yt-dlp uses to solve the YouTube challenge, from their official GitHub pages, and checks the SHA-256 of each;
+- looks for Kotonoha in Chrome, Edge, Brave and Chromium, and registers the helper for every copy it finds;
+- if it finds none, offers to install the extension too, with a fixed ID, and explains how to load it.
+
+Its status can be checked under **Settings, Transcription**. If the installer does not find a copy, Settings shows the command with its ID, to run in the helper's folder:
 
 ```bash
 powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
 ```
 
-The extension must then be reloaded at `edge://extensions` or `chrome://extensions`. Its status can be checked under **Settings, Transcription**.
-
 | Aspect | Behavior |
 |---|---|
 | Scope | Only the extension can call it, and it only accepts http or https addresses |
 | Registry | Adds a per-user key under `HKCU`, without administrator rights |
+| Conversion | With FFmpeg on the computer, the helper converts the audio. Without it, the extension converts it with its own FFmpeg, somewhat more slowly |
+| yt-dlp | Updates itself once a week: YouTube changes often |
 | Files | Uses a temporary folder that is deleted on completion or cancellation |
-| Identifier | If the extension is loaded from another folder its identifier changes: it is passed with `-Extension`, and shown on the extensions page |
-| Removal | The same command with `-Quitar` |
+| Removal | Double-click `Desinstalar.cmd`. The extension and its data are not touched |
 
 If a video cannot be downloaded, for example because it is private or age-restricted, the notice offers to transcribe it while it plays.
 
@@ -306,9 +312,11 @@ Three settings decide how much word queries are used:
 
 ## Data and backups
 
-All data is stored in the browser, in IndexedDB. **Settings, Your data** exports and imports a single file with the words, cards, library, generated subtitles and corrections of every language that has been used, along with the settings and the spending log. The Claude key and the dictionaries are not included. A backup from before version 0.4.0 is restored as Japanese.
+All data is stored in the browser, in IndexedDB. **Settings, Your data** exports and imports a single file with the words, cards, library, generated subtitles and corrections of every language that has been used, along with the settings and the spending log. API keys and dictionaries are not included. A backup from before version 0.4.0 is restored as Japanese.
 
-**New versions.** Once a day, Kotonoha asks GitHub for the latest published version. If it is newer than the installed one, it says so on **Home** and in the extension menu, with a link to its page. The notice for a version can be closed and does not return until the next one. **Settings, Version** shows the installed version, checks by hand and turns the notices off with **Notify about new versions**.
+**Full copy.** **Export to a folder** also saves the book files, what the OCR read and what was edited, and the dictations, in a folder named with the date. **Restore from a folder** puts everything into another copy without deleting what it already has. It serves to move Kotonoha to another computer, or to a copy installed with the fixed ID, because each copy keeps its data separately. Dictionaries and models are installed again from Settings.
+
+**New versions.** Once a day, Kotonoha asks GitHub for the latest published version. If it is newer than the installed one, it says so on **Home** and in the extension menu, with a link to its page. The notice for a version can be closed and does not return until the next one. **Settings, Version** shows the installed version, checks by hand and turns the notices off with **Notify about new versions**. With the helper installed, in a copy loaded from a folder, the notice and **Settings, Version** offer **Update now**: the helper downloads the package, checks its SHA-256 against the version's `SHA256SUMS.txt`, copies it over the extension's folder keeping its ID, and the extension reloads itself as soon as nothing is running. Store copies update themselves.
 
 ## Keyboard shortcuts
 

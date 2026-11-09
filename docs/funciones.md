@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.16.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.17.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -64,8 +64,11 @@ Estado de cada función en la versión 0.16.0, con la forma en que se ha verific
 | Recuperación de la voz omitida bajo música | Automática, con videos reales |
 | Control de carga: descansos, intensidad automática y pausa | Automática, con medidas de fluidez |
 | Recuperación ante la pérdida de la GPU | Automática, destruyendo el dispositivo WebGPU |
-| Ayudante local con yt-dlp y FFmpeg | Automática, con descarga local. Falta el registro real en el navegador y una descarga real de YouTube |
+| Ayudante local en PowerShell con yt-dlp, sin Python, con FFmpeg o sin él | Automática: instalador sin registro, las dos conversiones, cancelar y los errores, con descarga local; el registro real con Edge, y una descarga real de YouTube con QuickJS |
 | La orden de instalación del ayudante en Ajustes, con el identificador de la copia y un enlace a su descarga | Automática |
+| `Instalar.cmd` de doble clic: encuentra Kotonoha en los navegadores, baja yt-dlp y QuickJS comprobando su SHA-256 y, si no hay copia, instala la extensión con identificador fijo | Automática, sin tocar el registro |
+| **Actualizar ahora**: el ayudante pone la versión nueva en la carpeta de la copia, con su SHA-256 y la misma clave, y la extensión se recarga | Automática, de punta a punta con Edge |
+| Copia completa en una carpeta: libros, texto del OCR y dictados, sin claves de API | Automática, de ida y vuelta |
 | Corrección del resultado con Claude | Simulador |
 | Letra de una canción colocada sobre los tiempos de la transcripción: el texto sale de la letra y los tiempos, de Whisper | Simulador, con Whisper real, y sesión real con una canción |
 | Haas-ja para la voz hablada en japonés, Parakeet para la del inglés y Whisper Turbo para las canciones, elegidos según el video | Automática, con los tres modelos reales en la GPU, y sesión real en YouTube |
@@ -239,7 +242,7 @@ Estado de cada función en la versión 0.16.0, con la forma en que se ha verific
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
-| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad: en otro equipo hay que volver a importarlos Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra. |
-| Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia de seguridad |
+| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad de un solo archivo, sino en la copia completa. Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra. |
+| Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia completa |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
 | Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |

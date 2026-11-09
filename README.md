@@ -145,7 +145,9 @@ Requisito: Chrome o Edge 120 o posterior.
 2. Abrir `chrome://extensions` o `edge://extensions` y activar el **modo de desarrollador**.
 3. Pulsar **Cargar descomprimida** y elegir la carpeta `kotonoha`.
 
-La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, e instala los diccionarios. Para actualizar, basta con descomprimir la versión nueva encima de la anterior: la extensión se recarga sola. Cuando hay una versión nueva, Kotonoha lo avisa en Inicio. La [guía de uso](docs/guia.md) explica cada función, y [CONTRIBUTING.md](CONTRIBUTING.md), cómo compilarla desde el código.
+En Windows también se puede empezar por el ayudante: `kotonoha-<versión>-ayudante.zip` trae `Instalar.cmd`, que con un doble clic instala el ayudante y, si no encuentra Kotonoha, también la extensión, con un identificador fijo. Después solo quedan los pasos 2 y 3.
+
+La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, e instala los diccionarios. Para actualizar, basta con descomprimir la versión nueva encima de la anterior: la extensión se recarga sola. Cuando hay una versión nueva, Kotonoha lo avisa en Inicio y, con el ayudante instalado, **Actualizar ahora** la pone con un clic. La [guía de uso](docs/guia.md) explica cada función, y [CONTRIBUTING.md](CONTRIBUTING.md), cómo compilarla desde el código.
 
 ## Atajos principales
 
@@ -162,7 +164,7 @@ Todos los atajos sobre el video se pueden cambiar, y funcionan con cualquier dis
 
 ## Privacidad
 
-- Los datos y la clave de Claude se guardan solo en el navegador. No hay servidor propio ni estadísticas de uso.
+- Los datos y la clave de Claude se guardan solo en el navegador. No hay servidor propio ni estadísticas de uso. La [política de privacidad](docs/privacidad.md) detalla qué se envía a cada servicio.
 - El audio que se transcribe y las páginas que se reconocen no salen del equipo.
 - A Claude solo se envía lo necesario para cada petición: la frase, el guion de los subtítulos y el título.
 - Los diccionarios y los modelos se descargan una sola vez, de GitHub y de Hugging Face. [AVISOS.md](AVISOS.md) detalla cada fuente.
@@ -178,7 +180,7 @@ flowchart LR
   M --> CL["API de Claude"]
   M --> AN["Anki"]
   S["Service worker"] <--> M
-  S <-->|Native Messaging| H["Ayudante local<br/>yt-dlp y FFmpeg"]
+  S <-->|Native Messaging| H["Ayudante local<br/>PowerShell y yt-dlp"]
 ```
 
 TypeScript, Preact, Dexie y esbuild, con ONNX Runtime y Transformers.js sobre WebGPU para la voz y el OCR. El detalle de cada parte, las decisiones técnicas y las medidas de rendimiento están en [docs/arquitectura.md](docs/arquitectura.md). Las pruebas cubren la lógica con más de 750 pruebas unitarias y los flujos principales de extremo a extremo con Edge real y la GPU; cómo se ejecutan está en [CONTRIBUTING.md](CONTRIBUTING.md).
