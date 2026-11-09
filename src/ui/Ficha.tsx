@@ -630,6 +630,7 @@ const PESTANAS: { id: PestanaDiccionario; icono: NombreIcono; nombre: string; ti
   { id: 'imagenes', icono: 'imagen', nombre: tm('Imágenes'), titulo: tm('Imágenes') },
   { id: 'ejemplos', icono: 'frases', nombre: tm('Ejemplos'), titulo: tm('Frases de ejemplo de lo que has visto') },
   { id: 'trazos', icono: 'trazos', nombre: tm('Trazos'), titulo: tm('Orden de los trazos') },
+  { id: 'suena', icono: 'oido', nombre: tm('Cómo suena'), titulo: tm('Cómo suena de verdad la frase'), conFrase: true },
   { id: 'enlaces', icono: 'enlace', nombre: tm('Enlaces'), titulo: tm('Enlaces externos') },
 ];
 
@@ -929,6 +930,7 @@ export function Ficha(p: PropsFicha) {
           {pestana === 'imagenes' && <PanelImagenes lema={r.lema} frase={p.contexto.frase} enviar={enviar} primeraGlosa={lengua.value.consultaImagen(r.lema, r.entradas, definicionesUnicas)} />}
           {pestana === 'ejemplos' && <PanelEjemplos lema={r.lema} enviar={enviar} />}
           {pestana === 'trazos' && <PanelTrazos palabra={r.lema} />}
+          {pestana === 'suena' && p.contexto.frase && <PanelComoSuena frase={p.contexto.frase} />}
           {sincronizada && pestana === 'explicar' && (
             <>
               <PanelFlujo
@@ -969,7 +971,7 @@ export function Ficha(p: PropsFicha) {
   };
 
   const iaDock = PESTANAS.filter((x) => x.ia);
-  const otrasDock = PESTANAS.filter((x) => !x.ia && (x.id !== 'trazos' || lengua.value.trazos));
+  const otrasDock = PESTANAS.filter((x) => !x.ia && (x.id !== 'trazos' || lengua.value.trazos) && (x.id !== 'suena' || lengua.value.comoSuena));
   const botonPestana = (x: (typeof PESTANAS)[number]) => (
     <button
       key={x.id}
@@ -1090,6 +1092,43 @@ export function Ficha(p: PropsFicha) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Cómo suena de verdad la frase al hablar seguido: la forma hablada encima de cada trozo que cambia, como el furigana,
+ * con una leyenda de lo que pasa en ella. Lo calculan las reglas de la lengua, sin IA.
+ */
+function PanelComoSuena({ frase }: { frase: string }) {
+  const paquete = lengua.value.comoSuena;
+  const trozos = useMemo(() => paquete?.analizar(frase) ?? [], [frase, paquete]);
+  if (!paquete) return null;
+  const presentes = [...new Set(trozos.map((t) => t.fenomeno).filter((f): f is string => !!f))];
+  return (
+    <div class="como-suena">
+      <p class="como-suena-frase" lang={lengua.value.id}>
+        {trozos.map((t, i) =>
+          t.suena ? (
+            <ruby key={i} class={`cs-${t.fenomeno}`}>
+              {t.texto}
+              <rt>{t.suena}</rt>
+            </ruby>
+          ) : (
+            <span key={i}>{t.texto}</span>
+          )
+        )}
+      </p>
+      {presentes.length ? (
+        <ul class="como-suena-leyenda">
+          {presentes.map((f) => (
+            <li key={f}><b class={`cs-${f}`}>{tr(paquete.fenomenos[f]?.nombre ?? f)}</b> {tr(paquete.fenomenos[f]?.explicacion ?? '')}</li>
+          ))}
+        </ul>
+      ) : (
+        <p class="ayuda">{tr('Esta frase se dice como se escribe: no hay reducciones ni uniones que marcar.')}</p>
+      )}
+      <button class="btn chico" onClick={() => decirConNavegador(frase).catch(() => {})}><Icono n="altavoz" t={14} /> {tr('Escuchar la frase')}</button>
     </div>
   );
 }

@@ -291,6 +291,7 @@ Everything this guide explains works the same way, with these differences:
 |---|---|
 | Dictionaries | Wiktionary in the interface language, in two parts: definitions and short translations. With the interface in English, the English-English one is suggested, which takes about 110 MB to download and about 220 MB on disk |
 | Pronunciation | American and British IPA in the word panel. Over the words it starts off, and is turned on in the **Display** panel. Which of the two is written is chosen under **Settings, Language and level** |
+| How it really sounds | The **How it sounds** tab on the word panel shows the sentence as it is said in connected speech, with the spoken form above each part: reductions (*going to* → *gonna*), weak forms (*to* → *tə*), linking (*turn off* → *tur‿noff*), t or d with *you* (*meet you* → *meechu*) and the American soft t (*get it* → *ge‿dit*), with a legend. They are rules, without Claude |
 | Accent color | Shows the stressed syllable: the first, a middle one or the last. It also starts off |
 | Forms | The panel says which word each one comes from: *went* opens *go*, and *didn't*, *do* |
 | Phrasal verbs | The panel looks for them even when they are split: *picked it up* brings up *pick up*. The same goes for set phrases |

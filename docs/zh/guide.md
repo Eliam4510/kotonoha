@@ -291,6 +291,7 @@ powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
 |---|---|
 | 词典 | 界面语言的 Wiktionary，分两部分：释义和简短翻译。界面为英语时，建议使用英英词典，下载约 110 MB，占用约 220 MB |
 | 发音 | 单词面板中显示美式和英式 IPA。单词上方默认关闭，可在**显示**面板中开启。写哪一种在**设置、语言和水平**中选择 |
+| 实际发音 | 单词面板的**实际发音**标签页会按连贯说话时的样子显示这句话，在每个变化的部分上方标出实际读法：缩略（*going to* → *gonna*）、弱读（*to* → *tə*）、连读（*turn off* → *tur‿noff*）、t 或 d 与 *you* 融合（*meet you* → *meechu*）以及美式软化的 t（*get it* → *ge‿dit*），并附说明。全部基于规则，不用 Claude |
 | 重音颜色 | 表示重读音节：第一个、中间或最后一个。同样默认关闭 |
 | 词形 | 面板指出每个词形来自哪个词：*went* 打开 *go*，*didn't* 打开 *do* |
 | 短语动词 | 即使被拆开，面板也会查找：*picked it up* 中会出现 *pick up*。固定搭配也一样 |

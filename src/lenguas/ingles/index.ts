@@ -5,6 +5,7 @@ import type { PaqueteLengua } from '../tipos';
 import { contarEscrituras, esTextoIngles, paginaEnIngles, pareceFrase, SIGNOS_FRASE, tieneIngles } from './escritura';
 import { dePronunciacion, lecturaVisible, patronAcento } from './pronunciacion';
 import { TEXTOS } from './textos';
+import { comoSuena, FENOMENOS } from './conectado';
 import { nombreFlexion, pegarSignos } from './tokens';
 
 function saludo(hora: number, nombre: string): string {
@@ -127,5 +128,6 @@ export const INGLES: PaqueteLengua = {
   },
   saludo,
   textos: TEXTOS,
+  comoSuena: { analizar: comoSuena, fenomenos: FENOMENOS },
   ideasRelato: [tm('Un gato que pasea por Londres'), tm('Una tarde de lluvia en el tren'), tm('La feria de verano del pueblo')],
 };

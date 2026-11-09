@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.0 · 2026-11-09
+
+- **Cómo suena de verdad el inglés.** La ficha de una palabra inglesa tiene una pestaña nueva, **Cómo suena**, que enseña la frase como se dice al hablar seguido, con la forma hablada encima de cada trozo: reducciones (*going to* → *gonna*), formas débiles (*to* → *tə*), uniones (*turn off* → *tur‿noff*), la t o la d con *you* (*meet you* → *meechu*) y la t suave americana (*get it* → *ge‿dit*), con una leyenda. Se calcula con reglas, sin gastar nada.
+
 ## 0.26.0 · 2026-11-09
 
 - **Dictado.** Un modo de reproducción nuevo: oculta la frase, pausa al final y en su lugar se escribe lo que se ha oído. Al comprobar, cada palabra sale en verde, en amarillo o subrayada, con la nota. En japonés se compara cómo se lee, con las otras lecturas del diccionario: 後 escrito «あと» vale aunque el analizador leyera «ご».
@@ -190,6 +194,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.0 · 2026-11-09
+
+- **How English really sounds.** The word panel for an English word has a new tab, **How it sounds**, that shows the sentence as it is said in connected speech, with the spoken form above each part: reductions (*going to* → *gonna*), weak forms (*to* → *tə*), linking (*turn off* → *tur‿noff*), t or d with *you* (*meet you* → *meechu*) and the American soft t (*get it* → *ge‿dit*), with a legend. It is worked out with rules, at no cost.
 
 ## 0.26.0 · 2026-11-09
 

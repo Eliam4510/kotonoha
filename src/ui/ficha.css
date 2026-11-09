@@ -318,3 +318,17 @@ button.chip-gram:active { transform: scale(0.96); }
 .visto-en-titulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--texto-2); }
 .visto-en-frase { font-family: var(--letra-lengua); font-size: 13.5px; }
 .opcion-multiple { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0; }
+
+/* Cómo suena de verdad: la forma hablada encima de lo escrito */
+.como-suena { display: flex; flex-direction: column; gap: 10px; }
+.como-suena-frase { margin: 0; font-family: var(--letra-lengua); font-size: 18px; font-weight: 600; line-height: 2.6; }
+.como-suena-frase ruby { padding: 0 2px; border-radius: 6px; background: color-mix(in srgb, var(--c, var(--info)) 14%, transparent); }
+.como-suena-frase rt { font-size: 0.62em; font-weight: 800; color: var(--c, var(--info)); }
+.como-suena .cs-reduccion { --c: var(--info); }
+.como-suena .cs-debil { --c: var(--texto-2); }
+.como-suena .cs-union { --c: var(--hoja); }
+.como-suena .cs-fusion { --c: var(--est-aprendiendo); }
+.como-suena .cs-tSuave { --c: var(--ac-odaka); }
+.como-suena-leyenda { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--texto-2); }
+.como-suena-leyenda b { color: var(--c, var(--texto)); font-weight: 800; }
+.como-suena > .btn { width: fit-content; }

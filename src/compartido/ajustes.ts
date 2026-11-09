@@ -369,7 +369,7 @@ export const CLAVES_POR_LENGUA = ['nivel', 'diccionarioPestana', 'formatoLectura
 
 export type AjustesLengua = Pick<Ajustes, (typeof CLAVES_POR_LENGUA)[number]>;
 
-export type PestanaDiccionario = 'ninguna' | 'audio' | 'imagenes' | 'explicar' | 'desglose' | 'traduccion' | 'trazos' | 'enlaces' | 'ejemplos';
+export type PestanaDiccionario = 'ninguna' | 'audio' | 'imagenes' | 'explicar' | 'desglose' | 'traduccion' | 'trazos' | 'enlaces' | 'ejemplos' | 'suena';
 
 export interface Prellenado {
   fraseVideo: boolean;

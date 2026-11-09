@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.26.0, along with how it has been verified.
+Status of each feature in version 0.27.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -32,6 +32,7 @@ Status of each feature in version 0.26.0, along with how it has been verified.
 | Dictionary: search by meaning among common words, with the matching gloss; JLPT grammar by form or meaning; under each word, its kanji with their level, homophones and similar words (Claude); seven categories to explore from the JMdict tags | Automated, with the test profile dictionaries and a simulated Claude |
 | Grammar with statuses: new, learning or known in the video bubble, the word panel, the JLPT screen and the dictionary; known points are not flagged under subtitles; where each point was seen; multiple-choice card with distractors from Claude; import from Anki against the 501 list points | Automated (statuses, filter, saving and undo on the JLPT screen); the import, with unit tests |
 | Dictation mode: line hidden, pause at the end, type what you heard and compare (in Japanese by reading, with the other dictionary readings); Hear it again, Continue with Enter; Repeat in your voice (button and P key) opens pitch accent practice with the line | Automated, on the test video page |
+| How it really sounds (English): the sentence with its spoken form above, with reductions, weak forms, linking, t or d with you and the American soft t, and a legend; by rules, without Claude | Automated, with unit tests of the rules |
 | The word panel opens with the dictionary, with no request to Claude | Simulator and real session |
 | Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator, and real session for the meaning in the sentence |
 | Every answer is stored: the same word in the same sentence is never requested again | Simulator and real session |
