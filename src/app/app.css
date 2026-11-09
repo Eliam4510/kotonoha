@@ -458,7 +458,7 @@ section .ap-botones { margin-top: 10px; }
 .ap-dock-separacion { width: 1px; height: 22px; margin: 0 4px; background: var(--borde-2); }
 .ap-dock-velocidad { min-width: 46px; font-size: 13px; font-weight: 800; }
 /* Sobre lo seleccionado en el texto: escucharlo o practicarlo. */
-.ap-seleccion { position: fixed; z-index: 30; display: flex; gap: 2px; padding: 4px; border-radius: var(--r-pill); transform: translate(-50%, calc(-100% - 10px)); background: var(--vidrio-denso); backdrop-filter: blur(14px) saturate(1.3); box-shadow: inset 0 0 0 1px var(--borde-2), var(--sombra-2); animation: kk-aparecer 0.16s var(--salida); }
+.ap-seleccion-texto { position: fixed; z-index: 30; display: flex; gap: 2px; padding: 4px; border-radius: var(--r-pill); transform: translate(-50%, calc(-100% - 10px)); background: var(--vidrio-denso); backdrop-filter: blur(14px) saturate(1.3); box-shadow: inset 0 0 0 1px var(--borde-2), var(--sombra-2); animation: kk-fundido 0.14s var(--salida); }
 /* La práctica del acento, en el sitio de la consulta. */
 .ap-lectura-practica { overflow-y: auto; }
 .ap-practica { display: flex; flex-direction: column; gap: 14px; padding: 16px 18px 22px; }
@@ -1046,3 +1046,58 @@ section .ap-botones { margin-top: 10px; }
 .ap-web .ap-lienzo { padding: 22px 20px 48px; }
 .ap-web .ap-lectura-ficha { height: calc(100vh - 88px); }
 @container (max-width: 560px) { .ap-web .ap-papel { padding: 22px 18px 30px; } }
+
+/* ---------- Niveles: el vocabulario, los caracteres y la gramática de cada nivel del examen ---------- */
+.ap-niveles-tarjetas { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+@media (max-width: 1100px) { .ap-niveles-tarjetas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ap-nivel-examen { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 15px; text-align: left; cursor: pointer; border: 1px solid var(--borde); transition: transform 0.15s var(--resorte), box-shadow 0.15s, border-color 0.15s; }
+.ap-nivel-examen:hover { transform: translateY(-2px); }
+.ap-nivel-examen.activo { border-color: var(--hoja); box-shadow: 0 0 0 3px var(--hoja-suave), var(--sombra-2); }
+.ap-nivel-examen-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ap-nivel-examen-cab b { font-size: 26px; font-weight: 900; letter-spacing: -0.01em; }
+.ap-nivel-examen dl { display: grid; gap: 4px; margin: 0; }
+.ap-nivel-examen dl div { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; }
+.ap-nivel-examen dt { color: var(--texto-2); font-weight: 600; }
+.ap-nivel-examen dd { margin: 0; font-weight: 700; }
+.ap-anillo-nivel .fondo { fill: none; stroke: var(--superficie-3); stroke-width: 7; }
+.ap-anillo-nivel .conocida, .ap-anillo-nivel .aprendiendo { fill: none; stroke-width: 7; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 32px 32px; transition: stroke-dasharray 0.5s var(--salida); }
+.ap-anillo-nivel .conocida { stroke: var(--est-conocida); }
+.ap-anillo-nivel .aprendiendo { stroke: var(--est-aprendiendo); opacity: 0.6; }
+.ap-anillo-nivel text { font-family: var(--letra); font-size: 14px; font-weight: 800; fill: var(--texto); }
+.ap-niveles-filtros { flex-wrap: wrap; }
+.ap-niveles-filtros .segmentado small { margin-left: 2px; opacity: 0.72; font-weight: 700; }
+.ap-niveles-cargando { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 48px; color: var(--texto-2); }
+.ap-lista-nivel .ap-fila-palabra { grid-template-columns: 18px minmax(130px, 0.9fr) minmax(0, 1.5fr) 142px 30px; }
+.ap-fila-glosa { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--texto-2); font-size: 13px; }
+.ap-niveles-credito { margin: 22px auto 0; max-width: 720px; text-align: center; font-size: 12px; }
+
+.ap-caracteres { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.ap-caracteres.con-detalle { grid-template-columns: minmax(0, 1fr) 360px; }
+.ap-caracteres-rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 8px; }
+.ap-caracter { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: var(--r-2); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo); font-family: var(--letra-lengua); font-size: 28px; font-weight: 700; color: var(--texto); cursor: pointer; transition: transform 0.12s var(--resorte), background 0.12s; }
+.ap-caracter::after { content: ''; position: absolute; left: 16px; right: 16px; bottom: 6px; height: 3px; border-radius: 3px; background: var(--superficie-4); }
+.ap-caracter.conocida::after { background: var(--est-conocida); }
+.ap-caracter.aprendiendo::after { background: var(--est-aprendiendo); }
+.ap-caracter:hover { transform: translateY(-2px); background: var(--superficie-2); }
+.ap-caracter.activo { box-shadow: inset 0 0 0 2px var(--hoja), var(--sombra-1); }
+.ap-caracter-detalle { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 32px); padding: 16px 18px; overflow-y: auto; }
+.ap-caracter-cab { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 14px; }
+.ap-caracter-cab > b { font-family: var(--letra-lengua); font-size: 64px; font-weight: 700; line-height: 1; }
+.ap-caracter-cab p { margin: 0 0 4px; font-size: 14px; }
+.ap-caracter-cab small { display: inline-block; min-width: 30px; color: var(--texto-3); font-family: var(--letra); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.ap-caracter-glosa { color: var(--texto-2); }
+.ap-estado-chip { width: fit-content; }
+.ap-caracter-palabras { display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-caracter-detalle > .btn { width: fit-content; }
+
+.ap-lista-gramatica { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-4); box-shadow: var(--brillo), var(--sombra-1); overflow: hidden; }
+.ap-patron { border-top: 1px solid var(--borde); }
+.ap-patron:first-child { border-top: 0; }
+.ap-patron-cab { display: grid; grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.6fr) 18px; align-items: center; gap: 16px; width: 100%; min-height: 52px; padding: 8px 16px; text-align: left; color: var(--texto); }
+.ap-patron-cab:hover { background: var(--superficie-2); }
+.ap-patron-cab b { font-family: var(--letra-lengua); font-size: 17px; font-weight: 700; }
+.ap-patron-cab span { color: var(--texto-2); font-size: 13.5px; }
+.ap-patron.abierto { background: var(--superficie-2); }
+.ap-patron-detalle { display: flex; flex-direction: column; gap: 10px; padding: 2px 16px 16px; }
+.ap-patron-detalle > .btn { width: fit-content; }
+.ap-patron-detalle mark { padding: 0 1px; border-radius: 4px; background: var(--hoja-media); color: var(--texto); font-weight: 800; }

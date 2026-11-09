@@ -116,6 +116,12 @@ La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y
 
 **Compartir como imagen**, en la ficha, convierte una palabra o un punto de gramática en una tarjeta con lo que significa en esa frase y la frase donde apareció, y la deja en el portapapeles para pegarla en cualquier chat con Ctrl+V. Sale en tinta o en papel, como los temas.
 
+### El JLPT, nivel a nivel
+
+<img src="docs/img/niveles.png" alt="Pantalla JLPT con el avance de N5 a N1 y el vocabulario de N4" width="100%">
+
+La pantalla **JLPT** reúne el vocabulario, los kanji y la gramática de cada nivel, de N5 a N1, y dice cuánto se conoce ya de cada uno, a partir de las palabras marcadas mientras se ve y se lee. Las que ya se saben se marcan de una vez, cada kanji enseña sus trazos y las palabras que lo llevan, y cada punto de gramática, las frases vistas en que apareció.
+
 ### Inglés y alemán
 
 <img src="docs/img/ingles-subtitulos.png" alt="Ficha de una palabra inglesa sobre un video, con la pronunciación en IPA" width="100%">

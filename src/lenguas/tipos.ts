@@ -199,6 +199,22 @@ export interface NivelLengua {
   palabras?: number;
 }
 
+/** Las listas por nivel de un examen, como el JLPT. */
+export interface ListasNivelLengua {
+  /** El nombre del examen, que no se traduce. */
+  examen: string;
+  /** Los niveles, del más fácil al más difícil. */
+  niveles: string[];
+  /** Dónde están vocabulario.json, kanji.json y gramatica.json dentro del paquete de la extensión. */
+  carpeta: string;
+  descripcion: string;
+  /** El nombre de la pestaña de los caracteres, como «Kanji»; sin él no hay pestaña. */
+  caracteres?: string;
+  /** Lo que se dice en la ficha de un carácter de la lista, sobre las palabras del nivel que lo llevan. */
+  palabrasConCaracter?: string;
+  credito: string;
+}
+
 /** Ejemplos que la interfaz enseña en la lengua que se estudia. */
 export interface EjemplosLengua {
   palabra: string;
@@ -330,6 +346,11 @@ export interface PaqueteLengua {
      */
     conocidas?: { caracteres(palabra: string): string[]; titulo: string; ninguna: string };
   };
+  /**
+   * Las listas de cada nivel de un examen de la lengua: su vocabulario, sus caracteres y su gramática, en archivos JSON
+   * del paquete de la extensión (ver herramientas/jlpt.mjs). Sin ellas, la pantalla de niveles no aparece.
+   */
+  listasNivel?: ListasNivelLengua;
   /** Para quien empieza desde cero: va antes de los niveles. */
   principiante: NivelLengua;
   niveles: NivelLengua[];

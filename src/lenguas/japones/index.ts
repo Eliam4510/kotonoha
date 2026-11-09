@@ -103,6 +103,15 @@ export const JAPONES: PaqueteLengua = {
       ninguna: tm('Aún no conoces otras palabras con {0}. Cuando las marques como conocidas o en aprendizaje, aparecerán aquí.'),
     },
   },
+  listasNivel: {
+    examen: 'JLPT',
+    niveles: ['N5', 'N4', 'N3', 'N2', 'N1'],
+    carpeta: 'datos/jlpt',
+    descripcion: tm('El vocabulario, los kanji y la gramática de cada nivel del JLPT, con lo que ya conoces de cada uno. No hay listas oficiales: estas son las de uso común.'),
+    caracteres: tm('Kanji'),
+    palabrasConCaracter: tm('Palabras del nivel con este kanji'),
+    credito: tm('Vocabulario y kanji: listas de Jonathan Waller (JLPT Resources, tanos.co.uk), con licencia CC BY. Gramática: lista propia de Kotonoha, cotejada con las de uso común.'),
+  },
   principiante: { valor: 'principiante absoluto', nombre: tm('Empiezo desde cero'), ayuda: tm('Aún no leo kana'), lectura: 'todas' },
   // Vocabulario que suele asociarse a cada nivel del JLPT. Son cifras orientativas, no oficiales.
   niveles: [

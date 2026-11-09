@@ -19,6 +19,7 @@ import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navega
 import { Biblioteca } from './Biblioteca';
 import { Cuaderno } from './Cuaderno';
 import { Diccionario, Inicio, Memoria, Palabras } from './Pantallas';
+import { Niveles } from './Niveles';
 import { ReproductorLocal } from './ReproductorLocal';
 import { MenuLengua } from './SelectorLengua';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
@@ -45,6 +46,8 @@ const GRUPOS: { titulo?: string; rutas: Ruta[] }[] = [
     rutas: [
       { id: 'memoria', icono: 'tarjetas', nombre: tm('Memoria') },
       { id: 'palabras', icono: 'palabras', nombre: tm('Palabras') },
+      // Las listas por nivel del examen de la lengua: con su nombre (JLPT), y solo si la lengua las tiene.
+      { id: 'niveles', icono: 'nivel', nombre: '' },
     ],
   },
 ];
@@ -119,9 +122,11 @@ function Lateral({ ruta, a }: { ruta: string; a: Ajustes }) {
         {GRUPOS.map((g, i) => (
           <div class="ap-nav-grupo" key={i}>
             {g.titulo && !compacta && <div class="ap-nav-titulo">{tr(g.titulo)}</div>}
-            {g.rutas.map((r) => (
-              <BotonRuta key={r.id} r={r} ruta={ruta} compacta={compacta} cuenta={r.id === 'memoria' ? pendientes : undefined} />
-            ))}
+            {g.rutas.map((r) => {
+              if (r.id !== 'niveles') return <BotonRuta key={r.id} r={r} ruta={ruta} compacta={compacta} cuenta={r.id === 'memoria' ? pendientes : undefined} />;
+              const examen = lengua.value.listasNivel?.examen;
+              return examen ? <BotonRuta key={r.id} r={{ ...r, nombre: examen }} ruta={ruta} compacta={compacta} /> : null;
+            })}
           </div>
         ))}
       </div>
@@ -208,6 +213,7 @@ function App() {
         {ruta === 'reproductor' && <ReproductorLocal a={a} />}
         {ruta === 'memoria' && <Memoria />}
         {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}
+        {ruta === 'niveles' && <Niveles ajustes={a} />}
         {ruta === 'ajustes' && <PantallaAjustes a={a} />}
       </main>
       <Creador ajustes={a} />

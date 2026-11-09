@@ -117,6 +117,50 @@ export interface EstadisticasPalabras {
   ignoradas: number;
 }
 
+/** Una palabra de la lista de un nivel, con lo que se sabe de ella. */
+export interface PalabraNivel {
+  clave: string;
+  lema: string;
+  lectura: string;
+  /** La glosa de la lista, en inglés. */
+  glosa: string;
+  estado: EstadoPalabra;
+  rastreada: boolean;
+}
+
+/** Un carácter de la lista de un nivel: sus lecturas y cuánto se conoce por las palabras que lo llevan. */
+export interface CaracterNivel {
+  caracter: string;
+  on: string;
+  kun: string;
+  glosa: string;
+  /** Conocido si alguna palabra conocida lo lleva; en aprendizaje si solo lo llevan palabras en aprendizaje. */
+  estado: EstadoPalabra;
+  /** Cuántas palabras conocidas o en aprendizaje lo llevan. */
+  palabras: number;
+}
+
+/** Un punto de gramática de la lista de un nivel, con su significado en cada idioma de la interfaz que lo tenga. */
+export interface GramaticaNivel {
+  patron: string;
+  significado: Record<string, string>;
+}
+
+export interface ListaNivel {
+  nivel: string;
+  palabras: PalabraNivel[];
+  caracteres: CaracterNivel[];
+  gramatica: GramaticaNivel[];
+}
+
+/** Cuánto se conoce de un nivel. */
+export interface ResumenNivel {
+  nivel: string;
+  palabras: { total: number; conocidas: number; aprendiendo: number };
+  caracteres: { total: number; conocidas: number; aprendiendo: number };
+  gramatica: { total: number };
+}
+
 export interface FilaPalabra {
   clave: string;
   lema: string;

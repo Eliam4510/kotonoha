@@ -21,7 +21,9 @@ import type {
   FuenteBiblioteca,
   InfoDiccionario,
   LineaAnalizada,
+  ListaNivel,
   PalabraToken,
+  ResumenNivel,
   PeticionRevisionOcr,
   ProgresoInstalacion,
   ResultadoAudio,
@@ -127,6 +129,12 @@ export interface ApiMotor {
   /** Lo mismo con narabas, el modelo de las moras de la práctica. */
   prepararMoras(): Promise<void>;
   listarPalabras(filtro: FiltroPalabras): Promise<{ filas: FilaPalabra[]; total: number }>;
+  /** Las listas de un nivel del examen de la lengua (el JLPT), cruzadas con lo que se sabe de cada palabra. */
+  listaNivel(carpeta: string, nivel: string): Promise<ListaNivel>;
+  /** Cuánto se conoce de cada nivel. */
+  resumenNiveles(carpeta: string, niveles: string[]): Promise<ResumenNivel[]>;
+  /** Frases ya vistas que llevan un punto de gramática: ejemplos reales. */
+  frasesConPatron(patron: string, limite?: number): Promise<FraseEjemplo[]>;
   muestraEvaluacion(): Promise<{ lema: string; lectura: string; rango: number }[]>;
   aplicarEvaluacion(rangoEstimado: number): Promise<number>;
   importarConocidasAnki(consulta: string, campo: string): Promise<number>;
