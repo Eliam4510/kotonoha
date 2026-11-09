@@ -116,12 +116,33 @@ const lenguaActual = async () => (await leerAjustes()).idiomaObjetivo;
 // ---------- Elegir la lengua ----------
 
 console.log('\n== Elegir la lengua ==');
-// Si una ejecución anterior se quedó en inglés, se vuelve al punto de partida.
+// Si una ejecución anterior se quedó a medias, se vuelve al punto de partida: el inglés sin palabras conocidas ni ajustes
+// propios (su lector encendido haría fallar lo que sigue), y el japonés con los de siempre.
+await motor('fijarLengua', 'en');
+await motor('cambiarPalabras', ['go', 'wait'].map((x) => ({ clave: `${x}|${x}`, lema: x, lectura: x, estado: 'desconocida' })));
 await motor('fijarLengua', 'ja');
 await sw.evaluate(async () => {
-  const d = await chrome.storage.local.get('ajustes');
-  const a = d.ajustes ?? {};
-  if (a.idiomaObjetivo === 'en') await chrome.storage.local.set({ ajustes: { ...a, idiomaObjetivo: 'ja', porLengua: {}, nivel: 'JLPT N3', formatoLectura: 'hiragana', furigana: 'todas', lectorFurigana: 'desconocidas', lectorActivo: true, colorAcento: 'siempre', ankiMazo: 'Kotonoha' } });
+  const a = (await chrome.storage.local.get('ajustes')).ajustes ?? {};
+  await chrome.storage.local.set({ ajustes: { ...a, idiomaObjetivo: 'ja', porLengua: {}, nivel: 'JLPT N3', formatoLectura: 'hiragana', furigana: 'todas', lectorFurigana: 'desconocidas', lectorActivo: true, colorAcento: 'siempre', ankiMazo: 'Kotonoha' } });
+});
+// Lo que Claude respondió en otra ejecución está guardado para no volver a pagarlo: sin vaciarlo, no se le pediría nada.
+await app.evaluate(async () => {
+  if (!(await indexedDB.databases()).some((d) => d.name === 'kikitori-en')) return;
+  const base = await new Promise((ok, mal) => {
+    const r = indexedDB.open('kikitori-en');
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => mal(r.error);
+  });
+  const almacenes = ['cacheIA', 'correcciones'].filter((x) => base.objectStoreNames.contains(x));
+  if (almacenes.length) {
+    await new Promise((ok, mal) => {
+      const t = base.transaction(almacenes, 'readwrite');
+      for (const x of almacenes) t.objectStore(x).clear();
+      t.oncomplete = ok;
+      t.onerror = () => mal(t.error);
+    });
+  }
+  base.close();
 });
 await app.reload();
 await app.waitForTimeout(1200);
@@ -168,7 +189,8 @@ const muestra = await motor('muestraEvaluacion');
 comprobar(muestra.length >= 8 && muestra.every((p) => /^[a-z'-]+$/i.test(p.lema)), 'La evaluación de nivel pregunta palabras inglesas', muestra.map((p) => p.lema).join(', '));
 comprobar(estado.tokenizadorListo, 'El analizador se ha cargado');
 const bases = await app.evaluate(async () => (await indexedDB.databases()).map((d) => `${d.name}:${d.version}`));
-comprobar(bases.includes('kikitori:60') && bases.includes('kikitori-en:60'), 'Cada lengua tiene su base', bases.join(', '));
+const versionDe = (nombre) => bases.find((b) => b.startsWith(`${nombre}:`))?.split(':')[1];
+comprobar(!!versionDe('kikitori') && versionDe('kikitori') === versionDe('kikitori-en'), 'Cada lengua tiene su base, con la misma versión', bases.join(', '));
 
 // ---------- Análisis y diccionario ----------
 
@@ -238,6 +260,7 @@ await p.screenshot({ path: join(CAPTURAS, 'video.png') });
 const pedidas = () => mock.peticiones.filter((x) => x.url.includes('/messages'));
 const correccion = pedidas().find((x) => /subtítulos en inglés generados/.test(JSON.stringify(x.cuerpo.system ?? '')));
 comprobar(!!correccion, 'Corrige los subtítulos automáticos con el prompt del inglés');
+if (!correccion) console.log('   peticiones:', mock.peticiones.map((x) => `${x.url} ${JSON.stringify(x.cuerpo?.system ?? '').slice(0, 70)}`).join(' | ') || 'ninguna');
 await hasta(() => true, undefined, 500);
 
 const palabraEn = (s) => enOverlay(`(r, s) => {
@@ -280,6 +303,7 @@ await hasta((r) => (r.querySelector('.panel-ia-texto')?.textContent ?? '').lengt
 const nuevas = pedidas().slice(antes).map((x) => JSON.stringify(x.cuerpo.system ?? ''));
 comprobar(nuevas.some((s) => s.includes('lexicógrafo experto en inglés')), 'Pregunta el sentido como experto en inglés');
 comprobar(nuevas.some((s) => s.includes('profesor de inglés')), 'Explica como profesor de inglés');
+if (nuevas.length < 2) console.log('   pedidas tras abrir la ficha:', nuevas.map((s) => s.slice(0, 70)).join(' | ') || 'ninguna');
 comprobar(!nuevas.some((s) => /japon[eé]/i.test(s)), 'Y sin rastro del japonés en lo que se le pide');
 
 // Una tarjeta de un clic, en el repaso integrado.
@@ -410,11 +434,13 @@ comprobar(/^Good (morning|afternoon|evening)/.test(saludo ?? ''), 'La pantalla d
 comprobar((await app.locator('.ap-sendero').textContent()).includes('B1'), 'Y el sendero es el de los niveles del inglés');
 await app.screenshot({ path: join(CAPTURAS, 'inicio.png') });
 
+// El Cuaderno abre con el texto que se le haya dejado.
+await sw.evaluate(async (texto) => {
+  await chrome.storage.local.set({ lectorTexto: texto });
+  await chrome.storage.local.remove('notaCuaderno');
+}, 'She picked it up. Then she went home, because it was late.');
 await app.goto(`chrome-extension://${id}/app.html#/lector`);
 await app.reload();
-await app.waitForTimeout(800);
-await app.locator('textarea').first().fill('She picked it up. Then she went home, because it was late.');
-await app.locator('button.primario').first().click();
 await app.waitForSelector('.ap-papel .pal', { timeout: 20000 });
 await app.waitForTimeout(500);
 const papel = (await app.locator('.ap-papel').textContent()).replaceAll('\u2060', '');

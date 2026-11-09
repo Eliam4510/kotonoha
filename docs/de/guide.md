@@ -291,6 +291,7 @@ Alles, was diese Anleitung erklärt, funktioniert genauso, mit diesen Unterschie
 |---|---|
 | Wörterbücher | Wiktionary in der Sprache der Oberfläche, in zwei Teilen: Definitionen und kurze Übersetzungen. Mit englischer Oberfläche wird das Englisch-Englisch-Wörterbuch vorgeschlagen, mit etwa 110 MB Download und etwa 220 MB Speicherplatz |
 | Aussprache | Amerikanische und britische IPA im Wortfenster. Über den Wörtern ist sie anfangs ausgeschaltet und wird im Fenster **Anzeige** eingeschaltet. Welche der beiden geschrieben wird, legt **Einstellungen, Sprache und Niveau** fest |
+| Wie es wirklich klingt | Der Tab **Wie es klingt** im Wortfenster zeigt den Satz so, wie er beim zusammenhängenden Sprechen klingt, mit der gesprochenen Form über jedem Teil: Verkürzungen (*going to* → *gonna*), schwache Formen (*to* → *tə*), Bindungen (*turn off* → *tur‿noff*), t oder d mit *you* (*meet you* → *meechu*) und das weiche amerikanische t (*get it* → *ge‿dit*), mit Legende. Es sind Regeln, ohne Claude |
 | Akzentfarbe | Zeigt die betonte Silbe: die erste, eine mittlere oder die letzte. Auch sie ist anfangs ausgeschaltet |
 | Formen | Das Wortfenster nennt das Wort, von dem jede stammt: *went* öffnet *go*, und *didn't* öffnet *do* |
 | Partikelverben | Das Wortfenster sucht sie auch dann, wenn sie getrennt stehen: Bei *picked it up* erscheint *pick up*. Dasselbe gilt für feste Wendungen |

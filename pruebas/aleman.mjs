@@ -139,7 +139,9 @@ for (let i = 0; i < 60 && estado.terminosCargados <= 50000; i++) {
 }
 comprobar(estado.terminosCargados > 50000, 'Los términos están en memoria', estado.terminosCargados);
 const bases = await app.evaluate(async () => (await indexedDB.databases()).map((d) => `${d.name}:${d.version}`));
-comprobar(bases.includes('kikitori-de:60'), 'El alemán tiene su base, con la tabla de formas', bases.join(', '));
+// La tabla de formas llegó con la versión 6 de la base (Dexie la multiplica por 10).
+const versionDe = Number(bases.find((b) => b.startsWith('kikitori-de:'))?.split(':')[1] ?? 0);
+comprobar(versionDe >= 60, 'El alemán tiene su base, con la tabla de formas', bases.join(', '));
 
 // ---------- Análisis y diccionario ----------
 

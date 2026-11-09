@@ -291,6 +291,7 @@ Todo lo que explica esta guía funciona igual, con estas diferencias:
 |---|---|
 | Diccionarios | Wiktionary en el idioma de la interfaz, en dos partes: definiciones y traducciones breves. Con la interfaz en inglés se propone el inglés-inglés, que descarga unos 110 MB y ocupa unos 220 MB |
 | Pronunciación | IPA americana y británica en la ficha. Sobre las palabras empieza apagada, y se enciende en el panel **Visualización**. Cuál de las dos se escribe se elige en **Ajustes, Idioma y nivel** |
+| Cómo suena de verdad | La pestaña **Cómo suena** de la ficha enseña la frase como se dice al hablar seguido, con la forma hablada encima de cada trozo: reducciones (*going to* → *gonna*), formas débiles (*to* → *tə*), uniones (*turn off* → *tur‿noff*), la t o la d con *you* (*meet you* → *meechu*) y la t suave americana (*get it* → *ge‿dit*), con una leyenda. Son reglas, sin Claude |
 | Color de acento | Indica la sílaba tónica: la primera, una del medio o la última. También empieza apagado |
 | Formas | La ficha dice de qué palabra viene cada una: *went* abre *go*, y *didn't*, *do* |
 | Verbos con partícula | La ficha los busca aunque vayan separados: en *picked it up* aparece *pick up*. Lo mismo con las frases hechas |

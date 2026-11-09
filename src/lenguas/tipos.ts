@@ -200,6 +200,14 @@ export interface NivelLengua {
   palabras?: number;
 }
 
+/** Un trozo de una frase y cómo se dice al hablar seguido, si cambia. */
+export interface TrozoHablado {
+  texto: string;
+  suena?: string;
+  /** Qué pasa ahí: el nombre de uno de los fenómenos de la lengua. */
+  fenomeno?: string;
+}
+
 export interface CategoriaDiccionario {
   id: string;
   nombre: string;
@@ -362,6 +370,11 @@ export interface PaqueteLengua {
    * del paquete de la extensión (ver herramientas/jlpt.mjs). Sin ellas, la pantalla de niveles no aparece.
    */
   listasNivel?: ListasNivelLengua;
+  /**
+   * Cómo suena de verdad una frase al hablar seguido: reducciones, formas débiles, uniones… Se enseña en la ficha, en su
+   * propia pestaña, con la forma hablada encima de lo escrito.
+   */
+  comoSuena?: { analizar(frase: string): TrozoHablado[]; fenomenos: Record<string, { nombre: string; explicacion: string }> };
   /** Categorías para explorar el diccionario, por las etiquetas de sus entradas: en JMdict, «on-mim» son las onomatopeyas. */
   categoriasDiccionario?: CategoriaDiccionario[];
   /** Para quien empieza desde cero: va antes de los niveles. */
