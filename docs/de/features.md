@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.13.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.13.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -65,6 +65,7 @@ Stand jeder Funktion in Version 0.13.0 und die Art ihrer Überprüfung.
 | Laststeuerung: Pausen, automatische Intensität und Anhalten | Automatisch, mit Messungen der Flüssigkeit |
 | Wiederherstellung bei Verlust der GPU | Automatisch, durch Zerstören des WebGPU-Geräts |
 | Lokaler Helfer mit yt-dlp und FFmpeg | Automatisch, mit lokalem Download. Es fehlen die echte Registrierung im Browser und ein echter YouTube-Download |
+| Der Installationsbefehl des Helfers in den Einstellungen, mit der ID der Kopie und einem Link zum Download | Automatisch |
 | Korrektur des Ergebnisses mit Claude | Simulator |
 | Liedtext auf die Zeiten der Transkription gelegt: der Text aus dem Liedtext, die Zeiten von Whisper | Simulator, mit echtem Whisper, und echte Sitzung mit einem Lied |
 | Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder, je nach Video gewählt | Automatisch, mit den drei echten Modellen auf der GPU, und echte Sitzung auf YouTube |
@@ -84,6 +85,7 @@ Stand jeder Funktion in Version 0.13.0 und die Art ihrer Überprüfung.
 | Ohne Hardwarebeschleunigung verzichtet die Oberfläche auf Unschärfe, um keine Bilder zu verlieren | Automatisch |
 | Audio des Wortes: JapanesePod101 und Lingua Libre | Automatisch |
 | Neuronale Azure-Stimmen mit eigenem Schlüssel | Ausstehend |
+| Stimme des Browsers ohne Azure-Schlüssel: die beste, die er anbietet („Natural“ in Edge, Google in Chrome), oder eine andere aus den Einstellungen, je Sprache | Automatisch |
 | Bilder von Openverse | Automatisch |
 | Erstellen mehrerer Karten aus ausgewählten Zeilen | Simulator |
 | Bekannte Wörter aus Anki-Stapeln | Simulator |
@@ -156,8 +158,9 @@ Stand jeder Funktion in Version 0.13.0 und die Art ihrer Überprüfung.
 
 | Funktion | Überprüfung |
 |---|---|
-| Die Lernsprache wählen: in der Begrüßung, in den Einstellungen oder im Menü der Erweiterung | Automatisch |
+| Die Lernsprache wählen: auf der Startseite und in der Seitenleiste, mit ihrer Flagge, in der Begrüßung, in den Einstellungen oder im Menü der Erweiterung | Automatisch |
 | Wörter, Wörterbücher, Karten und Einstellungen je Sprache getrennt | Automatisch |
+| Hinweis auf eine neue Version von GitHub, einmal am Tag, auf der Startseite und im Menü der Erweiterung; je Version schließbar und unter Einstellungen, Version abschaltbar | Automatisch, mit simuliertem GitHub |
 | Oberfläche auf Spanisch, Englisch, Deutsch, vereinfachtem Chinesisch, Koreanisch und Japanisch | Automatisch: vollständige Tabellen und Screenshots jeder Sprache |
 | Begrüßung mit Sprache, Niveau, Wörterbüchern, Schlüssel und Ziel der Karten | Automatisch |
 | Erklärungen und Übersetzungen in einer anderen Sprache als die Oberfläche, auch Portugiesisch und Französisch | Automatisch |

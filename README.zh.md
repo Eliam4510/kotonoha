@@ -135,7 +135,7 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 2. 打开 `chrome://extensions` 或 `edge://extensions`，开启**开发者模式**。
 3. 点击**加载已解压的扩展程序**，选择 `kotonoha` 文件夹。
 
-首次启动时，欢迎页面会询问你的语言、想学的语言和水平，并安装词典。更新时，只需把新版本解压覆盖旧版本：扩展会自动重新加载。[使用指南](docs/zh/guide.md)介绍了每项功能，[CONTRIBUTING.md](CONTRIBUTING.md) 介绍了如何从源代码构建。
+首次启动时，欢迎页面会询问你的语言、想学的语言和水平，并安装词典。更新时，只需把新版本解压覆盖旧版本：扩展会自动重新加载。有新版本时，Kotonoha 会在首页提示。[使用指南](docs/zh/guide.md)介绍了每项功能，[CONTRIBUTING.md](CONTRIBUTING.md) 介绍了如何从源代码构建。
 
 ## 主要快捷键
 

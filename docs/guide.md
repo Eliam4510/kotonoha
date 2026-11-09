@@ -29,7 +29,7 @@ The first time, a welcome screen asks for the language, the one to study and the
 | Dictionaries | Settings, Dictionaries | JMdict in Spanish, English or German, Kanjium pitch accent and JPDB frequency. They are downloaded once and stay in the browser |
 | Claude API key | Settings, Claude | Explanations, reading review, translation and correction. It is stored only in the browser |
 | Language and level | Settings, Language and level | The interface language and, separately, that of explanations and translations. The level adapts the explanations and decides how much furigana is shown at first |
-| Language you're studying | Settings, Language and level, the extension menu, or **Video settings, Subtitles** on the video itself | Japanese, English or German. Each keeps its own words, dictionaries, cards and settings |
+| Language you're studying | **Home** and the sidebar, Settings, Language and level, the extension menu, or **Video settings, Subtitles** on the video itself | Japanese, English or German. Each keeps its own words, dictionaries, cards and settings |
 | Anki | Settings, Cards and Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
 
 The extension works without a Claude key: subtitles, the dictionary, furigana, colors, flashcards and Whisper do not need one.
@@ -165,10 +165,10 @@ Whisper gets the timing right, but in a song it misses many words. If someone ha
 
 ### Local helper
 
-An extension cannot download the audio of a video by itself. The helper is a small local program that does so with [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg. It requires Python, and its installer adds yt-dlp if missing. It is installed once from the project folder:
+An extension cannot download the audio of a video by itself. The helper is a small local program that does so with [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg. It requires Python, and its installer adds yt-dlp if missing. It is downloaded from the latest version's page, as `kotonoha-X.Y.Z-ayudante.zip`, and unzipped into a folder that will not be moved. Inside that folder, run once the command shown under **Settings, Transcription**, which already includes the extension's ID:
 
 ```bash
-powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
+powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
 ```
 
 The extension must then be reloaded at `edge://extensions` or `chrome://extensions`. Its status can be checked under **Settings, Transcription**.
@@ -200,7 +200,7 @@ Cards can be sent to Anki through AnkiConnect, with a custom note type or the on
 |---|---|---|
 | Word audio | JapanesePod101 and Lingua Libre, through Wikimedia Commons | No |
 | Sentence audio | Recorded from the tab with `tabCapture`, on the computer itself, and converted to MP3 | No |
-| Synthetic voices | Azure Speech, if configured. Otherwise the system voices, for listening only | Azure only |
+| Synthetic voices | Azure Speech, if configured. Otherwise the browser's voices: the best one it offers, or another chosen in **Settings, Voices**, for listening only | Azure only |
 | Images | Openverse, searching for the first English JMdict gloss | No |
 | Video frame | Captured from the video, on the computer itself | No |
 | Examples | Sentences the user has already seen, stored in the browser | No |
@@ -299,6 +299,8 @@ Three settings decide how much word queries are used:
 ## Data and backups
 
 All data is stored in the browser, in IndexedDB. **Settings, Your data** exports and imports a single file with the words, cards, library, generated subtitles and corrections of every language that has been used, along with the settings and the spending log. The Claude key and the dictionaries are not included. A backup from before version 0.4.0 is restored as Japanese.
+
+**New versions.** Once a day, Kotonoha asks GitHub for the latest published version. If it is newer than the installed one, it says so on **Home** and in the extension menu, with a link to its page. The notice for a version can be closed and does not return until the next one. **Settings, Version** shows the installed version, checks by hand and turns the notices off with **Notify about new versions**.
 
 ## Keyboard shortcuts
 

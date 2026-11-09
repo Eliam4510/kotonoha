@@ -133,7 +133,7 @@ Requirement: Chrome or Edge 120 or later.
 2. Open `chrome://extensions` or `edge://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and choose the `kotonoha` folder.
 
-On first run a welcome screen asks for your language, the one you want to study and your level, and installs the dictionaries. To update, unzip the new version over the old one: the extension reloads by itself. The [user guide](docs/guide.md) explains every feature, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to build it from source.
+On first run a welcome screen asks for your language, the one you want to study and your level, and installs the dictionaries. To update, unzip the new version over the old one: the extension reloads by itself. When there is a new version, Kotonoha says so on Home. The [user guide](docs/guide.md) explains every feature, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to build it from source.
 
 ## Main shortcuts
 

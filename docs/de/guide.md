@@ -29,7 +29,7 @@ Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und
 | Wörterbücher | Einstellungen, Wörterbücher | JMdict auf Spanisch, Englisch oder Deutsch, Tonhöhenakzent von Kanjium und Häufigkeit von JPDB. Sie werden einmal heruntergeladen und bleiben im Browser |
 | Claude-API-Schlüssel | Einstellungen, Claude | Erklärungen, Prüfung der Lesungen, Übersetzung und Korrektur. Er wird nur im Browser gespeichert |
 | Sprache und Niveau | Einstellungen, Sprache und Niveau | Sprache der Oberfläche und, getrennt davon, die der Erklärungen und Übersetzungen. Das Niveau passt die Erklärungen an und bestimmt, wie viele Furigana anfangs sichtbar sind |
-| Sprache, die du lernst | Einstellungen, Sprache und Niveau, das Menü der Erweiterung oder **Videoeinstellungen, Untertitel** direkt im Video | Japanisch, Englisch oder Deutsch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
+| Sprache, die du lernst | **Start** und die Seitenleiste, Einstellungen, Sprache und Niveau, das Menü der Erweiterung oder **Videoeinstellungen, Untertitel** direkt im Video | Japanisch, Englisch oder Deutsch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
 | Anki | Einstellungen, Karten und Anki | Optional. Erfordert ein geöffnetes Anki mit dem Add-on AnkiConnect |
 
 Die Erweiterung funktioniert ohne Claude-Schlüssel: Untertitel, Wörterbuch, Furigana, Farben, Karten und Whisper benötigen ihn nicht.
@@ -165,10 +165,10 @@ Whisper trifft die Zeiten, verfehlt in einem Lied aber viele Wörter. Wenn jeman
 
 ### Lokaler Helfer
 
-Eine Erweiterung kann das Audio eines Videos nicht selbst herunterladen. Der Helfer ist ein kleines lokales Programm, das dies mit [yt-dlp](https://github.com/yt-dlp/yt-dlp) und FFmpeg erledigt. Er benötigt Python, und sein Installationsprogramm ergänzt yt-dlp, falls es fehlt. Er wird einmal aus dem Projektordner installiert:
+Eine Erweiterung kann das Audio eines Videos nicht selbst herunterladen. Der Helfer ist ein kleines lokales Programm, das dies mit [yt-dlp](https://github.com/yt-dlp/yt-dlp) und FFmpeg erledigt. Er benötigt Python, und sein Installationsprogramm ergänzt yt-dlp, falls es fehlt. Er wird von der Seite der neuesten Version heruntergeladen, als `kotonoha-X.Y.Z-ayudante.zip`, und in einen Ordner entpackt, der nicht verschoben wird. In diesem Ordner wird einmal der Befehl ausgeführt, den **Einstellungen, Transkription** anzeigt; er enthält bereits die ID der Erweiterung:
 
 ```bash
-powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
+powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension ERWEITERUNGS_ID
 ```
 
 Danach muss die Erweiterung unter `edge://extensions` oder `chrome://extensions` neu geladen werden. Der Status lässt sich unter **Einstellungen, Transkription** prüfen.
@@ -200,7 +200,7 @@ Karten lassen sich über AnkiConnect an Anki senden, mit einem eigenen Notiztyp 
 |---|---|---|
 | Audio des Wortes | JapanesePod101 und Lingua Libre über Wikimedia Commons | Nein |
 | Audio des Satzes | Mit `tabCapture` aus dem Tab aufgenommen, auf dem eigenen Computer, und in MP3 umgewandelt | Nein |
-| Synthetische Stimmen | Azure Speech, falls eingerichtet. Sonst die Systemstimmen, nur zum Anhören | Nur für Azure |
+| Synthetische Stimmen | Azure Speech, falls eingerichtet. Sonst die Stimmen des Browsers: die beste, die er anbietet, oder eine andere unter **Einstellungen, Stimmen**, nur zum Anhören | Nur für Azure |
 | Bilder | Openverse, mit der ersten englischen Glosse von JMdict als Suchbegriff | Nein |
 | Einzelbild | Aufnahme aus dem Video, auf dem eigenen Computer | Nein |
 | Beispiele | Bereits gesehene Sätze, im Browser gespeichert | Nein |
@@ -299,6 +299,8 @@ Drei Einstellungen bestimmen, wie viel Wortanfragen genutzt werden:
 ## Daten und Sicherung
 
 Alle Daten werden im Browser in IndexedDB gespeichert. **Einstellungen, Deine Daten** erlaubt den Export und Import einer einzigen Datei mit den Wörtern, Karten, der Bibliothek, den erzeugten Untertiteln und Korrekturen jeder verwendeten Sprache sowie den Einstellungen und dem Kostenprotokoll. Der Claude-Schlüssel und die Wörterbücher sind nicht enthalten. Eine Sicherung aus der Zeit vor Version 0.4.0 wird als Japanisch wiederhergestellt.
+
+**Neue Versionen.** Einmal am Tag fragt Kotonoha bei GitHub nach der neuesten veröffentlichten Version. Ist sie neuer als die installierte, zeigt Kotonoha das auf **Start** und im Menü der Erweiterung an, mit einem Link zu ihrer Seite. Der Hinweis zu einer Version lässt sich schließen und erscheint erst mit der nächsten wieder. **Einstellungen, Version** zeigt die installierte Version, sucht auf Wunsch sofort und schaltet die Hinweise mit **Über neue Versionen informieren** ab.
 
 ## Tastenkürzel
 

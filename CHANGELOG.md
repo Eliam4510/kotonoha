@@ -2,6 +2,13 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.13.1 · 2026-11-08
+
+- **Cambiar de idioma a la vista.** Inicio tiene un selector con las tres lenguas, cada una con su bandera y su nombre, y la barra lateral muestra la que se estudia, con un menú para cambiarla.
+- **Aviso de versiones nuevas.** Una vez al día, Kotonoha mira en GitHub la última versión publicada y, si es más nueva, lo dice en Inicio y en el menú de la extensión. **Ajustes, Versión** muestra la versión instalada, busca a mano y apaga el aviso.
+- **Voz del navegador.** Sin clave de Azure, la lectura en voz alta y la ficha usan la mejor voz del navegador, como las «Natural» de Edge o las de Google en Chrome, en lugar de dejar que el navegador elija. En **Ajustes, Voces** se puede elegir otra para cada idioma.
+- La orden de instalación del ayudante, en **Ajustes, Transcripción**, lleva ya el identificador de la extensión y se ejecuta en la carpeta del zip descargado, con un enlace a la descarga.
+
 ## 0.13.0 · 2026-11-08
 
 - **Dictar al Portapapeles.** **Dictar** graba con el micrófono y añade lo dicho al final del texto, ya analizado y con furigana. Se transcribe en el equipo con el modelo de voz de los ajustes (Haas-ja en japonés, Parakeet en inglés y alemán), y la grabación queda encima de su párrafo para volver a oírla, también en la biblioteca.
@@ -118,6 +125,13 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.13.1 · 2026-11-08
+
+- **Switching languages in plain sight.** Home has a selector with the three languages, each with its flag and its name, and the sidebar shows the language being studied, with a menu to change it.
+- **New version notices.** Once a day, Kotonoha checks GitHub for the latest published version and, if it is newer, says so on Home and in the extension menu. **Settings, Version** shows the installed version, checks by hand and turns the notice off.
+- **Browser voice.** Without an Azure key, read aloud and the word panel use the browser's best voice, such as Edge's "Natural" voices or Google's in Chrome, instead of letting the browser pick. Another one can be chosen per language in **Settings, Voices**.
+- The helper's install command, in **Settings, Transcription**, now includes the extension's ID and runs in the folder of the downloaded zip, with a link to the download.
 
 ## 0.13.0 · 2026-11-08
 

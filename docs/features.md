@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.13.0, along with how it has been verified.
+Status of each feature in version 0.13.1, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -65,6 +65,7 @@ Status of each feature in version 0.13.0, along with how it has been verified.
 | Load control: rest periods, automatic intensity and pause | Automated, with smoothness measurements |
 | Recovery from GPU loss | Automated, by destroying the WebGPU device |
 | Local helper with yt-dlp and FFmpeg | Automated, with a local download. The real browser registration and a real YouTube download are still pending |
+| The helper's install command in Settings, with the copy's ID and a link to its download | Automated |
 | Correction of the result with Claude | Simulator |
 | Song lyrics placed on the transcription timing: the text comes from the lyrics and the timing from Whisper | Simulator, with real Whisper, and real session with a song |
 | Haas-ja for Japanese speech, Parakeet for English speech and Whisper Turbo for songs, chosen according to the video | Automated, with the three real models on the GPU, and a real session on YouTube |
@@ -84,6 +85,7 @@ Status of each feature in version 0.13.0, along with how it has been verified.
 | Without hardware acceleration, the interface removes blur so as not to drop frames | Automated |
 | Word audio: JapanesePod101 and Lingua Libre | Automated |
 | Azure neural voices, with a personal key | Pending |
+| Browser voice without an Azure key: the best one it offers (Edge's “Natural” voices, Google's in Chrome) or another chosen in Settings, per language | Automated |
 | Images from Openverse | Automated |
 | Creating several cards from selected lines | Simulator |
 | Known words from Anki decks | Simulator |
@@ -156,8 +158,9 @@ Status of each feature in version 0.13.0, along with how it has been verified.
 
 | Feature | Verification |
 |---|---|
-| Choosing the language to study: in the welcome screen, in Settings or in the extension menu | Automated |
+| Choosing the language to study: on Home and in the sidebar, with its flag, in the welcome screen, in Settings or in the extension menu | Automated |
 | Words, dictionaries, cards and settings kept apart per language | Automated |
+| New version notice from GitHub, once a day, on Home and in the extension menu; closed per version and turned off in Settings, Version | Automated, with a simulated GitHub |
 | Interface in Spanish, English, German, Simplified Chinese, Korean and Japanese | Automated: complete tables and screenshots of each language |
 | Welcome screen with language, level, dictionaries, key and card destination | Automated |
 | Explanations and translations in a language other than the interface's, also Portuguese and French | Automated |

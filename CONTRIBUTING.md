@@ -72,6 +72,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/experiencia.mjs` | Lo que se percibe sobre el video, fotograma a fotograma: parpadeos, temblores y arrastre, y el registro del gasto |
 | `node pruebas/e2e.mjs` | La extensión de extremo a extremo en Edge. Los sitios de video no sirven subtítulos a un navegador automatizado: lo de YouTube real falla ahí y se comprueba a mano |
 | `node pruebas/modelos-guardados.mjs` | La lista de modelos guardados, y que borrar uno no rompa otro que comparte sus archivos |
+| `node pruebas/producto.mjs` | El aviso de versión nueva con GitHub simulado, el selector de idioma en Inicio y en la barra lateral, la orden del ayudante y la voz del navegador |
 | `node pruebas/ingles-grande.mjs` | El diccionario más grande con un perfil limpio. Descarga unos 110 MB |
 | `node pruebas/letra.mjs voz.wav` | Colocar una letra sobre los tiempos de una transcripción |
 | `node pruebas/modelos-voz.mjs voz.wav` | Qué modelo transcribe cada cosa |
@@ -199,6 +200,7 @@ Browser tests use a build with a fixed extension ID, created with `KK_SALIDA=.di
 | `node pruebas/ocr.mjs` | OCR on a book page and a manga page, on the GPU, a scanned PDF with another OCR's layer, with PDF text on and off, Edit and Restore, the eight pages read ahead, and a whole book processed from its card |
 | `node pruebas/libros-texto.mjs` | A Japanese PDF made by the browser and a vertical EPUB with traps: word taps in the PDF, the EPUB with its CSS and ruby, nothing from the book runs or loads anything from outside |
 | `node pruebas/trazos-web.mjs` | Stroke order, the Clipboard and its structure, a text EPUB in the viewer, split view |
+| `node pruebas/producto.mjs` | The new version notice with a simulated GitHub, the language selector on Home and in the sidebar, the helper command and the browser voice |
 | `node pruebas/dictado.mjs voz-ja.wav [voz-en.wav]` | Dictation into the Clipboard with a fake microphone and the speech models stored in the profile, on the GPU: recording, transcribing, playing the recording again, the library, cleaning up unused recordings, a silent recording and a microphone without permission |
 | `node pruebas/ingles.mjs`, `node pruebas/aleman.mjs` | Studying English and German end to end |
 | `node pruebas/e2e.mjs` | The extension end to end in Edge. Video sites do not serve subtitles to an automated browser, so the real YouTube checks fail there and are verified by hand |

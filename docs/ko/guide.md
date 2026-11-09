@@ -29,7 +29,7 @@
 | 사전 | 설정, 사전 | 스페인어, 영어 또는 독일어 JMdict, Kanjium의 고저 악센트, JPDB의 빈도. 한 번 내려받아 브라우저에 보관합니다 |
 | Claude API 키 | 설정, Claude | 설명, 읽는 법 검토, 번역, 수정. 브라우저에만 저장됩니다 |
 | 언어와 수준 | 설정, 언어와 수준 | 인터페이스 언어와 별도로 설정하는 설명과 번역 언어. 수준은 설명 방식을 조정하고 처음에 후리가나를 얼마나 보여 줄지 정합니다 |
-| 공부하는 언어 | 설정, 언어와 수준, 확장 프로그램 메뉴, 또는 영상 위의 **영상 설정, 자막** | 일본어, 영어 또는 독일어. 언어마다 단어, 사전, 카드, 설정을 따로 저장합니다 |
+| 공부하는 언어 | **홈**과 사이드바, 설정, 언어와 수준, 확장 프로그램 메뉴, 또는 영상 위의 **영상 설정, 자막** | 일본어, 영어 또는 독일어. 언어마다 단어, 사전, 카드, 설정을 따로 저장합니다 |
 | Anki | 설정, 카드와 Anki | 선택 사항. AnkiConnect 부가 기능이 설치된 Anki를 열어 두어야 합니다 |
 
 확장 프로그램은 Claude 키 없이도 작동합니다. 자막, 사전, 후리가나, 색상, 카드, Whisper에는 키가 필요하지 않습니다.
@@ -165,10 +165,10 @@ Whisper는 시간은 잘 맞히지만 노래에서는 많은 단어를 잘못 �
 
 ### 로컬 도우미
 
-확장 프로그램은 영상의 오디오를 스스로 내려받을 수 없습니다. 도우미는 [yt-dlp](https://github.com/yt-dlp/yt-dlp)와 FFmpeg로 이 일을 하는 작은 로컬 프로그램입니다. Python이 필요하고, 설치 프로그램이 없는 경우 yt-dlp를 추가합니다. 프로젝트 폴더에서 한 번만 설치합니다.
+확장 프로그램은 영상의 오디오를 스스로 내려받을 수 없습니다. 도우미는 [yt-dlp](https://github.com/yt-dlp/yt-dlp)와 FFmpeg로 이 일을 하는 작은 로컬 프로그램입니다. Python이 필요하고, 설치 프로그램이 없는 경우 yt-dlp를 추가합니다. 최신 버전 페이지에서 `kotonoha-X.Y.Z-ayudante.zip`을 내려받아 옮기지 않을 폴더에 압축을 풉니다. 그 폴더 안에서 **설정, 전사**에 표시되는 명령을 한 번 실행합니다. 이 명령에는 확장 프로그램의 ID가 이미 들어 있습니다.
 
 ```bash
-powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
+powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
 ```
 
 그런 다음 `edge://extensions` 또는 `chrome://extensions`에서 확장 프로그램을 다시 로드해야 합니다. 상태는 **설정, 전사**에서 확인합니다.
@@ -200,7 +200,7 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 |---|---|---|
 | 단어 오디오 | Wikimedia Commons를 통한 JapanesePod101과 Lingua Libre | 아니요 |
 | 문장 오디오 | `tabCapture`로 탭에서 녹음하여 컴퓨터 안에서 MP3로 변환 | 아니요 |
-| 합성 음성 | 구성된 경우 Azure Speech, 아니면 듣기 전용 시스템 음성 | Azure만 |
+| 합성 음성 | 구성된 경우 Azure Speech, 아니면 듣기 전용 브라우저 음성: 브라우저가 제공하는 가장 좋은 음성이나 **설정, 음성**에서 고른 음성 | Azure만 |
 | 이미지 | JMdict의 첫 영어 뜻풀이로 검색한 Openverse | 아니요 |
 | 화면 | 영상 캡처, 컴퓨터 안에서 | 아니요 |
 | 예문 | 이미 본 문장, 브라우저에 저장 | 아니요 |
@@ -299,6 +299,8 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 ## 데이터와 백업
 
 모든 데이터는 브라우저의 IndexedDB에 저장됩니다. **설정, 내 데이터**에서 사용한 모든 언어의 단어, 카드, 서재, 생성된 자막, 수정 내용과 설정, 비용 기록이 담긴 파일 하나를 내보내고 가져올 수 있습니다. Claude 키와 사전은 포함되지 않습니다. 버전 0.4.0 이전의 백업은 일본어로 복원됩니다.
+
+**새 버전.** Kotonoha는 하루에 한 번 GitHub에 최신 공개 버전을 물어봅니다. 설치된 버전보다 새로우면 **홈**과 확장 프로그램 메뉴에 그 페이지 링크와 함께 알려 줍니다. 한 버전의 알림을 닫으면 다음 버전이 나올 때까지 다시 나오지 않습니다. **설정, 버전**에서 설치된 버전을 보고, 직접 확인하고, **새 버전 알림**으로 알림을 끌 수 있습니다.
 
 ## 키보드 단축키
 

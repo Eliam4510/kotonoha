@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.13.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.13.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -65,6 +65,7 @@ Estado de cada función en la versión 0.13.0, con la forma en que se ha verific
 | Control de carga: descansos, intensidad automática y pausa | Automática, con medidas de fluidez |
 | Recuperación ante la pérdida de la GPU | Automática, destruyendo el dispositivo WebGPU |
 | Ayudante local con yt-dlp y FFmpeg | Automática, con descarga local. Falta el registro real en el navegador y una descarga real de YouTube |
+| La orden de instalación del ayudante en Ajustes, con el identificador de la copia y un enlace a su descarga | Automática |
 | Corrección del resultado con Claude | Simulador |
 | Letra de una canción colocada sobre los tiempos de la transcripción: el texto sale de la letra y los tiempos, de Whisper | Simulador, con Whisper real, y sesión real con una canción |
 | Haas-ja para la voz hablada en japonés, Parakeet para la del inglés y Whisper Turbo para las canciones, elegidos según el video | Automática, con los tres modelos reales en la GPU, y sesión real en YouTube |
@@ -84,6 +85,7 @@ Estado de cada función en la versión 0.13.0, con la forma en que se ha verific
 | Sin aceleración por hardware, la interfaz quita el desenfoque para no perder fotogramas | Automática |
 | Audio de la palabra: JapanesePod101 y Lingua Libre | Automática |
 | Voces neuronales de Azure, con clave propia | Pendiente |
+| Voz del navegador sin clave de Azure: la mejor que ofrezca (las «Natural» de Edge, las de Google en Chrome) u otra elegida en Ajustes, por idioma | Automática |
 | Imágenes de Openverse | Automática |
 | Creación de varias tarjetas desde líneas seleccionadas | Simulador |
 | Palabras conocidas a partir de los mazos de Anki | Simulador |
@@ -156,8 +158,9 @@ Estado de cada función en la versión 0.13.0, con la forma en que se ha verific
 
 | Función | Verificación |
 |---|---|
-| Elegir el idioma que se estudia: en la bienvenida, en Ajustes o en el menú de la extensión | Automática |
+| Elegir el idioma que se estudia: en Inicio y en la barra lateral, con su bandera, en la bienvenida, en Ajustes o en el menú de la extensión | Automática |
 | Palabras, diccionarios, tarjetas y ajustes separados por idioma | Automática |
+| Aviso de versión nueva desde GitHub, una vez al día, en Inicio y en el menú de la extensión; se cierra por versión y se apaga en Ajustes, Versión | Automática, con GitHub simulado |
 | Interfaz en español, inglés, alemán, chino simplificado, coreano y japonés | Automática: tablas completas y capturas de cada idioma |
 | Bienvenida con idioma, nivel, diccionarios, clave y destino de las tarjetas | Automática |
 | Explicaciones y traducciones en un idioma distinto al de la interfaz, también portugués y francés | Automática |

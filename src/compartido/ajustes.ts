@@ -311,6 +311,8 @@ export interface Ajustes {
   azureClave: string;
   azureRegion: string;
   vocesFrase: string[];
+  /** La voz del navegador con que se lee sin clave de Azure. Vacía, la mejor que haya para la lengua. */
+  vozNavegador: string;
 
   // Apariencia
   /** Idioma de la interfaz. En automático sigue al del navegador. */
@@ -318,10 +320,12 @@ export interface Ajustes {
   estiloFrecuencia: 'numero' | 'estrellas';
   frecuenciaMaxRecomendada: number;
   guardarHistorial: boolean;
+  /** Mirar una vez al día en GitHub si hay una versión nueva, y avisar. */
+  avisarVersiones: boolean;
 }
 
 /** Lo que cada lengua recuerda por su cuenta: el nivel en japonés no es el nivel en inglés. */
-export const CLAVES_POR_LENGUA = ['nivel', 'diccionarioPestana', 'formatoLectura', 'furigana', 'lectorFurigana', 'lectorActivo', 'colorAcento', 'particulasConocidas', 'vocesFrase', 'prompts', 'ankiMazo', 'whisperModelo'] as const;
+export const CLAVES_POR_LENGUA = ['nivel', 'diccionarioPestana', 'formatoLectura', 'furigana', 'lectorFurigana', 'lectorActivo', 'colorAcento', 'particulasConocidas', 'vocesFrase', 'vozNavegador', 'prompts', 'ankiMazo', 'whisperModelo'] as const;
 
 export type AjustesLengua = Pick<Ajustes, (typeof CLAVES_POR_LENGUA)[number]>;
 
@@ -488,11 +492,13 @@ export const AJUSTES_INICIALES: Ajustes = {
   azureClave: '',
   azureRegion: '',
   vocesFrase: PAQUETE_INICIAL.vocesIniciales,
+  vozNavegador: '',
 
   idiomaInterfaz: 'auto',
   estiloFrecuencia: 'numero',
   frecuenciaMaxRecomendada: 20000,
   guardarHistorial: true,
+  avisarVersiones: true,
 };
 
 const CLAVE = 'ajustes';

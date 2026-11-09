@@ -12,6 +12,7 @@ import { Icono, type NombreIcono } from './iconos';
 import { formatoLectura, lengua } from './lengua';
 import { numero, tm, tr } from '../compartido/i18n';
 import { PanelTrazos } from './Trazos';
+import { decirConNavegador } from './vozNavegador';
 
 export const NOMBRE_ESTADO: Record<EstadoPalabra, string> = {
   desconocida: tm('Desconocida'),
@@ -255,12 +256,8 @@ async function reproducirBase64(datos: string, tipo = 'audio/mpeg') {
 function BotonAudio({ lema, lectura }: { lema: string; lectura: string }) {
   const [estado, fijarEstado] = useState<'listo' | 'cargando' | 'sonando'>('listo');
   const voz = () => {
-    const u = new SpeechSynthesisUtterance(lema);
-    u.lang = lengua.value.bcp47;
-    u.onend = () => fijarEstado('listo');
-    u.onerror = () => fijarEstado('listo');
     fijarEstado('sonando');
-    speechSynthesis.speak(u);
+    decirConNavegador(lema).finally(() => fijarEstado('listo'));
   };
   const tocar = async () => {
     if (estado !== 'listo') return;
@@ -294,13 +291,8 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
   const tocarVoz = async (voz: string, texto: string) => {
     try {
       fijarError('');
-      if (ajustes.azureClave) {
-        await reproducirBase64(await motor.vozFrase(texto, voz));
-      } else {
-        const u = new SpeechSynthesisUtterance(texto);
-        u.lang = lengua.value.bcp47;
-        speechSynthesis.speak(u);
-      }
+      if (ajustes.azureClave) await reproducirBase64(await motor.vozFrase(texto, voz));
+      else await decirConNavegador(texto);
     } catch (e) {
       fijarError(e instanceof Error ? e.message : String(e));
     }
