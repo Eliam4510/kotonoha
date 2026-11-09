@@ -56,7 +56,7 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 
 ## 外部プログラム
 
-ローカルヘルパーは [yt-dlp](https://github.com/yt-dlp/yt-dlp)（Unlicense）と [FFmpeg](https://ffmpeg.org)（ビルドにより LGPL または GPL）を使います。このリポジトリにもパッケージにも含まれず、パソコンにインストールされたものを使います。
+ローカルヘルパーは [yt-dlp](https://github.com/yt-dlp/yt-dlp)（Unlicense）と [QuickJS-NG](https://github.com/quickjs-ng/quickjs)（MIT）を使います。どちらもインストーラーが GitHub の公式ページからダウンロードし、SHA-256 を確認します。パソコンに [FFmpeg](https://ffmpeg.org)（ビルドにより LGPL または GPL）がインストールされていれば、それも使います。いずれもこのリポジトリやパッケージには含まれません。
 
 ## 責任ある利用
 

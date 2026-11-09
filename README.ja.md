@@ -131,7 +131,9 @@ Kotonoha はキーがなくても使えます。任意で Claude のキーを入
 2. `chrome://extensions` または `edge://extensions` を開き、**デベロッパー モード**をオンにします。
 3. **パッケージ化されていない拡張機能を読み込む**を押し、`kotonoha` フォルダーを選びます。
 
-初回はウェルカム画面で、表示言語、学ぶ言語、レベルを選ぶと辞書がインストールされます。更新するときは、新しいバージョンを前のものの上に展開するだけで、拡張機能が自動で再読み込みされます。新しいバージョンが出ると、Kotonoha がホームでお知らせします。[使い方](docs/ja/guide.md)ですべての機能を、[CONTRIBUTING.md](CONTRIBUTING.md) でソースからのビルド方法を説明しています。
+Windows ではヘルパーから始めることもできます。`kotonoha-<バージョン>-ayudante.zip` の `Instalar.cmd` をダブルクリックするとヘルパーがインストールされ、Kotonoha が見つからなければ拡張機能も固定の識別子でインストールされます。あとは手順 2 と 3 だけです。
+
+初回はウェルカム画面で、表示言語、学ぶ言語、レベルを選ぶと辞書がインストールされます。更新するときは、新しいバージョンを前のものの上に展開するだけで、拡張機能が自動で再読み込みされます。新しいバージョンが出ると Kotonoha がホームでお知らせし、ヘルパーがあれば**今すぐ更新**でワンクリックで入れ替わります。[使い方](docs/ja/guide.md)ですべての機能を、[CONTRIBUTING.md](CONTRIBUTING.md) でソースからのビルド方法を説明しています。
 
 ## 主なショートカット
 
@@ -148,7 +150,7 @@ Kotonoha はキーがなくても使えます。任意で Claude のキーを入
 
 ## プライバシー
 
-- データと Claude のキーはブラウザーの中だけに保存されます。独自のサーバーも、利用状況の収集もありません。
+- データと Claude のキーはブラウザーの中だけに保存されます。独自のサーバーも、利用状況の収集もありません。各サービスに何を送るかは[プライバシーポリシー](docs/privacidad.md#english)にあります。
 - 文字起こしした音声と読み取ったページは、パソコンの外に出ません。
 - Claude に送るのは、リクエストに必要なものだけです。文、字幕の台本、タイトルです。
 - 辞書とモデルは GitHub と Hugging Face から一度だけダウンロードします。すべての出典は[告知](docs/ja/notices.md)にあります。
@@ -164,7 +166,7 @@ flowchart LR
   M --> CL["Claude API"]
   M --> AN["Anki"]
   S["Service Worker"] <--> M
-  S <-->|Native Messaging| H["ローカルの補助ツール<br/>yt-dlp と FFmpeg"]
+  S <-->|Native Messaging| H["ローカルの補助ツール<br/>PowerShell と yt-dlp"]
 ```
 
 TypeScript、Preact、Dexie、esbuild で作られ、音声と OCR には WebGPU 上の ONNX Runtime と Transformers.js を使っています。各部分、技術的な判断、性能の測定は [docs/ja/architecture.md](docs/ja/architecture.md) にあります。750 を超える単体テストが中心のロジックを、エンドツーエンドのテストが実際の Edge と GPU で主な流れを確かめています。実行方法は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。

@@ -141,7 +141,9 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 2. 打开 `chrome://extensions` 或 `edge://extensions`，开启**开发者模式**。
 3. 点击**加载已解压的扩展程序**，选择 `kotonoha` 文件夹。
 
-首次启动时，欢迎页面会询问你的语言、想学的语言和水平，并安装词典。更新时，只需把新版本解压覆盖旧版本：扩展会自动重新加载。有新版本时，Kotonoha 会在首页提示。[使用指南](docs/zh/guide.md)介绍了每项功能，[CONTRIBUTING.md](CONTRIBUTING.md) 介绍了如何从源代码构建。
+在 Windows 上也可以先装助手：`kotonoha-<版本>-ayudante.zip` 里有 `Instalar.cmd`，双击即可安装助手；如果没找到 Kotonoha，还会以固定的标识符安装扩展。之后只剩第 2 步和第 3 步。
+
+首次启动时，欢迎页面会询问你的语言、想学的语言和水平，并安装词典。更新时，只需把新版本解压覆盖旧版本：扩展会自动重新加载。有新版本时，Kotonoha 会在首页提示；安装了助手的话，点**立即更新**一下就能装好。[使用指南](docs/zh/guide.md)介绍了每项功能，[CONTRIBUTING.md](CONTRIBUTING.md) 介绍了如何从源代码构建。
 
 ## 主要快捷键
 
@@ -158,7 +160,7 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 
 ## 隐私
 
-- 数据和 Claude 密钥只保存在浏览器中。没有自己的服务器，也不收集使用统计。
+- 数据和 Claude 密钥只保存在浏览器中。没有自己的服务器，也不收集使用统计。[隐私政策](docs/privacidad.md#english)说明了会向每个服务发送什么。
 - 转写的音频和识别的页面不会离开你的电脑。
 - Claude 只会收到每次请求所需的内容：句子、字幕文本和标题。
 - 词典和模型只下载一次，来自 GitHub 和 Hugging Face。[声明](docs/zh/notices.md)列出了每个来源。
@@ -174,7 +176,7 @@ flowchart LR
   M --> CL["Claude API"]
   M --> AN["Anki"]
   S["Service Worker"] <--> M
-  S <-->|Native Messaging| H["本地助手<br/>yt-dlp 和 FFmpeg"]
+  S <-->|Native Messaging| H["本地助手<br/>PowerShell 和 yt-dlp"]
 ```
 
 使用 TypeScript、Preact、Dexie 和 esbuild，并通过 WebGPU 上的 ONNX Runtime 和 Transformers.js 处理语音和 OCR。各部分的细节、技术决策和性能测量见 [docs/zh/architecture.md](docs/zh/architecture.md)。超过 750 个单元测试覆盖核心逻辑，端到端测试在真实的 Edge 和 GPU 上覆盖主要流程；[CONTRIBUTING.md](CONTRIBUTING.md) 说明了如何运行。

@@ -141,7 +141,9 @@ Voraussetzung: Chrome oder Edge ab Version 120.
 2. `chrome://extensions` oder `edge://extensions` öffnen und den **Entwicklermodus** einschalten.
 3. **Entpackte Erweiterung laden** wählen und den Ordner `kotonoha` auswählen.
 
-Beim ersten Start fragt eine Begrüßung nach der eigenen Sprache, der Lernsprache und dem Niveau und installiert die Wörterbücher. Zum Aktualisieren genügt es, die neue Version über die alte zu entpacken: Die Erweiterung lädt sich selbst neu. Gibt es eine neue Version, zeigt Kotonoha das auf der Startseite an. Die [Anleitung](docs/de/guide.md) erklärt jede Funktion, [CONTRIBUTING.md](CONTRIBUTING.md) das Erstellen aus dem Quellcode.
+Unter Windows geht es auch mit dem Helfer: `kotonoha-<version>-ayudante.zip` enthält `Instalar.cmd`, das per Doppelklick den Helfer installiert und, wenn es Kotonoha nicht findet, auch die Erweiterung, mit fester Kennung. Danach fehlen nur noch die Schritte 2 und 3.
+
+Beim ersten Start fragt eine Begrüßung nach der eigenen Sprache, der Lernsprache und dem Niveau und installiert die Wörterbücher. Zum Aktualisieren genügt es, die neue Version über die alte zu entpacken: Die Erweiterung lädt sich selbst neu. Gibt es eine neue Version, zeigt Kotonoha das auf der Startseite an, und mit installiertem Helfer spielt **Jetzt aktualisieren** sie mit einem Klick ein. Die [Anleitung](docs/de/guide.md) erklärt jede Funktion, [CONTRIBUTING.md](CONTRIBUTING.md) das Erstellen aus dem Quellcode.
 
 ## Wichtige Tastenkürzel
 
@@ -158,7 +160,7 @@ Alle Kürzel über dem Video lassen sich ändern und funktionieren mit jedem Tas
 
 ## Datenschutz
 
-- Daten und Claude-Schlüssel werden nur im Browser gespeichert. Es gibt keinen eigenen Server und keine Nutzungsstatistik.
+- Daten und Claude-Schlüssel werden nur im Browser gespeichert. Es gibt keinen eigenen Server und keine Nutzungsstatistik. Die [Datenschutzerklärung](docs/privacidad.md#english) nennt, was an welchen Dienst gesendet wird.
 - Transkribierter Ton und erkannte Seiten verlassen den Rechner nicht.
 - Claude erhält nur, was eine Anfrage braucht: den Satz, das Untertitelskript und den Titel.
 - Wörterbücher und Modelle werden einmal heruntergeladen, von GitHub und Hugging Face. Die [Hinweise](docs/de/notices.md) nennen jede Quelle.
@@ -174,7 +176,7 @@ flowchart LR
   M --> CL["Claude-API"]
   M --> AN["Anki"]
   S["Service Worker"] <--> M
-  S <-->|Native Messaging| H["Lokaler Helfer<br/>yt-dlp und FFmpeg"]
+  S <-->|Native Messaging| H["Lokaler Helfer<br/>PowerShell und yt-dlp"]
 ```
 
 TypeScript, Preact, Dexie und esbuild, mit ONNX Runtime und Transformers.js auf WebGPU für Sprache und OCR. Jeder Teil, die technischen Entscheidungen und die Leistungsmessungen stehen in [docs/de/architecture.md](docs/de/architecture.md). Über 750 Unit-Tests decken die Logik ab, End-to-End-Tests die wichtigsten Abläufe mit echtem Edge und der GPU; [CONTRIBUTING.md](CONTRIBUTING.md) erklärt, wie sie laufen.

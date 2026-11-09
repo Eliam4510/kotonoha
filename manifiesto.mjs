@@ -15,37 +15,37 @@ export const SITIOS_VIDEO = [
 /** Lo que el navegador muestra fuera de la extensión: su ficha y la página de atajos. Va en _locales, una carpeta por idioma. */
 export const MENSAJES = {
   es: {
-    descripcion: 'Subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés e inglés.',
+    descripcion: 'Subtítulos interactivos, diccionario, tarjetas y ayuda de lectura para aprender japonés, inglés y alemán con video y texto real.',
     crearTarjeta: 'Crear tarjeta de la frase actual',
     alternarCaptura: 'Permitir captura de imagen y audio en esta sesión',
     abrirApp: 'Abrir la ventana de Kotonoha',
   },
   en: {
-    descripcion: 'Interactive subtitles, a dictionary, flashcards and Claude explanations to learn Japanese and English from real video and text.',
+    descripcion: 'Interactive subtitles, a dictionary, flashcards and reading help to learn Japanese, English and German from real video and text.',
     crearTarjeta: 'Create a card from the current sentence',
     alternarCaptura: 'Allow image and audio capture for this session',
     abrirApp: 'Open the Kotonoha window',
   },
   de: {
-    descripcion: 'Interaktive Untertitel, Wörterbuch, Karten und Claude-Erklärungen, um Japanisch und Englisch mit echten Videos und Texten zu lernen.',
+    descripcion: 'Interaktive Untertitel, Wörterbuch, Karten und Lesehilfe, um Japanisch, Englisch und Deutsch mit echten Videos und Texten zu lernen.',
     crearTarjeta: 'Karte aus dem aktuellen Satz erstellen',
     alternarCaptura: 'Bild- und Audioaufnahme für diese Sitzung erlauben',
     abrirApp: 'Kotonoha-Fenster öffnen',
   },
   zh_CN: {
-    descripcion: '交互式字幕、词典、卡片和 Claude 讲解，通过真实的视频和文章学日语和英语。',
+    descripcion: '交互式字幕、词典、卡片和阅读辅助，通过真实的视频和文章学日语、英语和德语。',
     crearTarjeta: '用当前句子创建卡片',
     alternarCaptura: '允许本次会话捕获图像和音频',
     abrirApp: '打开 Kotonoha 窗口',
   },
   ko: {
-    descripcion: '대화형 자막, 사전, 카드, Claude 설명으로 실제 영상과 글에서 일본어와 영어를 배워요.',
+    descripcion: '대화형 자막, 사전, 카드, 읽기 도우미로 실제 영상과 글에서 일본어, 영어, 독일어를 배워요.',
     crearTarjeta: '현재 문장으로 카드 만들기',
     alternarCaptura: '이번 세션에서 이미지와 오디오 캡처 허용',
     abrirApp: 'Kotonoha 창 열기',
   },
   ja: {
-    descripcion: 'インタラクティブな字幕、辞書、カード、Claude の解説で、本物の動画や文章から日本語と英語を学べます。',
+    descripcion: 'インタラクティブな字幕、辞書、カード、読書サポートで、本物の動画や文章から日本語・英語・ドイツ語を学べます。',
     crearTarjeta: '現在の文からカードを作成',
     alternarCaptura: 'このセッションで画像と音声のキャプチャを許可',
     abrirApp: 'Kotonoha のウィンドウを開く',
@@ -55,7 +55,7 @@ export const MENSAJES = {
 export const manifiesto = {
   manifest_version: 3,
   name: 'Kotonoha',
-  version: '0.16.0',
+  version: '0.17.0',
   default_locale: 'en',
   description: '__MSG_descripcion__',
   minimum_chrome_version: '120',

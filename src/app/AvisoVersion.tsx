@@ -1,14 +1,17 @@
-// El aviso de Inicio cuando hay una versión nueva de Kotonoha en GitHub: qué versión es, qué trae y cómo ponerla. Se
-// cierra por versión: cerrado, no vuelve hasta que salga otra. Se apaga en Ajustes, en «Versión».
+// El aviso de Inicio cuando hay una versión nueva de Kotonoha en GitHub: qué versión es, qué trae y cómo ponerla, con un
+// clic si el ayudante está instalado. Se cierra por versión: cerrado, no vuelve hasta que salga otra. Se apaga en
+// Ajustes, en «Versión».
 
 import { useEffect, useState } from 'preact/hooks';
 import { avisoCerrado, buscarVersionNueva, cerrarAviso, type VersionPublicada } from '../compartido/actualizaciones';
 import { idiomaActual, tr } from '../compartido/i18n';
 import { novedadesDeTitulo } from '../nucleo/versiones';
 import { Icono } from '../ui/iconos';
+import { BotonActualizar, useActualizacion } from './ActualizarAhora';
 
 export function AvisoVersion({ avisar }: { avisar: boolean }) {
   const [nueva, fijarNueva] = useState<VersionPublicada | null>(null);
+  const actualizacion = useActualizacion(nueva?.version ?? null);
 
   useEffect(() => {
     fijarNueva(null);
@@ -32,9 +35,10 @@ export function AvisoVersion({ avisar }: { avisar: boolean }) {
       <div class="ap-aviso-version-texto">
         <b>{tr('Kotonoha {0} ya está disponible', nueva.version)}{novedades && <span class="ap-aviso-version-trae"> · {novedades}</span>}</b>
         {/* El paquete lleva compilacion.txt al final: al descomprimirlo encima, la extensión ve el cambio y se recarga. */}
-        <span>{tr('Descarga el zip de la extensión y descomprímelo sobre la carpeta de Kotonoha: la extensión se recarga sola.')}</span>
+        <span role="status">{actualizacion.texto}</span>
       </div>
-      <a class="btn chico primario" href={nueva.url} target="_blank" rel="noreferrer noopener">{tr('Ver la versión')} <Icono n="externo" t={13} /></a>
+      <BotonActualizar a={actualizacion} />
+      <a class={`btn chico ${actualizacion.posible ? 'fantasma' : 'primario'}`} href={nueva.url} target="_blank" rel="noreferrer noopener">{tr('Ver la versión')} <Icono n="externo" t={13} /></a>
       <button
         class="btn-icono chico"
         aria-label={tr('Cerrar el aviso')}

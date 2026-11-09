@@ -1,7 +1,7 @@
 // Las grabaciones del dictado del Portapapeles. Van en una base propia del navegador; el texto solo lleva una marca con su
 // id (nucleo/dictado.ts), así que la grabación acompaña al texto también en la biblioteca. Como los archivos de los
-// libros, no entran en la copia de seguridad: son audio y pesan. Es el mismo origen para la app, la pestaña del
-// Portapapeles y el motor, que es quien borra las que ya nadie usa.
+// libros, no entran en la copia de seguridad, que es un solo JSON: son audio y pesan. Van en la copia completa. Es el
+// mismo origen para la app, la pestaña del Portapapeles y el motor, que es quien borra las que ya nadie usa.
 
 import Dexie, { type Table } from 'dexie';
 
@@ -32,6 +32,9 @@ export async function guardarGrabacion(g: Grabacion): Promise<void> {
 }
 
 export const leerGrabacion = (id: string): Promise<Grabacion | undefined> => baseDictados().grabaciones.get(id);
+
+/** Los identificadores de todas las grabaciones, de todas las lenguas: para la copia completa. */
+export const idsDeGrabaciones = (): Promise<string[]> => baseDictados().grabaciones.toCollection().primaryKeys();
 
 /** Cuándo se guardó cada grabación de una lengua, sin leer su audio. */
 export async function grabacionesDe(lengua: string): Promise<{ id: string; creado: number }[]> {

@@ -139,7 +139,9 @@ Requirement: Chrome or Edge 120 or later.
 2. Open `chrome://extensions` or `edge://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and choose the `kotonoha` folder.
 
-On first run a welcome screen asks for your language, the one you want to study and your level, and installs the dictionaries. To update, unzip the new version over the old one: the extension reloads by itself. When there is a new version, Kotonoha says so on Home. The [user guide](docs/guide.md) explains every feature, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to build it from source.
+On Windows you can also start with the helper: `kotonoha-<version>-ayudante.zip` contains `Instalar.cmd`, which with a double click installs the helper and, if it does not find Kotonoha, the extension too, with a fixed ID. Then only steps 2 and 3 remain.
+
+On first run a welcome screen asks for your language, the one you want to study and your level, and installs the dictionaries. To update, unzip the new version over the old one: the extension reloads by itself. When there is a new version, Kotonoha says so on Home and, with the helper installed, **Update now** puts it in place with one click. The [user guide](docs/guide.md) explains every feature, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to build it from source.
 
 ## Main shortcuts
 
@@ -156,7 +158,7 @@ Every shortcut over the video can be changed, and they work with any keyboard la
 
 ## Privacy
 
-- Your data and your Claude key are stored only in the browser. There is no server and no usage tracking.
+- Your data and your Claude key are stored only in the browser. There is no server and no usage tracking. The [privacy policy](docs/privacidad.md#english) details what is sent to each service.
 - Transcribed audio and recognised pages never leave your computer.
 - Claude receives only what each request needs: the sentence, the subtitle script and the title.
 - Dictionaries and models are downloaded once, from GitHub and Hugging Face. [AVISOS.md](AVISOS.md#english) lists every source.
@@ -172,7 +174,7 @@ flowchart LR
   M --> CL["Claude API"]
   M --> AN["Anki"]
   S["Service worker"] <--> M
-  S <-->|Native Messaging| H["Local helper<br/>yt-dlp and FFmpeg"]
+  S <-->|Native Messaging| H["Local helper<br/>PowerShell and yt-dlp"]
 ```
 
 TypeScript, Preact, Dexie and esbuild, with ONNX Runtime and Transformers.js on WebGPU for speech and OCR. Each part, the technical decisions and the performance measurements are described in [docs/architecture.md](docs/architecture.md). More than 750 unit tests cover the logic, and end-to-end tests cover the main flows with real Edge and the GPU; [CONTRIBUTING.md](CONTRIBUTING.md) explains how to run them.

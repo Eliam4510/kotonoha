@@ -168,21 +168,27 @@ Whisper trifft die Zeiten, verfehlt in einem Lied aber viele Wörter. Wenn jeman
 
 ### Lokaler Helfer
 
-Eine Erweiterung kann das Audio eines Videos nicht selbst herunterladen. Der Helfer ist ein kleines lokales Programm, das dies mit [yt-dlp](https://github.com/yt-dlp/yt-dlp) und FFmpeg erledigt. Er benötigt Python, und sein Installationsprogramm ergänzt yt-dlp, falls es fehlt. Er wird von der Seite der neuesten Version heruntergeladen, als `kotonoha-X.Y.Z-ayudante.zip`, und in einen Ordner entpackt, der nicht verschoben wird. In diesem Ordner wird einmal der Befehl ausgeführt, den **Einstellungen, Transkription** anzeigt; er enthält bereits die ID der Erweiterung:
+Eine Erweiterung kann das Audio eines Videos nicht selbst herunterladen. Der Helfer ist ein kleines lokales Programm in PowerShell, das mit Windows mitkommt: Weder Python noch FFmpeg müssen installiert werden. Er lädt das Audio mit [yt-dlp](https://github.com/yt-dlp/yt-dlp) herunter und aktualisiert außerdem die Erweiterung (siehe **Neue Versionen** unter [Daten und Sicherung](#daten-und-sicherung)). Er wird von der Seite der neuesten Version heruntergeladen, als `kotonoha-X.Y.Z-ayudante.zip`, in einen beliebigen Ordner entpackt und mit einem Doppelklick auf `Instalar.cmd` eingerichtet. Das Installationsprogramm:
+
+- kopiert den Helfer nach `%LOCALAPPDATA%\Kotonoha\ayudante`, sodass der entpackte Ordner danach nicht mehr gebraucht wird;
+- lädt yt-dlp und QuickJS, mit dem yt-dlp die YouTube-Aufgabe löst, von ihren offiziellen GitHub-Seiten herunter und prüft jeweils die SHA-256;
+- sucht Kotonoha in Chrome, Edge, Brave und Chromium und registriert den Helfer für jede gefundene Kopie;
+- bietet an, auch die Erweiterung mit fester Kennung zu installieren, wenn es keine findet, und erklärt, wie man sie lädt.
+
+Der Status lässt sich unter **Einstellungen, Transkription** prüfen. Findet das Installationsprogramm eine Kopie nicht, zeigen die Einstellungen den Befehl mit ihrer Kennung, der im Ordner des Helfers ausgeführt wird:
 
 ```bash
 powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension ERWEITERUNGS_ID
 ```
 
-Danach muss die Erweiterung unter `edge://extensions` oder `chrome://extensions` neu geladen werden. Der Status lässt sich unter **Einstellungen, Transkription** prüfen.
-
 | Aspekt | Verhalten |
 |---|---|
 | Reichweite | Nur die Erweiterung kann ihn aufrufen, und er akzeptiert nur http- oder https-Adressen |
 | Registrierung | Fügt einen Benutzerschlüssel in `HKCU` hinzu, ohne Administratorrechte |
+| Umwandlung | Mit FFmpeg auf dem Rechner wandelt der Helfer das Audio um. Ohne FFmpeg übernimmt das die Erweiterung mit ihrem eigenen FFmpeg, etwas langsamer |
+| yt-dlp | Aktualisiert sich einmal pro Woche selbst: YouTube ändert sich oft |
 | Dateien | Verwendet einen temporären Ordner, der am Ende oder beim Abbruch gelöscht wird |
-| Kennung | Wird die Erweiterung aus einem anderen Ordner geladen, ändert sich ihre Kennung: Sie wird mit `-Extension` angegeben und steht auf der Erweiterungsseite |
-| Deinstallation | Derselbe Befehl mit `-Quitar` |
+| Deinstallation | Doppelklick auf `Desinstalar.cmd`. Die Erweiterung und ihre Daten bleiben unberührt |
 
 Lässt sich ein Video nicht herunterladen, etwa weil es privat oder altersbeschränkt ist, bietet der Hinweis an, es während der Wiedergabe zu transkribieren.
 
@@ -306,9 +312,11 @@ Drei Einstellungen bestimmen, wie viel Wortanfragen genutzt werden:
 
 ## Daten und Sicherung
 
-Alle Daten werden im Browser in IndexedDB gespeichert. **Einstellungen, Deine Daten** erlaubt den Export und Import einer einzigen Datei mit den Wörtern, Karten, der Bibliothek, den erzeugten Untertiteln und Korrekturen jeder verwendeten Sprache sowie den Einstellungen und dem Kostenprotokoll. Der Claude-Schlüssel und die Wörterbücher sind nicht enthalten. Eine Sicherung aus der Zeit vor Version 0.4.0 wird als Japanisch wiederhergestellt.
+Alle Daten werden im Browser in IndexedDB gespeichert. **Einstellungen, Deine Daten** erlaubt den Export und Import einer einzigen Datei mit den Wörtern, Karten, der Bibliothek, den erzeugten Untertiteln und Korrekturen jeder verwendeten Sprache sowie den Einstellungen und dem Kostenprotokoll. API-Schlüssel und Wörterbücher sind nicht enthalten. Eine Sicherung aus der Zeit vor Version 0.4.0 wird als Japanisch wiederhergestellt.
 
-**Neue Versionen.** Einmal am Tag fragt Kotonoha bei GitHub nach der neuesten veröffentlichten Version. Ist sie neuer als die installierte, zeigt Kotonoha das auf **Start** und im Menü der Erweiterung an, mit einem Link zu ihrer Seite. Der Hinweis zu einer Version lässt sich schließen und erscheint erst mit der nächsten wieder. **Einstellungen, Version** zeigt die installierte Version, sucht auf Wunsch sofort und schaltet die Hinweise mit **Über neue Versionen informieren** ab.
+**Vollständige Kopie.** **In einen Ordner exportieren** speichert zusätzlich die Buchdateien, was die OCR gelesen hat und was bearbeitet wurde, sowie die Diktate in einem Ordner mit dem Datum. **Aus einem Ordner wiederherstellen** überträgt alles in eine andere Kopie, ohne zu löschen, was sie schon hat. So zieht Kotonoha auf einen anderen Rechner oder in eine Kopie mit fester Kennung um, denn jede Kopie speichert ihre Daten getrennt. Wörterbücher und Modelle werden in den Einstellungen neu installiert.
+
+**Neue Versionen.** Einmal am Tag fragt Kotonoha bei GitHub nach der neuesten veröffentlichten Version. Ist sie neuer als die installierte, zeigt Kotonoha das auf **Start** und im Menü der Erweiterung an, mit einem Link zu ihrer Seite. Der Hinweis zu einer Version lässt sich schließen und erscheint erst mit der nächsten wieder. **Einstellungen, Version** zeigt die installierte Version, sucht auf Wunsch sofort und schaltet die Hinweise mit **Über neue Versionen informieren** ab. Mit installiertem Helfer bieten der Hinweis und **Einstellungen, Version** bei einer aus einem Ordner geladenen Kopie **Jetzt aktualisieren** an: Der Helfer lädt das Paket herunter, prüft seine SHA-256 anhand der `SHA256SUMS.txt` der Version, kopiert es über den Ordner der Erweiterung und behält dabei ihre Kennung, und die Erweiterung lädt sich neu, sobald nichts mehr läuft. Kopien aus den Stores aktualisieren sich selbst.
 
 ## Tastenkürzel
 

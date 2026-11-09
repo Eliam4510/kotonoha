@@ -47,13 +47,20 @@ mkdirSync(SALIDA, { recursive: true });
 // cuando este archivo cambia, y para entonces todo lo demás ya está escrito.
 const extension = listar(COMPILADO).sort(([a], [b]) => Number(a === 'compilacion.txt') - Number(b === 'compilacion.txt'));
 
-// Solo estos archivos del ayudante: los que genera su instalador llevan las rutas de cada equipo.
+// Solo estos archivos del ayudante: los que genera su instalador llevan las rutas de cada equipo, y yt-dlp y QuickJS
+// los baja el instalador de sus páginas oficiales.
 const ayudante = [
+  ['Instalar.cmd', 'herramientas/ayudante/Instalar.cmd'],
+  ['Desinstalar.cmd', 'herramientas/ayudante/Desinstalar.cmd'],
   ['LEEME.txt', 'herramientas/ayudante/LEEME.txt'],
   ['instalar.ps1', 'herramientas/ayudante/instalar.ps1'],
-  ['kotonoha_ayudante.py', 'herramientas/ayudante/kotonoha_ayudante.py'],
+  ['kotonoha_ayudante.ps1', 'herramientas/ayudante/kotonoha_ayudante.ps1'],
   ['LICENSE.txt', 'LICENSE'],
 ];
+// Windows PowerShell lee sin BOM en la página de códigos del sistema: los acentos saldrían rotos.
+for (const [nombre, origen] of ayudante) {
+  if (nombre.endsWith('.ps1') && readFileSync(origen).subarray(0, 3).toString('hex') !== 'efbbbf') throw new Error(`${origen} debe llevar BOM`);
+}
 
 const sumas = [
   empaquetar(`kotonoha-${version}-extension.zip`, 'kotonoha', extension),

@@ -1179,6 +1179,9 @@ export async function iniciarWhisper(enVivo = false) {
         colaWhisper = colaWhisper.then(() => recibirLineasWhisper(e.lineas, fuente, vigente)).catch(console.error);
       } else if (e.tipo === 'bajandoAudio') {
         whisper.value = { ...actual, fase: 'bajando', porcentaje: e.porcentaje };
+      } else if (e.tipo === 'extrayendoAudio') {
+        // Sin FFmpeg en el equipo, el ayudante entrega el archivo y la extensión saca de él el audio.
+        whisper.value = { ...actual, fase: 'extrayendo', porcentaje: e.porcentaje };
       } else if (e.tipo === 'descarga') {
         whisper.value = { ...actual, fase: 'descargando', porcentaje: e.porcentaje, cargadoMb: e.cargadoMb, totalMb: e.totalMb };
       } else if (e.tipo === 'escuchando') {

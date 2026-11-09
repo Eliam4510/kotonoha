@@ -28,3 +28,10 @@ export async function archivoDocumento(id: string): Promise<File | null> {
 export async function borrarArchivoDocumento(id: string): Promise<void> {
   await (await carpeta()).removeEntry(id).catch(() => {});
 }
+
+/** Los identificadores de todos los archivos guardados: para la copia completa. */
+export async function idsDeDocumentos(): Promise<string[]> {
+  const ids: string[] = [];
+  for await (const [nombre, h] of (await carpeta()) as unknown as AsyncIterable<[string, FileSystemHandle]>) if (h.kind === 'file') ids.push(nombre);
+  return ids;
+}

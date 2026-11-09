@@ -60,6 +60,23 @@ export async function olvidarOcr(libro: string): Promise<void> {
   await baseOcr().ediciones.where('libro').equals(libro).delete();
 }
 
+/** Los libros con algo leído o editado: para la copia completa. */
+export async function librosConOcr(): Promise<string[]> {
+  const paginas = (await baseOcr().paginas.orderBy('libro').uniqueKeys()) as string[];
+  const ediciones = (await baseOcr().ediciones.orderBy('libro').uniqueKeys()) as string[];
+  return [...new Set([...paginas, ...ediciones])];
+}
+
+/** Lo leído y lo editado de un libro, tal cual, para guardarlo aparte y restaurarlo. */
+export async function ocrDe(libro: string): Promise<{ paginas: FilaOcr[]; ediciones: EdicionLinea[] }> {
+  return { paginas: await baseOcr().paginas.where('libro').equals(libro).toArray(), ediciones: await edicionesDe(libro) };
+}
+
+export async function restaurarOcr(d: { paginas?: FilaOcr[]; ediciones?: EdicionLinea[] }): Promise<void> {
+  if (d.paginas?.length) await baseOcr().paginas.bulkPut(d.paginas);
+  if (d.ediciones?.length) await baseOcr().ediciones.bulkPut(d.ediciones);
+}
+
 /** Todo lo editado de un libro. */
 export const edicionesDe = (libro: string) => baseOcr().ediciones.where('libro').equals(libro).toArray();
 export const guardarEdicion = (e: EdicionLinea) => baseOcr().ediciones.put(e);

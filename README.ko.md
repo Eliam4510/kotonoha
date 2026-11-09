@@ -141,7 +141,9 @@ Kotonoha는 키 없이도 동작합니다. 선택 사항인 Claude 키를 넣으
 2. `chrome://extensions` 또는 `edge://extensions`를 열고 **개발자 모드**를 켭니다.
 3. **압축해제된 확장 프로그램을 로드합니다**를 누르고 `kotonoha` 폴더를 선택합니다.
 
-처음 실행하면 환영 화면이 사용하는 언어, 배우려는 언어, 수준을 묻고 사전을 설치합니다. 업데이트할 때는 새 버전을 이전 버전 위에 압축을 풀기만 하면 확장 프로그램이 알아서 다시 로드됩니다. 새 버전이 나오면 Kotonoha가 홈에서 알려 줍니다. [사용 안내](docs/ko/guide.md)에서 모든 기능을, [CONTRIBUTING.md](CONTRIBUTING.md)에서 소스 코드로 빌드하는 방법을 볼 수 있습니다.
+Windows에서는 도우미부터 시작할 수도 있습니다. `kotonoha-<버전>-ayudante.zip`에 든 `Instalar.cmd`를 두 번 클릭하면 도우미를 설치하고, Kotonoha를 찾지 못하면 확장 프로그램도 고정 식별자로 설치합니다. 그다음에는 2단계와 3단계만 남습니다.
+
+처음 실행하면 환영 화면이 사용하는 언어, 배우려는 언어, 수준을 묻고 사전을 설치합니다. 업데이트할 때는 새 버전을 이전 버전 위에 압축을 풀기만 하면 확장 프로그램이 알아서 다시 로드됩니다. 새 버전이 나오면 Kotonoha가 홈에서 알려 주고, 도우미가 설치되어 있으면 **지금 업데이트**로 한 번에 설치합니다. [사용 안내](docs/ko/guide.md)에서 모든 기능을, [CONTRIBUTING.md](CONTRIBUTING.md)에서 소스 코드로 빌드하는 방법을 볼 수 있습니다.
 
 ## 주요 단축키
 
@@ -158,7 +160,7 @@ Kotonoha는 키 없이도 동작합니다. 선택 사항인 Claude 키를 넣으
 
 ## 개인정보
 
-- 데이터와 Claude 키는 브라우저에만 저장됩니다. 자체 서버도, 사용 통계 수집도 없습니다.
+- 데이터와 Claude 키는 브라우저에만 저장됩니다. 자체 서버도, 사용 통계 수집도 없습니다. [개인정보 처리방침](docs/privacidad.md#english)에 서비스마다 무엇을 보내는지 나와 있습니다.
 - 받아쓰기한 오디오와 인식한 페이지는 컴퓨터 밖으로 나가지 않습니다.
 - Claude에는 요청마다 필요한 내용만 보냅니다. 문장, 자막 대본, 제목입니다.
 - 사전과 모델은 GitHub와 Hugging Face에서 한 번만 내려받습니다. [고지](docs/ko/notices.md)에 모든 출처가 있습니다.
@@ -174,7 +176,7 @@ flowchart LR
   M --> CL["Claude API"]
   M --> AN["Anki"]
   S["서비스 워커"] <--> M
-  S <-->|Native Messaging| H["로컬 도우미<br/>yt-dlp와 FFmpeg"]
+  S <-->|Native Messaging| H["로컬 도우미<br/>PowerShell과 yt-dlp"]
 ```
 
 TypeScript, Preact, Dexie, esbuild를 쓰며, 음성과 OCR에는 WebGPU 위의 ONNX Runtime과 Transformers.js를 사용합니다. 각 부분과 기술적 결정, 성능 측정은 [docs/ko/architecture.md](docs/ko/architecture.md)에 있습니다. 750개가 넘는 단위 테스트가 핵심 로직을, 엔드투엔드 테스트가 실제 Edge와 GPU에서 주요 흐름을 검증합니다. 실행 방법은 [CONTRIBUTING.md](CONTRIBUTING.md)에 있습니다.

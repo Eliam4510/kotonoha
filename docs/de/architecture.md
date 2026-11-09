@@ -43,7 +43,7 @@ flowchart TB
   App <-->|RPC und Ports| Motor
   App <--> SW
   SW <--> Motor
-  SW <-->|Native Messaging| AY["Lokaler Helfer<br/>yt-dlp und FFmpeg"]
+  SW <-->|Native Messaging| AY["Lokaler Helfer<br/>PowerShell und yt-dlp"]
   WH <--> GPU
   IA --> CL["Claude-API"]
   ANKI --> AN["Anki"]
@@ -58,7 +58,7 @@ flowchart TB
 | **Service Worker** | APIs, die sonst niemand nutzen kann: Befehle, `tabCapture`, `captureVisibleTab`, `connectNative` | Chrome hält ihn bei Inaktivität an, daher speichert er keinen Zustand |
 | **Engine (Offscreen)** | Tokenizer, Datenbank, Claude, Anki und Aufnahme | Das ist das Schwere und Langlaufende. Ein Offscreen-Dokument wird nicht mitten in einer Antwort angehalten |
 | **Whisper-Worker** | Das Modell laden und auf der GPU transkribieren | Sehr schwer, würde die Engine blockieren. Wird separat gepackt und nur bei Bedarf geladen |
-| **Lokaler Helfer** | Das Audio eines Internetvideos herunterladen | Eine Erweiterung kann das nicht allein. Nur die Erweiterung kann ihn aufrufen, und er akzeptiert nur http- oder https-Adressen |
+| **Lokaler Helfer** | Das Audio eines Internetvideos herunterladen und die Erweiterung aktualisieren | Eine Erweiterung kann das nicht allein. Nur die Erweiterung kann ihn aufrufen, und er akzeptiert nur http- oder https-Adressen |
 | **Anwendungsfenster** | Verwaltungsseiten und lokaler Player | Eine normale Seite der Erweiterung, die dieselbe Engine per RPC nutzt |
 | **Kern (`src/nucleo`)** | Reine Logik: Parser, Modi, Statistiken, Synchronisierung, Transkription und Stapel | Ohne Browser-Abhängigkeiten, getestet mit Vitest |
 | **Sprachpakete (`src/lenguas`)** | Alles, was von der gelernten Sprache abhängt | Der Rest des Programms kennt nur ihre Schnittstelle |
@@ -97,7 +97,7 @@ Claude transkribiert kein Audio, daher läuft dieser Teil auf dem lokalen Comput
 | Quelle | Wie das Audio ankommt | Geschwindigkeit |
 |---|---|---|
 | Eigene Datei | ffmpeg.wasm extrahiert die gewählte Spur im Anwendungsfenster. Die Datei wird ohne Kopie eingebunden, sodass auch ganze Filme funktionieren | So schnell wie die GPU erlaubt |
-| Internetvideo mit dem Helfer | yt-dlp lädt das Audio herunter, FFmpeg wandelt es in eine temporäre Datei um, die die Engine stückweise über den Service Worker liest | So schnell wie die GPU erlaubt |
+| Internetvideo mit dem Helfer | yt-dlp lädt das Audio in einen temporären Ordner. Mit FFmpeg auf dem Rechner wandelt der Helfer es um, und die Engine liest die Samples stückweise über den Service Worker; ohne FFmpeg erhält die Engine die Datei und wandelt sie mit ffmpeg.wasm um | So schnell wie die GPU erlaubt |
 | Internetvideo ohne den Helfer | Tab-Aufnahme während der Wiedergabe. Der Player meldet viermal pro Sekunde die Videozeit, die Samples auch bei Pausen und Sprüngen in Videozeit übersetzt | Echtzeit |
 
 Netflix bleibt absichtlich außen vor: Es hat fast immer Untertitel, und sein Audio lässt sich nicht vorab verarbeiten.
@@ -134,7 +134,7 @@ Pausenloses Arbeiten hält die GPU stundenlang bei 100 %, was den Desktop ausbre
 | Wörterbücher | Yomitan-Format: JMdict auf Spanisch und Englisch, Akzent von Kanjium, Häufigkeit von JPDB | Offenes Format, das auch den Import anderer aus einer Datei erlaubt |
 | KI | Offizielles SDK `@anthropic-ai/sdk` aus der Engine | Der Schlüssel erreicht nie die Skripte, die auf Seiten laufen |
 | Transkription | Whisper large-v3-turbo mit Transformers.js und WebGPU, Encoder in 16 Bit und quantisierter Decoder | Das genaueste der verglichenen, und nichts zu installieren |
-| Audio von Internetvideos | yt-dlp und FFmpeg in einem lokalen Programm, über Native Messaging | Die einzige Möglichkeit, es zu verarbeiten, ohne auf die Wiedergabe zu warten. Es lädt in eine temporäre Datei statt zu streamen, sodass im Tempo der GPU gelesen wird und nichts staut |
+| Audio von Internetvideos | yt-dlp in einem lokalen PowerShell-Programm, über Native Messaging, und FFmpeg, falls installiert | Die einzige Möglichkeit, es zu verarbeiten, ohne auf die Wiedergabe zu warten. Es lädt in eine temporäre Datei statt zu streamen, sodass im Tempo der GPU gelesen wird und nichts staut |
 | Eigene Dateien | ffmpeg.wasm | Eingebettete Untertitel und Audiospuren von MKV, ohne externe Programme |
 | Karten | AnkiConnect und eine interne Wiederholung mit FSRS | Anbindung an Anki oder Wiederholung in der Anwendung |
 | Audio der Karten | `tabCapture` und `MediaRecorder`, als MP3 exportiert | Funktioniert auf jeder Website, ohne das Video herunterzuladen |

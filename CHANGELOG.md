@@ -2,6 +2,13 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.17.0 · 2026-11-09
+
+- **Ayudante sin Python.** El ayudante local está escrito en PowerShell, que viene con Windows, y usa el `yt-dlp.exe` oficial con QuickJS para YouTube. `Instalar.cmd` se ejecuta con un doble clic: copia el ayudante a su sitio, baja yt-dlp y QuickJS comprobando su SHA-256, encuentra Kotonoha en Chrome, Edge, Brave y Chromium, y, si no hay ninguna copia, instala también la extensión con un identificador fijo. FFmpeg ya no hace falta: sin él, la extensión convierte el audio con su propio FFmpeg.
+- **Actualizar ahora.** Con el ayudante instalado, el aviso de versión nueva y **Ajustes, Versión** la ponen con un clic: el ayudante baja el paquete, comprueba su SHA-256, lo copia sobre la carpeta de la extensión conservando su identificador, y la extensión se recarga sola.
+- **Copia completa.** **Ajustes, Tus datos** exporta a una carpeta, además de lo de siempre, los archivos de los libros, el texto del OCR y los dictados, y los restaura en otra copia o en otro equipo. Ninguna copia lleva ya las claves de API.
+- Material para publicar en Edge Add-ons y Chrome Web Store: ficha, justificación de los permisos, capturas y [política de privacidad](docs/privacidad.md).
+
 ## 0.16.0 · 2026-11-08
 
 - **Otros proveedores de IA.** Además de Claude, OpenRouter, DeepSeek y OpenAI con su clave, y LM Studio y Ollama en el propio equipo: se añaden en **Ajustes, Otros proveedores de IA**, con sus modelos y una prueba de conexión, y en **Modelo y esfuerzo por tarea** cada tarea elige el suyo. Las respuestas llegan en flujo; las que piden estructura van con su esquema JSON o, si el proveedor no lo admite, en modo JSON. El gasto se anota con el coste que dice el proveedor. Claude sigue siendo el de siempre.
@@ -138,6 +145,13 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.17.0 · 2026-11-09
+
+- **A helper without Python.** The local helper is written in PowerShell, which comes with Windows, and uses the official `yt-dlp.exe` with QuickJS for YouTube. `Instalar.cmd` runs with a double click: it copies the helper into place, downloads yt-dlp and QuickJS checking their SHA-256, finds Kotonoha in Chrome, Edge, Brave and Chromium and, if there is no copy, installs the extension too with a fixed ID. FFmpeg is no longer needed: without it, the extension converts the audio with its own FFmpeg.
+- **Update now.** With the helper installed, the new-version notice and **Settings, Version** install it with one click: the helper downloads the package, checks its SHA-256, copies it over the extension's folder keeping its ID, and the extension reloads itself.
+- **Full copy.** **Settings, Your data** exports to a folder, besides the usual, the book files, the OCR text and the dictations, and restores them into another copy or on another computer. No copy includes API keys any more.
+- Material for publishing on Edge Add-ons and the Chrome Web Store: listing, permission justifications, screenshots and [privacy policy](docs/privacidad.md#english).
 
 ## 0.16.0 · 2026-11-08
 

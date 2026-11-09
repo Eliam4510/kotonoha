@@ -39,6 +39,7 @@ export type EventoWhisper =
   | { tipo: 'descarga'; porcentaje: number; cargadoMb: number; totalMb: number }
   | { tipo: 'preparando' }
   | { tipo: 'bajandoAudio'; porcentaje: number }
+  | { tipo: 'extrayendoAudio'; porcentaje: number }
   | { tipo: 'escuchando'; dispositivo: string }
   | { tipo: 'procesando'; porcentaje?: number; dispositivo?: string; restanteS?: number | null }
   | { tipo: 'recuperando'; segundos: number }
@@ -457,7 +458,12 @@ export async function transcribirDescarga(
   desdeMs = 0
 ): Promise<number> {
   emitir({ tipo: 'bajandoAudio', porcentaje: 0 });
-  const audio = await abrirDescarga(url, (porcentaje) => emitir({ tipo: 'bajandoAudio', porcentaje }), senal);
+  const audio = await abrirDescarga(
+    url,
+    (porcentaje) => emitir({ tipo: 'bajandoAudio', porcentaje }),
+    senal,
+    (porcentaje) => emitir({ tipo: 'extrayendoAudio', porcentaje })
+  );
   try {
     return await transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs);
   } finally {

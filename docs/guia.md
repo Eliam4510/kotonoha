@@ -168,21 +168,27 @@ Whisper acierta los tiempos, pero en una canción falla muchas palabras. Si algu
 
 ### Ayudante local
 
-Una extensión no puede descargar por sí sola el audio de un video. El ayudante es un pequeño programa local que lo hace con [yt-dlp](https://github.com/yt-dlp/yt-dlp) y FFmpeg. Requiere Python, y su instalador añade yt-dlp si falta. Se descarga de la página de la última versión, en `kotonoha-X.Y.Z-ayudante.zip`, y se descomprime en una carpeta que no se vaya a mover. Dentro de esa carpeta se ejecuta una vez la orden que muestra **Ajustes, Transcripción**, que ya lleva el identificador de la extensión:
+Una extensión no puede descargar por sí sola el audio de un video. El ayudante es un pequeño programa local escrito en PowerShell, que viene con Windows: no hace falta instalar Python ni FFmpeg. Baja el audio con [yt-dlp](https://github.com/yt-dlp/yt-dlp) y, además, actualiza la extensión (ver **Versiones nuevas**, en [Datos y copia de seguridad](#datos-y-copia-de-seguridad)). Se descarga de la página de la última versión, en `kotonoha-X.Y.Z-ayudante.zip`, se descomprime en cualquier carpeta y se hace doble clic en `Instalar.cmd`. El instalador:
+
+- copia el ayudante a `%LOCALAPPDATA%\Kotonoha\ayudante`, de modo que la carpeta descomprimida ya no hace falta;
+- baja yt-dlp y QuickJS, con el que yt-dlp resuelve el desafío de YouTube, de sus páginas oficiales en GitHub, y comprueba el SHA-256 de cada uno;
+- busca Kotonoha en Chrome, Edge, Brave y Chromium, y registra el ayudante para cada copia que encuentra;
+- si no encuentra ninguna, ofrece instalar también la extensión, con un identificador fijo, y explica cómo cargarla.
+
+El estado se comprueba en **Ajustes, Transcripción**. Si el instalador no encuentra una copia, Ajustes muestra la orden con su identificador, para ejecutarla en la carpeta del ayudante:
 
 ```bash
 powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension IDENTIFICADOR
 ```
 
-Después hay que recargar la extensión en `edge://extensions` o `chrome://extensions`. El estado se comprueba en **Ajustes, Transcripción**.
-
 | Aspecto | Comportamiento |
 |---|---|
 | Alcance | Solo la extensión puede llamarlo, y solo acepta direcciones http o https |
 | Registro | Añade una clave por usuario en `HKCU`, sin permisos de administrador |
+| Conversión | Con FFmpeg en el equipo, el ayudante convierte el audio. Sin él, lo convierte la extensión con su propio FFmpeg, algo más despacio |
+| yt-dlp | Se pone al día solo una vez por semana: YouTube cambia a menudo |
 | Archivos | Usa una carpeta temporal que se borra al terminar o al cancelar |
-| Identificador | Si la extensión se carga desde otra carpeta, su identificador cambia: se indica con `-Extension`, y aparece en la página de extensiones |
-| Desinstalación | El mismo comando con `-Quitar` |
+| Desinstalación | Doble clic en `Desinstalar.cmd`. La extensión y sus datos no se tocan |
 
 Si un video no se puede descargar, por ejemplo por ser privado o tener restricción de edad, el aviso ofrece transcribirlo mientras se reproduce.
 
@@ -306,9 +312,11 @@ Tres ajustes deciden cuánto se usan las consultas de palabras:
 
 ## Datos y copia de seguridad
 
-Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos** permite exportar e importar un solo archivo con las palabras, tarjetas, biblioteca, subtítulos generados y correcciones de cada idioma que se haya usado, junto con los ajustes y el registro de gasto. La clave de Claude y los diccionarios no se incluyen. Una copia anterior a la versión 0.4.0 se restaura como japonés.
+Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos** permite exportar e importar un solo archivo con las palabras, tarjetas, biblioteca, subtítulos generados y correcciones de cada idioma que se haya usado, junto con los ajustes y el registro de gasto. Las claves de API y los diccionarios no se incluyen. Una copia anterior a la versión 0.4.0 se restaura como japonés.
 
-**Versiones nuevas.** Una vez al día, Kotonoha pregunta a GitHub cuál es la última versión publicada. Si es más nueva que la instalada, lo dice en **Inicio** y en el menú de la extensión, con un enlace a su página. El aviso de una versión se cierra y no vuelve hasta la siguiente. **Ajustes, Versión** muestra la versión instalada, busca a mano y apaga los avisos con **Avisar de versiones nuevas**.
+**Copia completa.** **Exportar a una carpeta** guarda, además, los archivos de los libros, lo que el OCR leyó y lo editado, y los dictados, en una carpeta con la fecha. **Restaurar de una carpeta** lo pone todo en otra copia sin borrar lo que ya tenga. Sirve para pasar Kotonoha a otro equipo, o a una copia instalada con el identificador fijo, porque cada copia guarda sus datos aparte. Los diccionarios y los modelos se vuelven a instalar desde Ajustes.
+
+**Versiones nuevas.** Una vez al día, Kotonoha pregunta a GitHub cuál es la última versión publicada. Si es más nueva que la instalada, lo dice en **Inicio** y en el menú de la extensión, con un enlace a su página. El aviso de una versión se cierra y no vuelve hasta la siguiente. **Ajustes, Versión** muestra la versión instalada, busca a mano y apaga los avisos con **Avisar de versiones nuevas**. Con el ayudante instalado, en una copia cargada desde una carpeta, el aviso y **Ajustes, Versión** ofrecen **Actualizar ahora**: el ayudante descarga el paquete, comprueba su SHA-256 con el `SHA256SUMS.txt` de la versión, lo copia sobre la carpeta de la extensión conservando su identificador, y la extensión se recarga sola en cuanto nada esté en marcha. Las copias de las tiendas se actualizan solas.
 
 ## Atajos de teclado
 

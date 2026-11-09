@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.16.0, along with how it has been verified.
+Status of each feature in version 0.17.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -64,8 +64,11 @@ Status of each feature in version 0.16.0, along with how it has been verified.
 | Recovery of speech skipped under music | Automated, with real videos |
 | Load control: rest periods, automatic intensity and pause | Automated, with smoothness measurements |
 | Recovery from GPU loss | Automated, by destroying the WebGPU device |
-| Local helper with yt-dlp and FFmpeg | Automated, with a local download. The real browser registration and a real YouTube download are still pending |
+| Local helper in PowerShell with yt-dlp, without Python, with or without FFmpeg | Automated: installer without registry, both conversions, cancelling and errors, with a local download; real registration with Edge, and a real YouTube download with QuickJS |
 | The helper's install command in Settings, with the copy's ID and a link to its download | Automated |
+| Double-click `Instalar.cmd`: finds Kotonoha in the browsers, downloads yt-dlp and QuickJS checking their SHA-256 and, with no copy, installs the extension with a fixed ID | Automated, without touching the registry |
+| **Update now**: the helper puts the new version in the copy's folder, with its SHA-256 and the same key, and the extension reloads | Automated, end to end with Edge |
+| Full copy in a folder: books, OCR text and dictations, without API keys | Automated, round trip |
 | Correction of the result with Claude | Simulator |
 | Song lyrics placed on the transcription timing: the text comes from the lyrics and the timing from Whisper | Simulator, with real Whisper, and real session with a song |
 | Haas-ja for Japanese speech, Parakeet for English speech and Whisper Turbo for songs, chosen according to the video | Automated, with the three real models on the GPU, and a real session on YouTube |
@@ -239,7 +242,7 @@ Status of each feature in version 0.16.0, along with how it has been verified.
 | Platforms | Desktop Chrome and Edge. The local helper is prepared for Windows |
 | Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card carries the episode's official image, if the site offers one |
 | Audio with DRM | A protected site may withhold its sound from capture. After two silent sentences in a row in a video, the line is no longer replayed to record it |
-| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the backup: on another computer they have to be imported again A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word. |
-| Synchronization | No server: moving between computers is done with a backup |
+| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the single-file backup, but they are in the full copy. A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word. |
+| Synchronization | No server: moving between computers is done with the full copy |
 | Background music | Whisper can miss quiet conversation under loud music |
 | Song lyrics | Timing is per Whisper line, not per word. With very loud music Whisper may hear little, and then more verses get an estimated time |

@@ -20,6 +20,8 @@ import { PAQUETES } from '../lenguas';
 import { estudiarLengua, lengua } from '../ui/lengua';
 import { buscarVersionNueva, type VersionPublicada } from '../compartido/actualizaciones';
 import { ordenInstalarAyudante, URL_ULTIMA_VERSION, versionInstalada } from '../compartido/proyecto';
+import { BotonActualizar, useActualizacion } from './ActualizarAhora';
+import { exportarCopiaCompleta, hayCopiaCompleta, restaurarCopiaCompleta, type ResumenCopia } from './copiaCompleta';
 import { nombreCorto } from '../nucleo/voces';
 import { CLAVES_PROVEEDORES, idParaProveedor, type ProveedorConocido, type ProveedorIA, PROVEEDORES_CONOCIDOS, separarModelo, valorDeModelo } from '../compartido/proveedores';
 import { decirConNavegador, vocesDeLaLengua } from '../ui/vozNavegador';
@@ -571,9 +573,19 @@ function AyudanteLocal() {
   useEffect(comprobar, []);
   if (info === undefined) return <Opcion titulo={tr('Ayudante para YouTube')} ayuda={tr('Comprobando si está instalado…')}><span class="ayuda">…</span></Opcion>;
   if (info) {
+    // El de PowerShell convierte el audio con FFmpeg si lo hay, y si no lo convierte la extensión: solo le falta yt-dlp.
+    const falta = !info.ytdlp ? tr('Falta yt-dlp') : info.version < 2 && !info.ffmpeg ? tr('Falta ffmpeg') : null;
     return (
-      <Opcion titulo={tr('Ayudante para YouTube')} ayuda={tr('Instalado, con yt-dlp {0}. Los videos de internet se transcriben enteros, sin reproducirlos.', info.ytdlp ?? tr('(falta)'))}>
-        {info.ytdlp && info.ffmpeg ? <span class="ap-whisper-tam"><Icono n="check" t={14} /> {tr('Listo')}</span> : <span class="ayuda">{info.ffmpeg ? tr('Falta yt-dlp') : tr('Falta ffmpeg')}</span>}
+      <Opcion
+        titulo={tr('Ayudante para YouTube')}
+        ayuda={
+          <>
+            {tr('Instalado, con yt-dlp {0}. Los videos de internet se transcriben enteros, sin reproducirlos.', info.ytdlp ?? tr('(falta)'))}{' '}
+            {info.version < 2 ? tr('Hay un ayudante nuevo que no necesita Python y también actualiza Kotonoha: descárgalo y haz doble clic en Instalar.cmd.') : !info.ffmpeg ? tr('Sin FFmpeg en el equipo, la extensión convierte el audio por su cuenta, algo más despacio.') : ''}
+          </>
+        }
+      >
+        {falta ? <span class="ayuda">{falta}</span> : <span class="ap-whisper-tam"><Icono n="check" t={14} /> {tr('Listo')}</span>}
       </Opcion>
     );
   }
@@ -583,8 +595,9 @@ function AyudanteLocal() {
       titulo={tr('Ayudante para YouTube')}
       ayuda={
         <>
-          {tr('Permite transcribir un video entero sin reproducirlo. Necesita Windows, Python 3 y FFmpeg.')}{' '}
-          {tr('Descarga el ayudante de la última versión, descomprímelo en una carpeta que no vayas a mover y ejecuta esto dentro de esa carpeta:')}{' '}
+          {tr('Permite transcribir un video entero sin reproducirlo, y actualizar Kotonoha con un clic. Solo para Windows, sin instalar nada más.')}{' '}
+          {tr('Descarga el ayudante de la última versión, descomprímelo y haz doble clic en Instalar.cmd: encuentra Kotonoha en Chrome y Edge.')}{' '}
+          {tr('Si no la encuentra, ejecuta esto en la carpeta del ayudante:')}{' '}
           <code class="ap-orden-ayudante">{orden}</code>
         </>
       }
@@ -1126,10 +1139,31 @@ function SeccionVoces({ a, cambiar }: PropsSeccion) {
 function SeccionDatos({ a, cambiar }: PropsSeccion) {
   const entrada = useRef<HTMLInputElement>(null);
   const [mensaje, fijarMensaje] = useState<{ texto: string; error?: boolean } | null>(null);
+  const [copiando, fijarCopiando] = useState<string | null>(null);
+  const textoResumen = (r: ResumenCopia) => tr('libros: {0}; libros con texto del OCR: {1}; dictados: {2}.', r.libros, r.librosConOcr, r.dictados);
+  const copiaCompleta = async (restaurar: boolean) => {
+    fijarMensaje(null);
+    fijarCopiando(tr('Preparando…'));
+    try {
+      if (restaurar) {
+        const { ajustes, resumen } = await restaurarCopiaCompleta(fijarCopiando);
+        if (ajustes) cambiar(ajustes);
+        fijarMensaje({ texto: `${tr('Copia completa restaurada:')} ${textoResumen(resumen)}` });
+      } else {
+        const { carpeta, resumen } = await exportarCopiaCompleta(a, fijarCopiando);
+        fijarMensaje({ texto: `${tr('Copia completa guardada en la carpeta «{0}»:', carpeta)} ${textoResumen(resumen)}` });
+      }
+    } catch (err) {
+      // Cerrar el selector de carpetas sin elegir ninguna no es un error.
+      if (!(err instanceof DOMException && err.name === 'AbortError')) fijarMensaje({ texto: err instanceof Error ? err.message : String(err), error: true });
+    } finally {
+      fijarCopiando(null);
+    }
+  };
   return (
     <Seccion id="datos" icono="carpeta" titulo={tr('Tus datos')} descripcion={tr('Todo se guarda en este navegador. Haz copias de vez en cuando para no perder tus palabras.')}>
       <div class="ap-grupo">
-        <Opcion titulo={tr('Copia de seguridad')} ayuda={tr('Palabras, tarjetas, biblioteca y ajustes en un archivo.')}>
+        <Opcion titulo={tr('Copia de seguridad')} ayuda={tr('Palabras, tarjetas, biblioteca y ajustes en un archivo. Las claves de API no se guardan.')}>
           <span class="ap-botones">
             <button class="btn chico" onClick={async () => {
               const json = await motor.exportarDatos(a);
@@ -1154,6 +1188,17 @@ function SeccionDatos({ a, cambiar }: PropsSeccion) {
             }
           }} />
         </Opcion>
+        {hayCopiaCompleta() && (
+          <Opcion
+            titulo={tr('Copia completa')}
+            ayuda={copiando ? <span role="status">{copiando}</span> : tr('Lo anterior más los archivos de los libros, el texto del OCR y los dictados, en una carpeta. Sirve para pasar Kotonoha a otro equipo o a otra copia. Las claves de API no se guardan.')}
+          >
+            <span class="ap-botones">
+              <button class="btn chico" disabled={!!copiando} onClick={() => void copiaCompleta(false)}><Icono n="descargar" t={14} /> {tr('Exportar a una carpeta')}</button>
+              <button class="btn chico" disabled={!!copiando} onClick={() => void copiaCompleta(true)}><Icono n="subir" t={14} /> {tr('Restaurar de una carpeta')}</button>
+            </span>
+          </Opcion>
+        )}
         <Opcion titulo={tr('Guardar las frases que ves')} ayuda={tr('Sirven para buscar ejemplos de lo que ya conoces.')}>
           <Interruptor etiqueta={tr('Guardar historial')} on={a.guardarHistorial} alCambiar={(v) => cambiar({ guardarHistorial: v })} />
         </Opcion>
@@ -1244,11 +1289,12 @@ function SeccionVersion({ a, cambiar }: PropsSeccion) {
       fijarEstado({ fase: 'error' });
     }
   };
+  const actualizacion = useActualizacion(estado.fase === 'nueva' ? estado.nueva.version : null);
   const resultado =
     estado.fase === 'buscando' ? tr('Buscando…')
     : estado.fase === 'al-dia' ? tr('Tienes la última versión.')
     : estado.fase === 'error' ? tr('No se pudo consultar GitHub. Comprueba la conexión.')
-    : estado.fase === 'nueva' ? tr('Hay una versión nueva: {0}.', estado.nueva.version)
+    : estado.fase === 'nueva' ? `${tr('Hay una versión nueva: {0}.', estado.nueva.version)} ${actualizacion.texto}`
     : tr('Comprueba ahora si hay una versión nueva.');
   return (
     <Seccion id="version" icono="sello" titulo={tr('Versión')} descripcion={tr('Tienes Kotonoha {0}.', versionInstalada())}>
@@ -1259,6 +1305,7 @@ function SeccionVersion({ a, cambiar }: PropsSeccion) {
         <Opcion titulo={tr('Buscar una versión nueva')} ayuda={<span role="status">{resultado}</span>}>
           <span class="ap-acciones-fila">
             <button class="btn chico" disabled={estado.fase === 'buscando'} onClick={() => void buscar()}>{tr('Buscar')}</button>
+            <BotonActualizar a={actualizacion} />
             <a class="btn chico fantasma" href={estado.fase === 'nueva' ? estado.nueva.url : URL_ULTIMA_VERSION} target="_blank" rel="noreferrer noopener">{tr('Ver en GitHub')} <Icono n="externo" t={13} /></a>
           </span>
         </Opcion>

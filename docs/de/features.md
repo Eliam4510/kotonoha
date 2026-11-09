@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.16.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.17.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -64,8 +64,11 @@ Stand jeder Funktion in Version 0.16.0 und die Art ihrer Überprüfung.
 | Wiederherstellung von Sprache, die unter Musik ausgelassen wurde | Automatisch, mit echten Videos |
 | Laststeuerung: Pausen, automatische Intensität und Anhalten | Automatisch, mit Messungen der Flüssigkeit |
 | Wiederherstellung bei Verlust der GPU | Automatisch, durch Zerstören des WebGPU-Geräts |
-| Lokaler Helfer mit yt-dlp und FFmpeg | Automatisch, mit lokalem Download. Es fehlen die echte Registrierung im Browser und ein echter YouTube-Download |
+| Lokaler Helfer in PowerShell mit yt-dlp, ohne Python, mit oder ohne FFmpeg | Automatisch: Installation ohne Registrierung, beide Umwandlungen, Abbrechen und Fehler, mit lokalem Download; echte Registrierung mit Edge und ein echter YouTube-Download mit QuickJS |
 | Der Installationsbefehl des Helfers in den Einstellungen, mit der ID der Kopie und einem Link zum Download | Automatisch |
+| `Instalar.cmd` per Doppelklick: findet Kotonoha in den Browsern, lädt yt-dlp und QuickJS mit geprüfter SHA-256 herunter und installiert ohne Kopie die Erweiterung mit fester Kennung | Automatisch, ohne die Registrierung zu berühren |
+| **Jetzt aktualisieren**: Der Helfer legt die neue Version mit ihrer SHA-256 und demselben Schlüssel in den Ordner der Kopie, und die Erweiterung lädt sich neu | Automatisch, durchgehend mit Edge |
+| Vollständige Kopie in einem Ordner: Bücher, OCR-Text und Diktate, ohne API-Schlüssel | Automatisch, hin und zurück |
 | Korrektur des Ergebnisses mit Claude | Simulator |
 | Liedtext auf die Zeiten der Transkription gelegt: der Text aus dem Liedtext, die Zeiten von Whisper | Simulator, mit echtem Whisper, und echte Sitzung mit einem Lied |
 | Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder, je nach Video gewählt | Automatisch, mit den drei echten Modellen auf der GPU, und echte Sitzung auf YouTube |
@@ -239,7 +242,7 @@ Stand jeder Funktion in Version 0.16.0 und die Art ihrer Überprüfung.
 | Plattformen | Chrome und Edge auf dem Desktop. Der lokale Helfer ist für Windows vorbereitet |
 | Bild mit DRM | Bei Netflix und anderen geschützten Websites liefert der Browser das Einzelbild schwarz. Die Karte erhält das offizielle Bild der Folge, falls die Website eines anbietet |
 | Audio mit DRM | Eine geschützte Website kann ihren Ton der Aufnahme vorenthalten. Nach zwei stummen Sätzen in Folge in einem Video wird die Zeile nicht mehr zur Aufnahme erneut abgespielt |
-| Betrachter | Die Texterkennung kann ähnliche Zeichen verwechseln (エ und 工, ー und 一), gelegentlich eines auslassen und die Indizes von Formeln verlieren; das Originalbild bleibt immer sichtbar. Der Modus Buch ist mit horizontalem Text gemessen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung: Auf einem anderen Computer müssen sie erneut importiert werden Ein Text-EPUB wird kapitelweise mit Scrollen gelesen, nicht seitenweise; im Modus Manga wird die ganze Sprechblase angetippt, nicht jedes Wort. |
-| Synchronisierung | Ohne Server: Die Übertragung zwischen Computern erfolgt über die Sicherung |
+| Betrachter | Die Texterkennung kann ähnliche Zeichen verwechseln (エ und 工, ー und 一), gelegentlich eines auslassen und die Indizes von Formeln verlieren; das Originalbild bleibt immer sichtbar. Der Modus Buch ist mit horizontalem Text gemessen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung in einer Datei, wohl aber der vollständigen Kopie. Ein Text-EPUB wird kapitelweise mit Scrollen gelesen, nicht seitenweise; im Modus Manga wird die ganze Sprechblase angetippt, nicht jedes Wort. |
+| Synchronisierung | Ohne Server: Die Übertragung zwischen Computern erfolgt über die vollständige Kopie |
 | Hintergrundmusik | Whisper kann leise Gespräche unter lauter Musik verlieren |
 | Liedtexte | Die Zeiten gelten je Whisper-Zeile, nicht je Wort. Bei sehr lauter Musik hört Whisper womöglich wenig, und dann erhalten mehr Verse eine geschätzte Zeit |
