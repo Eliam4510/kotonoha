@@ -19,7 +19,7 @@ const RUTAS: [string, NombreIcono, string][] = [
   ['inicio', 'inicio', tm('Inicio')],
   ['diccionario', 'diccionario', tm('Diccionario')],
   ['lector', 'cuaderno', tm('Cuaderno')],
-  ['biblioteca', 'biblioteca', tm('Ayuda de lectura')],
+  ['biblioteca', 'biblioteca', tm('Biblioteca')],
   ['reproductor', 'video', tm('Reproductor')],
   ['memoria', 'tarjetas', tm('Memoria')],
   ['palabras', 'palabras', tm('Palabras')],

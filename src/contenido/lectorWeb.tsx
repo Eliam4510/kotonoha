@@ -45,7 +45,7 @@ let pintor: Pintor | null = null;
 let anfitrion: HTMLElement;
 let montado = false;
 /**
- * Dentro de un libro de la Ayuda de lectura, el lector está siempre encendido: no es un sitio que se pueda apagar, las
+ * Dentro de un libro de la Biblioteca, el lector está siempre encendido: no es un sitio que se pueda apagar, las
  * tarjetas van al creador del visor y el texto puede ir en vertical, avanzando de lado.
  */
 let enLibro = false;

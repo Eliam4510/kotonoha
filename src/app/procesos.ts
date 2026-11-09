@@ -1,4 +1,4 @@
-// El procesado de libros enteros con el OCR desde la Ayuda de lectura: de uno en uno, con el avance a la vista en la
+// El procesado de libros enteros con el OCR desde la Biblioteca: de uno en uno, con el avance a la vista en la
 // tarjeta de cada libro y con pausa. Dura lo que dure abierta la página; lo ya leído queda guardado, y al volver a pedirlo
 // sigue por donde iba.
 

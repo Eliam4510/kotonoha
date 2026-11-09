@@ -1,4 +1,4 @@
-// Prueba la importación de carpetas de imágenes en la Ayuda de lectura con una carpeta hecha aquí mismo: una serie con
+// Prueba la importación de carpetas de imágenes en la Biblioteca con una carpeta hecha aquí mismo: una serie con
 // dos tomos (uno con la portada llamada cover.jpg, que el orden natural dejaría al final, y una doble página apaisada;
 // otro con su ComicInfo.xml), un archivo que no es imagen y unas imágenes sueltas. Comprueba que los tomos entran en una
 // colección con el nombre de la serie, el orden de las páginas, la doble página que va sola, el sentido de lectura y que

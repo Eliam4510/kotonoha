@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.27.6 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.27.7 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -118,10 +118,10 @@ Stand jeder Funktion in Version 0.27.6 und die Art ihrer Überprüfung.
 | Vorlesen mit Geschwindigkeit (0,6× bis 1,2×) und Modus (am Stück, Satz für Satz oder den Satz wiederholend); jeden markierten Teil anhören oder üben, ohne seine Furigana | Automatisch |
 | Die Sprachmodelle laden während der Aufnahme (Diktat und Übung): Die zweite Aufnahme der Übung wird in 0,2 s analysiert, und das Diktat eine Sekunde nach dem Ende transkribiert | Automatisch, auf der GPU des Entwicklungsrechners |
 | Die Aufnahme jedes Diktats über ihrem Absatz, zum erneuten Anhören; sie geht mit dem Text in die Bibliothek, und eine, die kein Text nutzt, wird nach einer Woche gelöscht | Automatisch |
-| Tonhöhenakzent üben im Notizbuch, den Texten der Lesehilfe und der Textansicht: der Akzent jedes Worts gezeichnet, die Aufnahme, die Tonhöhenkurve über dem erwarteten Akzent, eine Bewertung pro Wort und lange Pausen | Automatisch, mit einer synthetischen Stimme |
+| Tonhöhenakzent üben im Notizbuch, den Texten der Bibliothek und der Textansicht: der Akzent jedes Worts gezeichnet, die Aufnahme, die Tonhöhenkurve über dem erwarteten Akzent, eine Bewertung pro Wort und lange Pausen | Automatisch, mit einer synthetischen Stimme |
 | Die Tonhöhe der Stimme im Browser gemessen (YIN), die Moren anhand der Stimme und der Transkription verortet und wo die Tonhöhe in jedem Wort fällt, auch bei verzögertem Gipfel und entstimmten Moren | Automatisch; abgestimmt mit Minimalpaaren (箸, 橋 und 端; 雨 und 飴), gelesen von einer synthetischen Stimme, und mit einer echten Aufnahme |
 | Besondere Moren in der Übung, mit narabas: ein fehlendes oder überzähliges っ, ん oder langer Vokal, mit markierter Mora; der Download des Modells mit seiner SHA-256 geprüft, die GPU nur, wenn sie wie der Prozessor rechnet, und keine Bewertung für ein っ vor einem Reibelaut, für anders gesprochene Phrasen oder für Zögerer am Wortende | Automatisch, mit einer synthetischen Stimme; gemessen mit Minimalpaaren (おばあさん und おばさん, きって und きて…), gesprochen von zwei synthetischen Stimmen: 17 von 22 fehlenden Moren und 10 von 10 überzähligen, ohne Hinweise bei 22 von 24 richtig gesprochenen Sätzen |
-| Lesehilfe: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
+| Bibliothek: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
 | Betrachter für Seitenbücher: EPUB aus Bildern, CBZ und PDF in einem eigenen Tab, mit Zoom, Anpassung an Breite oder Seite, Einzelseite, Doppelseite und fortlaufendem Bildlauf | Automatisch |
 | Bilderordner als Bücher: Jeder Ordner, oder jeder Band darin, wird ein Buch, mit der Titelseite vorn, einem Inhaltsverzeichnis nach Kapiteln und querformatigen Doppelseiten für sich | Automatisch, und mit 40 echten Manga-Bänden |
 | Sammlungen im Regal: eine Reihe mit ihren Bänden oder ein Thema, mit Art, Beschreibung und Titelbild; ein Ordner mit mehreren Bänden kommt als Sammlung herein, und ein neuer Band kommt in seine | Automatisch |

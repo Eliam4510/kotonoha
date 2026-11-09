@@ -1,4 +1,4 @@
-// Lector de ZIP por partes, para los EPUB y los CBZ de la Ayuda de lectura. Lee el índice central del final del archivo y
+// Lector de ZIP por partes, para los EPUB y los CBZ de la Biblioteca. Lee el índice central del final del archivo y
 // luego solo la entrada que se pide: un libro de cientos de MB no tiene que estar entero en memoria para enseñar una
 // página. Admite ZIP64, los nombres en UTF-8 y los antiguos en Shift_JIS, y las entradas guardadas o comprimidas.
 

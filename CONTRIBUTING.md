@@ -45,7 +45,7 @@ Después se carga la carpeta `dist` como extensión descomprimida, en `chrome://
 | `src/lenguas` | Un paquete por lengua de estudio (japonés, inglés, alemán): su analizador, sus diccionarios y sus instrucciones a Claude |
 | `src/motor` | El motor en un documento offscreen: base de datos, diccionarios, Claude, Whisper y grabación |
 | `src/contenido` | Lo que va sobre las páginas: el reproductor de subtítulos y el lector de páginas |
-| `src/app`, `src/visor`, `src/libro` | La ventana de la aplicación, el visor de la Ayuda de lectura y la página de los EPUB de texto |
+| `src/app`, `src/visor`, `src/libro` | La ventana de la aplicación, el visor de la Biblioteca y la página de los EPUB de texto |
 | `idiomas` | Los textos de la interfaz en cada idioma |
 | `docs` | La guía, las funciones, la arquitectura y los costos, en seis idiomas |
 
@@ -204,7 +204,7 @@ Then load the `dist` folder as an unpacked extension in `chrome://extensions` or
 | `src/lenguas` | One package per study language (Japanese, English, German): its analyzer, dictionaries and instructions to Claude |
 | `src/motor` | The engine in an offscreen document: database, dictionaries, Claude, Whisper and recording |
 | `src/contenido` | What runs on pages: the subtitle player and the page reader |
-| `src/app`, `src/visor`, `src/libro` | The app window, the Reading assistant viewer and the text EPUB page |
+| `src/app`, `src/visor`, `src/libro` | The app window, the Library viewer and the text EPUB page |
 | `idiomas` | The interface texts in each language |
 | `docs` | The guide, features, architecture and costs, in six languages |
 

@@ -1,4 +1,4 @@
-// Las horas de inmersión al leer: el visor de la Ayuda de lectura, el Portapapeles y los textos de la biblioteca cuentan
+// Las horas de inmersión al leer: los libros y textos de la Biblioteca y el Cuaderno cuentan
 // el tiempo con la página a la vista y algo hecho en ella en los últimos minutos.
 
 import { useEffect } from 'preact/hooks';

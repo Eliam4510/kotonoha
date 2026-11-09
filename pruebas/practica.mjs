@@ -1,5 +1,5 @@
 // Prueba la práctica del acento tonal con un micrófono falso que lee una frase con una voz del sistema: abrir la práctica
-// desde la barra de la Ayuda de lectura, ver el acento esperado de cada palabra, grabar, y ver la curva del tono sobre la
+// desde la barra de la Biblioteca, ver el acento esperado de cada palabra, grabar, y ver la curva del tono sobre la
 // esperada con un veredicto por palabra. Después, que la práctica sigue a la frase en curso, que consultar una palabra la
 // cierra y que en inglés no aparece. No gasta nada y no descarga nada: el perfil ya tiene el modelo de voz. El perfil no
 // tiene el diccionario de acento: la prueba pone el de las palabras de la frase y lo quita al acabar.

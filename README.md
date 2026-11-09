@@ -86,7 +86,7 @@ En noticias, blogs, wikis o en un chat como el de Claude, el texto japonés reci
 
 <img src="docs/img/libro-texto.png" alt="Novela japonesa en vertical, con ruby, colores y la ficha de una palabra" width="100%">
 
-La **Ayuda de lectura** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras. La estantería agrupa los libros en colecciones, como una serie con sus tomos, con su portada y una descripción, y muestra cuánto se ha leído de cada libro y de cada colección. En el visor se marcan páginas, se resalta o subraya el texto con un comentario y se dejan notas sobre la página, como en un lector de PDF. Se busca una palabra en todo el libro, cada página se puede leer como texto, con la ayuda de lectura, y Claude puede revisar el texto que leyó el OCR comparándolo con la imagen de la página.
+La **Biblioteca** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras. La estantería agrupa los libros en colecciones, como una serie con sus tomos, con su portada y una descripción, y muestra cuánto se ha leído de cada libro y de cada colección. En el visor se marcan páginas, se resalta o subraya el texto con un comentario y se dejan notas sobre la página, como en un lector de PDF. Se busca una palabra en todo el libro, cada página se puede leer como texto, con la ayuda de lectura, y Claude puede revisar el texto que leyó el OCR comparándolo con la imagen de la página.
 
 <img src="docs/img/ocr.png" alt="Página escaneada con su texto reconocido y el panel de la línea con la ficha de 週末" width="100%">
 
@@ -163,7 +163,7 @@ Kotonoha funciona sin ninguna clave. La de Claude, opcional, añade lo que neces
 |---|---|
 | Subtítulos con furigana, acento y estado de cada palabra | El sentido de una palabra en su frase |
 | Diccionario, ficha, orden de trazos y pronunciación | Explicaciones de palabras, frases y gramática |
-| Lector de páginas web, Cuaderno y Ayuda de lectura con OCR | Traducción y corrección de subtítulos |
+| Lector de páginas web, Cuaderno y Biblioteca con OCR | Traducción y corrección de subtítulos |
 | Transcripción de audio en el propio equipo | Revisión de las lecturas del furigana |
 | Tarjetas para Anki y repaso integrado | Relatos a la medida del nivel |
 

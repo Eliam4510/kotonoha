@@ -84,6 +84,13 @@ button.chip-gram:active { transform: scale(0.96); }
   .etiqueta-frec { padding: 0 8px; margin-right: 0; }
   .ficha-palabra { font-size: 30px; }
 }
+/* Más estrecho todavía, como el panel de una línea en el visor: en español los cuatro estados no cabían y el último se
+   salía sobre el botón de al lado. Sin el punto, que en el activo ya dice su fondo de color. */
+@container (max-width: 390px) {
+  .estados { grid-template-columns: repeat(4, minmax(0, auto)); gap: 1px; }
+  .estado { gap: 0; min-width: 0; padding: 0 4px; font-size: 10.5px; overflow: hidden; }
+  .estado > i { display: none; }
+}
 
 .ficha-cab { flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 4px 18px; }
 .esq-palabra { width: 46%; height: 34px; }

@@ -122,7 +122,7 @@ async function abrirLectorWeb(junto = false): Promise<void> {
   await enfocar(await chrome.tabs.create({ url, windowId: ventana.id }));
 }
 
-/** El visor de la Ayuda de lectura, en una pestaña normal: para leer a pantalla completa o en vista dividida. */
+/** El visor de la Biblioteca, en una pestaña normal: para leer a pantalla completa o en vista dividida. */
 async function abrirVisor(id: string): Promise<void> {
   const url = chrome.runtime.getURL(`visor.html#${encodeURIComponent(id)}`);
   const ventana = await chrome.windows.getLastFocused({ windowTypes: ['normal'] }).catch(() => null);

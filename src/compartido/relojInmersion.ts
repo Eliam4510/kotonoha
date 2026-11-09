@@ -1,6 +1,6 @@
 // El reloj de las horas de inmersión. Cada pocos segundos mira si se está escuchando o leyendo la lengua que se
 // estudia, y lo sumado lo manda al motor cada minuto, al cambiar de video o de libro y al ocultar la página. Lo usan el
-// controlador de los videos (también los archivos propios), el visor de la Ayuda de lectura y el Portapapeles.
+// controlador de los videos (también los archivos propios), el visor de la Biblioteca y el Portapapeles.
 
 import { pasoDeReloj, type TipoInmersion } from '../nucleo/inmersion';
 import { motor } from './rpc';

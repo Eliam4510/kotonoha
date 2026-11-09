@@ -93,7 +93,7 @@ async function medirConNavegador(blob: Blob): Promise<Tamano> {
 export async function paginadorDeZip(archivo: Blob, nombre: string, porDefecto: Direccion): Promise<Paginador> {
   const f = fuenteDeArchivo(archivo);
   const { libro, indice } = await leerLibro(f, nombre, porDefecto);
-  if (!libro) throw new Error(tr('Este EPUB es de texto: se lee desde la Ayuda de lectura, como texto.'));
+  if (!libro) throw new Error(tr('Este EPUB es de texto: se lee desde la Biblioteca, como texto.'));
   const cache = new CachePaginas();
   const tamanos = new Map<number, Tamano>();
   return {

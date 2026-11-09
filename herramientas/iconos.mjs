@@ -21,7 +21,7 @@ export const CATALOGO = {
   portapapeles: 'clipboard-text',
   libro: 'book-open-text',
   biblioteca: 'books',
-  // El visor de la Ayuda de lectura
+  // El visor de la Biblioteca
   'pantalla-completa': 'arrows-out',
   'salir-pantalla': 'arrows-in',
   'una-pagina': 'file',

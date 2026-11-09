@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.27.6, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.27.7, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -118,10 +118,10 @@ Estado de cada función en la versión 0.27.6, con la forma en que se ha verific
 | Lectura en voz alta con velocidad (0,6× a 1,2×) y modo (seguido, frase a frase o repitiendo la frase); escuchar o practicar cualquier trozo seleccionado, sin su furigana | Automática |
 | Los modelos de voz se cargan mientras se graba (dictado y práctica): la segunda grabación de la práctica se analiza en 0,2 s, y el dictado se transcribe un segundo después de terminar | Automática, en la GPU del equipo de desarrollo |
 | La grabación de cada dictado encima de su párrafo, para volver a oírla; va con el texto a la biblioteca, y la que ningún texto usa se borra pasada una semana | Automática |
-| Practicar el acento tonal en el Cuaderno, los textos de la Ayuda de lectura y la vista de texto: el acento de cada palabra dibujado, la grabación, la curva del tono sobre el acento esperado, un veredicto por palabra y las pausas largas | Automática, con una voz sintética |
+| Practicar el acento tonal en el Cuaderno, los textos de la Biblioteca y la vista de texto: el acento de cada palabra dibujado, la grabación, la curva del tono sobre el acento esperado, un veredicto por palabra y las pausas largas | Automática, con una voz sintética |
 | El tono de la voz medido en el navegador (YIN), las moras situadas con la voz y la transcripción, y dónde cae el tono en cada palabra, también con el pico retrasado y las moras ensordecidas | Automática; ajustado con pares mínimos (箸, 橋 y 端; 雨 y 飴) leídos por una voz sintética y con una grabación real |
 | Las moras especiales en la práctica, con narabas: la っ, la ん y la vocal larga que faltan o sobran, con la mora marcada; la descarga del modelo comprobada con su SHA-256, la GPU solo si calcula como el procesador, y sin juzgar la っ delante de fricativa, las frases dichas de otra manera ni los titubeos al final de una palabra | Automática, con una voz sintética; medido con pares mínimos (おばあさん y おばさん, きって y きて…) dichos por dos voces sintéticas: 17 de 22 moras que faltaban y 10 de 10 de más, sin avisos en 22 de 24 frases bien dichas |
-| Ayuda de lectura: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
+| Biblioteca: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
 | Carpetas de imágenes como libros: cada carpeta, o cada tomo dentro de ella, entra como un libro, con la portada delante, el índice por capítulos y las dobles páginas apaisadas solas | Automática, y con 40 tomos reales de manga |
 | Colecciones en la estantería: una serie con sus tomos o un tema, con su tipo, su descripción y su portada; una carpeta con varios tomos entra ya como una colección, y un tomo nuevo se añade a la suya | Automática |

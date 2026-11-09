@@ -1,4 +1,4 @@
-// La Ayuda de lectura: la estantería con los libros, textos y relatos, sus colecciones, lo que se importa a ella y la
+// La Biblioteca: la estantería con los libros, textos y relatos, sus colecciones, lo que se importa a ella y la
 // lectura de los textos por páginas. Los libros de páginas se leen en el visor, en su propia pestaña, que guarda por dónde
 // se va; aquí se ve cuánto se lleva de cada uno y de cada colección.
 
@@ -875,7 +875,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
           titulo={abierto.titulo}
           inicioBarra={
             <>
-              <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Ayuda de lectura')}</button>
+              <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Biblioteca')}</button>
               <b class="ap-lectura-titulo" lang={lengua.value.id}>{abierto.titulo}</b>
               <button class="btn chico fantasma" onClick={() => void abrirEnCuaderno(abierto)}><Icono n="lapiz" t={14} /> {tr('Editar en el Cuaderno')}</button>
             </>
@@ -997,7 +997,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
     const tipo = TIPOS.find((t) => t.id === vista.tipo);
     return (
       <div class={`ap-lienzo ap-biblioteca ap-vista-coleccion ${arrastrando ? 'arrastrando' : ''}`} {...soltar(vista.id)}>
-        <button class="btn chico fantasma ap-volver" onClick={() => navegar('biblioteca')}><Icono n="flecha-izq" t={15} /> {tr('Ayuda de lectura')}</button>
+        <button class="btn chico fantasma ap-volver" onClick={() => navegar('biblioteca')}><Icono n="flecha-izq" t={15} /> {tr('Biblioteca')}</button>
         <header class="ap-coleccion-cab">
           <div class="ap-pila ap-coleccion-tapa">
             <TapaColeccion c={vista} portada={r.portada} total={total} fraccion={r.fraccion} />
@@ -1059,7 +1059,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
   const leyendo = enCurso(lista, avance, 3);
   return (
     <div class="ap-lienzo ap-biblioteca" {...soltar()}>
-      <Cabecera titulo={tr('Ayuda de lectura')} sub={tr('Tus libros, textos y subtítulos, listos para leer con diccionario y Claude.')} />
+      <Cabecera titulo={tr('Biblioteca')} sub={tr('Tus libros, textos y subtítulos, listos para leer con diccionario y Claude.')} />
 
       <div class="ap-biblioteca-entrada">
         <div class="ap-entrada-libros">

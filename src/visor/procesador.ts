@@ -1,4 +1,4 @@
-// Leer un libro entero con el OCR por adelantado, desde la Ayuda de lectura: al abrirlo después, el texto de cada página
+// Leer un libro entero con el OCR por adelantado, desde la Biblioteca: al abrirlo después, el texto de cada página
 // ya está y no hay que esperar. Usa el mismo lector y la misma base que el visor, así que lo que lee uno lo aprovecha el
 // otro, y lo que ya estaba leído no se vuelve a leer: pausar y seguir más tarde no pierde nada.
 
@@ -35,7 +35,7 @@ export async function procesarLibro(e: ElementoBiblioteca, lector: LectorOcr, al
   const d = e.documento;
   if (!d || d.texto) return true;
   const archivo = await archivoDocumento(e.id);
-  if (!archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Ayuda de lectura.'));
+  if (!archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Biblioteca.'));
   const p: Paginador = d.formato === 'pdf' ? await paginadorDePdf(archivo) : await paginadorDeZip(archivo, `${e.titulo}.${d.formato}`, d.direccion);
   const modo = modoDe(d);
   const textoPdf = d.ocr?.textoPdf ?? true;

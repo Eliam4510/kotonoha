@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.7 · 2026-11-09
+
+- **La Ayuda de lectura se llama ahora Biblioteca.** Es el nombre que ya usaban el Cuaderno («Guardar en la biblioteca») y las copias de seguridad. Cambia en la barra lateral, el menú de la extensión, el visor y los mensajes, en los seis idiomas de la interfaz, en la documentación y en sus imágenes.
+- **Los estados de una palabra caben en el panel del visor.** En el panel estrecho de una línea, «Ignorada» se salía y tapaba el botón de al lado.
+
 ## 0.27.6 · 2026-11-09
 
 - **〜ので, solo cuando es «porque».** 「どうしたのですか」, 「〜のでしょう」, 「〜のである」 o 「〜のではないか」 llevan el の explicativo, no 〜ので, y salían marcados: en la novela de la revisión eran 185 de 311 detecciones. Tampoco 「のには」 es 〜のに.
@@ -222,6 +227,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.7 · 2026-11-09
+
+- **The Reading assistant is now called Library.** It is the name the Notebook (“Save to the library”) and backups already used. It changes in the sidebar, the extension menu, the viewer and the messages, in all six interface languages, in the documentation and in its images.
+- **A word's states fit in the viewer panel.** In the narrow panel of a line, “Ignored” spilled over the button next to it.
 
 ## 0.27.6 · 2026-11-09
 
