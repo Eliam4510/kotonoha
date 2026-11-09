@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.19.0 · 2026-11-09
+
+- **Moras especiales en la práctica del acento.** Con **Comprobar también っ, ん y vocales largas**, la práctica dice si en la grabación falta o sobra una っ (きて por きって), una ん (かじ por かんじ) o una vocal larga (おばさん por おばあさん), y marca la mora en el acento esperado. Lo oye en el equipo narabas, un modelo de fonemas del japonés que se descarga la primera vez (1,26 GB), se comprueba con su SHA-256 y va en la GPU solo si calcula igual que el procesador. Medido con pares mínimos dichos por dos voces sintéticas: vio 17 de 22 moras que faltaban y 10 de 10 de más, y no avisó de nada en 22 de 24 frases bien dichas.
+
 ## 0.18.0 · 2026-11-09
 
 - **Cómics en inglés y alemán.** En el visor, el modo **Cómic** lee cada globo con el reconocedor de libros, en el orden de las viñetas y de izquierda a derecha; antes, el modo Manga solo sabía japonés. Medido: un 0,4 % de error por carácter en páginas de prueba en los dos idiomas y un 12 % en una página real de 1922 rotulada a mano.
@@ -151,6 +155,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.19.0 · 2026-11-09
+
+- **Special morae in pitch accent practice.** With **Also check っ, ん and long vowels**, the practice says whether a っ (きて for きって), a ん (かじ for かんじ) or a long vowel (おばさん for おばあさん) is missing or extra in the recording, and highlights the mora in the expected accent. It is heard on your computer by narabas, a Japanese phoneme model downloaded the first time (1.26 GB), checked against its SHA-256 and run on the GPU only if it calculates the same as the processor. Measured with minimal pairs said by two synthetic voices: it caught 17 of 22 missing morae and 10 of 10 extra ones, and gave no warning on 22 of 24 sentences said correctly.
 
 ## 0.18.0 · 2026-11-09
 

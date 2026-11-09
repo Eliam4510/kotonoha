@@ -98,7 +98,7 @@ Die **Zwischenablage** sammelt, was irgendwo kopiert wird, und zeigt es mit Abs�
 
 <img src="docs/img/practica.de.png" alt="Akzentübung: die Tonhöhenkurve der Stimme über dem erwarteten Akzent jedes Worts" width="100%">
 
-**Üben** zeigt den Akzent jedes Worts im Satz. Man liest ihn laut vor, und Kotonoha legt die Tonhöhenkurve der Stimme über die erwartete, sagt, bei welchen Wörtern die Tonhöhe an der falschen Stelle fällt, und zeigt lange Pausen an. Die Tonhöhe wird im Browser gemessen und die Aufnahme auf dem Rechner transkribiert, ohne ihn zu verlassen. Sind AivisSpeech oder VOICEVOX geöffnet, liest die Modellstimme jeden Satz mit dem Akzent aus dem Wörterbuch, kostenlos und ebenfalls ohne den Rechner zu verlassen.
+**Üben** zeigt den Akzent jedes Worts im Satz. Man liest ihn laut vor, und Kotonoha legt die Tonhöhenkurve der Stimme über die erwartete, sagt, bei welchen Wörtern die Tonhöhe an der falschen Stelle fällt, zeigt lange Pausen an und auf Wunsch auch fehlende oder überzählige っ, ん und lange Vokale. Die Tonhöhe wird im Browser gemessen und die Aufnahme auf dem Rechner transkribiert, ohne ihn zu verlassen. Sind AivisSpeech oder VOICEVOX geöffnet, liest die Modellstimme jeden Satz mit dem Akzent aus dem Wörterbuch, kostenlos und ebenfalls ohne den Rechner zu verlassen.
 
 ### Wie jedes Kanji geschrieben wird
 

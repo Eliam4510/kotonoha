@@ -3,10 +3,12 @@
 // el equipo: el tono se mide aquí mismo (nucleo/tono.ts) y la transcripción la hace el modelo de voz en el motor.
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { type Ajustes, hayVozSintetica } from '../compartido/ajustes';
+import { type Ajustes, guardarAjustes, hayVozSintetica } from '../compartido/ajustes';
 import { numero, tm, tr } from '../compartido/i18n';
 import { type FlujoCancelable, flujoMotor, lectorJson, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
+import type { TextosMoras } from '../lenguas/tipos';
+import { type MoraEspecialOida, morasEspecialesOidas } from '../nucleo/alineacion';
 import { minutosYSegundos } from '../nucleo/dictado';
 import {
   type FraseAcentual,
@@ -28,6 +30,7 @@ import { lengua } from '../ui/lengua';
 import { decirConNavegador } from '../ui/vozNavegador';
 import { navegar } from './estadoApp';
 import { abrirPermisosMicrofono, empezarGrabacion, errorDeMicrofono, type Grabadora, type GrabacionHecha } from './grabadora';
+import { Interruptor } from './Piezas';
 
 /** Una frase se lee en unos segundos: la grabación se termina sola a los veinte. */
 const MAXIMO_MS = 20_000;
@@ -45,6 +48,8 @@ interface Resultado {
   desde: number;
   hasta: number;
   audio: Blob;
+  /** Las っ, ん y vocales largas que faltan o sobran, si se comprobaron con narabas; o por qué no se pudo. */
+  moras?: { errores: MoraEspecialOida[]; especiales: number; juzgadas: number } | { error: string };
 }
 
 type Estado =
@@ -90,10 +95,70 @@ function explicacion(f: FraseAcentual, j: Juicio): string {
   }
 }
 
-/** Mide el tono de la grabación, la transcribe y juzga cada frase acentual. */
+/** Dónde va una mora de entre todas las de la frase: en qué frase acentual y en qué lugar de ella. */
+function moraEnFrase(frases: FraseAcentual[], mora: number): { frase: FraseAcentual; i: number } | null {
+  let base = 0;
+  for (const frase of frases) {
+    if (mora < base + frase.moras.length) return { frase, i: mora - base };
+    base += frase.moras.length;
+  }
+  return null;
+}
+
+/** Qué mora falta o sobra, dicho con las de alrededor dentro de su palabra: «きょう», «きって», «かんじ». */
+function explicacionMora(e: MoraEspecialOida, frases: FraseAcentual[], textos: TextosMoras): string {
+  const sitio = moraEnFrase(frases, e.mora);
+  if (!sitio) return '';
+  const { frase, i } = sitio;
+  const alrededor = frase.moras.slice(Math.max(0, i - 1), e.error === 'falta' && e.tipo === 'larga' ? i + 1 : i + 2).join('');
+  return tr((e.error === 'falta' ? textos.falta : textos.sobra)[e.tipo], alrededor);
+}
+
+/**
+ * Las っ, ん y vocales largas que faltan o sobran: narabas oye los fonemas en el motor y se comparan con la lectura. Un
+ * fallo (sin conexión para la descarga, por ejemplo) no estropea el resto del resultado.
+ */
+async function comprobarMoras(
+  url: string,
+  frases: FraseAcentual[],
+  alPaso: (texto: string) => void,
+  alFlujo: (f: FlujoCancelable) => void
+): Promise<Resultado['moras']> {
+  const paquete = lengua.value.acento?.practica?.moras;
+  if (!paquete) return undefined;
+  const porMora = frases.flatMap((f) => paquete.fonemas(f));
+  const especiales = paquete.especiales(porMora);
+  alPaso(tr('Comprobando las moras…'));
+  let oidos: string[];
+  try {
+    const f = flujoMotor(
+      'oirFonemas',
+      [url],
+      lectorJson<{ tipo: string; porcentaje?: number }>((e) => {
+        if (e.tipo === 'descarga') alPaso(tr('Descargando el modelo de las moras: {0} %', e.porcentaje ?? 0));
+        else if (e.tipo === 'comprobando') alPaso(tr('Comprobando la descarga…'));
+        else if (e.tipo === 'preparando') alPaso(tr('Preparando el modelo de las moras…'));
+        else if (e.tipo === 'procesando') alPaso(tr('Comprobando las moras…'));
+      })
+    );
+    alFlujo(f);
+    oidos = JSON.parse((await f) || '[]');
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : String(e) };
+  }
+  if (!oidos.length) return { error: tr('No se oyó voz en la grabación.') };
+  // Cada frase se juzga por lo que se oye de ella: no se filtra por la transcripción, que justo cuando falta una mora
+  // entiende otra palabra (おばさん por おばあさん).
+  const fraseDeMora = frases.flatMap((f, i) => f.moras.map(() => i));
+  const { errores, juzgadas } = morasEspecialesOidas(porMora, especiales, oidos, fraseDeMora);
+  return { errores, especiales: especiales.filter(Boolean).length, juzgadas };
+}
+
+/** Mide el tono de la grabación, la transcribe y juzga cada frase acentual; con `moras`, también sus moras especiales. */
 async function analizar(
   g: GrabacionHecha,
   frases: FraseAcentual[],
+  moras: boolean,
   alPaso: (texto: string) => void,
   alFlujo: (f: FlujoCancelable) => void,
   vigente: () => boolean
@@ -106,7 +171,6 @@ async function analizar(
   const finVoz = sonoros[sonoros.length - 1].t + 0.05;
 
   const url = URL.createObjectURL(g.audio);
-  let tokens: { texto: string; t: number }[];
   try {
     const f = flujoMotor(
       'transcribirPractica',
@@ -120,32 +184,40 @@ async function analizar(
     alFlujo(f);
     const texto = await f;
     if (!vigente()) return null;
-    tokens = JSON.parse(texto || '[]');
+    const tokens: { texto: string; t: number }[] = JSON.parse(texto || '[]');
+
+    const reconocido = tokens.map((t) => t.texto).join('');
+    if (!reconocido.trim()) throw new Error(tr('No se reconoció nada en la grabación. Prueba a leer más alto o más cerca del micrófono.'));
+    const palabras = (await motor.analizarTexto(reconocido, { expresiones: false })).flat();
+    const crudos = tramosDeFrases(frases, kanaConTiempo(tokens, palabras, finVoz), finVoz);
+    if (!crudos) throw new Error(tr('En la grabación no se reconoce esta frase. Escúchala y vuelve a probar.'));
+    const tramos = tramosConVoz(frases, crudos, curva);
+    const referencia = referenciaDeVoz(curva);
+    const { juicios } = juzgarFrases(frases, tramos, curva, referencia);
+    const desde = Math.max(0, Math.min(sonoros[0].t, ...tramos.filter((t) => t.fin > t.inicio).map((t) => t.inicio)) - 0.1);
+    const hasta = Math.max(finVoz, ...tramos.map((t) => t.fin)) + 0.1;
+    const especiales = moras ? await comprobarMoras(url, frases, alPaso, alFlujo) : undefined;
+    if (!vigente()) return null;
+    return { curva, referencia, tramos, juicios, pausas: pausasLargas(curva, tramos, frases), desde, hasta, audio: g.audio, moras: especiales };
   } finally {
     URL.revokeObjectURL(url);
   }
-
-  const reconocido = tokens.map((t) => t.texto).join('');
-  if (!reconocido.trim()) throw new Error(tr('No se reconoció nada en la grabación. Prueba a leer más alto o más cerca del micrófono.'));
-  const palabras = (await motor.analizarTexto(reconocido, { expresiones: false })).flat();
-  const crudos = tramosDeFrases(frases, kanaConTiempo(tokens, palabras, finVoz), finVoz);
-  if (!crudos) throw new Error(tr('En la grabación no se reconoce esta frase. Escúchala y vuelve a probar.'));
-  const tramos = tramosConVoz(frases, crudos, curva);
-  const referencia = referenciaDeVoz(curva);
-  const { juicios } = juzgarFrases(frases, tramos, curva, referencia);
-  const desde = Math.max(0, Math.min(sonoros[0].t, ...tramos.filter((t) => t.fin > t.inicio).map((t) => t.inicio)) - 0.1);
-  const hasta = Math.max(finVoz, ...tramos.map((t) => t.fin)) + 0.1;
-  return { curva, referencia, tramos, juicios, pausas: pausasLargas(curva, tramos, frases), desde, hasta, audio: g.audio };
 }
 
-/** El acento esperado de cada palabra: una línea sobre sus moras, alta o baja, que cae donde está el núcleo. */
-function AcentoEsperado({ frases }: { frases: FraseAcentual[] }) {
+/**
+ * El acento esperado de cada palabra: una línea sobre sus moras, alta o baja, que cae donde está el núcleo. `marcadas` son
+ * las moras (contadas en toda la frase) donde falta o sobra una っ, una ん o una vocal larga.
+ */
+function AcentoEsperado({ frases, marcadas }: { frases: FraseAcentual[]; marcadas?: Set<number> }) {
   const ANCHO = 22;
+  let base = 0;
   return (
     <div class="ap-practica-acento" lang="ja">
       {frases.map((f, i) => {
         const tonos = f.nucleos ? tonosEsperados(f.moras.length, f.nucleos[0]) : null;
         const puntos = tonos?.map((t, j) => `${j * ANCHO + ANCHO / 2},${t === 'alto' ? 5 : 17}`).join(' ');
+        const desde = base;
+        base += f.moras.length;
         return (
           <span key={i} class={`ap-practica-palabra ${tonos ? '' : 'sin-acento'}`} title={tonos ? undefined : tr('Sin juzgar: no se sabe su acento en esta forma.')}>
             <svg width={f.moras.length * ANCHO} height="22" viewBox={`0 0 ${f.moras.length * ANCHO} 22`} aria-hidden="true">
@@ -154,7 +226,7 @@ function AcentoEsperado({ frases }: { frases: FraseAcentual[] }) {
             </svg>
             <span class="ap-practica-moras">
               {f.moras.map((m, j) => (
-                <span key={j} style={{ width: `${ANCHO}px` }}>{m}</span>
+                <span key={j} class={marcadas?.has(desde + j) ? 'revisar' : undefined} style={{ width: `${ANCHO}px` }}>{m}</span>
               ))}
             </span>
           </span>
@@ -264,6 +336,14 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
   const vivo = useRef(true);
   const intento = useRef(0);
   const [sinDiccionario, fijarSinDiccionario] = useState(false);
+  // Las moras especiales se comprueban con narabas si la lengua sabe sus fonemas y se ha pedido: la primera vez descarga 1,26 GB.
+  const textosMoras = lengua.value.acento?.practica?.moras?.textos;
+  const sabeMoras = !!textosMoras;
+  const [moras, fijarMoras] = useState(ajustes.practicaMoras);
+  const cambiarMoras = (v: boolean) => {
+    fijarMoras(v);
+    guardarAjustes({ practicaMoras: v }).catch(() => {});
+  };
 
   useEffect(() => {
     vivo.current = true;
@@ -302,7 +382,7 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
     const vigente = () => vivo.current && intento.current === este;
     fijar({ fase: 'analizando', paso: tr('Midiendo el tono…') });
     try {
-      const r = await analizar(hecha, frases, (paso) => vigente() && fijar({ fase: 'analizando', paso }), (f) => (flujo.current = f), vigente);
+      const r = await analizar(hecha, frases, sabeMoras && moras, (paso) => vigente() && fijar({ fase: 'analizando', paso }), (f) => (flujo.current = f), vigente);
       if (r && vigente()) fijar({ fase: 'resultado', r });
     } catch (e) {
       if (vigente()) fijar({ fase: 'error', mensaje: e instanceof Error ? e.message : String(e) });
@@ -377,6 +457,8 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
   const r = estado.fase === 'resultado' ? estado.r : null;
   const juzgadas = r ? r.juicios.filter((j) => j.veredicto === 'bien' || j.veredicto === 'revisar') : [];
   const bien = juzgadas.filter((j) => j.veredicto === 'bien').length;
+  const erroresMoras = r?.moras && 'errores' in r.moras ? r.moras.errores : [];
+  const marcadas = erroresMoras.length ? new Set(erroresMoras.map((e) => e.mora)) : undefined;
 
   return (
     <div class="ap-practica">
@@ -385,7 +467,7 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
         <button class="btn-icono chico" aria-label={tr('Cerrar la práctica')} onClick={alCerrar}><Icono n="cerrar" t={15} /></button>
       </div>
       <p class="ap-practica-frase-texto" lang="ja">{frase}</p>
-      {frases.length ? <AcentoEsperado frases={frases} /> : <p class="ayuda">{tr('Esta frase no tiene palabras que practicar.')}</p>}
+      {frases.length ? <AcentoEsperado frases={frases} marcadas={marcadas} /> : <p class="ayuda">{tr('Esta frase no tiene palabras que practicar.')}</p>}
       {sinDiccionario && aviso && (
         <div class="ap-practica-aviso" role="note">
           <Icono n="info" t={15} />
@@ -394,7 +476,12 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
         </div>
       )}
 
-      {estado.fase === 'listo' && <p class="ayuda">{tr('Escúchala, pulsa Grabar y léela en voz alta. Kotonoha mira dónde cae el tono en cada palabra.')}</p>}
+      {estado.fase === 'listo' && (
+        <p class="ayuda">
+          {tr('Escúchala, pulsa Grabar y léela en voz alta. Kotonoha mira dónde cae el tono en cada palabra.')}
+          {textosMoras && moras && ` ${tr(textosMoras.ayuda)}`}
+        </p>
+      )}
 
       <div class="ap-practica-botones">
         {estado.fase === 'grabando' ? (
@@ -421,6 +508,16 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
           </>
         )}
       </div>
+
+      {textosMoras && (
+        <div class="ap-practica-opcion">
+          <Interruptor etiqueta={tr(textosMoras.opcion)} on={moras} alCambiar={cambiarMoras} />
+          <span>
+            <b>{tr(textosMoras.opcion)}</b>
+            <span class="ayuda">{tr(textosMoras.ayudaOpcion, numero(1.26))}</span>
+          </span>
+        </div>
+      )}
 
       {estado.fase === 'error' && (
         <div class="ap-dictado error" role="alert">
@@ -452,6 +549,33 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
                 <span>{tr('{0} s entre «{1}» y «{2}»: dentro de una frase, mejor seguido.', numero(p.duracion), frases[p.despuesDe].texto, frases[p.antesDe].texto)}</span>
               </li>
             ))}
+            {erroresMoras.map((e, i) => (
+              <li key={`m${i}`}>
+                <span class="ap-veredicto revisar">{tr('Mora')}</span>
+                <span>{textosMoras && explicacionMora(e, frases, textosMoras)}</span>
+              </li>
+            ))}
+            {textosMoras && r.moras && 'errores' in r.moras && !erroresMoras.length && (
+              <li>
+                {r.moras.juzgadas ? (
+                  <>
+                    <span class="ap-veredicto bien">{tr('Moras')}</span>
+                    <span>{tr(r.moras.especiales ? textosMoras.bien : textosMoras.sinEspeciales)}</span>
+                  </>
+                ) : (
+                  <>
+                    <span class="ap-veredicto">{tr('Moras')}</span>
+                    <span>{tr('No se pudieron comprobar: {0}', tr('lo que se oye no se parece a la frase.'))}</span>
+                  </>
+                )}
+              </li>
+            )}
+            {r.moras && 'error' in r.moras && (
+              <li>
+                <span class="ap-veredicto">{tr('Moras')}</span>
+                <span>{tr('No se pudieron comprobar: {0}', r.moras.error)}</span>
+              </li>
+            )}
           </ul>
           <p class="ayuda">{tr('Es una orientación: con frases leídas, la medida automática no acierta siempre. Compara las dos curvas y escucha tu grabación.')}</p>
         </div>

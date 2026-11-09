@@ -4,6 +4,7 @@ import { idiomaActual, tm } from '../../compartido/i18n';
 import type { PaqueteLengua } from '../tipos';
 import { contarEscrituras, esTextoJapones, pareceFrase, proporcionDeKana, SIGNOS_FRASE } from './escritura';
 import { TEXTOS } from './textos';
+import { fonemasDeMoras, morasEspeciales } from './fonemas';
 import { frasesAcentuales } from './practica';
 import { alinearFurigana, kataAHira, lecturaVisible, nombreFlexion, patronAcento, pegarSignos, separarMoras, tieneJapones } from './tokens';
 import { caracteresConTrazos } from './trazos';
@@ -62,6 +63,27 @@ export const JAPONES: PaqueteLengua = {
     moras: separarMoras,
     practica: {
       frases: frasesAcentuales,
+      moras: {
+        fonemas: fonemasDeMoras,
+        especiales: morasEspeciales,
+        textos: {
+          opcion: tm('Comprobar también っ, ん y vocales largas'),
+          ayudaOpcion: tm('Con narabas, un modelo de fonemas del japonés. La primera vez se descargan {0} GB, que quedan guardados en el navegador.'),
+          ayuda: tm('También mira si faltan o sobran っ, ん o vocales largas.'),
+          bien: tm('Ni faltan ni sobran っ, ん o vocales largas.'),
+          sinEspeciales: tm('No se oye ninguna っ, ん o vocal larga de más.'),
+          falta: {
+            larga: tm('En «{0}» la vocal larga se oye corta: dura dos moras.'),
+            sokuon: tm('En «{0}» no se oye la っ: es una pausa breve, del largo de una mora.'),
+            hatsuon: tm('En «{0}» no se oye la ん: es una mora entera.'),
+          },
+          sobra: {
+            larga: tm('En «{0}» se oye una vocal larga que no está: es corta.'),
+            sokuon: tm('En «{0}» se oye una pausa, como una っ, que no está.'),
+            hatsuon: tm('En «{0}» se oye una ん que no está.'),
+          },
+        },
+      },
       sinDiccionario: tm('Sin un diccionario de acento solo se juzgan las formas corteses, como 〜ます. Instala «{0}» en Ajustes, en Diccionarios.'),
     },
     leyenda: [

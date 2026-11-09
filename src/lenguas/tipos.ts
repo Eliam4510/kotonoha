@@ -7,6 +7,7 @@
 
 import type { AjustesLengua, ModoLectura, PromptPersonalizado } from '../compartido/ajustes';
 import type { EntradaDiccionario, FuenteBiblioteca, PalabraToken, ResultadoAudio } from '../compartido/tipos';
+import type { TipoMoraEspecial } from '../nucleo/alineacion';
 import type { FraseAcentual } from '../nucleo/practicaAcento';
 import type { ReglasTranscripcion } from '../nucleo/transcripcion';
 import type { FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
@@ -159,7 +160,30 @@ export interface AcentoLengua {
     frases(palabras: PalabraToken[]): FraseAcentual[];
     /** Lo que se puede juzgar sin el diccionario de acento instalado; `{0}` es el nombre del diccionario. */
     sinDiccionario: string;
+    /**
+     * Las moras especiales, que se acortan o se alargan al hablarla como segunda lengua (っ, ん, la mitad de una vocal larga),
+     * comprobadas con narabas, el modelo de fonemas: los de cada mora de una frase, cuáles son especiales y qué decir.
+     */
+    moras?: {
+      fonemas(frase: { texto: string; moras: string[] }): string[][];
+      especiales(fonemasPorMora: string[][]): (TipoMoraEspecial | null)[];
+      textos: TextosMoras;
+    };
   };
+}
+
+/** Lo que dice la práctica de las moras especiales; en los avisos, `{0}` son las moras de alrededor («きって»). */
+export interface TextosMoras {
+  /** El interruptor que la enciende, y su ayuda: `{0}` es lo que se descarga la primera vez, en GB. */
+  opcion: string;
+  ayudaOpcion: string;
+  /** Lo que se añade a la explicación de la práctica con la comprobación encendida. */
+  ayuda: string;
+  /** Sin avisos: con moras especiales en la frase, y sin ellas. */
+  bien: string;
+  sinEspeciales: string;
+  falta: Record<TipoMoraEspecial, string>;
+  sobra: Record<TipoMoraEspecial, string>;
 }
 
 export interface NivelLengua {

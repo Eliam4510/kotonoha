@@ -94,3 +94,27 @@ export async function borrarArchivosSueltos(): Promise<void> {
   const urls = (await cache.keys()).map((k) => k.url);
   await Promise.all(archivosSueltos(urls).map((u) => cache.delete(u)));
 }
+
+// ---------- El modelo de las moras de la práctica ----------
+
+/**
+ * narabas, el modelo de fonemas del japonés con que la práctica del acento comprueba las moras especiales (っ, ん y vocales
+ * largas). Es el que publica su autor y descarga la propia herramienta narabas (MIT); se comprueba con su SHA-256.
+ */
+export const MODELO_MORAS = {
+  url: 'https://github.com/darashi/narabas-models/releases/download/v0/narabas-v0.onnx',
+  sha256: 'ac9983740343b260e20f3ac72ee37c5f85a86436ff256c5701707f5909c4a126',
+  bytes: 1262530407,
+  cache: 'kotonoha-modelo-moras',
+};
+
+/** Lo que ocupa guardado: 0 si no está. Sin abrir la caché si no existe, que la crearía vacía. */
+export async function bytesModeloMoras(): Promise<number> {
+  if (!(await caches.has(MODELO_MORAS.cache))) return 0;
+  const r = await (await caches.open(MODELO_MORAS.cache)).match(MODELO_MORAS.url);
+  return r ? Number(r.headers.get('content-length') ?? 0) || MODELO_MORAS.bytes : 0;
+}
+
+export async function borrarModeloMoras(): Promise<void> {
+  await caches.delete(MODELO_MORAS.cache);
+}

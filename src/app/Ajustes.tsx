@@ -4,7 +4,7 @@ import type { InfoAyudante, MotorVozLocal } from '../compartido/api';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { AJUSTES_INICIALES, type Ajustes, type AjustesVozLocal, type AjustesVozNeuronal, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, type TareaIA, type Tema } from '../compartido/ajustes';
-import { borrarArchivosSueltos, borrarModeloGuardado, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
+import { borrarArchivosSueltos, borrarModeloGuardado, borrarModeloMoras, bytesModeloMoras, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
 import { mostrarCombinacion, teclaLatina, textoCombinacion } from '../nucleo/teclas';
@@ -613,7 +613,12 @@ function AyudanteLocal() {
 
 function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
   const [guardados, fijarGuardados] = useState<ResumenModelos | null>(null);
-  const releer = () => leerModelosGuardados().then(fijarGuardados).catch(() => {});
+  // narabas, el modelo con que la práctica del acento comprueba las moras: va en su propia caché.
+  const [moras, fijarMoras] = useState(0);
+  const releer = () => {
+    leerModelosGuardados().then(fijarGuardados).catch(() => {});
+    bytesModeloMoras().then(fijarMoras).catch(() => {});
+  };
   useEffect(() => {
     releer();
   }, []);
@@ -649,14 +654,19 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
         </Opcion>
         <AyudanteLocal />
       </div>
-      {guardados && guardados.totalBytes > 0 && (
+      {guardados && guardados.totalBytes + moras > 0 && (
         <>
           <Subtitulo>{tr('Modelos guardados')}</Subtitulo>
           <p class="ayuda ap-subtitulo-ayuda">
             {tr('Se guardan en este navegador: se leen del disco y no se vuelven a descargar. Si borras uno, se descargará de nuevo la próxima vez que lo uses. Desinstalar la extensión también los borra.')}
-            {guardados.modelos.length > 1 && ` ${tr('En total ocupan {0}.', textoTamano(guardados.totalBytes / 1e6))}`}
+            {guardados.modelos.length + (moras ? 1 : 0) > 1 && ` ${tr('En total ocupan {0}.', textoTamano((guardados.totalBytes + moras) / 1e6))}`}
           </p>
           <div class="ap-grupo">
+            {moras > 0 && (
+              <Opcion titulo={tr('narabas, para las moras de la práctica del acento')} ayuda={textoTamano(moras / 1e6)}>
+                <button class="btn chico fantasma" aria-label={`${tr('Borrar')}: narabas`} onClick={() => borrarModeloMoras().then(releer)}><Icono n="basura" t={14} /> {tr('Borrar')}</button>
+              </Opcion>
+            )}
             {guardados.modelos.map(({ id, bytes }) => (
               <Opcion key={id} titulo={tr(MODELOS_WHISPER[id].nombre)} ayuda={textoTamano(bytes / 1e6)}>
                 <button class="btn chico fantasma" aria-label={`${tr('Borrar')}: ${tr(MODELOS_WHISPER[id].nombre)}`} onClick={() => borrarModeloGuardado(id).then(releer)}><Icono n="basura" t={14} /> {tr('Borrar')}</button>

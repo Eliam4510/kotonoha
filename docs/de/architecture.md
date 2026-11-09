@@ -206,6 +206,17 @@ Der Speicher wächst nicht mit der Zeit, und das Tempo bleibt erhalten. Der Graf
 
 **Wiederherstellung.** Das Zerstören des WebGPU-Geräts löst dasselbe Ereignis aus wie ein Treiber-Neustart. Whisper nimmt die Arbeit nach 27 s wieder auf, ohne Transkribiertes zu verlieren oder durcheinanderzubringen, und hält beim zweiten Ausfall mit einem Hinweis an.
 
+### Moren in der Akzentübung
+
+narabas, ein wav2vec2, das alle 20 ms die Wahrscheinlichkeit jedes japanischen Phonems liefert, wurde auf zwei Arten mit Minimalpaaren (おばあさん und おばさん, きって und きて …) getestet, gesprochen von zwei AivisSpeech-Stimmen:
+
+- **Die erwartete Lesung ausrichten**, mit der erzwungenen Ausrichtung von narabas, und messen, wie lange jede besondere Mora dauert. Eine fehlende Mora bekam trotzdem ihr Zeitstück, und die Dauer trennte sie nicht gut von einer gesprochenen. Auch die Tonhöhenbewertung wurde nicht besser: Mit ausgerichteten Moren lag sie nicht öfter richtig als mit gleichmäßig aufgeteilten Wörtern (61 von 76 Bewertungen), daher wird die Tonhöhe wie bisher beurteilt.
+- **Was es selbst hört**, das wahrscheinlichste Phonem jedes Rahmens, verglichen mit der Lesung über die Editierdistanz. Das wird verwendet: Es fand 17 von 22 fehlenden Moren und 10 von 10 überzähligen, ohne Hinweise bei 22 von 24 richtig gesprochenen Sätzen. Ein っ vor s, sh, z, j, h oder f wird nicht beurteilt: Das Modell gibt sein Symbol auch dann nicht aus, wenn es gesprochen wird.
+
+Auf der GPU hört es dasselbe wie ONNX Runtime auf dem Prozessor, Phonem für Phonem. Bevor der Worker sie nutzt, prüft er sie mit einem festen Signal; mit Kokoro lieferte dieselbe GPU unmögliche Werte.
+
+PASQA, ein Modell, das die Aussprache eines ganzen Satzes bewertet, blieb außen vor: Die Umwandlung verlangt bestimmte Versionen von Python, PyTorch und s3prl, und es ließ sich nicht messen.
+
 ### Kosten des Seiten-Readers
 
 Zeit im Haupt-Thread, mit allen Wörtern unbekannt und Furigana bei allen: der schlimmste Fall. Gemessen in Edge bei 1366×860 mit `Performance.getMetrics`, bei bereits geladenem Reader.
