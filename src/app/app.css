@@ -1047,6 +1047,9 @@ section .ap-botones { margin-top: 10px; }
 .ap-web-cuerpo { flex: 1; min-height: 0; display: flex; }
 .ap-web .ap-lienzo { padding: 22px 20px 48px; }
 .ap-web .ap-lectura-ficha { height: calc(100vh - 88px); }
+/* En el Cuaderno de la app, la ficha empieza debajo de su cabecera: con la altura de siempre, su parte de abajo (Enviar al
+   creador) quedaba fuera de la ventana hasta desplazar la página. */
+.ap-app:not(.ap-web) .cu-pagina .ap-lectura-ficha { height: calc(100vh - 100px); }
 @container (max-width: 560px) { .ap-web .ap-papel { padding: 22px 18px 30px; } }
 
 /* ---------- Niveles: el vocabulario, los caracteres y la gramática de cada nivel del examen ---------- */
