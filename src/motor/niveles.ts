@@ -1,7 +1,8 @@
 // Las listas por nivel del examen de la lengua (en japonés, el JLPT), leídas del paquete de la extensión y cruzadas con las
 // palabras guardadas. Las cuentas están en nucleo/niveles.ts.
 
-import type { FraseEjemplo, ListaNivel, ResumenNivel } from '../compartido/tipos';
+import type { CaracterConNivel, FraseEjemplo, ListaNivel, PuntoEncontrado, ResumenNivel } from '../compartido/tipos';
+import { buscarGramatica as buscarEnGramatica } from '../nucleo/explorar';
 import {
   caracteresDelNivel,
   type DatosNivel,
@@ -63,6 +64,21 @@ export async function resumenNiveles(carpeta: string, niveles: string[]): Promis
   return niveles.map((nivel) =>
     resumirNivel(nivel, palabrasDelNivel(l.vocabulario.niveles[nivel] ?? [], mapa), caracteresDelNivel(l.kanji?.niveles[nivel] ?? [], todas), l.gramatica?.niveles[nivel]?.length ?? 0)
   );
+}
+
+/** Los caracteres de una palabra con su nivel, sus lecturas y su glosa, si están en las listas. */
+export async function caracteresConNivel(carpeta: string, caracteres: string[]): Promise<CaracterConNivel[]> {
+  const k = await leer<DatosNivel<FilaCaracter>>(`${carpeta}/kanji.json`).catch(() => null);
+  const mapa = new Map<string, CaracterConNivel>();
+  for (const [nivel, filas] of Object.entries(k?.niveles ?? {})) for (const [caracter, on, kun, glosa] of filas) if (!mapa.has(caracter)) mapa.set(caracter, { caracter, nivel, on, kun, glosa });
+  return caracteres.map((c) => mapa.get(c) ?? { caracter: c, on: '', kun: '', glosa: '' });
+}
+
+/** Los puntos de gramática de las listas que encajan con lo buscado, por su forma o por su significado. */
+export async function buscarGramatica(carpeta: string, texto: string, idioma: string): Promise<PuntoEncontrado[]> {
+  const g = await leer<DatosNivel<FilaGramatica>>(`${carpeta}/gramatica.json`).catch(() => null);
+  const puntos = Object.entries(g?.niveles ?? {}).flatMap(([nivel, filas]) => gramaticaDelNivel(filas).map((x) => ({ nivel, g: x })));
+  return buscarEnGramatica(puntos, texto, idioma);
 }
 
 /**

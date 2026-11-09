@@ -130,6 +130,7 @@ En inglés, la ficha da la pronunciación americana y británica en IPA, encuent
 
 ### Y además
 
+- **Un diccionario para explorar.** Busca por significado («perro» → 犬), encuentra la gramática por su forma o su sentido, enseña los kanji y los homófonos de cada palabra y reúne onomatopeyas, refranes, expresiones de cuatro kanji y más.
 - **Horas de inmersión.** Inicio cuenta el tiempo que escuchas y lees la lengua que estudias, con la racha de días seguidos.
 - **El gasto, a la vista.** La pantalla de inicio muestra lo gastado este mes en Claude, por días, modelos y tareas, con un tope mensual. Nada se paga dos veces: cada respuesta se guarda. El [estudio de costos](docs/costos.md) da cifras medidas.
 - **Repaso integrado.** Con el algoritmo FSRS, para quien no usa Anki.

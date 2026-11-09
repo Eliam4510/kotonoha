@@ -371,7 +371,7 @@ function ConPatron({ texto, trozos }: { texto: string; trozos: string[] }) {
 }
 
 /** Ejemplos reales, de las frases ya vistas, y la explicación de Claude cuando se pide. */
-function DetalleGramatica({ g, idioma }: { g: GramaticaNivel; idioma: string }) {
+export function DetalleGramatica({ g, idioma }: { g: GramaticaNivel; idioma: string }) {
   const [ejemplos, fijarEjemplos] = useState<FraseEjemplo[] | null>(null);
   const trozos = useMemo(() => trozosDePatron(g.patron), [g.patron]);
   const [explicar, fijarExplicar] = useState(false);

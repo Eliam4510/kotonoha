@@ -12,10 +12,13 @@ import type {
   EstadoPalabra,
   FilaPalabra,
   ProgresoInstalacion,
+  PuntoEncontrado,
   ResultadoBusqueda,
   TarjetaMemoria,
 } from '../compartido/tipos';
 import { AvisoVersion } from './AvisoVersion';
+import { CategoriaDiccionario, Explorar, MasDeLaPalabra, ResultadosGramatica, ResultadosSignificado } from './DiccionarioMas';
+import type { EntradaBreve } from '../nucleo/explorar';
 import { SeguirLeyendo } from './Biblioteca';
 import { TarjetaInmersion } from './Inmersion';
 import { SelectorLengua } from './SelectorLengua';
@@ -305,7 +308,12 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 
 // ---------- Diccionario ----------
 
-export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta: string }) {
+export function Diccionario({ ajustes, consulta, categoria }: { ajustes: Ajustes; consulta: string; categoria?: string }) {
+  if (categoria) return <CategoriaDiccionario id={categoria} ajustes={ajustes} />;
+  return <BuscarEnDiccionario ajustes={ajustes} consulta={consulta} />;
+}
+
+function BuscarEnDiccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta: string }) {
   const [texto, fijarTexto] = useState(consulta);
   const [resultados, fijarResultados] = useState<ResultadoBusqueda[] | null>(null);
   const [buscado, fijarBuscado] = useState('');
@@ -313,19 +321,34 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
   const [cargando, fijarCargando] = useState(false);
   const [recientes, fijarRecientes] = useState<string[]>(() => leerPreferencia('busquedas', []));
   const [hayDics, fijarHayDics] = useState(true);
+  const [porSignificado, fijarPorSignificado] = useState<EntradaBreve[]>([]);
+  const [gramatica, fijarGramatica] = useState<PuntoEncontrado[]>([]);
+  const [preparando, fijarPreparando] = useState(false);
 
   const buscar = async (t: string) => {
     const limpio = t.trim();
     if (!limpio) return;
     fijarCargando(true);
+    const paquete = lengua.value;
+    // Lo escrito sin la escritura de la lengua es un significado: «perro» busca 犬. Solo donde la escritura lo distingue.
+    const significado = paquete.lectura.distingue && !paquete.escritura.tieneTexto(limpio);
+    fijarPreparando(significado);
     try {
-      fijarResultados(await motor.buscarLibre(limpio));
+      const [palabras, sentido, puntos] = await Promise.all([
+        motor.buscarLibre(limpio),
+        significado ? motor.buscarPorSignificado(limpio).catch(() => []) : Promise.resolve([]),
+        paquete.listasNivel ? motor.buscarGramatica(paquete.listasNivel.carpeta, limpio, idiomaActual()).catch(() => []) : Promise.resolve([]),
+      ]);
+      fijarResultados(palabras);
+      fijarPorSignificado(sentido);
+      fijarGramatica(puntos);
       fijarBuscado(limpio);
       const nuevas = [limpio, ...recientes.filter((x) => x !== limpio)].slice(0, 8);
       fijarRecientes(nuevas);
       guardarPreferencia('busquedas', nuevas);
     } finally {
       fijarCargando(false);
+      fijarPreparando(false);
     }
   };
   useEffect(() => {
@@ -368,13 +391,18 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
           ))}
         </div>
       )}
+      {inicial && <Explorar />}
+      {cargando && preparando && <p class="ayuda ap-dic-preparando"><span class="giro" /> {tr('Preparando el diccionario para buscar por significado: la primera vez tarda unos segundos.')}</p>}
+
+      {!cargando && <ResultadosGramatica key={buscado} puntos={gramatica} />}
+      {!cargando && <ResultadosSignificado buscado={buscado} entradas={porSignificado} />}
 
       {resultados && resultados.length > 0 && (
         <h2 class="ap-seccion-titulo">
           {resultados.length === 1 ? tr('1 resultado') : tr('{0} resultados', resultados.length)} · <span lang={lengua.value.id}>{buscado}</span>
         </h2>
       )}
-      {resultados?.length === 0 && (
+      {resultados?.length === 0 && !porSignificado.length && !gramatica.length && (
         <Vacio icono="buscar" titulo={hayDics ? tr('Sin resultados') : tr('Aún no hay diccionarios')}>
           <p>{hayDics ? tr('No hay nada para «{0}». Comprueba la escritura o busca solo la raíz de la palabra.', buscado) : tr('Instálalos en Ajustes para poder buscar.')}</p>
           {!hayDics && <button class="btn primario" onClick={() => navegar('ajustes')}>{tr('Ir a Ajustes')}</button>}
@@ -391,6 +419,7 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
               pestanaInicial={frase ? 'ninguna' : 'audio'}
               alEnviar={(x) => enviarAlCreador({ palabra: x.lema, lectura: lecturaDeTarjeta(x), frase, definicion: [...new Set(x.entradas.flatMap((e) => e.glosas))].slice(0, 5).join('<br>') }, false)}
             />
+            <MasDeLaPalabra r={r} frase={frase} />
           </div>
         ))}
       </div>
