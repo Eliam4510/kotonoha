@@ -1,0 +1,85 @@
+// Las etiquetas de JMdict que se enseñan sobre cada sentido en la página del diccionario: qué clase de palabra es, cómo
+// se usa y de qué campo es. Las demás (los números de sentido, las de nombres propios, «forms») no se enseñan.
+
+import { tm } from '../../compartido/i18n';
+
+const ETIQUETAS: Record<string, string> = {
+  // Clase de palabra
+  n: tm('nombre'),
+  vs: tm('con する'),
+  'vs-s': tm('verbo con する'),
+  'vs-i': tm('verbo con する'),
+  vt: tm('transitivo'),
+  vi: tm('intransitivo'),
+  v1: tm('verbo ichidan'),
+  'v1-s': tm('verbo ichidan'),
+  vk: tm('verbo irregular (来る)'),
+  vz: tm('verbo en -ずる'),
+  'adj-i': tm('adjetivo -i'),
+  'adj-ix': tm('adjetivo -i (いい)'),
+  'adj-na': tm('adjetivo -na'),
+  'adj-no': tm('nombre con の'),
+  'adj-t': tm('adjetivo -taru'),
+  'adj-f': tm('prenominal'),
+  'adj-pn': tm('prenominal'),
+  adv: tm('adverbio'),
+  'adv-to': tm('adverbio con と'),
+  exp: tm('expresión'),
+  int: tm('interjección'),
+  pn: tm('pronombre'),
+  pref: tm('prefijo'),
+  'n-pref': tm('prefijo'),
+  suf: tm('sufijo'),
+  'n-suf': tm('sufijo'),
+  ctr: tm('contador'),
+  conj: tm('conjunción'),
+  prt: tm('partícula'),
+  'aux-v': tm('verbo auxiliar'),
+  'aux-adj': tm('adjetivo auxiliar'),
+  cop: tm('cópula'),
+  num: tm('numeral'),
+  // Cómo se usa
+  uk: tm('suele ir en kana'),
+  col: tm('coloquial'),
+  sl: tm('jerga'),
+  'net-sl': tm('jerga de internet'),
+  hon: tm('honorífico'),
+  hum: tm('humilde'),
+  pol: tm('cortés'),
+  form: tm('formal'),
+  arch: tm('arcaico'),
+  obs: tm('en desuso'),
+  dated: tm('anticuado'),
+  rare: tm('poco usado'),
+  abbr: tm('abreviatura'),
+  'on-mim': tm('onomatopeya'),
+  id: tm('modismo'),
+  yoji: tm('yojijukugo'),
+  proverb: tm('refrán'),
+  vulg: tm('vulgar'),
+  derog: tm('despectivo'),
+  fam: tm('familiar'),
+  poet: tm('poético'),
+  liter: tm('literario'),
+  ksb: tm('dialecto de Kansai'),
+  male: tm('habla masculina'),
+  fem: tm('habla femenina'),
+  joc: tm('humorístico'),
+  sens: tm('delicado'),
+  // De qué campo es
+  comp: tm('informática'),
+  med: tm('medicina'),
+  food: tm('cocina'),
+  Buddh: tm('budismo'),
+  law: tm('derecho'),
+  math: tm('matemáticas'),
+  hist: tm('historia'),
+  sports: tm('deporte'),
+  music: tm('música'),
+};
+
+/** El nombre de una etiqueta de JMdict, o nada si no se enseña. Todos los verbos godan (v5r, v5s…) son uno. */
+export function etiquetaDiccionario(etiqueta: string): string | undefined {
+  if (/^v5/.test(etiqueta)) return tm('verbo godan');
+  return Object.hasOwn(ETIQUETAS, etiqueta) ? ETIQUETAS[etiqueta] : undefined;
+}

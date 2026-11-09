@@ -130,11 +130,15 @@ The word panel shows the stroke order of every kanji in the word, one stroke at 
 
 The **JLPT** screen brings together the vocabulary, kanji and grammar of each level, from N5 to N1, and shows how much of each you already know, from the words marked while watching and reading. Words you already know are marked all at once, each kanji shows its strokes and the words that use it, and each grammar point, the sentences you have seen it in.
 
-### A dictionary to explore
+### A complete dictionary
 
-<img src="docs/img/diccionario.en.png" alt="Dictionary with the word 話す: its kanji, words with the same meaning and words read the same way" width="100%">
+<img src="docs/img/diccionario.en.png" alt="The dictionary page with 話す: the results list, the word with its senses and, beside it, its kanji, words with the same meaning and words read the same way" width="100%">
 
-The dictionary also searches by meaning, such as “dog” → 犬, and finds grammar by its form or its meaning. Below each word are its kanji with their level; **Same meaning**, with the common words that mean the same, such as 喋る or 会話 for 話す; and the words read the same way, such as 離す and 放す. Claude explains how they differ when asked. The start page gathers onomatopoeia, proverbs, four-kanji expressions, and literary, colloquial and respectful words.
+The dictionary uses the whole window: the results list on one side; in the center, the word in large type, with its reading above and each sense with its part of speech; and on the other side its kanji, its opposites, the common words with the same meaning, such as 喋る or 会話 for 話す, and the words read the same way. Below are the sentences from your videos where it appeared, with the minute and a button to go back to that moment. It also searches by meaning, such as “dog” → 犬, and finds grammar by its form or its meaning. The start page gathers onomatopoeia, proverbs, four-kanji expressions, and literary, colloquial and respectful words. Size and typeface can be changed from the page itself.
+
+<img src="docs/img/kanji.en.png" alt="The page of the kanji 愛: how it is written, its readings, its components and the words that contain it" width="100%">
+
+A single kanji has its own page: how it is written, stroke by stroke; its meaning and readings; its components, with the radical and the one that gives the sound; the words you already know with it and the most used words that contain it; and how it looks in print and by hand.
 
 ### German too
 

@@ -249,6 +249,21 @@ export function saltar(ms: number) {
   return control.saltar(Math.max(0, ms));
 }
 
+/**
+ * Salta a un momento pedido desde fuera, como «Volver al momento» de un ejemplo del diccionario. Espera a que el video
+ * tenga su duración y a que acabe el anuncio: un reproductor que aún carga ignora el salto.
+ */
+export async function irAlMomento(ms: number) {
+  for (let i = 0; i < 160; i++) {
+    const v = control.video();
+    if (v && v.readyState >= 1 && Number.isFinite(v.duration) && v.duration > 0 && !anuncio.value) {
+      await saltar(Math.min(ms, Math.max(0, v.duration * 1000 - 1000)));
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+}
+
 let avisoActualizacion = false;
 
 /** Tras recargarse la extensión, esta página sigue con la versión anterior y sin conexión con el motor. */

@@ -41,6 +41,68 @@ describe('leerTrazos', () => {
   });
 });
 
+// El de KanjiVG para 愛, sin los trazados: lo que importa son sus grupos.
+const AI = `<svg xmlns:kvg="https://kanjivg.tagaini.net/">
+<g id="kvg:StrokePaths_0611b">
+<g id="kvg:0611b" kvg:element="愛">
+  <g id="kvg:0611b-g1" kvg:element="⺤" kvg:variant="true" kvg:original="爪" kvg:position="top" kvg:radical="nelson" kvg:phon="旡">
+    <path id="kvg:0611b-s1" d="M1,1"/>
+  </g>
+  <g id="kvg:0611b-g2" kvg:position="bottom">
+    <g id="kvg:0611b-g3" kvg:element="冖"><path id="kvg:0611b-s5" d="M2,2"/></g>
+    <g id="kvg:0611b-g4" kvg:element="心" kvg:radical="tradit"><path id="kvg:0611b-s7" d="M3,3"/></g>
+    <g id="kvg:0611b-g5" kvg:element="夂"><path id="kvg:0611b-s11" d="M4,4"/></g>
+  </g>
+</g>
+</g>
+</svg>`;
+
+// 漢: la mitad derecha es la que da el sonido, y dentro lleva otras piezas.
+const KAN = `<svg>
+<g id="kvg:StrokePaths_06f22">
+<g id="kvg:06f22" kvg:element="漢">
+  <g id="kvg:06f22-g1" kvg:element="氵" kvg:variant="true" kvg:original="水" kvg:position="left" kvg:radical="general"><path id="kvg:06f22-s1" d="M1,1"/></g>
+  <g id="kvg:06f22-g2" kvg:position="right" kvg:phon="𦰩">
+    <g id="kvg:06f22-g3" kvg:element="艹" kvg:original="艸"><path id="kvg:06f22-s4" d="M2,2"/></g>
+    <g id="kvg:06f22-g4" kvg:position="bottom">
+      <g id="kvg:06f22-g5" kvg:element="口"><path id="kvg:06f22-s7" d="M3,3"/></g>
+      <g id="kvg:06f22-g6" kvg:element="夫"><g id="kvg:06f22-g7" kvg:element="大"><path id="kvg:06f22-s11" d="M4,4"/></g></g>
+    </g>
+  </g>
+</g>
+</g>
+</svg>`;
+
+describe('piezas de un carácter', () => {
+  it('saca las piezas atravesando los grupos sin nombre, con su forma original y el radical', () => {
+    const d = leerTrazos(AI);
+    expect(d?.componentes).toEqual([
+      { caracter: '⺤', original: '爪', piezas: [] },
+      { caracter: '冖', piezas: [] },
+      { caracter: '心', radical: true, piezas: [] },
+      { caracter: '夂', piezas: [] },
+    ]);
+    expect(d?.fonetico).toBe('旡');
+  });
+
+  it('guarda lo que lleva dentro cada pieza y la parte que da el sonido', () => {
+    const d = leerTrazos(KAN);
+    expect(d?.componentes?.map((p) => p.caracter)).toEqual(['氵', '艹', '口', '夫']);
+    expect(d?.componentes?.[0]).toMatchObject({ original: '水', radical: true });
+    expect(d?.componentes?.[3].piezas).toEqual([{ caracter: '大', piezas: [] }]);
+    expect(d?.fonetico).toBe('𦰩');
+  });
+
+  it('una pieza partida en dos cuenta una vez, y lo que no es un carácter se descarta', () => {
+    const partida = `<svg><g kvg:element="衷"><g kvg:element="衣" kvg:part="1"><path id="a-s1" d="M1,1"/></g><g kvg:element="中"><path id="a-s2" d="M2,2"/></g><g kvg:element="衣" kvg:part="2"><path id="a-s3" d="M3,3"/></g><g kvg:element="&lt;b&gt;"><path id="a-s4" d="M4,4"/></g></g></svg>`;
+    expect(leerTrazos(partida)?.componentes?.map((p) => p.caracter)).toEqual(['衣', '中']);
+  });
+
+  it('un carácter sin grupos no tiene piezas', () => {
+    expect(leerTrazos(SVG)?.componentes).toEqual([]);
+  });
+});
+
 describe('hechosPorCaracter', () => {
   it('reparte los trazos dibujados entre los caracteres', () => {
     expect(hechosPorCaracter([4, 6], 0)).toEqual([0, 0]);

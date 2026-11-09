@@ -28,6 +28,7 @@ export const INGLES: PaqueteLengua = {
   nombrePropio: 'English',
   presentacion: tm('Subtítulos con pronunciación, verbos con partícula y falsos amigos'),
   letra: 'var(--letra)',
+  letras: { gotica: "'Segoe UI', 'Helvetica Neue', system-ui, sans-serif", libro: "Charter, 'Iowan Old Style', Georgia, 'Times New Roman', serif" },
   ajustes: {
     nivel: 'CEFR B1',
     formatoLectura: 'us',

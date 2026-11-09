@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.27.7, along with how it has been verified.
+Status of each feature in version 0.28.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -30,6 +30,9 @@ Status of each feature in version 0.27.7, along with how it has been verified.
 | Share as image: a card for the word (furigana, pitch accent, what it means in the sentence or the dictionary, the sentence with the word highlighted) or for a grammar point, copied to the clipboard on click; Ink or Paper; Save image | Automated, with a simulated Claude, reading the clipboard |
 | JLPT: vocabulary (8,354 words), kanji (2,211) and grammar (501 points) from N5 to N1 with what you know of each level; change the status one by one or all selected; kanji card with strokes and words of the level; examples of each grammar point among the sentences you have seen, and its explanation by Claude | Automated, with a simulated Claude |
 | Dictionary: search by meaning among common words, with the matching gloss; JLPT grammar by form or meaning; under each word, its kanji with their level, common words with the same meaning, homophones and similar words (Claude); seven categories to explore from the JMdict tags | Automated, with the test profile dictionaries and a simulated Claude |
+| Full-width dictionary page: results list, word and related words in columns depending on the width (or a centered column); senses with their glosses together and their part of speech; cards with the reading above; opposites and “see also” from JMdict; size and typeface in Settings and next to the search box | Automated, with the test profile dictionaries |
+| The sentences where a word was seen, with their reading, the word highlighted even when conjugated, the minute in the video and “Back to…”, which brings up the video’s tab or opens it and jumps to that moment (also in the word panel’s Examples tab) | Automated: the address with the minute on YouTube and the pending jump on other sites |
+| Kanji page: large strokes, meaning, level, stroke count, on and kun readings, KanjiVG components with the radical and the phonetic part, your words with it, the common words that contain it, where it was seen, print, book and handwritten type, and its origin with Claude | Automated |
 | Grammar with statuses: new, learning or known in the video bubble, the word panel, the JLPT screen and the dictionary; known points are not flagged under subtitles; where each point was seen; multiple-choice card with distractors from Claude; import from Anki against the 501 list points | Automated (statuses, filter, saving and undo on the JLPT screen); the import, with unit tests |
 | Dictation mode: line hidden, pause at the end, type what you heard and compare (in Japanese by reading, with the other dictionary readings); Hear it again, Continue with Enter; Repeat in your voice (button and P key) opens pitch accent practice with the line | Automated, on the test video page |
 | How it really sounds (English): the sentence with its spoken form above, with reductions, weak forms, linking, t or d with you and the American soft t, and a legend; by rules, without Claude | Automated, with unit tests of the rules |

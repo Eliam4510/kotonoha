@@ -172,6 +172,11 @@ button.chip-gram:active { transform: scale(0.96); }
 .lista-defs li:hover .def-enviar, .def-enviar:focus-visible { opacity: 1; }
 .def-enviar:hover { background: var(--superficie-3); color: var(--hoja); }
 .ver-mas { margin: 2px 0 0 -6px; }
+/* Los opuestos y las palabras que hay que ver, que JMdict mete entre las definiciones: van aparte, en una línea. */
+.ficha-refs { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 13px; color: var(--texto-2); }
+.ficha-ref { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.ficha-ref b { font-size: 11.5px; font-weight: 800; color: var(--texto-3); }
+.ficha-ref .enlace { font-family: var(--letra-lengua); font-size: 15px; font-weight: 700; }
 .lista-compuestos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .lista-compuestos b { font-family: var(--letra-lengua); font-weight: 700; font-size: 14.5px; }
 .compuesto-def { font-size: 13px; color: var(--texto-2); line-height: 1.4; }

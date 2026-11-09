@@ -8,7 +8,7 @@ import { aplicarLengua, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { cargarFuentes } from '../ui/fuentes';
 import { ejecutarComando, instalarAtajos } from './atajos';
-import { cargarVideoActual, iniciarControlador, vigilarAnuncios } from './controlador';
+import { cargarVideoActual, iniciarControlador, irAlMomento, vigilarAnuncios } from './controlador';
 import { ajustes, avisar, sinAceleracion } from './estado';
 import { iniciarLectorWeb } from './lectorWeb';
 import overlay from './overlay.css';
@@ -93,6 +93,10 @@ async function iniciarReproductor() {
   await esperarAdaptador();
   cargar();
   vigilarAnuncios();
+  // Si esta pestaña se abrió para volver al momento de una frase, se salta ahí.
+  fondo.momentoPendiente().then((ms) => {
+    if (typeof ms === 'number') irAlMomento(ms).catch(() => {});
+  }).catch(() => {});
   let ultimoId: string | null = null;
   alNavegar(async () => {
     const i = await control.info().catch(() => null);
@@ -104,6 +108,7 @@ async function iniciarReproductor() {
 
   alRecibirEvento((e) => {
     if (e.tipo === 'comando') ejecutarComando(e.comando);
+    if (e.tipo === 'saltar') irAlMomento(e.ms).catch(() => {});
   });
 }
 

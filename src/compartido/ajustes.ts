@@ -5,6 +5,9 @@ import type { ProveedorIA } from './proveedores';
 // Ajustes del usuario, guardados en chrome.storage.local.
 
 export type ModoLectura = 'ninguna' | 'todas' | 'desconocidas' | 'alPasar';
+export type LetraDiccionario = 'redondeada' | 'gotica' | 'libro' | 'escuela';
+/** Los tamaños que admite la página del diccionario, en tanto por ciento. */
+export const TAMANO_DICCIONARIO = { minimo: 80, maximo: 160, paso: 10 };
 export type ModoGlosa = 'ninguna' | 'desconocidas' | 'alPasar';
 export type ModoColor = 'ninguno' | 'alPasar' | 'siempre';
 export type PausaInteraccion = 'nunca' | 'alPasarSubtitulo' | 'consultaPalabra';
@@ -295,6 +298,12 @@ export interface Ajustes {
   negritaPalabra: boolean;
   diccionarioPestana: PestanaDiccionario;
   ordenContenido: ('definiciones' | 'flexiones' | 'pestanas')[];
+  /** La página del diccionario: a todo el ancho de la ventana o en una columna centrada. */
+  diccionarioAncho: 'completo' | 'centrado';
+  /** El tamaño de lo escrito en la lengua en la página del diccionario, en tanto por ciento. */
+  diccionarioTamano: number;
+  /** La letra de lo escrito en la lengua en el diccionario: la redondeada de Kotonoha o una de las que da la lengua. */
+  diccionarioLetra: LetraDiccionario;
 
   // IA
   modelos: Record<TareaIA, string>;
@@ -486,6 +495,10 @@ export const AJUSTES_INICIALES: Ajustes = {
   negritaPalabra: true,
   diccionarioPestana: 'ninguna',
   ordenContenido: ['definiciones', 'flexiones', 'pestanas'],
+  diccionarioAncho: 'completo',
+  diccionarioTamano: 100,
+  // La letra redondeada se lee peor en los kanji complejos: el diccionario empieza con una gótica de lectura fácil.
+  diccionarioLetra: 'gotica',
 
   // Sonnet 5.5 para el día a día; «Profundizar» recurre a Opus 5.5 cuando un verso se resiste.
   modelos: {
@@ -598,6 +611,11 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
     salida.usarGuion = false;
     if (salida.diccionarioPestana === 'explicar') salida.diccionarioPestana = 'ninguna';
   }
+  // Un tamaño fuera de lo que admite la página (copiado de otro equipo, escrito a mano) se queda en el borde.
+  const { minimo, maximo } = TAMANO_DICCIONARIO;
+  salida.diccionarioTamano = Number.isFinite(salida.diccionarioTamano) ? Math.min(maximo, Math.max(minimo, Math.round(salida.diccionarioTamano))) : AJUSTES_INICIALES.diccionarioTamano;
+  if (!['redondeada', 'gotica', 'libro', 'escuela'].includes(salida.diccionarioLetra)) salida.diccionarioLetra = AJUSTES_INICIALES.diccionarioLetra;
+  if (salida.diccionarioAncho !== 'centrado') salida.diccionarioAncho = 'completo';
   // Con esfuerzo medio, Claude se saltaba versos enteros al colocar una letra.
   if (guardados && (guardados.migracion ?? 0) < 2) {
     salida.migracion = 2;

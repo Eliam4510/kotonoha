@@ -245,8 +245,6 @@ section .ap-botones { margin-top: 10px; }
 .ap-cita cite { font-size: 12px; font-style: normal; color: var(--texto-3); opacity: 0.85; }
 
 /* ---------- Diccionario ---------- */
-.ap-diccionario { max-width: 860px; }
-.ap-diccionario.inicial { max-width: 680px; padding-top: 14vh; }
 .ap-dic-portada { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 26px; text-align: center; }
 .ap-dic-portada h1 { font-size: 32px; }
 .ap-dic-portada p { font-size: 15px; color: var(--texto-2); max-width: 46ch; }
@@ -264,8 +262,6 @@ section .ap-botones { margin-top: 10px; }
 .ap-contexto input:focus { border-bottom-color: var(--fuji); }
 .ap-contexto input::placeholder { color: var(--texto-3); }
 .ap-dic-atajos { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin-top: 26px; }
-.ap-resultados { display: flex; flex-direction: column; gap: 14px; }
-.ap-resultado { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-4); box-shadow: var(--brillo), var(--sombra-1); overflow: hidden; animation: kk-aparecer 0.28s var(--salida); }
 
 /* ---------- Panel del creador de tarjetas ---------- */
 .ap-creador-marco { flex: none; width: 0; height: 100%; overflow: hidden; transition: width 0.3s var(--salida); }
@@ -413,6 +409,11 @@ section .ap-botones { margin-top: 10px; }
 .ap-tamano { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border-radius: var(--r-pill); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); }
 .ap-tamano span { width: 22px; text-align: center; font-family: var(--letra-lengua); font-size: 14px; font-weight: 700; color: var(--texto-2); }
 .ap-tamano .btn-icono { width: 26px; height: 26px; }
+.ap-tamano .ap-tamano-valor { width: auto; min-width: 52px; font-family: var(--letra); font-size: 13px; }
+.ap-letras span[lang] { margin-right: 3px; font-size: 16px; font-weight: 700; }
+/* Cuatro letras con su muestra no caben en una fila en una ventana estrecha: van de dos en dos. */
+.segmentado.ap-letras { display: inline-grid; grid-template-columns: repeat(2, auto); border-radius: 18px; }
+@container lienzo (min-width: 1180px) { .segmentado.ap-letras { grid-template-columns: repeat(4, auto); border-radius: var(--r-pill); } }
 .ap-papel { position: relative; padding: 44px 56px 52px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-1); font-family: var(--letra-lengua); font-weight: 500; line-height: 2.25; }
 /* En un texto largo el subrayado de estado debe acompañar, no gritar. */
 .ap-papel .pal::before { height: 2px; opacity: 0.6; }
@@ -1111,28 +1112,6 @@ section .ap-botones { margin-top: 10px; }
 .ap-dic-seccion { margin-top: 8px; }
 .ap-dic-preparando { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; }
 .chip-nivel { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: var(--r-pill); background: var(--superficie-3); font-family: var(--letra); font-size: 11px; font-weight: 800; color: var(--texto-2); vertical-align: middle; }
-.ap-breves { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
-.ap-breve { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo); text-align: left; color: var(--texto); transition: background 0.12s, transform 0.12s var(--resorte); }
-.ap-breve:hover { background: var(--superficie-2); transform: translateY(-1px); }
-.ap-breve-termino { display: flex; flex-direction: column; line-height: 1.25; }
-.ap-breve-termino b { font-family: var(--letra-lengua); font-size: 18px; font-weight: 700; }
-.ap-breve-termino small { color: var(--texto-3); font-family: var(--letra-lengua); font-size: 12px; }
-.ap-breve-glosa { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--texto-2); font-size: 13px; }
-.ap-breve-comun { color: var(--est-aprendiendo); }
-.ap-mas-palabra { display: flex; flex-direction: column; gap: 14px; padding: 4px 22px 18px; border-top: 1px solid var(--borde); }
-.ap-mas-bloque { display: flex; flex-direction: column; gap: 8px; }
-.ap-mas-bloque > .btn { width: fit-content; }
-.ap-kanji-palabra { display: flex; flex-wrap: wrap; gap: 8px; }
-.ap-kanji-ficha { display: flex; align-items: center; gap: 12px; max-width: 360px; padding: 8px 14px 8px 10px; border-radius: var(--r-3); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); text-align: left; color: var(--texto); }
-.ap-kanji-ficha:hover { background: var(--superficie-3); }
-.ap-kanji-ficha > b { font-family: var(--letra-lengua); font-size: 32px; font-weight: 700; line-height: 1; }
-.ap-kanji-ficha > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 12.5px; }
-.ap-kanji-ficha .chip-nivel { width: fit-content; margin: 0; }
-.ap-kanji-ficha em { font-style: normal; color: var(--texto-2); }
-.ap-kanji-ficha small:not(.chip-nivel) { color: var(--texto-3); font-size: 11.5px; }
-.ap-homofonos, .ap-sinonimos { display: flex; flex-wrap: wrap; gap: 6px; }
-.ap-homofonos .chip, .ap-sinonimos .chip { font-family: var(--letra-lengua); font-size: 15px; }
-.ap-homofonos .chip.comun, .ap-sinonimos .chip.comun { box-shadow: inset 0 0 0 1px var(--hoja-media); }
 .ap-explorar { margin-top: 34px; }
 .ap-explorar .ap-seccion-titulo { justify-content: center; }
 .ap-explorar-rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
@@ -1142,6 +1121,184 @@ section .ap-botones { margin-top: 10px; }
 .ap-categoria .ayuda { font-size: 12.5px; line-height: 1.45; }
 .ap-categoria-vista h1 { display: flex; align-items: center; gap: 10px; }
 .ap-categoria-vista > .btn { margin-bottom: 6px; }
+
+/* ---------- Diccionario (0.28.0): a todo el ancho, con la lista, la palabra y lo que la rodea ----------
+   --escala-dic es el tamaño de lo escrito en la lengua que se elige en Ajustes; --letra-lengua, su letra. */
+.dic { container-type: inline-size; width: 100%; max-width: 1800px; margin: 0 auto; padding: 26px 36px 80px; animation: kk-aparecer 0.32s var(--salida); }
+.dic.centrado { max-width: 1040px; }
+.dic.inicial { max-width: 720px; padding-top: 14vh; }
+@container lienzo (max-width: 700px) { .dic { padding: 18px 16px 64px; } }
+.dic-barra { display: flex; align-items: flex-start; gap: 14px; }
+.dic-barra-busqueda { flex: 1; min-width: 0; max-width: 980px; }
+.dic.centrado .dic-barra-busqueda { max-width: none; }
+.dic-ajustes { flex: none; display: flex; align-items: center; gap: 6px; height: 60px; }
+.dic-ajustes .btn-icono.activo { color: var(--hoja); background: var(--hoja-suave); }
+@container (max-width: 640px) { .dic-barra { flex-direction: column; gap: 4px; } .dic-ajustes { height: auto; align-self: flex-end; } }
+.dic-vista { width: fit-content; margin-top: 20px; }
+.dic-vista span[lang] { margin-right: 4px; font-family: var(--letra-lengua); font-weight: 700; }
+.dic-gramatica:empty { display: none; }
+.dic-gramatica { margin-top: 6px; }
+
+.dic-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 22px; align-items: start; }
+.dic-centro, .dic-lateral, .dic-lista { min-width: 0; }
+@container (min-width: 900px) {
+  .dic-cuerpo { grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); }
+  .dic-cuerpo.con-lista .dic-lista { grid-column: 1 / -1; }
+}
+@container (min-width: 1280px) {
+  .dic-cuerpo.con-lista { grid-template-columns: 300px minmax(0, 1fr) minmax(320px, 380px); }
+  .dic-cuerpo.con-lista .dic-lista { grid-column: auto; position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow-y: auto; padding-right: 4px; }
+}
+.dic-lista-titulo { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 13px; font-weight: 800; color: var(--texto-2); }
+.dic-lista-titulo > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Con ancho medio la lista es una fila que se desliza; a lo ancho, una columna. */
+.dic-lista-items { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 10px; scroll-snap-type: x proximity; }
+.dic-lista-items .dic-tarjeta { flex: 0 0 216px; scroll-snap-align: start; }
+/* En la lista, la palabra va en una línea: la tarjeta abierta en el centro la enseña entera. */
+.dic-lista-items .dic-tarjeta-palabra { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@container (min-width: 1280px) {
+  .dic-lista-items { flex-direction: column; overflow: visible; padding: 2px; }
+  .dic-lista-items .dic-tarjeta { flex: none; }
+}
+
+/* Una palabra en una lista: la lectura encima, el significado debajo. */
+.dic-tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.dic-tarjeta {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0;
+  min-height: calc(92px * var(--escala-dic, 1)); padding: 10px 16px 14px; border-radius: var(--r-3);
+  background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo); text-align: left; color: var(--texto);
+  transition: background 0.14s, box-shadow 0.14s, transform 0.14s var(--resorte);
+}
+.dic-tarjeta:hover { background: var(--superficie-2); transform: translateY(-1px); }
+.dic-tarjeta.activa, .dic-tarjeta.activa:hover { background: var(--hoja-suave); box-shadow: inset 0 0 0 1.5px var(--hoja), var(--brillo); transform: none; }
+/* Con interlineado de sobra, la lectura encima cabe sin mover nada: con y sin ella, las tarjetas quedan a la par. */
+.dic-tarjeta-palabra { max-width: calc(100% - 26px); margin-top: -0.3em; font-family: var(--letra-lengua); font-size: calc(26px * var(--escala-dic, 1)); font-weight: 700; line-height: 2; overflow-wrap: anywhere; }
+.dic-tarjeta-palabra rt { font-size: 0.46em; font-weight: 600; letter-spacing: 0; color: var(--texto-2); }
+.dic-tarjeta-glosa { margin-top: -0.25em; font-size: 14.5px; line-height: 1.42; color: var(--texto-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dic-tarjeta-marcas { position: absolute; top: 11px; right: 11px; display: flex; align-items: center; gap: 6px; }
+.dic-marca-comun { display: inline-flex; color: var(--est-aprendiendo); --ico-opacidad: 0.5; }
+.dic-marca-estado { width: 9px; height: 9px; border-radius: 50%; background: var(--est-conocida); }
+.dic-marca-estado.aprendiendo { background: var(--est-aprendiendo); }
+.dic-marca-estado.ignorada { background: var(--est-ignorada); }
+.dic-tarjeta-esqueleto { display: block; height: calc(92px * var(--escala-dic, 1)); border-radius: var(--r-3); }
+
+.dic-seccion { margin-top: 28px; }
+.dic-seccion:first-child { margin-top: 0; }
+.dic-seccion-titulo { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 15.5px; font-weight: 800; color: var(--texto); }
+.dic-seccion-ayuda { margin: -6px 0 12px; font-size: 13px; }
+.dic-seccion > .btn.ia { width: fit-content; }
+.dic-cuenta { padding: 1px 8px; border-radius: var(--r-pill); background: var(--superficie-3); font-size: 11.5px; font-weight: 800; color: var(--texto-2); }
+
+/* La palabra, en grande: su ficha sin límite de alto y con las pestañas junto a lo que abren. */
+.dic-ficha { border-radius: var(--r-5); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo), var(--sombra-1); overflow: hidden; }
+.dic-centro > .dic-seccion { margin-top: 28px; }
+.dic .ficha-pagina .ficha-cab { gap: 16px; padding: 24px 28px 6px; }
+.dic .ficha-pagina .ficha-titulo { min-height: 0; }
+.dic .ficha-pagina .ficha-palabra { font-size: calc(56px * var(--escala-dic, 1)); font-weight: 800; line-height: 1.55; }
+.dic .ficha-pagina .ficha-palabra rt { font-size: 0.36em; }
+.dic .ficha-pagina .curva-mora { font-size: 12px; }
+.dic .ficha-pagina .estados { flex: 0 1 auto; }
+.dic .ficha-pagina .estado { height: 34px; padding: 0 16px; font-size: 13.5px; }
+.dic .ficha-pagina .ficha-cuerpo { overflow: visible; padding: 12px 28px 26px; -webkit-mask-image: none; mask-image: none; }
+.dic .ficha-pagina .subtitulo-def { font-size: 12.5px; }
+.dic .ficha-pagina .lista-defs li { gap: 12px; padding: 6px 8px; font-size: 16.5px; line-height: 1.5; }
+.dic .ficha-pagina .lista-defs li::before { width: 23px; height: 23px; margin-top: 1px; font-size: 12px; }
+.dic .ficha-pagina .sentido b { font-size: 19px; }
+.dic .ficha-pagina .ficha-dock { flex-wrap: wrap; gap: 6px; margin: 20px 0 2px; padding: 0; border-top: none; }
+.dic .ficha-pagina .ficha-dock .pestana { flex: 0 0 auto; flex-direction: row; gap: 7px; padding: 8px 14px; border-radius: var(--r-pill); font-size: 13px; background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); }
+.dic .ficha-pagina .ficha-dock .pestana span { max-width: none; }
+.dic .ficha-pagina .ficha-dock .pestana.activo { background: var(--superficie-3); box-shadow: inset 0 0 0 1.5px var(--borde-2); }
+.dic .ficha-pagina .ficha-dock .pestana.ia.activo { background: var(--fuji-suave); box-shadow: inset 0 0 0 1px var(--fuji-media); }
+.dic .ficha-pagina .dock-sep { margin: 6px 4px; }
+.dic .ficha-pagina .ficha-panel { margin-top: 12px; }
+.dic .ficha-pagina .ficha-pie { justify-content: flex-start; padding: 4px 28px 24px; }
+.dic .ficha-pagina .ficha-pie .btn { flex: 0 0 auto; }
+/* Los sentidos, como en un diccionario: cada uno con sus glosas juntas y, encima, su clase de palabra. */
+.sentidos { display: flex; flex-direction: column; gap: 16px; }
+.sentidos > .ver-mas { align-self: flex-start; margin-top: -6px; }
+.sentidos-dic-titulo { margin: 0 0 4px; font-size: 12px; font-weight: 800; letter-spacing: 0.02em; color: var(--texto-3); }
+.lista-sentidos { display: flex; flex-direction: column; gap: 2px; margin: 0 -8px; padding: 0; list-style: none; }
+.lista-sentidos li { padding: 5px 8px; border-radius: 12px; }
+.lista-sentidos li.elegida { background: var(--fuji-suave); }
+.sentido-etiquetas { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 5px 38px; }
+.sentido-etiquetas span { padding: 1px 9px; border-radius: var(--r-pill); background: var(--superficie-3); font-size: 11.5px; font-weight: 700; color: var(--texto-2); }
+.sentido-fila { display: flex; align-items: flex-start; gap: 14px; font-size: 16.5px; line-height: 1.5; }
+.sentido-num { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-top: 1px; border-radius: 50%; background: var(--superficie-3); font-size: 12px; font-weight: 800; color: var(--texto-3); }
+.lista-sentidos li.elegida .sentido-num { background: var(--fuji); color: var(--fuji-tinta); }
+.lista-sentidos li:hover .def-enviar { opacity: 1; }
+
+/* Lo que rodea a la palabra: en la columna, tarjetas algo más pequeñas, de dos en dos. */
+.dic-lateral .dic-tarjetas { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.dic-lateral .dic-tarjeta { min-height: calc(82px * var(--escala-dic, 1)); padding: 8px 12px 12px; }
+.dic-lateral .dic-tarjeta-palabra { font-size: calc(22px * var(--escala-dic, 1)); }
+.dic-lateral .dic-tarjeta-glosa { font-size: 13.5px; }
+.dic-caracteres { display: flex; flex-direction: column; gap: 10px; }
+.dic-caracter-tarjeta {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 12px 16px 12px 14px;
+  border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo); text-align: left; color: var(--texto);
+  transition: background 0.14s, transform 0.14s var(--resorte);
+}
+.dic-caracter-tarjeta:hover { background: var(--superficie-2); transform: translateY(-1px); }
+.dic-caracter-tarjeta > b { font-family: var(--letra-lengua); font-size: calc(46px * var(--escala-dic, 1)); font-weight: 600; line-height: 1.05; }
+.dic-caracter-tarjeta > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.dic-caracter-tarjeta em { font-style: normal; font-size: 14.5px; font-weight: 700; line-height: 1.35; }
+.dic-caracter-tarjeta small:not(.chip-nivel) { font-family: var(--letra-lengua); font-size: 13.5px; line-height: 1.45; color: var(--texto-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dic-caracter-tarjeta .chip-nivel { align-self: start; margin: 0; }
+
+/* Las frases donde la has visto: grandes, con la lectura encima, su minuto y el botón para volver a él. */
+.dic-frases-lista { display: flex; flex-direction: column; gap: 12px; }
+.dic-frase { padding: 12px 18px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo); }
+.dic-frase-texto { margin: 0; font-family: var(--letra-lengua); font-size: calc(21px * var(--escala-dic, 1)); font-weight: 500; line-height: 2.15; color: var(--texto); overflow-wrap: anywhere; }
+.dic-frase-texto rt { font-size: 0.48em; font-weight: 600; color: var(--texto-2); }
+.dic-frase-texto .dic-resaltada { border-radius: 6px; background: var(--hoja-suave); box-shadow: 0 0 0 2px var(--hoja-suave); font-weight: 700; }
+.dic-frase-pie { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin-top: 4px; font-size: 13px; color: var(--texto-3); }
+.dic-frase-fuente { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+.dic-frase-fuente > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dic-frase-momento { font-weight: 800; color: var(--texto-2); }
+.dic-frase-pie .btn-momento { margin-left: auto; }
+.dic-frase-esqueleto { display: block; height: 80px; border-radius: var(--r-3); }
+
+/* La página de un kanji: cómo se escribe a la izquierda; lo que significa, cómo se lee y sus piezas a la derecha. */
+.dic-caracter { margin-top: 20px; }
+.dic-caracter-cab { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px 34px; padding: 26px 30px; border-radius: var(--r-5); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo), var(--sombra-1); }
+@container (min-width: 760px) { .dic-caracter-cab { grid-template-columns: auto minmax(0, 1fr); } }
+.dic-caracter-trazos .trazos { padding: 0; }
+.trazos-lienzos.enormes svg, .trazos-lienzos.enormes .trazo-vacio, .trazos-lienzos.enormes .trazo-esqueleto { width: calc(232px * var(--escala-dic, 1)); height: calc(232px * var(--escala-dic, 1)); border-radius: 20px; }
+.trazos-lienzos.enormes .trazo-vacio { font-size: calc(150px * var(--escala-dic, 1)); }
+.trazos-lienzos.enormes figcaption { display: none; }
+.dic-caracter-titulo { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; }
+.dic-caracter-glifo { font-family: var(--letra-lengua); font-size: calc(60px * var(--escala-dic, 1)); font-weight: 700; line-height: 1; }
+.dic-caracter-tipo { font-size: 12.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-3); }
+.dic-caracter-titulo .chip-nivel { margin: 0; padding: 3px 10px; font-size: 12px; }
+.dic-dato { font-size: 13px; font-weight: 700; color: var(--texto-2); }
+.dic-caracter-significado { margin: 14px 0 0; font-size: 22px; font-weight: 800; line-height: 1.35; }
+.dic-caracter-significado:empty { display: none; }
+.dic-lecturas { display: flex; flex-direction: column; gap: 10px; margin: 18px 0 0; }
+.dic-lecturas-fila, .dic-piezas { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: start; gap: 12px; }
+.dic-lecturas dt, .dic-etiqueta { padding-top: 7px; font-size: 12.5px; font-weight: 800; color: var(--texto-3); }
+.dic-lecturas dt { cursor: help; }
+.dic-lecturas dd { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 0; }
+.dic-lectura { padding: 2px 12px; border-radius: var(--r-pill); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); font-family: var(--letra-lengua); font-size: calc(18px * var(--escala-dic, 1)); font-weight: 600; line-height: 1.6; }
+.dic-lectura-cola { color: var(--texto-3); }
+.dic-piezas { margin-top: 18px; }
+.dic-piezas-lista { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dic-pieza { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-width: 66px; padding: 8px 12px 7px; border-radius: var(--r-3); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); color: var(--texto); transition: background 0.14s, transform 0.14s var(--resorte); }
+.dic-pieza:hover { background: var(--superficie-3); transform: translateY(-1px); }
+.dic-pieza b { font-family: var(--letra-lengua); font-size: calc(30px * var(--escala-dic, 1)); font-weight: 600; line-height: 1.15; }
+.dic-pieza small { font-size: 11px; font-weight: 700; color: var(--texto-3); }
+.dic-pieza small span { font-family: var(--letra-lengua); }
+.dic-pieza.radical { box-shadow: inset 0 0 0 1.5px var(--hoja-media); }
+.dic-pieza .dic-pieza-radical { color: var(--hoja); }
+.dic-pieza-fonetico { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--r-pill); background: var(--fuji-suave); font-size: 12.5px; font-weight: 700; color: var(--fuji); }
+.dic-pieza-fonetico b { font-family: var(--letra-lengua); font-size: 19px; }
+.dic-caracter-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px 30px; margin-top: 28px; align-items: start; }
+@container (min-width: 1100px) { .dic-caracter-cuerpo { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); } }
+.dic-caracter-principal > .dic-seccion:first-child, .dic-caracter-lado > .dic-seccion:first-child { margin-top: 0; }
+.dic-formas { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 10px; }
+.dic-forma { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0; padding: 12px 8px 10px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde); }
+.dic-forma span { font-size: calc(54px * var(--escala-dic, 1)); line-height: 1.15; }
+.dic-forma figcaption { font-size: 12px; font-weight: 700; color: var(--texto-3); }
+.dic-caracter-lado .trazos-credito { margin-top: 18px; }
 
 /* Repetir con tu voz: la práctica con una frase que llega del video */
 .ap-practicar-frase { max-width: 760px; }
