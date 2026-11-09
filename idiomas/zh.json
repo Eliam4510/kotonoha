@@ -788,7 +788,7 @@
  "Escribe una palabra para buscarla en todo el libro.": "输入一个词，在整本书中搜索。",
  "Escríbela en alemán. También entiende formas conjugadas y declinadas, y frases enteras.": "请用德语输入。也能识别变位和变格形式以及整句。",
  "Escríbela en inglés. También entiende formas conjugadas y frases enteras.": "请用英语输入。也能识别变形和整句。",
- "Escríbela en japonés. También entiende formas conjugadas y frases enteras.": "请用日语输入。也能识别活用形和整句。",
+ "Escríbela en japonés, o escribe lo que significa, como «perro» o «aunque», para buscarla por su significado. También entiende formas conjugadas y frases enteras.": "请用日语输入，或者输入它的意思（比如“dog”或“although”）按意思查找。也能识别活用形和整句。",
  "Escribiendo…": "正在写作……",
  "Escribir": "写作",
  "Escribiste: {0}": "你写的是：{0}",
