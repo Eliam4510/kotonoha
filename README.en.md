@@ -94,6 +94,12 @@ Pages that are images, such as manga, scanned books and many PDFs, are read with
 
 The **Clipboard** collects what you copy anywhere and shows it with its paragraphs, headings, lists and tables, analysed and with furigana. It opens in a normal tab, also in the browser’s split view next to the page you are reading, and reads the text aloud. You can also dictate to it: what you say into the microphone is transcribed on your computer and added as a new paragraph, with its recording to play again.
 
+### Pitch accent, out loud
+
+<img src="docs/img/practica.en.png" alt="Pitch accent practice: the pitch curve of the voice over each word’s expected accent" width="100%">
+
+**Practice** shows the accent of each word in the sentence. You read it aloud and Kotonoha lays the pitch curve of your voice over the expected one, says which words have the fall in the wrong place and points out long pauses. The pitch is measured in the browser and the recording is transcribed on your computer, without leaving it.
+
 ### How each kanji is written
 
 <img src="docs/img/trazos.en.png" alt="Stroke order of a word in the word panel" width="100%">

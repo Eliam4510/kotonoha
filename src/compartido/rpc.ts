@@ -145,6 +145,18 @@ export function flujoMotor(metodo: string, args: unknown[], alParte: (acumulado:
   return promesa;
 }
 
+/** Lee por partes un flujo cuyo avance llega como líneas de JSON: cada línea completa, una sola vez. */
+export function lectorJson<T>(alEvento: (e: T) => void): (acumulado: string) => void {
+  let vistos = 0;
+  return (acumulado: string) => {
+    const texto = acumulado.slice(vistos);
+    const fin = texto.lastIndexOf('\n');
+    if (fin < 0) return;
+    vistos += fin + 1;
+    for (const fila of texto.slice(0, fin).split('\n')) if (fila) alEvento(JSON.parse(fila) as T);
+  };
+}
+
 let flujosEnMarcha = 0;
 /** Cuántos trabajos largos hay en marcha: transcripciones, traducciones, revisiones. */
 export const flujosActivos = () => flujosEnMarcha;

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.13.1, along with how it has been verified.
+Status of each feature in version 0.14.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -103,6 +103,8 @@ Status of each feature in version 0.13.1, along with how it has been verified.
 | Following the clipboard, without the tab having focus | Automated |
 | Dictation into the Clipboard: the microphone, the time and level while recording, and the text at the end, already analysed, transcribed on the computer with the speech model from the settings | Automated, with synthetic voices in Japanese and English |
 | Each dictation's recording above its paragraph, to play it again; it goes with the text to the library, and one that no text uses is deleted after a week | Automated |
+| Pitch accent practice in the Clipboard, the Reading assistant’s texts and the text view: each word’s accent drawn, the recording, the pitch curve over the expected accent, a verdict per word and long pauses | Automated, with a synthetic voice |
+| The voice’s pitch measured in the browser (YIN), the morae placed using the voice and the transcription, and where the pitch falls in each word, also with a delayed peak and devoiced morae | Automated; tuned with minimal pairs (箸, 橋 and 端; 雨 and 飴) read by a synthetic voice and with a real recording |
 | Reading assistant: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
 | Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
 | Image folders as books: each folder, or each volume inside it, comes in as a book, with the cover first, a table of contents by chapter and landscape two-page spreads on their own | Automated, and with 40 real manga volumes |

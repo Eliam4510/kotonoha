@@ -98,6 +98,12 @@ Las páginas que son imágenes, como los mangas, los libros escaneados y muchos 
 
 El **Portapapeles** recoge lo que se copia en cualquier sitio y lo muestra con sus párrafos, títulos, listas y tablas, analizado y con furigana. Se abre en una pestaña normal, también en la vista dividida del navegador junto a la página que se esté leyendo, y lee el texto en voz alta. También se le puede dictar: lo dicho al micrófono se transcribe en el equipo y entra como un párrafo más, con su grabación para volver a oírla.
 
+### El acento, en voz alta
+
+<img src="docs/img/practica.png" alt="Práctica del acento tonal: la curva del tono de la voz sobre el acento esperado de cada palabra" width="100%">
+
+**Practicar** enseña el acento de cada palabra de la frase. Se lee en voz alta y Kotonoha pone la curva del tono de la voz sobre la esperada, dice en qué palabras cae el tono en otro sitio y señala las pausas largas. El tono se mide en el navegador y la grabación se transcribe en el equipo, sin salir de él.
+
 ### Cómo se escribe cada kanji
 
 <img src="docs/img/trazos.png" alt="Orden de los trazos de una palabra en la ficha" width="100%">

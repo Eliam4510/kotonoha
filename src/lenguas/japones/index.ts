@@ -4,6 +4,7 @@ import { idiomaActual, tm } from '../../compartido/i18n';
 import type { PaqueteLengua } from '../tipos';
 import { contarEscrituras, esTextoJapones, pareceFrase, proporcionDeKana, SIGNOS_FRASE } from './escritura';
 import { TEXTOS } from './textos';
+import { frasesAcentuales } from './practica';
 import { alinearFurigana, kataAHira, lecturaVisible, nombreFlexion, patronAcento, pegarSignos, separarMoras, tieneJapones } from './tokens';
 import { caracteresConTrazos } from './trazos';
 
@@ -58,6 +59,10 @@ export const JAPONES: PaqueteLengua = {
   acento: {
     patron: patronAcento,
     moras: separarMoras,
+    practica: {
+      frases: frasesAcentuales,
+      sinDiccionario: tm('Sin un diccionario de acento solo se juzgan las formas corteses, como 〜ます. Instala «{0}» en Ajustes, en Diccionarios.'),
+    },
     leyenda: [
       { clase: 'heiban', nombre: tm('Heiban') },
       { clase: 'atamadaka', nombre: tm('Atamadaka') },

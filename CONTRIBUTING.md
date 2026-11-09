@@ -78,6 +78,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/modelos-voz.mjs voz.wav` | Qué modelo transcribe cada cosa |
 | `node pruebas/ingles-whisper.mjs voz.wav` | Whisper en inglés en la GPU, con la corrección de Claude simulada |
 | `node pruebas/dictado.mjs voz-ja.wav [voz-en.wav]` | El dictado del Portapapeles con un micrófono falso y los modelos de voz guardados en el perfil, en la GPU: grabar, transcribir, volver a oír la grabación, guardarla en la biblioteca, la limpieza de las que nadie usa, una grabación sin voz y el micrófono sin permiso. Usa `KK_SALIDA=.dist-whisper` y no borra el perfil |
+| `node pruebas/practica.mjs voz.wav [--imagenes]` | La práctica del acento con un micrófono falso que dice «箸を使います。» y el modelo de voz guardado en el perfil, en la GPU: el acento esperado, grabar, la gráfica y los veredictos, la frase siguiente, Escape, la consulta de una palabra y el inglés, que no tiene práctica. Pone y quita el acento de sus palabras; con `--imagenes`, guarda también las imágenes del README. Usa `KK_SALIDA=.dist-whisper` y no borra el perfil |
 | `node pruebas/tarjetas.mjs audio.wav` | Anki simulado, memoria y grabación |
 | `node pruebas/sin-gpu.mjs` | Cuánto cuesta la interfaz sin aceleración por hardware |
 | `node pruebas/captura-real.mjs` | El creador de tarjetas con la captura real de una pestaña. Necesita un navegador visible |
@@ -202,6 +203,7 @@ Browser tests use a build with a fixed extension ID, created with `KK_SALIDA=.di
 | `node pruebas/trazos-web.mjs` | Stroke order, the Clipboard and its structure, a text EPUB in the viewer, split view |
 | `node pruebas/producto.mjs` | The new version notice with a simulated GitHub, the language selector on Home and in the sidebar, the helper command and the browser voice |
 | `node pruebas/dictado.mjs voz-ja.wav [voz-en.wav]` | Dictation into the Clipboard with a fake microphone and the speech models stored in the profile, on the GPU: recording, transcribing, playing the recording again, the library, cleaning up unused recordings, a silent recording and a microphone without permission |
+| `node pruebas/practica.mjs voz.wav [--imagenes]` | Pitch accent practice with a fake microphone saying «箸を使います。» and the speech model stored in the profile, on the GPU: the expected accent, recording, the chart and verdicts, the next sentence, Escape, looking up a word and English, which has no practice. It adds and removes the accent of its words; with `--imagenes`, it also saves the README images |
 | `node pruebas/ingles.mjs`, `node pruebas/aleman.mjs` | Studying English and German end to end |
 | `node pruebas/e2e.mjs` | The extension end to end in Edge. Video sites do not serve subtitles to an automated browser, so the real YouTube checks fail there and are verified by hand |
 

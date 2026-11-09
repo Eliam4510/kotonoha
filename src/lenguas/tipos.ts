@@ -6,7 +6,8 @@
 // MotorLengua trae lo que pesa más (analizador, reglas, prompts) y solo se carga donde hace falta.
 
 import type { AjustesLengua, ModoLectura, PromptPersonalizado } from '../compartido/ajustes';
-import type { EntradaDiccionario, FuenteBiblioteca, ResultadoAudio } from '../compartido/tipos';
+import type { EntradaDiccionario, FuenteBiblioteca, PalabraToken, ResultadoAudio } from '../compartido/tipos';
+import type { FraseAcentual } from '../nucleo/practicaAcento';
 import type { ReglasTranscripcion } from '../nucleo/transcripcion';
 import type { FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
 import type { DatosTrazos } from '../nucleo/trazos';
@@ -148,6 +149,12 @@ export interface AcentoLengua {
   moras?(lectura: string): string[];
   /** Qué significa cada color. */
   leyenda: { clase: string; nombre: string }[];
+  /** La práctica del acento con el micrófono: las frases acentuales de una frase analizada. Sin esto, no se ofrece. */
+  practica?: {
+    frases(palabras: PalabraToken[]): FraseAcentual[];
+    /** Lo que se puede juzgar sin el diccionario de acento instalado; `{0}` es el nombre del diccionario. */
+    sinDiccionario: string;
+  };
 }
 
 export interface NivelLengua {
