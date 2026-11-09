@@ -8,10 +8,13 @@ import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, Resultado
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
 import type { PuntoGramatica } from '../lenguas/tipos';
 import { enviarAlCreador } from './borrador';
+import { type Compartida, compartir, PanelCompartir } from './Compartir';
 import { Icono, type NombreIcono } from './iconos';
 import { formatoLectura, lengua } from './lengua';
 import { numero, tm, tr } from '../compartido/i18n';
 import { PanelTrazos } from './Trazos';
+import { type DatosTarjeta, type EstiloTarjeta, primerPunto, resolverLetra } from './tarjeta';
+import { type Paleta, paletaDe } from './paletas';
 import { decirConNavegador } from './vozNavegador';
 
 export const NOMBRE_ESTADO: Record<EstadoPalabra, string> = {
@@ -109,12 +112,15 @@ export function PanelFlujo({
   titulo,
   render,
   extra,
+  alTerminar,
 }: {
   metodo: string;
   args: unknown[];
   titulo: string;
   render?: (texto: string) => preact.ComponentChildren;
   extra?: preact.ComponentChildren;
+  /** Recibe la respuesta completa, por ejemplo para ponerla en la tarjeta para compartir. */
+  alTerminar?: (texto: string) => void;
 }) {
   const [texto, fijarTexto] = useState('');
   const [error, fijarError] = useState('');
@@ -161,6 +167,7 @@ export function PanelFlujo({
       fijarTexto(t);
       // Claude no responde tan rápido: esto venía de lo guardado.
       fijarGuardada(!!t && performance.now() - inicio < 350);
+      if (t) alTerminar?.(t);
     })
       .catch((e: Error) => {
         if (vivo) fijarError(e.message);
@@ -466,17 +473,25 @@ export interface PropsFicha {
   rastreada?: boolean;
 }
 
+interface SentidoVisible {
+  significado: string;
+  uso?: string;
+  nota?: string;
+}
+
 /**
  * El significado en esta frase, que es lo que el diccionario no puede darte. La ficha abre siempre con el
  * diccionario, sin gastar nada: Claude solo se consulta si se pide, y lo ya consultado aparece solo.
  */
-function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegir, children }: {
+function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegir, alSentido, children }: {
   contexto: ContextoIA;
   definiciones: string[];
   previo?: { significado: string; uso?: string };
   automatico: boolean;
   listo: boolean;
   alElegir: (i: number) => void;
+  /** Lo que significa en la frase, cuando se sabe: va en la tarjeta para compartir. */
+  alSentido?: (s: SentidoVisible | null) => void;
   children: (bloque: preact.ComponentChildren, boton: preact.ComponentChildren) => preact.ComponentChildren;
 }) {
   const clave = `${contexto.lema}|${contexto.lectura}|${contexto.frase}`;
@@ -524,6 +539,7 @@ function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegi
 
   const significado = s?.significado ?? previo?.significado;
   const uso = s?.uso ?? previo?.uso;
+  useEffect(() => alSentido?.(significado ? { significado, uso, nota: s?.nota || undefined } : null), [clave, significado, uso, s?.nota]);
   const bloque = significado || cargando ? (
     <div class={`sentido ${significado ? '' : 'cargando'}`}>
       <div class="sentido-cab">
@@ -636,6 +652,9 @@ export function Ficha(p: PropsFicha) {
   const [corrigiendo, fijarCorrigiendo] = useState(false);
   const [altoPanel, fijarAltoPanel] = useState(0);
   const [hojas, fijarHojas] = useState(0);
+  const [compartida, fijarCompartida] = useState<Compartida | null>(null);
+  const [sentido, fijarSentido] = useState<SentidoVisible | null>(null);
+  const [explicacionPatron, fijarExplicacionPatron] = useState<{ patron: string; texto: string } | null>(null);
   const cuerpo = useRef<HTMLDivElement>(null);
   const zonaPestana = useRef<HTMLDivElement>(null);
 
@@ -648,6 +667,7 @@ export function Ficha(p: PropsFicha) {
     fijarVerTodas(false);
     fijarCorrigiendo(false);
     fijarAltoPanel(0);
+    fijarCompartida(null);
     cuerpo.current?.scrollTo({ top: 0 });
     motor.buscar(p.lema, p.lectura).then((x) => {
       if (vivo) {
@@ -756,20 +776,86 @@ export function Ficha(p: PropsFicha) {
   const enviar = !!p.alEnviar;
   const defsVisibles = verTodas ? defsOrdenadas : defsOrdenadas.slice(0, 5);
 
+  // Compartir como imagen: la palabra o el patrón, lo que significa aquí y la frase donde apareció.
+  // El título es la fuente (el video, el libro) salvo cuando es una línea del propio texto, como la primera de una nota.
+  const tituloComoFuente = p.contexto.titulo?.trim() && ![p.contexto.frase, ...(p.contexto.antes ?? []), ...(p.contexto.despues ?? [])].some((l) => l?.includes(p.contexto.titulo!.trim()))
+    ? p.contexto.titulo.trim()
+    : undefined;
+  const resaltadoEn = (frase: string | undefined, trozo: string | undefined) => {
+    const i = frase && trozo ? frase.indexOf(trozo) : -1;
+    return i >= 0 && trozo ? { inicio: i, fin: i + trozo.length } : undefined;
+  };
+  const datosPalabra = (): DatosTarjeta => {
+    const paquete = lengua.value;
+    const titulo = paquete.lectura.distingue && r.lectura && r.lectura !== r.lema
+      ? paquete.lectura.segmentar(r.lema, r.lectura).map((s) => ({ texto: s.texto, lectura: s.lectura ? paquete.lectura.visible(s.lectura, formatoLectura.value) : undefined }))
+      : [{ texto: r.lema }];
+    const moras = r.acentos.length ? paquete.acento?.moras?.(r.lectura) ?? [] : [];
+    const tono = (oscuro: boolean) => {
+      const paleta = paletaDe(p.ajustes.paleta, oscuro);
+      return paleta[(r.patron && r.patron in paleta ? r.patron : 'heiban') as keyof Paleta];
+    };
+    return {
+      etiqueta: tr('Palabra'),
+      titulo,
+      pronunciacion: r.pronunciaciones?.length ? r.pronunciaciones.map((t) => `${t.zona.toUpperCase()}  ${t.ipa}`).join('      ') : undefined,
+      acento: moras.length ? { moras, posicion: r.acentos[0], color: { oscuro: tono(true), claro: tono(false) } } : undefined,
+      rotulo: sentido ? tr('En esta frase') : tr('Significado'),
+      deClaude: !!sentido,
+      uso: sentido?.uso && sentido.uso !== 'literal' ? (NOMBRES_USO[sentido.uso] ? tr(NOMBRES_USO[sentido.uso]) : sentido.uso) : undefined,
+      significado: sentido?.significado ?? defsOrdenadas[0],
+      otros: sentido ? [] : defsOrdenadas.slice(1, 3),
+      nota: sentido?.nota,
+      frase: p.contexto.frase,
+      resaltado: resaltadoEn(p.contexto.frase, p.superficie ?? r.lema),
+      traduccion: p.contexto.traduccion,
+      fuente: tituloComoFuente,
+    };
+  };
+  const datosGramatica = (g: PuntoGramatica): DatosTarjeta => ({
+    etiqueta: tr('Gramática'),
+    nivel: g.nivel,
+    titulo: [{ texto: g.patron }],
+    rotulo: tr('Significado'),
+    significado: tr(g.significado),
+    nota: explicacionPatron?.patron === g.patron ? primerPunto(explicacionPatron.texto) || undefined : undefined,
+    frase: p.contexto.frase,
+    resaltado: resaltadoEn(p.contexto.frase, g.fragmento),
+    traduccion: p.contexto.traduccion,
+    fuente: tituloComoFuente,
+  });
+  const compartirComo = (origen: string, datos: DatosTarjeta, nombre: string) => {
+    if (compartida?.origen === origen) return fijarCompartida(null);
+    const tema: EstiloTarjeta = cuerpo.current?.closest('[data-tema]')?.getAttribute('data-tema') === 'claro' ? 'claro' : 'oscuro';
+    fijarCompartida(compartir(origen, datos, `kotonoha-${nombre}`, tema, resolverLetra(cuerpo.current, lengua.value.letra)));
+    if (origen === 'palabra') cuerpo.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const panelCompartir = (origen: string) =>
+    compartida?.origen === origen && <PanelCompartir c={compartida} alCambiar={fijarCompartida} alCerrar={() => fijarCompartida(null)} />;
+
   const bloqueGramatica = p.gramatica && p.gramatica.length > 0 ? (
     <div key="gram" class="ficha-bloque">
       <div class="subtitulo-def">{tr('Gramática en esta frase')}</div>
       <div class="ficha-chips">
         {p.gramatica.map((g) => (
-          <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={tr(g.significado)} aria-pressed={patron?.patron === g.patron} onClick={() => fijarPatron(patron?.patron === g.patron ? null : g)}>
+          <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={tr(g.significado)} aria-pressed={patron?.patron === g.patron} onClick={() => {
+            fijarPatron(patron?.patron === g.patron ? null : g);
+            if (compartida?.origen === 'gramatica') fijarCompartida(null);
+          }}>
             <span lang={lengua.value.id}>{g.patron}</span>{g.nivel && <small>{g.nivel}</small>}
           </button>
         ))}
       </div>
       {patron && (
         <div class="ficha-patron">
-          <div class="ayuda">{tr(patron.significado)}</div>
-          <PanelFlujo metodo="gramatica" args={[{ ...contexto, lema: patron.patron }]} titulo={patron.patron} />
+          <div class="ficha-patron-cab">
+            <div class="ayuda">{tr(patron.significado)}</div>
+            <button class={`btn-icono chico ${compartida?.origen === 'gramatica' ? 'activo' : ''}`} data-tip={tr('Compartir como imagen')} data-tip-lado="izq" aria-label={tr('Compartir como imagen')} aria-pressed={compartida?.origen === 'gramatica'} onClick={() => compartirComo('gramatica', datosGramatica(patron), patron.patron)}>
+              <Icono n="compartir" t={15} />
+            </button>
+          </div>
+          {panelCompartir('gramatica')}
+          <PanelFlujo metodo="gramatica" args={[{ ...contexto, lema: patron.patron }]} titulo={patron.patron} alTerminar={(texto) => fijarExplicacionPatron({ patron: patron.patron, texto })} />
         </div>
       )}
     </div>
@@ -929,6 +1015,9 @@ export function Ficha(p: PropsFicha) {
                 <Icono n="lapiz" t={17} />
               </button>
             )}
+            <button class={`btn-icono ${compartida?.origen === 'palabra' ? 'activo' : ''}`} data-tip={tr('Compartir como imagen')} aria-label={tr('Compartir como imagen')} aria-pressed={compartida?.origen === 'palabra'} onClick={() => compartirComo('palabra', datosPalabra(), r.lema)}>
+              <Icono n="compartir" t={17} />
+            </button>
             <BotonAudio key={r.clave} lema={r.lema} lectura={r.lectura} />
             {p.alCerrar && <button class="btn-icono" data-tip={tr('Cerrar · Esc')} aria-label={tr('Cerrar')} onClick={p.alCerrar}><Icono n="cerrar" t={17} /></button>}
           </div>
@@ -962,10 +1051,11 @@ export function Ficha(p: PropsFicha) {
       </div>
 
       <div class="ficha-cuerpo" ref={cuerpo}>
+        {panelCompartir('palabra')}
         {corrigiendo && p.contexto.frase && (
           <CorregirLectura contexto={contexto} textoLinea={p.contexto.frase} superficie={p.superficie ?? r.lema} alHecho={p.alCorregirLectura} alCerrar={() => fijarCorrigiendo(false)} />
         )}
-        <ConSentido contexto={contexto} definiciones={definicionesUnicas} previo={p.sentidoPrevio} automatico={p.ajustes.sentidoAutomatico} listo={sincronizada} alElegir={fijarElegida}>
+        <ConSentido contexto={contexto} definiciones={definicionesUnicas} previo={p.sentidoPrevio} automatico={p.ajustes.sentidoAutomatico} listo={sincronizada} alElegir={fijarElegida} alSentido={fijarSentido}>
           {(bloque, boton) => (
             <>
               {bloque}
