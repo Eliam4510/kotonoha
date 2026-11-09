@@ -435,15 +435,27 @@ if (quiere('local')) {
 
 // ---------- YouTube real ----------
 
-/** YouTube suele negarse a reproducir en un navegador automatizado, y eso no dice nada de la extensión. */
+/**
+ * YouTube suele negarse a reproducir en un navegador automatizado, y eso no dice nada de la extensión. Tampoco que
+ * responda vacío al pedir los subtítulos: desde noviembre de 2026 se lo hace también a su propio reproductor, con su
+ * token, y a una petición directa sin la extensión instalada.
+ */
 async function youtubeReproduce() {
   const p = await contexto.newPage();
+  const tamanos = [];
+  p.on('response', async (r) => {
+    if (r.url().includes('/api/timedtext')) tamanos.push(await r.body().then((b) => b.length).catch(() => -1));
+  });
   await p.goto('https://www.youtube.com/watch?v=Jh2C7JlWGKU', { waitUntil: 'domcontentloaded' }).catch(() => {});
   await p.waitForTimeout(6000);
   const error = await p.evaluate(() => document.querySelector('.ytp-error')?.textContent ?? '').catch(() => '');
+  // La extensión pide los subtítulos al cargar el video: se espera a la primera respuesta.
+  for (let i = 0; i < 30 && !error && !tamanos.length; i++) await p.waitForTimeout(500);
   await p.close();
+  const vacios = tamanos.length > 0 && tamanos.every((t) => t === 0);
   if (error) console.log('\n== YouTube real ==\nSe omite: el reproductor rechaza este navegador automatizado.');
-  return !error;
+  else if (vacios) console.log('\n== YouTube real ==\nSe omite: YouTube responde vacío a los subtítulos en un navegador automatizado.');
+  return !error && !vacios;
 }
 
 if (quiere('youtube') && (await youtubeReproduce())) {

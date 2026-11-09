@@ -64,6 +64,8 @@ await p.evaluate(
           ja: {
             palabras: [{ clave: '猫|ねこ', lema: '猫', lectura: 'ねこ', estado: 'aprendiendo', rastreada: 1, creada: ahora, actualizada: ahora }],
             biblioteca: [{ id: LIBRO, titulo: 'Libro de prueba', texto: '', origen: 'archivo', creado: ahora }],
+            gramatica: [{ patron: 'ことができる', estado: 'sabido', actualizada: ahora }],
+            gramaticaVista: [{ clave: 'ことができる|video-de-prueba', patron: 'ことができる', fuente: 'video-de-prueba', titulo: 'Un video', frase: '泳ぐことができる', veces: 2, ultima: ahora }],
           },
         },
       })
@@ -131,6 +133,10 @@ comprobar(enBases.libroBien, 'El archivo del libro queda en el almacenamiento, b
 comprobar(enBases.paginas === 1, 'El texto del OCR queda en su base', enBases.paginas);
 comprobar(enBases.grabacion?.id === 'dictado-1' && enBases.grabacion.tipo === 'audio/webm;codecs=opus' && enBases.grabacion.tam === 8, 'El dictado queda con su audio', JSON.stringify(enBases.grabacion));
 comprobar((await sw.evaluate(() => chrome.storage.local.get('ajustes').then((d) => d.ajustes.azureClave))) === 'CLAVE-AZURE-DE-PRUEBA', 'Restaurar no borra la clave que ya había');
+const motorDe = (metodo, ...args) => p.evaluate(({ metodo, args }) => chrome.runtime.sendMessage({ canal: 'motor', metodo, args }).then((r) => r?.valor), { metodo, args });
+const estadosGramatica = await motorDe('estadosGramatica');
+const vistas = await motorDe('gramaticaVista', 'ことができる');
+comprobar(estadosGramatica?.['ことができる'] === 'sabido' && vistas?.[0]?.veces === 2, 'Lo que se sabe de la gramática y dónde se vio vuelven con la copia', `${JSON.stringify(estadosGramatica)}, ${vistas?.length ?? 0} vistas`);
 
 // ---------- Exportar ----------
 await elegir(['prueba-copias', 'exportadas']);
@@ -154,6 +160,7 @@ const exportado = await p.evaluate(async (LIBRO) => {
     carpetas: nombres,
     palabras: datos.lenguas?.ja?.palabras?.length ?? 0,
     biblioteca: datos.lenguas?.ja?.biblioteca?.length ?? 0,
+    gramatica: `${datos.lenguas?.ja?.gramatica?.length ?? 0}/${datos.lenguas?.ja?.gramaticaVista?.length ?? 0}`,
     clave: 'azureClave' in (datos.ajustes ?? {}),
     texto: JSON.stringify(datos).includes('CLAVE-AZURE'),
     libro: libro.size,
@@ -164,6 +171,7 @@ const exportado = await p.evaluate(async (LIBRO) => {
 }, LIBRO);
 comprobar(exportado.carpetas.length === 1, 'Una carpeta por copia', exportado.carpetas.join(', '));
 comprobar(exportado.palabras === 1 && exportado.biblioteca === 1, 'Lleva las palabras y la biblioteca', `${exportado.palabras} y ${exportado.biblioteca}`);
+comprobar(exportado.gramatica === '1/1', 'Lleva lo que se sabe de la gramática y dónde se vio', exportado.gramatica);
 comprobar(!exportado.clave && !exportado.texto, 'Las claves de API no van en la copia');
 comprobar(exportado.libro === BYTES, 'Lleva el archivo del libro', exportado.libro);
 comprobar(exportado.paginas === 1, 'Lleva el texto del OCR', exportado.paginas);

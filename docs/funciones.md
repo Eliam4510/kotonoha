@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.27.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.27.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -29,7 +29,7 @@ Estado de cada función en la versión 0.27.0, con la forma en que se ha verific
 | Kanji que ya conoces: junto a los trazos, las palabras conocidas o en aprendizaje con cada kanji de la palabra, las conocidas primero | Automática, con palabras sembradas en la base |
 | Compartir como imagen: la tarjeta de la palabra (furigana, acento, lo que significa en la frase o el diccionario, la frase con la palabra resaltada) o de un punto de gramática, copiada al portapapeles al pulsar; Tinta o Papel; Guardar imagen | Automática, con un Claude simulado, leyendo el portapapeles |
 | JLPT: vocabulario (8354 palabras), kanji (2211) y gramática (501 puntos) de N5 a N1 con lo que se conoce de cada nivel; cambiar el estado una a una o todas las elegidas; ficha del kanji con trazos y palabras del nivel; ejemplos de cada punto de gramática entre las frases vistas, y su explicación con Claude | Automática, con un Claude simulado |
-| Diccionario: buscar por significado entre las palabras de uso común, con la glosa que encaja; la gramática del JLPT por su forma o su significado; bajo cada palabra, sus kanji con su nivel, los homófonos y las palabras parecidas (Claude); siete categorías para explorar según las etiquetas de JMdict | Automática, con los diccionarios del perfil de pruebas y un Claude simulado |
+| Diccionario: buscar por significado entre las palabras de uso común, con la glosa que encaja; la gramática del JLPT por su forma o su significado; bajo cada palabra, sus kanji con su nivel, las de uso común que significan lo mismo, los homófonos y las palabras parecidas (Claude); siete categorías para explorar según las etiquetas de JMdict | Automática, con los diccionarios del perfil de pruebas y un Claude simulado |
 | Gramática con estados: nuevo, aprendiendo o sabido en el globo del video, la ficha, el JLPT y el diccionario; lo sabido no se señala bajo los subtítulos; dónde se ha visto cada punto; tarjeta de opción múltiple con distractores de Claude; importar desde Anki contra los 501 puntos de las listas | Automática (estados, filtro, guardado y vuelta atrás en la pantalla JLPT); la importación, con pruebas unitarias |
 | Modo Dictado: frase oculta, pausa al final, escribir lo oído y comparar (en japonés por la lectura y con las otras lecturas del diccionario); Oír otra vez, Seguir con Enter; Repetir con tu voz (botón y tecla P) abre la práctica del acento con la frase | Automática, sobre la página de video de pruebas |
 | Cómo suena de verdad (inglés): la frase con su forma hablada encima, con reducciones, formas débiles, uniones, t o d con you y la t suave americana, y una leyenda; por reglas, sin Claude | Automática, con pruebas unitarias de las reglas |

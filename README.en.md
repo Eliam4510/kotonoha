@@ -118,13 +118,18 @@ The word panel shows the stroke order of every kanji in the word, one stroke at 
 
 The **JLPT** screen brings together the vocabulary, kanji and grammar of each level, from N5 to N1, and shows how much of each you already know, from the words marked while watching and reading. Words you already know are marked all at once, each kanji shows its strokes and the words that use it, and each grammar point, the sentences you have seen it in.
 
+### A dictionary to explore
+
+<img src="docs/img/diccionario.en.png" alt="Dictionary with the word 話す: its kanji, words with the same meaning and words read the same way" width="100%">
+
+The dictionary also searches by meaning, such as “dog” → 犬, and finds grammar by its form or its meaning. Below each word are its kanji with their level; **Same meaning**, with the common words that mean the same, such as 喋る or 会話 for 話す; and the words read the same way, such as 離す and 放す. Claude explains how they differ when asked. The start page gathers onomatopoeia, proverbs, four-kanji expressions, and literary, colloquial and respectful words.
+
 ### German too
 
 The same tools work for German: the word panel tells you which word each conjugated or declined form comes from, such as *ging* from *gehen* or *Häuser* from *Haus*, finds separable verbs even when the particle sits at the end of the sentence, and gives the pronunciation in IPA. Its dictionaries come from Wiktionary, and German speech is transcribed by Parakeet. Speakers of other languages can study English the same way. Comics are read balloon by balloon, from left to right, and sentences are spoken by neural voices on your own computer: Kokoro in English and Piper in German. Each language keeps its own words, cards and settings, and switching takes one click.
 
 ### And also
 
-- **A dictionary to explore.** Search by meaning (“dog” → 犬), find grammar by its form or its meaning, see the kanji and homophones of each word, and browse onomatopoeia, proverbs, four-kanji expressions and more.
 - **Grammar you already know.** Each point is marked as new, learning or known; known points are no longer flagged under subtitles, each point remembers the videos it appeared in, and it can be imported from Anki or turned into a multiple-choice card.
 - **Dictation and Repeat in your voice.** Dictation mode hides the line, pauses at the end and compares what you type with what was said; with `P`, any subtitle can be practised out loud.
 - **How English really sounds.** The word panel shows the sentence as it is said in connected speech: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, with what happens in each case.

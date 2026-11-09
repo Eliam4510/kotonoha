@@ -122,6 +122,12 @@ La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y
 
 La pantalla **JLPT** reúne el vocabulario, los kanji y la gramática de cada nivel, de N5 a N1, y dice cuánto se conoce ya de cada uno, a partir de las palabras marcadas mientras se ve y se lee. Las que ya se saben se marcan de una vez, cada kanji enseña sus trazos y las palabras que lo llevan, y cada punto de gramática, las frases vistas en que apareció.
 
+### Un diccionario para explorar
+
+<img src="docs/img/diccionario.png" alt="Diccionario con la palabra 話す: su kanji, las palabras que significan lo mismo y las que se leen igual" width="100%">
+
+El diccionario busca también por significado, como «perro» → 犬, y encuentra la gramática por su forma o por su sentido. Debajo de cada palabra están sus kanji con su nivel; **Significan lo mismo**, con las de uso común del mismo significado, como 喋る o 会話 para 話す, y las que se leen igual, como 離す y 放す. Claude explica en qué se diferencian cuando se le pide. La portada reúne onomatopeyas, refranes, expresiones de cuatro kanji y palabras literarias, coloquiales y respetuosas.
+
 ### Inglés y alemán
 
 <img src="docs/img/ingles-subtitulos.png" alt="Ficha de una palabra inglesa sobre un video, con la pronunciación en IPA" width="100%">
@@ -130,7 +136,6 @@ En inglés, la ficha da la pronunciación americana y británica en IPA, encuent
 
 ### Y además
 
-- **Un diccionario para explorar.** Busca por significado («perro» → 犬), encuentra la gramática por su forma o su sentido, enseña los kanji y los homófonos de cada palabra y reúne onomatopeyas, refranes, expresiones de cuatro kanji y más.
 - **Gramática que ya sabes.** Cada punto se marca como nuevo, en aprendizaje o sabido; lo sabido deja de señalarse bajo los subtítulos, cada punto recuerda en qué videos salió y se puede importar desde Anki o convertir en una tarjeta de opción múltiple.
 - **Dictado y Repetir con tu voz.** El modo Dictado oculta la frase, pausa al final y compara lo que escribes con lo que se dijo; con `P`, cualquier subtítulo se practica en voz alta.
 - **Cómo suena de verdad el inglés.** La ficha enseña la frase como se dice al hablar seguido: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, con lo que pasa en cada caso.

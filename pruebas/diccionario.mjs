@@ -103,6 +103,16 @@ await resultado.locator('.ap-mas-palabra .panel-ia-texto').waitFor({ timeout: 15
 comprobar((await resultado.locator('.ap-mas-palabra .panel-ia-texto').innerText()).length > 20, 'Claude explica las palabras parecidas cuando se pide');
 await p.screenshot({ path: join(CAPTURAS, '3-palabra.png'), fullPage: true });
 
+// Las que significan lo mismo salen del diccionario, sin Claude.
+await ir('食べる');
+const conSinonimos = p.locator('.ap-resultado').first();
+await conSinonimos.locator('.ap-sinonimos .chip').first().waitFor({ timeout: 20000 }).catch(() => {});
+const sinonimos = await conSinonimos.locator('.ap-sinonimos .chip').allTextContents();
+comprobar(sinonimos.includes('食う') && !sinonimos.includes('食べる'), 'Y las que significan lo mismo, sin ella: 食う para 食べる', sinonimos.join(' '));
+const pista = await conSinonimos.locator('.ap-sinonimos .chip', { hasText: '食う' }).first().getAttribute('data-tip').catch(() => '');
+comprobar(/くう/.test(pista ?? ''), 'Con su lectura y su significado al pasar el ratón', pista);
+await conSinonimos.locator('.ap-mas-palabra').screenshot({ path: join(CAPTURAS, '4-sinonimos.png') }).catch(() => {});
+
 // ---------- Categorías ----------
 
 await ir('');

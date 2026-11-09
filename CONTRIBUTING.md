@@ -70,7 +70,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/aleman.mjs` | Estudiar alemán de principio a fin con los diccionarios reales |
 | `node pruebas/subtitulos.mjs` | Traducir, corregir, exportar e importar, en páginas que imitan a Netflix y YouTube y con una API de Claude simulada |
 | `node pruebas/experiencia.mjs` | Lo que se percibe sobre el video, fotograma a fotograma: parpadeos, temblores y arrastre, y el registro del gasto |
-| `node pruebas/e2e.mjs` | La extensión de extremo a extremo en Edge. Los sitios de video no sirven subtítulos a un navegador automatizado: lo de YouTube real falla ahí y se comprueba a mano |
+| `node pruebas/e2e.mjs` | La extensión de extremo a extremo en Edge. Los sitios de video no sirven subtítulos a un navegador automatizado: si YouTube responde vacío, la prueba omite lo de YouTube real, que se comprueba a mano |
 | `node pruebas/modelos-guardados.mjs` | La lista de modelos guardados, y que borrar uno no rompa otro que comparte sus archivos |
 | `node pruebas/producto.mjs` | El aviso de versión nueva con GitHub simulado, el selector de idioma en Inicio y en la barra lateral, la orden del ayudante y la voz del navegador |
 | `node pruebas/ingles-grande.mjs` | El diccionario más grande con un perfil limpio. Descarga unos 110 MB |
@@ -84,7 +84,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/cuaderno.mjs` | El Cuaderno: escribir con los atajos y los botones, que se guarde solo como Markdown, leer a todo lo ancho, la velocidad y el modo de la lectura en voz alta, practicar un trozo seleccionado, «Organizar» con el Claude simulado y deshacerlo, guardar en la biblioteca (y que se siga guardando allí) y volver a abrir desde la biblioteca. Usa el perfil de `local.mjs` |
 | `node pruebas/compartir.mjs` | Compartir como imagen: la tarjeta de una palabra con y sin lo que significa en la frase (Claude simulado), copiada al portapapeles en los dos estilos y guardada como archivo; la de un punto de gramática, y una en inglés. Las imágenes quedan en `capturas-e2e/compartir` |
 | `node pruebas/niveles.mjs` | La pantalla JLPT: las tarjetas de N5 a N1, el vocabulario con sus estados (uno a uno y en grupo, y vuelta a como estaba), la ficha de un kanji con sus trazos, los ejemplos de un punto de gramática y su explicación con el Claude simulado; estudiando inglés no aparece |
-| `node pruebas/diccionario.mjs` | El diccionario: buscar por significado («perro» → 犬, y el tiempo del índice), la gramática por su forma y su significado, los kanji y los homófonos de una palabra, las palabras parecidas con el Claude simulado y las categorías para explorar |
+| `node pruebas/diccionario.mjs` | El diccionario: buscar por significado («perro» → 犬, y el tiempo del índice), la gramática por su forma y su significado, los kanji, los sinónimos (食う para 食べる) y los homófonos de una palabra, las palabras parecidas con el Claude simulado y las categorías para explorar |
 | `node pruebas/dictado-video.mjs` | El modo Dictado sobre la página de video de pruebas: la frase oculta, la pausa al final, lo escrito en kana comparado por la lectura (con las otras lecturas del diccionario), lo que falta marcado, Seguir con Enter y Repetir con tu voz abriendo la práctica con la frase |
 | `node pruebas/como-suena.mjs` | La pestaña «Cómo suena» de la ficha con una frase inglesa del Cuaderno: la forma hablada encima de cada trozo y la leyenda; en japonés no aparece |
 | `node pruebas/voz-local.mjs [--real]` | La voz local con un motor simulado que habla la API de VOICEVOX: Ajustes lo encuentra y enseña sus voces, «Probar», la lectura en voz alta con el acento del diccionario corregido, la caché, la ficha y la vuelta a la voz del navegador con el motor cerrado. Con `--real`, también AivisSpeech si está abierto. Usa el perfil base |
@@ -95,7 +95,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/medios.mjs audio.wav` | ffmpeg.wasm con un MKV de varias pistas |
 | `node pruebas/ayudante.mjs [video.mp4]` | El ayudante de PowerShell sin tocar el registro: el instalador, los dos modos de conversión, cancelar, los errores y la actualización de la extensión, con descargas desde el propio equipo |
 | `node pruebas/actualizar.mjs` | **Actualizar ahora** de punta a punta, con el ayudante registrado y una versión servida desde el propio equipo |
-| `node pruebas/copia-completa.mjs` | La copia completa de ida y vuelta, sin diálogos |
+| `node pruebas/copia-completa.mjs` | La copia completa de ida y vuelta, sin diálogos: un libro con su archivo y su OCR, un dictado, palabras y lo marcado en la gramática, y sin claves |
 | `node pruebas/voz-neuronal.mjs` | Las voces neuronales del inglés y del alemán desde Ajustes, con su caché |
 | `node pruebas/ayudante-navegador.mjs video.mp4` | Todo el camino del ayudante, desde el panel hasta Whisper en la GPU; con `KK_SIN_FFMPEG=1`, convirtiendo en la extensión |
 | `node pruebas/whisper-comparar.mjs corpus` | Precisión de los modelos con frases reales |
@@ -130,6 +130,7 @@ La documentación nombra los botones y las pantallas tal como aparecen en la int
 | `node pruebas/capturas/cuaderno.mjs` | La imagen del Cuaderno del README en cada idioma de la interfaz, con una nota de dominio público; en japonés, en inglés |
 | `node pruebas/capturas/tarjeta.mjs` | La tarjeta para compartir del README en cada idioma de la interfaz, copiada del portapapeles; en japonés, la de una palabra inglesa |
 | `node pruebas/capturas/niveles.mjs` | La imagen de la pantalla JLPT del README en cada idioma de la interfaz, con unas palabras marcadas que luego se devuelven a «Desconocida» |
+| `node pruebas/capturas/diccionario.mjs` | La imagen del diccionario del README en cada idioma de la interfaz que estudia japonés: la ficha de 話す con su kanji, sus sinónimos y sus homófonos, con los diccionarios que tendría quien lee cada README |
 | `node herramientas/jlpt.mjs` | Vuelve a generar `publico/datos/jlpt`: el vocabulario y los kanji de las listas de Jonathan Waller (copias del Internet Archive, CC BY) y la gramática de `herramientas/jlpt/gramatica.tsv` |
 | `node pruebas/capturas.mjs` | El banco de capturas de todas las pantallas, para revisar el diseño |
 | `node pruebas/capturas/demo.mjs` | El GIF de demostración |
@@ -226,13 +227,13 @@ Browser tests use a build with a fixed extension ID, created with `KK_SALIDA=.di
 | `node pruebas/cuaderno.mjs` | The Notebook: writing with shortcuts and buttons, saving itself as Markdown, full-width reading, read-aloud speed and mode, practising a selected part, “Organize” with the simulated Claude and undoing it, saving to the library (and keeping it saved there) and reopening from the library. It uses the `local.mjs` profile |
 | `node pruebas/compartir.mjs` | Share as image: the card for a word with and without what it means in the sentence (simulated Claude), copied to the clipboard in both styles and saved as a file; the card for a grammar point, and one in English. The images are left in `capturas-e2e/compartir` |
 | `node pruebas/niveles.mjs` | The JLPT screen: the N5 to N1 cards, the vocabulary with its statuses (one by one and in bulk, then back as it was), a kanji card with its strokes, the examples of a grammar point and its explanation by the simulated Claude; it does not appear when studying English |
-| `node pruebas/diccionario.mjs` | The dictionary: search by meaning (“perro” → 犬, and the index time), grammar by form and meaning, a word’s kanji and homophones, similar words with the simulated Claude, and the categories to explore |
+| `node pruebas/diccionario.mjs` | The dictionary: search by meaning (“perro” → 犬, and the index time), grammar by form and meaning, a word’s kanji, synonyms (食う for 食べる) and homophones, similar words with the simulated Claude, and the categories to explore |
 | `node pruebas/dictado-video.mjs` | Dictation mode on the test video page: the hidden line, the pause at the end, kana input compared by reading (with the other dictionary readings), what is missing marked, Continue with Enter, and Repeat in your voice opening practice with the line |
 | `node pruebas/como-suena.mjs` | The «How it sounds» tab on the word panel with an English sentence in the Notebook: the spoken form above each part and the legend; it does not appear in Japanese |
 | `node pruebas/voz-local.mjs [--real]` | The local voice with a simulated engine speaking the VOICEVOX API: Settings finds it and lists its voices, “Try”, read aloud with the dictionary accent applied, the cache, the word panel and falling back to the browser voice with the engine closed. With `--real`, AivisSpeech too if it is open. Uses the base profile |
 | `node pruebas/proveedores.mjs` | Another AI provider with a simulated server that behaves like DeepSeek (it rejects the JSON schema and high token limits): the Settings card, its models, the connection test, the streamed explanation with the key, the meaning in context in JSON mode and spending with the provider’s cost. Uses the base profile and spends nothing |
 | `node pruebas/ingles.mjs`, `node pruebas/aleman.mjs` | Studying English and German end to end |
-| `node pruebas/e2e.mjs` | The extension end to end in Edge. Video sites do not serve subtitles to an automated browser, so the real YouTube checks fail there and are verified by hand |
+| `node pruebas/e2e.mjs` | The extension end to end in Edge. Video sites do not serve subtitles to an automated browser: if YouTube answers with an empty response, the test skips the real YouTube checks, which are verified by hand |
 
 The full list, with the speech and helper tests, is in the Spanish section above.
 

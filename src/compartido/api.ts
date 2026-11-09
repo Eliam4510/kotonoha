@@ -163,6 +163,8 @@ export interface ApiMotor {
   cuentaCategorias(): Promise<Record<string, number>>;
   /** Las palabras que se leen igual que una. */
   homofonos(lectura: string, excluir: string): Promise<EntradaBreve[]>;
+  /** Las palabras de uso común que significan lo mismo que una. */
+  sinonimos(lema: string, lectura: string): Promise<EntradaBreve[]>;
   muestraEvaluacion(): Promise<{ lema: string; lectura: string; rango: number }[]>;
   aplicarEvaluacion(rangoEstimado: number): Promise<number>;
   importarConocidasAnki(consulta: string, campo: string): Promise<number>;
