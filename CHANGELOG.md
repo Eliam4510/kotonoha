@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.3 · 2026-11-09
+
+- **La ficha del Cuaderno, entera.** En el Cuaderno, la ficha de una palabra empieza debajo de la cabecera y, con la altura de la ventana, su parte de abajo, con **Enviar al creador**, quedaba fuera hasta desplazar la página. Ahora cabe entera.
+- El README japonés, que presenta el inglés, enseña la pestaña **Cómo suena** (音声変化) con una imagen.
+
 ## 0.27.2 · 2026-11-09
 
 - **El diccionario dice lo que sabe hacer.** Su portada explica que, además de escribir la palabra en japonés, se puede escribir lo que significa, como «perro» o «aunque», para buscarla por su significado o encontrar la gramática: hasta ahora no lo anunciaba en ningún sitio.
@@ -204,6 +209,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.3 · 2026-11-09
+
+- **The Notebook's word panel, in full.** In the Notebook, the word panel starts below the header and, at the window's height, its bottom with **Send to creator** was cut off until the page was scrolled. It now fits.
+- The Japanese README, which presents English, shows the **How it sounds** tab (音声変化) with an image.
 
 ## 0.27.2 · 2026-11-09
 

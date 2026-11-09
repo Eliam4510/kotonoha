@@ -131,6 +131,7 @@ La documentación nombra los botones y las pantallas tal como aparecen en la int
 | `node pruebas/capturas/tarjeta.mjs` | La tarjeta para compartir del README en cada idioma de la interfaz, copiada del portapapeles; en japonés, la de una palabra inglesa |
 | `node pruebas/capturas/niveles.mjs` | La imagen de la pantalla JLPT del README en cada idioma de la interfaz, con unas palabras marcadas que luego se devuelven a «Desconocida» |
 | `node pruebas/capturas/diccionario.mjs` | La imagen del diccionario del README en cada idioma de la interfaz que estudia japonés: la ficha de 話す con su kanji, sus sinónimos y sus homófonos, con los diccionarios que tendría quien lee cada README |
+| `node pruebas/capturas/como-suena.mjs` | La imagen de «Cómo suena» (音声変化) del README japonés, que presenta el inglés: el Cuaderno con un texto inglés propio y la ficha abierta en esa pestaña |
 | `node herramientas/jlpt.mjs` | Vuelve a generar `publico/datos/jlpt`: el vocabulario y los kanji de las listas de Jonathan Waller (copias del Internet Archive, CC BY) y la gramática de `herramientas/jlpt/gramatica.tsv` |
 | `node pruebas/capturas.mjs` | El banco de capturas de todas las pantallas, para revisar el diseño |
 | `node pruebas/capturas/demo.mjs` | El GIF de demostración |
