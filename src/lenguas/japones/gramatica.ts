@@ -120,3 +120,6 @@ export const REGLAS: ReglaGramatica[] = [
 
 /** Encuentra los puntos de gramática de una línea. Si dos se pisan se queda con el más largo. */
 export const detectarGramatica = (texto: string): PuntoGramatica[] => aplicarReglas(REGLAS, texto);
+
+/** Todos los puntos que se detectan, sin su expresión regular: para casarlos con tarjetas de Anki. */
+export const puntosGramatica = () => REGLAS.map(({ patron, nivel, significado }) => ({ patron, nivel, significado }));

@@ -163,6 +163,8 @@ export const PROMPTS_INGLES: PromptsLengua = {
   imagen: 'Devuelve solo dos o tres palabras en inglés útiles para buscar una imagen que ilustre el término dado, según su sentido en la frase. Sin comillas.',
   glosa: (idioma) => `Traduce el término inglés a ${idioma} con una o dos palabras, en forma de diccionario. Responde solo con la traducción.`,
   revisarLectura: (idioma) => `Eres un experto en pronunciación del inglés. Decide cómo se pronuncia esta palabra en esta frase, teniendo en cuenta el contexto: read, lead o tear suenan distinto según su sentido. Responde en ${idioma}.`,
+  distractores: (idioma) =>
+    `Eres profesor de inglés y preparas una pregunta de opción múltiple sobre un punto de gramática. Recibes una frase real, el punto que aparece en ella, su sentido y el fragmento exacto. Propón tres opciones falsas: otros puntos de gramática del inglés que se confunden con este por la forma o por el sentido, de un nivel del MCER parecido, escritos como se enseñan (used to, be used to, would). Ninguna puede encajar bien en esa frase en lugar del fragmento. Para cada una, explica en ${idioma}, en una frase corta, por qué no va ahí.`,
   revisionOcr: promptRevisionOcr({
     lengua: 'inglés',
     confusiones: 'rn y m, l, I y 1, O y 0, cl y d, vv y w, las ligaduras (fi, fl), y las comillas y los apóstrofos',

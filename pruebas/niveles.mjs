@@ -164,6 +164,28 @@ comprobar((await p.locator('.ap-patron.abierto .panel-ia-texto').innerText()).le
 comprobar(mock.peticiones.some((x) => JSON.stringify(x.cuerpo?.messages ?? '').includes('Explica este punto de gramática') && JSON.stringify(x.cuerpo?.messages ?? '').includes('〜ている')), 'Y se le pregunta por ese patrón');
 await p.screenshot({ path: join(CAPTURAS, '3-gramatica.png') });
 
+// Cómo va cada punto: nuevo, aprendiendo o sabido.
+const gramN5 = async () => (await p.locator('.ap-nivel-examen', { hasText: 'N5' }).locator('dd').nth(2).textContent()).replace(/\s/g, '');
+const antesGram = await gramN5();
+await p.locator('.ap-patron.abierto .estado-gram button', { hasText: 'Sabido' }).click();
+await p.waitForTimeout(600);
+comprobar((await p.locator('.ap-patron.abierto .ap-patron-cab .punto-gram').getAttribute('class')).includes('sabido'), 'Un punto de gramática se marca como sabido');
+const despuesGram = await gramN5();
+comprobar(Number(despuesGram.split('/')[0]) === Number(antesGram.split('/')[0]) + 1, 'Y la tarjeta del nivel lo cuenta', `${antesGram} → ${despuesGram}`);
+await p.locator('.ap-niveles-filtros [role="radio"]', { hasText: 'Sabidos' }).click();
+await p.waitForTimeout(300);
+comprobar((await p.locator('.ap-patron').allTextContents()).some((t) => t.includes('〜ている')), 'El filtro «Sabidos» lo enseña');
+await p.reload();
+await p.getByRole('tab', { name: /Gramática/ }).click();
+await p.locator('.ap-patron').first().waitFor({ timeout: 10000 });
+const tras = await p.locator('.ap-patron', { hasText: '〜ている' }).first().locator('.punto-gram').getAttribute('class');
+comprobar(tras.includes('sabido'), 'Y se guarda: sigue sabido al volver', tras);
+// Como estaba.
+await p.locator('.ap-patron', { hasText: '〜ている' }).first().locator('.ap-patron-cab').click();
+await p.locator('.ap-patron.abierto .estado-gram button', { hasText: 'Nuevo' }).click();
+await p.waitForTimeout(500);
+comprobar((await gramN5()) === antesGram, 'Y vuelve a nuevo', await gramN5());
+
 // ---------- En inglés no hay listas ----------
 
 await sw.evaluate(async () => {

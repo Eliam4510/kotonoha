@@ -22,6 +22,7 @@ import { Abriendo, AvisoError, Cabeza } from './comun';
 import visorCss from './visor.css';
 import { VisorPaginas } from './VisorPaginas';
 import { VisorTexto } from './VisorTexto';
+import { seguirEstadosGramatica } from '../ui/gramatica';
 
 function Visor({ id }: { id: string }) {
   const [a, fijarA] = useState<Ajustes>(() => ({ ...AJUSTES_INICIALES, tema: leerPreferencia('tema', AJUSTES_INICIALES.tema) }));
@@ -38,6 +39,7 @@ function Visor({ id }: { id: string }) {
       fijarCargados(true);
     });
     cargarFuentes().catch(() => {});
+    seguirEstadosGramatica(() => lengua.value.id);
     return alCambiarAjustes(fijarA);
   }, []);
 

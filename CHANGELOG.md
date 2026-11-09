@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.25.0 · 2026-11-09
+
+- **Gramática que ya sabes.** Cada punto de gramática se marca como **Nuevo**, **Aprendiendo** o **Sabido**, en el globo del video, la ficha, la pantalla **JLPT** y el diccionario. Lo sabido deja de señalarse bajo los subtítulos. Cada punto recuerda en qué videos salió (**Dónde lo has visto**), se convierte en una **Tarjeta de opción múltiple** con opciones falsas elegidas por Claude, y se importa desde Anki (**Ajustes, Anki**), contra los 501 puntos de las listas del JLPT.
+
 ## 0.24.0 · 2026-11-09
 
 - **Un diccionario para explorar.** El diccionario busca también por significado: «perro» da 犬, 愛犬 o 番犬, con la glosa que encaja. Lo buscado se compara con la gramática del JLPT, por su forma o por lo que significa. Debajo de cada palabra están sus kanji con su nivel, lecturas y significado, las palabras que se leen igual y **Palabras parecidas y en qué se diferencian**, con Claude. Y en la portada, **Explorar el diccionario**: onomatopeyas, expresiones de cuatro kanji, refranes, expresiones idiomáticas, palabras literarias y arcaicas, coloquiales y lenguaje respetuoso.
@@ -180,6 +184,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.25.0 · 2026-11-09
+
+- **Grammar you already know.** Each grammar point is marked as **New**, **Learning** or **Known**, in the video bubble, the word panel, the **JLPT** screen and the dictionary. Known points are no longer flagged under subtitles. Each point remembers the videos it appeared in (**Where you’ve seen it**), turns into a **Multiple-choice card** with wrong options chosen by Claude, and can be imported from Anki (**Settings, Anki**), against the 501 points of the JLPT lists.
 
 ## 0.24.0 · 2026-11-09
 

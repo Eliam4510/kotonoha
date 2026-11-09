@@ -4,7 +4,7 @@ import Dexie, { type Table } from 'dexie';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
-import type { AnotacionLibro, ColeccionBiblioteca, ElementoBiblioteca, EstadoPalabra, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
+import type { AnotacionLibro, ColeccionBiblioteca, ElementoBiblioteca, EstadoGramatica, EstadoPalabra, GramaticaVista, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
 import type { FormaFlexionada, Transcripcion } from '../lenguas/tipos';
 import type { FilaInmersion } from '../nucleo/inmersion';
 import type { DatosTrazos } from '../nucleo/trazos';
@@ -99,6 +99,18 @@ export interface FilaGlosa {
   glosa: string;
 }
 
+/** El estado de un punto de gramática. Sin fila, es nuevo. */
+export interface FilaGramatica {
+  patron: string;
+  estado: EstadoGramatica;
+  actualizada: number;
+}
+
+/** Un punto de gramática en un video: una fila por punto y video. */
+export interface FilaGramaticaVista extends GramaticaVista {
+  clave: string;
+}
+
 /** Trazos de un carácter ya descargados. Sin datos: KanjiVG no lo tiene, y no hace falta volver a preguntar. */
 export interface FilaTrazos {
   caracter: string;
@@ -125,6 +137,8 @@ class BaseKotonoha extends Dexie {
   colecciones!: Table<ColeccionBiblioteca, string>;
   anotaciones!: Table<AnotacionLibro, string>;
   inmersion!: Table<FilaInmersion, [string, string, string]>;
+  gramatica!: Table<FilaGramatica, string>;
+  gramaticaVista!: Table<FilaGramaticaVista, string>;
 
   constructor(nombre: string) {
     super(nombre);
@@ -152,6 +166,8 @@ class BaseKotonoha extends Dexie {
     this.version(8).stores({ anotaciones: 'id, libro' });
     // Las horas de inmersión (0.20.0): el tiempo de cada día con cada video, libro o texto.
     this.version(9).stores({ inmersion: '[dia+tipo+fuente], dia' });
+    // La gramática con estados (0.21.0): el de cada punto, y en qué videos se vio.
+    this.version(10).stores({ gramatica: 'patron, estado', gramaticaVista: 'clave, patron, ultima' });
   }
 }
 

@@ -2,14 +2,14 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { Ajustes, Esfuerzo, TareaIA } from '../compartido/ajustes';
-import type { ContextoIA, ImagenIA, PeticionRevisionOcr, SentidoEnContexto } from '../compartido/tipos';
+import type { ContextoIA, ImagenIA, OpcionFalsa, PeticionRevisionOcr, SentidoEnContexto } from '../compartido/tipos';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import { type Lote, ordenarPorCercania, partirEnLotes } from '../nucleo/lotes';
 import { claveDia, claveMes, costeDe, type UsoTokens } from '../nucleo/precios';
 import { type EntradaAjuste, mensajeAjuste } from '../nucleo/letra';
 import { mensajeRevision } from '../nucleo/revision';
 import type { Linea } from '../nucleo/subtitulos';
-import type { TareaPrompt } from '../lenguas/tipos';
+import type { PuntoGramatica, TareaPrompt } from '../lenguas/tipos';
 import { baseGeneral, db } from './db';
 import { tr } from '../compartido/i18n';
 import { lengua, motorLengua } from './lengua';
@@ -409,6 +409,41 @@ export async function organizarTexto(a: Ajustes, md: string): Promise<string> {
   const texto = await ejecutar({ a, tarea: 'generar', sistema: PROMPT_ORGANIZAR, usuario: md, maxTokens: Math.min(64000, Math.ceil(md.length * 2.5) + 2000) });
   // Por si llega envuelto en un bloque de código, a pesar de las instrucciones.
   return texto.trim().replace(/^```(?:markdown|md)?\s*\n([\s\S]*?)\n```$/i, '$1').trim();
+}
+
+/**
+ * Las opciones falsas de una tarjeta de opción múltiple sobre un punto de gramática: tres puntos que se confunden con él,
+ * cada uno con por qué no va en esa frase. Se piden una vez: la respuesta queda en la caché.
+ */
+export async function distractoresGramatica(a: Ajustes, punto: PuntoGramatica, frase: string): Promise<OpcionFalsa[]> {
+  const { comillar } = lengua().escritura;
+  const texto = await ejecutar({
+    a,
+    tarea: 'generar',
+    sistema: motorLengua().prompts.distractores(a.idiomaExplicaciones),
+    usuario: `Nivel del estudiante: ${a.nivel}
+Frase: ${comillar(frase)}
+Punto de gramática: ${punto.patron}${punto.nivel ? ` (${punto.nivel})` : ''}: ${punto.significado}
+Fragmento de la frase: ${comillar(punto.fragmento)}`,
+    maxTokens: 4000,
+    formato: {
+      type: 'json_schema',
+      schema: {
+        type: 'object',
+        properties: {
+          opciones: {
+            type: 'array',
+            items: { type: 'object', properties: { patron: { type: 'string' }, motivo: { type: 'string' } }, required: ['patron', 'motivo'], additionalProperties: false },
+          },
+        },
+        required: ['opciones'],
+        additionalProperties: false,
+      },
+    },
+  });
+  const { opciones } = JSON.parse(texto) as { opciones: OpcionFalsa[] };
+  const vistos = new Set([punto.patron]);
+  return opciones.filter((o) => o.patron?.trim() && !vistos.has(o.patron) && vistos.add(o.patron)).slice(0, 3);
 }
 
 /** Revisa una lectura concreta que el usuario señaló como dudosa. */

@@ -127,6 +127,7 @@ Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache i
 ### Außerdem
 
 - **Ein Wörterbuch zum Erkunden.** Suche nach Bedeutung („dog“ → 犬), Grammatik nach Form oder Sinn, die Kanji und Homophone jedes Wortes, dazu Lautmalereien, Sprichwörter, Ausdrücke aus vier Kanji und mehr.
+- **Grammatik, die du schon kannst.** Jeder Punkt wird als neu, im Lernen oder gelernt markiert; gelernte Punkte werden unter Untertiteln nicht mehr markiert, jeder Punkt merkt sich, in welchen Videos er vorkam, und lässt sich aus Anki importieren oder in eine Multiple-Choice-Karte verwandeln.
 - **Immersionsstunden.** Die Startseite zählt die Zeit, in der du die Lernsprache hörst und liest, mit deiner Serie von Tagen in Folge.
 - **Die Kosten im Blick.** Die Startseite zeigt, was Claude in diesem Monat gekostet hat, nach Tagen, Modellen und Aufgaben, mit einem Monatslimit. Nichts wird zweimal bezahlt: Jede Antwort wird gespeichert. Die [Kostenstudie](docs/de/costs.md) nennt gemessene Zahlen.
 - **Eingebaute Wiederholung.** Mit dem FSRS-Algorithmus, für alle, die Anki nicht nutzen.

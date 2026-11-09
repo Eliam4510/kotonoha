@@ -66,6 +66,12 @@ export async function resumenNiveles(carpeta: string, niveles: string[]): Promis
   );
 }
 
+/** Todos los patrones de gramática de las listas, de todos los niveles. */
+export async function patronesDeLasListas(carpeta: string): Promise<string[]> {
+  const g = await leer<DatosNivel<FilaGramatica>>(`${carpeta}/gramatica.json`).catch(() => null);
+  return Object.values(g?.niveles ?? {}).flatMap((filas) => filas.map(([patron]) => patron));
+}
+
 /** Los caracteres de una palabra con su nivel, sus lecturas y su glosa, si están en las listas. */
 export async function caracteresConNivel(carpeta: string, caracteres: string[]): Promise<CaracterConNivel[]> {
   const k = await leer<DatosNivel<FilaCaracter>>(`${carpeta}/kanji.json`).catch(() => null);
