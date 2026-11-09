@@ -105,6 +105,8 @@ const yaInstalado = await p.evaluate(async () => {
 if (yaInstalado) throw new Error('El perfil ya tiene un diccionario de acento: la prueba espera uno sin él');
 await tablaAcentos(false, IMAGENES);
 
+// El Cuaderno añade lo que llega al final de lo que ya hay: se empieza vacío.
+await sw.evaluate(() => chrome.storage.local.remove(['lectorTexto', 'notaCuaderno']));
 await p.goto(`chrome-extension://${id}/app.html#/lector?t=${encodeURIComponent(FRASE + SEGUNDA)}`);
 await p.locator('.ap-papel .pal').first().waitFor({ timeout: 30000 });
 await p.waitForTimeout(600);
@@ -172,6 +174,17 @@ if (await resultado.isVisible()) {
   comprobar(resumen === '2 de 2 palabras con el tono en su sitio.', 'Dice cuántas palabras salieron bien', resumen);
   comprobar(await panel.getByRole('button', { name: 'Oír tu grabación' }).isVisible(), 'Se puede oír la grabación');
   comprobar(await panel.getByRole('button', { name: 'Volver a grabar' }).isVisible(), 'Y volver a grabar');
+
+  // La segunda vez el modelo ya está cargado: el análisis no espera a leerlo del disco.
+  await panel.getByRole('button', { name: 'Volver a grabar' }).click();
+  await panel.locator('.ap-dictado.grabando').waitFor({ timeout: 15000 });
+  await dormir(4600);
+  await panel.getByRole('button', { name: 'Terminar' }).click();
+  const otraVez = Date.now();
+  await Promise.race([resultado.waitFor({ timeout: 120000 }), fallo.waitFor({ timeout: 120000 })]).catch(() => {});
+  await panel.locator('.ap-dictado[role="status"]').waitFor({ state: 'detached', timeout: 120000 }).catch(() => {});
+  const segundos = (Date.now() - otraVez) / 1000;
+  comprobar(segundos < 10 && (await resultado.isVisible()), 'Una segunda grabación se analiza en unos segundos', `${segundos.toFixed(1)} s`);
   await p.screenshot({ path: join(CAPTURAS, '2-resultado.png') });
   await panel.screenshot({ path: join(CAPTURAS, '3-panel-oscuro.png') });
   await ajustar({ tema: 'claro' });
@@ -228,6 +241,8 @@ comprobar(!(await panel.isVisible()), 'Escape la cierra también nada más abrir
 // ---------- En inglés no hay acento que practicar ----------
 
 await ajustar({ idiomaObjetivo: 'en' });
+// El Cuaderno añade lo que llega al final de lo que ya hay: se empieza vacío.
+await sw.evaluate(() => chrome.storage.local.remove(['lectorTexto', 'notaCuaderno']));
 await p.goto(`chrome-extension://${id}/app.html#/lector?t=${encodeURIComponent('It is going to rain today.')}`);
 await p.reload();
 await p.locator('.ap-papel .pal').first().waitFor({ timeout: 30000 });

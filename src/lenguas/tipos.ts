@@ -263,6 +263,8 @@ export interface TextosLengua {
   lectorResumen: string;
   lectorActivar: string;
   lectorPegar: string;
+  /** Lo que se lee en el Cuaderno vacío, antes de escribir: qué se puede poner y cómo se da formato. */
+  cuadernoVacio: string;
   lectorBotonAyuda: string;
   separarLineas: string;
   separarLineasAyuda: string;

@@ -106,6 +106,8 @@ export function Dictado({ alDictar }: { alDictar: (id: string, texto: string) =>
   };
 
   const empezar = async () => {
+    // El modelo de voz se carga mientras se habla: al terminar, la transcripción no espera a leerlo del disco.
+    motor.prepararVoz('dictado').catch(() => {});
     fijar({ fase: 'pidiendo' });
     try {
       const g = await empezarGrabacion(() => void terminar());

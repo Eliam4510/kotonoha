@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.20.0, along with how it has been verified.
+Status of each feature in version 0.21.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -103,12 +103,16 @@ Status of each feature in version 0.20.0, along with how it has been verified.
 | Home with vocabulary and review summary | Automated |
 | Claude spending: monthly total, chart by day and model, tasks and request log | Simulator |
 | Dictionary with free search and conjugated forms | Automated |
-| Clipboard: pasted or copied text keeps its paragraphs, line breaks, headings, lists, quotes, code, tables and bold, without the source page's furigana | Automated |
-| Clipboard in a regular tab, also in split view next to the page being viewed | Automated, on Edge and Chrome |
+| Notebook: pasted or copied text keeps its paragraphs, line breaks, headings, lists, quotes, code, tables and bold, without the source page's furigana | Automated |
+| Notebook in a regular tab, also in split view next to the page being viewed | Automated, on Edge and Chrome |
 | Following the clipboard, without the tab having focus | Automated |
-| Dictation into the Clipboard: the microphone, the time and level while recording, and the text at the end, already analysed, transcribed on the computer with the speech model from the settings | Automated, with synthetic voices in Japanese and English |
+| Dictation into the Notebook: the microphone, the time and level while recording, and the text at the end, already analysed, transcribed on the computer with the speech model from the settings | Automated, with synthetic voices in Japanese and English |
+| Notebook: a full-width editor with headings, lists with sub-items, quotes, code and bold, with buttons and shortcuts (# , - , ・ , 1. , > , Tab, Ctrl+B); Edit and Read on the same page; pasted text keeps its structure; saved by itself, and to the library on request, and a library text can be edited again | Automated: writing with shortcuts and buttons, reading, saving to the library and reopening from it |
+| Organize: Claude adds a title, subheadings, paragraphs and lists to text pasted as one block; it warns if any word changed, and Ctrl+Z undoes it | Automated, with a simulated Claude |
+| Read aloud with speed (0.6× to 1.2×) and mode (continuous, sentence by sentence or repeating the sentence); listen to or practise any selected part, without its furigana | Automated |
+| Speech models load while you record (dictation and practice): the second practice recording is analysed in 0.2 s, and dictation is transcribed a second after you finish | Automated, on the development computer’s GPU |
 | Each dictation's recording above its paragraph, to play it again; it goes with the text to the library, and one that no text uses is deleted after a week | Automated |
-| Pitch accent practice in the Clipboard, the Reading assistant’s texts and the text view: each word’s accent drawn, the recording, the pitch curve over the expected accent, a verdict per word and long pauses | Automated, with a synthetic voice |
+| Pitch accent practice in the Notebook, the Reading assistant’s texts and the text view: each word’s accent drawn, the recording, the pitch curve over the expected accent, a verdict per word and long pauses | Automated, with a synthetic voice |
 | The voice’s pitch measured in the browser (YIN), the morae placed using the voice and the transcription, and where the pitch falls in each word, also with a delayed peak and devoiced morae | Automated; tuned with minimal pairs (箸, 橋 and 端; 雨 and 飴) read by a synthetic voice and with a real recording |
 | Special morae in the practice, with narabas: a missing or extra っ, ん or long vowel, with the mora highlighted; the model download checked against its SHA-256, the GPU only if it calculates like the processor, and no verdict on a っ before a fricative, on phrases said differently or on hesitations at the end of a word | Automated, with a synthetic voice; measured with minimal pairs (おばあさん and おばさん, きって and きて…) said by two synthetic voices: 17 of 22 missing morae and 10 of 10 extra ones, with no warnings on 22 of 24 sentences said correctly |
 | Reading assistant: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
@@ -127,7 +131,7 @@ Status of each feature in version 0.20.0, along with how it has been verified.
 | Edit a line's text by hand, stored apart from what was read and with Restore | Automated |
 | Notes and bookmarks, as in a PDF reader: bookmark pages, highlight in four colours or underline a line, a word or a stretch, with a comment, and sticky notes on the page; in the "Notes and bookmarks" panel, everything by page, to go to, edit, remove or copy as text | Automated |
 | Search the book: in the PDF text and the OCR text, with edits, ignoring character width and the difference between hiragana and katakana, also a word split across two lines; results by page and marked on the page | Automated |
-| Text view: the page as text, in paragraphs with headings set apart, with the Clipboard's reading help (furigana, comprehension, read aloud, word panel and cards); each book remembers it | Automated, and the paragraphs with 16 real pages |
+| Text view: the page as text, in paragraphs with headings set apart, with the Notebook's reading help (furigana, comprehension, read aloud, word panel and cards); each book remembers it | Automated, and the paragraphs with 16 real pages |
 | Review a page's text with Claude, using its image: only the changes that do not match, letter by letter, to choose which to apply, stored as edited lines | Simulator |
 | Tapping a line on the page opens its text with furigana and words to look up, with their word panel and card creation | Automated |
 | Each page is read only once and saved; its text also reaches screen readers | Automated |
@@ -140,7 +144,7 @@ Status of each feature in version 0.20.0, along with how it has been verified.
 | Player for local files | Automated |
 | Embedded MKV subtitles and audio track selection, with ffmpeg.wasm | Automated |
 | Word explorer by status | Automated |
-| Immersion hours: the time with a playing video and subtitles in the language you study, with a book in the viewer and while reading in the Clipboard or the library; on Home, today, the last seven days, the total, the streak, one bar per day and what was watched and read the most | Automated: one of your own videos actually playing, and earlier days seeded in the database |
+| Immersion hours: the time with a playing video and subtitles in the language you study, with a book in the viewer and while reading in the Notebook or the library; on Home, today, the last seven days, the total, the streak, one bar per day and what was watched and read the most | Automated: one of your own videos actually playing, and earlier days seeded in the database |
 | Level assessment | Automated |
 | Full settings and editable prompts | Automated |
 | Backups of every language and the settings, in a single file | Automated |

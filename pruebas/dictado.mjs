@@ -68,6 +68,7 @@ async function abrir(voz, ajustes, conPermiso = true) {
   await sw.evaluate(async (cambios) => {
     const d = await chrome.storage.local.get('ajustes');
     await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), ...cambios }, lectorTexto: '' });
+    await chrome.storage.local.remove('notaCuaderno');
   }, ajustes);
   return { contexto, id };
 }
@@ -132,8 +133,11 @@ async function dictar(p, segundos, captura) {
   await p.waitForTimeout(1200);
   const antes = await grabaciones(p);
 
-  comprobar(await p.getByRole('button', { name: 'Dictar' }).isVisible(), 'El Portapapeles tiene el botón «Dictar»');
-  await p.locator('.ap-hoja-escritura textarea').fill('最初の段落です。');
+  comprobar(await p.getByRole('button', { name: 'Dictar' }).isVisible(), 'El Cuaderno tiene el botón «Dictar»');
+  await p.locator('.cu-editor').click();
+  await p.waitForTimeout(200);
+  await p.keyboard.type('最初の段落です。');
+  await p.waitForTimeout(900);
 
   const visto = await dictar(p, 11.5, '1-grabando.png');
   comprobar(/^0:1[0-2]$/.test(visto.tiempo), 'Mientras graba, el tiempo avanza', visto.tiempo);
@@ -180,22 +184,23 @@ async function dictar(p, segundos, captura) {
   comprobar(nuevas.length === 1 && nuevas[0].lengua === 'ja' && nuevas[0].bytes > 10000 && nuevas[0].tipo.startsWith('audio/webm'), 'La grabación queda guardada en Opus', JSON.stringify(nuevas[0] ?? {}));
   comprobar(nuevas[0]?.duracionMs > 11000 && nuevas[0]?.duracionMs < 13500, 'Con lo que duró de verdad', nuevas[0]?.duracionMs);
 
-  // El texto que se edita lleva la marca, en su propia línea.
-  await p.getByRole('button', { name: 'Editar el texto' }).click();
-  const texto = await p.locator('.ap-hoja-escritura textarea').inputValue();
+  // El texto guardado lleva la marca, en su propia línea.
+  const texto = await p.evaluate(() => chrome.storage.local.get('lectorTexto').then((d) => d.lectorTexto ?? ''));
+  await p.getByRole('radio', { name: 'Editar' }).click();
+  await p.waitForTimeout(400);
   const marca = new RegExp(`^<!-- dictado:${nuevas[0]?.id} -->$`, 'm');
-  comprobar(marca.test(texto) && texto.startsWith('最初の段落です。\n\n<!-- dictado:'), 'Al editar, la marca va en su propia línea antes del párrafo', texto.split('\n').slice(0, 3).join(' ⏎ '));
+  comprobar(marca.test(texto) && texto.startsWith('最初の段落です。\n\n<!-- dictado:'), 'La marca va en su propia línea antes del párrafo', texto.split('\n').slice(0, 3).join(' ⏎ '));
 
   // Cancelar mientras graba no deja nada.
   await p.getByRole('button', { name: 'Dictar' }).click();
   await p.locator('.ap-dictado.grabando').waitFor({ timeout: 15000 });
   await p.waitForTimeout(1000);
-  const aLaVista = await p.locator('.ap-hoja-pie button:visible').allInnerTexts();
-  comprobar(!aLaVista.some((b) => /Leer|Pegar|Guardar/.test(b)), 'Mientras graba, los demás botones se apartan', aLaVista.join(' · '));
+  const aLaVista = await p.locator('.cu-herramientas-extra button:visible').allInnerTexts();
+  comprobar(!aLaVista.some((b) => /Organizar|Pegar/.test(b)), 'Mientras graba, los demás botones se apartan', aLaVista.join(' · '));
   await p.locator('.ap-dictado').getByRole('button', { name: 'Cancelar' }).click();
   await p.waitForTimeout(500);
   comprobar(await p.getByRole('button', { name: 'Dictar' }).isVisible(), 'Cancelar vuelve al botón «Dictar»');
-  comprobar((await p.locator('.ap-hoja-escritura textarea').inputValue()) === texto, 'Y no cambia el texto');
+  comprobar((await p.evaluate(() => chrome.storage.local.get('lectorTexto').then((d) => d.lectorTexto ?? ''))) === texto, 'Y no cambia el texto');
 
   // Un dictado sin voz: el micrófono falso ya terminó su grabación.
   await p.getByRole('button', { name: 'Dictar' }).click();
@@ -209,7 +214,7 @@ async function dictar(p, segundos, captura) {
   ]).catch(() => 'nada');
   if (resultado === 'aviso') {
     const sinVoz = await aviso.innerText();
-    comprobar(sinVoz.includes('No se oyó voz') && (await p.locator('.ap-hoja-escritura textarea').inputValue()) === texto, 'Sin voz, lo dice y no añade nada', sinVoz);
+    comprobar(sinVoz.includes('No se oyó voz') && (await p.evaluate(() => chrome.storage.local.get('lectorTexto').then((d) => d.lectorTexto ?? ''))) === texto, 'Sin voz, lo dice y no añade nada', sinVoz);
     await p.screenshot({ path: join(CAPTURAS, '5-sin-voz.png') });
     await p.getByRole('button', { name: 'Cerrar el aviso' }).click();
   } else {
@@ -218,7 +223,6 @@ async function dictar(p, segundos, captura) {
   }
 
   // Guardar en la biblioteca: la marca va con el texto y el título sale de lo que se lee.
-  if (!(await p.locator('.ap-hoja-escritura textarea').isVisible().catch(() => false))) await p.getByRole('button', { name: 'Editar el texto' }).click();
   await p.getByRole('button', { name: 'Guardar en la biblioteca' }).click();
   await p.waitForTimeout(1200);
   const guardado = (await llamarMotor(p, 'bibliotecaListar')).find((e) => e.texto.includes(`dictado:${nuevas[0]?.id}`));
@@ -252,7 +256,7 @@ async function dictar(p, segundos, captura) {
   await contexto.close();
 }
 
-// ---------- Inglés, en la pestaña del Portapapeles ----------
+// ---------- Inglés, en la pestaña del Cuaderno ----------
 
 if (vozEn) {
   const { contexto, id } = await abrir(vozEn, { idiomaInterfaz: 'es', idiomaObjetivo: 'en', whisperModelo: 'auto', bienvenidaVista: true, tema: 'claro' });
@@ -304,7 +308,7 @@ if (vozEn) {
   await aviso.waitFor({ timeout: 60000 }).catch(() => {});
   const texto = await aviso.innerText().catch(() => '');
   comprobar(texto.includes('No se oyó voz'), 'Lo dice sin cargar el modelo', `${texto} · ${((Date.now() - inicio) / 1000).toFixed(1)} s`);
-  comprobar((await p.locator('.ap-hoja-escritura textarea').inputValue()) === '', 'Y no añade nada al texto');
+  comprobar((await p.evaluate(() => chrome.storage.local.get('lectorTexto').then((d) => d.lectorTexto ?? ''))) === '', 'Y no añade nada al texto');
   comprobar((await grabaciones(p)).length === antes.length, 'Ni guarda la grabación');
   await p.screenshot({ path: join(CAPTURAS, '5-sin-voz.png') });
   await p.getByRole('button', { name: 'Cerrar el aviso' }).click();

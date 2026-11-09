@@ -92,11 +92,11 @@ La **Ayuda de lectura** es un visor completo, como un lector de PDF: zoom, doble
 
 Las páginas que son imágenes, como los mangas, los libros escaneados y muchos PDF, se leen con reconocimiento de texto (OCR) en el propio equipo y con la tarjeta gráfica. Hay un modo para libros impresos y otro para manga, que lee los globos de texto vertical sin confundir el furigana con el texto. Al tocar una palabra en la página se abre su línea con furigana y su ficha. Cada página se lee una sola vez y queda guardada.
 
-### Lo que se copia, con su estructura
+### Un cuaderno para escribir y leer
 
-<img src="docs/img/lector-web.png" alt="Portapapeles en una pestaña, con párrafos, furigana y comprensión" width="100%">
+<img src="docs/img/lector-web.png" alt="Cuaderno en una pestaña, con párrafos, furigana y comprensión" width="100%">
 
-El **Portapapeles** recoge lo que se copia en cualquier sitio y lo muestra con sus párrafos, títulos, listas y tablas, analizado y con furigana. Se abre en una pestaña normal, también en la vista dividida del navegador junto a la página que se esté leyendo, y lee el texto en voz alta. También se le puede dictar: lo dicho al micrófono se transcribe en el equipo y entra como un párrafo más, con su grabación para volver a oírla.
+El **Cuaderno** es una página a todo lo ancho para escribir y pegar texto en la lengua que estudias, con títulos, listas y citas, y leerlo analizado y con furigana. **Organizar** le pone estructura a un texto pegado de corrido sin cambiar sus palabras, y cada nota se guarda en la biblioteca. Lee en voz alta a la velocidad que elijas, todo seguido, frase a frase o repitiendo una frase, y cualquier trozo seleccionado se escucha o se practica. También se le puede dictar: lo dicho al micrófono se transcribe en el equipo y entra como un párrafo más, con su grabación. Se abre además en una pestaña normal, en la vista dividida junto a la página que se esté leyendo, y recoge lo que copias en cualquier sitio.
 
 ### El acento, en voz alta
 
@@ -132,7 +132,7 @@ Kotonoha funciona sin ninguna clave. La de Claude, opcional, añade lo que neces
 |---|---|
 | Subtítulos con furigana, acento y estado de cada palabra | El sentido de una palabra en su frase |
 | Diccionario, ficha, orden de trazos y pronunciación | Explicaciones de palabras, frases y gramática |
-| Lector de páginas web, Portapapeles y Ayuda de lectura con OCR | Traducción y corrección de subtítulos |
+| Lector de páginas web, Cuaderno y Ayuda de lectura con OCR | Traducción y corrección de subtítulos |
 | Transcripción de audio en el propio equipo | Revisión de las lecturas del furigana |
 | Tarjetas para Anki y repaso integrado | Relatos a la medida del nivel |
 

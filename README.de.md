@@ -88,11 +88,11 @@ Die **Lesehilfe** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Do
 
 Seiten, die Bilder sind, wie Manga, eingescannte Bücher und viele PDFs, werden mit Texterkennung (OCR) auf dem eigenen Rechner und der Grafikkarte gelesen. Es gibt einen Modus für gedruckte Bücher und einen für Manga, der vertikale Sprechblasen liest, ohne Furigana mit dem Text zu verwechseln. Ein Tippen auf ein Wort der Seite öffnet seine Zeile mit Furigana und sein Wortfenster. Jede Seite wird nur einmal gelesen und gespeichert.
 
-### Kopiertes, mit seiner Struktur
+### Ein Notizbuch zum Schreiben und Lesen
 
-<img src="docs/img/lector-web.de.png" alt="Zwischenablage in einem Tab, mit Absätzen, Furigana und Textverständnis" width="100%">
+<img src="docs/img/lector-web.de.png" alt="Das Notizbuch in einem Tab, mit Absätzen, Furigana und Textverständnis" width="100%">
 
-Die **Zwischenablage** sammelt, was irgendwo kopiert wird, und zeigt es mit Absätzen, Überschriften, Listen und Tabellen, analysiert und mit Furigana. Sie öffnet sich in einem normalen Tab, auch in der geteilten Ansicht des Browsers neben der gerade gelesenen Seite, und liest den Text vor. Man kann ihr auch diktieren: Was ins Mikrofon gesprochen wird, wird auf dem Rechner transkribiert und als neuer Absatz angefügt, mit der Aufnahme zum erneuten Anhören.
+Das **Notizbuch** ist eine Seite über die ganze Breite, um Text in der Lernsprache mit Überschriften, Listen und Zitaten zu schreiben und einzufügen und ihn analysiert und mit Furigana zu lesen. **Ordnen** gibt einem am Stück eingefügten Text Struktur, ohne seine Wörter zu ändern, und jede Notiz wird in der Bibliothek gespeichert. Es liest in der gewählten Geschwindigkeit vor, am Stück, Satz für Satz oder einen Satz wiederholend, und jeder markierte Teil lässt sich anhören oder üben. Man kann ihm auch diktieren: Was man ins Mikrofon sagt, wird auf dem Rechner transkribiert und kommt als weiterer Absatz hinzu, mit seiner Aufnahme. Es öffnet sich außerdem in einem normalen Tab, in der geteilten Ansicht neben der gelesenen Seite, und sammelt, was man irgendwo kopiert.
 
 ### Der Akzent, laut gesprochen
 
@@ -128,7 +128,7 @@ Kotonoha funktioniert ohne jeden Schlüssel. Ein optionaler Claude-Schlüssel er
 |---|---|
 | Untertitel mit Furigana, Tonhöhenakzent und Wortstand | Die Bedeutung eines Wortes in seinem Satz |
 | Wörterbuch, Wortfenster, Strichfolge und Aussprache | Erklärungen zu Wörtern, Sätzen und Grammatik |
-| Seiten-Reader, Zwischenablage und Lesehilfe mit OCR | Übersetzung und Korrektur von Untertiteln |
+| Seiten-Reader, Notizbuch und Lesehilfe mit OCR | Übersetzung und Korrektur von Untertiteln |
 | Transkription auf dem eigenen Rechner | Prüfung der Furigana-Lesungen |
 | Karten für Anki und eingebaute Wiederholung | Geschichten passend zum Niveau |
 

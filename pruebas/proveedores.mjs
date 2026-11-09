@@ -138,6 +138,8 @@ await p.locator('#proveedores').screenshot({ path: join(CAPTURAS, '1-ajustes.png
 
 // La explicación de una palabra llega en flujo, con la clave.
 pedidas.length = 0;
+// El Cuaderno añade lo que llega al final de lo que ya hay: se empieza vacío.
+await sw.evaluate(() => chrome.storage.local.remove(['lectorTexto', 'notaCuaderno']));
 await p.goto(`chrome-extension://${id}/app.html#/lector?t=${encodeURIComponent('橋を渡ります。')}`);
 await p.locator('.ap-papel .pal').first().waitFor({ timeout: 30000 });
 await p.locator('.ap-papel .pal').first().click();

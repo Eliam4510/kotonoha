@@ -14,11 +14,11 @@ Las tiendas piden justificar cada permiso. Estos textos sirven para el formulari
 | `offscreen` | El motor (diccionarios, análisis de frases, transcripción de voz y OCR) corre en un documento offscreen para no cargar las páginas. |
 | `tabCapture` y `activeTab` | Grabar el audio de la frase del video para una tarjeta y transcribir un video mientras se reproduce. Solo se activa con el icono o un atajo de teclado. |
 | `scripting` y `tabs` | Mostrar los subtítulos y el lector sobre la página que se está viendo, y abrir las páginas de la extensión. |
-| `contextMenus` | «Buscar en Kotonoha» y «Abrir selección en el Portapapeles» en el menú del texto seleccionado. |
+| `contextMenus` | «Buscar en Kotonoha» y «Abrir la selección en el Cuaderno» en el menú del texto seleccionado. |
 | `idle` | Saber si el usuario está usando el equipo: la transcripción de un video va más suave mientras lo usa. |
 | `alarms` | En una copia instalada desde GitHub, ver cada medio minuto si su carpeta se actualizó y recargarse. |
 | `nativeMessaging` | Hablar con el ayudante local, si el usuario lo instala: descarga el audio de un video para transcribirlo entero y actualiza la extensión. |
-| `clipboardRead` y `clipboardWrite` | El Portapapeles: leer el texto copiado para analizarlo, y copiar frases y notas. |
+| `clipboardRead` y `clipboardWrite` | El Cuaderno: leer el texto copiado para analizarlo, y copiar frases y notas. |
 | Acceso a todos los sitios (`<all_urls>`) | Los subtítulos interactivos y el lector funcionan en cualquier sitio con video o texto; la captura de la imagen de la frase para las tarjetas; la descarga de diccionarios y modelos; Anki y los motores locales en 127.0.0.1; y la API del proveedor de IA que elija el usuario. |
 
 **Código remoto.** La extensión no ejecuta código descargado. Descarga datos: modelos de reconocimiento de voz y de texto (pesos en formato ONNX) y diccionarios, que lee su propio código empaquetado.

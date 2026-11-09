@@ -138,6 +138,8 @@ comprobar(!(await seccion.locator('.texto-error').isVisible().catch(() => false)
 await seccion.screenshot({ path: join(CAPTURAS, '1-ajustes.png') });
 
 // Leer en voz alta: la frase va con el acento del diccionario.
+// El Cuaderno añade lo que llega al final de lo que ya hay: se empieza vacío.
+await sw.evaluate(() => chrome.storage.local.remove(['lectorTexto', 'notaCuaderno']));
 await p.goto(`chrome-extension://${id}/app.html#/lector?t=${encodeURIComponent('橋を渡ります。')}`);
 await p.locator('.ap-papel .pal').first().waitFor({ timeout: 30000 });
 await p.waitForTimeout(500);
@@ -172,6 +174,8 @@ await p.keyboard.press('Escape');
 // Con el motor cerrado, se lee con la voz del navegador y no hay errores.
 await new Promise((ok) => servidor.close(ok));
 servidor.closeAllConnections?.();
+// El Cuaderno añade lo que llega al final de lo que ya hay: se empieza vacío.
+await sw.evaluate(() => chrome.storage.local.remove(['lectorTexto', 'notaCuaderno']));
 await p.goto(`chrome-extension://${id}/app.html#/lector?t=${encodeURIComponent('雨が好きです。')}`);
 await p.locator('.ap-papel .pal').first().waitFor({ timeout: 30000 });
 await p.locator('.ap-dock').getByRole('button', { name: 'Leer en voz alta' }).click();

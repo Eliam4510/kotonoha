@@ -37,6 +37,8 @@ const MAXIMO_MS = 20_000;
 const MINIMO_MS = 400;
 const FRECUENCIA = 16000;
 const BARRAS_NIVEL = 5;
+/** Cada cuánto se pide que los modelos sigan cargados mientras el panel está abierto (el motor los suelta a los 3 minutos). */
+const MANTENER_CARGADO_MS = 2 * 60 * 1000;
 
 interface Resultado {
   curva: MarcoTono[];
@@ -344,6 +346,18 @@ export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string
     fijarMoras(v);
     guardarAjustes({ practicaMoras: v }).catch(() => {});
   };
+
+  // Los modelos se cargan ya, mientras se escucha y se graba: al terminar, el análisis no espera a leerlos del disco. Y se
+  // mantienen cargados mientras el panel esté abierto.
+  useEffect(() => {
+    const preparar = () => {
+      motor.prepararVoz('practica').catch(() => {});
+      if (sabeMoras && moras) motor.prepararMoras().catch(() => {});
+    };
+    preparar();
+    const reloj = setInterval(preparar, MANTENER_CARGADO_MS);
+    return () => clearInterval(reloj);
+  }, [moras]);
 
   useEffect(() => {
     vivo.current = true;

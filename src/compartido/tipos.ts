@@ -265,6 +265,8 @@ export interface ElementoBiblioteca {
  */
 export interface CambioBiblioteca {
   titulo?: string;
+  /** El texto de una nota del Cuaderno, que se va guardando mientras se escribe. */
+  texto?: string;
   pagina?: number;
   abierto?: number;
   coleccion?: string | null;

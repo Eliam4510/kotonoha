@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.20.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.21.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -103,12 +103,16 @@ Stand jeder Funktion in Version 0.20.0 und die Art ihrer Überprüfung.
 | Startseite mit Übersicht über Wortschatz und Wiederholung | Automatisch |
 | Kosten für Claude: Monatssumme, Diagramm nach Tagen und Modellen, Aufgaben und Anfrageprotokoll | Simulator |
 | Wörterbuch mit freier Suche und konjugierten Formen | Automatisch |
-| Zwischenablage: Eingefügter oder kopierter Text behält Absätze, Zeilenumbrüche, Überschriften, Listen, Zitate, Code, Tabellen und Fettdruck, ohne die Furigana der Ursprungsseite | Automatisch |
-| Zwischenablage in einem normalen Tab, auch in geteilter Ansicht neben der angezeigten Seite | Automatisch, in Edge und Chrome |
+| Notizbuch: Eingefügter oder kopierter Text behält Absätze, Zeilenumbrüche, Überschriften, Listen, Zitate, Code, Tabellen und Fettdruck, ohne die Furigana der Ursprungsseite | Automatisch |
+| Notizbuch in einem normalen Tab, auch in geteilter Ansicht neben der angezeigten Seite | Automatisch, in Edge und Chrome |
 | Zwischenablage folgen, ohne dass der Tab den Fokus hat | Automatisch |
-| Diktieren in die Zwischenablage: das Mikrofon, Zeit und Pegel während der Aufnahme und der Text am Ende, schon analysiert, auf dem Rechner mit dem Sprachmodell aus den Einstellungen transkribiert | Automatisch, mit synthetischen Stimmen auf Japanisch und Englisch |
+| Diktieren ins Notizbuch: das Mikrofon, Zeit und Pegel während der Aufnahme und der Text am Ende, schon analysiert, auf dem Rechner mit dem Sprachmodell aus den Einstellungen transkribiert | Automatisch, mit synthetischen Stimmen auf Japanisch und Englisch |
+| Notizbuch: ein Editor über die ganze Breite mit Überschriften, Listen mit Unterpunkten, Zitaten, Code und Fettdruck, mit Schaltflächen und Kürzeln (# , - , ・ , 1. , > , Tab, Strg+B); Bearbeiten und Lesen auf derselben Seite; Eingefügtes behält seine Struktur; speichert von selbst und auf Wunsch in der Bibliothek, und ein Text der Bibliothek lässt sich wieder bearbeiten | Automatisch: Schreiben mit Kürzeln und Schaltflächen, Lesen, Speichern in der Bibliothek und erneutes Öffnen von dort |
+| Ordnen: Claude gibt einem am Stück eingefügten Text Titel, Zwischenüberschriften, Absätze und Listen; es warnt, wenn sich ein Wort geändert hat, und Strg+Z macht es rückgängig | Automatisch, mit einem simulierten Claude |
+| Vorlesen mit Geschwindigkeit (0,6× bis 1,2×) und Modus (am Stück, Satz für Satz oder den Satz wiederholend); jeden markierten Teil anhören oder üben, ohne seine Furigana | Automatisch |
+| Die Sprachmodelle laden während der Aufnahme (Diktat und Übung): Die zweite Aufnahme der Übung wird in 0,2 s analysiert, und das Diktat eine Sekunde nach dem Ende transkribiert | Automatisch, auf der GPU des Entwicklungsrechners |
 | Die Aufnahme jedes Diktats über ihrem Absatz, zum erneuten Anhören; sie geht mit dem Text in die Bibliothek, und eine, die kein Text nutzt, wird nach einer Woche gelöscht | Automatisch |
-| Tonhöhenakzent üben in der Zwischenablage, den Texten der Lesehilfe und der Textansicht: der Akzent jedes Worts gezeichnet, die Aufnahme, die Tonhöhenkurve über dem erwarteten Akzent, eine Bewertung pro Wort und lange Pausen | Automatisch, mit einer synthetischen Stimme |
+| Tonhöhenakzent üben im Notizbuch, den Texten der Lesehilfe und der Textansicht: der Akzent jedes Worts gezeichnet, die Aufnahme, die Tonhöhenkurve über dem erwarteten Akzent, eine Bewertung pro Wort und lange Pausen | Automatisch, mit einer synthetischen Stimme |
 | Die Tonhöhe der Stimme im Browser gemessen (YIN), die Moren anhand der Stimme und der Transkription verortet und wo die Tonhöhe in jedem Wort fällt, auch bei verzögertem Gipfel und entstimmten Moren | Automatisch; abgestimmt mit Minimalpaaren (箸, 橋 und 端; 雨 und 飴), gelesen von einer synthetischen Stimme, und mit einer echten Aufnahme |
 | Besondere Moren in der Übung, mit narabas: ein fehlendes oder überzähliges っ, ん oder langer Vokal, mit markierter Mora; der Download des Modells mit seiner SHA-256 geprüft, die GPU nur, wenn sie wie der Prozessor rechnet, und keine Bewertung für ein っ vor einem Reibelaut, für anders gesprochene Phrasen oder für Zögerer am Wortende | Automatisch, mit einer synthetischen Stimme; gemessen mit Minimalpaaren (おばあさん und おばさん, きって und きて…), gesprochen von zwei synthetischen Stimmen: 17 von 22 fehlenden Moren und 10 von 10 überzähligen, ohne Hinweise bei 22 von 24 richtig gesprochenen Sätzen |
 | Lesehilfe: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
@@ -127,7 +131,7 @@ Stand jeder Funktion in Version 0.20.0 und die Art ihrer Überprüfung.
 | Den Text einer Zeile von Hand bearbeiten, getrennt vom Gelesenen gespeichert und mit „Wiederherstellen“ | Automatisch |
 | Notizen und Lesezeichen wie in einem PDF-Reader: Seiten markieren, eine Zeile, ein Wort oder einen Abschnitt in vier Farben hervorheben oder unterstreichen, mit Kommentar, und Notizen auf der Seite; im Fenster „Notizen und Lesezeichen“ alles nach Seiten, zum Hinspringen, Bearbeiten, Entfernen oder Kopieren als Text | Automatisch |
 | Im Buch suchen: im PDF-Text und im Text der Texterkennung, mit Bearbeitungen, ohne Unterschied bei Zeichenbreite sowie zwischen Hiragana und Katakana, auch ein über zwei Zeilen geteiltes Wort; Ergebnisse nach Seiten und auf der Seite markiert | Automatisch |
-| Textansicht: die Seite als Text, in Absätzen und mit abgesetzten Überschriften, mit der Lesehilfe der Zwischenablage (Furigana, Verständnis, Vorlesen, Wortfenster und Karten); jedes Buch merkt sie sich | Automatisch, und die Absätze mit 16 echten Seiten |
+| Textansicht: die Seite als Text, in Absätzen und mit abgesetzten Überschriften, mit der Lesehilfe des Notizbuchs (Furigana, Verständnis, Vorlesen, Wortfenster und Karten); jedes Buch merkt sie sich | Automatisch, und die Absätze mit 16 echten Seiten |
 | Den Text einer Seite mit Claude prüfen, anhand ihres Bildes: nur die Änderungen, die nicht übereinstimmen, Buchstabe für Buchstabe, zur Auswahl, gespeichert als bearbeitete Zeilen | Simulator |
 | Ein Tippen auf eine Zeile der Seite öffnet ihren Text mit Furigana und nachschlagbaren Wörtern, samt Wortfenster und Kartenerstellung | Automatisch |
 | Jede Seite wird nur einmal gelesen und gespeichert; ihr Text erreicht auch Bildschirmleser | Automatisch |
@@ -140,7 +144,7 @@ Stand jeder Funktion in Version 0.20.0 und die Art ihrer Überprüfung.
 | Player für eigene Dateien | Automatisch |
 | In MKV eingebettete Untertitel und Wahl der Audiospur, mit ffmpeg.wasm | Automatisch |
 | Wortübersicht nach Status | Automatisch |
-| Immersionsstunden: die Zeit mit einem laufenden Video und Untertiteln in der Lernsprache, mit einem Buch im Viewer und beim Lesen in der Zwischenablage oder der Bibliothek; auf Start heute, die letzten sieben Tage, insgesamt, die Serie, ein Balken pro Tag und das am meisten Gesehene und Gelesene | Automatisch: ein eigenes Video, das wirklich läuft, und frühere Tage in der Datenbank |
+| Immersionsstunden: die Zeit mit einem laufenden Video und Untertiteln in der Lernsprache, mit einem Buch im Viewer und beim Lesen im Notizbuch oder in der Bibliothek; auf Start heute, die letzten sieben Tage, insgesamt, die Serie, ein Balken pro Tag und das am meisten Gesehene und Gelesene | Automatisch: ein eigenes Video, das wirklich läuft, und frühere Tage in der Datenbank |
 | Niveaubewertung | Automatisch |
 | Vollständige Einstellungen und bearbeitbare Prompts | Automatisch |
 | Sicherung aller Sprachen und der Einstellungen in einer einzigen Datei | Automatisch |

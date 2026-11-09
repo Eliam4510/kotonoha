@@ -262,6 +262,9 @@ const api: ApiMotor = {
     });
   },
   resumenInmersion: async () => resumirInmersion(await db.inmersion.toArray(), diaLocal(Date.now())),
+  organizarTexto: async (md) => ia.organizarTexto(await aj(), md),
+  prepararVoz: async (uso) => whisper.precargar(uso === 'practica' ? whisper.modeloDePractica() : await modeloPorOmision()),
+  prepararMoras: () => narabas.preparar(),
 
   async listarPalabras(f: FiltroPalabras) {
     let filas = await db.palabras.toArray();

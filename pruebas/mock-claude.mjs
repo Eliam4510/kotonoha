@@ -110,6 +110,14 @@ function respuestaPara(cuerpo, idioma = 'es') {
   if (sistema.includes('traductor profesional')) return t.traduccion;
   if (sistema.includes('gramática inglesa')) return 'Aquí used to habla de un hábito del pasado que ya no se da. Se forma con used to más el verbo en infinitivo. No se confunde con be used to, que significa estar acostumbrado.';
   if (sistema.includes('gramática japonesa')) return 'Aquí 〜と思う presenta lo que dice el hablante como su opinión o intención, y suaviza la afirmación. Se forma con la forma simple del verbo más と思う. Se confunde con 〜と考える, más reflexivo y formal.\n\n明日は雨だと思う。 Creo que mañana lloverá.';
+  // «Organizar» del Cuaderno: el mismo texto con un título, sus párrafos y una lista, como haría Claude con el de prueba.
+  if (sistema.includes('Organizas un texto')) {
+    const contenido = String(cuerpo.messages?.[0]?.content ?? '');
+    const [titulo, ...resto] = contenido.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    const lista = resto.filter((l) => l.startsWith('・')).map((l) => `- ${l.slice(1).trim()}`);
+    const parrafos = resto.filter((l) => !l.startsWith('・'));
+    return [`# ${titulo}`, ...parrafos, lista.join('\n')].filter(Boolean).join('\n\n');
+  }
   if (sistema.includes('autor de lecturas')) return '猫の散歩\n\n京都に猫がいました。猫は毎日、川の近くを歩きました。ある日、猫は小さな花を見つけました。';
   if (sistema.includes('autor de material')) return '毎朝、公園で友達とパンを食べる。';
   if (sistema.includes('Responde únicamente')) return '接続';

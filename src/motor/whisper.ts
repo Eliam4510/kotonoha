@@ -106,7 +106,33 @@ function programarLiberacion() {
   temporizadorLiberar = setTimeout(terminarTrabajador, 3 * 60 * 1000);
 }
 
-async function cargarModelo(idModelo: ModeloWhisper, emitir: Emitir): Promise<string> {
+/**
+ * La carga en marcha, si la hay. Quien pide el mismo modelo mientras se carga (la práctica tras su precarga, por ejemplo)
+ * espera esta misma carga: un segundo «cargar» haría que el trabajador soltara el modelo a medio leer y empezara otra vez.
+ */
+let cargaEnCurso: { modelo: ModeloWhisper; promesa: Promise<string>; emisores: Set<Emitir> } | null = null;
+
+function cargarModelo(idModelo: ModeloWhisper, emitir: Emitir): Promise<string> {
+  if (cargaEnCurso?.modelo === idModelo) {
+    cargaEnCurso.emisores.add(emitir);
+    emitir({ tipo: 'preparando' });
+    return cargaEnCurso.promesa;
+  }
+  const emisores = new Set<Emitir>([emitir]);
+  const aTodos: Emitir = (e) => {
+    for (const fn of emisores) fn(e);
+  };
+  const promesa = cargarModeloAhora(idModelo, aTodos);
+  const esta = { modelo: idModelo, promesa, emisores };
+  cargaEnCurso = esta;
+  const terminar = () => {
+    if (cargaEnCurso === esta) cargaEnCurso = null;
+  };
+  promesa.then(terminar, terminar);
+  return promesa;
+}
+
+async function cargarModeloAhora(idModelo: ModeloWhisper, emitir: Emitir): Promise<string> {
   const modelo = MODELOS_WHISPER[idModelo] ?? MODELOS_WHISPER.turbo;
   const t = obtenerTrabajador();
   const archivos = new Map<string, { cargado: number; total: number }>();
@@ -546,7 +572,7 @@ export async function tokensDeGrabacion(url: string, emitir: Emitir, senal: Abor
   if (!audio) throw new Error(tr('El navegador no pudo leer la grabación.'));
   const pcm = await audio.leer(0, Math.min(audio.muestras, MAXIMO_PRACTICA_S * FRECUENCIA));
   if (esGrabacionMuda(pcm)) return [];
-  const modelo = modeloParaTranscribir('auto', lengua().id, false);
+  const modelo = modeloDePractica();
   if (!MODELOS_WHISPER[modelo]?.tdt) throw new Error(tr('Esta lengua no tiene un modelo de voz que diga dónde suena cada palabra.'));
   const dispositivo = await cargarModelo(modelo, emitir);
   if (senal.aborted) return [];
@@ -558,6 +584,21 @@ export async function tokensDeGrabacion(url: string, emitir: Emitir, senal: Abor
     programarLiberacion();
   }
 }
+
+/**
+ * Carga ya el modelo con el que se va a transcribir una grabación, para que esté listo al terminarla: la práctica lo pide
+ * al abrirse y al empezar a grabar, y el dictado al empezar a grabar. Solo si ya está en el disco: una descarga se ve
+ * mejor al transcribir, con su avance. También aplaza que se libere.
+ */
+export async function precargar(idModelo: ModeloWhisper): Promise<void> {
+  const modelo = MODELOS_WHISPER[idModelo];
+  if (!modelo || !(await modeloGuardado(modelo).catch(() => false))) return;
+  await cargarModelo(idModelo, () => {});
+  programarLiberacion();
+}
+
+/** El modelo que usa la práctica del acento: el que dice dónde suena cada palabra. */
+export const modeloDePractica = (): ModeloWhisper => modeloParaTranscribir('auto', lengua().id, false);
 
 // ---------- Dictado ----------
 

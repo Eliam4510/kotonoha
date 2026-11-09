@@ -88,11 +88,11 @@ The **Reading assistant** is a complete viewer, like a PDF reader: zoom, two-pag
 
 Pages that are images, such as manga, scanned books and many PDFs, are read with on-device text recognition (OCR) on the graphics card. There is a mode for printed books and another for manga, which reads vertical speech bubbles without mistaking furigana for text. Tapping a word on the page opens its line with furigana and its word panel. Each page is read only once and saved.
 
-### What you copy, with its structure
+### A notebook to write and read
 
-<img src="docs/img/lector-web.en.png" alt="Clipboard in a tab, with paragraphs, furigana and comprehension" width="100%">
+<img src="docs/img/lector-web.en.png" alt="Notebook in a tab, with paragraphs, furigana and comprehension" width="100%">
 
-The **Clipboard** collects what you copy anywhere and shows it with its paragraphs, headings, lists and tables, analysed and with furigana. It opens in a normal tab, also in the browser’s split view next to the page you are reading, and reads the text aloud. You can also dictate to it: what you say into the microphone is transcribed on your computer and added as a new paragraph, with its recording to play again.
+The **Notebook** is a full-width page to write and paste text in the language you study, with headings, lists and quotes, and read it analysed and with furigana. **Organize** gives structure to text pasted as one block without changing its words, and every note is saved to the library. It reads aloud at the speed you choose, continuously, sentence by sentence or repeating a sentence, and any selected part can be listened to or practised. You can also dictate to it: what you say into the microphone is transcribed on your computer and comes in as one more paragraph, with its recording. It also opens in a regular tab, in split view next to the page you are reading, and collects what you copy anywhere.
 
 ### Pitch accent, out loud
 
@@ -126,7 +126,7 @@ Kotonoha works without any key. An optional Claude key adds what needs a languag
 |---|---|
 | Subtitles with furigana, pitch accent and word states | The meaning of a word in its sentence |
 | Dictionary, word panel, stroke order and pronunciation | Explanations of words, sentences and grammar |
-| Page reader, Clipboard and Reading assistant with OCR | Subtitle translation and correction |
+| Page reader, Notebook and Reading assistant with OCR | Subtitle translation and correction |
 | On-device speech transcription | Review of furigana readings |
 | Cards for Anki and the built-in review | Stories written for your level |
 

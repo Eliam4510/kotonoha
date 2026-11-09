@@ -59,6 +59,8 @@ async function abrir(wav, ajustesIniciales) {
   const p = await contexto.newPage();
   const errores = [];
   p.on('pageerror', (e) => errores.push(e.message));
+  // El Cuaderno añade lo que llega al final de lo que ya hay: se empieza vacío.
+  await sw.evaluate(() => chrome.storage.local.remove(['lectorTexto', 'notaCuaderno']));
   await p.goto(`chrome-extension://${id}/app.html#/lector?t=${encodeURIComponent(FRASE)}`);
   await p.locator('.ap-papel .pal').first().waitFor({ timeout: 30000 });
   await p.waitForTimeout(600);
