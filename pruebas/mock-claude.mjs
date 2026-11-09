@@ -15,6 +15,15 @@ const TEXTOS = {
   ko: { sentido: '흡수하다, 제 것으로 만들다', nota: '여기서 별을 ‘먹는다’는 것은 별을 자기 일부로 만든다는 비유이지, 실제로 먹는다는 뜻이 아닙니다.', traduccion: '빨간 별과 파란 별을 삼키는 꿈을 꿨다' },
 };
 
+/** Lo que explica Claude de 〜ことができる en la frase del video de pruebas, en cada idioma de la interfaz. */
+const PODER = {
+  es: 'Aquí 〜ことができる dice que alguien es capaz de hacer algo: 立ち上がることができます, «todavía puedo levantarme». Se forma con el verbo en forma de diccionario más ことができる, y suena algo más formal que la forma potencial (立ち上がれます).',
+  en: 'Here 〜ことができる says that someone is able to do something: 立ち上がることができます, “I can still stand up”. It is formed with the dictionary form of the verb plus ことができる, and it sounds a little more formal than the potential form (立ち上がれます).',
+  de: 'Hier sagt 〜ことができる, dass jemand etwas tun kann: 立ち上がることができます, „ich kann noch aufstehen“. Es wird mit der Wörterbuchform des Verbs und ことができる gebildet und klingt etwas förmlicher als die Potentialform (立ち上がれます).',
+  zh: '这里的〜ことができる表示有能力做某事：立ち上がることができます，“我还能站起来”。由动词的辞书形加ことができる构成，比可能形（立ち上がれます）听起来更正式一些。',
+  ko: '여기서 〜ことができる는 어떤 일을 할 수 있다는 뜻입니다. 立ち上がることができます는 “아직 일어설 수 있습니다”입니다. 동사 사전형에 ことができる를 붙여 만들며, 가능형(立ち上がれます)보다 조금 더 격식 있게 들립니다.',
+};
+
 function respuestaPara(cuerpo, idioma = 'es') {
   const t = TEXTOS[idioma] ?? TEXTOS.es;
   const formato = cuerpo.output_config?.format?.schema;
@@ -113,6 +122,8 @@ function respuestaPara(cuerpo, idioma = 'es') {
   }
   if (sistema.includes('traductor profesional')) return t.traduccion;
   if (sistema.includes('gramática inglesa')) return 'Aquí used to habla de un hábito del pasado que ya no se da. Se forma con used to más el verbo en infinitivo. No se confunde con be used to, que significa estar acostumbrado.';
+  // El globo de gramática del video de pruebas, en el idioma de cada captura.
+  if (sistema.includes('gramática japonesa') && texto.includes('ことができ')) return PODER[idioma] ?? PODER.es;
   if (sistema.includes('gramática japonesa')) return 'Aquí 〜と思う presenta lo que dice el hablante como su opinión o intención, y suaviza la afirmación. Se forma con la forma simple del verbo más と思う. Se confunde con 〜と考える, más reflexivo y formal.\n\n明日は雨だと思う。 Creo que mañana lloverá.';
   // «Organizar» del Cuaderno: el mismo texto con un título, sus párrafos y una lista, como haría Claude con el de prueba.
   if (sistema.includes('Organizas un texto')) {

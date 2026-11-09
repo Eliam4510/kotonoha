@@ -23,6 +23,14 @@ describe('detección de gramática sin IA', () => {
     expect(patrones(texto)).toContain(patron);
   });
 
+  it('〜ておく con su お, y no できます ni 〜てくる', () => {
+    expect(patrones('準備しておきます')).toContain('〜ておく');
+    expect(patrones('買っておいた')).toContain('〜ておく');
+    expect(patrones('言っとく')).toContain('〜ておく');
+    expect(patrones('私はまだ立ち上がることができます')).not.toContain('〜ておく');
+    expect(patrones('お土産を持ってきます')).not.toContain('〜ておく');
+  });
+
   it('no marca formas parecidas que no son gramática', () => {
     expect(patrones('出る')).not.toContain('〜ている');
     expect(patrones('私は学生です')).toEqual([]);

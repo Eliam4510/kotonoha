@@ -110,6 +110,12 @@ El **Cuaderno** es una página a todo lo ancho para escribir y pegar texto en la
 
 El modo **Dictado** oculta la frase mientras suena, pausa al terminarla y pide escribir lo que se oyó. Al comprobar, cada parte sale en verde si se oyó bien, en amarillo si a medias o subrayada si faltó, con la nota de la frase. En japonés se compara cómo se lee, así que vale escribir en kana. **Repetir con tu voz** abre la práctica del acento con esa misma frase, y `P` lo hace con cualquier subtítulo.
 
+### La gramática que ya sabes
+
+<img src="docs/img/gramatica.png" alt="Globo de 〜ことができる sobre un video, marcado como Aprendiendo, con su explicación y dónde se ha visto" width="100%">
+
+Bajo cada subtítulo salen los puntos de gramática que lleva la frase, con su nivel del JLPT. Al tocar uno se abre su globo: qué significa, la explicación de Claude para esa frase y dónde lo has visto antes. Cada punto se marca como **Nuevo**, **Aprendiendo** o **Sabido**; lo que se está aprendiendo lleva una raya amarilla y lo sabido deja de señalarse. Lo que ya se sabía se puede importar desde Anki, y **Tarjeta de opción múltiple** prepara una con tres opciones que se confunden con la buena.
+
 ### Cómo se escribe cada kanji
 
 <img src="docs/img/trazos.png" alt="Orden de los trazos de una palabra en la ficha" width="100%">
@@ -142,7 +148,6 @@ En inglés, la ficha da la pronunciación americana y británica en IPA, encuent
 
 ### Y además
 
-- **Gramática que ya sabes.** Cada punto se marca como nuevo, en aprendizaje o sabido; lo sabido deja de señalarse bajo los subtítulos, cada punto recuerda en qué videos salió y se puede importar desde Anki o convertir en una tarjeta de opción múltiple.
 - **Cómo suena de verdad el inglés.** La ficha enseña la frase como se dice al hablar seguido: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, con lo que pasa en cada caso.
 - **Horas de inmersión.** Inicio cuenta el tiempo que escuchas y lees la lengua que estudias, con la racha de días seguidos.
 - **El gasto, a la vista.** La pantalla de inicio muestra lo gastado este mes en Claude, por días, modelos y tareas, con un tope mensual. Nada se paga dos veces: cada respuesta se guarda. El [estudio de costos](docs/costos.md) da cifras medidas.
