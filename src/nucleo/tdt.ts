@@ -254,7 +254,7 @@ export function segmentosDeTokens(tokens: TokenConTiempo[], reglas: ReglasTransc
       cursor = posicion + parte.length;
       return instantes[Math.min(posicion, instantes.length - 1)] ?? grupo[0].t;
     });
-    partes.forEach((parte, k) => salida.push({ texto: parte, inicio: inicios[k], fin: k + 1 < partes.length ? inicios[k + 1] : final }));
+    partes.forEach((parte, k) => salida.push({ texto: parte, inicio: inicios[k], fin: k + 1 < partes.length ? inicios[k + 1] : final, palabrasEnteras: true }));
   }
   return salida;
 }

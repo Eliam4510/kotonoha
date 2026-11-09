@@ -96,7 +96,7 @@ Las páginas que son imágenes, como los mangas, los libros escaneados y muchos 
 
 <img src="docs/img/lector-web.png" alt="Portapapeles en una pestaña, con párrafos, furigana y comprensión" width="100%">
 
-El **Portapapeles** recoge lo que se copia en cualquier sitio y lo muestra con sus párrafos, títulos, listas y tablas, analizado y con furigana. Se abre en una pestaña normal, también en la vista dividida del navegador junto a la página que se esté leyendo, y lee el texto en voz alta.
+El **Portapapeles** recoge lo que se copia en cualquier sitio y lo muestra con sus párrafos, títulos, listas y tablas, analizado y con furigana. Se abre en una pestaña normal, también en la vista dividida del navegador junto a la página que se esté leyendo, y lee el texto en voz alta. También se le puede dictar: lo dicho al micrófono se transcribe en el equipo y entra como un párrafo más, con su grabación para volver a oírla.
 
 ### Cómo se escribe cada kanji
 

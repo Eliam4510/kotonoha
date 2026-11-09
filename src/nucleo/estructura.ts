@@ -3,6 +3,8 @@
 // texto plano (el Portapapeles, la biblioteca, la copia de seguridad), se puede editar a mano, y lo que se copia del chat
 // de Claude ya llega así. Lo que se copia de una página web llega como HTML y se convierte a lo mismo.
 
+import { idDeMarca } from './dictado';
+
 export interface Linea {
   /** El texto tal como se lee, sin marcas. */
   texto: string;
@@ -25,7 +27,9 @@ export type Bloque =
   | { tipo: 'cita'; lineas: Linea[] }
   | { tipo: 'codigo'; lineas: Linea[] }
   | { tipo: 'tabla'; cabecera: Linea[] | null; filas: Linea[][] }
-  | { tipo: 'separador' };
+  | { tipo: 'separador' }
+  /** La grabación de un dictado, que va encima del párrafo que salió de ella (nucleo/dictado.ts). */
+  | { tipo: 'dictado'; id: string };
 
 // ---------- Del Markdown a los bloques ----------
 
@@ -133,6 +137,14 @@ export function leerEstructura(md: string): Bloque[] {
 
     if (!crudo.trim()) {
       cerrar();
+      continue;
+    }
+
+    // La marca de un dictado va en su propia línea y no se lee como texto.
+    const dictado = idDeMarca(crudo);
+    if (dictado) {
+      cerrar();
+      bloques.push({ tipo: 'dictado', id: dictado });
       continue;
     }
 

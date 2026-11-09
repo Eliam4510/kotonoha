@@ -167,3 +167,24 @@ describe('el texto plano tal como llega', () => {
     expect(normalizarTextoPlano('a  \r\nb\r\n\r\n\r\n\r\nc')).toBe('a\nb\n\nc');
   });
 });
+
+describe('los dictados en el texto', () => {
+  it('la marca es un bloque propio, encima del párrafo que salió de la grabación', () => {
+    const b = leerEstructura('前の段落。\n<!-- dictado:abcd-1234 -->\n今日はいい天気ですね。');
+    expect(b.map((x) => x.tipo)).toEqual(['parrafo', 'dictado', 'parrafo']);
+    expect(b[1]).toEqual({ tipo: 'dictado', id: 'abcd-1234' });
+    expect(lineas(b[2])).toEqual(['今日はいい天気ですね。']);
+  });
+
+  it('dentro de un bloque de código es texto', () => {
+    const [codigo] = leerEstructura('```\n<!-- dictado:abcd-1234 -->\n```');
+    expect(codigo.tipo).toBe('codigo');
+    expect(lineas(codigo)).toEqual(['<!-- dictado:abcd-1234 -->']);
+  });
+
+  it('no da frases ni entra en el texto plano', () => {
+    const b = leerEstructura('<!-- dictado:abcd-1234 -->\nHallo. Wie geht es dir?');
+    expect(frasesDeBloques(b, /(?<=[.?!])\s+/).frases).toEqual(['Hallo.', 'Wie geht es dir?']);
+    expect(textoPlano(b)).toBe('Hallo. Wie geht es dir?');
+  });
+});

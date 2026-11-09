@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.12.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.13.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -99,6 +99,8 @@ Stand jeder Funktion in Version 0.12.0 und die Art ihrer Überprüfung.
 | Zwischenablage: Eingefügter oder kopierter Text behält Absätze, Zeilenumbrüche, Überschriften, Listen, Zitate, Code, Tabellen und Fettdruck, ohne die Furigana der Ursprungsseite | Automatisch |
 | Zwischenablage in einem normalen Tab, auch in geteilter Ansicht neben der angezeigten Seite | Automatisch, in Edge und Chrome |
 | Zwischenablage folgen, ohne dass der Tab den Fokus hat | Automatisch |
+| Diktieren in die Zwischenablage: das Mikrofon, Zeit und Pegel während der Aufnahme und der Text am Ende, schon analysiert, auf dem Rechner mit dem Sprachmodell aus den Einstellungen transkribiert | Automatisch, mit synthetischen Stimmen auf Japanisch und Englisch |
+| Die Aufnahme jedes Diktats über ihrem Absatz, zum erneuten Anhören; sie geht mit dem Text in die Bibliothek, und eine, die kein Text nutzt, wird nach einer Woche gelöscht | Automatisch |
 | Lesehilfe: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
 | Betrachter für Seitenbücher: EPUB aus Bildern, CBZ und PDF in einem eigenen Tab, mit Zoom, Anpassung an Breite oder Seite, Einzelseite, Doppelseite und fortlaufendem Bildlauf | Automatisch |
 | Bilderordner als Bücher: Jeder Ordner, oder jeder Band darin, wird ein Buch, mit der Titelseite vorn, einem Inhaltsverzeichnis nach Kapiteln und querformatigen Doppelseiten für sich | Automatisch, und mit 40 echten Manga-Bänden |

@@ -67,5 +67,6 @@ export const TEXTOS: TextosLengua = {
   pegarLista: tm('Pega una lista o cualquier texto en alemán.'),
   localArrastrar: tm('Arrastra aquí un video y sus subtítulos. Tendrás pronunciación, diccionario, tarjetas y Claude, y el video no sale de tu ordenador.'),
   seguirPortapapeles: tm('Añade aquí el alemán que copies en cualquier sitio, mientras esta pestaña esté a la vista.'),
+  dictar: tm('Habla en alemán y Kotonoha lo escribe aquí, con tu grabación para volver a oírla.'),
   temaRelato: tm('Un gato que pasea por Berlín…'),
 };

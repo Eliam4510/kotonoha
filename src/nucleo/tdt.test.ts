@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { crearMel, decodificarTokens, parsearLista, parsearPiezas, segmentosDeTokens, type TokenConTiempo } from './tdt';
-import type { ReglasTranscripcion } from './transcripcion';
+import { REGLAS_TRANSCRIPCION as REGLAS_ALEMAN } from '../lenguas/aleman/transcripcion';
+import { REGLAS_TRANSCRIPCION as REGLAS_INGLES } from '../lenguas/ingles/transcripcion';
+import { type ReglasTranscripcion, segmentosALineas } from './transcripcion';
 
 const REGLAS: ReglasTranscripcion = {
   alucinaciones: [],
@@ -141,5 +143,21 @@ describe('segmentosDeTokens', () => {
     const s = segmentosDeTokens(tokens([[' brand', 1], [' new', 1.3], [' world', 1.5]]), { ...REGLAS, maximoCaracteres: 50 });
     expect(s.map((x) => x.texto)).toEqual(['brand new world']);
     expect(s[0].inicio).toBe(1);
+  });
+});
+
+describe('las palabras de un transductor en inglés y en alemán', () => {
+  const linea = (texto: string, desde: number) =>
+    texto.split(/(?= )/).map((p, i): [string, number] => [p, desde + i * 0.2]);
+
+  it('una frase larga partida en dos líneas no pega la primera palabra de la segunda a la primera', () => {
+    const s = segmentosDeTokens(tokens(linea(' This afternoon I am going for a walk in the park.', 1)), REGLAS_INGLES);
+    const l = segmentosALineas(s, [], 10, 1, REGLAS_INGLES);
+    expect(l.map((x) => x.texto)).toEqual(['This afternoon I am going', 'for a walk in the park.']);
+  });
+
+  it('lo de Whisper sí se une: allí una palabra puede quedar partida entre dos trozos', () => {
+    const l = segmentosALineas([{ texto: 'Sie betrat da', inicio: 0, fin: 1.5 }, { texto: 's Zimmer.', inicio: 1.5, fin: 2.5 }], [], 3, 1, REGLAS_ALEMAN);
+    expect(l.map((x) => x.texto)).toEqual(['Sie betrat das', 'Zimmer.']);
   });
 });

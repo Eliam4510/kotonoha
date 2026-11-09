@@ -10,11 +10,13 @@ import { modeloGuardado } from '../compartido/modelosGuardados';
 import { tr } from '../compartido/i18n';
 import { fondo } from '../compartido/rpc';
 import type { Linea } from '../nucleo/subtitulos';
+import { textoDeLineas } from '../nucleo/dictado';
 import { segmentosDeTokens, type TokenConTiempo } from '../nucleo/tdt';
 import {
   AcumuladorAudio,
   esAlucinacion,
   esBucle,
+  esGrabacionMuda,
   esSilencio,
   esTextoRecuperable,
   FRECUENCIA,
@@ -513,3 +515,33 @@ async function transcribirMuestras(
 }
 
 export const transcribiendoEnVivo = () => acumuladorVivo !== null;
+
+// ---------- Dictado ----------
+
+/**
+ * Una grabación del micrófono, entera: el dictado del Portapapeles. Se corta por los silencios como un archivo, pero sin
+ * descansos entre trozos, porque dura poco, y sin tocar el estado de otra transcripción que pueda estar en marcha (su
+ * pausa o su parada). Devuelve el texto, con las líneas seguidas como en un párrafo.
+ */
+export async function transcribirGrabacion(url: string, idModelo: ModeloWhisper, emitir: Emitir, senal: AbortSignal): Promise<string> {
+  emitir({ tipo: 'preparando' });
+  const audio = await abrirAudio(url, false);
+  if (!audio) throw new Error(tr('El navegador no pudo leer la grabación.'));
+  const muestras = await audio.leer(0, audio.muestras);
+  // Para saber que no hay voz no hace falta cargar el modelo.
+  if (esGrabacionMuda(muestras)) return '';
+  const dispositivo = await cargarModelo(idModelo, emitir);
+  const acumulador = new AcumuladorAudio();
+  acumulador.agregar(muestras, 0);
+  const textos: string[] = [];
+  try {
+    for (let t = acumulador.extraer(true); t && !senal.aborted; t = acumulador.extraer(true)) {
+      const hechas = audio.muestras - acumulador.muestras - t.pcm.length;
+      emitir({ tipo: 'procesando', porcentaje: Math.round((hechas / Math.max(audio.muestras, 1)) * 100), dispositivo });
+      for (const l of await procesarTrozo(t, idModelo, emitir, senal)) textos.push(l.texto);
+    }
+  } finally {
+    programarLiberacion();
+  }
+  return textoDeLineas(textos, !!reglas().espacios);
+}

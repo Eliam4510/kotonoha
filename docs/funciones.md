@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.12.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.13.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -99,6 +99,8 @@ Estado de cada función en la versión 0.12.0, con la forma en que se ha verific
 | Portapapeles: lo pegado o copiado conserva sus párrafos, saltos de línea, títulos, listas, citas, código, tablas y negritas, sin el furigana de la página de origen | Automática |
 | Portapapeles en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
 | Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
+| Dictar al Portapapeles: el micrófono, el tiempo y el nivel mientras se graba, y el texto al final, ya analizado, transcrito en el equipo con el modelo de voz de los ajustes | Automática, con voces sintéticas en japonés e inglés |
+| La grabación de cada dictado encima de su párrafo, para volver a oírla; va con el texto a la biblioteca, y la que ningún texto usa se borra pasada una semana | Automática |
 | Ayuda de lectura: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
 | Carpetas de imágenes como libros: cada carpeta, o cada tomo dentro de ella, entra como un libro, con la portada delante, el índice por capítulos y las dobles páginas apaisadas solas | Automática, y con 40 tomos reales de manga |

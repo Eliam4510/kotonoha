@@ -5,7 +5,9 @@ import type { ApiMotor, CambioPalabra, FiltroPalabras } from '../compartido/api'
 import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
 import { borrarArchivoDocumento } from '../compartido/documentos';
+import { borrarGrabaciones, grabacionesDe } from '../compartido/dictados';
 import { olvidarOcr } from '../compartido/paginasOcr';
+import { grabacionesSinUso } from '../nucleo/dictado';
 import { aplicarCambio } from '../nucleo/estanteria';
 import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
@@ -449,6 +451,18 @@ const api: ApiMotor = {
     // El archivo de un libro de páginas se guarda aparte, y lo que el OCR leyó de él también: se van con él.
     if (e?.documento) await Promise.all([borrarArchivoDocumento(id), olvidarOcr(id)]);
   },
+  // Una grabación sin texto que la use se guarda aún unos días, por si ese texto vuelve (MARGEN_SIN_USO_MS).
+  async limpiarDictados(abiertos) {
+    const grabaciones = await grabacionesDe(lengua().id);
+    if (!grabaciones.length) return 0;
+    const textos = [...abiertos];
+    await db.biblioteca.each((e) => {
+      if (e.texto) textos.push(e.texto);
+    });
+    const sobran = grabacionesSinUso(grabaciones, textos, Date.now());
+    await borrarGrabaciones(sobran);
+    return sobran.length;
+  },
   bibliotecaObtener: (id) => db.biblioteca.get(id),
   coleccionesListar: () => db.colecciones.orderBy('creada').toArray(),
   async coleccionGuardar(c) {
@@ -601,6 +615,8 @@ atenderFlujos({
     const intensidad = async () => (await aj()).whisperIntensidad;
     return String(await whisper.transcribirArchivo(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, pcmCrudo, desdeMs));
   },
+  // El dictado del Portapapeles: la grabación entera, con el modelo de voz de los ajustes. El resultado es el texto.
+  transcribirDictado: async (emitir, senal, url: string) => whisper.transcribirGrabacion(url, await modeloPorOmision(), (e) => emitir(`${JSON.stringify(e)}\n`), senal),
 });
 
 async function modeloPorOmision(): Promise<ModeloWhisper> {

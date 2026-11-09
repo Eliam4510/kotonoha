@@ -16,8 +16,10 @@ import type {
   ResultadoBusqueda,
   TarjetaMemoria,
 } from '../compartido/tipos';
-import { normalizarTextoPlano, textoConEstructura } from '../nucleo/estructura';
+import { anadirDictado } from '../nucleo/dictado';
+import { leerEstructura, normalizarTextoPlano, textoConEstructura, textoPlano } from '../nucleo/estructura';
 import { SeguirLeyendo } from './Biblioteca';
+import { Dictado, limpiarDictadosSiToca } from './Dictado';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
@@ -440,6 +442,25 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
     return alCambiarTextoLector(recibir);
   }, [web]);
 
+  // Las grabaciones de dictados que ya nadie usa se borran de vez en cuando; las de lo que hay abierto, nunca.
+  useEffect(() => {
+    const reloj = setTimeout(async () => {
+      const abiertos = [textoActual.current, await leerTextoLector().catch(() => '')];
+      await limpiarDictadosSiToca(abiertos);
+    }, 5000);
+    return () => clearTimeout(reloj);
+  }, []);
+
+  /** Lo dictado va al final, en su propio párrafo, y se lee ya analizado. */
+  const dictar = (id: string, dictado: string) => {
+    const nuevo = anadirDictado(textoActual.current, id, dictado);
+    textoActual.current = nuevo;
+    fijarTexto(nuevo);
+    fijarLeyendo(true);
+    if (web) guardarTextoLector(nuevo).catch(console.error);
+    setTimeout(() => document.querySelector('.ap-principal')?.scrollTo({ top: 1e9, behavior: 'smooth' }), 350);
+  };
+
   const botonWeb = !web && (
     <button class="btn chico fantasma" data-tip={tr('Abre el Portapapeles en una pestaña normal del navegador, para ponerlo en vista dividida junto a otra página.')} onClick={async () => {
       await guardarTextoLector(texto);
@@ -454,7 +475,7 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
           texto={texto}
           ajustes={ajustes}
           titulo={tr('Portapapeles')}
-          inicioBarra={<><button class="btn chico fantasma" onClick={() => fijarLeyendo(false)}><Icono n="flecha-izq" t={15} /> {tr('Editar el texto')}</button>{botonWeb}</>}
+          inicioBarra={<><button class="btn chico fantasma" onClick={() => fijarLeyendo(false)}><Icono n="flecha-izq" t={15} /> {tr('Editar el texto')}</button>{botonWeb}<Dictado alDictar={dictar} /></>}
         />
       </div>
     );
@@ -493,6 +514,7 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
         <div class="ap-hoja-pie">
           <div class="ap-botones">
             <button class="btn fantasma chico" onClick={async () => fijarTexto(await pegadoConEstructura())}><Icono n="portapapeles" t={15} /> {tr('Pegar')}</button>
+            <Dictado alDictar={dictar} />
             {texto ? (
               <button class="btn fantasma chico" onClick={() => {
                 fijarTexto('');
@@ -504,7 +526,9 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
           </div>
           <div class="ap-botones">
             <button class="btn" disabled={!texto.trim()} onClick={async () => {
-              await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo: texto.trim().slice(0, 30), texto, origen: 'pegado', creado: Date.now() });
+              // El título sale del texto que se lee, sin las marcas del Markdown ni las de los dictados.
+              const titulo = textoPlano(leerEstructura(texto)).trim().slice(0, 30) || tr('Texto dictado');
+              await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo, texto, origen: 'pegado', creado: Date.now() });
               navegar('biblioteca');
             }}><Icono n="biblioteca" t={16} /> {tr('Guardar en la biblioteca')}</button>
             <button class="btn primario" disabled={!texto.trim()} onClick={() => {
