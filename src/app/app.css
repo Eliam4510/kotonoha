@@ -1127,9 +1127,9 @@ section .ap-botones { margin-top: 10px; }
 .ap-kanji-ficha .chip-nivel { width: fit-content; margin: 0; }
 .ap-kanji-ficha em { font-style: normal; color: var(--texto-2); }
 .ap-kanji-ficha small:not(.chip-nivel) { color: var(--texto-3); font-size: 11.5px; }
-.ap-homofonos { display: flex; flex-wrap: wrap; gap: 6px; }
-.ap-homofonos .chip { font-family: var(--letra-lengua); font-size: 15px; }
-.ap-homofonos .chip.comun { box-shadow: inset 0 0 0 1px var(--hoja-media); }
+.ap-homofonos, .ap-sinonimos { display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-homofonos .chip, .ap-sinonimos .chip { font-family: var(--letra-lengua); font-size: 15px; }
+.ap-homofonos .chip.comun, .ap-sinonimos .chip.comun { box-shadow: inset 0 0 0 1px var(--hoja-media); }
 .ap-explorar { margin-top: 34px; }
 .ap-explorar .ap-seccion-titulo { justify-content: center; }
 .ap-explorar-rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }

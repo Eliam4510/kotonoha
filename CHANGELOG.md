@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.1 · 2026-11-09
+
+- **Sinónimos en el diccionario.** Debajo de cada palabra, **Significan lo mismo** reúne las de uso común con el mismo significado, como 食う, 召し上がる o 頂く para 食べる, sacadas del propio diccionario al momento y sin gastar nada. Para saber en qué se diferencian sigue estando **Palabras parecidas y en qué se diferencian**, con Claude.
+- **La copia de seguridad lleva la gramática.** Lo marcado en cada punto de gramática (sabido o aprendiendo) y dónde se ha visto no entraba, desde la 0.25.0, ni en la copia de seguridad ni en la copia completa. Ahora va en las dos y vuelve al restaurar.
+
 ## 0.27.0 · 2026-11-09
 
 - **Cómo suena de verdad el inglés.** La ficha de una palabra inglesa tiene una pestaña nueva, **Cómo suena**, que enseña la frase como se dice al hablar seguido, con la forma hablada encima de cada trozo: reducciones (*going to* → *gonna*), formas débiles (*to* → *tə*), uniones (*turn off* → *tur‿noff*), la t o la d con *you* (*meet you* → *meechu*) y la t suave americana (*get it* → *ge‿dit*), con una leyenda. Se calcula con reglas, sin gastar nada.
@@ -194,6 +199,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.1 · 2026-11-09
+
+- **Synonyms in the dictionary.** Below each word, **Same meaning** gathers the common words with the same meaning, such as 食う, 召し上がる or 頂く for 食べる, taken from the dictionary itself, instantly and at no cost. To learn how they differ, **Similar words and how they differ** is still there, with Claude.
+- **Backups include grammar.** What has been marked on each grammar point (known or learning) and where it has been seen was left out of the backup and the full backup since 0.25.0. It now goes in both and comes back on restore.
 
 ## 0.27.0 · 2026-11-09
 

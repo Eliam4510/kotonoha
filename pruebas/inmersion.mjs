@@ -109,7 +109,10 @@ await p.locator('.ficha').first().screenshot({ path: join(CAPTURAS, '1-kanji-con
 
 // ---------- Horas de inmersión: un video propio ----------
 
-const antes = (await leerTabla('inmersion').catch(() => [])).map((f) => [f.dia, f.tipo, f.fuente]);
+// Lo que otras pruebas contaron en este perfil (hoy mismo, con el Cuaderno o un video) descuadraría las sumas: se aparta
+// y se devuelve al final.
+const apartadas = await leerTabla('inmersion').catch(() => []);
+if (apartadas.length) await escribir('inmersion', apartadas.map((f) => [f.dia, f.tipo, f.fuente]), true);
 await p.goto(`chrome-extension://${id}/app.html#/reproductor`);
 await p.waitForTimeout(1200);
 await p.setInputFiles('input[type="file"]', ARCHIVO);
@@ -174,8 +177,8 @@ await tarjeta.screenshot({ path: join(CAPTURAS, '4-inicio-estrecho.png') });
 // ---------- Lo deja como estaba ----------
 
 const despues = await leerTabla('inmersion');
-const nuevas = despues.filter((f) => !antes.some(([d, t, fu]) => d === f.dia && t === f.tipo && fu === f.fuente)).map((f) => [f.dia, f.tipo, f.fuente]);
-await escribir('inmersion', nuevas, true);
+await escribir('inmersion', despues.map((f) => [f.dia, f.tipo, f.fuente]), true);
+if (apartadas.length) await escribir('inmersion', apartadas);
 await escribir('palabras', PALABRAS.filter((x) => !previas.some((y) => y.clave === x.clave)).map((x) => x.clave), true);
 if (previas.length) await escribir('palabras', previas);
 await sw.evaluate(async () => {

@@ -118,6 +118,12 @@ Das Wortfenster zeigt die Strichfolge jedes Kanji im Wort, Strich für Strich un
 
 Die Ansicht **JLPT** vereint Wortschatz, Kanji und Grammatik jeder Stufe von N5 bis N1 und zeigt, wie viel davon du schon kennst, anhand der beim Sehen und Lesen markierten Wörter. Bekannte Wörter werden auf einmal markiert, jedes Kanji zeigt seine Striche und die Wörter, die es enthalten, und jeder Grammatikpunkt die gesehenen Sätze, in denen er vorkam.
 
+### Ein Wörterbuch zum Erkunden
+
+<img src="docs/img/diccionario.de.png" alt="Wörterbuch mit dem Wort 話す: sein Kanji, Wörter gleicher Bedeutung und gleich gelesene Wörter" width="100%">
+
+Das Wörterbuch sucht auch nach Bedeutung, etwa „Hund“ → 犬, und findet Grammatik nach Form oder Sinn. Unter jedem Wort stehen seine Kanji mit Stufe; **Gleiche Bedeutung** mit den gebräuchlichen Wörtern derselben Bedeutung, etwa 喋る oder 会話 für 話す; und die gleich gelesenen, etwa 離す und 放す. Auf Wunsch erklärt Claude die Unterschiede. Die Startseite versammelt Lautmalereien, Sprichwörter, Ausdrücke aus vier Kanji sowie literarische, umgangssprachliche und höfliche Wörter.
+
 ### Auch Englisch
 
 <img src="docs/img/ingles-subtitulos.de.png" alt="Wortfenster zu einem englischen Wort über einem Video, mit der Aussprache in IPA" width="100%">
@@ -126,7 +132,6 @@ Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache i
 
 ### Außerdem
 
-- **Ein Wörterbuch zum Erkunden.** Suche nach Bedeutung („dog“ → 犬), Grammatik nach Form oder Sinn, die Kanji und Homophone jedes Wortes, dazu Lautmalereien, Sprichwörter, Ausdrücke aus vier Kanji und mehr.
 - **Grammatik, die du schon kannst.** Jeder Punkt wird als neu, im Lernen oder gelernt markiert; gelernte Punkte werden unter Untertiteln nicht mehr markiert, jeder Punkt merkt sich, in welchen Videos er vorkam, und lässt sich aus Anki importieren oder in eine Multiple-Choice-Karte verwandeln.
 - **Diktat und Nachsprechen.** Der Diktat-Modus blendet die Zeile aus, pausiert am Ende und vergleicht, was du schreibst, mit dem Gesagten; mit `P` lässt sich jeder Untertitel laut üben.
 - **Wie Englisch wirklich klingt.** Das Wortfenster zeigt den Satz so, wie er beim zusammenhängenden Sprechen klingt: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, mit Erklärung zu jedem Fall.

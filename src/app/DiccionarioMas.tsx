@@ -78,6 +78,7 @@ export function MasDeLaPalabra({ r, frase }: { r: ResultadoBusqueda; frase?: str
   const caracteres = lengua.value.trazos?.conocidas?.caracteres(r.lema) ?? [];
   const [kanji, fijarKanji] = useState<CaracterConNivel[]>([]);
   const [homofonos, fijarHomofonos] = useState<EntradaBreve[]>([]);
+  const [sinonimos, fijarSinonimos] = useState<EntradaBreve[]>([]);
   const [parecidas, fijarParecidas] = useState(false);
   useEffect(() => {
     let vivo = true;
@@ -86,6 +87,8 @@ export function MasDeLaPalabra({ r, frase }: { r: ResultadoBusqueda; frase?: str
     else fijarKanji([]);
     if (lengua.value.lectura.distingue && r.lectura) motor.homofonos(r.lectura, r.lema).then((h) => vivo && fijarHomofonos(h)).catch(() => {});
     else fijarHomofonos([]);
+    fijarSinonimos([]);
+    if (lengua.value.categoriasDiccionario?.length) motor.sinonimos(r.lema, r.lectura ?? '').then((s) => vivo && fijarSinonimos(s)).catch(() => {});
     return () => {
       vivo = false;
     };
@@ -105,6 +108,18 @@ export function MasDeLaPalabra({ r, frase }: { r: ResultadoBusqueda; frase?: str
                   <em>{k.glosa || tr('Fuera de las listas')}</em>
                   {(k.on || k.kun) && <small lang={lengua.value.id}>{[k.on, k.kun].filter(Boolean).join(' · ')}</small>}
                 </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {sinonimos.length > 0 && (
+        <div class="ap-mas-bloque">
+          <div class="subtitulo-def">{tr('Significan lo mismo')}</div>
+          <div class="ap-sinonimos">
+            {sinonimos.map((s) => (
+              <button key={`${s.termino}|${s.lectura}`} class={`chip ${s.comun ? 'comun' : ''}`} lang={lengua.value.id} data-tip={[s.lectura !== s.termino ? s.lectura : '', s.glosa].filter(Boolean).join(' · ')} onClick={() => buscarPalabra(s.termino)}>
+                {s.termino}
               </button>
             ))}
           </div>

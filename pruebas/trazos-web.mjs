@@ -182,14 +182,18 @@ comprobar(inexistente === null, 'Un carácter sin datos no da error', String(ine
 
 // ---------- Lector en su pestaña ----------
 
-console.log('\n== Lector en su pestaña ==');
+console.log('\n== Cuaderno en su pestaña ==');
 const TEXTO = '今日は図書館で本を読みます。天気がいいです。';
+// El Cuaderno abre con lo que se le haya dejado escrito; escribir en su editor ya lo prueba pruebas/cuaderno.mjs.
+await sw.evaluate(async (texto) => {
+  await chrome.storage.local.set({ lectorTexto: texto });
+  await chrome.storage.local.remove('notaCuaderno');
+}, TEXTO);
 const app = await contexto.newPage();
 await app.goto(`chrome-extension://${id}/app.html#/lector`);
-await app.waitForSelector('.ap-hoja-escritura textarea', { timeout: 15000 });
-await app.fill('.ap-hoja-escritura textarea', TEXTO);
+await app.waitForSelector('.ap-papel .pal', { timeout: 20000 });
 const botonWeb = app.locator('button', { hasText: 'Modo web' }).first();
-comprobar(await botonWeb.count() > 0, 'El lector de la app tiene el botón «Modo web»');
+comprobar(await botonWeb.count() > 0, 'El Cuaderno de la app tiene el botón «Modo web»');
 const nueva = contexto.waitForEvent('page', { timeout: 10000 }).catch(() => null);
 await botonWeb.click();
 const web = await nueva;
@@ -202,7 +206,7 @@ comprobar(!!conTexto, 'Llega con el texto ya analizado');
 const textoWeb = await web.evaluate(() => document.querySelector('.ap-papel')?.textContent ?? '');
 comprobar(textoWeb.includes('図書館'), 'Es el mismo texto', textoWeb.slice(0, 30));
 const titulo = await web.title();
-comprobar(/Portapapeles/.test(titulo), 'La pestaña se llama como debe', titulo);
+comprobar(/Cuaderno/.test(titulo), 'La pestaña se llama como debe', titulo);
 comprobar(await web.evaluate(() => !document.querySelector('.ap-lateral')), 'No lleva la barra lateral de la app');
 await web.screenshot({ path: join(CAPTURAS, 'lector-web.png') });
 
@@ -334,20 +338,7 @@ comprobar(!!enMarkdown && enMarkdown.elementos.includes('傘') && enMarkdown.ele
 await web.locator('.ap-web-seguir button, .ap-web-seguir [role="switch"]').first().click();
 await web.waitForTimeout(300);
 
-// Pegar con Ctrl+V en el cuadro de texto también conserva la estructura.
-await app.bringToFront();
-const pegado = await app.evaluate((html) => {
-  const area = document.querySelector('.ap-hoja-escritura textarea');
-  area.focus();
-  area.setSelectionRange(area.value.length, area.value.length);
-  const datos = new DataTransfer();
-  datos.setData('text/html', html);
-  datos.setData('text/plain', '見出し 一つ目 二つ目');
-  area.dispatchEvent(new ClipboardEvent('paste', { clipboardData: datos, bubbles: true, cancelable: true }));
-  return new Promise((r) => setTimeout(() => r(document.querySelector('.ap-hoja-escritura textarea').value), 300));
-}, '<h2>見出し</h2><ul><li>一つ目</li><li>二つ目</li></ul>');
-comprobar(pegado.includes('## 見出し') && pegado.includes('- 一つ目\n- 二つ目'), 'Pegar en el cuadro de texto conserva la estructura', JSON.stringify(pegado.slice(-40)));
-comprobar(/。\n\n## 見出し/.test(pegado), 'Y lo que trae bloques empieza en su propio párrafo', JSON.stringify(pegado.slice(-40)));
+// Pegar con Ctrl+V en el editor del Cuaderno, con su estructura, lo prueba pruebas/cuaderno.mjs.
 
 // Un EPUB de texto con un título, dos párrafos y su propio furigana, importado en la Ayuda de lectura: se abre en el
 // visor con su propio formato. Lo demás de los EPUB de texto lo prueba pruebas/libros-texto.mjs.

@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.27.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.27.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -29,7 +29,7 @@ Stand jeder Funktion in Version 0.27.0 und die Art ihrer Überprüfung.
 | Kanji, die du schon kennst: neben den Strichen die bekannten oder gerade gelernten Wörter mit jedem Kanji des Worts, die bekannten zuerst | Automatisch, mit in die Datenbank gesetzten Wörtern |
 | Als Bild teilen: eine Karte des Wortes (Furigana, Akzent, Bedeutung im Satz oder das Wörterbuch, der Satz mit dem hervorgehobenen Wort) oder eines Grammatikpunkts, beim Klicken in die Zwischenablage kopiert; Tinte oder Papier; Bild speichern | Automatisch, mit einem simulierten Claude, über die Zwischenablage |
 | JLPT: Wortschatz (8354 Wörter), Kanji (2211) und Grammatik (501 Punkte) von N5 bis N1 mit dem, was du von jeder Stufe kennst; Status einzeln oder für alle ausgewählten ändern; Kanji-Karte mit Strichen und Wörtern der Stufe; Beispiele jedes Grammatikpunkts aus gesehenen Sätzen und seine Erklärung durch Claude | Automatisch, mit einem simulierten Claude |
-| Wörterbuch: Suche nach Bedeutung unter gebräuchlichen Wörtern mit passender Glosse; JLPT-Grammatik nach Form oder Bedeutung; unter jedem Wort seine Kanji mit Stufe, Homophone und ähnliche Wörter (Claude); sieben Kategorien zum Erkunden nach den JMdict-Kennzeichnungen | Automatisch, mit den Wörterbüchern des Testprofils und einem simulierten Claude |
+| Wörterbuch: Suche nach Bedeutung unter gebräuchlichen Wörtern mit passender Glosse; JLPT-Grammatik nach Form oder Bedeutung; unter jedem Wort seine Kanji mit Stufe, gebräuchliche Wörter gleicher Bedeutung, Homophone und ähnliche Wörter (Claude); sieben Kategorien zum Erkunden nach den JMdict-Kennzeichnungen | Automatisch, mit den Wörterbüchern des Testprofils und einem simulierten Claude |
 | Grammatik mit Status: neu, im Lernen oder gelernt in der Videoblase, im Wortfenster, in der JLPT-Ansicht und im Wörterbuch; Gelerntes wird unter Untertiteln nicht markiert; wo jeder Punkt gesehen wurde; Multiple-Choice-Karte mit Ablenkern von Claude; Import aus Anki gegen die 501 Listenpunkte | Automatisch (Status, Filter, Speichern und Zurücksetzen in der JLPT-Ansicht); der Import mit Unit-Tests |
 | Diktat-Modus: Zeile ausgeblendet, Pause am Ende, Gehörtes schreiben und vergleichen (im Japanischen nach der Lesung, mit den anderen Wörterbuchlesungen); Noch einmal hören, Weiter mit Enter; Mit deiner Stimme nachsprechen (Schaltfläche und Taste P) öffnet die Akzentübung mit der Zeile | Automatisch, auf der Testvideoseite |
 | Wie es wirklich klingt (Englisch): der Satz mit der gesprochenen Form darüber, mit Verkürzungen, schwachen Formen, Bindungen, t oder d mit you und dem weichen amerikanischen t, samt Legende; nach Regeln, ohne Claude | Automatisch, mit Unit-Tests der Regeln |

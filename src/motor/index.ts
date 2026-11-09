@@ -109,6 +109,8 @@ interface DatosDeLengua {
   memoria?: never[];
   generados?: never[];
   correcciones?: never[];
+  gramatica?: never[];
+  gramaticaVista?: never[];
 }
 
 let sinGpu: boolean | null = null;
@@ -279,6 +281,7 @@ const api: ApiMotor = {
   categoriaDiccionario: (id, desde, limite) => explorar.categoriaDiccionario(id, desde, limite),
   cuentaCategorias: () => explorar.cuentaCategorias(),
   homofonos: (lectura, excluir) => explorar.homofonos(lectura, excluir),
+  sinonimos: (lema, lectura) => explorar.sinonimos(lema, lectura),
 
   async estadosGramatica(estudio) {
     const filas = await baseDeEstudio(estudio).gramatica.toArray();
@@ -638,6 +641,9 @@ const api: ApiMotor = {
         generados: await base.generados.toArray(),
         correcciones: await base.correcciones.toArray(),
         inmersion: await base.inmersion.toArray(),
+        // Lo que se sabe de cada punto de gramática y dónde se ha visto: marcarlo otra vez llevaría semanas.
+        gramatica: await base.gramatica.toArray(),
+        gramaticaVista: await base.gramaticaVista.toArray(),
       };
     }
     // Las claves de API no van en la copia: un archivo así acaba en cualquier sitio. Se vuelven a escribir al restaurar.
@@ -658,9 +664,12 @@ const api: ApiMotor = {
       if (datos.generados) await base.generados.bulkPut(datos.generados);
       if (datos.correcciones) await base.correcciones.bulkPut(datos.correcciones);
       if (datos.inmersion) await base.inmersion.bulkPut(datos.inmersion);
+      if (datos.gramatica) await base.gramatica.bulkPut(datos.gramatica);
+      if (datos.gramaticaVista) await base.gramaticaVista.bulkPut(datos.gramaticaVista);
     }
     if (d.consumo) await baseGeneral.consumo.bulkPut(d.consumo);
     await fondo.difundir({ tipo: 'palabrasRecargar' });
+    await fondo.difundir({ tipo: 'gramatica' });
     return d.ajustes ?? null;
   },
   async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen, estudio) {
