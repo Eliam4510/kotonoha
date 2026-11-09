@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.6 · 2026-11-09
+
+- **〜ので, solo cuando es «porque».** 「どうしたのですか」, 「〜のでしょう」, 「〜のである」 o 「〜のではないか」 llevan el の explicativo, no 〜ので, y salían marcados: en la novela de la revisión eran 185 de 311 detecciones. Tampoco 「のには」 es 〜のに.
+
 ## 0.27.5 · 2026-11-09
 
 - **La gramática bajo los subtítulos, más fiable.** Revisadas las reglas con una novela entera (8622 frases): 「なくては」 y 「なくちゃ」 («hay que») salían como 〜てはいけない («no se debe»), justo lo contrario, y ahora son 〜なければならない; la interjección 「なるほど」 ya no es 〜ほど; el 過ぎる de «pasar» (三十分過ぎた, 昼過ぎ) ya no es 〜すぎる; el adjetivo 「うまい」 ya no es 〜まい, y 「ようになる」 y 「ようにする」 ya no se toman por 〜ようだ.
@@ -218,6 +222,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.6 · 2026-11-09
+
+- **〜ので, only when it means “because”.** どうしたのですか, 〜のでしょう, 〜のである or 〜のではないか carry the explanatory の, not 〜ので, and were being flagged: in the review's novel they were 185 of 311 detections. Nor is のには 〜のに.
 
 ## 0.27.5 · 2026-11-09
 
