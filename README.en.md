@@ -100,6 +100,12 @@ The **Notebook** is a full-width page to write and paste text in the language yo
 
 **Practice** shows the accent of each word in the sentence. You read it aloud and Kotonoha lays the pitch curve of your voice over the expected one, says which words have the fall in the wrong place, points out long pauses and, if you want, any っ, ん or long vowels that are missing or extra. The pitch is measured in the browser and the recording is transcribed on your computer, without leaving it. With AivisSpeech or VOICEVOX open, the model voice reads each sentence with the dictionary’s accent, for free and also without leaving your computer.
 
+### Dictation
+
+<img src="docs/img/dictado.en.png" alt="Dictation mode on a video: what was heard in green, what was missing underlined, what was partly heard in amber, and the score" width="100%">
+
+**Dictation** mode hides the line while it plays, pauses at its end and asks you to type what you heard. On checking, each part turns green if you got it, amber if you got it partly, or underlined if it was missing, with a score for the line. In Japanese it compares how it is read, so typing in kana is fine. **Repeat in your voice** opens the pitch-accent practice with that same line, and `P` does it with any subtitle.
+
 ### How each kanji is written
 
 <img src="docs/img/trazos.en.png" alt="Stroke order of a word in the word panel" width="100%">
@@ -131,7 +137,6 @@ The same tools work for German: the word panel tells you which word each conjuga
 ### And also
 
 - **Grammar you already know.** Each point is marked as new, learning or known; known points are no longer flagged under subtitles, each point remembers the videos it appeared in, and it can be imported from Anki or turned into a multiple-choice card.
-- **Dictation and Repeat in your voice.** Dictation mode hides the line, pauses at the end and compares what you type with what was said; with `P`, any subtitle can be practised out loud.
 - **How English really sounds.** The word panel shows the sentence as it is said in connected speech: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, with what happens in each case.
 - **Immersion hours.** Home counts the time you spend listening to and reading the language you study, with your streak of days in a row.
 - **Costs in plain sight.** The home screen shows what Claude has cost this month, by day, model and task, with a monthly cap. Nothing is paid for twice: every answer is saved. The [cost study](docs/costs.md) gives measured figures.
