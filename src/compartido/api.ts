@@ -3,6 +3,7 @@
 import type { OpcionesAnalisis } from '../lenguas/tipos';
 import type { Ajustes } from './ajustes';
 import type { ResumenInmersion, TipoInmersion } from '../nucleo/inmersion';
+import type { EntradaBreve } from '../nucleo/explorar';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { DatosTrazos } from '../nucleo/trazos';
@@ -20,8 +21,10 @@ import type {
   FraseEjemplo,
   FuenteBiblioteca,
   InfoDiccionario,
+  CaracterConNivel,
   LineaAnalizada,
   ListaNivel,
+  PuntoEncontrado,
   PalabraToken,
   ResumenNivel,
   PeticionRevisionOcr,
@@ -135,6 +138,17 @@ export interface ApiMotor {
   resumenNiveles(carpeta: string, niveles: string[]): Promise<ResumenNivel[]>;
   /** Frases ya vistas que llevan un punto de gramática: ejemplos reales. */
   frasesConPatron(patron: string, limite?: number): Promise<FraseEjemplo[]>;
+  /** Los caracteres de una palabra con su nivel del examen, sus lecturas y su glosa. */
+  caracteresConNivel(carpeta: string, caracteres: string[]): Promise<CaracterConNivel[]>;
+  /** Los puntos de gramática de las listas que encajan con lo buscado. */
+  buscarGramatica(carpeta: string, texto: string, idioma: string): Promise<PuntoEncontrado[]>;
+  /** Palabras de uso común que significan lo buscado: del idioma de quien estudia a la lengua que estudia. */
+  buscarPorSignificado(texto: string): Promise<EntradaBreve[]>;
+  /** Las entradas de una categoría del diccionario (onomatopeyas, refranes…), de las más comunes a las menos. */
+  categoriaDiccionario(id: string, desde: number, limite: number): Promise<{ filas: EntradaBreve[]; total: number }>;
+  cuentaCategorias(): Promise<Record<string, number>>;
+  /** Las palabras que se leen igual que una. */
+  homofonos(lectura: string, excluir: string): Promise<EntradaBreve[]>;
   muestraEvaluacion(): Promise<{ lema: string; lectura: string; rango: number }[]>;
   aplicarEvaluacion(rangoEstimado: number): Promise<number>;
   importarConocidasAnki(consulta: string, campo: string): Promise<number>;

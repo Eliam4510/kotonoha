@@ -124,6 +124,7 @@ The same tools work for German: the word panel tells you which word each conjuga
 
 ### And also
 
+- **A dictionary to explore.** Search by meaning (“dog” → 犬), find grammar by its form or its meaning, see the kanji and homophones of each word, and browse onomatopoeia, proverbs, four-kanji expressions and more.
 - **Immersion hours.** Home counts the time you spend listening to and reading the language you study, with your streak of days in a row.
 - **Costs in plain sight.** The home screen shows what Claude has cost this month, by day, model and task, with a monthly cap. Nothing is paid for twice: every answer is saved. The [cost study](docs/costs.md) gives measured figures.
 - **Built-in review.** With the FSRS algorithm, for those who do not use Anki.

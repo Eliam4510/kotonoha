@@ -146,6 +146,21 @@ export interface GramaticaNivel {
   significado: Record<string, string>;
 }
 
+/** Un carácter de una palabra, con el nivel del examen en que aparece si está en sus listas. */
+export interface CaracterConNivel {
+  caracter: string;
+  nivel?: string;
+  on: string;
+  kun: string;
+  glosa: string;
+}
+
+/** Un punto de gramática encontrado al buscar, con su nivel. */
+export interface PuntoEncontrado {
+  nivel: string;
+  g: GramaticaNivel;
+}
+
 export interface ListaNivel {
   nivel: string;
   palabras: PalabraNivel[];

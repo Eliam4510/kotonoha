@@ -112,6 +112,15 @@ export const JAPONES: PaqueteLengua = {
     palabrasConCaracter: tm('Palabras del nivel con este kanji'),
     credito: tm('Vocabulario y kanji: listas de Jonathan Waller (JLPT Resources, tanos.co.uk), con licencia CC BY. Gramática: lista propia de Kotonoha, cotejada con las de uso común.'),
   },
+  categoriasDiccionario: [
+    { id: 'onomatopeyas', nombre: tm('Onomatopeyas'), descripcion: tm('Palabras que imitan un sonido o dicen cómo es algo: どきどき, ふわふわ, ざあざあ.'), etiquetas: ['on-mim'], icono: 'ondas' },
+    { id: 'yojijukugo', nombre: tm('Expresiones de cuatro kanji'), descripcion: tm('Los yojijukugo, frases hechas de cuatro kanji: 一期一会, 十人十色.'), etiquetas: ['yoji'], icono: 'cuadricula' },
+    { id: 'refranes', nombre: tm('Refranes'), descripcion: tm('Refranes y dichos: 猿も木から落ちる.'), etiquetas: ['proverb'], icono: 'pergamino' },
+    { id: 'modismos', nombre: tm('Expresiones idiomáticas'), descripcion: tm('Frases cuyo sentido no sale de sus palabras: 猫の手も借りたい.'), etiquetas: ['id'], icono: 'charla' },
+    { id: 'literarias', nombre: tm('Literarias y arcaicas'), descripcion: tm('Palabras de los libros, la poesía y el japonés antiguo.'), etiquetas: ['liter', 'poet', 'arch'], icono: 'libro' },
+    { id: 'coloquiales', nombre: tm('Coloquiales y jerga'), descripcion: tm('Lo que se oye en la calle, en el anime y en los chats.'), etiquetas: ['col', 'sl'], icono: 'chat' },
+    { id: 'respetuosas', nombre: tm('Lenguaje respetuoso'), descripcion: tm('El keigo: formas honoríficas, humildes y corteses.'), etiquetas: ['hon', 'hum', 'pol'], icono: 'corona' },
+  ],
   principiante: { valor: 'principiante absoluto', nombre: tm('Empiezo desde cero'), ayuda: tm('Aún no leo kana'), lectura: 'todas' },
   // Vocabulario que suele asociarse a cada nivel del JLPT. Son cifras orientativas, no oficiales.
   niveles: [

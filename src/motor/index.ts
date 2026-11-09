@@ -27,6 +27,7 @@ import * as medios from './medios';
 import * as vozLocal from './vozLocal';
 import * as narabas from './narabas';
 import * as niveles from './niveles';
+import * as explorar from './explorar';
 import * as vozNeuronal from './vozNeuronal';
 import * as compatible from './compatible';
 import * as memoria from './memoria';
@@ -269,6 +270,12 @@ const api: ApiMotor = {
   listaNivel: (carpeta, nivel) => niveles.listaNivel(carpeta, nivel),
   resumenNiveles: (carpeta, ids) => niveles.resumenNiveles(carpeta, ids),
   frasesConPatron: (patron, limite) => niveles.frasesConPatron(patron, limite),
+  caracteresConNivel: (carpeta, caracteres) => niveles.caracteresConNivel(carpeta, caracteres),
+  buscarGramatica: (carpeta, texto, idioma) => niveles.buscarGramatica(carpeta, texto, idioma),
+  buscarPorSignificado: (texto) => explorar.buscarPorSignificado(texto),
+  categoriaDiccionario: (id, desde, limite) => explorar.categoriaDiccionario(id, desde, limite),
+  cuentaCategorias: () => explorar.cuentaCategorias(),
+  homofonos: (lectura, excluir) => explorar.homofonos(lectura, excluir),
 
   async listarPalabras(f: FiltroPalabras) {
     let filas = await db.palabras.toArray();

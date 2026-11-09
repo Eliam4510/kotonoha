@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.24.0 · 2026-11-09
+
+- **Un diccionario para explorar.** El diccionario busca también por significado: «perro» da 犬, 愛犬 o 番犬, con la glosa que encaja. Lo buscado se compara con la gramática del JLPT, por su forma o por lo que significa. Debajo de cada palabra están sus kanji con su nivel, lecturas y significado, las palabras que se leen igual y **Palabras parecidas y en qué se diferencian**, con Claude. Y en la portada, **Explorar el diccionario**: onomatopeyas, expresiones de cuatro kanji, refranes, expresiones idiomáticas, palabras literarias y arcaicas, coloquiales y lenguaje respetuoso.
+
 ## 0.23.0 · 2026-11-09
 
 - **El JLPT, nivel a nivel.** Una pantalla nueva, **JLPT**, reúne el vocabulario (8354 palabras), los kanji (2211) y la gramática (501 puntos) de cada nivel, de N5 a N1, con lo que ya se conoce de cada uno. Las palabras se marcan en su fila o todas a la vez; cada kanji enseña sus lecturas, sus trazos y las palabras del nivel que lo llevan; cada punto de gramática, las frases vistas en que aparece, y Claude lo explica cuando se pide. El vocabulario y los kanji son las listas de Jonathan Waller (CC BY); la gramática, una lista propia.
@@ -176,6 +180,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.24.0 · 2026-11-09
+
+- **A dictionary to explore.** The dictionary also searches by meaning: “dog” gives 犬, 愛犬 or 番犬, with the matching gloss. What you search is compared with the JLPT grammar, by form or by meaning. Below each word are its kanji with their level, readings and meaning, the words read the same way and **Similar words and how they differ**, with Claude. And on the start page, **Explore the dictionary**: onomatopoeia, four-kanji expressions, proverbs, idioms, literary and archaic words, colloquial words and respectful language.
 
 ## 0.23.0 · 2026-11-09
 

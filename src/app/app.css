@@ -1101,3 +1101,39 @@ section .ap-botones { margin-top: 10px; }
 .ap-patron-detalle { display: flex; flex-direction: column; gap: 10px; padding: 2px 16px 16px; }
 .ap-patron-detalle > .btn { width: fit-content; }
 .ap-patron-detalle mark { padding: 0 1px; border-radius: 4px; background: var(--hoja-media); color: var(--texto); font-weight: 800; }
+
+/* ---------- Diccionario: por significado, gramática, kanji, homófonos y categorías ---------- */
+.ap-dic-seccion { margin-top: 8px; }
+.ap-dic-preparando { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; }
+.chip-nivel { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: var(--r-pill); background: var(--superficie-3); font-family: var(--letra); font-size: 11px; font-weight: 800; color: var(--texto-2); vertical-align: middle; }
+.ap-breves { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.ap-breve { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--brillo); text-align: left; color: var(--texto); transition: background 0.12s, transform 0.12s var(--resorte); }
+.ap-breve:hover { background: var(--superficie-2); transform: translateY(-1px); }
+.ap-breve-termino { display: flex; flex-direction: column; line-height: 1.25; }
+.ap-breve-termino b { font-family: var(--letra-lengua); font-size: 18px; font-weight: 700; }
+.ap-breve-termino small { color: var(--texto-3); font-family: var(--letra-lengua); font-size: 12px; }
+.ap-breve-glosa { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--texto-2); font-size: 13px; }
+.ap-breve-comun { color: var(--est-aprendiendo); }
+.ap-mas-palabra { display: flex; flex-direction: column; gap: 14px; padding: 4px 22px 18px; border-top: 1px solid var(--borde); }
+.ap-mas-bloque { display: flex; flex-direction: column; gap: 8px; }
+.ap-mas-bloque > .btn { width: fit-content; }
+.ap-kanji-palabra { display: flex; flex-wrap: wrap; gap: 8px; }
+.ap-kanji-ficha { display: flex; align-items: center; gap: 12px; max-width: 360px; padding: 8px 14px 8px 10px; border-radius: var(--r-3); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); text-align: left; color: var(--texto); }
+.ap-kanji-ficha:hover { background: var(--superficie-3); }
+.ap-kanji-ficha > b { font-family: var(--letra-lengua); font-size: 32px; font-weight: 700; line-height: 1; }
+.ap-kanji-ficha > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 12.5px; }
+.ap-kanji-ficha .chip-nivel { width: fit-content; margin: 0; }
+.ap-kanji-ficha em { font-style: normal; color: var(--texto-2); }
+.ap-kanji-ficha small:not(.chip-nivel) { color: var(--texto-3); font-size: 11.5px; }
+.ap-homofonos { display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-homofonos .chip { font-family: var(--letra-lengua); font-size: 15px; }
+.ap-homofonos .chip.comun { box-shadow: inset 0 0 0 1px var(--hoja-media); }
+.ap-explorar { margin-top: 34px; }
+.ap-explorar .ap-seccion-titulo { justify-content: center; }
+.ap-explorar-rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.ap-categoria { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 14px 16px; text-align: left; cursor: pointer; transition: transform 0.15s var(--resorte), box-shadow 0.15s; }
+.ap-categoria:hover { transform: translateY(-2px); box-shadow: var(--brillo), var(--sombra-2); }
+.ap-categoria b { font-size: 15px; font-weight: 800; }
+.ap-categoria .ayuda { font-size: 12.5px; line-height: 1.45; }
+.ap-categoria-vista h1 { display: flex; align-items: center; gap: 10px; }
+.ap-categoria-vista > .btn { margin-bottom: 6px; }

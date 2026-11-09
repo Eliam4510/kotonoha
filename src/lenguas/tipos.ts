@@ -199,6 +199,16 @@ export interface NivelLengua {
   palabras?: number;
 }
 
+export interface CategoriaDiccionario {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  /** Las etiquetas de las entradas del diccionario que entran en la categoría. */
+  etiquetas: string[];
+  /** Un icono de la interfaz. */
+  icono: string;
+}
+
 /** Las listas por nivel de un examen, como el JLPT. */
 export interface ListasNivelLengua {
   /** El nombre del examen, que no se traduce. */
@@ -351,6 +361,8 @@ export interface PaqueteLengua {
    * del paquete de la extensión (ver herramientas/jlpt.mjs). Sin ellas, la pantalla de niveles no aparece.
    */
   listasNivel?: ListasNivelLengua;
+  /** Categorías para explorar el diccionario, por las etiquetas de sus entradas: en JMdict, «on-mim» son las onomatopeyas. */
+  categoriasDiccionario?: CategoriaDiccionario[];
   /** Para quien empieza desde cero: va antes de los niveles. */
   principiante: NivelLengua;
   niveles: NivelLengua[];
