@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.2 · 2026-11-09
+
+- **El diccionario dice lo que sabe hacer.** Su portada explica que, además de escribir la palabra en japonés, se puede escribir lo que significa, como «perro» o «aunque», para buscarla por su significado o encontrar la gramática: hasta ahora no lo anunciaba en ningún sitio.
+- En japonés, la pestaña **Cómo suena** de la ficha se llama 音声変化, el término habitual en los materiales de inglés, y cabe en una línea.
+
 ## 0.27.1 · 2026-11-09
 
 - **Sinónimos en el diccionario.** Debajo de cada palabra, **Significan lo mismo** reúne las de uso común con el mismo significado, como 食う, 召し上がる o 頂く para 食べる, sacadas del propio diccionario al momento y sin gastar nada. Para saber en qué se diferencian sigue estando **Palabras parecidas y en qué se diferencian**, con Claude.
@@ -199,6 +204,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.2 · 2026-11-09
+
+- **The dictionary says what it can do.** Its start page explains that, besides typing the word in Japanese, you can type what it means, such as “dog” or “although”, to look it up by meaning or find the grammar: until now it said so nowhere.
+- In Japanese, the **How it sounds** tab on the word panel is called 音声変化, the usual term in English-learning materials, and fits on one line.
 
 ## 0.27.1 · 2026-11-09
 

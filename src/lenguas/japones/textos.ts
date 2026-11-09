@@ -64,7 +64,8 @@ export const TEXTOS: TextosLengua = {
   primerVideo: tm('Abre uno con subtítulos en japonés y aparecerá la barra de Kotonoha. Si no tiene, arrastra tu archivo SRT sobre él.'),
   primeraPagina: tm('En cualquier página, haz clic en una palabra japonesa para ver su ficha.'),
   diccionariosResumen: tm('JMdict, acento tonal y frecuencia'),
-  buscarAyuda: tm('Escríbela en japonés. También entiende formas conjugadas y frases enteras.'),
+  // La búsqueda por significado y la de gramática solo se descubren si se dicen aquí.
+  buscarAyuda: tm('Escríbela en japonés, o escribe lo que significa, como «perro» o «aunque», para buscarla por su significado. También entiende formas conjugadas y frases enteras.'),
   pegarLista: tm('Pega una lista o cualquier texto japonés.'),
   localArrastrar: tm('Arrastra aquí un video y sus subtítulos. Tendrás furigana, diccionario, tarjetas y Claude, y el video no sale de tu ordenador.'),
   seguirPortapapeles: tm('Añade aquí el japonés que copies en cualquier sitio, mientras esta pestaña esté a la vista.'),

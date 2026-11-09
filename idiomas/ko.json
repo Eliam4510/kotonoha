@@ -788,7 +788,7 @@
  "Escribe una palabra para buscarla en todo el libro.": "단어를 입력해 책 전체에서 찾으세요.",
  "Escríbela en alemán. También entiende formas conjugadas y declinadas, y frases enteras.": "독일어로 입력하세요. 활용형, 격변화형과 문장 전체도 이해합니다.",
  "Escríbela en inglés. También entiende formas conjugadas y frases enteras.": "영어로 입력하세요. 활용형과 문장 전체도 이해합니다.",
- "Escríbela en japonés. También entiende formas conjugadas y frases enteras.": "일본어로 입력하세요. 활용형과 문장 전체도 이해합니다.",
+ "Escríbela en japonés, o escribe lo que significa, como «perro» o «aunque», para buscarla por su significado. También entiende formas conjugadas y frases enteras.": "일본어로 입력하거나, “dog”나 “although”처럼 뜻을 입력해 뜻으로 찾으세요. 활용형과 문장 전체도 이해합니다.",
  "Escribiendo…": "쓰는 중…",
  "Escribir": "쓰기",
  "Escribiste: {0}": "쓴 내용: {0}",
