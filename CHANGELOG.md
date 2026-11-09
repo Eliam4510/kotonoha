@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.27.5 · 2026-11-09
+
+- **La gramática bajo los subtítulos, más fiable.** Revisadas las reglas con una novela entera (8622 frases): 「なくては」 y 「なくちゃ」 («hay que») salían como 〜てはいけない («no se debe»), justo lo contrario, y ahora son 〜なければならない; la interjección 「なるほど」 ya no es 〜ほど; el 過ぎる de «pasar» (三十分過ぎた, 昼過ぎ) ya no es 〜すぎる; el adjetivo 「うまい」 ya no es 〜まい, y 「ようになる」 y 「ようにする」 ya no se toman por 〜ようだ.
+
 ## 0.27.4 · 2026-11-09
 
 - **Menos gramática de más bajo los subtítulos.** La regla de 〜ておく tomaba 「できます」 («poder») y 〜てくる (持ってきます) por 〜ておく, y ponía un chip falso bajo muchísimas frases. Ahora pide la お de verdad.
@@ -214,6 +218,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.27.5 · 2026-11-09
+
+- **More reliable grammar under subtitles.** The rules were checked against a whole novel (8,622 sentences): なくては and なくちゃ (“must”) came out as 〜てはいけない (“must not”), the exact opposite, and are now 〜なければならない; the interjection なるほど is no longer 〜ほど; 過ぎる meaning “to pass” (三十分過ぎた, 昼過ぎ) is no longer 〜すぎる; the adjective うまい is no longer 〜まい; and ようになる and ようにする are no longer taken for 〜ようだ.
 
 ## 0.27.4 · 2026-11-09
 
