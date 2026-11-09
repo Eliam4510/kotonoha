@@ -104,6 +104,12 @@ El **Cuaderno** es una página a todo lo ancho para escribir y pegar texto en la
 
 **Practicar** enseña el acento de cada palabra de la frase. Se lee en voz alta y Kotonoha pone la curva del tono de la voz sobre la esperada, dice en qué palabras cae el tono en otro sitio, señala las pausas largas y, si se quiere, las っ, ん y vocales largas que faltan o sobran. El tono se mide en el navegador y la grabación se transcribe en el equipo, sin salir de él. Con AivisSpeech o VOICEVOX abiertos, la voz modelo lee cada frase con el acento del diccionario, gratis y también sin salir del equipo.
 
+### Dictado
+
+<img src="docs/img/dictado.png" alt="Modo Dictado sobre un video: lo oído en verde, lo que faltó subrayado, lo oído a medias en amarillo y la nota" width="100%">
+
+El modo **Dictado** oculta la frase mientras suena, pausa al terminarla y pide escribir lo que se oyó. Al comprobar, cada parte sale en verde si se oyó bien, en amarillo si a medias o subrayada si faltó, con la nota de la frase. En japonés se compara cómo se lee, así que vale escribir en kana. **Repetir con tu voz** abre la práctica del acento con esa misma frase, y `P` lo hace con cualquier subtítulo.
+
 ### Cómo se escribe cada kanji
 
 <img src="docs/img/trazos.png" alt="Orden de los trazos de una palabra en la ficha" width="100%">
@@ -137,7 +143,6 @@ En inglés, la ficha da la pronunciación americana y británica en IPA, encuent
 ### Y además
 
 - **Gramática que ya sabes.** Cada punto se marca como nuevo, en aprendizaje o sabido; lo sabido deja de señalarse bajo los subtítulos, cada punto recuerda en qué videos salió y se puede importar desde Anki o convertir en una tarjeta de opción múltiple.
-- **Dictado y Repetir con tu voz.** El modo Dictado oculta la frase, pausa al final y compara lo que escribes con lo que se dijo; con `P`, cualquier subtítulo se practica en voz alta.
 - **Cómo suena de verdad el inglés.** La ficha enseña la frase como se dice al hablar seguido: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, con lo que pasa en cada caso.
 - **Horas de inmersión.** Inicio cuenta el tiempo que escuchas y lees la lengua que estudias, con la racha de días seguidos.
 - **El gasto, a la vista.** La pantalla de inicio muestra lo gastado este mes en Claude, por días, modelos y tareas, con un tope mensual. Nada se paga dos veces: cada respuesta se guarda. El [estudio de costos](docs/costos.md) da cifras medidas.
