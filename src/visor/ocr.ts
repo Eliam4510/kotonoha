@@ -6,10 +6,17 @@
 import { baseOcr, claveOcr, LECTURA } from '../compartido/paginasOcr';
 import { lineasEnMarco } from '../nucleo/escaneo';
 import type { LineaOcr } from '../nucleo/ocr';
-import type { ModoOcr, PedidoOcr, RespuestaOcr } from './ocrTrabajador';
+import { lengua } from '../ui/lengua';
+import type { ModoLectura, ModoOcr, PedidoOcr, RespuestaOcr } from './ocrTrabajador';
 import type { ImagenOcr } from './paginador';
 
 export type { ModoOcr };
+
+/**
+ * Lo que se lee en un modo: el modo Manga de una lengua con espacios lee como cómic, con el reconocedor de libros. Va con
+ * su propia clave en la base, así que lo que manga-ocr leyó antes en un cómic no se aprovecha.
+ */
+export const modoDeLectura = (modo: ModoOcr): ModoLectura => (modo === 'manga' && lengua.value.escritura.globos === 'lector' ? 'comic' : modo);
 
 export interface Descarga {
   archivo: string;
@@ -24,7 +31,7 @@ const cancelada = () => Object.assign(new Error('Cancelada'), { name: 'Cancelada
 interface Tarea {
   clave: string;
   libro: string;
-  modo: ModoOcr;
+  modo: ModoLectura;
   /** Menos es antes. */
   prioridad: number;
   /** Para desempatar: la que llegó antes. */
@@ -77,7 +84,8 @@ export class LectorOcr {
    * Lo leído de una página: de la base si ya se leyó, con la lectura `minima` o una posterior; si no, del trabajador,
    * cuando le llegue su turno. Si ya estaba pedida, se queda con la prioridad más urgente de las dos.
    */
-  leer(libro: string, pagina: number, modo: ModoOcr, imagen: () => Promise<ImagenOcr>, prioridad = 0, minima = 0): Promise<LineaOcr[]> {
+  leer(libro: string, pagina: number, modoPedido: ModoOcr, imagen: () => Promise<ImagenOcr>, prioridad = 0, minima = 0): Promise<LineaOcr[]> {
+    const modo = modoDeLectura(modoPedido);
     const clave = claveOcr(libro, modo, pagina);
     const ya = this.tareas.get(clave);
     if (ya) {
@@ -116,7 +124,7 @@ export class LectorOcr {
 
   /** De un libro, solo siguen esperando estas páginas (en este modo): las demás que aún no han empezado se cancelan. */
   soloEstas(libro: string, modo: ModoOcr, paginas: Iterable<number>): void {
-    const quedan = new Set([...paginas].map((p) => claveOcr(libro, modo, p)));
+    const quedan = new Set([...paginas].map((p) => claveOcr(libro, modoDeLectura(modo), p)));
     for (const t of [...this.tareas.values()]) {
       if (t.libro !== libro || t.enMarcha || quedan.has(t.clave)) continue;
       this.tareas.delete(t.clave);

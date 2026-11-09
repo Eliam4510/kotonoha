@@ -4,6 +4,7 @@ import { build, context } from 'esbuild';
 import { copyFile, cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { generarIconos } from './herramientas/iconos.mjs';
+import { prepararFonetizador } from './herramientas/fonetizador.mjs';
 import { escribirLicencias } from './herramientas/licencias.mjs';
 import { MENSAJES, manifiesto } from './manifiesto.mjs';
 
@@ -49,7 +50,8 @@ const opciones = {
 const opcionesWhisper = {
   ...opciones,
   // El OCR del visor también va aparte: carga sus modelos solo si se pide el texto de un libro.
-  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts', ocr: 'src/visor/ocrTrabajador.ts' },
+  // Y las voces neuronales del inglés y del alemán, que solo se cargan si se activan.
+  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts', ocr: 'src/visor/ocrTrabajador.ts', voz: 'src/motor/vozTrabajador.ts' },
   format: 'esm',
   sourcemap: false,
   minify: true,
@@ -88,6 +90,9 @@ async function estaticos() {
   for (const archivo of ['ffmpeg-core.js', 'ffmpeg-core.wasm']) {
     await copyFile(`node_modules/@ffmpeg/core/dist/esm/${archivo}`, join(SALIDA, 'ffmpeg', archivo));
   }
+
+  // El fonetizador de las voces neuronales (espeak-ng), con los diccionarios del inglés y del alemán.
+  await prepararFonetizador(SALIDA);
 
   // pdf.js para el visor: su trabajador y lo que pide al leer un PDF (mapas de caracteres, fuentes, decodificadores).
   await mkdir(join(SALIDA, 'pdfjs'), { recursive: true });

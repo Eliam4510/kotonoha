@@ -1,0 +1,19 @@
+eSpeak NG y piper-phonemize, en la carpeta voz/
+================================================
+
+Los archivos de voz/ (piper_phonemize.mjs, piper_phonemize.wasm y piper_phonemize.data) son la compilación a
+WebAssembly de piper-phonemize con eSpeak NG que publica @diffusionstudio/piper-wasm. Al compilar Kotonoha se deja
+en sus datos solo lo que usan el inglés y el alemán; el programa no se modifica.
+
+- eSpeak NG: GPL-3.0-or-later. Copyright de sus autores. Código fuente: https://github.com/rhasspy/espeak-ng
+  (la versión que usa Piper) y https://github.com/espeak-ng/espeak-ng. El texto de la licencia está en GPL-3.0.txt.
+- piper-phonemize: MIT. Copyright (c) Michael Hansen. Código fuente: https://github.com/rhasspy/piper-phonemize y la
+  adaptación a WebAssembly en https://github.com/wide-video/piper-phonemize.
+- @diffusionstudio/piper-wasm: MIT. Instrucciones de compilación: https://github.com/diffusion-studio/piper-wasm
+
+Quien redistribuya estos archivos debe respetar la GPL, lo que incluye ofrecer el código fuente indicado.
+
+The files in voz/ are the WebAssembly build of piper-phonemize with eSpeak NG published as @diffusionstudio/piper-wasm.
+When Kotonoha is built, only what English and German use is kept in their data; the program is not modified. eSpeak NG
+is GPL-3.0-or-later (source above; license text in GPL-3.0.txt), piper-phonemize and piper-wasm are MIT. Anyone
+redistributing these files must comply with the GPL, which includes offering that source code.

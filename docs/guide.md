@@ -280,6 +280,9 @@ Everything this guide explains works the same way, with these differences:
 | Grammar | Points from A1 to C2, with the same confirmation by Claude |
 | Page reader | It starts off, because English is on almost every page. It is turned on in the extension menu or under **Settings, Page reader** |
 | Strokes and reading correction | Not offered |
+| Comics | In the viewer, **Comic** mode (**Manga** in Japanese) reads each speech balloon with the book recognizer, in panel order and from left to right. Measured: 0.4 % character error on test pages and 12 % on a hand-lettered 1922 *Krazy Kat* page |
+| Book OCR | Measured with a real 19th-century scan: 1.5 % character error, almost all of it in the page header |
+| Sentence voice | In **Settings, Voices**, **Neural voice in the browser** reads sentences with Kokoro, on your own computer and with no key, with six voices from the United States and the United Kingdom. The first time it downloads 92 MB; each new sentence takes a few seconds on the processor and is saved afterwards |
 
 ## Studying German
 
@@ -295,6 +298,9 @@ It is chosen like English, and everything works the same way, with these differe
 | Transcription | Parakeet for speech and Whisper Turbo for songs. With a real recording, Parakeet wrote with capitals and punctuation in less than half of Whisper's time |
 | Page reader | It starts off. It is turned on in the extension menu or under **Settings, Page reader** |
 | Strokes and reading correction | Not offered |
+| Comics | **Comic** mode, as in English, with ä, ö, ü and ß: 0.4 % error on test pages |
+| Book OCR | Reads modern type well: 0.03 % error on test pages in four typefaces. The blackletter (Fraktur) of old books is not read: on a 1919 page it missed three letters out of four |
+| Sentence voice | **Neural voice in the browser** reads sentences with Piper, in Thorsten’s voice, on your own computer and with no key. The first time it downloads 63 MB, and it reads a sentence in under a second |
 
 ## Claude spending
 

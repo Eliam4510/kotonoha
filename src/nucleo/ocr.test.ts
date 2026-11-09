@@ -5,6 +5,7 @@ import {
   type Caja,
   cajasDeMapa,
   decodificarCtc,
+  esRuidoComic,
   esRuidoManga,
   esVertical,
   idsRepetibles,
@@ -17,6 +18,7 @@ import {
   quitarFurigana,
   siguienteToken,
   textoDeMangaOcr,
+  unirRenglones,
   vinetasDeImagen,
 } from './ocr';
 
@@ -230,5 +232,44 @@ describe('las viñetas del manga', () => {
   it('sin viñetas claras, el orden de siempre', () => {
     const bloque = (t: string, x0: number, y0: number) => ({ t, caja: { x0, y0, x1: x0 + 0.1, y1: y0 + 0.1 } });
     expect(ordenMangaPorVinetas([bloque('b', 0.2, 0.1), bloque('a', 0.7, 0.1)], []).map((b) => b.t)).toEqual(['a', 'b']);
+  });
+});
+
+describe('los cómics occidentales', () => {
+  const bloque = (t: string, x0: number, y0: number, x1: number, y1: number) => ({ t, caja: { x0, y0, x1, y1 } });
+
+  it('leen las franjas de izquierda a derecha', () => {
+    const orden = ordenManga([bloque('abajo', 100, 700, 200, 900), bloque('der', 600, 120, 700, 330), bloque('izq', 100, 100, 200, 300)], false);
+    expect(orden.map((b) => b.t)).toEqual(['izq', 'der', 'abajo']);
+  });
+
+  it('y las viñetas, también de izquierda a derecha', () => {
+    const vinetas = [
+      { x0: 0.05, y0: 0.05, x1: 0.47, y1: 0.45 },
+      { x0: 0.53, y0: 0.05, x1: 0.95, y1: 0.45 },
+      { x0: 0.05, y0: 0.5, x1: 0.95, y1: 0.95 },
+    ];
+    expect(ordenVinetas(vinetas, false).map((v) => v.x0)).toEqual([0.05, 0.53, 0.05]);
+    // «der arriba» está más arriba que «izq abajo», pero en la viñeta de la derecha: va después de toda la de la izquierda.
+    const bloques = [bloque('der arriba', 0.6, 0.06, 0.7, 0.2), bloque('izq abajo', 0.1, 0.25, 0.2, 0.4), bloque('izq', 0.1, 0.08, 0.2, 0.2), bloque('ancha', 0.3, 0.6, 0.5, 0.7)];
+    expect(ordenMangaPorVinetas(bloques, vinetas, false).map((b) => b.t)).toEqual(['izq', 'izq abajo', 'der arriba', 'ancha']);
+  });
+
+  it('unen los renglones de un globo y la palabra partida con guion', () => {
+    expect(unirRenglones(['EVERY-', 'THING IS', 'FINE!'])).toBe('EVERYTHING IS FINE!');
+    expect(unirRenglones(['Die Straßen-', 'bahn kommt.'])).toBe('Die Straßenbahn kommt.');
+    expect(unirRenglones(['WAIT -', 'NO'])).toBe('WAIT - NO');
+    expect(unirRenglones(['Page 22-', '23'])).toBe('Page 22- 23');
+    expect(unirRenglones([' Hello ', '', 'world'])).toBe('Hello world');
+  });
+
+  it('quitan los números de página y las letras sueltas, pero no los globos de solo signos', () => {
+    expect(esRuidoComic('12')).toBe(true);
+    expect(esRuidoComic('A')).toBe(true);
+    expect(esRuidoComic('—')).toBe(true);
+    expect(esRuidoComic('...')).toBe(false);
+    expect(esRuidoComic('?!')).toBe(false);
+    expect(esRuidoComic('HI')).toBe(false);
+    expect(esRuidoComic('Oh!')).toBe(false);
   });
 });

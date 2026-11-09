@@ -56,6 +56,7 @@ export const ALEMAN: PaqueteLengua = {
     pegarSignos,
     palabrasSeparadas: true,
     portadaVertical: false,
+    globos: 'lector',
   },
   lectura: {
     distingue: false,

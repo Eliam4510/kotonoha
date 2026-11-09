@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.17.0, along with how it has been verified.
+Status of each feature in version 0.18.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -192,6 +192,9 @@ Status of each feature in version 0.17.0, along with how it has been verified.
 | Grammar from A1 to C2: 51 rules, confirmed by Claude | Simulator |
 | Page reader, off at the start, that leaves pages in other languages alone | Automated, and on 16 real public sites |
 | Parakeet and Whisper in English, with lines split for reading | Automated, with a synthetic voice, and in a real session |
+| Comics in the viewer’s **Comic** mode: each balloon with the book recognizer, by panels from left to right | Automated: 0.4 % character error on test pages, and 12 % on a real hand-lettered 1922 page |
+| Book OCR in English | Measured: 1.5 % character error on a real 19th-century scan, mostly in the header |
+| Neural voice in the browser: Kokoro, with six voices | Automated; Whisper Turbo understands its sentences without errors |
 | Instructions to Claude specific to English | Simulator |
 | Word audio from Wikimedia Commons and Lingua Libre | Automated |
 | Azure neural voices in English | Pending |
@@ -211,6 +214,9 @@ Status of each feature in version 0.17.0, along with how it has been verified.
 | Grammar from A1 to C2: 24 rules, confirmed by Claude | Automated |
 | Page reader, off at the start | Automated |
 | Parakeet for speech and Whisper Turbo for songs | Automated, with a real recording |
+| Comics in **Comic** mode, with ä, ö, ü and ß | Automated: 0.4 % error on test pages |
+| Book OCR in German, with modern type; blackletter (Fraktur) is not read | Measured: 0.03 % error on test pages in four typefaces, and 75 % on a 1919 Fraktur page |
+| Neural voice in the browser: Piper, in Thorsten’s voice | Automated; Whisper Turbo understands its sentences without errors |
 | Word audio from Wikimedia Commons and Lingua Libre | Automated |
 
 ## Design principles

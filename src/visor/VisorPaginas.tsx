@@ -803,7 +803,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                     </button>
                   )}
                   <button class="btn chico fantasma" aria-pressed={modoOcr === 'libro'} data-tip={tr('Para libros impresos')} onClick={() => fijarModoOcr('libro')}>{tr('Libro')}</button>
-                  <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para manga: globos y texto vertical')} onClick={() => fijarModoOcr('manga')}>{tr('Manga')}</button>
+                  {lengua.value.escritura.globos === 'lector' ? (
+                    <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para cómics: lee los globos de izquierda a derecha')} onClick={() => fijarModoOcr('manga')}>{tr('Cómic')}</button>
+                  ) : (
+                    <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para manga: globos y texto vertical')} onClick={() => fijarModoOcr('manga')}>{tr('Manga')}</button>
+                  )}
                 </span>
               )}
               <Boton

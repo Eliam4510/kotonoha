@@ -23,8 +23,10 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR)，PaddlePaddle 出品，使用 [nakamura196 的 ONNX 转换](https://huggingface.co/nakamura196/ppocrv5-mobile-web-onnx) | 书籍文字行的检测，使用时下载 | Apache-2.0 |
 | [PP-OCRv6 small](https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx)，PaddlePaddle 出品 | 书籍的文字识别，使用时下载；字典随扩展程序附带（`modelos/`） | Apache-2.0 |
 | [manga-ocr](https://github.com/kha-white/manga-ocr)，kha-white 出品，使用 [onnx-community 的 ONNX 转换](https://huggingface.co/onnx-community/manga-ocr-base-ONNX)，以及 [ogkalu 的对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector) | 漫画的文字识别，使用时下载 | Apache-2.0 |
+| [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)，hexgrad 出品，使用 [onnx-community 的 ONNX 转换](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)，以及带 [Thorsten 声音](https://huggingface.co/rhasspy/piper-voices)的 [Piper](https://github.com/rhasspy/piper) | 英语和德语的神经网络语音，使用时下载 | Apache-2.0 和 MIT；Thorsten 的声音用 CC0 数据集训练 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/ffmpeg` | 读取本地文件 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/core` | FFmpeg 核心，编译时复制 | GPL-2.0-or-later |
+| [piper-phonemize](https://github.com/rhasspy/piper-phonemize) 与 [eSpeak NG](https://github.com/espeak-ng/espeak-ng)，`@diffusionstudio/piper-wasm` | 神经网络语音的音素，编译时复制，只含英语和德语词典 | MIT 和 GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs)，`@breezystack/lamejs` | MP3 编码 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | 复习计划 | MIT |
 | [fflate](https://github.com/101arrowz/fflate) | 读取 ZIP 文件 | MIT |
@@ -34,7 +36,7 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [Phosphor Icons](https://phosphoricons.com) | 图标 | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) 和 [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | 字体 | OFL-1.1 |
 
-本仓库的代码不包含第三方二进制文件：它们在安装时从 npm 获取。`dist` 文件夹和每个版本的编译包确实包含 `@ffmpeg/core` 和 `lamejs`，并在 `licencias` 文件夹中附有所有组件的文本和声明。
+本仓库的代码不包含第三方二进制文件：它们在安装时从 npm 获取。`dist` 文件夹和每个版本的编译包确实包含 `@ffmpeg/core`、`lamejs` 和 eSpeak NG，并在 `licencias` 文件夹中附有所有组件的文本和声明。
 
 相应的源代码位于 [ffmpeg.wasm v0.12.10](https://github.com/ffmpegwasm/ffmpeg.wasm/tree/v0.12.10)（用其库编译 [FFmpeg n5.1.4](https://github.com/FFmpeg/FFmpeg/tree/n5.1.4)）和 [lamejs](https://github.com/gideonstele/lamejs)。重新分发这些包的人必须遵守 GPL 和 LGPL，包括提供这些源代码。
 

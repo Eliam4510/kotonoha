@@ -98,6 +98,11 @@ export interface EscrituraLengua {
   /** Si los títulos de las portadas de la biblioteca se escriben en vertical. */
   portadaVertical: boolean;
   /**
+   * Cómo se leen los globos en el modo Manga del visor: con manga-ocr, el modelo del manga japonés, de derecha a
+   * izquierda; o, en un cómic, con el reconocedor de libros dentro de cada globo, de izquierda a derecha.
+   */
+  globos: 'manga-ocr' | 'lector';
+  /**
    * Lo que abre un elemento de una lista o de un ejercicio al principio de un renglón y es propio de la lengua, además de
    * lo que vale para todas ((1), 1., ①, una viñeta): en japonés, «・» o «問5».
    */

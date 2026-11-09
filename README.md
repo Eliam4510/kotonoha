@@ -114,7 +114,7 @@ La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y
 
 <img src="docs/img/ingles-subtitulos.png" alt="Ficha de una palabra inglesa sobre un video, con la pronunciación en IPA" width="100%">
 
-En inglés, la ficha da la pronunciación americana y británica en IPA, encuentra los verbos con partícula aunque vayan separados, como *picked it up*, y dice de qué palabra viene cada forma irregular. En alemán, dice de qué palabra sale cada forma conjugada o declinada, como *ging* de *gehen*, y encuentra los verbos separables aunque la partícula vaya al final. Los diccionarios salen de Wiktionary, en el idioma propio. Cada idioma guarda sus propias palabras, tarjetas y ajustes, y se cambia de uno a otro con un clic.
+En inglés, la ficha da la pronunciación americana y británica en IPA, encuentra los verbos con partícula aunque vayan separados, como *picked it up*, y dice de qué palabra viene cada forma irregular. En alemán, dice de qué palabra sale cada forma conjugada o declinada, como *ging* de *gehen*, y encuentra los verbos separables aunque la partícula vaya al final. Los diccionarios salen de Wiktionary, en el idioma propio. Los cómics se leen globo a globo, de izquierda a derecha, y las frases suenan con voces neuronales en el propio equipo: Kokoro en inglés y Piper en alemán. Cada idioma guarda sus propias palabras, tarjetas y ajustes, y se cambia de uno a otro con un clic.
 
 ### Y además
 

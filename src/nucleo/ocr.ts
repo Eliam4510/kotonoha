@@ -198,7 +198,7 @@ export function ordenarLineas(lineas: LineaOcr[]): LineaOcr[] {
 }
 
 /** Por renglones de arriba abajo y de izquierda a derecha; en vertical, por columnas de derecha a izquierda. */
-function porRenglones(lineas: LineaOcr[], verticales: boolean): LineaOcr[] {
+export function porRenglones(lineas: LineaOcr[], verticales: boolean): LineaOcr[] {
   const centro = (c: Caja) => (verticales ? (c.x0 + c.x1) / 2 : (c.y0 + c.y1) / 2);
   const grosor = (c: Caja) => (verticales ? ancho(c) : alto(c));
   const grupos: { centro: number; grosor: number; lineas: LineaOcr[] }[] = [];
@@ -212,9 +212,10 @@ function porRenglones(lineas: LineaOcr[], verticales: boolean): LineaOcr[] {
 
 /**
  * El orden de lectura de los bloques de un manga: de arriba abajo por franjas y, dentro de cada franja, de derecha a
- * izquierda. Dos bloques van en la misma franja si se solapan en altura más de la mitad del menor.
+ * izquierda; en un cómic occidental (`deDerecha` falso), de izquierda a derecha. Dos bloques van en la misma franja si
+ * se solapan en altura más de la mitad del menor.
  */
-export function ordenManga<T extends { caja: Caja }>(bloques: T[]): T[] {
+export function ordenManga<T extends { caja: Caja }>(bloques: T[], deDerecha = true): T[] {
   const franjas: { y0: number; y1: number; bloques: T[] }[] = [];
   for (const b of [...bloques].sort((a, z) => a.caja.y0 - z.caja.y0)) {
     const f = franjas.find((x) => Math.min(x.y1, b.caja.y1) - Math.max(x.y0, b.caja.y0) > 0.5 * Math.min(x.y1 - x.y0, alto(b.caja)));
@@ -224,7 +225,7 @@ export function ordenManga<T extends { caja: Caja }>(bloques: T[]): T[] {
       f.y1 = Math.max(f.y1, b.caja.y1);
     } else franjas.push({ y0: b.caja.y0, y1: b.caja.y1, bloques: [b] });
   }
-  return franjas.flatMap((f) => f.bloques.sort((a, z) => z.caja.x1 - a.caja.x1));
+  return franjas.flatMap((f) => f.bloques.sort((a, z) => (deDerecha ? z.caja.x1 - a.caja.x1 : a.caja.x0 - z.caja.x0)));
 }
 
 /**
@@ -311,10 +312,11 @@ export function vinetasDeImagen(gris: ArrayLike<number>, w: number, h: number, b
 
 /**
  * El orden de las viñetas de una página de manga: se parte por el hueco horizontal más claro (franjas de arriba abajo) y,
- * dentro de cada franja, por el vertical (de derecha a izquierda), y así sucesivamente. Si ningún corte separa las viñetas
- * (se solapan sus cajas, como con los bordes inclinados), van por franjas como los globos.
+ * dentro de cada franja, por el vertical (de derecha a izquierda, o de izquierda a derecha en un cómic occidental), y así
+ * sucesivamente. Si ningún corte separa las viñetas (se solapan sus cajas, como con los bordes inclinados), van por
+ * franjas como los globos.
  */
-export function ordenVinetas(vinetas: Caja[]): Caja[] {
+export function ordenVinetas(vinetas: Caja[], deDerecha = true): Caja[] {
   if (vinetas.length < 2) return vinetas;
   const holgura = 0.02;
   const cortes = (eje: 'x' | 'y') => {
@@ -334,10 +336,10 @@ export function ordenVinetas(vinetas: Caja[]): Caja[] {
     const bordes = [-Infinity, ...c, Infinity];
     const partes = bordes.slice(1).map((b, i) => vinetas.filter((v) => centro(v) >= bordes[i] && centro(v) < b));
     if (partes.filter((p) => p.length).length < 2) continue;
-    // En vertical, la parte de la derecha va primero.
-    return (eje === 'x' ? partes.reverse() : partes).flatMap((p) => ordenVinetas(p));
+    // En vertical, la parte de la derecha va primero en un manga.
+    return (eje === 'x' && deDerecha ? partes.reverse() : partes).flatMap((p) => ordenVinetas(p, deDerecha));
   }
-  return ordenManga(vinetas.map((caja) => ({ caja }))).map((v) => v.caja);
+  return ordenManga(vinetas.map((caja) => ({ caja })), deDerecha).map((v) => v.caja);
 }
 
 /**
@@ -345,9 +347,9 @@ export function ordenVinetas(vinetas: Caja[]): Caja[] {
  * más cercana si cae en el canal), las viñetas en su orden y, dentro de cada una, el orden de siempre. Sin viñetas, el
  * orden de siempre.
  */
-export function ordenMangaPorVinetas<T extends { caja: Caja }>(bloques: T[], vinetas: Caja[]): T[] {
-  if (vinetas.length < 2) return ordenManga(bloques);
-  const orden = ordenVinetas(vinetas);
+export function ordenMangaPorVinetas<T extends { caja: Caja }>(bloques: T[], vinetas: Caja[], deDerecha = true): T[] {
+  if (vinetas.length < 2) return ordenManga(bloques, deDerecha);
+  const orden = ordenVinetas(vinetas, deDerecha);
   const comun = (a: Caja, b: Caja) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
   const distancia = (a: Caja, b: Caja) => Math.hypot(Math.max(0, b.x0 - a.x1, a.x0 - b.x1), Math.max(0, b.y0 - a.y1, a.y0 - b.y1));
   const grupos = orden.map(() => [] as T[]);
@@ -359,7 +361,32 @@ export function ordenMangaPorVinetas<T extends { caja: Caja }>(bloques: T[], vin
     }
     grupos[mejor].push(b);
   }
-  return grupos.flatMap((g) => ordenManga(g));
+  return grupos.flatMap((g) => ordenManga(g, deDerecha));
+}
+
+/**
+ * Los renglones de un globo de cómic en una lengua con espacios, unidos en un solo texto: separados por un espacio, y sin
+ * el guion de una palabra partida a final de renglón («EVERY-» y «THING» dan «EVERYTHING»). Un guion tras un espacio, o
+ * delante de lo que no es una letra, se queda.
+ */
+export function unirRenglones(renglones: string[]): string {
+  let texto = '';
+  for (const r of renglones.map((x) => x.trim()).filter(Boolean)) {
+    if (!texto) texto = r;
+    else if (/\p{L}-$/u.test(texto) && /^\p{L}/u.test(r)) texto = texto.slice(0, -1) + r;
+    else texto += ` ${r}`;
+  }
+  return texto;
+}
+
+/**
+ * Lo que se lee en un cómic y no es diálogo: números de página, firmas sueltas de una letra, signos solos. Un globo con
+ * solo «...» o «?!» sí es diálogo y se queda.
+ */
+export function esRuidoComic(texto: string): boolean {
+  const letras = texto.match(/\p{L}/gu)?.length ?? 0;
+  if (/^[\p{P}\s]+$/u.test(texto)) return !/[.?!…]/.test(texto);
+  return letras < 2 && !/[?!]/.test(texto);
 }
 
 /** Un bloque de texto del detector de globos: 1 si va dentro de un globo, 2 si va suelto; y su puntuación. */

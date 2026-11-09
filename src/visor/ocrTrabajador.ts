@@ -8,6 +8,9 @@
 // leen los modelos, el manga deja repetir los signos («……»), quita las marcas de agua y lo suelto dudoso, y ordena los
 // globos por viñetas; en 18 páginas de cinco series, en el navegador, de 4,3 % a 2,8 % de error y de 11 falsos a 4.
 //
+// Para los cómics en lenguas con espacios (inglés, alemán), el mismo detector de globos encuentra los bloques de texto y
+// el reconocedor de libros lee los renglones de cada uno, de izquierda a derecha: manga-ocr solo sabe japonés.
+//
 // manga-ocr va con el codificador en q4f16 y el decodificador en fp32: las versiones int8 hacen que ONNX mande a la CPU
 // las operaciones con enteros, y en un solo hilo tardaban entre 10 y 30 s por página; las fp16 y q4f16 del decodificador
 // no llegan a cargar. Se descargan una vez y se guardan con los demás modelos.
@@ -20,6 +23,7 @@ import {
   type Caja,
   cajasDeMapa,
   decodificarCtc,
+  esRuidoComic,
   esRuidoManga,
   esVertical,
   idsRepetibles,
@@ -27,15 +31,19 @@ import {
   medidaDeDeteccion,
   ordenarLineas,
   ordenMangaPorVinetas,
+  porRenglones,
   quitarFurigana,
   siguienteToken,
   textoDeMangaOcr,
+  unirRenglones,
   vinetasDeImagen,
 } from '../nucleo/ocr';
 
 export type ModoOcr = 'libro' | 'manga';
+/** Lo que de verdad lee el trabajador: el modo Manga de una lengua con espacios es el de los cómics. */
+export type ModoLectura = ModoOcr | 'comic';
 
-export type PedidoOcr = { tipo: 'leer'; id: number; modo: ModoOcr; imagen: ImageBitmap } | { tipo: 'liberar' };
+export type PedidoOcr = { tipo: 'leer'; id: number; modo: ModoLectura; imagen: ImageBitmap } | { tipo: 'liberar' };
 
 export type RespuestaOcr =
   | { tipo: 'descarga'; archivo: string; cargado: number; total: number }
@@ -93,8 +101,13 @@ async function hayGpu(): Promise<boolean> {
   return gpu;
 }
 
-async function sesion(datos: Uint8Array, enGpu: boolean): Promise<ort.InferenceSession> {
-  return ort.InferenceSession.create(datos, { executionProviders: enGpu && (await hayGpu()) ? ['webgpu', 'wasm'] : ['wasm'] });
+let colaSesiones: Promise<unknown> = Promise.resolve();
+
+/** El proveedor de WebGPU de ONNX no admite crear dos sesiones a la vez («another WebGPU EP inference session is being created»): van en fila. */
+function sesion(datos: Uint8Array, enGpu: boolean): Promise<ort.InferenceSession> {
+  const r = colaSesiones.then(async () => ort.InferenceSession.create(datos, { executionProviders: enGpu && (await hayGpu()) ? ['webgpu', 'wasm'] : ['wasm'] }));
+  colaSesiones = r.catch(() => {});
+  return r;
 }
 
 interface ModelosLibro {
@@ -114,6 +127,19 @@ interface ModelosManga {
 
 let libro: Promise<ModelosLibro> | null = null;
 let manga: Promise<ModelosManga> | null = null;
+let globos: Promise<ort.InferenceSession> | null = null;
+
+/** El detector de globos, que comparten el manga y los cómics: los cómics no necesitan manga-ocr. */
+function cargarGlobos(): Promise<ort.InferenceSession> {
+  globos ??= (async () => {
+    const g = MODELOS.globos;
+    return sesion(await descargar(g.repositorio, g.revision, g.archivo), true);
+  })().catch((e) => {
+    globos = null;
+    throw e;
+  });
+  return globos;
+}
 
 function cargarLibro(): Promise<ModelosLibro> {
   libro ??= (async () => {
@@ -134,18 +160,17 @@ function cargarLibro(): Promise<ModelosLibro> {
 
 function cargarManga(): Promise<ModelosManga> {
   manga ??= (async () => {
-    const g = MODELOS.globos;
     const o = MODELOS.mangaOcr;
     const v = MODELOS.vocabulario;
-    const [globos, codificador, decodificador, vocabulario] = await Promise.all([
-      descargar(g.repositorio, g.revision, g.archivo),
+    const [detector, codificador, decodificador, vocabulario] = await Promise.all([
+      cargarGlobos(),
       descargar(o.repositorio, o.revision, o.codificador),
       descargar(o.repositorio, o.revision, o.decodificador),
       descargar(v.repositorio, v.revision, v.archivo),
     ]);
     const lista = new TextDecoder().decode(vocabulario).split(/\r?\n/);
     return {
-      globos: await sesion(globos, true),
+      globos: detector,
       codificador: await sesion(codificador, true),
       // En la GPU, con formas fijas: lotes de LOTE_MANGA y largos por tramos, para compilar una vez y no en cada paso.
       decodificador: await sesion(decodificador, true),
@@ -219,28 +244,34 @@ function adaptar(s: ort.InferenceSession, nombre: string, t: ort.Tensor): ort.Te
   return tensorReal(s, nombre, Float32Array.from(reales(t)), t.dims as number[]);
 }
 
-async function leerLibro(imagen: ImageBitmap): Promise<LineaOcr[]> {
-  const m = await cargarLibro();
-  fase('modelos');
-  const { width: w, height: h } = imagen;
-  const medida = medidaDeDeteccion(w, h);
+/**
+ * Las líneas de texto de una región de la imagen, con el detector de libros, en píxeles de la imagen. La región se pinta
+ * con su lado mayor en `limite` píxeles, que en una página entera es la escala con la que se ajustó el detector.
+ */
+async function cajasDeLineas(m: ModelosLibro, imagen: ImageBitmap, region: Caja, limite?: number): Promise<Caja[]> {
+  const rw = region.x1 - region.x0;
+  const rh = region.y1 - region.y0;
+  const medida = medidaDeDeteccion(rw, rh, limite);
   const media = [0.485, 0.456, 0.406];
   const desv = [0.229, 0.224, 0.225];
-  const entrada = aTensor(pixeles(imagen, { x0: 0, y0: 0, x1: w, y1: h }, medida.w, medida.h), medida.w, medida.h, (v, c) => (v - media[c]) / desv[c], true);
+  const entrada = aTensor(pixeles(imagen, region, medida.w, medida.h), medida.w, medida.h, (v, c) => (v - media[c]) / desv[c], true);
   const det = await m.detector.run({ [m.detector.inputNames[0]]: new ort.Tensor('float32', entrada, [1, 3, medida.h, medida.w]) });
-  const cajas = cajasDeMapa(det[m.detector.outputNames[0]].data as Float32Array, medida.w, medida.h, w, h);
-  fase('deteccion');
+  return cajasDeMapa(det[m.detector.outputNames[0]].data as Float32Array, medida.w, medida.h, rw, rh).map((c) => ({ x0: c.x0 + region.x0, y0: c.y0 + region.y0, x1: c.x1 + region.x0, y1: c.y1 + region.y0 }));
+}
 
-  // Cada línea a 48 píxeles de alto; las de ancho parecido se leen de una vez, rellenas hasta el mismo ancho.
-  const grupos = new Map<number, { caja: Caja; vertical: boolean; ancho: number }[]>();
-  for (const caja of cajas) {
-    const vertical = esVertical(caja);
+/**
+ * Lee cada línea a 48 píxeles de alto, de la imagen original; las de ancho parecido se leen de una vez, rellenas hasta el
+ * mismo ancho. Devuelve el texto de cada caja, en su orden.
+ */
+async function leerCajas(m: ModelosLibro, imagen: ImageBitmap, cajas: { caja: Caja; vertical: boolean }[]): Promise<string[]> {
+  const textos = cajas.map(() => '');
+  const grupos = new Map<number, { i: number; caja: Caja; vertical: boolean; ancho: number }[]>();
+  cajas.forEach(({ caja, vertical }, i) => {
     const proporcion = vertical ? (caja.y1 - caja.y0) / (caja.x1 - caja.x0) : (caja.x1 - caja.x0) / (caja.y1 - caja.y0);
     const ancho = Math.min(ANCHO_MAXIMO, Math.max(16, Math.round(ALTO_LINEA * proporcion)));
     const tramo = Math.ceil(ancho / TRAMO_ANCHO) * TRAMO_ANCHO;
-    grupos.set(tramo, [...(grupos.get(tramo) ?? []), { caja, vertical, ancho }]);
-  }
-  const lineas: LineaOcr[] = [];
+    grupos.set(tramo, [...(grupos.get(tramo) ?? []), { i, caja, vertical, ancho }]);
+  });
   for (const [tramo, grupo] of grupos) {
     const n = ALTO_LINEA * tramo;
     const lote = new Float32Array(grupo.length * 3 * n);
@@ -254,26 +285,101 @@ async function leerLibro(imagen: ImageBitmap): Promise<LineaOcr[]> {
     const probs = salida[m.lector.outputNames[0]];
     const [, T, C] = probs.dims as number[];
     const datos = probs.data as Float32Array;
-    grupo.forEach((g, i) => {
-      const texto = decodificarCtc(datos.subarray(i * T * C, (i + 1) * T * C), T, C, m.diccionario);
-      if (texto) lineas.push({ caja: fraccion(g.caja, w, h), texto, vertical: g.vertical });
-    });
+    grupo.forEach((g, i) => (textos[g.i] = decodificarCtc(datos.subarray(i * T * C, (i + 1) * T * C), T, C, m.diccionario)));
   }
+  return textos;
+}
+
+async function leerLibro(imagen: ImageBitmap): Promise<LineaOcr[]> {
+  const m = await cargarLibro();
+  fase('modelos');
+  const { width: w, height: h } = imagen;
+  const cajas = (await cajasDeLineas(m, imagen, { x0: 0, y0: 0, x1: w, y1: h })).map((caja) => ({ caja, vertical: esVertical(caja) }));
+  fase('deteccion');
+  const textos = await leerCajas(m, imagen, cajas);
+  const lineas: LineaOcr[] = [];
+  cajas.forEach((c, i) => {
+    if (textos[i]) lineas.push({ caja: fraccion(c.caja, w, h), texto: textos[i], vertical: c.vertical });
+  });
   fase('lectura');
   return ordenarLineas(quitarFurigana(lineas));
+}
+
+/** Los bloques de texto de una página de manga o de cómic, con el detector de globos. */
+async function bloquesDeGlobos(detector: ort.InferenceSession, imagen: ImageBitmap) {
+  const { width: w, height: h } = imagen;
+  const entrada = aTensor(pixeles(imagen, { x0: 0, y0: 0, x1: w, y1: h }, LADO_GLOBOS, LADO_GLOBOS), LADO_GLOBOS, LADO_GLOBOS, (v) => v);
+  const det = await detector.run({
+    [detector.inputNames[0]]: new ort.Tensor('float32', entrada, [1, 3, LADO_GLOBOS, LADO_GLOBOS]),
+    [detector.inputNames[1]]: new ort.Tensor('int64', BigInt64Array.from([BigInt(w), BigInt(h)]), [1, 2]),
+  });
+  const nombre = (patron: RegExp) => detector.outputNames.find((x) => patron.test(x))!;
+  return bloquesDeDetector(det[nombre(/label/)].data as BigInt64Array, det[nombre(/box/)].data as Float32Array, det[nombre(/score/)].data as Float32Array, w, h);
+}
+
+/** Las viñetas de la página, buscadas en una miniatura en grises. */
+function vinetasDePagina(imagen: ImageBitmap): Caja[] {
+  const { width: w, height: h } = imagen;
+  const alto = Math.max(1, Math.round((h * ANCHO_VINETAS) / w));
+  const px = pixeles(imagen, { x0: 0, y0: 0, x1: w, y1: h }, ANCHO_VINETAS, alto);
+  const gris = new Uint8Array(ANCHO_VINETAS * alto);
+  for (let i = 0; i < gris.length; i++) gris[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+  return vinetasDeImagen(gris, ANCHO_VINETAS, alto);
+}
+
+/** Una caja más alta que ancha que toca el borde de la región: un trazo del dibujo o de otro globo, no un renglón. */
+function esTrazoDelBorde(c: Caja, region: Caja): boolean {
+  const toca = c.x0 - region.x0 <= 2 || region.x1 - c.x1 <= 2 || c.y0 - region.y0 <= 2 || region.y1 - c.y1 <= 2;
+  return toca && c.x1 - c.x0 < c.y1 - c.y0;
+}
+
+/**
+ * Un cómic en una lengua con espacios: cada bloque del detector de globos, con un margen y ampliado, pasa por el detector
+ * de líneas de los libros; sus renglones se leen con el reconocedor de libros y se unen en un solo texto. El orden va por
+ * viñetas, de izquierda a derecha.
+ */
+async function leerComic(imagen: ImageBitmap): Promise<LineaOcr[]> {
+  const [detector, m] = await Promise.all([cargarGlobos(), cargarLibro()]);
+  fase('modelos');
+  const { width: w, height: h } = imagen;
+  const bloques = await bloquesDeGlobos(detector, imagen);
+  fase('deteccion');
+  // Las líneas de todos los bloques, y de qué bloque es cada una: se leen todas juntas.
+  const porBloque: Caja[][] = [];
+  for (const b of bloques) {
+    const margen = Math.max(4, Math.round(0.08 * Math.max(b.x1 - b.x0, b.y1 - b.y0)));
+    const region = { x0: Math.max(0, b.x0 - margen), y0: Math.max(0, b.y0 - margen), x1: Math.min(w, b.x1 + margen), y1: Math.min(h, b.y1 + margen) };
+    // Las letras de un globo son pequeñas: el recorte se amplía al doble, entre 320 y 960 píxeles de lado.
+    const limite = Math.min(960, Math.max(320, 2 * Math.max(region.x1 - region.x0, region.y1 - region.y0)));
+    // El margen da aire a las letras que se salen un poco del bloque, pero por él asoman también los globos de al lado: solo
+    // valen los renglones con el centro dentro del bloque. Y fuera los trazos estrechos pegados al borde del recorte.
+    const dentro = (c: Caja) => (c.x0 + c.x1) / 2 >= b.x0 && (c.x0 + c.x1) / 2 <= b.x1 && (c.y0 + c.y1) / 2 >= b.y0 && (c.y0 + c.y1) / 2 <= b.y1;
+    const lineas = (await cajasDeLineas(m, imagen, region, limite)).filter((c) => c.x1 - c.x0 >= 4 && c.y1 - c.y0 >= 4 && dentro(c) && !esTrazoDelBorde(c, region));
+    // Si no ve renglones, el bloque entero es uno.
+    porBloque.push(lineas.length ? lineas : [b]);
+  }
+  fase('lineas');
+  const todas = porBloque.flatMap((cajas) => cajas.map((caja) => ({ caja, vertical: false })));
+  const textos = await leerCajas(m, imagen, todas);
+  fase('lectura');
+  const salida: LineaOcr[] = [];
+  let k = 0;
+  bloques.forEach((b, i) => {
+    const renglones = porBloque[i].map((caja) => ({ caja: fraccion(caja, w, h), texto: textos[k++], vertical: false }));
+    // Un globo no tiene columnas: sus renglones van de arriba abajo, aunque unos sean mucho más cortos que otros.
+    const texto = unirRenglones(porRenglones(renglones.filter((r) => r.texto), false).map((r) => r.texto));
+    if (texto && !esRuidoComic(texto)) salida.push({ caja: fraccion(b, w, h), texto, vertical: false });
+  });
+  const orden = ordenMangaPorVinetas(salida, vinetasDePagina(imagen), false);
+  fase('orden');
+  return orden;
 }
 
 async function leerManga(imagen: ImageBitmap): Promise<LineaOcr[]> {
   const m = await cargarManga();
   fase('modelos');
   const { width: w, height: h } = imagen;
-  const entrada = aTensor(pixeles(imagen, { x0: 0, y0: 0, x1: w, y1: h }, LADO_GLOBOS, LADO_GLOBOS), LADO_GLOBOS, LADO_GLOBOS, (v) => v);
-  const det = await m.globos.run({
-    [m.globos.inputNames[0]]: new ort.Tensor('float32', entrada, [1, 3, LADO_GLOBOS, LADO_GLOBOS]),
-    [m.globos.inputNames[1]]: new ort.Tensor('int64', BigInt64Array.from([BigInt(w), BigInt(h)]), [1, 2]),
-  });
-  const nombre = (patron: RegExp) => m.globos.outputNames.find((x) => patron.test(x))!;
-  const bloques = bloquesDeDetector(det[nombre(/label/)].data as BigInt64Array, det[nombre(/box/)].data as Float32Array, det[nombre(/score/)].data as Float32Array, w, h);
+  const bloques = await bloquesDeGlobos(m.globos, imagen);
   fase('deteccion');
 
   const lineas: LineaOcr[] = [];
@@ -287,11 +393,7 @@ async function leerManga(imagen: ImageBitmap): Promise<LineaOcr[]> {
     });
   }
   // El orden de lectura va por viñetas, buscadas en una miniatura en grises de la página.
-  const alto = Math.max(1, Math.round((h * ANCHO_VINETAS) / w));
-  const px = pixeles(imagen, { x0: 0, y0: 0, x1: w, y1: h }, ANCHO_VINETAS, alto);
-  const gris = new Uint8Array(ANCHO_VINETAS * alto);
-  for (let i = 0; i < gris.length; i++) gris[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
-  const orden = ordenMangaPorVinetas(lineas, vinetasDeImagen(gris, ANCHO_VINETAS, alto));
+  const orden = ordenMangaPorVinetas(lineas, vinetasDePagina(imagen));
   fase('orden');
   return orden;
 }
@@ -371,22 +473,26 @@ function probabilidad(logits: ArrayLike<number>, base: number, V: number, token:
 self.onmessage = async (e: MessageEvent<PedidoOcr>) => {
   const p = e.data;
   if (p.tipo === 'liberar') {
+    // El detector de globos va en el manga y suelto: cada sesión se libera una vez.
+    const sesiones = new Set<unknown>([await globos?.catch(() => null)]);
     for (const promesa of [libro, manga]) {
       const modelos = (await promesa?.catch(() => null)) as Record<string, unknown> | null;
-      for (const s of Object.values(modelos ?? {})) {
-        const liberable = s as { release?: () => Promise<void> };
-        if (typeof liberable?.release === 'function') await liberable.release().catch(() => {});
-      }
+      for (const s of Object.values(modelos ?? {})) sesiones.add(s);
+    }
+    for (const s of sesiones) {
+      const liberable = s as { release?: () => Promise<void> } | null;
+      if (typeof liberable?.release === 'function') await liberable.release().catch(() => {});
     }
     libro = null;
     manga = null;
+    globos = null;
     return;
   }
   const inicio = performance.now();
   fases = {};
   desde = inicio;
   try {
-    const lineas = p.modo === 'manga' ? await leerManga(p.imagen) : await leerLibro(p.imagen);
+    const lineas = p.modo === 'manga' ? await leerManga(p.imagen) : p.modo === 'comic' ? await leerComic(p.imagen) : await leerLibro(p.imagen);
     avisar({ tipo: 'lineas', id: p.id, lineas, ms: Math.round(performance.now() - inicio), dispositivo: (await hayGpu()) ? 'webgpu' : 'wasm', fases });
   } catch (err) {
     avisar({ tipo: 'error', id: p.id, mensaje: err instanceof Error ? err.message : String(err) });
