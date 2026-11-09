@@ -12,6 +12,7 @@ import type { PuntoGramatica } from '../lenguas/tipos';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
+import { GrabacionDictada } from './Dictado';
 import { guardarPreferencia, leerPreferencia } from './estadoApp';
 import { Anillo } from './Piezas';
 import { numero, tr } from '../compartido/i18n';
@@ -258,6 +259,8 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
         );
       case 'separador':
         return <hr key={i} class="ap-sep" />;
+      case 'dictado':
+        return <GrabacionDictada key={i} id={b.id} />;
     }
   };
 
@@ -282,15 +285,17 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
         </div>
 
         <article class="ap-papel" lang={lengua.value.id} style={{ fontSize: `${tam}px` }} onClick={() => fijarAbierta(null)}>
-          {tokens.length === 0 && (
+          {/* Un texto sin frases, como una grabación cuyo párrafo se borró, no espera ningún análisis. */}
+          {tokens.length === 0 && frases.length > 0 ? (
             <div aria-hidden="true">
               <span class="esqueleto" style={{ width: '96%' }} />
               <span class="esqueleto" style={{ width: '88%' }} />
               <span class="esqueleto" style={{ width: '92%' }} />
               <span class="esqueleto" style={{ width: '60%' }} />
             </div>
+          ) : (
+            bloques.map(pintarBloque)
           )}
-          {tokens.length > 0 && bloques.map(pintarBloque)}
         </article>
 
         {pie}

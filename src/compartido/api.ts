@@ -149,6 +149,11 @@ export interface ApiMotor {
   bibliotecaCambiar(id: string, cambio: CambioBiblioteca): Promise<ElementoBiblioteca | undefined>;
   bibliotecaEliminar(id: string): Promise<void>;
   bibliotecaObtener(id: string): Promise<ElementoBiblioteca | undefined>;
+  /**
+   * Borra las grabaciones de dictados de la lengua actual que ya no usa ningún texto: ni los de la biblioteca ni los que
+   * se le pasan, que son los que hay abiertos en el Portapapeles. Devuelve cuántas borró.
+   */
+  limpiarDictados(abiertos: string[]): Promise<number>;
   coleccionesListar(): Promise<ColeccionBiblioteca[]>;
   coleccionGuardar(c: ColeccionBiblioteca): Promise<void>;
   /** Quita la colección; sus libros se quedan en la estantería, sueltos. */

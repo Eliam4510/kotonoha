@@ -9,6 +9,7 @@ import {
   elegirCorte,
   esAlucinacion as esAlucinacionCon,
   esBucle,
+  esGrabacionMuda,
   esSilencio,
   esTextoRecuperable as esTextoRecuperableCon,
   FRECUENCIA,
@@ -263,3 +264,14 @@ describe('tramos que Whisper se salta', () => {
   });
 });
 
+
+describe('una grabación del dictado sin voz', () => {
+  it('se reconoce sin el modelo, también si es larga y la voz corta', () => {
+    expect(esGrabacionMuda(new Float32Array(FRECUENCIA * 3))).toBe(true);
+    expect(esGrabacionMuda(tono(3, 0.001))).toBe(true);
+    // Un minuto de silencio con medio segundo de voz suave: la media no llega al umbral, pero esa ventana sí.
+    const largo = new Float32Array(FRECUENCIA * 60);
+    largo.set(tono(0.5, 0.02), FRECUENCIA * 30);
+    expect(esGrabacionMuda(largo)).toBe(false);
+  });
+});

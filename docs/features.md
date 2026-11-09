@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.12.0, along with how it has been verified.
+Status of each feature in version 0.13.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -99,6 +99,8 @@ Status of each feature in version 0.12.0, along with how it has been verified.
 | Clipboard: pasted or copied text keeps its paragraphs, line breaks, headings, lists, quotes, code, tables and bold, without the source page's furigana | Automated |
 | Clipboard in a regular tab, also in split view next to the page being viewed | Automated, on Edge and Chrome |
 | Following the clipboard, without the tab having focus | Automated |
+| Dictation into the Clipboard: the microphone, the time and level while recording, and the text at the end, already analysed, transcribed on the computer with the speech model from the settings | Automated, with synthetic voices in Japanese and English |
+| Each dictation's recording above its paragraph, to play it again; it goes with the text to the library, and one that no text uses is deleted after a week | Automated |
 | Reading assistant: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
 | Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
 | Image folders as books: each folder, or each volume inside it, comes in as a book, with the cover first, a table of contents by chapter and landscape two-page spreads on their own | Automated, and with 40 real manga volumes |

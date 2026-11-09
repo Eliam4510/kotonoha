@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.13.0 · 2026-11-08
+
+- **Dictar al Portapapeles.** **Dictar** graba con el micrófono y añade lo dicho al final del texto, ya analizado y con furigana. Se transcribe en el equipo con el modelo de voz de los ajustes (Haas-ja en japonés, Parakeet en inglés y alemán), y la grabación queda encima de su párrafo para volver a oírla, también en la biblioteca.
+- Con Parakeet, en inglés y en alemán, una frase larga partida en dos líneas ya no pega la primera palabra de la segunda línea al final de la primera, tampoco en los subtítulos generados.
+
 ## 0.12.0 · 2026-11-08
 
 - **Buscar en el libro.** **Buscar en el libro**, o Ctrl+F, encuentra una palabra en todas las páginas con texto, el del PDF o el del OCR, sin distinguir anchos ni hiragana y katakana, y también partida entre dos renglones. Lo encontrado sale por páginas y queda marcado en la página; Intro pasa al siguiente.
@@ -113,6 +118,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.13.0 · 2026-11-08
+
+- **Dictation into the Clipboard.** **Dictate** records from the microphone and adds what was said at the end of the text, already analysed and with furigana. It is transcribed on the computer with the speech model from the settings (Haas-ja for Japanese, Parakeet for English and German), and the recording stays above its paragraph so it can be played again, also in the library.
+- With Parakeet, in English and German, a long sentence split across two lines no longer glues the first word of the second line to the end of the first, in generated subtitles as well.
 
 ## 0.12.0 · 2026-11-08
 

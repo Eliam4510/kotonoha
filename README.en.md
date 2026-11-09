@@ -92,7 +92,7 @@ Pages that are images, such as manga, scanned books and many PDFs, are read with
 
 <img src="docs/img/lector-web.en.png" alt="Clipboard in a tab, with paragraphs, furigana and comprehension" width="100%">
 
-The **Clipboard** collects what you copy anywhere and shows it with its paragraphs, headings, lists and tables, analysed and with furigana. It opens in a normal tab, also in the browser’s split view next to the page you are reading, and reads the text aloud.
+The **Clipboard** collects what you copy anywhere and shows it with its paragraphs, headings, lists and tables, analysed and with furigana. It opens in a normal tab, also in the browser’s split view next to the page you are reading, and reads the text aloud. You can also dictate to it: what you say into the microphone is transcribed on your computer and added as a new paragraph, with its recording to play again.
 
 ### How each kanji is written
 

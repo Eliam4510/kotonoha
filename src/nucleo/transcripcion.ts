@@ -34,6 +34,7 @@ export function unirPalabrasPartidas(segmentos: SegmentoWhisper[]): SegmentoWhis
   for (let i = 1; i < salida.length; i++) {
     const previo = salida[i - 1];
     const actual = salida[i];
+    if (actual.palabrasEnteras) continue;
     const resto = /^[\p{L}\p{M}'’]{1,6}(?=\s|[,.;:!?…]|$)/u.exec(actual.texto)?.[0];
     if (!resto || !/\p{L}$/u.test(previo.texto.trimEnd())) continue;
     // Una palabra partida no deja hueco entre los dos: con una pausa en medio, son dos palabras.
@@ -64,6 +65,17 @@ export function energia(pcm: Float32Array, desde = 0, hasta = pcm.length): numbe
 }
 
 export const esSilencio = (pcm: Float32Array) => energia(pcm) < UMBRAL_SILENCIO;
+
+/**
+ * Si en ninguna ventana de medio segundo suena algo que pueda ser voz: una grabación del dictado en la que no se habló.
+ * Se mira por ventanas y no entera: en un minuto con una sola frase corta, la energía media quedaría por debajo del
+ * umbral aunque la frase esté.
+ */
+export function esGrabacionMuda(pcm: Float32Array): boolean {
+  const ventana = FRECUENCIA / 2;
+  for (let i = 0; i < pcm.length; i += ventana) if (!esSilencio(pcm.subarray(i, i + ventana))) return false;
+  return true;
+}
 
 /** Devuelve la muestra donde conviene cortar: el centro del tramo más silencioso entre min y max. */
 export function elegirCorte(pcm: Float32Array, minS = MINIMO_S, maxS = MAXIMO_S): number {
@@ -158,6 +170,11 @@ export interface SegmentoWhisper {
   /** Segundos desde el inicio del trozo. */
   inicio: number;
   fin: number | null;
+  /**
+   * Viene de un transductor, que ya parte por palabras: entre este segmento y el anterior no puede haber una palabra
+   * partida. Sus segmentos salen de cortar una frase larga, a menudo justo antes de una palabra corta («going» | «for»).
+   */
+  palabrasEnteras?: boolean;
 }
 
 export const esAlucinacion = (texto: string, reglas: ReglasTranscripcion) => reglas.alucinaciones.some((r) => r.test(texto.trim()));

@@ -76,6 +76,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/letra.mjs voz.wav` | Colocar una letra sobre los tiempos de una transcripción |
 | `node pruebas/modelos-voz.mjs voz.wav` | Qué modelo transcribe cada cosa |
 | `node pruebas/ingles-whisper.mjs voz.wav` | Whisper en inglés en la GPU, con la corrección de Claude simulada |
+| `node pruebas/dictado.mjs voz-ja.wav [voz-en.wav]` | El dictado del Portapapeles con un micrófono falso y los modelos de voz guardados en el perfil, en la GPU: grabar, transcribir, volver a oír la grabación, guardarla en la biblioteca, la limpieza de las que nadie usa, una grabación sin voz y el micrófono sin permiso. Usa `KK_SALIDA=.dist-whisper` y no borra el perfil |
 | `node pruebas/tarjetas.mjs audio.wav` | Anki simulado, memoria y grabación |
 | `node pruebas/sin-gpu.mjs` | Cuánto cuesta la interfaz sin aceleración por hardware |
 | `node pruebas/captura-real.mjs` | El creador de tarjetas con la captura real de una pestaña. Necesita un navegador visible |
@@ -198,6 +199,7 @@ Browser tests use a build with a fixed extension ID, created with `KK_SALIDA=.di
 | `node pruebas/ocr.mjs` | OCR on a book page and a manga page, on the GPU, a scanned PDF with another OCR's layer, with PDF text on and off, Edit and Restore, the eight pages read ahead, and a whole book processed from its card |
 | `node pruebas/libros-texto.mjs` | A Japanese PDF made by the browser and a vertical EPUB with traps: word taps in the PDF, the EPUB with its CSS and ruby, nothing from the book runs or loads anything from outside |
 | `node pruebas/trazos-web.mjs` | Stroke order, the Clipboard and its structure, a text EPUB in the viewer, split view |
+| `node pruebas/dictado.mjs voz-ja.wav [voz-en.wav]` | Dictation into the Clipboard with a fake microphone and the speech models stored in the profile, on the GPU: recording, transcribing, playing the recording again, the library, cleaning up unused recordings, a silent recording and a microphone without permission |
 | `node pruebas/ingles.mjs`, `node pruebas/aleman.mjs` | Studying English and German end to end |
 | `node pruebas/e2e.mjs` | The extension end to end in Edge. Video sites do not serve subtitles to an automated browser, so the real YouTube checks fail there and are verified by hand |
 

@@ -252,6 +252,8 @@ export interface TextosLengua {
   pegarLista: string;
   localArrastrar: string;
   seguirPortapapeles: string;
+  /** La ayuda del botón «Dictar» del Portapapeles. */
+  dictar: string;
   temaRelato: string;
 }
 

@@ -92,7 +92,7 @@ Seiten, die Bilder sind, wie Manga, eingescannte Bücher und viele PDFs, werden 
 
 <img src="docs/img/lector-web.de.png" alt="Zwischenablage in einem Tab, mit Absätzen, Furigana und Textverständnis" width="100%">
 
-Die **Zwischenablage** sammelt, was irgendwo kopiert wird, und zeigt es mit Absätzen, Überschriften, Listen und Tabellen, analysiert und mit Furigana. Sie öffnet sich in einem normalen Tab, auch in der geteilten Ansicht des Browsers neben der gerade gelesenen Seite, und liest den Text vor.
+Die **Zwischenablage** sammelt, was irgendwo kopiert wird, und zeigt es mit Absätzen, Überschriften, Listen und Tabellen, analysiert und mit Furigana. Sie öffnet sich in einem normalen Tab, auch in der geteilten Ansicht des Browsers neben der gerade gelesenen Seite, und liest den Text vor. Man kann ihr auch diktieren: Was ins Mikrofon gesprochen wird, wird auf dem Rechner transkribiert und als neuer Absatz angefügt, mit der Aufnahme zum erneuten Anhören.
 
 ### Wie jedes Kanji geschrieben wird
 
