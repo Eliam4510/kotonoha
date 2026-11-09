@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.23.0 · 2026-11-09
+
+- **El JLPT, nivel a nivel.** Una pantalla nueva, **JLPT**, reúne el vocabulario (8354 palabras), los kanji (2211) y la gramática (501 puntos) de cada nivel, de N5 a N1, con lo que ya se conoce de cada uno. Las palabras se marcan en su fila o todas a la vez; cada kanji enseña sus lecturas, sus trazos y las palabras del nivel que lo llevan; cada punto de gramática, las frases vistas en que aparece, y Claude lo explica cuando se pide. El vocabulario y los kanji son las listas de Jonathan Waller (CC BY); la gramática, una lista propia.
+- La barrita de **Escuchar** y **Practicar** del Cuaderno vuelve a salir justo encima del trozo seleccionado: compartía estilos con la barra de selección de **Palabras**, que también se descolocaba. Una prueba nueva avisa si dos piezas vuelven a usar la misma clase.
+
 ## 0.22.0 · 2026-11-09
 
 - **Compartir como imagen.** La ficha tiene un botón **Compartir como imagen**, junto a la frecuencia, que dibuja una tarjeta con la palabra, su furigana y su acento, lo que significa en esa frase (o lo que dice el diccionario), la frase donde apareció con la palabra resaltada y el título del video o del libro, y la copia al portapapeles al momento, lista para pegarla en un chat con Ctrl+V. Cada punto de **Gramática en esta frase** tiene el mismo botón. La tarjeta sale en **Tinta** o en **Papel** y se puede guardar como PNG.
@@ -171,6 +176,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.23.0 · 2026-11-09
+
+- **The JLPT, level by level.** A new **JLPT** screen brings together the vocabulary (8,354 words), kanji (2,211) and grammar (501 points) of each level, from N5 to N1, with what you already know of each. Words are marked on their row or all at once; each kanji shows its readings, its strokes and the words of the level that use it; each grammar point, the sentences you have seen it in, and Claude explains it when asked. The vocabulary and kanji are Jonathan Waller’s lists (CC BY); the grammar is the project’s own list.
+- The Notebook’s **Listen** and **Practice** bar appears right above the selected text again: it shared styles with the selection bar of **Words**, which was also out of place. A new test warns if two pieces use the same class again.
 
 ## 0.22.0 · 2026-11-09
 

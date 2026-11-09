@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.22.0, along with how it has been verified.
+Status of each feature in version 0.23.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -28,6 +28,7 @@ Status of each feature in version 0.22.0, along with how it has been verified.
 | Stroke order of each kanji, animated and looping, with pause and step by step | Automated, with real KanjiVG data |
 | Kanji you already know: next to the strokes, the known or learning words with each kanji of the word, known ones first | Automated, with words seeded in the database |
 | Share as image: a card for the word (furigana, pitch accent, what it means in the sentence or the dictionary, the sentence with the word highlighted) or for a grammar point, copied to the clipboard on click; Ink or Paper; Save image | Automated, with a simulated Claude, reading the clipboard |
+| JLPT: vocabulary (8,354 words), kanji (2,211) and grammar (501 points) from N5 to N1 with what you know of each level; change the status one by one or all selected; kanji card with strokes and words of the level; examples of each grammar point among the sentences you have seen, and its explanation by Claude | Automated, with a simulated Claude |
 | The word panel opens with the dictionary, with no request to Claude | Simulator and real session |
 | Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator, and real session for the meaning in the sentence |
 | Every answer is stored: the same word in the same sentence is never requested again | Simulator and real session |

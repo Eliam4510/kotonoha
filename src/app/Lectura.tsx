@@ -448,7 +448,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
       )}
 
       {seleccion && (
-        <div class="ap-seleccion" role="toolbar" aria-label={tr('Lo seleccionado')} style={{ left: `${seleccion.x}px`, top: `${seleccion.y}px` }} onMouseDown={(e) => e.preventDefault()}>
+        <div class="ap-seleccion-texto" role="toolbar" aria-label={tr('Lo seleccionado')} style={{ left: `${seleccion.x}px`, top: `${seleccion.y}px` }} onMouseDown={(e) => e.preventDefault()}>
           <button class="btn chico fantasma" onClick={() => void decirTexto(seleccion.texto)}><Icono n="altavoz" t={14} /> {tr('Escuchar')}</button>
           {lengua.value.acento?.practica && <button class="btn chico fantasma" onClick={() => practicarTrozo(seleccion.texto)}><Icono n="ondas" t={14} /> {tr('Practicar')}</button>}
         </div>

@@ -112,6 +112,12 @@ Das Wortfenster zeigt die Strichfolge jedes Kanji im Wort, Strich für Strich un
 
 **Als Bild teilen** im Wortfenster macht aus einem Wort oder einem Grammatikpunkt eine Karte mit seiner Bedeutung in diesem Satz und dem Satz, in dem es vorkam, und legt sie in die Zwischenablage, um sie mit Strg+V in jeden Chat einzufügen. Es gibt sie in Tinte oder Papier, wie die Designs.
 
+### Das JLPT, Stufe für Stufe
+
+<img src="docs/img/niveles.de.png" alt="JLPT-Ansicht mit dem Fortschritt von N5 bis N1 und dem Wortschatz von N4" width="100%">
+
+Die Ansicht **JLPT** vereint Wortschatz, Kanji und Grammatik jeder Stufe von N5 bis N1 und zeigt, wie viel davon du schon kennst, anhand der beim Sehen und Lesen markierten Wörter. Bekannte Wörter werden auf einmal markiert, jedes Kanji zeigt seine Striche und die Wörter, die es enthalten, und jeder Grammatikpunkt die gesehenen Sätze, in denen er vorkam.
+
 ### Auch Englisch
 
 <img src="docs/img/ingles-subtitulos.de.png" alt="Wortfenster zu einem englischen Wort über einem Video, mit der Aussprache in IPA" width="100%">

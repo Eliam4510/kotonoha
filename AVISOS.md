@@ -37,6 +37,7 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | Modelo de inglés para wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Iconos | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) y [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Tipografía | OFL-1.1 |
+| Listas del JLPT de Jonathan Waller ([JLPT Resources, tanos.co.uk](https://web.archive.org/web/20251114165345/https://www.tanos.co.uk/jlpt/sharing/)) | El vocabulario y los kanji de cada nivel en la pantalla JLPT (`datos/jlpt`); la gramática es una lista propia del proyecto | Creative Commons BY |
 
 El código de este repositorio no incluye binarios de terceros: se obtienen de npm al instalar. La carpeta `dist` y los paquetes compilados de cada versión sí contienen `@ffmpeg/core`, `lamejs` y eSpeak NG, y llevan en su carpeta `licencias` los textos y avisos de todos los componentes.
 
@@ -110,6 +111,7 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | English model for wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Icons | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) and [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Typography | OFL-1.1 |
+| Jonathan Waller's JLPT lists ([JLPT Resources, tanos.co.uk](https://web.archive.org/web/20251114165345/https://www.tanos.co.uk/jlpt/sharing/)) | The vocabulary and kanji of each level on the JLPT screen (`datos/jlpt`); the grammar is the project's own list | Creative Commons BY |
 
 The code in this repository contains no third-party binaries: they come from npm on install. The `dist` folder and the compiled packages of each version do contain `@ffmpeg/core`, `lamejs` and eSpeak NG, and carry the texts and notices of every component in their `licencias` folder.
 

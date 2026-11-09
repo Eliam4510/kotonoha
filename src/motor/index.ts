@@ -26,6 +26,7 @@ import { PAQUETES, paqueteDe } from '../lenguas';
 import * as medios from './medios';
 import * as vozLocal from './vozLocal';
 import * as narabas from './narabas';
+import * as niveles from './niveles';
 import * as vozNeuronal from './vozNeuronal';
 import * as compatible from './compatible';
 import * as memoria from './memoria';
@@ -265,6 +266,9 @@ const api: ApiMotor = {
   organizarTexto: async (md) => ia.organizarTexto(await aj(), md),
   prepararVoz: async (uso) => whisper.precargar(uso === 'practica' ? whisper.modeloDePractica() : await modeloPorOmision()),
   prepararMoras: () => narabas.preparar(),
+  listaNivel: (carpeta, nivel) => niveles.listaNivel(carpeta, nivel),
+  resumenNiveles: (carpeta, ids) => niveles.resumenNiveles(carpeta, ids),
+  frasesConPatron: (patron, limite) => niveles.frasesConPatron(patron, limite),
 
   async listarPalabras(f: FiltroPalabras) {
     let filas = await db.palabras.toArray();

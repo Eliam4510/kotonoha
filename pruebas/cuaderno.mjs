@@ -133,9 +133,16 @@ await p.evaluate(() => {
   s.addRange(rango);
   pal.closest('.ap-papel').dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
 });
-const barrita = p.locator('.ap-seleccion');
+const barrita = p.locator('.ap-seleccion-texto');
 await barrita.waitFor({ timeout: 3000 }).catch(() => {});
 comprobar(await barrita.isVisible(), 'Al seleccionar un trozo, aparecen «Escuchar» y «Practicar»');
+// Encima del trozo: no se puede confundir con la barra de selección de la pantalla Palabras.
+const sitio = await p.evaluate(() => {
+  const b = document.querySelector('.ap-seleccion-texto').getBoundingClientRect();
+  const s = getSelection().getRangeAt(0).getBoundingClientRect();
+  return { posicion: getComputedStyle(document.querySelector('.ap-seleccion-texto')).position, encima: b.bottom <= s.top + 2, centrada: Math.abs(b.left + b.width / 2 - (s.left + s.width / 2)) < 40 };
+});
+comprobar(sitio.posicion === 'fixed' && sitio.encima && sitio.centrada, 'La barrita queda justo encima del trozo', JSON.stringify(sitio));
 await barrita.getByRole('button', { name: 'Practicar' }).click();
 await p.locator('.ap-practica').waitFor({ timeout: 5000 }).catch(() => {});
 const practicado = await p.locator('.ap-practica-frase-texto').innerText().catch(() => '');

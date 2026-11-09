@@ -112,6 +112,12 @@ The word panel shows the stroke order of every kanji in the word, one stroke at 
 
 **Share as image**, on the word panel, turns a word or a grammar point into a card with what it means in that sentence and the sentence it appeared in, and leaves it on the clipboard to paste into any chat with Ctrl+V. It comes in ink or paper, like the themes.
 
+### The JLPT, level by level
+
+<img src="docs/img/niveles.en.png" alt="JLPT screen with progress from N5 to N1 and the N4 vocabulary" width="100%">
+
+The **JLPT** screen brings together the vocabulary, kanji and grammar of each level, from N5 to N1, and shows how much of each you already know, from the words marked while watching and reading. Words you already know are marked all at once, each kanji shows its strokes and the words that use it, and each grammar point, the sentences you have seen it in.
+
 ### German too
 
 The same tools work for German: the word panel tells you which word each conjugated or declined form comes from, such as *ging* from *gehen* or *Häuser* from *Haus*, finds separable verbs even when the particle sits at the end of the sentence, and gives the pronunciation in IPA. Its dictionaries come from Wiktionary, and German speech is transcribed by Parakeet. Speakers of other languages can study English the same way. Comics are read balloon by balloon, from left to right, and sentences are spoken by neural voices on your own computer: Kokoro in English and Piper in German. Each language keeps its own words, cards and settings, and switching takes one click.

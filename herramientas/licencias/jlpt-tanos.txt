@@ -1,0 +1,13 @@
+Listas del JLPT · JLPT lists (datos/jlpt/vocabulario.json, datos/jlpt/kanji.json)
+
+El vocabulario y los kanji de cada nivel proceden de las listas de Jonathan Waller, publicadas en
+JLPT Resources (http://www.tanos.co.uk/jlpt/) con licencia Creative Commons BY. Según su página
+«Use my data!»: «Everything on this site (that I'm not selling), is licenced under Creative Commons
+"BY". Basically this means... use anything here however you like (commercial or non-commercial), but
+credit my site.» La web ya no está en línea; se leyeron sus copias del Internet Archive:
+https://web.archive.org/web/20251114165345/https://www.tanos.co.uk/jlpt/sharing/
+
+The vocabulary and kanji of each level come from Jonathan Waller's lists, published on JLPT Resources
+(http://www.tanos.co.uk/jlpt/) under a Creative Commons BY licence, as quoted above. Kotonoha only
+cleaned the lists (split alternative spellings and readings, fixed one typo); the grammar list
+(datos/jlpt/gramatica.json) was written for Kotonoha and is covered by the project's MIT licence.
