@@ -73,10 +73,13 @@ When a video with Japanese subtitles opens, a floating bar appears at the top. I
 | Escucha preparada (prepared listening) | Pauses before each sentence and shows the translation |
 | Lectura intensiva (intensive reading) | Pauses before each sentence so it can be read and then heard |
 | Escucha intensiva (intensive listening) | Hides subtitles until the sentence is spoken, then pauses and shows them |
+| Dictado (dictation) | Hides the subtitles and pauses at the end of each line to type what you heard; then marks what you got right |
 | Híbrido intensivo (intensive hybrid) | Pauses after each sentence, with subtitles visible |
 | Mostrar al pausar (show on pause) | Shows subtitles only while paused |
 | Enfoque 1D (1-unknown focus) | Stops on sentences with exactly one unknown word |
 | Personalizado (custom) | Pauses and veils can be adjusted |
+
+**Dictation and Repeat in your voice.** In **Dictation** mode, at the end of each line the video stops and, where the subtitle would be, you type what you heard. **Check** shows the line with each word in green if you got it, yellow if half and underlined if not, and the score. In Japanese the reading is what counts: you can type in kana, and if a word with kanji has another dictionary reading that matches what you typed (後 as あと), it counts. **Hear it again** repeats the line and **Continue**, or Enter, goes on. **Repeat in your voice**, in the result, or the `P` key over any subtitle, opens pitch accent practice with that line in the Kotonoha window: listen in the video with `S`, say it the same way and compare the intonation.
 
 Scenes without dialogue can be sped up or skipped from the video panel.
 

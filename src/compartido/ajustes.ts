@@ -46,6 +46,7 @@ export type IdModo =
   | 'hibridoIntensivo'
   | 'alPausar'
   | 'enfoque1d'
+  | 'dictado'
   | 'personalizado';
 
 export type TareaIA = 'explicar' | 'desglosar' | 'traducir' | 'generar' | 'subtitulos' | 'historia' | 'preguntar' | 'sentido' | 'analisis' | 'corregir' | 'profundo' | 'letra' | 'ocr';
@@ -675,6 +676,13 @@ export const MODOS: Record<Exclude<IdModo, 'personalizado'>, ConfigModo> = {
     velarObjetivo: velo('ocultar', { revelarPorEstado: ['1d'] }),
     velarSecundario: velo('ocultar', { revelarEnPausa: ['auto'] }),
   },
+  // Sin revelar al pasar el ratón: la frase se descubre al comprobar lo escrito.
+  dictado: {
+    objetivosPausa: ['todas'],
+    disparador: 'despues',
+    velarObjetivo: velo('ocultar', { revelarAlPasar: false }),
+    velarSecundario: velo('ocultar', { revelarAlPasar: false }),
+  },
 };
 
 export function configDeModo(a: Ajustes): ConfigModo {
@@ -704,5 +712,6 @@ export const NOMBRES_MODO: Record<IdModo, { titulo: string; descripcion: string 
     titulo: tm('Enfoque 1D'),
     descripcion: tm('Muestra las frases con una sola palabra desconocida; retrocede y pausa tras ellas.'),
   },
+  dictado: { titulo: tm('Dictado'), descripcion: tm('Oculta los subtítulos y pausa al final de cada frase para que escribas lo que has oído; después te dice qué acertaste.') },
   personalizado: { titulo: tm('Personalizado'), descripcion: tm('Ajusta las pausas y lo que se oculta con controles avanzados.') },
 };

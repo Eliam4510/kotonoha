@@ -73,10 +73,13 @@ Beim Öffnen eines Videos mit japanischen Untertiteln erscheint oben eine schweb
 | Vorbereitetes Hören | Hält vor jedem Satz an und zeigt die Übersetzung |
 | Intensives Lesen | Hält vor jedem Satz an, um ihn zu lesen und danach zu hören |
 | Intensives Hören | Blendet die Untertitel aus, bis der Satz gesprochen ist, hält dann an und zeigt sie |
+| Diktat | Blendet die Untertitel aus und pausiert am Ende jeder Zeile, um das Gehörte zu schreiben; danach markiert es, was richtig war |
 | Intensiver Hybrid | Hält nach jedem Satz an, mit sichtbaren Untertiteln |
 | Beim Pausieren anzeigen | Zeigt Untertitel nur bei angehaltenem Video |
 | 1T-Fokus | Hält bei Sätzen mit genau einem unbekannten Wort an |
 | Benutzerdefiniert | Erlaubt, Pausen und Schleier anzupassen |
+
+**Diktat und Mit deiner Stimme nachsprechen.** Im Modus **Diktat** hält das Video am Ende jeder Zeile an, und wo der Untertitel stünde, schreibst du, was du gehört hast. **Prüfen** zeigt die Zeile mit jedem Wort grün, wenn es richtig war, gelb bei halb und unterstrichen, wenn nicht, sowie die Note. Im Japanischen zählt die Lesung: Du kannst in Kana schreiben, und wenn ein Wort mit Kanji eine andere Wörterbuchlesung hat, die zum Geschriebenen passt (後 als あと), zählt sie. **Noch einmal hören** wiederholt die Zeile, **Weiter** oder Enter macht weiter. **Mit deiner Stimme nachsprechen** im Ergebnis oder die Taste `P` über einem Untertitel öffnet die Akzentübung mit dieser Zeile im Kotonoha-Fenster: Im Video mit `S` anhören, genauso sprechen und die Intonation vergleichen.
 
 Szenen ohne Dialog lassen sich über den Videobereich beschleunigen oder überspringen.
 

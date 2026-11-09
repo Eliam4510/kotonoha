@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.25.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.26.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -31,6 +31,7 @@ Estado de cada función en la versión 0.25.0, con la forma en que se ha verific
 | JLPT: vocabulario (8354 palabras), kanji (2211) y gramática (501 puntos) de N5 a N1 con lo que se conoce de cada nivel; cambiar el estado una a una o todas las elegidas; ficha del kanji con trazos y palabras del nivel; ejemplos de cada punto de gramática entre las frases vistas, y su explicación con Claude | Automática, con un Claude simulado |
 | Diccionario: buscar por significado entre las palabras de uso común, con la glosa que encaja; la gramática del JLPT por su forma o su significado; bajo cada palabra, sus kanji con su nivel, los homófonos y las palabras parecidas (Claude); siete categorías para explorar según las etiquetas de JMdict | Automática, con los diccionarios del perfil de pruebas y un Claude simulado |
 | Gramática con estados: nuevo, aprendiendo o sabido en el globo del video, la ficha, el JLPT y el diccionario; lo sabido no se señala bajo los subtítulos; dónde se ha visto cada punto; tarjeta de opción múltiple con distractores de Claude; importar desde Anki contra los 501 puntos de las listas | Automática (estados, filtro, guardado y vuelta atrás en la pantalla JLPT); la importación, con pruebas unitarias |
+| Modo Dictado: frase oculta, pausa al final, escribir lo oído y comparar (en japonés por la lectura y con las otras lecturas del diccionario); Oír otra vez, Seguir con Enter; Repetir con tu voz (botón y tecla P) abre la práctica del acento con la frase | Automática, sobre la página de video de pruebas |
 | La ficha abre con el diccionario, sin ninguna petición a Claude | Simulador y sesión real |
 | Qué significa en esta frase, explicar, desglosar y traducir con Claude, a petición | Simulador, y sesión real para el significado en la frase |
 | Cada respuesta se guarda: la misma palabra en la misma frase no se vuelve a pedir | Simulador y sesión real |

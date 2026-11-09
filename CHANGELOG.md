@@ -2,6 +2,12 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.26.0 · 2026-11-09
+
+- **Dictado.** Un modo de reproducción nuevo: oculta la frase, pausa al final y en su lugar se escribe lo que se ha oído. Al comprobar, cada palabra sale en verde, en amarillo o subrayada, con la nota. En japonés se compara cómo se lee, con las otras lecturas del diccionario: 後 escrito «あと» vale aunque el analizador leyera «ご».
+- **Repetir con tu voz.** Desde el resultado del dictado, o con `P` sobre cualquier subtítulo, la práctica del acento se abre con esa frase en la ventana de Kotonoha.
+- En la práctica, las moras de dos letras (じゅ, ぎょ) ya no se parten en dos líneas, y mientras se prepara la frase ya no dice que no tiene palabras.
+
 ## 0.25.0 · 2026-11-09
 
 - **Gramática que ya sabes.** Cada punto de gramática se marca como **Nuevo**, **Aprendiendo** o **Sabido**, en el globo del video, la ficha, la pantalla **JLPT** y el diccionario. Lo sabido deja de señalarse bajo los subtítulos. Cada punto recuerda en qué videos salió (**Dónde lo has visto**), se convierte en una **Tarjeta de opción múltiple** con opciones falsas elegidas por Claude, y se importa desde Anki (**Ajustes, Anki**), contra los 501 puntos de las listas del JLPT.
@@ -184,6 +190,12 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.26.0 · 2026-11-09
+
+- **Dictation.** A new playback mode: it hides the line, pauses at the end and, in its place, you type what you heard. When you check, each word shows in green, yellow or underlined, with the score. In Japanese the reading is compared, with the other dictionary readings: 後 typed as “あと” counts even if the analyser read “ご”.
+- **Repeat in your voice.** From the dictation result, or with `P` over any subtitle, pitch accent practice opens with that line in the Kotonoha window.
+- In practice, two-letter morae (じゅ, ぎょ) are no longer split over two lines, and while the line is being prepared it no longer says it has no words.
 
 ## 0.25.0 · 2026-11-09
 
