@@ -18,8 +18,10 @@ import type {
 } from '../compartido/tipos';
 import { anadirDictado } from '../nucleo/dictado';
 import { leerEstructura, normalizarTextoPlano, textoConEstructura, textoPlano } from '../nucleo/estructura';
+import { AvisoVersion } from './AvisoVersion';
 import { SeguirLeyendo } from './Biblioteca';
 import { Dictado, limpiarDictadosSiToca } from './Dictado';
+import { SelectorLengua } from './SelectorLengua';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
@@ -174,11 +176,15 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
   return (
     <div class="ap-lienzo ap-inicio">
       <header class="ap-saludo">
-        <h1 lang={lengua.value.id}>{lengua.value.saludo(new Date().getHours(), ajustes.nombre.trim())}</h1>
-        <p>{pendientes ? (pendientes === 1 ? tr('Hoy tienes 1 tarjeta por repasar.') : tr('Hoy tienes {0} tarjetas por repasar.', numero(pendientes))) : tr('Hoy no tienes tarjetas pendientes. Buen momento para ver algo nuevo.')}</p>
+        <div class="ap-saludo-texto">
+          <h1 lang={lengua.value.id}>{lengua.value.saludo(new Date().getHours(), ajustes.nombre.trim())}</h1>
+          <p>{pendientes ? (pendientes === 1 ? tr('Hoy tienes 1 tarjeta por repasar.') : tr('Hoy tienes {0} tarjetas por repasar.', numero(pendientes))) : tr('Hoy no tienes tarjetas pendientes. Buen momento para ver algo nuevo.')}</p>
+        </div>
+        <SelectorLengua a={ajustes} />
       </header>
 
       <div class="ap-rejilla">
+        <AvisoVersion avisar={ajustes.avisarVersiones} />
         <PrimerosPasos estado={estado} anki={anki} instalando={instalando} alInstalar={instalarRecomendados} />
 
         <section class="tarjeta ap-vocabulario ap-c8" aria-label={tr('Tu vocabulario')}>

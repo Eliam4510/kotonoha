@@ -29,7 +29,7 @@
 | 词典 | 设置、词典 | 西班牙语、英语或德语的 JMdict，Kanjium 的音调重音和 JPDB 的频率。只下载一次，保存在浏览器中 |
 | Claude API 密钥 | 设置、Claude | 解释、读音检查、翻译和更正。只保存在浏览器中 |
 | 语言和水平 | 设置、语言和水平 | 界面语言，以及单独设置的解释和翻译语言。水平会调整解释的方式，并决定一开始显示多少注音 |
-| 正在学习的语言 | 设置、语言和水平，扩展菜单，或视频上的**视频设置、字幕** | 日语、英语或德语。每种语言都保存自己的单词、词典、卡片和设置 |
+| 正在学习的语言 | **首页**和侧栏，设置、语言和水平，扩展菜单，或视频上的**视频设置、字幕** | 日语、英语或德语。每种语言都保存自己的单词、词典、卡片和设置 |
 | Anki | 设置、卡片和 Anki | 可选。需要打开 Anki 并安装 AnkiConnect 插件 |
 
 扩展无需 Claude 密钥也能使用：字幕、词典、注音、颜色、卡片和 Whisper 都不需要它。
@@ -165,10 +165,10 @@ Whisper 的时间很准，但在歌曲中会听错很多词。如果有人发布
 
 ### 本地助手
 
-扩展无法自行下载视频的音频。助手是一个小型本地程序，使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 和 FFmpeg 完成这项工作。它需要 Python，安装程序会在缺少时添加 yt-dlp。只需在项目文件夹中安装一次：
+扩展无法自行下载视频的音频。助手是一个小型本地程序，使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 和 FFmpeg 完成这项工作。它需要 Python，安装程序会在缺少时添加 yt-dlp。从最新版本的页面下载 `kotonoha-X.Y.Z-ayudante.zip`，解压到一个不会移动的文件夹。在该文件夹中运行一次**设置、转录**显示的命令，其中已包含扩展的 ID：
 
 ```bash
-powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
+powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
 ```
 
 然后需要在 `edge://extensions` 或 `chrome://extensions` 中重新加载扩展。状态可在**设置、转录**中查看。
@@ -200,7 +200,7 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 |---|---|---|
 | 单词音频 | JapanesePod101 和 Lingua Libre（通过 Wikimedia Commons） | 否 |
 | 句子音频 | 用 `tabCapture` 从标签页录制，在本机进行，并转换为 MP3 | 否 |
-| 合成语音 | 已配置时使用 Azure Speech，否则使用系统语音，仅供收听 | 仅 Azure 需要 |
+| 合成语音 | 已配置时使用 Azure Speech，否则使用浏览器的语音：它提供的最佳语音，或在**设置、语音**中选择的其他语音，仅供收听 | 仅 Azure 需要 |
 | 图片 | Openverse，以 JMdict 的第一条英文释义作为搜索词 | 否 |
 | 画面 | 从视频捕获，在本机进行 | 否 |
 | 例句 | 看过的句子，保存在浏览器中 | 否 |
@@ -299,6 +299,8 @@ powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
 ## 数据和备份
 
 所有数据都保存在浏览器的 IndexedDB 中。**设置、你的数据**可以导出和导入一个文件，其中包含每种用过的语言的单词、卡片、书库、生成的字幕和更正，以及设置和费用记录。不包括 Claude 密钥和词典。0.4.0 版之前的备份会按日语恢复。
+
+**新版本。** Kotonoha 每天向 GitHub 查询一次最新发布的版本。如果比已安装的版本新，会在**首页**和扩展菜单中提示，并附上其页面的链接。某个版本的提示关闭后，要到下一个版本才会再出现。**设置、版本**显示已安装的版本，可以手动检查，也可以用**提示新版本**关闭提示。
 
 ## 键盘快捷键
 

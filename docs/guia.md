@@ -29,7 +29,7 @@ La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere e
 | Diccionarios | Ajustes, Diccionarios | JMdict en español, inglés o alemán, acento tonal de Kanjium y frecuencia de JPDB. Se descargan una vez y quedan en el navegador |
 | Clave de la API de Claude | Ajustes, Claude | Explicaciones, revisión de lecturas, traducción y corrección. Se guarda solo en el navegador |
 | Idioma y nivel | Ajustes, Idioma y nivel | Idioma de la interfaz, y por separado el de las explicaciones y las traducciones. El nivel adapta las explicaciones y decide cuánto furigana se ve al principio |
-| Idioma que estudias | Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés, inglés o alemán. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
+| Idioma que estudias | **Inicio** y la barra lateral, Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés, inglés o alemán. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
 La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
@@ -165,10 +165,10 @@ Whisper acierta los tiempos, pero en una canción falla muchas palabras. Si algu
 
 ### Ayudante local
 
-Una extensión no puede descargar por sí sola el audio de un video. El ayudante es un pequeño programa local que lo hace con [yt-dlp](https://github.com/yt-dlp/yt-dlp) y FFmpeg. Requiere Python, y su instalador añade yt-dlp si falta. Se instala una vez desde la carpeta del proyecto:
+Una extensión no puede descargar por sí sola el audio de un video. El ayudante es un pequeño programa local que lo hace con [yt-dlp](https://github.com/yt-dlp/yt-dlp) y FFmpeg. Requiere Python, y su instalador añade yt-dlp si falta. Se descarga de la página de la última versión, en `kotonoha-X.Y.Z-ayudante.zip`, y se descomprime en una carpeta que no se vaya a mover. Dentro de esa carpeta se ejecuta una vez la orden que muestra **Ajustes, Transcripción**, que ya lleva el identificador de la extensión:
 
 ```bash
-powershell -ExecutionPolicy Bypass -File herramientas\ayudante\instalar.ps1
+powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension IDENTIFICADOR
 ```
 
 Después hay que recargar la extensión en `edge://extensions` o `chrome://extensions`. El estado se comprueba en **Ajustes, Transcripción**.
@@ -200,7 +200,7 @@ Las tarjetas pueden enviarse a Anki mediante AnkiConnect, con un tipo de nota pr
 |---|---|---|
 | Audio de la palabra | JapanesePod101 y Lingua Libre, por Wikimedia Commons | No |
 | Audio de la frase | Grabado de la pestaña con `tabCapture`, en el propio equipo, y convertido a MP3 | No |
-| Voces sintéticas | Azure Speech, si se configura. En su defecto, las voces del sistema, solo para escuchar | Solo para Azure |
+| Voces sintéticas | Azure Speech, si se configura. En su defecto, las del navegador: la mejor que ofrezca, u otra elegida en **Ajustes, Voces**, solo para escuchar | Solo para Azure |
 | Imágenes | Openverse, con la primera glosa en inglés de JMdict como búsqueda | No |
 | Fotograma | Captura del video, en el propio equipo | No |
 | Ejemplos | Frases ya vistas por el usuario, guardadas en el navegador | No |
@@ -299,6 +299,8 @@ Tres ajustes deciden cuánto se usan las consultas de palabras:
 ## Datos y copia de seguridad
 
 Todos los datos se guardan en el navegador, en IndexedDB. **Ajustes, Tus datos** permite exportar e importar un solo archivo con las palabras, tarjetas, biblioteca, subtítulos generados y correcciones de cada idioma que se haya usado, junto con los ajustes y el registro de gasto. La clave de Claude y los diccionarios no se incluyen. Una copia anterior a la versión 0.4.0 se restaura como japonés.
+
+**Versiones nuevas.** Una vez al día, Kotonoha pregunta a GitHub cuál es la última versión publicada. Si es más nueva que la instalada, lo dice en **Inicio** y en el menú de la extensión, con un enlace a su página. El aviso de una versión se cierra y no vuelve hasta la siguiente. **Ajustes, Versión** muestra la versión instalada, busca a mano y apaga los avisos con **Avisar de versiones nuevas**.
 
 ## Atajos de teclado
 

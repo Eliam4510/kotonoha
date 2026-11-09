@@ -18,6 +18,10 @@ import { Cabecera, Interruptor, Mensaje } from './Piezas';
 import { IDIOMAS_INTERFAZ, bcp47Actual, lenguaDe, lenguasExplicacion, lenguasTraduccion, numero, resolverIdioma, tm, tr } from '../compartido/i18n';
 import { PAQUETES } from '../lenguas';
 import { estudiarLengua, lengua } from '../ui/lengua';
+import { buscarVersionNueva, type VersionPublicada } from '../compartido/actualizaciones';
+import { ordenInstalarAyudante, URL_ULTIMA_VERSION, versionInstalada } from '../compartido/proyecto';
+import { nombreCorto } from '../nucleo/voces';
+import { decirConNavegador, vocesDeLaLengua } from '../ui/vozNavegador';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -390,8 +394,6 @@ const INTENSIDADES: { id: Ajustes['whisperIntensidad']; nombre: string; ayuda: s
   { id: 'rapida', nombre: tm('Rápida'), ayuda: tm('Siempre a la máxima velocidad segura. Un video de 30 minutos tarda menos de uno con Haas-ja o Parakeet, y unos 4 con Whisper.') },
 ];
 
-const ORDEN_INSTALAR = 'powershell -ExecutionPolicy Bypass -File herramientas\\ayudante\\instalar.ps1';
-
 /** Sin el ayudante, un video de internet solo se puede transcribir mientras se reproduce. */
 function AyudanteLocal() {
   const [info, fijarInfo] = useState<InfoAyudante | null | undefined>(undefined);
@@ -408,10 +410,21 @@ function AyudanteLocal() {
       </Opcion>
     );
   }
+  const orden = ordenInstalarAyudante(chrome.runtime.id);
   return (
-    <Opcion titulo={tr('Ayudante para YouTube')} ayuda={<>{tr('Permite transcribir un video entero sin reproducirlo. Para instalarlo, ejecuta esto una vez en la carpeta del proyecto:')} <code>{ORDEN_INSTALAR}</code></>}>
-      <span class="ap-acciones-fila">
-        <button class="btn chico fantasma" onClick={() => navigator.clipboard.writeText(ORDEN_INSTALAR)}><Icono n="portapapeles" t={14} /> {tr('Copiar')}</button>
+    <Opcion
+      titulo={tr('Ayudante para YouTube')}
+      ayuda={
+        <>
+          {tr('Permite transcribir un video entero sin reproducirlo. Necesita Windows, Python 3 y FFmpeg.')}{' '}
+          {tr('Descarga el ayudante de la última versión, descomprímelo en una carpeta que no vayas a mover y ejecuta esto dentro de esa carpeta:')}{' '}
+          <code class="ap-orden-ayudante">{orden}</code>
+        </>
+      }
+    >
+      <span class="ap-acciones-fila ap-acciones-ayudante">
+        <a class="btn chico fantasma" href={URL_ULTIMA_VERSION} target="_blank" rel="noreferrer noopener"><Icono n="descargar" t={14} /> {tr('Descargar')}</a>
+        <button class="btn chico fantasma" onClick={() => navigator.clipboard.writeText(orden).catch(() => {})}><Icono n="portapapeles" t={14} /> {tr('Copiar')}</button>
         <button class="btn chico fantasma" onClick={comprobar}>{tr('Comprobar')}</button>
       </span>
     </Opcion>
@@ -801,11 +814,48 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
   );
 }
 
+/** La voz del navegador para esta lengua: la mejor por omisión, u otra de las que ofrezca, con un botón para oírla. */
+function VozDelNavegador({ a, cambiar }: PropsSeccion) {
+  const [voces, fijarVoces] = useState<SpeechSynthesisVoice[] | null>(null);
+  useEffect(() => {
+    let vigente = true;
+    const leer = () => {
+      vocesDeLaLengua().then((v) => vigente && fijarVoces(v)).catch(() => vigente && fijarVoces([]));
+    };
+    leer();
+    speechSynthesis.addEventListener('voiceschanged', leer);
+    return () => {
+      vigente = false;
+      speechSynthesis.removeEventListener('voiceschanged', leer);
+    };
+  }, [a.idiomaObjetivo, a.formatoLectura]);
+  const mejor = voces?.[0];
+  // La primera frase del texto de ejemplo de la lengua, partida con sus propias reglas.
+  const ejemplo = lengua.value.ejemplos.texto.split(lengua.value.escritura.frase.partir).find((f) => f.trim()) ?? lengua.value.ejemplos.palabra;
+  return (
+    <Opcion
+      titulo={tr('Voz del navegador')}
+      ayuda={voces && !voces.length ? tr('Este navegador no tiene voces para esta lengua.') : tr('Sin clave de Azure se lee con ella. Las voces «Natural» de Edge y las de Google en Chrome suenan mejor que las de Windows.')}
+    >
+      <span class="ap-acciones-fila">
+        <select class="campo ap-campo-medio" aria-label={tr('Voz del navegador')} value={a.vozNavegador} onChange={(e) => cambiar({ vozNavegador: e.currentTarget.value })}>
+          <option value="">{mejor ? tr('Automática: {0}', nombreCorto(mejor.name)) : tr('Automática')}</option>
+          {voces?.map((v) => (
+            <option key={v.name} value={v.name}>{v.localService ? nombreCorto(v.name) : tr('{0}, en línea', nombreCorto(v.name))}</option>
+          ))}
+        </select>
+        <button class="btn chico fantasma" disabled={!voces?.length} onClick={() => decirConNavegador(ejemplo, a.vozNavegador).catch(() => {})}><Icono n="reproducir" t={14} /> {tr('Probar')}</button>
+      </span>
+    </Opcion>
+  );
+}
+
 function SeccionVoces({ a, cambiar }: PropsSeccion) {
   const VOCES = lengua.value.voces.map((v) => [v.id, tr(v.nombre)]);
   return (
-    <Seccion id="voces" icono="voz" titulo={tr('Voces')} descripcion={tr('Para frases sin audio del video. Azure Speech ofrece medio millón de caracteres gratis al mes con tu propia cuenta. Sin clave se usa la voz del sistema, que no se puede guardar en tarjetas.')}>
+    <Seccion id="voces" icono="voz" titulo={tr('Voces')} descripcion={tr('Para frases sin audio del video. Azure Speech ofrece medio millón de caracteres gratis al mes con tu propia cuenta. Sin clave se usa la voz del navegador, que no se puede guardar en tarjetas.')}>
       <div class="ap-grupo">
+        <VozDelNavegador a={a} cambiar={cambiar} />
         <Opcion titulo={tr('Clave de Azure Speech')}>
           <input class="campo ap-campo-medio" type="password" autocomplete="off" aria-label={tr('Clave de Azure Speech')} placeholder={tr('Clave')} value={a.azureClave} onInput={(e) => cambiar({ azureClave: e.currentTarget.value.trim() })} />
         </Opcion>
@@ -938,6 +988,41 @@ function SeccionAtajos({ a, cambiar }: PropsSeccion) {
   );
 }
 
+/** La versión de esta copia y los avisos de versiones nuevas en GitHub. */
+function SeccionVersion({ a, cambiar }: PropsSeccion) {
+  const [estado, fijarEstado] = useState<{ fase: 'nada' | 'buscando' | 'al-dia' | 'error' } | { fase: 'nueva'; nueva: VersionPublicada }>({ fase: 'nada' });
+  const buscar = async () => {
+    fijarEstado({ fase: 'buscando' });
+    try {
+      const nueva = await buscarVersionNueva(true);
+      fijarEstado(nueva ? { fase: 'nueva', nueva } : { fase: 'al-dia' });
+    } catch {
+      fijarEstado({ fase: 'error' });
+    }
+  };
+  const resultado =
+    estado.fase === 'buscando' ? tr('Buscando…')
+    : estado.fase === 'al-dia' ? tr('Tienes la última versión.')
+    : estado.fase === 'error' ? tr('No se pudo consultar GitHub. Comprueba la conexión.')
+    : estado.fase === 'nueva' ? tr('Hay una versión nueva: {0}.', estado.nueva.version)
+    : tr('Comprueba ahora si hay una versión nueva.');
+  return (
+    <Seccion id="version" icono="sello" titulo={tr('Versión')} descripcion={tr('Tienes Kotonoha {0}.', versionInstalada())}>
+      <div class="ap-grupo">
+        <Opcion titulo={tr('Avisar de versiones nuevas')} ayuda={tr('Una vez al día, Kotonoha pregunta a GitHub cuál es la última versión publicada. Si es más nueva, lo dice en Inicio y en el menú de la extensión.')}>
+          <Interruptor etiqueta={tr('Avisar de versiones nuevas')} on={a.avisarVersiones} alCambiar={(v) => cambiar({ avisarVersiones: v })} />
+        </Opcion>
+        <Opcion titulo={tr('Buscar una versión nueva')} ayuda={<span role="status">{resultado}</span>}>
+          <span class="ap-acciones-fila">
+            <button class="btn chico" disabled={estado.fase === 'buscando'} onClick={() => void buscar()}>{tr('Buscar')}</button>
+            <a class="btn chico fantasma" href={estado.fase === 'nueva' ? estado.nueva.url : URL_ULTIMA_VERSION} target="_blank" rel="noreferrer noopener">{tr('Ver en GitHub')} <Icono n="externo" t={13} /></a>
+          </span>
+        </Opcion>
+      </div>
+    </Seccion>
+  );
+}
+
 const SECCIONES: { id: string; nombre: string; icono: NombreIcono }[] = [
   { id: 'idioma', nombre: tm('Idioma y nivel'), icono: 'nivel' },
   { id: 'apariencia', nombre: tm('Apariencia'), icono: 'paleta' },
@@ -950,6 +1035,7 @@ const SECCIONES: { id: string; nombre: string; icono: NombreIcono }[] = [
   { id: 'voces', nombre: tm('Voces'), icono: 'voz' },
   { id: 'prompts', nombre: tm('Prompts'), icono: 'nota-lapiz' },
   { id: 'datos', nombre: tm('Tus datos'), icono: 'carpeta' },
+  { id: 'version', nombre: tm('Versión'), icono: 'sello' },
 ];
 
 export function PantallaAjustes({ a }: { a: Ajustes }) {
@@ -1005,6 +1091,7 @@ export function PantallaAjustes({ a }: { a: Ajustes }) {
           <SeccionVoces a={a} cambiar={cambiar} />
           <SeccionPrompts a={a} cambiar={cambiar} />
           <SeccionDatos a={a} cambiar={cambiar} />
+          <SeccionVersion a={a} cambiar={cambiar} />
         </div>
       </div>
     </div>

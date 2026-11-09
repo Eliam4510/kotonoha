@@ -9,10 +9,13 @@ import { PAQUETE_INICIAL, paqueteDe } from '../lenguas';
 
 export const lengua = signal(PAQUETE_INICIAL);
 export const formatoLectura = signal(PAQUETE_INICIAL.lectura.formatoInicial);
+/** La voz del navegador elegida para esta lengua; vacía, la mejor que haya (ui/vozNavegador.ts). */
+export const vozNavegador = signal('');
 
-export function aplicarLengua(a: Pick<Ajustes, 'idiomaObjetivo' | 'formatoLectura'>) {
+export function aplicarLengua(a: Pick<Ajustes, 'idiomaObjetivo' | 'formatoLectura' | 'vozNavegador'>) {
   lengua.value = paqueteDe(a.idiomaObjetivo);
   formatoLectura.value = a.formatoLectura;
+  vozNavegador.value = a.vozNavegador ?? '';
 }
 
 /** Pasa a estudiar otra lengua: guarda los ajustes de la actual, recupera los de la nueva y se lo dice al motor. */

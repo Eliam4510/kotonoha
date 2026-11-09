@@ -12,6 +12,8 @@ import css from './popup.css';
 import { bcp47Actual, fijarIdioma, numero, tm, tr } from '../compartido/i18n';
 import { PAQUETES } from '../lenguas';
 import { aplicarLengua, estudiarLengua, lengua } from '../ui/lengua';
+import { buscarVersionNueva, type VersionPublicada } from '../compartido/actualizaciones';
+import { Bandera } from '../app/SelectorLengua';
 
 const RUTAS: [string, NombreIcono, string][] = [
   ['inicio', 'inicio', tm('Inicio')],
@@ -34,12 +36,15 @@ function Popup() {
   const [pestana, fijarPestana] = useState<number | undefined>();
   const [error, fijarError] = useState('');
   const [atajoCaptura, fijarAtajoCaptura] = useState('');
+  const [nueva, fijarNueva] = useState<VersionPublicada | null>(null);
   const tema = useTema(a?.tema ?? 'auto');
 
   useEffect(() => {
     leerAjustes().then((x) => {
       aplicarLengua(x);
       fijarA(x);
+      // Se mira después de leer los ajustes: el aviso puede estar apagado.
+      if (x.avisarVersiones) buscarVersionNueva().then(fijarNueva).catch(() => {});
     });
     // El menú está en español: no merece la pena esperar a la tipografía japonesa, que pesa megas.
     cargarFuentes({ soloLatin: true }).catch(() => {});
@@ -88,6 +93,14 @@ function Popup() {
         </button>
       </header>
 
+      {nueva && (
+        <a class="ap-menu-version" href={nueva.url} target="_blank" rel="noreferrer noopener">
+          <Icono n="sello" t={15} />
+          <span>{tr('Kotonoha {0} ya está disponible', nueva.version)}</span>
+          <Icono n="externo" t={13} />
+        </a>
+      )}
+
       <section class="ap-menu-grupo">
         <div class="ap-menu-fila columna">
           <div class="ap-menu-texto">
@@ -95,7 +108,7 @@ function Popup() {
           </div>
           <div class="segmentado" role="radiogroup" aria-label={tr('Idioma que estudias')}>
             {PAQUETES.map((p) => (
-              <button key={p.id} role="radio" aria-checked={a.idiomaObjetivo === p.id} class={a.idiomaObjetivo === p.id ? 'activo' : ''} onClick={() => estudiar(p.id)}>{tr(p.textos.nombre)}</button>
+              <button key={p.id} role="radio" aria-checked={a.idiomaObjetivo === p.id} class={a.idiomaObjetivo === p.id ? 'activo' : ''} onClick={() => estudiar(p.id)}><Bandera id={p.id} t={16} />{tr(p.textos.nombre)}</button>
             ))}
           </div>
         </div>

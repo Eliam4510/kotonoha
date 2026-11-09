@@ -135,7 +135,7 @@ Voraussetzung: Chrome oder Edge ab Version 120.
 2. `chrome://extensions` oder `edge://extensions` öffnen und den **Entwicklermodus** einschalten.
 3. **Entpackte Erweiterung laden** wählen und den Ordner `kotonoha` auswählen.
 
-Beim ersten Start fragt eine Begrüßung nach der eigenen Sprache, der Lernsprache und dem Niveau und installiert die Wörterbücher. Zum Aktualisieren genügt es, die neue Version über die alte zu entpacken: Die Erweiterung lädt sich selbst neu. Die [Anleitung](docs/de/guide.md) erklärt jede Funktion, [CONTRIBUTING.md](CONTRIBUTING.md) das Erstellen aus dem Quellcode.
+Beim ersten Start fragt eine Begrüßung nach der eigenen Sprache, der Lernsprache und dem Niveau und installiert die Wörterbücher. Zum Aktualisieren genügt es, die neue Version über die alte zu entpacken: Die Erweiterung lädt sich selbst neu. Gibt es eine neue Version, zeigt Kotonoha das auf der Startseite an. Die [Anleitung](docs/de/guide.md) erklärt jede Funktion, [CONTRIBUTING.md](CONTRIBUTING.md) das Erstellen aus dem Quellcode.
 
 ## Wichtige Tastenkürzel
 

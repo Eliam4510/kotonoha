@@ -139,7 +139,7 @@ Requisito: Chrome o Edge 120 o posterior.
 2. Abrir `chrome://extensions` o `edge://extensions` y activar el **modo de desarrollador**.
 3. Pulsar **Cargar descomprimida** y elegir la carpeta `kotonoha`.
 
-La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, e instala los diccionarios. Para actualizar, basta con descomprimir la versión nueva encima de la anterior: la extensión se recarga sola. La [guía de uso](docs/guia.md) explica cada función, y [CONTRIBUTING.md](CONTRIBUTING.md), cómo compilarla desde el código.
+La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, e instala los diccionarios. Para actualizar, basta con descomprimir la versión nueva encima de la anterior: la extensión se recarga sola. Cuando hay una versión nueva, Kotonoha lo avisa en Inicio. La [guía de uso](docs/guia.md) explica cada función, y [CONTRIBUTING.md](CONTRIBUTING.md), cómo compilarla desde el código.
 
 ## Atajos principales
 

@@ -256,6 +256,9 @@ textarea.campo { resize: vertical; min-height: 76px; line-height: 1.55; }
 
 .segmentado { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--r-pill); background: var(--superficie-2); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.16), inset 0 0 0 1px var(--borde); }
 .segmentado button { height: 30px; padding: 0 14px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 700; color: var(--texto-2); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: background 0.18s, color 0.18s; }
+/* La bandera de una lengua (app/SelectorLengua.tsx), en Inicio, la barra lateral y el menú de la extensión. */
+.ap-bandera { flex: none; display: inline-block; border-radius: 2px; box-shadow: 0 0 0 1px var(--borde-2); }
+.ap-bandera-codigo { width: 18px; height: 12px; font-size: 8px; font-weight: 800; line-height: 12px; text-align: center; color: var(--texto-2); background: var(--superficie-3); }
 .segmentado button:hover:not(.activo):not(:disabled) { color: var(--texto); }
 .segmentado button.activo { background: var(--superficie-4); color: var(--texto); box-shadow: var(--brillo-2), var(--sombra-1); }
 .segmentado.acento button.activo { background: var(--caramelo); color: var(--hoja-tinta); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55); }

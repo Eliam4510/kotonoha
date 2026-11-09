@@ -17,6 +17,7 @@ import { guardarPreferencia, leerPreferencia } from './estadoApp';
 import { Anillo } from './Piezas';
 import { numero, tr } from '../compartido/i18n';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
+import { decirConNavegador } from '../ui/vozNavegador';
 
 interface Abierta {
   palabra: PalabraToken;
@@ -133,13 +134,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
         a.play().catch(() => ok());
       });
     } else {
-      await new Promise<void>((ok) => {
-        const u = new SpeechSynthesisUtterance(f);
-        u.lang = lengua.value.bcp47;
-        u.onend = () => ok();
-        u.onerror = () => ok();
-        speechSynthesis.speak(u);
-      });
+      await decirConNavegador(f);
     }
   };
 

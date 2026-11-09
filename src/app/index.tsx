@@ -19,6 +19,7 @@ import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navega
 import { Biblioteca } from './Biblioteca';
 import { Diccionario, Inicio, Lector, Memoria, Palabras } from './Pantallas';
 import { ReproductorLocal } from './ReproductorLocal';
+import { MenuLengua } from './SelectorLengua';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
 
 interface Ruta {
@@ -71,7 +72,7 @@ function BotonRuta({ r, ruta, compacta, cuenta }: { r: Ruta; ruta: string; compa
   );
 }
 
-function Lateral({ ruta }: { ruta: string }) {
+function Lateral({ ruta, a }: { ruta: string; a: Ajustes }) {
   const estrecha = useMedia('(max-width: 1100px)');
   const [preferida, fijarPreferida] = useState(() => leerPreferencia('lateralCompacta', false));
   const compacta = estrecha || preferida;
@@ -98,6 +99,8 @@ function Lateral({ ruta }: { ruta: string }) {
       <button class="ap-lateral-marca" aria-label={tr('Kotonoha, ir a Inicio')} onClick={() => navegar('inicio')}>
         {compacta ? <Logo t={34} /> : <Marca t={32} />}
       </button>
+
+      <MenuLengua a={a} compacta={compacta} />
 
       <button
         class={`ap-lateral-crear ${creadorAbierto.value ? 'abierto' : ''}`}
@@ -194,7 +197,7 @@ function App() {
   return (
     <div class="kk-raiz ap-app" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
       <style>{base + overlay + appCss}</style>
-      <Lateral ruta={ruta} />
+      <Lateral ruta={ruta} a={a} />
       {/* Cada pantalla empieza de nuevo con otra lengua, salvo el reproductor: el video sigue abierto y solo cambian sus pistas. */}
       <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={ruta === 'reproductor' ? ruta : `${ruta}:${a.idiomaObjetivo}`}>
         {ruta === 'inicio' && <Inicio ajustes={a} />}

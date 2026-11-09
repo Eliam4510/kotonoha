@@ -39,6 +39,32 @@
 .compacta .ap-nav-grupo + .ap-nav-grupo { padding-top: 8px; border-top: 1px solid var(--borde); }
 .ap-nav-titulo { padding: 0 12px 4px; font-size: 11.5px; font-weight: 700; color: var(--texto-3); }
 
+/* Las lenguas que se estudian: cada una con su bandera y su nombre escrito en ella misma. */
+.ap-lengua-segmentado button { gap: 7px; padding: 0 12px; }
+.ap-lengua-segmentado button span[lang] { font-family: var(--letra); }
+.ap-lengua-segmentado button span[lang="ja"] { font-family: var(--letra-japones); }
+.ap-lengua-menu { position: relative; width: 100%; }
+.compacta .ap-lengua-menu { width: auto; }
+.ap-lengua-actual { display: flex; align-items: center; gap: 9px; width: 100%; height: 34px; padding: 0 10px; border-radius: var(--r-2); font-size: 13px; font-weight: 700; color: var(--texto-2); transition: background 0.14s, color 0.14s; }
+.ap-lengua-actual:hover, .ap-lengua-actual[aria-expanded="true"] { background: var(--superficie-2); color: var(--texto); }
+.ap-lengua-actual > span { flex: 1; text-align: start; }
+.ap-lengua-actual span[lang="ja"], .ap-lengua-lista span[lang="ja"] { font-family: var(--letra-japones); }
+.compacta .ap-lengua-actual { width: 40px; height: 34px; padding: 0; justify-content: center; }
+.ap-lengua-lista { position: absolute; top: calc(100% + 4px); left: 0; z-index: 20; min-width: 220px; padding: 5px; display: flex; flex-direction: column; gap: 2px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde-2), var(--sombra-2); animation: kk-aparecer 0.16s var(--salida); }
+.ap-lengua-lista button { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 9px; height: 36px; padding: 0 10px; border-radius: var(--r-2); font-size: 13.5px; font-weight: 700; color: var(--texto); text-align: start; }
+.ap-lengua-lista button:hover { background: var(--superficie-2); }
+.ap-lengua-lista button.activa { color: var(--hoja); }
+.ap-lengua-nombre { font-size: 12px; font-weight: 600; color: var(--texto-3); }
+@media (prefers-reduced-motion: reduce) { .ap-lengua-lista { animation: none; } }
+
+/* Una versión nueva en GitHub, arriba de Inicio. */
+.ap-aviso-version { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 14px; padding: 14px 16px; }
+.ap-aviso-version-icono { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; border-radius: 50%; color: var(--hoja); background: var(--hoja-suave); }
+.ap-aviso-version-texto { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 2px; }
+.ap-aviso-version-texto b { font-size: 14.5px; font-weight: 800; }
+.ap-aviso-version-trae { font-weight: 600; color: var(--texto-2); }
+.ap-aviso-version-texto > span { font-size: 13px; color: var(--texto-2); }
+
 .ap-nav {
   display: flex; align-items: center; gap: 12px; width: 100%; height: 38px; padding: 0 12px;
   border-radius: var(--r-2); font-size: 14px; font-weight: 600; color: var(--texto-2); text-align: left;
@@ -111,7 +137,8 @@
 .ap-tarjeta-ayuda { margin-bottom: 14px; font-size: 13px; }
 
 /* ---------- Inicio ---------- */
-.ap-saludo { margin-bottom: 24px; }
+.ap-saludo { margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 14px 24px; }
+.ap-saludo-texto { min-width: 0; }
 .ap-saludo h1 { font-size: 32px; font-weight: 700; letter-spacing: 0.01em; font-feature-settings: 'palt'; }
 .ap-saludo p { margin-top: 6px; font-size: 15px; color: var(--texto-2); }
 
@@ -761,6 +788,8 @@ section .ap-botones { margin-top: 10px; }
 /* Ayudante local */
 .ap-opcion-texto code { display: block; margin-top: 6px; padding: 6px 10px; border-radius: 10px; background: var(--superficie-2); font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: 11.5px; overflow-wrap: anywhere; user-select: all; }
 .ap-acciones-fila { display: inline-flex; gap: 6px; }
+.ap-acciones-ayudante { flex-wrap: wrap; justify-content: flex-end; }
+.ap-orden-ayudante { overflow-wrap: anywhere; user-select: all; }
 
 /* Gasto en Claude. El color de cada serie sigue al modelo y está validado en ambos temas. */
 .kk-raiz { --serie-sonnet: #8F74EC; --serie-opus: #CF7A24; --serie-haiku: #1FA57E; --serie-otra: #7D8578; }
