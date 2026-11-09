@@ -81,7 +81,7 @@ async function esperarDiseno() {
 
 async function abrir() {
   const archivo = await archivoDocumento(id);
-  if (!archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Ayuda de lectura.'));
+  if (!archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Biblioteca.'));
   const f = fuenteDeArchivo(archivo);
   const indice = await leerIndiceZip(f);
   const libro = await leerEpubDeTexto(f, indice, '');

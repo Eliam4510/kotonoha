@@ -1,4 +1,4 @@
-// Pantallas de la ventana de la app: inicio, diccionario, lector, memoria y palabras. La Ayuda de lectura está en
+// Pantallas de la ventana de la app: inicio, diccionario, lector, memoria y palabras. La Biblioteca está en
 // Biblioteca.tsx.
 
 import { useEffect, useMemo, useState } from 'preact/hooks';

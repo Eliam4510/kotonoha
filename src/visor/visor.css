@@ -1,4 +1,4 @@
-/* El visor de la Ayuda de lectura: barra arriba, lienzo con las páginas, panel lateral opcional y barra de páginas abajo. */
+/* El visor de la Biblioteca: barra arriba, lienzo con las páginas, panel lateral opcional y barra de páginas abajo. */
 .vs { display: flex; flex-direction: column; height: 100vh; background: var(--fondo); color: var(--texto); font-family: var(--letra, inherit); }
 
 .vs-barra { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 8px 14px; background: var(--superficie); border-bottom: 1px solid var(--borde); position: relative; z-index: 2; }

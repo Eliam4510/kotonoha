@@ -1,4 +1,4 @@
-// Prueba el visor de la Ayuda de lectura con libros hechos aquí mismo: un manga EPUB de derecha a izquierda con índice,
+// Prueba el visor de la Biblioteca con libros hechos aquí mismo: un manga EPUB de derecha a izquierda con índice,
 // un CBZ que se lee de izquierda a derecha y un PDF. Importar, portadas, páginas (también con teclas seguidas), doble
 // página, zoom, vistas, índice, miniaturas, sentido, memoria de la página, borrar y un archivo que falta.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/visor.mjs

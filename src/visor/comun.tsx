@@ -14,11 +14,11 @@ export function Boton({ icono, etiqueta, activo, alPulsar, deshabilitado }: { ic
   );
 }
 
-/** La vuelta a la Ayuda de lectura y el título del libro. */
+/** La vuelta a la Biblioteca y el título del libro. */
 export function Cabeza({ titulo }: { titulo?: string }) {
   return (
     <div class="vs-grupo vs-cabeza">
-      <button class="btn chico fantasma" onClick={() => fondo.abrirApp('biblioteca')}><Icono n="flecha-izq" t={15} /> {tr('Ayuda de lectura')}</button>
+      <button class="btn chico fantasma" onClick={() => fondo.abrirApp('biblioteca')}><Icono n="flecha-izq" t={15} /> {tr('Biblioteca')}</button>
       {titulo && <b class="vs-titulo" title={titulo}>{titulo}</b>}
     </div>
   );
@@ -30,7 +30,7 @@ export function AvisoError({ mensaje }: { mensaje: string }) {
       <Icono n="aviso" t={28} />
       <b>{tr('No se pudo abrir el libro')}</b>
       <p>{mensaje}</p>
-      <button class="btn" onClick={() => fondo.abrirApp('biblioteca')}><Icono n="flecha-izq" t={15} /> {tr('Volver a la Ayuda de lectura')}</button>
+      <button class="btn" onClick={() => fondo.abrirApp('biblioteca')}><Icono n="flecha-izq" t={15} /> {tr('Volver a la Biblioteca')}</button>
     </div>
   );
 }

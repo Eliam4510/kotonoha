@@ -340,7 +340,7 @@ await web.waitForTimeout(300);
 
 // Pegar con Ctrl+V en el editor del Cuaderno, con su estructura, lo prueba pruebas/cuaderno.mjs.
 
-// Un EPUB de texto con un título, dos párrafos y su propio furigana, importado en la Ayuda de lectura: se abre en el
+// Un EPUB de texto con un título, dos párrafos y su propio furigana, importado en la Biblioteca: se abre en el
 // visor con su propio formato. Lo demás de los EPUB de texto lo prueba pruebas/libros-texto.mjs.
 console.log('\n== Libro EPUB con su estructura ==');
 const EPUB = zipSync({

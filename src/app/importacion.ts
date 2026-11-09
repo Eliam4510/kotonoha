@@ -1,4 +1,4 @@
-// Lo que llega a la Ayuda de lectura para importarlo: archivos sueltos y carpetas enteras, del selector o soltados en la
+// Lo que llega a la Biblioteca para importarlo: archivos sueltos y carpetas enteras, del selector o soltados en la
 // página. De una carpeta se recorre todo; sus imágenes se convierten en libros (nucleo/carpetas) y cada libro, en un CBZ
 // hecho con los propios archivos, que se importa como cualquier otro.
 

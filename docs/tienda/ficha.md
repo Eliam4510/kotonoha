@@ -21,7 +21,7 @@ Subtítulos interactivos
 • Al tocarla se abre su ficha: definición, su sentido en esa frase, audio y un botón para crear la tarjeta.
 • Sin subtítulos, los genera en tu equipo con reconocimiento de voz (Whisper, Haas-ja o Parakeet), sin enviar el audio a ningún servidor.
 
-Ayuda de lectura
+Biblioteca
 • Visor de libros, PDF y manga con OCR en el propio navegador.
 • Búsqueda, vista de texto, notas, marcadores y colecciones.
 

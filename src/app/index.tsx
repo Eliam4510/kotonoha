@@ -39,7 +39,7 @@ const GRUPOS: { titulo?: string; rutas: Ruta[] }[] = [
     rutas: [
       { id: 'diccionario', icono: 'diccionario', nombre: tm('Diccionario') },
       { id: 'lector', icono: 'cuaderno', nombre: tm('Cuaderno') },
-      { id: 'biblioteca', icono: 'biblioteca', nombre: tm('Ayuda de lectura') },
+      { id: 'biblioteca', icono: 'biblioteca', nombre: tm('Biblioteca') },
       { id: 'reproductor', icono: 'video', nombre: tm('Reproductor') },
     ],
   },

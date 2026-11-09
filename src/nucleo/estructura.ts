@@ -1,4 +1,4 @@
-// Texto con estructura para el Portapapeles y la Ayuda de lectura: párrafos con sus saltos de línea, títulos, listas,
+// Texto con estructura para el Portapapeles y la Biblioteca: párrafos con sus saltos de línea, títulos, listas,
 // citas, código, tablas y negritas. Se guarda como un Markdown sencillo, que sigue siendo texto: cabe donde ya cabía el
 // texto plano (el Portapapeles, la biblioteca, la copia de seguridad), se puede editar a mano, y lo que se copia del chat
 // de Claude ya llega así. Lo que se copia de una página web llega como HTML y se convierte a lo mismo.

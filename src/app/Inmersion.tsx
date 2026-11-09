@@ -1,6 +1,6 @@
 // Las horas de inmersión en Inicio: el tiempo de hoy, de los últimos siete días y del total, la racha de días seguidos,
 // una barra por día de la semana y lo que más se ha visto o leído. Lo cuentan el controlador de los videos, el visor de
-// la Ayuda de lectura, el Cuaderno y los textos de la biblioteca (compartido/relojInmersion.ts).
+// los libros y textos de la Biblioteca y el Cuaderno (compartido/relojInmersion.ts).
 
 import { useEffect, useState } from 'preact/hooks';
 import { bcp47Actual, numero, tr } from '../compartido/i18n';
@@ -39,7 +39,7 @@ export function TarjetaInmersion() {
         <h2 id="ap-t-inmersion">{tr('Horas de inmersión')}</h2>
       </div>
       {r.total < 60 ? (
-        <p class="ayuda ap-tarjeta-ayuda">{tr('Kotonoha cuenta el tiempo que escuchas y lees en la lengua que estudias: los videos con sus subtítulos, los libros de la Ayuda de lectura y el Cuaderno. Aquí verás tus horas y tu racha de días seguidos.')}</p>
+        <p class="ayuda ap-tarjeta-ayuda">{tr('Kotonoha cuenta el tiempo que escuchas y lees en la lengua que estudias: los videos con sus subtítulos, los libros de la Biblioteca y el Cuaderno. Aquí verás tus horas y tu racha de días seguidos.')}</p>
       ) : (
         <div class="ap-inmersion-cuerpo">
           <div class="ap-inmersion-cifras">

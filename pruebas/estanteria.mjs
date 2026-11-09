@@ -1,4 +1,4 @@
-// Prueba la estantería de la Ayuda de lectura con libros hechos aquí mismo: una carpeta con una serie de tres tomos, que
+// Prueba la estantería de la Biblioteca con libros hechos aquí mismo: una carpeta con una serie de tres tomos, que
 // entra como una colección; un PDF, que trae su portada desde que se importa; y después un cuarto tomo, que va solo a su
 // colección. Colecciones (crear, editar, añadir, mover, portada, quitar), el progreso de lectura (porcentaje, «Seguir
 // leyendo», «Terminado» al llegar al final y a mano, «Volver a empezar»), los filtros y «Usar esta página como portada».

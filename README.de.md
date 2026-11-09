@@ -5,7 +5,7 @@
 <h3 align="center">Japanisch und Englisch lernen mit dem, was man ohnehin schaut und liest.</h3>
 
 <p align="center">
-  Interaktive Untertitel über den eigenen Videos, ein Wortfenster, das jedes Wort in seinem Satz versteht, Lesehilfe für Bücher, PDFs und Manga und Karten für Anki. Alles im Browser, kostenlos und quelloffen.
+  Interaktive Untertitel über den eigenen Videos, ein Wortfenster, das jedes Wort in seinem Satz versteht, Bibliothek für Bücher, PDFs und Manga und Karten für Anki. Alles im Browser, kostenlos und quelloffen.
 </p>
 
 <p align="center">
@@ -82,7 +82,7 @@ Auf Nachrichtenseiten, Blogs, Wikis oder in einem Chat wie dem von Claude bekomm
 
 <img src="docs/img/libro-texto.de.png" alt="Japanischer Roman in vertikaler Schrift, mit Ruby, Farben und einem Wortfenster" width="100%">
 
-Die **Lesehilfe** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Doppelseiten, fortlaufendes Scrollen, Inhaltsverzeichnis, Miniaturen und die Seite, an der jedes Buch zuletzt aufgeschlagen war. Ein Text-EPUB wie ein Roman behält sein eigenes Layout, seine Ruby und seine vertikale Schrift, mit dem Seiten-Reader darüber: Farben, Furigana und Wortfenster wie im Web. Ein PDF, das Text enthält, lässt sich sofort Wort für Wort lesen. Manga in Bilderordnern werden durch Auswahl des Ordners importiert: Jeder Band wird ein Buch, mit der Titelseite vorn und den Farbdoppelseiten im Ganzen. Das Regal ordnet die Bücher in Sammlungen, etwa eine Reihe mit ihren Bänden, mit Titelbild und Beschreibung, und zeigt, wie viel von jedem Buch und jeder Sammlung gelesen ist. Im Betrachter lassen sich Seiten markieren, Text mit Kommentar hervorheben oder unterstreichen und Notizen auf der Seite hinterlassen, wie in einem PDF-Reader. Ein Wort lässt sich im ganzen Buch suchen, jede Seite als Text mit der Lesehilfe lesen, und Claude kann den von der Texterkennung gelesenen Text prüfen, indem es ihn mit dem Seitenbild vergleicht.
+Die **Bibliothek** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Doppelseiten, fortlaufendes Scrollen, Inhaltsverzeichnis, Miniaturen und die Seite, an der jedes Buch zuletzt aufgeschlagen war. Ein Text-EPUB wie ein Roman behält sein eigenes Layout, seine Ruby und seine vertikale Schrift, mit dem Seiten-Reader darüber: Farben, Furigana und Wortfenster wie im Web. Ein PDF, das Text enthält, lässt sich sofort Wort für Wort lesen. Manga in Bilderordnern werden durch Auswahl des Ordners importiert: Jeder Band wird ein Buch, mit der Titelseite vorn und den Farbdoppelseiten im Ganzen. Das Regal ordnet die Bücher in Sammlungen, etwa eine Reihe mit ihren Bänden, mit Titelbild und Beschreibung, und zeigt, wie viel von jedem Buch und jeder Sammlung gelesen ist. Im Betrachter lassen sich Seiten markieren, Text mit Kommentar hervorheben oder unterstreichen und Notizen auf der Seite hinterlassen, wie in einem PDF-Reader. Ein Wort lässt sich im ganzen Buch suchen, jede Seite als Text mit der Lesehilfe lesen, und Claude kann den von der Texterkennung gelesenen Text prüfen, indem es ihn mit dem Seitenbild vergleicht.
 
 <img src="docs/img/ocr.de.png" alt="Eingescannte Seite mit erkanntem Text und dem Zeilenfenster zum Wort 週末" width="100%">
 
@@ -159,7 +159,7 @@ Kotonoha funktioniert ohne jeden Schlüssel. Ein optionaler Claude-Schlüssel er
 |---|---|
 | Untertitel mit Furigana, Tonhöhenakzent und Wortstand | Die Bedeutung eines Wortes in seinem Satz |
 | Wörterbuch, Wortfenster, Strichfolge und Aussprache | Erklärungen zu Wörtern, Sätzen und Grammatik |
-| Seiten-Reader, Notizbuch und Lesehilfe mit OCR | Übersetzung und Korrektur von Untertiteln |
+| Seiten-Reader, Notizbuch und Bibliothek mit OCR | Übersetzung und Korrektur von Untertiteln |
 | Transkription auf dem eigenen Rechner | Prüfung der Furigana-Lesungen |
 | Karten für Anki und eingebaute Wiederholung | Geschichten passend zum Niveau |
 

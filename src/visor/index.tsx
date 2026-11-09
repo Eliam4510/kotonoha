@@ -1,4 +1,4 @@
-// El visor de la Ayuda de lectura, en una pestaña propia. Abre el libro de la biblioteca y su archivo guardado y le da
+// El visor de la Biblioteca, en una pestaña propia. Abre el libro de la biblioteca y su archivo guardado y le da
 // paso al visor que le toca: el de páginas, como un lector de PDF, para los EPUB de imágenes, los CBZ y los PDF; o el de
 // texto para un EPUB de texto, que se pinta con su propio formato. Es una página de la extensión: el libro no sale del equipo.
 
@@ -57,9 +57,9 @@ function Visor({ id }: { id: string }) {
     let vivo = true;
     (async () => {
       const e = await motor.bibliotecaObtener(id);
-      if (!e?.documento) throw new Error(tr('Este libro ya no está en la Ayuda de lectura.'));
+      if (!e?.documento) throw new Error(tr('Este libro ya no está en la Biblioteca.'));
       const archivo = await archivoDocumento(id);
-      if (!archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Ayuda de lectura.'));
+      if (!archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Biblioteca.'));
       if (!vivo) return;
       document.title = tr('{0} · Kotonoha', e.titulo);
       fijarAbierto({ doc: e, archivo });
