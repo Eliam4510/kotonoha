@@ -28,12 +28,13 @@ export async function vocesDeLaLengua(): Promise<SpeechSynthesisVoice[]> {
 }
 
 /** Lee un texto con la voz elegida o, si no, con la mejor. Termina cuando acaba de sonar, o si falla. */
-export async function decirConNavegador(texto: string, elegida = vozNavegador.value): Promise<void> {
+export async function decirConNavegador(texto: string, elegida = vozNavegador.value, velocidad = 1): Promise<void> {
   const voz = vozParaLeer(await vocesDelNavegador(), lengua.value.id, elegida, region());
   await new Promise<void>((ok) => {
     const u = new SpeechSynthesisUtterance(texto);
     u.lang = voz?.lang ?? lengua.value.bcp47;
     if (voz) u.voice = voz;
+    u.rate = velocidad;
     u.onend = () => ok();
     u.onerror = () => ok();
     speechSynthesis.speak(u);

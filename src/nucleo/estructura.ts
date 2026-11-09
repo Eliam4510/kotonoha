@@ -106,6 +106,14 @@ function celdas(fila: string): Linea[] {
 
 const esFila = (l: string | undefined) => !!l && l.includes('|') && !!l.trim();
 
+/**
+ * Si una línea de párrafo se leería como otra cosa (un título, una viñeta, un número, una cita, una valla de código o un
+ * separador). Quien escribe Markdown desde otro sitio, como el editor del Cuaderno, la escapa con una barra invertida.
+ */
+export function empiezaComoEstructura(linea: string): boolean {
+  return [VALLA, TITULO, SEPARADOR, CITA, VINETA, NUMERO].some((re) => re.test(linea)) && !ESCAPADA.test(linea);
+}
+
 /** Lee el texto por bloques. Un texto sin marcas queda en párrafos separados por líneas en blanco, con cada salto de línea en su sitio. */
 export function leerEstructura(md: string): Bloque[] {
   const lineas = md.replace(/\r\n?/g, '\n').split('\n');

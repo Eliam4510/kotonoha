@@ -3,6 +3,7 @@
 // memoria, y al cancelar, que corta también una descarga a medias.
 
 import { tr } from '../compartido/i18n';
+import { MODELO_MORAS } from '../compartido/modelosGuardados';
 import { esGrabacionMuda, FRECUENCIA } from '../nucleo/transcripcion';
 import type { Dispositivo, PedidoNarabas, RespuestaNarabas } from './narabasTrabajador';
 import { abrirAudio } from './whisper';
@@ -93,6 +94,15 @@ function pedir(muestras: Float32Array, emitir: (e: EventoMoras) => void, senal: 
     });
     trabajadorListo().postMessage({ tipo: 'oir', id, muestras: muestras.slice(), cpu: soloCpu } satisfies PedidoNarabas);
   });
+}
+
+/** Carga ya el modelo en el trabajador, si está en la caché (nunca lo descarga): la práctica lo pide al abrirse y al grabar. */
+export async function preparar(): Promise<void> {
+  // Sin abrir una caché que no existe, que la crearía vacía.
+  const guardado = (await caches.has(MODELO_MORAS.cache)) ? await (await caches.open(MODELO_MORAS.cache)).match(MODELO_MORAS.url) : undefined;
+  if (!guardado) return;
+  trabajadorListo().postMessage({ tipo: 'preparar', cpu: soloCpu } satisfies PedidoNarabas);
+  if (!pendientes.size) programarCierre();
 }
 
 /** Los fonemas que oye narabas en una grabación, en orden: sin pausas, blancos ni repeticiones. */

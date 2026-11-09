@@ -1,6 +1,6 @@
 {
   "name": "kotonoha",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "private": true,
   "type": "module",
   "description": "Extensión de navegador para aprender japonés con video y texto real: subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude.",
@@ -27,6 +27,14 @@
     "kuromoji": "^0.1.2",
     "pdfjs-dist": "^6.5.438",
     "preact": "^11.1.1",
+    "prosemirror-commands": "^1.7.2",
+    "prosemirror-history": "^1.5.1",
+    "prosemirror-inputrules": "^1.5.1",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-model": "^1.25.13",
+    "prosemirror-schema-list": "^1.6.0",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.42.9",
     "ts-fsrs": "^6.0.0",
     "wink-eng-lite-web-model": "^1.8.1",
     "wink-nlp": "^2.4.0"

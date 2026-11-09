@@ -38,6 +38,7 @@ export const TEXTOS: TextosLengua = {
   lectorResumen: tm('Colores, furigana y consulta en cualquier texto japonés.'),
   lectorActivar: tm('Activar en las páginas con japonés'),
   lectorPegar: tm('Pega cualquier texto japonés para leerlo con furigana, diccionario y Claude al alcance de un clic.'),
+  cuadernoVacio: tm('Escribe o pega aquí un texto en japonés. Empieza una línea con # para un título, con - o ・ para una lista y con > para una cita.'),
   lectorBotonAyuda: tm('Para ajustar los colores y el furigana sin venir aquí.'),
   separarLineas: tm('Separar las líneas para el furigana'),
   separarLineasAyuda: tm('Si el furigana no cabe entre dos líneas, abre un poco ese texto. Apagado, el diseño de la página no se mueve nada, pero el furigana puede chocar con la línea de arriba.'),

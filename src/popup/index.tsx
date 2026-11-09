@@ -18,7 +18,7 @@ import { Bandera } from '../app/SelectorLengua';
 const RUTAS: [string, NombreIcono, string][] = [
   ['inicio', 'inicio', tm('Inicio')],
   ['diccionario', 'diccionario', tm('Diccionario')],
-  ['lector', 'portapapeles', tm('Portapapeles')],
+  ['lector', 'cuaderno', tm('Cuaderno')],
   ['biblioteca', 'biblioteca', tm('Ayuda de lectura')],
   ['reproductor', 'video', tm('Reproductor')],
   ['memoria', 'tarjetas', tm('Memoria')],
@@ -186,7 +186,7 @@ function Popup() {
         fondo.abrirLectorWeb(esWeb).catch(console.error);
         window.close();
       }}>
-        <Icono n="dividir" t={15} /> {esWeb ? tr('Abrir el Portapapeles junto a esta pestaña') : tr('Abrir el Portapapeles en una pestaña')}
+        <Icono n="dividir" t={15} /> {esWeb ? tr('Abrir el Cuaderno junto a esta pestaña') : tr('Abrir el Cuaderno en una pestaña')}
       </button>
 
       {pestana !== undefined && !/youtube|netflix|disneyplus|viki|iq\.com|bilibili|crunchyroll|primevideo/.test(host) && esWeb && (

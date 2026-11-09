@@ -7,7 +7,7 @@ import { useEffect, useState } from 'preact/hooks';
 import appCss from '../app/app.css';
 import { Creador } from '../app/Creador';
 import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
-import { Lector } from '../app/Pantallas';
+import { Cuaderno } from '../app/Cuaderno';
 import { Interruptor } from '../app/Piezas';
 import { AJUSTES_INICIALES, type Ajustes, alCambiarAjustes, leerAjustes } from '../compartido/ajustes';
 import { bcp47Actual, fijarIdioma, idiomaActual, tr } from '../compartido/i18n';
@@ -81,7 +81,7 @@ function LectorWeb() {
   }, [cargados, a.idiomaInterfaz]);
 
   useEffect(() => {
-    document.title = tr('{0} · Kotonoha', tr('Portapapeles'));
+    document.title = tr('{0} · Kotonoha', tr('Cuaderno'));
     guardarPreferencia('tema', a.tema);
   }, [a.tema, idiomaActual()]);
 
@@ -103,7 +103,7 @@ function LectorWeb() {
       </header>
       <div class="ap-web-cuerpo">
         <main class="ap-principal">
-          <Lector ajustes={a} inicial="" web />
+          <Cuaderno ajustes={a} inicial="" web />
         </main>
         <Creador ajustes={a} />
       </div>

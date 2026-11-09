@@ -14,6 +14,7 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 |---|---|---|
 | [Preact](https://preactjs.com) 和 Preact Signals | 界面 | MIT |
 | [Dexie](https://dexie.org) | 本地数据库 | Apache-2.0 |
+| [ProseMirror](https://prosemirror.net) | 笔记本的编辑器 | MIT |
 | [Kuromoji](https://github.com/takuyaa/kuromoji.js) | 形态分析，使用 IPADIC 词典 | Apache-2.0，以及 IPADIC 自身的许可证 |
 | [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Claude API 客户端 | Apache-2.0 |
 | [Transformers.js](https://github.com/huggingface/transformers.js) 和 [ONNX Runtime](https://onnxruntime.ai) | 运行 Whisper | Apache-2.0 和 MIT |

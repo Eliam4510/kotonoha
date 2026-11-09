@@ -6,7 +6,7 @@ import * as ort from 'onnxruntime-web/webgpu';
 import { MODELO_MORAS } from '../compartido/modelosGuardados';
 import { fonemasOidos } from '../nucleo/alineacion';
 
-export type PedidoNarabas = { tipo: 'oir'; id: number; muestras: Float32Array; cpu: boolean };
+export type PedidoNarabas = { tipo: 'oir'; id: number; muestras: Float32Array; cpu: boolean } | { tipo: 'preparar'; cpu: boolean };
 
 export type RespuestaNarabas =
   | { tipo: 'descarga'; cargado: number; total: number }
@@ -121,6 +121,11 @@ let cola: Promise<unknown> = Promise.resolve();
 
 self.onmessage = (e: MessageEvent<PedidoNarabas>) => {
   const p = e.data;
+  // Solo cargar, para que la grabación que viene no espere (el modelo ya está en la caché: lo mira quien lo pide).
+  if (p.tipo === 'preparar') {
+    cola = cola.then(() => cargar(p.cpu).catch(() => {}));
+    return;
+  }
   // Una grabación detrás de otra.
   cola = cola.then(async () => {
     let dispositivo: Dispositivo | undefined;

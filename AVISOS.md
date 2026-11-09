@@ -14,6 +14,7 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 |---|---|---|
 | [Preact](https://preactjs.com) y Preact Signals | Interfaz | MIT |
 | [Dexie](https://dexie.org) | Base de datos local | Apache-2.0 |
+| [ProseMirror](https://prosemirror.net) | El editor del Cuaderno | MIT |
 | [Kuromoji](https://github.com/takuyaa/kuromoji.js) | Análisis morfológico, con el diccionario IPADIC | Apache-2.0, y la licencia propia de IPADIC |
 | [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Cliente de la API de Claude | Apache-2.0 |
 | [Transformers.js](https://github.com/huggingface/transformers.js) y [ONNX Runtime](https://onnxruntime.ai) | Ejecución de Whisper | Apache-2.0 y MIT |
@@ -86,6 +87,7 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 |---|---|---|
 | [Preact](https://preactjs.com) and Preact Signals | Interface | MIT |
 | [Dexie](https://dexie.org) | Local database | Apache-2.0 |
+| [ProseMirror](https://prosemirror.net) | The Notebook editor | MIT |
 | [Kuromoji](https://github.com/takuyaa/kuromoji.js) | Morphological analysis, with the IPADIC dictionary | Apache-2.0, and IPADIC's own license |
 | [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) | Claude API client | Apache-2.0 |
 | [Transformers.js](https://github.com/huggingface/transformers.js) and [ONNX Runtime](https://onnxruntime.ai) | Running Whisper | Apache-2.0 and MIT |

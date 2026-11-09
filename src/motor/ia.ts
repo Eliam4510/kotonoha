@@ -395,6 +395,22 @@ export async function glosaBreve(a: Ajustes, lema: string, frase?: string): Prom
   return texto.trim();
 }
 
+const PROMPT_ORGANIZAR = `Organizas un texto para leerlo y estudiarlo. Recibes un texto, a veces pegado de corrido, y lo devuelves en Markdown con su estructura: # para el título, ## para los subtítulos y ### para los apartados; párrafos separados por una línea en blanco; - para las listas, con dos espacios más por cada subnivel; 1. para las listas numeradas; > para las citas, y ** para lo que ya venía destacado.
+
+Reglas:
+- No cambies, quites, añadas, traduzcas ni corrijas ninguna palabra ni ningún signo: solo pones la estructura que el texto ya tiene. Si algo no está claro, déjalo como párrafo.
+- Un título solo si el texto lo tiene: una línea corta que encabeza lo que sigue.
+- Dentro de un párrafo, conserva los saltos de línea que separan versos, líneas de un diálogo o renglones con sentido propio.
+- Conserva tal cual, cada una en su línea, las marcas <!-- dictado:… -->.
+- Responde solo con el Markdown, sin explicaciones ni bloque de código alrededor.`;
+
+/** El texto del Cuaderno, organizado por Claude: el mismo texto, con títulos, párrafos y listas. */
+export async function organizarTexto(a: Ajustes, md: string): Promise<string> {
+  const texto = await ejecutar({ a, tarea: 'generar', sistema: PROMPT_ORGANIZAR, usuario: md, maxTokens: Math.min(64000, Math.ceil(md.length * 2.5) + 2000) });
+  // Por si llega envuelto en un bloque de código, a pesar de las instrucciones.
+  return texto.trim().replace(/^```(?:markdown|md)?\s*\n([\s\S]*?)\n```$/i, '$1').trim();
+}
+
 /** Revisa una lectura concreta que el usuario señaló como dudosa. */
 export async function revisarLectura(a: Ajustes, c: ContextoIA): Promise<{ lectura: string; lema: string; lectura_lema: string; motivo: string }> {
   const { comillar } = lengua().escritura;

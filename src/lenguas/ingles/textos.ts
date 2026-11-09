@@ -38,6 +38,7 @@ export const TEXTOS: TextosLengua = {
   lectorResumen: tm('Colores y consulta en cualquier texto en inglés.'),
   lectorActivar: tm('Activar en las páginas en inglés'),
   lectorPegar: tm('Pega cualquier texto en inglés para leerlo con pronunciación, diccionario y Claude al alcance de un clic.'),
+  cuadernoVacio: tm('Escribe o pega aquí un texto en inglés. Empieza una línea con # para un título, con - para una lista y con > para una cita.'),
   lectorBotonAyuda: tm('Para ajustar los colores y la pronunciación sin venir aquí.'),
   separarLineas: tm('Separar las líneas para la pronunciación'),
   separarLineasAyuda: tm('Si la pronunciación no cabe entre dos líneas, abre un poco ese texto. Apagado, el diseño de la página no se mueve nada, pero la pronunciación puede chocar con la línea de arriba.'),

@@ -1,12 +1,11 @@
 // Pantallas de la ventana de la app: inicio, diccionario, lector, memoria y palabras. La Ayuda de lectura está en
 // Biblioteca.tsx.
 
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { type Card, fsrs, type Grade } from 'ts-fsrs';
 import type { Ajustes } from '../compartido/ajustes';
 import type { EstadoMotor } from '../compartido/api';
-import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
-import { alCambiarTextoLector, guardarTextoLector, leerTextoLector } from '../compartido/textoLector';
+import { alRecibirEvento, motor } from '../compartido/rpc';
 import type {
   ElementoBiblioteca,
   EstadisticasPalabras,
@@ -16,24 +15,19 @@ import type {
   ResultadoBusqueda,
   TarjetaMemoria,
 } from '../compartido/tipos';
-import { anadirDictado } from '../nucleo/dictado';
-import { leerEstructura, normalizarTextoPlano, textoConEstructura, textoPlano } from '../nucleo/estructura';
 import { AvisoVersion } from './AvisoVersion';
 import { SeguirLeyendo } from './Biblioteca';
 import { TarjetaInmersion } from './Inmersion';
-import { Dictado, limpiarDictadosSiToca } from './Dictado';
 import { SelectorLengua } from './SelectorLengua';
 import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { TarjetaGasto } from './Gasto';
 import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navegar, refrescarAnki } from './estadoApp';
-import { TextoInteractivo } from './Lectura';
 import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
-import { useRelojLectura } from '../ui/relojLectura';
 
 // ---------- Inicio ----------
 
@@ -259,7 +253,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
               </div>
             ))}
           </div>
-          <button class="ap-enlace-tarjeta" onClick={() => navegar('lector')}><Icono n="portapapeles" t={16} /> {tr('O pega un texto en el Portapapeles')} <Icono n="flecha" t={14} /></button>
+          <button class="ap-enlace-tarjeta" onClick={() => navegar('lector')}><Icono n="cuaderno" t={16} /> {tr('O escribe y pega en el Cuaderno')} <Icono n="flecha" t={14} /></button>
         </section>
 
         <TarjetaGasto credito={ajustes.creditoMensual} />
@@ -403,157 +397,6 @@ export function Diccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta:
     </div>
   );
 }
-
-// ---------- Lector ----------
-
-/** Lo copiado, con su estructura cuando trae HTML; si el navegador no deja leer el HTML, el texto como siempre. */
-async function pegadoConEstructura(): Promise<string> {
-  try {
-    for (const item of await navigator.clipboard.read()) {
-      const leer = async (tipo: string) => (item.types.includes(tipo) ? (await item.getType(tipo)).text() : '');
-      const html = await leer('text/html');
-      const texto = await leer('text/plain');
-      if (html || texto) return textoConEstructura(html, texto);
-    }
-  } catch {
-    // Sigue abajo con el texto plano.
-  }
-  return normalizarTextoPlano(await navigator.clipboard.readText());
-}
-
-export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; inicial: string; web?: boolean }) {
-  const [texto, fijarTexto] = useState(inicial);
-  const [leyendo, fijarLeyendo] = useState(!!inicial);
-  const textoActual = useRef(inicial);
-  textoActual.current = texto;
-  // Las horas de inmersión: leer en el Portapapeles cuenta; escribir o pegar, no.
-  useRelojLectura(leyendo && texto.trim() ? 'portapapeles' : null, '', ajustes.idiomaObjetivo);
-  useEffect(() => {
-    if (inicial) {
-      fijarTexto(inicial);
-      fijarLeyendo(true);
-    }
-  }, [inicial]);
-
-  // En su pestaña, el texto llega desde la ventana de la app o desde lo que se va copiando, y se conserva al recargar.
-  useEffect(() => {
-    if (!web) return;
-    const recibir = (t: string) => {
-      const anterior = textoActual.current;
-      if (t === anterior) return;
-      textoActual.current = t;
-      fijarTexto(t);
-      fijarLeyendo(!!t.trim());
-      // Lo que se acaba de copiar va al final: se deja a la vista, ya con su análisis.
-      if (anterior.trim() && t.startsWith(anterior.trimEnd())) {
-        setTimeout(() => document.querySelector('.ap-principal')?.scrollTo({ top: 1e9, behavior: 'smooth' }), 350);
-      }
-    };
-    leerTextoLector().then(recibir).catch(console.error);
-    return alCambiarTextoLector(recibir);
-  }, [web]);
-
-  // Las grabaciones de dictados que ya nadie usa se borran de vez en cuando; las de lo que hay abierto, nunca.
-  useEffect(() => {
-    const reloj = setTimeout(async () => {
-      const abiertos = [textoActual.current, await leerTextoLector().catch(() => '')];
-      await limpiarDictadosSiToca(abiertos);
-    }, 5000);
-    return () => clearTimeout(reloj);
-  }, []);
-
-  /** Lo dictado va al final, en su propio párrafo, y se lee ya analizado. */
-  const dictar = (id: string, dictado: string) => {
-    const nuevo = anadirDictado(textoActual.current, id, dictado);
-    textoActual.current = nuevo;
-    fijarTexto(nuevo);
-    fijarLeyendo(true);
-    if (web) guardarTextoLector(nuevo).catch(console.error);
-    setTimeout(() => document.querySelector('.ap-principal')?.scrollTo({ top: 1e9, behavior: 'smooth' }), 350);
-  };
-
-  const botonWeb = !web && (
-    <button class="btn chico fantasma" data-tip={tr('Abre el Portapapeles en una pestaña normal del navegador, para ponerlo en vista dividida junto a otra página.')} onClick={async () => {
-      await guardarTextoLector(texto);
-      await fondo.abrirLectorWeb();
-    }}><Icono n="dividir" t={15} /> {tr('Modo web')}</button>
-  );
-
-  if (leyendo) {
-    return (
-      <div class="ap-lienzo ancho">
-        <TextoInteractivo
-          texto={texto}
-          ajustes={ajustes}
-          titulo={tr('Portapapeles')}
-          inicioBarra={<><button class="btn chico fantasma" onClick={() => fijarLeyendo(false)}><Icono n="flecha-izq" t={15} /> {tr('Editar el texto')}</button>{botonWeb}<Dictado alDictar={dictar} /></>}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div class="ap-lienzo ap-lector-entrada">
-      <Cabecera titulo={tr('Portapapeles')} sub={tr(lengua.value.textos.lectorPegar)}>{botonWeb}</Cabecera>
-      <div class="ap-hoja-escritura">
-        <textarea
-          lang={lengua.value.id}
-          aria-label={tr('Texto a leer')}
-          value={texto}
-          placeholder={lengua.value.ejemplos.pegarTexto}
-          onInput={(e) => fijarTexto(e.currentTarget.value)}
-          onPaste={(e) => {
-            // Lo copiado de una página trae su HTML, y se pega con su estructura. El texto plano entra como siempre.
-            const html = e.clipboardData?.getData('text/html');
-            if (!html) return;
-            const md = textoConEstructura(html, e.clipboardData?.getData('text/plain'));
-            if (!md) return;
-            e.preventDefault();
-            const area = e.currentTarget;
-            const antes = area.value.slice(0, area.selectionStart);
-            const despues = area.value.slice(area.selectionEnd);
-            // Lo que trae bloques (títulos, listas, varios párrafos) va en su propio párrafo; un trozo de frase, donde esté el cursor.
-            const enBloque = md.includes('\n') || /^(#|>|[-*+] |\d+[.)] |\||```|~~~)/.test(md);
-            const separar = (lado: string, alFinal: boolean) => {
-              if (!enBloque || !lado) return '';
-              const borde = alFinal ? lado.slice(-2) : lado.slice(0, 2);
-              return borde === '\n\n' ? '' : borde.includes('\n') ? '\n' : '\n\n';
-            };
-            fijarTexto(antes + separar(antes, true) + md + separar(despues, false) + despues);
-          }}
-        />
-        <div class="ap-hoja-pie">
-          <div class="ap-botones">
-            <button class="btn fantasma chico" onClick={async () => fijarTexto(await pegadoConEstructura())}><Icono n="portapapeles" t={15} /> {tr('Pegar')}</button>
-            <Dictado alDictar={dictar} />
-            {texto ? (
-              <button class="btn fantasma chico" onClick={() => {
-                fijarTexto('');
-                if (web) guardarTextoLector('').catch(console.error);
-              }}><Icono n="basura" t={15} /> {tr('Borrar')}</button>
-            ) : (
-              <button class="btn fantasma chico" onClick={() => fijarTexto(lengua.value.ejemplos.texto)}><Icono n="pergamino" t={15} /> {tr('Probar con un ejemplo')}</button>
-            )}
-          </div>
-          <div class="ap-botones">
-            <button class="btn" disabled={!texto.trim()} onClick={async () => {
-              // El título sale del texto que se lee, sin las marcas del Markdown ni las de los dictados.
-              const titulo = textoPlano(leerEstructura(texto)).trim().slice(0, 30) || tr('Texto dictado');
-              await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo, texto, origen: 'pegado', creado: Date.now() });
-              navegar('biblioteca');
-            }}><Icono n="biblioteca" t={16} /> {tr('Guardar en la biblioteca')}</button>
-            <button class="btn primario" disabled={!texto.trim()} onClick={() => {
-              if (web) guardarTextoLector(texto).catch(console.error);
-              fijarLeyendo(true);
-            }}>{tr('Leer')} <Icono n="flecha" t={15} /></button>
-          </div>
-        </div>
-      </div>
-      <p class="ayuda ap-nota-lector">{tr('También puedes seleccionar texto en cualquier página y elegir «Abrir selección en el Portapapeles» en el menú contextual.')}</p>
-    </div>
-  );
-}
-
 
 // ---------- Memoria ----------
 

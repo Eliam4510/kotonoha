@@ -2,6 +2,13 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.21.0 · 2026-11-09
+
+- **El Cuaderno.** El Portapapeles pasa a ser un cuaderno: una página a todo lo ancho, sin la hoja que lo encogía, con **Editar** y **Leer** en la misma página. Al editar se escribe con formato, como en un procesador de notas: títulos, subtítulos, listas con subpuntos, citas, código y negritas, con botones y con los atajos de costumbre (`# `, `- `, `・`, `1. `, `> `, Tab, Ctrl+B). **Organizar** le pide a Claude que estructure un texto pegado de corrido sin cambiar sus palabras, y Ctrl+Z lo deshace. Lo escrito se guarda solo; **Guardar en la biblioteca** lo lleva a la biblioteca, donde se sigue guardando, y **Editar en el Cuaderno** vuelve a abrir un texto de la biblioteca.
+- **Leer en voz alta**, con velocidad (0,6× a 1,2×) y modo: seguido, frase a frase o repitiendo la misma frase para decirla a la vez.
+- **Practicar cualquier trozo.** Al seleccionar con el ratón una palabra, media frase o varias, aparecen **Escuchar** y **Practicar**, que abre la práctica del acento con ese trozo.
+- **Más rápido.** Los modelos de voz se cargan mientras se graba y siguen cargados mientras la práctica está abierta: el dictado se transcribe un segundo después de terminar, y desde la segunda grabación la práctica se analiza en menos de un segundo.
+
 ## 0.20.0 · 2026-11-09
 
 - **Kanji que ya conoces.** En la pestaña **Trazos** de la ficha, **Con estos kanji ya conoces** reúne, para cada kanji de la palabra, las que ya sabes o estás aprendiendo con él: 冷蔵庫 trae 冷たい, 車庫 y 金庫. El kanji nuevo se recuerda a partir de lo que ya se sabe.
@@ -160,6 +167,13 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.21.0 · 2026-11-09
+
+- **The Notebook.** The Clipboard becomes a notebook: a full-width page, without the sheet that made it narrow, with **Edit** and **Read** on the same page. While editing you write with formatting, as in a note-taking app: headings, subheadings, lists with sub-items, quotes, code and bold, with buttons and the usual shortcuts (`# `, `- `, `・`, `1. `, `> `, Tab, Ctrl+B). **Organize** asks Claude to structure text pasted as one block without changing its words, and Ctrl+Z undoes it. What you write saves itself; **Save to the library** takes it to the library, where it keeps being saved, and **Edit in the Notebook** reopens a library text.
+- **Read aloud**, with speed (0.6× to 1.2×) and mode: continuous, sentence by sentence or repeating the same sentence so you can say it along.
+- **Practise any part.** Selecting a word, half a sentence or several with the mouse shows **Listen** and **Practice**, which opens pitch accent practice with that part.
+- **Faster.** Speech models load while you record and stay loaded while practice is open: dictation is transcribed a second after you finish, and from the second recording on, practice is analysed in under a second.
 
 ## 0.20.0 · 2026-11-09
 

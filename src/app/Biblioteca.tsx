@@ -18,6 +18,7 @@ import { fuenteDeArchivo, LIMITE_ZIP, leerEntrada } from '../nucleo/zip';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { useRelojLectura } from '../ui/relojLectura';
+import { abrirEnCuaderno } from './Cuaderno';
 import { datosDeZip, miniaturaDe } from '../visor/paginador';
 import { datosDePdf } from '../visor/pdf';
 import { estaProcesado } from '../visor/procesador';
@@ -876,6 +877,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
             <>
               <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Ayuda de lectura')}</button>
               <b class="ap-lectura-titulo" lang={lengua.value.id}>{abierto.titulo}</b>
+              <button class="btn chico fantasma" onClick={() => void abrirEnCuaderno(abierto)}><Icono n="lapiz" t={14} /> {tr('Editar en el Cuaderno')}</button>
             </>
           }
           pie={

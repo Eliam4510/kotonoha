@@ -120,6 +120,12 @@ export interface ApiMotor {
   /** Suma tiempo de inmersión: un video que se escucha o un texto que se lee en la lengua que se estudia. */
   sumarInmersion(tipo: TipoInmersion, fuente: string, titulo: string, segundos: number, estudio?: string): Promise<void>;
   resumenInmersion(): Promise<ResumenInmersion>;
+  /** El texto del Cuaderno con su estructura (títulos, párrafos, listas), puesta por Claude sin cambiar las palabras. */
+  organizarTexto(md: string): Promise<string>;
+  /** Carga ya el modelo de voz de la práctica o del dictado, si está en el disco: así al terminar de grabar está listo. */
+  prepararVoz(uso: 'practica' | 'dictado'): Promise<void>;
+  /** Lo mismo con narabas, el modelo de las moras de la práctica. */
+  prepararMoras(): Promise<void>;
   listarPalabras(filtro: FiltroPalabras): Promise<{ filas: FilaPalabra[]; total: number }>;
   muestraEvaluacion(): Promise<{ lema: string; lectura: string; rango: number }[]>;
   aplicarEvaluacion(rangoEstimado: number): Promise<number>;

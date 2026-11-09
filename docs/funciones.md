@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.20.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.21.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -103,12 +103,16 @@ Estado de cada función en la versión 0.20.0, con la forma en que se ha verific
 | Inicio con resumen de vocabulario y repaso | Automática |
 | Gasto en Claude: total del mes, gráfica por días y modelos, tareas y registro de peticiones | Simulador |
 | Diccionario con búsqueda libre y formas conjugadas | Automática |
-| Portapapeles: lo pegado o copiado conserva sus párrafos, saltos de línea, títulos, listas, citas, código, tablas y negritas, sin el furigana de la página de origen | Automática |
-| Portapapeles en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
+| Cuaderno: lo pegado o copiado conserva sus párrafos, saltos de línea, títulos, listas, citas, código, tablas y negritas, sin el furigana de la página de origen | Automática |
+| Cuaderno en una pestaña normal, también en vista dividida junto a la página que se esté viendo | Automática, en Edge y Chrome |
 | Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
-| Dictar al Portapapeles: el micrófono, el tiempo y el nivel mientras se graba, y el texto al final, ya analizado, transcrito en el equipo con el modelo de voz de los ajustes | Automática, con voces sintéticas en japonés e inglés |
+| Dictar al Cuaderno: el micrófono, el tiempo y el nivel mientras se graba, y el texto al final, ya analizado, transcrito en el equipo con el modelo de voz de los ajustes | Automática, con voces sintéticas en japonés e inglés |
+| Cuaderno: un editor a todo lo ancho con títulos, listas con subpuntos, citas, código y negritas, con botones y atajos (# , - , ・ , 1. , > , Tab, Ctrl+B); Editar y Leer en la misma página; lo pegado con su estructura; se guarda solo, y en la biblioteca si se pide, y un texto de la biblioteca se vuelve a editar | Automática: escribir con los atajos y los botones, leer, guardar en la biblioteca y volver a abrir desde ella |
+| Organizar: Claude pone título, subtítulos, párrafos y listas a un texto pegado de corrido; avisa si cambió alguna palabra, y Ctrl+Z lo deshace | Automática, con un Claude simulado |
+| Lectura en voz alta con velocidad (0,6× a 1,2×) y modo (seguido, frase a frase o repitiendo la frase); escuchar o practicar cualquier trozo seleccionado, sin su furigana | Automática |
+| Los modelos de voz se cargan mientras se graba (dictado y práctica): la segunda grabación de la práctica se analiza en 0,2 s, y el dictado se transcribe un segundo después de terminar | Automática, en la GPU del equipo de desarrollo |
 | La grabación de cada dictado encima de su párrafo, para volver a oírla; va con el texto a la biblioteca, y la que ningún texto usa se borra pasada una semana | Automática |
-| Practicar el acento tonal en el Portapapeles, los textos de la Ayuda de lectura y la vista de texto: el acento de cada palabra dibujado, la grabación, la curva del tono sobre el acento esperado, un veredicto por palabra y las pausas largas | Automática, con una voz sintética |
+| Practicar el acento tonal en el Cuaderno, los textos de la Ayuda de lectura y la vista de texto: el acento de cada palabra dibujado, la grabación, la curva del tono sobre el acento esperado, un veredicto por palabra y las pausas largas | Automática, con una voz sintética |
 | El tono de la voz medido en el navegador (YIN), las moras situadas con la voz y la transcripción, y dónde cae el tono en cada palabra, también con el pico retrasado y las moras ensordecidas | Automática; ajustado con pares mínimos (箸, 橋 y 端; 雨 y 飴) leídos por una voz sintética y con una grabación real |
 | Las moras especiales en la práctica, con narabas: la っ, la ん y la vocal larga que faltan o sobran, con la mora marcada; la descarga del modelo comprobada con su SHA-256, la GPU solo si calcula como el procesador, y sin juzgar la っ delante de fricativa, las frases dichas de otra manera ni los titubeos al final de una palabra | Automática, con una voz sintética; medido con pares mínimos (おばあさん y おばさん, きって y きて…) dichos por dos voces sintéticas: 17 de 22 moras que faltaban y 10 de 10 de más, sin avisos en 22 de 24 frases bien dichas |
 | Ayuda de lectura: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
@@ -127,7 +131,7 @@ Estado de cada función en la versión 0.20.0, con la forma en que se ha verific
 | Editar el texto de una línea a mano, guardado aparte de lo leído y con «Restaurar» | Automática |
 | Notas y marcadores, como en un lector de PDF: marcar páginas, resaltar en cuatro colores o subrayar una línea, una palabra o un tramo, con un comentario, y notas sueltas sobre la página; en el panel «Notas y marcadores», todo por páginas, para ir, editar, quitar o copiar como texto | Automática |
 | Buscar en el libro: en el texto del PDF y en el del OCR, con lo editado, sin distinguir anchos ni hiragana y katakana, también una palabra partida entre dos renglones; resultados por páginas y marcados en la página | Automática |
-| Vista de texto: la página como texto, en párrafos y con los títulos aparte, con la ayuda de lectura del Portapapeles (furigana, comprensión, lectura en voz alta, fichas y tarjetas); cada libro la recuerda | Automática, y los párrafos con 16 páginas reales |
+| Vista de texto: la página como texto, en párrafos y con los títulos aparte, con la ayuda de lectura del Cuaderno (furigana, comprensión, lectura en voz alta, fichas y tarjetas); cada libro la recuerda | Automática, y los párrafos con 16 páginas reales |
 | Revisar con Claude el texto de una página, con su imagen: solo los cambios que no coinciden, letra a letra, para elegir cuáles aplicar, guardados como líneas editadas | Simulador |
 | Tocar una línea de la página abre su texto con furigana y palabras para consultar, con su ficha y la creación de tarjetas | Automática |
 | Cada página se lee una sola vez y se guarda; su texto también llega a los lectores de pantalla | Automática |
@@ -140,7 +144,7 @@ Estado de cada función en la versión 0.20.0, con la forma en que se ha verific
 | Reproductor de archivos propios | Automática |
 | Subtítulos incrustados en MKV y elección de pista de audio, con ffmpeg.wasm | Automática |
 | Explorador de palabras por estado | Automática |
-| Horas de inmersión: el tiempo con un video en marcha y subtítulos en la lengua que se estudia, con un libro en el visor y leyendo en el Portapapeles o la biblioteca; en Inicio, hoy, los últimos siete días, el total, la racha, una barra por día y lo que más se vio y leyó | Automática: un video propio que se reproduce de verdad y días anteriores sembrados en la base |
+| Horas de inmersión: el tiempo con un video en marcha y subtítulos en la lengua que se estudia, con un libro en el visor y leyendo en el Cuaderno o la biblioteca; en Inicio, hoy, los últimos siete días, el total, la racha, una barra por día y lo que más se vio y leyó | Automática: un video propio que se reproduce de verdad y días anteriores sembrados en la base |
 | Evaluación de nivel | Automática |
 | Ajustes completos y prompts editables | Automática |
 | Copia de seguridad de todos los idiomas y de los ajustes, en un solo archivo | Automática |

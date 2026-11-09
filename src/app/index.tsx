@@ -17,7 +17,8 @@ import { Bienvenida } from './Bienvenida';
 import { Creador } from './Creador';
 import { creadorAbierto, estadoAnki, guardarPreferencia, leerPreferencia, navegar, refrescarAnki, useMedia } from './estadoApp';
 import { Biblioteca } from './Biblioteca';
-import { Diccionario, Inicio, Lector, Memoria, Palabras } from './Pantallas';
+import { Cuaderno } from './Cuaderno';
+import { Diccionario, Inicio, Memoria, Palabras } from './Pantallas';
 import { ReproductorLocal } from './ReproductorLocal';
 import { MenuLengua } from './SelectorLengua';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
@@ -34,7 +35,7 @@ const GRUPOS: { titulo?: string; rutas: Ruta[] }[] = [
     titulo: tm('Aprender'),
     rutas: [
       { id: 'diccionario', icono: 'diccionario', nombre: tm('Diccionario') },
-      { id: 'lector', icono: 'portapapeles', nombre: tm('Portapapeles') },
+      { id: 'lector', icono: 'cuaderno', nombre: tm('Cuaderno') },
       { id: 'biblioteca', icono: 'biblioteca', nombre: tm('Ayuda de lectura') },
       { id: 'reproductor', icono: 'video', nombre: tm('Reproductor') },
     ],
@@ -202,7 +203,7 @@ function App() {
       <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={ruta === 'reproductor' ? ruta : `${ruta}:${a.idiomaObjetivo}`}>
         {ruta === 'inicio' && <Inicio ajustes={a} />}
         {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} />}
-        {ruta === 'lector' && <Lector ajustes={a} inicial={params.get('t') ?? ''} />}
+        {ruta === 'lector' && <Cuaderno ajustes={a} inicial={params.get('t') ?? ''} editar={params.get('editar') === '1'} />}
         {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
         {ruta === 'reproductor' && <ReproductorLocal a={a} />}
         {ruta === 'memoria' && <Memoria />}
