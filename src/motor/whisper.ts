@@ -5,7 +5,7 @@
 // controlador. Por eso aquí: solo se procesa un trozo a la vez, se descansa tras cada uno, un trozo
 // colgado se aborta, y si la GPU se pierde se reintenta con calma y al segundo fallo se para.
 
-import { MODELOS_WHISPER, type ModeloWhisper } from '../compartido/ajustes';
+import { MODELOS_WHISPER, modeloParaTranscribir, type ModeloWhisper } from '../compartido/ajustes';
 import { modeloGuardado } from '../compartido/modelosGuardados';
 import { tr } from '../compartido/i18n';
 import { fondo } from '../compartido/rpc';
@@ -33,7 +33,7 @@ import {
 } from '../nucleo/transcripcion';
 import { abrirDescarga } from './ayudante';
 import { escucharPcm } from './grabacion';
-import { motorLengua } from './lengua';
+import { lengua, motorLengua } from './lengua';
 
 export type EventoWhisper =
   | { tipo: 'descarga'; porcentaje: number; cargadoMb: number; totalMb: number }
@@ -141,7 +141,10 @@ async function cargarModelo(idModelo: ModeloWhisper, emitir: Emitir): Promise<st
 /** Un trozo normal tarda unos segundos. Si tarda esto, la GPU está colgada y no va a responder. */
 const LIMITE_TROZO_MS = 90000;
 
-function transcribirTrozo(pcm: Float32Array): Promise<SegmentoWhisper[]> {
+/** Lo que devuelve el trabajador por un trozo: los tokens con su instante (un transductor) o los trozos de Whisper. */
+type RespuestaTrozo = { trozos?: { text: string; timestamp: [number, number | null] }[]; tokens?: TokenConTiempo[] };
+
+function pedirTrozo(pcm: Float32Array): Promise<RespuestaTrozo> {
   const t = obtenerTrabajador();
   const id = ++contadorId;
   return new Promise((ok, mal) => {
@@ -153,7 +156,7 @@ function transcribirTrozo(pcm: Float32Array): Promise<SegmentoWhisper[]> {
     pendientes.set(id, {
       ok: (r) => {
         clearTimeout(vigilante);
-        ok(r.tokens ? segmentosDeTokens(r.tokens, reglas()) : (r.trozos ?? []).map((c) => ({ texto: c.text, inicio: c.timestamp[0] ?? 0, fin: c.timestamp[1] ?? null })));
+        ok(r);
       },
       mal: (e) => {
         clearTimeout(vigilante);
@@ -162,6 +165,11 @@ function transcribirTrozo(pcm: Float32Array): Promise<SegmentoWhisper[]> {
     });
     t.postMessage({ tipo: 'transcribir', id, pcm, idioma: motorLengua().transcripcion.idioma }, [pcm.buffer]);
   });
+}
+
+async function transcribirTrozo(pcm: Float32Array): Promise<SegmentoWhisper[]> {
+  const r = await pedirTrozo(pcm);
+  return r.tokens ? segmentosDeTokens(r.tokens, reglas()) : (r.trozos ?? []).map((c) => ({ texto: c.text, inicio: c.timestamp[0] ?? 0, fin: c.timestamp[1] ?? null }));
 }
 
 // ---------- Recuperación ----------
@@ -515,6 +523,35 @@ async function transcribirMuestras(
 }
 
 export const transcribiendoEnVivo = () => acumuladorVivo !== null;
+
+// ---------- Práctica de pronunciación ----------
+
+/** Una frase para practicar dura poco: lo que pase de esto no se transcribe. */
+const MAXIMO_PRACTICA_S = 30;
+
+/**
+ * La transcripción de una frase leída en voz alta, token a token y con el instante en que empieza cada uno: con eso se
+ * sabe dónde suena cada palabra para medir su tono. Necesita un transductor, que da esos instantes: el modelo de voz de la
+ * lengua (Haas-ja en japonés), sea cual sea el elegido para transcribir videos. Sin voz, ningún token.
+ */
+export async function tokensDeGrabacion(url: string, emitir: Emitir, senal: AbortSignal): Promise<TokenConTiempo[]> {
+  emitir({ tipo: 'preparando' });
+  const audio = await abrirAudio(url, false);
+  if (!audio) throw new Error(tr('El navegador no pudo leer la grabación.'));
+  const pcm = await audio.leer(0, Math.min(audio.muestras, MAXIMO_PRACTICA_S * FRECUENCIA));
+  if (esGrabacionMuda(pcm)) return [];
+  const modelo = modeloParaTranscribir('auto', lengua().id, false);
+  if (!MODELOS_WHISPER[modelo]?.tdt) throw new Error(tr('Esta lengua no tiene un modelo de voz que diga dónde suena cada palabra.'));
+  const dispositivo = await cargarModelo(modelo, emitir);
+  if (senal.aborted) return [];
+  emitir({ tipo: 'procesando', dispositivo });
+  try {
+    const r = await pedirTrozo(pcm.slice());
+    return (r.tokens ?? []).filter((t) => t.texto);
+  } finally {
+    programarLiberacion();
+  }
+}
 
 // ---------- Dictado ----------
 

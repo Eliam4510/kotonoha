@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { guardarGrabacion, type Grabacion, leerGrabacion } from '../compartido/dictados';
 import { bcp47Actual, tr } from '../compartido/i18n';
-import { type FlujoCancelable, flujoMotor, motor } from '../compartido/rpc';
+import { type FlujoCancelable, flujoMotor, lectorJson, motor } from '../compartido/rpc';
 import { MAXIMO_DICTADO_MS, minutosYSegundos, nuevoIdDictado } from '../nucleo/dictado';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
@@ -28,18 +28,6 @@ type Estado =
 /** Una grabación más corta que esto se tomó por un toque sin querer. */
 const MINIMO_MS = 400;
 const BARRAS_NIVEL = 5;
-
-/** Lee por partes un flujo cuyo avance llega como líneas de JSON. */
-function lectorJson<T>(alEvento: (e: T) => void) {
-  let vistos = 0;
-  return (acumulado: string) => {
-    const texto = acumulado.slice(vistos);
-    const fin = texto.lastIndexOf('\n');
-    if (fin < 0) return;
-    vistos += fin + 1;
-    for (const fila of texto.slice(0, fin).split('\n')) if (fila) alEvento(JSON.parse(fila) as T);
-  };
-}
 
 function textoDelPaso(e: Extract<Estado, { fase: 'transcribiendo' }>): string {
   if (e.paso === 'descarga') return tr('Descargando el modelo de voz: {0} %', e.porcentaje ?? 0);

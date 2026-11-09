@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.13.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.14.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -103,6 +103,8 @@ Estado de cada función en la versión 0.13.1, con la forma en que se ha verific
 | Seguir el portapapeles, sin que la pestaña tenga el foco | Automática |
 | Dictar al Portapapeles: el micrófono, el tiempo y el nivel mientras se graba, y el texto al final, ya analizado, transcrito en el equipo con el modelo de voz de los ajustes | Automática, con voces sintéticas en japonés e inglés |
 | La grabación de cada dictado encima de su párrafo, para volver a oírla; va con el texto a la biblioteca, y la que ningún texto usa se borra pasada una semana | Automática |
+| Practicar el acento tonal en el Portapapeles, los textos de la Ayuda de lectura y la vista de texto: el acento de cada palabra dibujado, la grabación, la curva del tono sobre el acento esperado, un veredicto por palabra y las pausas largas | Automática, con una voz sintética |
+| El tono de la voz medido en el navegador (YIN), las moras situadas con la voz y la transcripción, y dónde cae el tono en cada palabra, también con el pico retrasado y las moras ensordecidas | Automática; ajustado con pares mínimos (箸, 橋 y 端; 雨 y 飴) leídos por una voz sintética y con una grabación real |
 | Ayuda de lectura: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
 | Carpetas de imágenes como libros: cada carpeta, o cada tomo dentro de ella, entra como un libro, con la portada delante, el índice por capítulos y las dobles páginas apaisadas solas | Automática, y con 40 tomos reales de manga |

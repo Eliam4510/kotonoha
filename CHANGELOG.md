@@ -2,6 +2,10 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.14.0 · 2026-11-08
+
+- **Practicar el acento tonal.** En el Portapapeles, los textos de la Ayuda de lectura y la vista de texto, **Practicar** enseña el acento de cada palabra de la frase, graba cómo se lee y pone la curva del tono de la voz sobre la esperada, con un veredicto por palabra (**Bien**, **Revisar**, **Sin juzgar**) y las pausas largas. El tono se mide en el navegador y la grabación se transcribe en el equipo con Haas-ja; no se guarda ni sale del equipo.
+
 ## 0.13.1 · 2026-11-08
 
 - **Cambiar de idioma a la vista.** Inicio tiene un selector con las tres lenguas, cada una con su bandera y su nombre, y la barra lateral muestra la que se estudia, con un menú para cambiarla.
@@ -125,6 +129,10 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.14.0 · 2026-11-08
+
+- **Pitch accent practice.** In the Clipboard, the Reading assistant’s texts and the text view, **Practice** shows the accent of each word in the sentence, records how it is read and lays the voice’s pitch curve over the expected one, with a verdict per word (**Good**, **Check**, **Not judged**) and long pauses. The pitch is measured in the browser and the recording is transcribed on the computer with Haas-ja; it is neither kept nor sent anywhere.
 
 ## 0.13.1 · 2026-11-08
 

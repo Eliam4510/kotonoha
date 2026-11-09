@@ -15,6 +15,7 @@ import { Icono } from '../ui/iconos';
 import { GrabacionDictada } from './Dictado';
 import { guardarPreferencia, leerPreferencia } from './estadoApp';
 import { Anillo } from './Piezas';
+import { Practica } from './Practica';
 import { numero, tr } from '../compartido/i18n';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
 import { decirConNavegador } from '../ui/vozNavegador';
@@ -81,6 +82,8 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
   const [analizado, fijarAnalizado] = useState<{ clave: string; tokens: PalabraToken[][] }>({ clave: '', tokens: [] });
   const tokens = analizado.clave === clave ? analizado.tokens : [];
   const [abierta, fijarAbierta] = useState<Abierta | null>(null);
+  /** La práctica del acento ocupa el sitio de la consulta, con la frase en curso del texto. */
+  const [practicando, fijarPracticando] = useState(false);
   const [actual, fijarActual] = useState(-1);
   const [sonando, fijarSonando] = useState(false);
   const [tam, fijarTam] = useState(() => leerPreferencia('tamanoLectura', tamano));
@@ -170,6 +173,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
       onClick={(e) => {
         e.stopPropagation();
         const f = frases[i];
+        fijarPracticando(false);
         fijarAbierta({
           palabra: p,
           frase: f,
@@ -213,6 +217,20 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
     });
     if (alineado && cursor < texto.length) salida.push(<span key="fin">{texto.slice(cursor)}</span>);
     return <span key={indice} class={indice === actual ? 'oracion-activa' : ''}>{salida}</span>;
+  };
+
+  // Se practica una frase con palabras: la lengua tiene que saber partirla en frases acentuales.
+  const puedePracticar = !!lengua.value.acento?.practica && tokens.length > 0;
+  const frasePractica = Math.max(actual, 0);
+  const practicar = () => {
+    if (practicando) {
+      fijarPracticando(false);
+      return;
+    }
+    detener();
+    fijarAbierta(null);
+    fijarActual(frasePractica);
+    fijarPracticando(true);
   };
 
   const pintarLinea = (l: Linea) => (deLinea.get(l) ?? []).map((f) => pintarFrase(f, l.negritas));
@@ -260,7 +278,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
   };
 
   return (
-    <div class={`ap-lectura ${abierta ? 'con-ficha' : ''}`}>
+    <div class={`ap-lectura ${abierta || (practicando && puedePracticar) ? 'con-ficha' : ''}`}>
       <div class="ap-lectura-principal">
         <div class="ap-lectura-barra">
           <div class="ap-lectura-inicio">{inicioBarra}</div>
@@ -304,9 +322,20 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
               <button class="btn primario" onClick={() => reproducirDesde(actual)}><Icono n="altavoz" t={16} /> {tr('Leer en voz alta')}</button>
             )}
             <button class="btn-icono" aria-label={tr('Frase siguiente')} data-tip={tr('Frase siguiente')} data-tip-lado="arriba" onClick={() => { detener(); fijarActual((a) => Math.min(a + 1, frases.length - 1)); }}><Icono n="siguiente" /></button>
+            {puedePracticar && (
+              <button class={`btn ${practicando ? 'activo' : ''}`} aria-pressed={practicando} data-tip={tr('Lee la frase en voz alta y mira dónde cae el tono en cada palabra')} data-tip-lado="arriba" onClick={practicar}>
+                <Icono n="ondas" t={16} /> {tr('Practicar')}
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {practicando && puedePracticar && !abierta && (
+        <div class="ap-lectura-ficha ap-lectura-practica" role="dialog" aria-label={tr('Practicar el acento')} key={`practica-${frasePractica}`}>
+          <Practica frase={frases[frasePractica] ?? ''} palabras={tokens[frasePractica] ?? []} ajustes={ajustes} alCerrar={() => fijarPracticando(false)} />
+        </div>
+      )}
 
       {abierta && (
         <div class="ap-lectura-ficha" role="dialog" aria-label={tr('Consulta de {0}', abierta.palabra.lema)} key={abierta.sitio}>

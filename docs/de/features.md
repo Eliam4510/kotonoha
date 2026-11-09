@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.13.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.14.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -103,6 +103,8 @@ Stand jeder Funktion in Version 0.13.1 und die Art ihrer Überprüfung.
 | Zwischenablage folgen, ohne dass der Tab den Fokus hat | Automatisch |
 | Diktieren in die Zwischenablage: das Mikrofon, Zeit und Pegel während der Aufnahme und der Text am Ende, schon analysiert, auf dem Rechner mit dem Sprachmodell aus den Einstellungen transkribiert | Automatisch, mit synthetischen Stimmen auf Japanisch und Englisch |
 | Die Aufnahme jedes Diktats über ihrem Absatz, zum erneuten Anhören; sie geht mit dem Text in die Bibliothek, und eine, die kein Text nutzt, wird nach einer Woche gelöscht | Automatisch |
+| Tonhöhenakzent üben in der Zwischenablage, den Texten der Lesehilfe und der Textansicht: der Akzent jedes Worts gezeichnet, die Aufnahme, die Tonhöhenkurve über dem erwarteten Akzent, eine Bewertung pro Wort und lange Pausen | Automatisch, mit einer synthetischen Stimme |
+| Die Tonhöhe der Stimme im Browser gemessen (YIN), die Moren anhand der Stimme und der Transkription verortet und wo die Tonhöhe in jedem Wort fällt, auch bei verzögertem Gipfel und entstimmten Moren | Automatisch; abgestimmt mit Minimalpaaren (箸, 橋 und 端; 雨 und 飴), gelesen von einer synthetischen Stimme, und mit einer echten Aufnahme |
 | Lesehilfe: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
 | Betrachter für Seitenbücher: EPUB aus Bildern, CBZ und PDF in einem eigenen Tab, mit Zoom, Anpassung an Breite oder Seite, Einzelseite, Doppelseite und fortlaufendem Bildlauf | Automatisch |
 | Bilderordner als Bücher: Jeder Ordner, oder jeder Band darin, wird ein Buch, mit der Titelseite vorn, einem Inhaltsverzeichnis nach Kapiteln und querformatigen Doppelseiten für sich | Automatisch, und mit 40 echten Manga-Bänden |

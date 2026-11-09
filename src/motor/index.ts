@@ -615,6 +615,8 @@ atenderFlujos({
     const intensidad = async () => (await aj()).whisperIntensidad;
     return String(await whisper.transcribirArchivo(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, pcmCrudo, desdeMs));
   },
+  // La práctica del acento: los tokens de la grabación, cada uno con el instante en que empieza, en JSON.
+  transcribirPractica: async (emitir, senal, url: string) => JSON.stringify(await whisper.tokensDeGrabacion(url, (e) => emitir(`${JSON.stringify(e)}\n`), senal)),
   // El dictado del Portapapeles: la grabación entera, con el modelo de voz de los ajustes. El resultado es el texto.
   transcribirDictado: async (emitir, senal, url: string) => whisper.transcribirGrabacion(url, await modeloPorOmision(), (e) => emitir(`${JSON.stringify(e)}\n`), senal),
 });
