@@ -14,6 +14,7 @@ import type { ElementoBiblioteca } from '../compartido/tipos';
 import overlay from '../contenido/overlay.css';
 import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
+import { useRelojLectura } from '../ui/relojLectura';
 import { aplicarLengua, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { useTema } from '../ui/tema';
@@ -29,6 +30,7 @@ function Visor({ id }: { id: string }) {
   aplicarLengua(a);
   const [abierto, fijarAbierto] = useState<{ doc: ElementoBiblioteca; archivo: File } | null>(null);
   const [error, fijarError] = useState('');
+  useRelojLectura(abierto ? abierto.doc.id : null, abierto?.doc.titulo ?? '', a.idiomaObjetivo);
 
   useEffect(() => {
     leerAjustes().then((x) => {

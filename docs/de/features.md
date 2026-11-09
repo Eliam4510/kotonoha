@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.19.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.20.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -26,6 +26,7 @@ Stand jeder Funktion in Version 0.19.0 und die Art ihrer Überprüfung.
 | Modi für Furigana, Glossen und Farbe: immer, beim Überfahren, unbekannte, nie | Automatisch |
 | Wortfenster: Definitionen, Status, Häufigkeit, Audio, Bilder, Beispiele und Links | Automatisch |
 | Strichfolge jedes Kanji, animiert und in einer Schleife, mit Pause und Einzelschritten | Automatisch, mit echten KanjiVG-Daten |
+| Kanji, die du schon kennst: neben den Strichen die bekannten oder gerade gelernten Wörter mit jedem Kanji des Worts, die bekannten zuerst | Automatisch, mit in die Datenbank gesetzten Wörtern |
 | Das Wortfenster öffnet sich mit dem Wörterbuch, ohne Anfrage an Claude | Simulator und echte Sitzung |
 | Bedeutung in diesem Satz, Erklären, Analysieren und Übersetzen mit Claude, auf Wunsch | Simulator, und echte Sitzung für die Bedeutung im Satz |
 | Jede Antwort wird gespeichert: Dasselbe Wort im selben Satz wird nicht erneut angefragt | Simulator und echte Sitzung |
@@ -139,6 +140,7 @@ Stand jeder Funktion in Version 0.19.0 und die Art ihrer Überprüfung.
 | Player für eigene Dateien | Automatisch |
 | In MKV eingebettete Untertitel und Wahl der Audiospur, mit ffmpeg.wasm | Automatisch |
 | Wortübersicht nach Status | Automatisch |
+| Immersionsstunden: die Zeit mit einem laufenden Video und Untertiteln in der Lernsprache, mit einem Buch im Viewer und beim Lesen in der Zwischenablage oder der Bibliothek; auf Start heute, die letzten sieben Tage, insgesamt, die Serie, ein Balken pro Tag und das am meisten Gesehene und Gelesene | Automatisch: ein eigenes Video, das wirklich läuft, und frühere Tage in der Datenbank |
 | Niveaubewertung | Automatisch |
 | Vollständige Einstellungen und bearbeitbare Prompts | Automatisch |
 | Sicherung aller Sprachen und der Einstellungen in einer einzigen Datei | Automatisch |

@@ -1,7 +1,7 @@
 // Punto de entrada del motor: vive en un documento offscreen para no detenerse a mitad de una tarea.
 
 import { type Ajustes, completarAjustes, modeloParaTranscribir, type ModeloWhisper } from '../compartido/ajustes';
-import type { ApiMotor, CambioPalabra, FiltroPalabras } from '../compartido/api';
+import type { ApiMotor, CambioPalabra, FiltroPalabras, PalabraConocida } from '../compartido/api';
 import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
 import { borrarArchivoDocumento } from '../compartido/documentos';
@@ -9,6 +9,7 @@ import { borrarGrabaciones, grabacionesDe } from '../compartido/dictados';
 import { olvidarOcr } from '../compartido/paginasOcr';
 import { grabacionesSinUso } from '../nucleo/dictado';
 import { aplicarCambio } from '../nucleo/estanteria';
+import { diaLocal, resumirInmersion } from '../nucleo/inmersion';
 import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
 import type { Linea } from '../nucleo/subtitulos';
@@ -77,6 +78,9 @@ async function arrancar() {
  */
 const baseDeEstudio = (estudio: string | undefined) => (estudio ? baseDe(paqueteDe(estudio).id) : db);
 
+/** En la ficha, junto a los trazos: cuántas palabras conocidas se enseñan de cada carácter. */
+const PALABRAS_POR_CARACTER = 8;
+
 const ESPERA_REPARACION_MS = 120000;
 
 /** Si una versión anterior dejó mal un diccionario, se vuelve a instalar solo en segundo plano. */
@@ -93,6 +97,7 @@ async function repararDiccionarios() {
 /** Lo que una copia de seguridad guarda de cada lengua. */
 interface DatosDeLengua {
   palabras?: never[];
+  inmersion?: never[];
   biblioteca?: never[];
   colecciones?: never[];
   anotaciones?: never[];
@@ -231,6 +236,32 @@ const api: ApiMotor = {
     ]);
     return { conocidas, aprendiendo, ignoradas, rastreadas };
   },
+
+  async palabrasConCaracteres(caracteres, excluir) {
+    // Primero las conocidas, y de cada grupo las más recientes: son las que más ayudan a recordar el carácter.
+    const filas = await db.palabras.where('estado').anyOf(['conocida', 'aprendiendo']).toArray();
+    const salida: Record<string, PalabraConocida[]> = {};
+    for (const c of caracteres) {
+      salida[c] = filas
+        .filter((f) => f.lema !== excluir && f.lema.includes(c))
+        .sort((a, b) => (a.estado === b.estado ? b.actualizada - a.actualizada : a.estado === 'conocida' ? -1 : 1))
+        .slice(0, PALABRAS_POR_CARACTER)
+        .map((f) => ({ lema: f.lema, lectura: f.lectura, estado: f.estado }));
+    }
+    return salida;
+  },
+
+  async sumarInmersion(tipo, fuente, titulo, segundos, estudio) {
+    // Un tic suma segundos; algo fuera de lo normal es un reloj roto, no una hora de estudio.
+    if (!(segundos > 0 && segundos <= 3600) || !fuente) return;
+    const base = baseDeEstudio(estudio);
+    const dia = diaLocal(Date.now());
+    await base.transaction('rw', base.inmersion, async () => {
+      const previa = await base.inmersion.get([dia, tipo, fuente]);
+      await base.inmersion.put({ dia, tipo, fuente, titulo: titulo || previa?.titulo || '', segundos: (previa?.segundos ?? 0) + segundos, actualizada: Date.now() });
+    });
+  },
+  resumenInmersion: async () => resumirInmersion(await db.inmersion.toArray(), diaLocal(Date.now())),
 
   async listarPalabras(f: FiltroPalabras) {
     let filas = await db.palabras.toArray();
@@ -537,6 +568,7 @@ const api: ApiMotor = {
         // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
         generados: await base.generados.toArray(),
         correcciones: await base.correcciones.toArray(),
+        inmersion: await base.inmersion.toArray(),
       };
     }
     // Las claves de API no van en la copia: un archivo así acaba en cualquier sitio. Se vuelven a escribir al restaurar.
@@ -556,6 +588,7 @@ const api: ApiMotor = {
       if (datos.memoria) await base.memoria.bulkPut(datos.memoria);
       if (datos.generados) await base.generados.bulkPut(datos.generados);
       if (datos.correcciones) await base.correcciones.bulkPut(datos.correcciones);
+      if (datos.inmersion) await base.inmersion.bulkPut(datos.inmersion);
     }
     if (d.consumo) await baseGeneral.consumo.bulkPut(d.consumo);
     await fondo.difundir({ tipo: 'palabrasRecargar' });

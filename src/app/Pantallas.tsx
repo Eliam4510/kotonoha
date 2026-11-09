@@ -20,6 +20,7 @@ import { anadirDictado } from '../nucleo/dictado';
 import { leerEstructura, normalizarTextoPlano, textoConEstructura, textoPlano } from '../nucleo/estructura';
 import { AvisoVersion } from './AvisoVersion';
 import { SeguirLeyendo } from './Biblioteca';
+import { TarjetaInmersion } from './Inmersion';
 import { Dictado, limpiarDictadosSiToca } from './Dictado';
 import { SelectorLengua } from './SelectorLengua';
 import { enviarAlCreador } from '../ui/borrador';
@@ -32,6 +33,7 @@ import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
+import { useRelojLectura } from '../ui/relojLectura';
 
 // ---------- Inicio ----------
 
@@ -219,6 +221,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
           )}
         </section>
 
+        <TarjetaInmersion />
         {ultimoLibro && <SeguirLeyendo e={ultimoLibro} />}
 
         <section class="tarjeta ap-c7" aria-labelledby="ap-t-video">
@@ -423,6 +426,8 @@ export function Lector({ ajustes, inicial, web = false }: { ajustes: Ajustes; in
   const [leyendo, fijarLeyendo] = useState(!!inicial);
   const textoActual = useRef(inicial);
   textoActual.current = texto;
+  // Las horas de inmersión: leer en el Portapapeles cuenta; escribir o pegar, no.
+  useRelojLectura(leyendo && texto.trim() ? 'portapapeles' : null, '', ajustes.idiomaObjetivo);
   useEffect(() => {
     if (inicial) {
       fijarTexto(inicial);

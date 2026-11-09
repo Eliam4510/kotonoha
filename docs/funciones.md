@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.19.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.20.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -26,6 +26,7 @@ Estado de cada función en la versión 0.19.0, con la forma en que se ha verific
 | Modos de furigana, glosas y color: siempre, al pasar, desconocidas, nunca | Automática |
 | Ficha de palabra: definiciones, estado, frecuencia, audio, imágenes, ejemplos y enlaces | Automática |
 | Orden de los trazos de cada kanji, animado y en bucle, con pausa y avance de uno en uno | Automática, con datos reales de KanjiVG |
+| Kanji que ya conoces: junto a los trazos, las palabras conocidas o en aprendizaje con cada kanji de la palabra, las conocidas primero | Automática, con palabras sembradas en la base |
 | La ficha abre con el diccionario, sin ninguna petición a Claude | Simulador y sesión real |
 | Qué significa en esta frase, explicar, desglosar y traducir con Claude, a petición | Simulador, y sesión real para el significado en la frase |
 | Cada respuesta se guarda: la misma palabra en la misma frase no se vuelve a pedir | Simulador y sesión real |
@@ -139,6 +140,7 @@ Estado de cada función en la versión 0.19.0, con la forma en que se ha verific
 | Reproductor de archivos propios | Automática |
 | Subtítulos incrustados en MKV y elección de pista de audio, con ffmpeg.wasm | Automática |
 | Explorador de palabras por estado | Automática |
+| Horas de inmersión: el tiempo con un video en marcha y subtítulos en la lengua que se estudia, con un libro en el visor y leyendo en el Portapapeles o la biblioteca; en Inicio, hoy, los últimos siete días, el total, la racha, una barra por día y lo que más se vio y leyó | Automática: un video propio que se reproduce de verdad y días anteriores sembrados en la base |
 | Evaluación de nivel | Automática |
 | Ajustes completos y prompts editables | Automática |
 | Copia de seguridad de todos los idiomas y de los ajustes, en un solo archivo | Automática |

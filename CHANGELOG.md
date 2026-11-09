@@ -2,6 +2,11 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.20.0 · 2026-11-09
+
+- **Kanji que ya conoces.** En la pestaña **Trazos** de la ficha, **Con estos kanji ya conoces** reúne, para cada kanji de la palabra, las que ya sabes o estás aprendiendo con él: 冷蔵庫 trae 冷たい, 車庫 y 金庫. El kanji nuevo se recuerda a partir de lo que ya se sabe.
+- **Horas de inmersión.** Kotonoha cuenta el tiempo que escuchas y lees la lengua que estudias: videos en marcha con sus subtítulos, también archivos propios, libros en el visor y lo que lees en el Portapapeles y la biblioteca. **Inicio** enseña las horas de hoy, de la semana y del total, la racha de días seguidos, una barra por día y lo que más has visto y leído. La copia de seguridad la incluye.
+
 ## 0.19.0 · 2026-11-09
 
 - **Moras especiales en la práctica del acento.** Con **Comprobar también っ, ん y vocales largas**, la práctica dice si en la grabación falta o sobra una っ (きて por きって), una ん (かじ por かんじ) o una vocal larga (おばさん por おばあさん), y marca la mora en el acento esperado. Lo oye en el equipo narabas, un modelo de fonemas del japonés que se descarga la primera vez (1,26 GB), se comprueba con su SHA-256 y va en la GPU solo si calcula igual que el procesador. Medido con pares mínimos dichos por dos voces sintéticas: vio 17 de 22 moras que faltaban y 10 de 10 de más, y no avisó de nada en 22 de 24 frases bien dichas.
@@ -155,6 +160,11 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.20.0 · 2026-11-09
+
+- **Kanji you already know.** On the **Strokes** tab of the word panel, **With these kanji you already know** gathers, for each kanji of the word, the words you already know or are learning with it: 冷蔵庫 brings up 冷たい, 車庫 and 金庫. The new kanji is remembered through what you already know.
+- **Immersion hours.** Kotonoha counts the time you spend listening to and reading the language you study: playing videos with their subtitles, including your own files, books in the viewer and what you read in the Clipboard and the library. **Home** shows the hours for today, the week and in total, your streak of days in a row, one bar per day and what you have watched and read the most. The backup includes it.
 
 ## 0.19.0 · 2026-11-09
 

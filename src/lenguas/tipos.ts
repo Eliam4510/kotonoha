@@ -322,6 +322,11 @@ export interface PaqueteLengua {
     /** Qué caracteres de una palabra se enseñan. */
     caracteres(palabra: string): string[];
     credito: { nombre: string; url: string; licencia: string };
+    /**
+     * Las palabras que ya se conocen con los mismos caracteres, junto a los trazos: cuáles se buscan (los kanji, no el
+     * kana) y qué se dice. En `ninguna`, `{0}` son los caracteres.
+     */
+    conocidas?: { caracteres(palabra: string): string[]; titulo: string; ninguna: string };
   };
   /** Para quien empieza desde cero: va antes de los niveles. */
   principiante: NivelLengua;

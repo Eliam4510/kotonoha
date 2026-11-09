@@ -2,6 +2,7 @@
 
 import type { OpcionesAnalisis } from '../lenguas/tipos';
 import type { Ajustes } from './ajustes';
+import type { ResumenInmersion, TipoInmersion } from '../nucleo/inmersion';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { DatosTrazos } from '../nucleo/trazos';
@@ -79,6 +80,12 @@ export interface CambioPalabra {
   rastreada?: boolean;
 }
 
+export interface PalabraConocida {
+  lema: string;
+  lectura: string;
+  estado: EstadoPalabra;
+}
+
 export interface ApiMotor {
   /** Pasa a estudiar otra lengua sin esperar a la siguiente petición. */
   fijarLengua(id: string): Promise<void>;
@@ -108,6 +115,11 @@ export interface ApiMotor {
   cambiarPalabras(cambios: CambioPalabra[]): Promise<void>;
   anadirConocidas(texto: string): Promise<number>;
   estadisticasPalabras(): Promise<EstadisticasPalabras>;
+  /** Las palabras conocidas o en aprendizaje que llevan cada carácter, sin la propia palabra: «Kanji que ya conoces». */
+  palabrasConCaracteres(caracteres: string[], excluir: string): Promise<Record<string, PalabraConocida[]>>;
+  /** Suma tiempo de inmersión: un video que se escucha o un texto que se lee en la lengua que se estudia. */
+  sumarInmersion(tipo: TipoInmersion, fuente: string, titulo: string, segundos: number, estudio?: string): Promise<void>;
+  resumenInmersion(): Promise<ResumenInmersion>;
   listarPalabras(filtro: FiltroPalabras): Promise<{ filas: FilaPalabra[]; total: number }>;
   muestraEvaluacion(): Promise<{ lema: string; lectura: string; rango: number }[]>;
   aplicarEvaluacion(rangoEstimado: number): Promise<number>;

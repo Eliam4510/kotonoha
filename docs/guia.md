@@ -59,7 +59,7 @@ Al abrir un video con subtítulos en japonés aparece una barra flotante en la p
 
 **En esta frase.** Con clave de Claude, el botón **¿Qué significa en esta frase?** indica el sentido de la palabra en ese contexto y señala cuándo el uso es figurado o poético. Claude recibe 40 líneas alrededor de la frase y la traducción. Las pestañas **Explicar**, **Desglose** y **Traducir** funcionan igual: preguntan al pulsarlas. Toda respuesta se guarda, de modo que volver a esa palabra en esa frase no gasta nada y la ficha lo indica con **Guardada, sin gasto**. El botón **Profundizar** repite la consulta con Opus 5.5.
 
-**Trazos.** La pestaña **Trazos** de la ficha enseña cómo se escribe cada kanji de la palabra: los trazos se dibujan uno a uno, en bucle y con su número. Se puede pausar, avanzar de uno en uno y cambiar la velocidad. Los datos son de [KanjiVG](https://kanjivg.tagaini.net): cada kanji se descarga la primera vez y queda guardado en el navegador.
+**Trazos.** La pestaña **Trazos** de la ficha enseña cómo se escribe cada kanji de la palabra: los trazos se dibujan uno a uno, en bucle y con su número. Se puede pausar, avanzar de uno en uno y cambiar la velocidad. Los datos son de [KanjiVG](https://kanjivg.tagaini.net): cada kanji se descarga la primera vez y queda guardado en el navegador. Debajo, **Con estos kanji ya conoces** reúne, para cada kanji, las palabras que lo llevan y ya están marcadas como conocidas o en aprendizaje (冷蔵庫: 冷たい, 車庫, 金庫), las conocidas primero: el kanji nuevo se recuerda a partir de lo que ya se sabe.
 
 **Navegador de subtítulos.** Con `G` se abre un panel lateral con todas las líneas, filtros, marcadores y selección múltiple. También permite unir líneas, crear varias tarjetas y sincronizar.
 
@@ -265,6 +265,8 @@ Nada de esto añade nada al contenido de la página. Los colores usan la CSS Cus
 **Reproductor local.** Reproduce archivos propios, con los subtítulos incrustados de un MKV y la elección de pista de audio, mediante ffmpeg.wasm.
 
 **Palabras y evaluación.** El explorador lista el vocabulario por estado, y la evaluación de nivel estima las palabras conocidas de partida.
+
+**Horas de inmersión.** Kotonoha cuenta el tiempo que se escucha y se lee la lengua que se estudia: un video en marcha con subtítulos en esa lengua, también un archivo propio; un libro abierto en el visor; y el Portapapeles o un texto de la biblioteca mientras se lee, es decir, con la página a la vista y algo hecho en ella en los últimos tres minutos. El video en pausa no cuenta. **Inicio** enseña las horas de hoy, de los últimos siete días y del total, la **Racha** de días seguidos con al menos cinco minutos, una barra por cada día de la semana y lo que más se ha visto y leído. Cada lengua lleva su propia cuenta, y la copia de seguridad la incluye.
 
 ## Estudiar inglés
 

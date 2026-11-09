@@ -108,7 +108,7 @@ El **Portapapeles** recoge lo que se copia en cualquier sitio y lo muestra con s
 
 <img src="docs/img/trazos.png" alt="Orden de los trazos de una palabra en la ficha" width="100%">
 
-La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y en bucle, con sus números.
+La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y en bucle, con sus números, y debajo, las palabras que ya conoces con ese mismo kanji.
 
 ### Inglés y alemán
 
@@ -118,6 +118,7 @@ En inglés, la ficha da la pronunciación americana y británica en IPA, encuent
 
 ### Y además
 
+- **Horas de inmersión.** Inicio cuenta el tiempo que escuchas y lees la lengua que estudias, con la racha de días seguidos.
 - **El gasto, a la vista.** La pantalla de inicio muestra lo gastado este mes en Claude, por días, modelos y tareas, con un tope mensual. Nada se paga dos veces: cada respuesta se guarda. El [estudio de costos](docs/costos.md) da cifras medidas.
 - **Repaso integrado.** Con el algoritmo FSRS, para quien no usa Anki.
 - **Archivos propios.** Un reproductor para videos del equipo, con los subtítulos que traiga el MKV.

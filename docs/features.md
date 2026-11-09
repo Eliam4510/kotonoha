@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.19.0, along with how it has been verified.
+Status of each feature in version 0.20.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -26,6 +26,7 @@ Status of each feature in version 0.19.0, along with how it has been verified.
 | Furigana, gloss and color modes: always, on hover, unknown only, never | Automated |
 | Word panel: definitions, status, frequency, audio, images, examples and links | Automated |
 | Stroke order of each kanji, animated and looping, with pause and step by step | Automated, with real KanjiVG data |
+| Kanji you already know: next to the strokes, the known or learning words with each kanji of the word, known ones first | Automated, with words seeded in the database |
 | The word panel opens with the dictionary, with no request to Claude | Simulator and real session |
 | Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator, and real session for the meaning in the sentence |
 | Every answer is stored: the same word in the same sentence is never requested again | Simulator and real session |
@@ -139,6 +140,7 @@ Status of each feature in version 0.19.0, along with how it has been verified.
 | Player for local files | Automated |
 | Embedded MKV subtitles and audio track selection, with ffmpeg.wasm | Automated |
 | Word explorer by status | Automated |
+| Immersion hours: the time with a playing video and subtitles in the language you study, with a book in the viewer and while reading in the Clipboard or the library; on Home, today, the last seven days, the total, the streak, one bar per day and what was watched and read the most | Automated: one of your own videos actually playing, and earlier days seeded in the database |
 | Level assessment | Automated |
 | Full settings and editable prompts | Automated |
 | Backups of every language and the settings, in a single file | Automated |

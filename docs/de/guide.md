@@ -59,7 +59,7 @@ Beim Öffnen eines Videos mit japanischen Untertiteln erscheint oben eine schweb
 
 **In diesem Satz.** Mit einem Claude-Schlüssel gibt die Schaltfläche **Was bedeutet es in diesem Satz?** den Sinn des Wortes in diesem Kontext an und weist auf übertragenen oder poetischen Gebrauch hin. Claude erhält 40 Zeilen rund um den Satz und die Übersetzung. Die Tabs **Erklären**, **Analyse** und **Übersetzen** funktionieren genauso: Sie fragen erst beim Anklicken. Jede Antwort wird gespeichert, sodass die Rückkehr zu diesem Wort in diesem Satz nichts kostet; das Wortfenster zeigt dann **Gespeichert, ohne Kosten** an. Die Schaltfläche **Vertiefen** wiederholt die Anfrage mit Opus 5.5.
 
-**Striche.** Der Tab **Striche** im Wortfenster zeigt, wie jedes Kanji des Wortes geschrieben wird: Die Striche werden einzeln gezeichnet, in einer Schleife und mit ihrer Nummer. Die Animation lässt sich anhalten, Strich für Strich durchgehen und in der Geschwindigkeit ändern. Die Daten stammen von [KanjiVG](https://kanjivg.tagaini.net): Jedes Kanji wird beim ersten Mal heruntergeladen und bleibt im Browser gespeichert.
+**Striche.** Der Tab **Striche** im Wortfenster zeigt, wie jedes Kanji des Wortes geschrieben wird: Die Striche werden einzeln gezeichnet, in einer Schleife und mit ihrer Nummer. Die Animation lässt sich anhalten, Strich für Strich durchgehen und in der Geschwindigkeit ändern. Die Daten stammen von [KanjiVG](https://kanjivg.tagaini.net): Jedes Kanji wird beim ersten Mal heruntergeladen und bleibt im Browser gespeichert. Darunter sammelt **Mit diesen Kanji kennst du schon** für jedes Kanji die Wörter, die es enthalten und schon als bekannt oder am Lernen markiert sind (冷蔵庫: 冷たい, 車庫, 金庫), die bekannten zuerst: Das neue Kanji merkt man sich über das, was man schon weiß.
 
 **Untertitel-Navigator.** `G` öffnet eine Seitenleiste mit allen Zeilen, Filtern, Markierungen und Mehrfachauswahl. Dort lassen sich auch Zeilen zusammenführen, mehrere Karten erstellen und Untertitel synchronisieren.
 
@@ -265,6 +265,8 @@ Nichts davon fügt dem Inhalt der Seite etwas hinzu. Die Farben verwenden die CS
 **Lokaler Player.** Spielt eigene Dateien ab, mit den eingebetteten Untertiteln einer MKV-Datei und der Wahl der Audiospur, über ffmpeg.wasm.
 
 **Wörter und Bewertung.** Die Übersicht listet den Wortschatz nach Status, und die Niveaubewertung schätzt die anfangs bekannten Wörter.
+
+**Immersionsstunden.** Kotonoha zählt die Zeit, in der man die Sprache hört und liest, die man lernt: ein laufendes Video mit Untertiteln in dieser Sprache, auch eine eigene Datei; ein im Viewer geöffnetes Buch; und die Zwischenablage oder einen Text der Bibliothek beim Lesen, also mit der Seite im Blick und einer Aktion darauf in den letzten drei Minuten. Ein pausiertes Video zählt nicht. **Start** zeigt die Stunden von heute, der letzten sieben Tage und insgesamt, die **Serie** von Tagen in Folge mit mindestens fünf Minuten, einen Balken pro Wochentag und das, was man am meisten gesehen und gelesen hat. Jede Sprache führt ihre eigene Zählung, und die Sicherung enthält sie.
 
 ## Englisch lernen
 

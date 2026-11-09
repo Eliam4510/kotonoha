@@ -163,6 +163,28 @@
 .ap-cifras-menores { display: flex; gap: 28px; margin: 0; }
 .ap-cifras-menores dt { font-size: 12px; font-weight: 600; color: var(--texto-3); }
 .ap-cifras-menores dd { margin: 2px 0 0; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; text-transform: capitalize; }
+/* Las horas de inmersión: las cifras, una barra por día de la semana y lo que más se vio. */
+.ap-inmersion { display: flex; flex-direction: column; gap: 14px; }
+.ap-inmersion-cuerpo { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(200px, 1fr); grid-template-areas: 'cifras dias' 'mas dias'; gap: 16px 32px; align-items: end; }
+.ap-inmersion-cifras { grid-area: cifras; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 16px 32px; }
+.ap-inmersion-cifras .ap-cifras-menores dd { text-transform: none; }
+.ap-inmersion-dias { grid-area: dias; align-self: stretch; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; min-height: 110px; margin: 0; padding: 0; list-style: none; }
+.ap-inmersion-dias li { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.ap-inmersion-barra { flex: 1; width: 100%; max-width: 24px; display: flex; align-items: flex-end; border-radius: 4px; background: var(--superficie-2); overflow: hidden; }
+.ap-inmersion-barra i { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--hoja); opacity: 0.5; }
+.ap-inmersion-dias li.hoy .ap-inmersion-barra i { opacity: 1; }
+.ap-inmersion-dias li:hover .ap-inmersion-barra { box-shadow: inset 0 0 0 1px var(--borde-2); }
+.ap-inmersion-dia { font-size: 11.5px; font-weight: 700; color: var(--texto-3); text-transform: uppercase; }
+.ap-inmersion-dias li.hoy .ap-inmersion-dia { color: var(--texto); }
+.ap-inmersion-mas { grid-area: mas; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ap-inmersion-mas ul { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.ap-inmersion-mas li { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.ap-inmersion-mas li .ico { flex: none; color: var(--texto-3); }
+.ap-inmersion-titulo { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-inmersion-mas .num { font-weight: 700; color: var(--texto-2); }
+@media (max-width: 760px) {
+  .ap-inmersion-cuerpo { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'cifras' 'dias' 'mas'; }
+}
 
 .ap-sendero .ayuda { margin-top: 30px; }
 .ap-sendero-pista { position: relative; height: 10px; border-radius: var(--r-pill); background: var(--superficie-3); }
