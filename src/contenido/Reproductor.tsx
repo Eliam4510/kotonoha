@@ -1,6 +1,6 @@
 // Interfaz sobre el video: isla, subtítulos, navegador, paneles y ventana de palabra.
 
-import { signal, useComputed, useSignal, useSignalEffect } from '@preact/signals';
+import { effect, signal, useComputed, useSignal, useSignalEffect } from '@preact/signals';
 import { memo } from 'preact/compat';
 import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 import { type Ajustes, guardarAjustes, NOMBRES_MODO } from '../compartido/ajustes';
@@ -73,6 +73,8 @@ import { Anillo, PanelesFlotantes, pestanaVideo } from './Paneles';
 import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas';
 import { numero, tm, tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
+import { BotonesEstadoGramatica, BotonOpcionMultiple, VistoEn } from '../ui/EstadoGramatica';
+import { estadoGramatica, gramaticaPorSaber } from '../ui/gramatica';
 
 export const ANCHO_NAVEGADOR = 380;
 
@@ -388,10 +390,11 @@ function Subtitulos() {
                 <div class="linea-texto" key={linea.id}>{linea.palabras.map((p, k) => <PalabraVista key={k} p={p} l={linea} />)}</div>
               </div>
             )}
-            {linea && a.mostrarGramatica && visObjetivo === 'visible' && (linea.gramatica?.length ?? 0) > 0 && (
+            {linea && a.mostrarGramatica && visObjetivo === 'visible' && gramaticaPorSaber(linea.gramatica).length > 0 && (
               <div class="fila-gram">
-                {linea.gramatica!.slice(0, 4).map((g) => (
-                  <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={tr(g.significado)} onClick={(e) => {
+                {/* Lo ya sabido no se señala: solo lo que queda por aprender. */}
+                {gramaticaPorSaber(linea.gramatica).slice(0, 4).map((g) => (
+                  <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''} estado-${estadoGramatica(g.patron)}`} title={tr(g.significado)} onClick={(e) => {
                     e.stopPropagation();
                     const c = e.currentTarget.getBoundingClientRect();
                     const caja = e.currentTarget.closest('.subs-bloque')?.getBoundingClientRect() ?? c;
@@ -494,6 +497,23 @@ function PopupPalabra() {
   );
 }
 
+/**
+ * Anota en qué video aparece cada punto de gramática: una vez por línea mostrada. Así la ficha del punto puede decir
+ * dónde se ha visto, y cuántas veces.
+ */
+const lineasVistas = new Set<string>();
+effect(() => {
+  const i = indiceVisual.value;
+  const l = i >= 0 ? lineasObjetivo.value[i] : null;
+  const info = infoVideo.value;
+  if (!l?.gramatica?.length || !info) return;
+  const fuente = info.idVideo ? `${info.sitio}:${info.idVideo}` : location.href.split('#')[0];
+  const clave = `${fuente}|${l.id}`;
+  if (lineasVistas.has(clave)) return;
+  lineasVistas.add(clave);
+  motor.verGramatica(l.gramatica.map((g) => g.patron), fuente, info.titulo, location.href.split('#')[0], l.texto).catch(() => {});
+});
+
 function PopupGramatica() {
   const c = consultaGramatica.value;
   if (!c) return null;
@@ -512,8 +532,11 @@ function PopupGramatica() {
         <button class="btn-icono chico relleno" data-tip={tr('Enviar al creador')} aria-label={tr('Enviar al creador de tarjetas')} onClick={() => enviarAlCreador({ tipo: 'frase', palabra: punto.patron, frase: linea.texto.replace(punto.fragmento, `<b>${punto.fragmento}</b>`), definicion: punto.significado, fuente: infoVideo.value?.titulo, url: location.href, etiquetas: ['gramatica', ...(punto.nivel ? [punto.nivel] : [])] })}><Icono n="enviar" t={15} /></button>
         <button class="btn-icono chico" aria-label={tr('Cerrar')} onClick={() => (consultaGramatica.value = null)}><Icono n="cerrar" t={15} /></button>
       </div>
+      <div class="gram-estado"><BotonesEstadoGramatica patron={punto.patron} /></div>
       <div class="gram-cuerpo">
         <PanelFlujo metodo="gramatica" args={[{ ...contextoDe(linea.texto, linea), lema: punto.patron, superficie: punto.fragmento }]} titulo={tr('Explicación')} />
+        <BotonOpcionMultiple punto={punto} frase={linea.texto} fuente={infoVideo.value?.titulo} url={location.href} />
+        <VistoEn patron={punto.patron} />
       </div>
     </div>
   );

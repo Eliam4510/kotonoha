@@ -8,6 +8,7 @@
 import type { AjustesLengua, ModoLectura, PromptPersonalizado } from '../compartido/ajustes';
 import type { EntradaDiccionario, FuenteBiblioteca, PalabraToken, ResultadoAudio } from '../compartido/tipos';
 import type { TipoMoraEspecial } from '../nucleo/alineacion';
+import type { FormasAnki } from '../nucleo/gramaticaAnki';
 import type { FraseAcentual } from '../nucleo/practicaAcento';
 import type { ReglasTranscripcion } from '../nucleo/transcripcion';
 import type { FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
@@ -433,6 +434,8 @@ export interface PromptsLengua {
   imagen: string;
   glosa(idioma: string): string;
   revisarLectura(idioma: string): string;
+  /** Tres puntos de gramática que se confunden con uno dado en una frase: las opciones falsas de una tarjeta. */
+  distractores(idioma: string): string;
   /** Revisa, con la imagen de la página delante, el texto que leyó el OCR de una página. */
   revisionOcr: string;
   esquemaRevisionOcr: unknown;
@@ -454,6 +457,8 @@ export interface MotorLengua {
   analizador: Analizador;
   /** Gramática sin IA, para que funcione al instante y sin conexión. */
   detectarGramatica(texto: string): PuntoGramatica[];
+  /** Todos los puntos que detecta, para casarlos con las tarjetas de Anki, y cómo se escriben en una tarjeta. */
+  gramaticaAnki: { puntos(): { patron: string; nivel?: string; significado: string }[]; formas: FormasAnki };
   prompts: PromptsLengua;
   transcripcion: TranscripcionLengua;
   /** La biblioteca de diccionarios abiertos. */

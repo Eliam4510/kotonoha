@@ -167,6 +167,8 @@ export const PROMPTS_JAPONES: PromptsLengua = {
   imagen: PROMPT_IMAGEN,
   glosa: promptGlosa,
   revisarLectura: promptRevisarLectura,
+  distractores: (idioma) =>
+    `Eres profesor de japonés y preparas una pregunta de opción múltiple sobre un punto de gramática. Recibes una frase real, el punto que aparece en ella, su sentido y el fragmento exacto. Propón tres opciones falsas: otros puntos de gramática que se confunden con este por la forma o por el sentido, del mismo nivel del JLPT o de uno cercano, escritos como se enseñan (〜べき, 〜はず, 〜わけ). Ninguna puede encajar bien en esa frase en lugar del fragmento. Para cada una, explica en ${idioma}, en una frase corta, por qué no va ahí.`,
   revisionOcr: promptRevisionOcr({
     lengua: 'japonés',
     confusiones:

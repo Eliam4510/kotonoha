@@ -20,6 +20,7 @@ import { Icono, Marca } from '../ui/iconos';
 import { aplicarLengua, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
 import { useTema } from '../ui/tema';
+import { seguirEstadosGramatica } from '../ui/gramatica';
 
 const INTERVALO_PORTAPAPELES = 1000;
 
@@ -70,6 +71,7 @@ function LectorWeb() {
       fijarCargados(true);
     });
     cargarFuentes().catch(() => {});
+    seguirEstadosGramatica(() => lengua.value.id);
     return alCambiarAjustes(fijarA);
   }, []);
 

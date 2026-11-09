@@ -17,6 +17,7 @@ import { ANCHO_NAVEGADOR, Reproductor } from './Reproductor';
 import { iniciarTarjetas } from './tarjetas';
 import { instalarAtajosWeb } from './webAtajos';
 import { bcp47Actual, fijarIdioma, tr, idiomaActual } from '../compartido/i18n';
+import { seguirEstadosGramatica } from '../ui/gramatica';
 
 const SITIOS_VIDEO = /(^|\.)(youtube\.com|netflix\.com|disneyplus\.com|viki\.com|iq\.com|bilibili\.com|crunchyroll\.com|primevideo\.com)$/;
 
@@ -68,6 +69,7 @@ async function iniciarReproductor() {
   instalarAtajos();
   instalarAtajosWeb(() => ajustes.value.activo, avisar);
   montar();
+  seguirEstadosGramatica(() => lengua.value.id);
   cargarFuentes({ soloLatin: lengua.value.id !== 'ja' && idiomaActual() !== 'ja' }).catch(() => {});
 
   // Efecto: reserva espacio para el navegador de subtítulos.

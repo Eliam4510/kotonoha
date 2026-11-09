@@ -14,6 +14,8 @@ import { formatoLectura, lengua } from './lengua';
 import { numero, tm, tr } from '../compartido/i18n';
 import { PanelTrazos } from './Trazos';
 import { type DatosTarjeta, type EstiloTarjeta, primerPunto, resolverLetra } from './tarjeta';
+import { BotonesEstadoGramatica, BotonOpcionMultiple, VistoEn } from './EstadoGramatica';
+import { estadoGramatica } from './gramatica';
 import { type Paleta, paletaDe } from './paletas';
 import { decirConNavegador } from './vozNavegador';
 
@@ -838,7 +840,7 @@ export function Ficha(p: PropsFicha) {
       <div class="subtitulo-def">{tr('Gramática en esta frase')}</div>
       <div class="ficha-chips">
         {p.gramatica.map((g) => (
-          <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''}`} title={tr(g.significado)} aria-pressed={patron?.patron === g.patron} onClick={() => {
+          <button key={g.patron} class={`chip-gram n-${g.nivel ?? ''} estado-${estadoGramatica(g.patron)}`} title={tr(g.significado)} aria-pressed={patron?.patron === g.patron} onClick={() => {
             fijarPatron(patron?.patron === g.patron ? null : g);
             if (compartida?.origen === 'gramatica') fijarCompartida(null);
           }}>
@@ -855,7 +857,10 @@ export function Ficha(p: PropsFicha) {
             </button>
           </div>
           {panelCompartir('gramatica')}
+          <BotonesEstadoGramatica patron={patron.patron} />
           <PanelFlujo metodo="gramatica" args={[{ ...contexto, lema: patron.patron }]} titulo={patron.patron} alTerminar={(texto) => fijarExplicacionPatron({ patron: patron.patron, texto })} />
+          <BotonOpcionMultiple punto={patron} frase={p.contexto.frase ?? ''} fuente={p.contexto.titulo} url={location.href} />
+          <VistoEn patron={patron.patron} />
         </div>
       )}
     </div>

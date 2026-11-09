@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.24.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.25.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -30,6 +30,7 @@ Stand jeder Funktion in Version 0.24.0 und die Art ihrer Überprüfung.
 | Als Bild teilen: eine Karte des Wortes (Furigana, Akzent, Bedeutung im Satz oder das Wörterbuch, der Satz mit dem hervorgehobenen Wort) oder eines Grammatikpunkts, beim Klicken in die Zwischenablage kopiert; Tinte oder Papier; Bild speichern | Automatisch, mit einem simulierten Claude, über die Zwischenablage |
 | JLPT: Wortschatz (8354 Wörter), Kanji (2211) und Grammatik (501 Punkte) von N5 bis N1 mit dem, was du von jeder Stufe kennst; Status einzeln oder für alle ausgewählten ändern; Kanji-Karte mit Strichen und Wörtern der Stufe; Beispiele jedes Grammatikpunkts aus gesehenen Sätzen und seine Erklärung durch Claude | Automatisch, mit einem simulierten Claude |
 | Wörterbuch: Suche nach Bedeutung unter gebräuchlichen Wörtern mit passender Glosse; JLPT-Grammatik nach Form oder Bedeutung; unter jedem Wort seine Kanji mit Stufe, Homophone und ähnliche Wörter (Claude); sieben Kategorien zum Erkunden nach den JMdict-Kennzeichnungen | Automatisch, mit den Wörterbüchern des Testprofils und einem simulierten Claude |
+| Grammatik mit Status: neu, im Lernen oder gelernt in der Videoblase, im Wortfenster, in der JLPT-Ansicht und im Wörterbuch; Gelerntes wird unter Untertiteln nicht markiert; wo jeder Punkt gesehen wurde; Multiple-Choice-Karte mit Ablenkern von Claude; Import aus Anki gegen die 501 Listenpunkte | Automatisch (Status, Filter, Speichern und Zurücksetzen in der JLPT-Ansicht); der Import mit Unit-Tests |
 | Das Wortfenster öffnet sich mit dem Wörterbuch, ohne Anfrage an Claude | Simulator und echte Sitzung |
 | Bedeutung in diesem Satz, Erklären, Analysieren und Übersetzen mit Claude, auf Wunsch | Simulator, und echte Sitzung für die Bedeutung im Satz |
 | Jede Antwort wird gespeichert: Dasselbe Wort im selben Satz wird nicht erneut angefragt | Simulator und echte Sitzung |

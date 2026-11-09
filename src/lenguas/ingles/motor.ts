@@ -5,7 +5,7 @@ import type { MotorLengua } from '../tipos';
 import { ANALIZADOR, candidatosCompuestos, describirPalabra } from './analizador';
 import { audiosIngles } from './audio';
 import { FUENTES, SECCIONES_OMITIDAS } from './diccionarios';
-import { detectarGramatica } from './gramatica';
+import { detectarGramatica, puntosGramatica } from './gramatica';
 import { PROMPTS_INGLES } from './prompts';
 import { filaPronunciacion } from './pronunciacion';
 import { REGLAS_TRANSCRIPCION } from './transcripcion';
@@ -41,6 +41,7 @@ const CATEGORIAS: Record<string, string> = { VERB: 'v', AUX: 'v', NOUN: 'n', PRO
 export const MOTOR_INGLES: MotorLengua = {
   analizador: ANALIZADOR,
   detectarGramatica,
+  gramaticaAnki: { puntos: puntosGramatica, formas: { colas: [''] } },
   prompts: PROMPTS_INGLES,
   transcripcion: { idioma: 'english', reglas: REGLAS_TRANSCRIPCION },
   diccionarios: FUENTES,

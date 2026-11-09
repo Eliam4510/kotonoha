@@ -10,6 +10,7 @@ import { olvidarOcr } from '../compartido/paginasOcr';
 import { grabacionesSinUso } from '../nucleo/dictado';
 import { aplicarCambio } from '../nucleo/estanteria';
 import { diaLocal, resumirInmersion } from '../nucleo/inmersion';
+import { puntosEnNotas } from '../nucleo/gramaticaAnki';
 import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
 import type { Linea } from '../nucleo/subtitulos';
@@ -82,6 +83,8 @@ const baseDeEstudio = (estudio: string | undefined) => (estudio ? baseDe(paquete
 
 /** En la ficha, junto a los trazos: cuántas palabras conocidas se enseñan de cada carácter. */
 const PALABRAS_POR_CARACTER = 8;
+/** En la ficha de un punto de gramática: los videos donde se vio, los más recientes. */
+const VIDEOS_POR_PUNTO = 5;
 
 const ESPERA_REPARACION_MS = 120000;
 
@@ -276,6 +279,58 @@ const api: ApiMotor = {
   categoriaDiccionario: (id, desde, limite) => explorar.categoriaDiccionario(id, desde, limite),
   cuentaCategorias: () => explorar.cuentaCategorias(),
   homofonos: (lectura, excluir) => explorar.homofonos(lectura, excluir),
+
+  async estadosGramatica(estudio) {
+    const filas = await baseDeEstudio(estudio).gramatica.toArray();
+    return Object.fromEntries(filas.filter((f) => f.estado !== 'nuevo').map((f) => [f.patron, f.estado]));
+  },
+  async fijarEstadoGramatica(patron, estado, estudio) {
+    const base = baseDeEstudio(estudio);
+    // Nuevo es no tener fila: así la tabla solo guarda lo que se ha decidido.
+    if (estado === 'nuevo') await base.gramatica.delete(patron);
+    else await base.gramatica.put({ patron, estado, actualizada: Date.now() });
+    await fondo.difundir({ tipo: 'gramatica' });
+  },
+  async verGramatica(patrones, fuente, titulo, url, frase, estudio) {
+    if (!fuente || !patrones.length) return;
+    const base = baseDeEstudio(estudio);
+    const ahora = Date.now();
+    await base.transaction('rw', base.gramaticaVista, async () => {
+      for (const patron of patrones) {
+        const clave = `${patron}|${fuente}`;
+        const previa = await base.gramaticaVista.get(clave);
+        await base.gramaticaVista.put({ clave, patron, fuente, titulo: titulo || previa?.titulo || '', url: url || previa?.url, frase, veces: (previa?.veces ?? 0) + 1, ultima: ahora });
+      }
+    });
+  },
+  async gramaticaVista(patron, estudio) {
+    const filas = await baseDeEstudio(estudio).gramaticaVista.where('patron').equals(patron).toArray();
+    return filas
+      .sort((a, b) => b.ultima - a.ultima)
+      .slice(0, VIDEOS_POR_PUNTO)
+      .map(({ clave: _clave, ...v }) => v);
+  },
+  async importarGramaticaAnki(consulta, campo) {
+    // Como las palabras: con intervalo de 21 días o más, sabido; si no, aprendiendo. Lo ya sabido no baja.
+    const filas = await anki.palabrasDeAnki(consulta, campo);
+    const { puntos, formas } = motorLengua().gramaticaAnki;
+    // Los que detectan las reglas y, si la lengua tiene listas por nivel, todos los de sus listas.
+    const carpeta = lengua().listasNivel?.carpeta;
+    const patrones = [...new Set([...puntos().map((p) => p.patron), ...(carpeta ? await niveles.patronesDeLasListas(carpeta) : [])])];
+    const sabidos = puntosEnNotas(patrones, filas.filter((f) => f.conocida).map((f) => f.texto), formas);
+    const aprendiendo = puntosEnNotas(patrones, filas.filter((f) => !f.conocida).map((f) => f.texto), formas);
+    const ahora = Date.now();
+    const cambios = [
+      ...[...sabidos].map((patron) => ({ patron, estado: 'sabido' as const, actualizada: ahora })),
+      ...[...aprendiendo].filter((p) => !sabidos.has(p)).map((patron) => ({ patron, estado: 'aprendiendo' as const, actualizada: ahora })),
+    ];
+    const previos = await db.gramatica.bulkGet(cambios.map((c) => c.patron));
+    const finales = cambios.filter((c, i) => !(previos[i]?.estado === 'sabido' && c.estado === 'aprendiendo'));
+    await db.gramatica.bulkPut(finales);
+    await fondo.difundir({ tipo: 'gramatica' });
+    return finales.length;
+  },
+  distractoresGramatica: async (punto, frase) => ia.distractoresGramatica(await aj(), punto, frase),
 
   async listarPalabras(f: FiltroPalabras) {
     let filas = await db.palabras.toArray();

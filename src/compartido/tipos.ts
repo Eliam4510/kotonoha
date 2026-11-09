@@ -8,6 +8,28 @@ export type EstadoPalabra = 'desconocida' | 'aprendiendo' | 'conocida' | 'ignora
 
 export const ESTADOS: EstadoPalabra[] = ['desconocida', 'aprendiendo', 'conocida', 'ignorada'];
 
+/** Cómo va un punto de gramática: sin fila en la base, nuevo. Los sabidos no se señalan en los subtítulos. */
+export type EstadoGramatica = 'nuevo' | 'aprendiendo' | 'sabido';
+
+export const ESTADOS_GRAMATICA: EstadoGramatica[] = ['nuevo', 'aprendiendo', 'sabido'];
+
+/** Dónde se vio un punto de gramática: un video, con la última frase y cuántas líneas distintas lo llevaban. */
+export interface GramaticaVista {
+  patron: string;
+  fuente: string;
+  titulo: string;
+  url?: string;
+  frase: string;
+  veces: number;
+  ultima: number;
+}
+
+/** Una opción falsa de una tarjeta de opción múltiple: otro punto que se confunde con el bueno, y por qué no va. */
+export interface OpcionFalsa {
+  patron: string;
+  motivo: string;
+}
+
 /** Palabra de una línea, ya enriquecida con datos del diccionario y tu estado. */
 export interface PalabraToken {
   superficie: string;

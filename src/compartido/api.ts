@@ -1,6 +1,6 @@
 // Contratos de las llamadas entre contextos.
 
-import type { OpcionesAnalisis } from '../lenguas/tipos';
+import type { OpcionesAnalisis, PuntoGramatica } from '../lenguas/tipos';
 import type { Ajustes } from './ajustes';
 import type { ResumenInmersion, TipoInmersion } from '../nucleo/inmersion';
 import type { EntradaBreve } from '../nucleo/explorar';
@@ -16,15 +16,18 @@ import type {
   ElementoBiblioteca,
   EstadisticasPalabras,
   EstadoAnki,
+  EstadoGramatica,
   EstadoPalabra,
   FilaPalabra,
   FraseEjemplo,
   FuenteBiblioteca,
+  GramaticaVista,
   InfoDiccionario,
   CaracterConNivel,
   LineaAnalizada,
   ListaNivel,
   PuntoEncontrado,
+  OpcionFalsa,
   PalabraToken,
   ResumenNivel,
   PeticionRevisionOcr,
@@ -131,6 +134,17 @@ export interface ApiMotor {
   prepararVoz(uso: 'practica' | 'dictado'): Promise<void>;
   /** Lo mismo con narabas, el modelo de las moras de la práctica. */
   prepararMoras(): Promise<void>;
+  /** Los puntos de gramática que no son nuevos, con su estado. */
+  estadosGramatica(estudio?: string): Promise<Record<string, EstadoGramatica>>;
+  fijarEstadoGramatica(patron: string, estado: EstadoGramatica, estudio?: string): Promise<void>;
+  /** Anota que una línea de un video llevaba estos puntos de gramática. */
+  verGramatica(patrones: string[], fuente: string, titulo: string, url: string, frase: string, estudio?: string): Promise<void>;
+  /** Dónde se vio un punto, lo más reciente primero. */
+  gramaticaVista(patron: string, estudio?: string): Promise<GramaticaVista[]>;
+  /** Marca como sabidos, o en aprendizaje, los puntos de gramática que aparecen en unas tarjetas de Anki. */
+  importarGramaticaAnki(consulta: string, campo: string): Promise<number>;
+  /** Tres puntos de gramática que se confunden con este en esta frase, para una tarjeta de opción múltiple. */
+  distractoresGramatica(punto: PuntoGramatica, frase: string): Promise<OpcionFalsa[]>;
   listarPalabras(filtro: FiltroPalabras): Promise<{ filas: FilaPalabra[]; total: number }>;
   /** Las listas de un nivel del examen de la lengua (el JLPT), cruzadas con lo que se sabe de cada palabra. */
   listaNivel(carpeta: string, nivel: string): Promise<ListaNivel>;
@@ -279,6 +293,7 @@ export interface ApiFondo {
 export type EventoDifundido =
   | { tipo: 'palabras'; cambios: CambioPalabra[] }
   | { tipo: 'palabrasRecargar' }
+  | { tipo: 'gramatica' }
   | { tipo: 'instalacion'; progreso: ProgresoInstalacion }
   | { tipo: 'diccionarios' }
   | { tipo: 'captura'; activa: boolean }

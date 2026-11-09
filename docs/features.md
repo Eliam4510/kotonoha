@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.24.0, along with how it has been verified.
+Status of each feature in version 0.25.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -30,6 +30,7 @@ Status of each feature in version 0.24.0, along with how it has been verified.
 | Share as image: a card for the word (furigana, pitch accent, what it means in the sentence or the dictionary, the sentence with the word highlighted) or for a grammar point, copied to the clipboard on click; Ink or Paper; Save image | Automated, with a simulated Claude, reading the clipboard |
 | JLPT: vocabulary (8,354 words), kanji (2,211) and grammar (501 points) from N5 to N1 with what you know of each level; change the status one by one or all selected; kanji card with strokes and words of the level; examples of each grammar point among the sentences you have seen, and its explanation by Claude | Automated, with a simulated Claude |
 | Dictionary: search by meaning among common words, with the matching gloss; JLPT grammar by form or meaning; under each word, its kanji with their level, homophones and similar words (Claude); seven categories to explore from the JMdict tags | Automated, with the test profile dictionaries and a simulated Claude |
+| Grammar with statuses: new, learning or known in the video bubble, the word panel, the JLPT screen and the dictionary; known points are not flagged under subtitles; where each point was seen; multiple-choice card with distractors from Claude; import from Anki against the 501 list points | Automated (statuses, filter, saving and undo on the JLPT screen); the import, with unit tests |
 | The word panel opens with the dictionary, with no request to Claude | Simulator and real session |
 | Meaning in this sentence, explain, break down and translate with Claude, on request | Simulator, and real session for the meaning in the sentence |
 | Every answer is stored: the same word in the same sentence is never requested again | Simulator and real session |

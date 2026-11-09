@@ -894,6 +894,8 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
   const [mensaje, fijarMensaje] = useState<{ texto: string; error?: boolean } | null>(null);
   const [consulta, fijarConsulta] = useState('deck:*');
   const [campoImport, fijarCampoImport] = useState('');
+  const [consultaGramatica, fijarConsultaGramatica] = useState('deck:*');
+  const [campoGramatica, fijarCampoGramatica] = useState('');
 
   useEffect(() => {
     refrescarAnki();
@@ -976,6 +978,22 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
                 fijarMensaje({ texto: tr('Importando…') });
                 try {
                   fijarMensaje({ texto: tr('{0} palabras importadas.', await motor.importarConocidasAnki(consulta, campoImport)) });
+                } catch (err) {
+                  fijarMensaje({ texto: err instanceof Error ? err.message : String(err), error: true });
+                }
+              }}>{tr('Importar')}</button>
+            </div>
+          </div>
+          <Subtitulo>{tr('Importar gramática desde Anki')}</Subtitulo>
+          <div class="ap-grupo ap-importar-anki">
+            <p class="ayuda">{tr('Busca en el campo indicado los puntos de gramática que Kotonoha conoce. Los de tarjetas con intervalo de 21 días o más quedan como sabidos y dejan de señalarse en los subtítulos; el resto, en aprendizaje.')}</p>
+            <div class="ap-importar-fila">
+              <input class="campo" aria-label={tr('Búsqueda de Anki para la gramática')} placeholder="deck:…" value={consultaGramatica} onInput={(ev) => fijarConsultaGramatica(ev.currentTarget.value)} />
+              <input class="campo ap-campo-corto" aria-label={tr('Campo con el punto de gramática')} placeholder={tr('Campo')} value={campoGramatica} onInput={(ev) => fijarCampoGramatica(ev.currentTarget.value)} />
+              <button class="btn" disabled={!campoGramatica} onClick={async () => {
+                fijarMensaje({ texto: tr('Importando…') });
+                try {
+                  fijarMensaje({ texto: tr('{0} puntos de gramática importados.', await motor.importarGramaticaAnki(consultaGramatica, campoGramatica)) });
                 } catch (err) {
                   fijarMensaje({ texto: err instanceof Error ? err.message : String(err), error: true });
                 }

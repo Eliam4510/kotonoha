@@ -12,6 +12,9 @@ import { NOMBRE_ESTADO, PanelFlujo } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { PanelTrazos } from '../ui/Trazos';
+import { BotonesEstadoGramatica, VistoEn } from '../ui/EstadoGramatica';
+import { estadoGramatica, estadosGramatica, NOMBRE_ESTADO_GRAMATICA } from '../ui/gramatica';
+import type { EstadoGramatica } from '../compartido/tipos';
 import { guardarPreferencia, leerPreferencia, navegar } from './estadoApp';
 import { Cabecera, Vacio } from './Piezas';
 
@@ -24,6 +27,17 @@ const FILTROS: { id: Filtro; nombre: string; punto?: EstadoPalabra }[] = [
   { id: 'aprendiendo', nombre: tm('Aprendiendo'), punto: 'aprendiendo' },
   { id: 'conocidas', nombre: tm('Conocidas'), punto: 'conocida' },
 ];
+
+/** Los mismos filtros, con los nombres de los estados de la gramática. */
+const FILTROS_GRAMATICA: { id: Filtro; nombre: string; punto?: string }[] = [
+  { id: 'todas', nombre: tm('Todos') },
+  { id: 'nuevas', nombre: tm('Nuevos'), punto: 'nuevo' },
+  { id: 'aprendiendo', nombre: tm('Aprendiendo'), punto: 'aprendiendo' },
+  { id: 'conocidas', nombre: tm('Sabidos'), punto: 'sabido' },
+];
+
+const pasaFiltroGramatica = (estado: EstadoGramatica, f: Filtro) =>
+  f === 'todas' || (f === 'nuevas' ? estado === 'nuevo' : f === 'aprendiendo' ? estado === 'aprendiendo' : estado === 'sabido');
 
 const pasaFiltro = (estado: EstadoPalabra, f: Filtro) =>
   f === 'todas' || (f === 'nuevas' ? estado === 'desconocida' : f === 'aprendiendo' ? estado === 'aprendiendo' : estado === 'conocida' || estado === 'ignorada');
@@ -45,7 +59,7 @@ function Anillo({ parte, aprendiendo }: { parte: number; aprendiendo: number }) 
   );
 }
 
-function TarjetaNivel({ id, r, activo, listas, alElegir }: { id: string; r?: ResumenNivel; activo: boolean; listas: ListasNivelLengua; alElegir: () => void }) {
+function TarjetaNivel({ id, r, activo, listas, alElegir, sabidos }: { id: string; r?: ResumenNivel; activo: boolean; listas: ListasNivelLengua; alElegir: () => void; sabidos: number }) {
   const parte = r?.palabras.total ? r.palabras.conocidas / r.palabras.total : 0;
   const aprendiendo = r?.palabras.total ? r.palabras.aprendiendo / r.palabras.total : 0;
   return (
@@ -57,7 +71,7 @@ function TarjetaNivel({ id, r, activo, listas, alElegir }: { id: string; r?: Res
       <dl>
         <div><dt>{tr('Vocabulario')}</dt><dd class="num">{r ? `${numero(r.palabras.conocidas)} / ${numero(r.palabras.total)}` : '–'}</dd></div>
         {listas.caracteres && <div><dt>{tr(listas.caracteres)}</dt><dd class="num">{r ? `${numero(r.caracteres.conocidas)} / ${numero(r.caracteres.total)}` : '–'}</dd></div>}
-        <div><dt>{tr('Gramática')}</dt><dd class="num">{r ? numero(r.gramatica.total) : '–'}</dd></div>
+        <div><dt>{tr('Gramática')}</dt><dd class="num">{r ? `${numero(sabidos)} / ${numero(r.gramatica.total)}` : '–'}</dd></div>
       </dl>
     </button>
   );
@@ -136,10 +150,18 @@ function PantallaNiveles({ listas, ajustes }: { listas: ListasNivelLengua; ajust
     [lista, filtro, texto]
   );
   const idioma = idiomaActual();
+  const estados = estadosGramatica.value;
   const gramatica = useMemo(
-    () => (lista?.gramatica ?? []).filter((g) => !texto || g.patron.includes(texto) || significadoEn(g, idioma).toLowerCase().includes(texto)),
-    [lista, texto, idioma]
+    () => (lista?.gramatica ?? []).filter((g) => pasaFiltroGramatica(estados[g.patron] ?? 'nuevo', filtro) && (!texto || g.patron.includes(texto) || significadoEn(g, idioma).toLowerCase().includes(texto))),
+    [lista, texto, idioma, filtro, estados]
   );
+  // Los patrones de cada nivel, para contar en sus tarjetas los que ya se saben.
+  const [patronesPorNivel, fijarPatronesPorNivel] = useState<Record<string, string[]>>({});
+  useEffect(() => {
+    Promise.all(listas.niveles.map((n) => motor.listaNivel(listas.carpeta, n).then((l) => [n, l.gramatica.map((g) => g.patron)] as const)))
+      .then((pares) => fijarPatronesPorNivel(Object.fromEntries(pares)))
+      .catch(() => {});
+  }, []);
 
   const cambiar = async (filas: PalabraNivel[], estado: EstadoPalabra) => {
     await motor.cambiarPalabras(filas.map((f) => ({ clave: f.clave, lema: f.lema, lectura: f.lectura, estado })));
@@ -159,7 +181,7 @@ function PantallaNiveles({ listas, ajustes }: { listas: ListasNivelLengua; ajust
 
       <div class="ap-niveles-tarjetas" role="radiogroup" aria-label={tr('Nivel')}>
         {listas.niveles.map((n) => (
-          <TarjetaNivel key={n} id={n} r={resumen?.find((x) => x.nivel === n)} activo={n === nivel} listas={listas} alElegir={() => elegirNivel(n)} />
+          <TarjetaNivel key={n} id={n} r={resumen?.find((x) => x.nivel === n)} activo={n === nivel} listas={listas} alElegir={() => elegirNivel(n)} sabidos={patronesPorNivel[n]?.filter((x) => estadosGramatica.value[x] === 'sabido').length ?? 0} />
         ))}
       </div>
 
@@ -175,11 +197,11 @@ function PantallaNiveles({ listas, ajustes }: { listas: ListasNivelLengua; ajust
           <Icono n="buscar" t={16} />
           <input aria-label={tr('Buscar en la lista')} placeholder={tr('Buscar')} value={busqueda} onInput={(e) => fijarBusqueda(e.currentTarget.value)} />
         </label>
-        {pestana !== 'gramatica' && (
+        {(
           <div class="segmentado" role="radiogroup" aria-label={tr('Filtrar por estado')}>
-            {FILTROS.map((f) => (
+            {(pestana === 'gramatica' ? FILTROS_GRAMATICA : FILTROS).map((f) => (
               <button key={f.id} role="radio" aria-checked={filtro === f.id} class={filtro === f.id ? 'activo' : ''} onClick={() => fijarFiltro(f.id)}>
-                {f.punto && <i class={`ap-punto-estado ${f.punto}`} />}
+                {f.punto && <i class={pestana === 'gramatica' ? `punto-gram ${f.punto}` : `ap-punto-estado ${f.punto}`} />}
                 {tr(f.nombre)}
               </button>
             ))}
@@ -345,7 +367,7 @@ function ListaGramatica({ gramatica, idioma, abierta, alAbrir }: { gramatica: Gr
       {gramatica.map((g) => (
         <div key={g.patron} class={`ap-patron ${abierta === g.patron ? 'abierto' : ''}`} role="listitem">
           <button class="ap-patron-cab" aria-expanded={abierta === g.patron} onClick={() => alAbrir(abierta === g.patron ? null : g.patron)}>
-            <b lang={lengua.value.id}>{g.patron}</b>
+            <b lang={lengua.value.id}><i class={`punto-gram ${estadoGramatica(g.patron)}`} aria-label={tr(NOMBRE_ESTADO_GRAMATICA[estadoGramatica(g.patron)])} /> {g.patron}</b>
             <span>{significadoEn(g, idioma)}</span>
             <Icono n={abierta === g.patron ? 'arriba' : 'abajo'} t={14} />
           </button>
@@ -380,6 +402,7 @@ export function DetalleGramatica({ g, idioma }: { g: GramaticaNivel; idioma: str
   }, [g.patron]);
   return (
     <div class="ap-patron-detalle">
+      <BotonesEstadoGramatica patron={g.patron} />
       <div class="subtitulo-def">{tr('En lo que has visto')}</div>
       {ejemplos === null && <span class="giro" />}
       {ejemplos?.length === 0 && <p class="ayuda">{tr('Aún no ha salido en tus videos, páginas ni libros. Cuando aparezca, sus frases se verán aquí.')}</p>}
@@ -391,6 +414,7 @@ export function DetalleGramatica({ g, idioma }: { g: GramaticaNivel; idioma: str
           </div>
         </div>
       ))}
+      <VistoEn patron={g.patron} />
       {explicar ? (
         <PanelFlujo
           metodo="preguntar"

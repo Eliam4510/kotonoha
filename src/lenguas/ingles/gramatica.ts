@@ -72,3 +72,6 @@ const REGLAS: ReglaGramatica[] = [
 ];
 
 export const detectarGramatica = (texto: string): PuntoGramatica[] => aplicarReglas(REGLAS, texto.replace(/[’ʼ]/g, "'"));
+
+/** Todos los puntos que se detectan, sin su expresión regular: para casarlos con tarjetas de Anki. */
+export const puntosGramatica = () => REGLAS.map(({ patron, nivel, significado }) => ({ patron, nivel, significado }));

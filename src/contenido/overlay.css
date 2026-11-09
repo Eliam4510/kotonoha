@@ -371,3 +371,4 @@
 .lector-grupo { display: flex; flex-direction: column; gap: 6px; }
 .lector-panel b { font-weight: 700; }
 .lector-panel .segmentado button { flex: 1; padding-inline: 4px; font-size: 12px; }
+.gram-estado { flex: none; padding: 0 14px 8px 18px; }

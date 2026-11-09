@@ -23,6 +23,7 @@ import { Niveles } from './Niveles';
 import { ReproductorLocal } from './ReproductorLocal';
 import { MenuLengua } from './SelectorLengua';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
+import { seguirEstadosGramatica } from '../ui/gramatica';
 
 interface Ruta {
   id: string;
@@ -175,6 +176,7 @@ function App() {
       fijarCargados(true);
     });
     cargarFuentes().catch(() => {});
+    seguirEstadosGramatica(() => lengua.value.id);
     const quitar = alCambiarAjustes(fijarA);
     const alCambiarHash = () => fijarRuta(leerRuta());
     window.addEventListener('hashchange', alCambiarHash);
