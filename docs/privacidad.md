@@ -10,7 +10,7 @@ Kotonoha es una extensión de navegador de código abierto para aprender idiomas
 
 ### Lo que se guarda y dónde
 
-Todo lo que Kotonoha guarda queda en el navegador de quien la usa, en su almacenamiento local (IndexedDB, el almacenamiento privado de archivos y `chrome.storage`): palabras, tarjetas, biblioteca, libros importados, lo leído por el OCR, notas, subtítulos generados, grabaciones del dictado, ajustes y claves de API. Nada de eso sale del equipo salvo en los casos que se describen abajo. Se borra al desinstalar la extensión.
+Todo lo que Kotonoha guarda queda en el navegador de quien la usa, en su almacenamiento local (IndexedDB, el almacenamiento privado de archivos y `chrome.storage`): palabras, tarjetas, biblioteca, libros importados, lo leído por el OCR, notas, subtítulos generados, grabaciones del dictado, el tiempo de inmersión, ajustes y claves de API. Nada de eso sale del equipo salvo en los casos que se describen abajo. Se borra al desinstalar la extensión.
 
 La copia de seguridad y la copia completa son archivos que el usuario guarda donde decide; no incluyen las claves de API.
 
@@ -51,7 +51,7 @@ Kotonoha is an open-source browser extension for learning languages from real vi
 
 ### What is stored, and where
 
-Everything Kotonoha stores stays in the user's browser, in its local storage (IndexedDB, the origin private file system and `chrome.storage`): words, flashcards, the library, imported books, OCR results, notes, generated subtitles, dictation recordings, settings and API keys. None of it leaves the computer except in the cases described below. It is deleted when the extension is uninstalled.
+Everything Kotonoha stores stays in the user's browser, in its local storage (IndexedDB, the origin private file system and `chrome.storage`): words, flashcards, the library, imported books, OCR results, notes, generated subtitles, dictation recordings, immersion time, settings and API keys. None of it leaves the computer except in the cases described below. It is deleted when the extension is uninstalled.
 
 The backup and the full copy are files the user saves wherever they choose; they do not include API keys.
 

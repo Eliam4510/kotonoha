@@ -2,7 +2,8 @@
 // se ve nítido a cualquier tamaño, sigue el tema claro u oscuro, y se puede parar y avanzar de uno en uno.
 
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { tr } from '../compartido/i18n';
+import { tm, tr } from '../compartido/i18n';
+import type { PalabraConocida } from '../compartido/api';
 import { motor } from '../compartido/rpc';
 import { type DatosTrazos, hechosPorCaracter } from '../nucleo/trazos';
 import { Icono } from './iconos';
@@ -44,6 +45,62 @@ function Lienzo({ k, hechos, dibujando, duracion, ultimo }: { k: Cargado; hechos
         <b lang={lengua.value.id}>{k.caracter}</b> · {total === 1 ? tr('1 trazo') : tr('{0} trazos', total)}
       </figcaption>
     </figure>
+  );
+}
+
+/** Las que salen junto a los trazos: las conocidas y las que se están aprendiendo. */
+const NOMBRE_ESTADO: Record<string, string> = { conocida: tm('Conocida'), aprendiendo: tm('Aprendiendo') };
+
+/** El carácter resaltado dentro de la palabra: 冷 en 冷たい. */
+function conResaltado(lema: string, caracter: string) {
+  const partes = lema.split(caracter);
+  return partes.flatMap((p, i) => (i ? [<b key={i}>{caracter}</b>, p] : [p]));
+}
+
+/**
+ * Las palabras que ya se conocen, o se están aprendiendo, con los mismos caracteres que la que se consulta: el kanji
+ * nuevo se recuerda a partir de lo que ya se sabe (冷蔵庫: 冷たい, 金庫).
+ */
+function Conocidas({ palabra }: { palabra: string }) {
+  const conf = lengua.value.trazos?.conocidas;
+  const caracteres = useMemo(() => conf?.caracteres(palabra) ?? [], [palabra, conf]);
+  const [lista, fijarLista] = useState<Record<string, PalabraConocida[]> | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    fijarLista(null);
+    if (caracteres.length) {
+      motor
+        .palabrasConCaracteres(caracteres, palabra)
+        .then((l) => vivo && fijarLista(l))
+        .catch(() => {});
+    }
+    return () => {
+      vivo = false;
+    };
+  }, [palabra, caracteres.join('')]);
+  if (!conf || !caracteres.length || !lista) return null;
+  const con = caracteres.filter((c) => lista[c]?.length);
+  return (
+    <section class="trazos-conocidas" aria-label={tr(conf.titulo)}>
+      <h4>{tr(conf.titulo)}</h4>
+      {con.length ? (
+        con.map((c) => (
+          <div class="trazos-conocidas-fila" key={c}>
+            <span class="trazos-conocidas-caracter" lang={lengua.value.id}>{c}</span>
+            <ul>
+              {lista[c].map((p) => (
+                <li key={`${p.lema}|${p.lectura}`} class={p.estado} title={NOMBRE_ESTADO[p.estado] ? tr(NOMBRE_ESTADO[p.estado]) : undefined}>
+                  <span lang={lengua.value.id}>{conResaltado(p.lema, c)}</span>
+                  {p.lectura && p.lectura !== p.lema && <small lang={lengua.value.id}>{p.lectura}</small>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      ) : (
+        <p class="ayuda">{tr(conf.ninguna, caracteres.join(' '))}</p>
+      )}
+    </section>
   );
 }
 
@@ -137,6 +194,7 @@ export function PanelTrazos({ palabra }: { palabra: string }) {
           </div>
         </div>
       )}
+      <Conocidas palabra={palabra} />
       {fuente && <p class="trazos-credito"><a href={fuente.credito.url} target="_blank" rel="noreferrer noopener">{fuente.credito.nombre}</a>{` · ${fuente.credito.licencia}`}</p>}
     </div>
   );

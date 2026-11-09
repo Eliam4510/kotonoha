@@ -104,7 +104,7 @@ Die **Zwischenablage** sammelt, was irgendwo kopiert wird, und zeigt es mit Abs�
 
 <img src="docs/img/trazos.de.png" alt="Strichfolge eines Wortes im Wortfenster" width="100%">
 
-Das Wortfenster zeigt die Strichfolge jedes Kanji im Wort, Strich für Strich und in Schleife, mit ihren Nummern.
+Das Wortfenster zeigt die Strichfolge jedes Kanji im Wort, Strich für Strich und in Schleife, mit ihren Nummern, und darunter die Wörter, die du mit demselben Kanji schon kennst.
 
 ### Auch Englisch
 
@@ -114,6 +114,7 @@ Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache i
 
 ### Außerdem
 
+- **Immersionsstunden.** Die Startseite zählt die Zeit, in der du die Lernsprache hörst und liest, mit deiner Serie von Tagen in Folge.
 - **Die Kosten im Blick.** Die Startseite zeigt, was Claude in diesem Monat gekostet hat, nach Tagen, Modellen und Aufgaben, mit einem Monatslimit. Nichts wird zweimal bezahlt: Jede Antwort wird gespeichert. Die [Kostenstudie](docs/de/costs.md) nennt gemessene Zahlen.
 - **Eingebaute Wiederholung.** Mit dem FSRS-Algorithmus, für alle, die Anki nicht nutzen.
 - **Eigene Dateien.** Ein Player für Videos auf dem Rechner, mit den Untertiteln aus einer MKV-Datei.

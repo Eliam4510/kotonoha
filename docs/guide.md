@@ -59,7 +59,7 @@ When a video with Japanese subtitles opens, a floating bar appears at the top. I
 
 **In this sentence.** With a Claude key, the **What does it mean in this sentence?** button gives the meaning of the word in that context and flags figurative or poetic use. Claude receives 40 lines around the sentence and the translation. The **Explain**, **Breakdown** and **Translate** tabs work the same way: they ask when pressed. Every answer is stored, so coming back to that word in that sentence costs nothing, and the panel says so with **Saved, no cost**. The **Go deeper** button repeats the query with Opus 5.5.
 
-**Strokes.** The **Strokes** tab on the word panel shows how each kanji in the word is written: strokes are drawn one by one, in a loop, with their numbers. It can be paused, stepped through and sped up or slowed down. The data comes from [KanjiVG](https://kanjivg.tagaini.net): each kanji is downloaded the first time and stays in the browser.
+**Strokes.** The **Strokes** tab on the word panel shows how each kanji in the word is written: strokes are drawn one by one, in a loop, with their numbers. It can be paused, stepped through and sped up or slowed down. The data comes from [KanjiVG](https://kanjivg.tagaini.net): each kanji is downloaded the first time and stays in the browser. Below, **With these kanji you already know** gathers, for each kanji, the words that contain it and are already marked as known or learning (冷蔵庫: 冷たい, 車庫, 金庫), known ones first: the new kanji is remembered through what you already know.
 
 **Subtitle navigator.** `G` opens a side panel with every line, filters, bookmarks and multiple selection. It can also merge lines, create several cards and synchronize.
 
@@ -265,6 +265,8 @@ None of this adds anything to the page's content. Colors use the CSS Custom High
 **Local player.** Plays local files, with the embedded subtitles of an MKV and a choice of audio track, through ffmpeg.wasm.
 
 **Words and assessment.** The explorer lists vocabulary by status, and the level assessment estimates the initial known words.
+
+**Immersion hours.** Kotonoha counts the time spent listening to and reading the language you study: a playing video with subtitles in that language, including your own files; a book open in the viewer; and the Clipboard or a library text while you read, that is, with the page in view and something done on it in the last three minutes. A paused video does not count. **Home** shows the hours for today, the last seven days and in total, the **Streak** of days in a row with at least five minutes, one bar per day of the week, and what you have watched and read the most. Each language keeps its own count, and the backup includes it.
 
 ## Studying English
 

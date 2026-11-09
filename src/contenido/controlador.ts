@@ -53,6 +53,7 @@ import {
 } from './estado';
 import type { Control } from './puente';
 import { tm, tr } from '../compartido/i18n';
+import { relojInmersion } from '../compartido/relojInmersion';
 import { lengua } from '../ui/lengua';
 
 let control: Control;
@@ -87,6 +88,19 @@ export function iniciarControlador(c: Control) {
 
   setInterval(tick, 50);
   setInterval(actualizarRect, 250);
+  // Las horas de inmersión: cuenta el tiempo con el video en marcha y subtítulos en la lengua que se estudia.
+  relojInmersion(
+    'video',
+    () => {
+      const info = infoVideo.value;
+      if (!info) return null;
+      return { id: info.idVideo ?? `${info.sitio}:${location.pathname}`, titulo: info.titulo || document.title, estudio: ajustes.value.idiomaObjetivo };
+    },
+    () => {
+      const v = videoActual;
+      return !!v && !v.paused && !v.ended && v.readyState >= 2 && lineasObjetivo.value.length > 0;
+    }
+  );
   // Además de la comprobación periódica, responde al instante a lo que puede mover el video.
   window.addEventListener('resize', actualizarRect, { passive: true });
   document.addEventListener('scroll', actualizarRect, { capture: true, passive: true });

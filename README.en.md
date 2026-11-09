@@ -104,7 +104,7 @@ The **Clipboard** collects what you copy anywhere and shows it with its paragrap
 
 <img src="docs/img/trazos.en.png" alt="Stroke order of a word in the word panel" width="100%">
 
-The word panel shows the stroke order of every kanji in the word, one stroke at a time and on a loop, with their numbers.
+The word panel shows the stroke order of every kanji in the word, one stroke at a time and on a loop, with their numbers, and below, the words you already know with the same kanji.
 
 ### German too
 
@@ -112,6 +112,7 @@ The same tools work for German: the word panel tells you which word each conjuga
 
 ### And also
 
+- **Immersion hours.** Home counts the time you spend listening to and reading the language you study, with your streak of days in a row.
 - **Costs in plain sight.** The home screen shows what Claude has cost this month, by day, model and task, with a monthly cap. Nothing is paid for twice: every answer is saved. The [cost study](docs/costs.md) gives measured figures.
 - **Built-in review.** With the FSRS algorithm, for those who do not use Anki.
 - **Your own files.** A player for videos on your computer, with the subtitles inside an MKV.

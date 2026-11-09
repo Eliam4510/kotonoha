@@ -7,7 +7,7 @@ import { TEXTOS } from './textos';
 import { fonemasDeMoras, morasEspeciales } from './fonemas';
 import { frasesAcentuales } from './practica';
 import { alinearFurigana, kataAHira, lecturaVisible, nombreFlexion, patronAcento, pegarSignos, separarMoras, tieneJapones } from './tokens';
-import { caracteresConTrazos } from './trazos';
+import { caracteresConTrazos, kanjiDe } from './trazos';
 
 function saludo(hora: number, nombre: string): string {
   const base = hora >= 5 && hora < 11 ? 'おはようございます' : hora >= 11 && hora < 18 ? 'こんにちは' : 'こんばんは';
@@ -97,6 +97,11 @@ export const JAPONES: PaqueteLengua = {
   trazos: {
     caracteres: caracteresConTrazos,
     credito: { nombre: 'KanjiVG', url: 'https://kanjivg.tagaini.net', licencia: 'CC BY-SA 3.0' },
+    conocidas: {
+      caracteres: kanjiDe,
+      titulo: tm('Con estos kanji ya conoces'),
+      ninguna: tm('Aún no conoces otras palabras con {0}. Cuando las marques como conocidas o en aprendizaje, aparecerán aquí.'),
+    },
   },
   principiante: { valor: 'principiante absoluto', nombre: tm('Empiezo desde cero'), ayuda: tm('Aún no leo kana'), lectura: 'todas' },
   // Vocabulario que suele asociarse a cada nivel del JLPT. Son cifras orientativas, no oficiales.

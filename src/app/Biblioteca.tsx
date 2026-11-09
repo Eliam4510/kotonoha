@@ -17,6 +17,7 @@ import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { fuenteDeArchivo, LIMITE_ZIP, leerEntrada } from '../nucleo/zip';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
+import { useRelojLectura } from '../ui/relojLectura';
 import { datosDeZip, miniaturaDe } from '../visor/paginador';
 import { datosDePdf } from '../visor/pdf';
 import { estaProcesado } from '../visor/procesador';
@@ -664,6 +665,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
   const [cargada, fijarCargada] = useState(false);
   const [abierto, fijarAbierto] = useState<ElementoBiblioteca | null>(null);
   const [pagina, fijarPagina] = useState(0);
+  useRelojLectura(abierto ? abierto.id : null, abierto?.titulo ?? '', ajustes.idiomaObjetivo);
   const [tema, fijarTema] = useState('');
   const [relato, fijarRelato] = useState('');
   const [generando, fijarGenerando] = useState(false);

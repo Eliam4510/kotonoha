@@ -16,4 +16,7 @@ export function caracteresConTrazos(palabra: string): string[] {
   return kanji.length ? kanji : unicos.filter((c) => ES_KANA.test(c));
 }
 
+/** Los kanji de una palabra, sin repetir: los que se buscan entre las palabras que ya se conocen. */
+export const kanjiDe = (palabra: string): string[] => [...new Set(palabra)].filter((c) => ES_KANJI.test(c));
+
 export const urlTrazos = (caracter: string) => BASE + archivoTrazos(caracter);

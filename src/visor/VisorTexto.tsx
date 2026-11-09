@@ -2,6 +2,7 @@
 // con su formato y su escritura vertical, y lleva encima el lector de páginas, el que pone colores, furigana y fichas en
 // cualquier web. Aquí están la barra, el zoom, el índice y la memoria de por dónde se va.
 
+import { marcarActividad } from '../compartido/relojInmersion';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Creador } from '../app/Creador';
 import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
@@ -90,6 +91,8 @@ export function VisorTexto({ doc, archivo, ajustes: a }: { doc: ElementoBibliote
       if (e.source !== marco.current?.contentWindow || e.origin !== location.origin) return;
       const m = e.data as MensajeLibro & { kk?: string };
       if (m?.kk !== DEL_LIBRO) return;
+      // Leer dentro del marco también es leer, para las horas de inmersión.
+      marcarActividad();
       if (m.tipo === 'listo') {
         fijarEscritura({ vertical: m.vertical, verticalPropio: m.verticalPropio });
         // Para pasar de página con el teclado sin tener que hacer clic antes en el libro.
