@@ -447,6 +447,12 @@ export interface PaqueteLengua {
    * si la lengua la tiene, la de escribir a mano que se enseña en la escuela.
    */
   letras?: { gotica: string; libro: string; escuela?: string };
+  /**
+   * Cuánto aire le falta a la lectura sobre la palabra con cada una de esas letras, en em de la palabra. El navegador
+   * junta las cajas de las dos, y hay letras que llenan su cuadro entero: con ellas la lectura toca la palabra. Sin
+   * esto, no se añade nada.
+   */
+  aireLectura?: { gotica?: number; libro?: number; escuela?: number };
   /** Para quien empieza desde cero: va antes de los niveles. */
   principiante: NivelLengua;
   niveles: NivelLengua[];

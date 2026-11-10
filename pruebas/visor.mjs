@@ -8,7 +8,7 @@ import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { confirmarBorrado, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -261,6 +261,14 @@ const archivos = () => app.evaluate(async () => {
 });
 comprobar((await archivos()) === 3, 'Cada libro guarda su archivo aparte', String(await archivos()));
 await app.locator('button[aria-label="Eliminar Tomo de prueba"]').click({ force: true });
+await app.locator('.ap-dialogo').waitFor({ timeout: 5000 });
+// La estantería quedó detrás de la pestaña del visor: las teclas van a la que está delante.
+await app.bringToFront();
+await app.keyboard.press('Escape');
+await app.waitForTimeout(300);
+comprobar((await archivos()) === 3 && (await app.locator('.ap-dialogo').count()) === 0, 'Eliminar un libro pregunta antes, y Escape lo deja como estaba', String(await archivos()));
+await app.locator('button[aria-label="Eliminar Tomo de prueba"]').click({ force: true });
+await confirmarBorrado(app);
 await app.waitForTimeout(600);
 comprobar((await archivos()) === 2, 'Al eliminar un libro se va también su archivo', String(await archivos()));
 

@@ -6,7 +6,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { confirmarBorrado, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -87,6 +87,7 @@ const boton = app.locator('button[aria-label="Eliminar Inglés–inglés"]');
 comprobar((await boton.count()) === 1, 'Ajustes lo ofrece para quitarlo');
 t = Date.now();
 await boton.click();
+await confirmarBorrado(app);
 await app.waitForTimeout(300);
 comprobar(await app.getByText('Eliminando…').isVisible(), 'Avisa de que está en ello');
 const latencias = [];

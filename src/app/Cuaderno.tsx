@@ -217,8 +217,19 @@ export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { aj
   };
 
   const pegar = async () => {
-    const md = await pegadoConEstructura().catch(() => '');
-    if (!md) return;
+    // Sin nada que pegar, o sin permiso para leerlo, se dice: si no, el botón parece no hacer nada.
+    let md = '';
+    try {
+      md = await pegadoConEstructura();
+    } catch {
+      fijarMensaje({ texto: tr('El navegador no dejó leer el portapapeles. Pega con el teclado dentro del texto.'), error: true });
+      return;
+    }
+    if (!md.trim()) {
+      fijarMensaje({ texto: tr('El portapapeles no tiene texto.'), error: true });
+      return;
+    }
+    fijarMensaje(null);
     if (editor.current) editor.current.insertar(md);
     else poner(textoActual.current.trim() ? `${textoActual.current.trimEnd()}\n\n${md}` : md);
   };

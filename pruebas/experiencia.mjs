@@ -500,12 +500,12 @@ if (quiere('largos')) {
   console.log('\n== Párrafos largos ==');
   await irA(1.5);
   await p.waitForTimeout(300);
-  const normal = await enOverlay((r) => parseFloat(r.querySelector('.linea-sub.objetivo').style.fontSize));
+  const normal = await enOverlay((r) => parseFloat(getComputedStyle(r.querySelector('.linea-sub.objetivo')).fontSize));
   await irA(21);
   await p.waitForTimeout(500);
   const larga = await rectBloque();
   const v = await rectVideo();
-  const letra = await enOverlay((r) => parseFloat(r.querySelector('.linea-sub.objetivo').style.fontSize));
+  const letra = await enOverlay((r) => parseFloat(getComputedStyle(r.querySelector('.linea-sub.objetivo')).fontSize));
   await p.screenshot({ path: join(CAPTURAS, 'parrafo.png') });
   comprobar(letra < normal, 'Un párrafo usa una letra algo menor', `${letra.toFixed(1)} frente a ${normal.toFixed(1)} px`);
   comprobar(larga.height < v.height * 0.5, 'Y no tapa más de medio video', `${Math.round((larga.height / v.height) * 100)} %`);

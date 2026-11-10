@@ -2,7 +2,7 @@
 
 import { type ComponentChildren, Fragment, type JSX } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { type Ajustes, hayVozSintetica } from '../compartido/ajustes';
+import { type Ajustes, guardarAjustes, hayVozSintetica, type ModoLectura } from '../compartido/ajustes';
 import { alRecibirEvento, motor } from '../compartido/rpc';
 import type { PalabraToken } from '../compartido/tipos';
 import { type Bloque, type ElementoLista, type FraseDeLinea, frasesDeBloques, type Linea, leerEstructura, textoPlano } from '../nucleo/estructura';
@@ -18,6 +18,8 @@ import { Anillo } from './Piezas';
 import { Practica } from './Practica';
 import { numero, tm, tr } from '../compartido/i18n';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
+import { clasesPalabras, MODOS_LECTURA } from '../ui/palabras';
+import { sinCortes } from '../ui/sinCorte';
 import { decirConNavegador } from '../ui/vozNavegador';
 
 interface Abierta {
@@ -206,6 +208,13 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
 
   useEffect(() => detener, []);
 
+  // La palabra que se consulta, a la vista: en una ventana estrecha la ficha va abajo y podría taparla.
+  useEffect(() => {
+    if (!abierta) return;
+    const id = setTimeout(() => papelRef.current?.querySelector('.ap-elegida')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60);
+    return () => clearTimeout(id);
+  }, [abierta?.sitio]);
+
   const cambiarTam = (d: number) => {
     const n = Math.max(TAMANO_MIN, Math.min(TAMANO_MAX, tam + d));
     fijarTam(n);
@@ -248,21 +257,31 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
     const texto = frases[indice];
     const piezas = tokens[indice] ?? [];
     const salida: JSX.Element[] = [];
+    // Lo que cada pieza dice de con quién va: sus signos ya pegados, o null si es una palabra o un hueco.
+    const signos: (string | null)[] = [];
     let cursor = 0;
     let alineado = true;
     piezas.forEach((p, k) => {
       const pos = alineado ? texto.indexOf(p.superficie, cursor) : -1;
       if (pos < 0) alineado = false;
       else {
-        if (pos > cursor) salida.push(<span key={`h${k}`}>{texto.slice(cursor, pos)}</span>);
+        if (pos > cursor) {
+          salida.push(<span key={`h${k}`}>{texto.slice(cursor, pos)}</span>);
+          signos.push(null);
+        }
         cursor = pos + p.superficie.length;
       }
-      const pieza = p.esPalabra ? pintarPalabra(p, indice, k) : <span key={k}>{lengua.value.escritura.pegarSignos(p.superficie)}</span>;
+      const pegados = p.esPalabra ? null : lengua.value.escritura.pegarSignos(p.superficie);
+      const pieza = p.esPalabra ? pintarPalabra(p, indice, k) : <span key={k}>{pegados}</span>;
       const negrita = pos >= 0 && negritas.some(([a, b]) => a < inicio + cursor && b > inicio + pos);
       salida.push(negrita ? <b key={`b${k}`}>{pieza}</b> : pieza);
+      signos.push(pegados);
     });
-    if (alineado && cursor < texto.length) salida.push(<span key="fin">{texto.slice(cursor)}</span>);
-    return <span key={indice} class={indice === actual ? 'oracion-activa' : ''}>{salida}</span>;
+    if (alineado && cursor < texto.length) {
+      salida.push(<span key="fin">{texto.slice(cursor)}</span>);
+      signos.push(null);
+    }
+    return <span key={indice} class={indice === actual ? 'oracion-activa' : ''}>{sinCortes(salida, signos)}</span>;
   };
 
   // Se practica una frase con palabras: la lengua tiene que saber partirla en frases acentuales.
@@ -388,6 +407,15 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
                 <b class="num">{comprension.porcentaje} %</b> {tr('de comprensión')}
               </span>
             )}
+            {/* Cuándo llevan lectura las palabras: el mismo ajuste que sobre el video, que aquí no había dónde cambiar. */}
+            {lengua.value.lectura.distingue && tokens.length > 0 && (
+              <label class="ap-lectura-modo">
+                <span>{tr(lengua.value.textos.lectura)}</span>
+                <select class="selector" value={ajustes.furigana} onChange={(e) => guardarAjustes({ furigana: e.currentTarget.value as ModoLectura }).catch(() => {})}>
+                  {MODOS_LECTURA.map(([v, n]) => <option key={v} value={v}>{tr(n)}</option>)}
+                </select>
+              </label>
+            )}
             <div class="ap-tamano" role="group" aria-label={tr('Tamaño del texto')}>
               <button class="btn-icono chico" aria-label={tr('Reducir el texto')} disabled={tam <= TAMANO_MIN} onClick={() => cambiarTam(-2)}><Icono n="menos" t={14} /></button>
               <span aria-hidden="true">{lengua.value.ejemplos.letra}</span>
@@ -396,7 +424,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
           </div>
         </div>
 
-        <article ref={papelRef} class="ap-papel" lang={lengua.value.id} style={{ fontSize: `${tam}px` }} onClick={() => fijarAbierta(null)} onMouseUp={() => setTimeout(leerSeleccion, 0)} onKeyUp={() => setTimeout(leerSeleccion, 0)}>
+        <article ref={papelRef} class={`ap-papel ${clasesPalabras(ajustes)}`} lang={lengua.value.id} style={{ fontSize: `${tam}px` }} onClick={() => fijarAbierta(null)} onMouseUp={() => setTimeout(leerSeleccion, 0)} onKeyUp={() => setTimeout(leerSeleccion, 0)}>
           {/* Un texto sin frases, como una grabación cuyo párrafo se borró, no espera ningún análisis. */}
           {tokens.length === 0 && frases.length > 0 ? (
             <div aria-hidden="true">

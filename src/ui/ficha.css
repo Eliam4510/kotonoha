@@ -14,13 +14,21 @@
 .ac-nakadaka { color: var(--ac-nakadaka); }
 .ac-odaka { color: var(--ac-odaka); }
 .color-alpasar .pal:not(:hover) { color: inherit; }
+/* Una palabra y el signo que la cierra, o el que la abre: juntos en un renglón (sinCorte.tsx). */
+.sin-corte { white-space: nowrap; }
 ruby { ruby-position: over; ruby-align: center; }
-/* Letra algo más estrecha que la base para que la lectura no separe los kanji. */
-.pal rt { font-size: 0.45em; font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; user-select: none; }
-.pal.leida rt { color: var(--fuji); }
+/* La lectura se compone pegada a la palabra: el navegador junta las cajas de las dos letras, y el aire que se ve es el
+   que cada letra deja dentro de su cuadro. Con letra pequeña ese aire no llega a verse: se le suma hasta dejar dos
+   píxeles y medio. Y hay letras que llenan el cuadro entero, con las que la lectura toca la palabra a cualquier tamaño:
+   --aire-lectura dice cuánto les falta, en em de la palabra, y --razon-lectura, cuánto mide la lectura respecto a ella,
+   que es lo que hace falta para contarlo desde aquí. */
+rt { padding-bottom: calc(var(--aire-lectura, 0) * 1em / var(--razon-lectura, 0.45) + max(0px, 2.5px - 0.1em)); }
+/* Letra algo más estrecha que la base para que la lectura no separe los kanji, y nunca tan pequeña que no se lea. */
+.pal rt { font-size: max(0.45em, 10px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; user-select: none; }
+.pal.leida rt:not(.glosa-bajo) { color: var(--fuji); }
 .pal.con-sentido::after { content: ''; position: absolute; top: 0.04em; right: -0.04em; width: 0.15em; height: 0.15em; min-width: 5px; min-height: 5px; border-radius: 50%; background: var(--fuji); box-shadow: 0 0 6px var(--fuji-media); }
-.fur-alpasar .pal:not(:hover) rt { visibility: hidden; }
-.fur-ninguna .pal rt { display: none; }
+.fur-alpasar .pal:not(:hover) rt:not(.glosa-bajo) { visibility: hidden; }
+.fur-ninguna .pal rt:not(.glosa-bajo) { display: none; }
 .fur-desconocidas .pal:not(.est-desconocida) rt { visibility: hidden; }
 /* La glosa se abre por encima de la palabra para no tapar la línea secundaria. */
 .pal .glosa {
@@ -33,6 +41,16 @@ ruby { ruby-position: over; ruby-align: center; }
 .glosas-alpasar .pal:hover .glosa { display: block; }
 .glosas-desconocidas .pal.est-desconocida .glosa { display: block; }
 .consultando .pal:hover .glosa { display: none; }
+/* Con las glosas en las palabras desconocidas, cada una va bajo su palabra como una segunda anotación ruby: el navegador
+   le hace sitio y dos seguidas no se pisan. La raya del estado pasa a la palabra, para no quedar bajo la glosa. */
+.pal .glosada { ruby-position: under; }
+.pal rt.glosa-bajo { padding-top: 0.55em; padding-bottom: 0; font: 600 max(12px, 0.32em)/1.2 var(--letra); letter-spacing: 0; white-space: nowrap; color: var(--texto); opacity: 0.9; user-select: none; }
+.pal.con-glosa { padding-bottom: 0; }
+.pal.con-glosa::before { content: none; }
+.pal.con-glosa .pal-base { position: relative; display: inline-block; padding: 0 0.05em 0.12em; }
+.pal.con-glosa .pal-base::after { content: ''; position: absolute; left: 0.1em; right: 0.1em; bottom: 0.02em; height: max(2.5px, 0.07em); border-radius: var(--r-pill); background: var(--est-desconocida); }
+.pal.con-glosa.rastreada .pal-base::after { background: var(--est-rastreada); }
+.sin-estado .pal.con-glosa .pal-base::after { background: transparent; }
 
 /* ---------- Gramática ---------- */
 .kk-raiz { --n5: #9BDFA6; --n4: #93CDFA; --n3: #EBD38A; --n2: #F3B795; --n1: #F3A3B4; }
@@ -48,7 +66,7 @@ ruby { ruby-position: over; ruby-align: center; }
 button.chip-gram:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--c) 24%, transparent); }
 button.chip-gram:active { transform: scale(0.96); }
 .chip-gram[aria-pressed='true'] { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent); }
-.chip-gram small { font-family: var(--letra); font-size: 10px; font-weight: 800; letter-spacing: 0.02em; opacity: 0.72; }
+.chip-gram small { font-family: var(--letra); font-size: max(10px, 0.8em); font-weight: 800; letter-spacing: 0.02em; opacity: 0.72; }
 .chip-gram.n-N5 { --c: var(--n5); }
 .chip-gram.n-N4 { --c: var(--n4); }
 .chip-gram.n-N3 { --c: var(--n3); }
@@ -79,7 +97,7 @@ button.chip-gram:active { transform: scale(0.96); }
 /* En espacios estrechos, como un panel lateral, todo se aprieta sin romperse. */
 @container (max-width: 450px) {
   .estado { gap: 4px; padding: 0 5px; font-size: 11.5px; }
-  .pestana { font-size: 9.5px; }
+  .pestana { font-size: 10px; }
   .ficha-pie .tecla { display: none; }
   .etiqueta-frec { padding: 0 8px; margin-right: 0; }
   .ficha-palabra { font-size: 30px; }
@@ -100,7 +118,7 @@ button.chip-gram:active { transform: scale(0.96); }
 .ficha-titulo { display: flex; align-items: flex-start; gap: 10px; min-height: 52px; }
 .ficha-izq { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 14px; }
 .ficha-palabra { font-family: var(--letra-lengua); font-size: 36px; font-weight: 900; line-height: 1.2; letter-spacing: 0.01em; min-width: 0; }
-.ficha-palabra rt { font-size: 0.38em; font-weight: 700; letter-spacing: 0; color: var(--texto-2); }
+.ficha-palabra rt { --razon-lectura: 0.38; font-size: 0.38em; font-weight: 700; letter-spacing: 0; color: var(--texto-2); }
 .ficha-tono { display: flex; gap: 10px; flex: none; margin-bottom: 1px; }
 .curva-acento { display: block; overflow: visible; }
 .curva-mora { font: 700 10.5px var(--letra-lengua); fill: var(--texto-3); }
@@ -223,7 +241,16 @@ button.chip-gram:active { transform: scale(0.96); }
 .ficha-dock { flex: none; display: flex; align-items: stretch; gap: 1px; padding: 5px 8px; border-top: 1px solid var(--borde); }
 .ficha-dock .pestana { min-width: 0; }
 .ficha-dock .pestana span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-.pestana { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 5px 0 4px; border-radius: 12px; font-size: 10.5px; font-weight: 600; line-height: 1.1; color: var(--texto-3); transition: background 0.14s, color 0.14s, transform 0.18s var(--resorte); }
+/* En un panel muy estrecho, como el de una línea en el visor, ocho pestañas en una fila no caben con su nombre y
+   salían cortadas con puntos suspensivos: van en dos filas de cuatro. */
+@container (max-width: 400px) {
+  .ficha-dock { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; }
+  .ficha-dock .dock-sep { display: none; }
+  .ficha-dock .pestana { padding: 6px 2px 5px; }
+}
+/* Cada pestaña ocupa lo que pide su nombre, más su parte de lo que sobre: a partes iguales, «Imágenes» llenaba la suya
+   de lado a lado y «Audio» tenía de sobra. */
+.pestana { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 5px 4px 4px; border-radius: 12px; font-size: 10.5px; font-weight: 600; line-height: 1.1; color: var(--texto-3); transition: background 0.14s, color 0.14s, transform 0.18s var(--resorte); }
 .pestana:hover:not(:disabled) { background: var(--superficie-3); color: var(--texto); }
 .pestana:active:not(:disabled) { transform: scale(0.94); }
 .pestana.ia { color: color-mix(in srgb, var(--fuji) 80%, var(--texto-3)); }
@@ -239,9 +266,11 @@ button.chip-gram:active { transform: scale(0.96); }
 
 /* Paneles de la IA */
 .panel-ia { padding: 11px 14px 13px; border-radius: var(--r-3); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); }
-.panel-ia-cab { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 30px; margin: -3px -5px 5px 0; }
+/* Si el título y sus botones no caben en un renglón, los botones bajan al siguiente: antes era el título el que se
+   partía en dos, apretado contra ellos. */
+.panel-ia-cab { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 2px 8px; min-height: 30px; margin: -3px -5px 5px 0; }
 .panel-ia-titulo { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 12.5px; font-weight: 700; color: var(--fuji); --ico-opacidad: 0.4; }
-.panel-ia-acciones { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.panel-ia-acciones { display: inline-flex; align-items: center; gap: 2px; flex: none; margin-left: auto; }
 .panel-ia-texto { white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
 .panel-ia-error { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: var(--r-2); background: var(--error-suave); color: var(--error); font-size: 13px; line-height: 1.4; }
 .panel-ia-error .ico { flex: none; }
@@ -298,7 +327,7 @@ button.chip-gram:active { transform: scale(0.96); }
 .compartir-vista img { display: block; width: 100%; height: auto; max-height: 340px; object-fit: contain; }
 .compartir-vista .esqueleto { display: block; width: 100%; height: 180px; border-radius: 0; }
 .compartir-estado { display: flex; align-items: center; gap: 7px; min-height: 22px; margin: 9px 0 8px; font-size: 12.5px; font-weight: 600; color: var(--texto-2); }
-.compartir-estado.copiada { color: var(--exito); }
+.compartir-estado.copiada, .compartir-estado.guardada { color: var(--exito); }
 .compartir-estado.sin-copiar { color: var(--aviso); }
 .compartir-estado.error { color: var(--error); }
 .compartir-estado .giro { width: 13px; height: 13px; }

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.29.0, along with how it has been verified.
+Status of each feature in version 0.30.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -24,6 +24,7 @@ Status of each feature in version 0.29.0, along with how it has been verified.
 | A line appearing under a resting pointer neither opens a card nor pauses the video | Automated |
 | Subtitles with furigana, pitch accent colors and status underlines | Automated |
 | Furigana, gloss and color modes: always, on hover, unknown only, never | Automated |
+| The subtitle box keeps space on all four sides and nothing overlaps, under any combination of size (70 to 250%), readings, glosses, translation and background, in wide and narrow windows; each unknown word’s translation sits under the word | Automated |
 | Word panel: definitions, status, frequency, audio, images, examples and links | Automated |
 | Stroke order of each kanji, animated and looping, with pause and step by step | Automated, with real KanjiVG data |
 | Kanji you already know: next to the strokes, the known or learning words with each kanji of the word, known ones first | Automated, with words seeded in the database |
@@ -122,12 +123,14 @@ Status of each feature in version 0.29.0, along with how it has been verified.
 | Notebook: a full-width editor with headings, lists with sub-items, quotes, code and bold, with buttons and shortcuts (# , - , ・ , 1. , > , Tab, Ctrl+B); Edit and Read on the same page; pasted text keeps its structure; saved by itself, and to the library on request, and a library text can be edited again | Automated: writing with shortcuts and buttons, reading, saving to the library and reopening from it |
 | Organize: Claude adds a title, subheadings, paragraphs and lists to text pasted as one block; it warns if any word changed, and Ctrl+Z undoes it | Automated, with a simulated Claude |
 | Read aloud with speed (0.6× to 1.2×) and mode (continuous, sentence by sentence or repeating the sentence); listen to or practise any selected part, without its furigana | Automated |
+| When reading, the same furigana, status and color modes apply as over the video, with a selector in the text toolbar; no closing punctuation starts a line; in a narrow window the word card opens below the text | Automated |
 | Speech models load while you record (dictation and practice): the second practice recording is analysed in 0.2 s, and dictation is transcribed a second after you finish | Automated, on the development computer’s GPU |
 | Each dictation's recording above its paragraph, to play it again; it goes with the text to the library, and one that no text uses is deleted after a week | Automated |
 | Pitch accent practice in the Notebook, the Library’s texts and the text view: each word’s accent drawn, the recording, the pitch curve over the expected accent, a verdict per word and long pauses | Automated, with a synthetic voice |
 | The voice’s pitch measured in the browser (YIN), the morae placed using the voice and the transcription, and where the pitch falls in each word, also with a delayed peak and devoiced morae | Automated; tuned with minimal pairs (箸, 橋 and 端; 雨 and 飴) read by a synthetic voice and with a real recording |
 | Special morae in the practice, with narabas: a missing or extra っ, ん or long vowel, with the mora highlighted; the model download checked against its SHA-256, the GPU only if it calculates like the processor, and no verdict on a っ before a fricative, on phrases said differently or on hesitations at the end of a word | Automated, with a synthetic voice; measured with minimal pairs (おばあさん and おばさん, きって and きて…) said by two synthetic voices: 17 of 22 missing morae and 10 of 10 extra ones, with no warnings on 22 of 24 sentences said correctly |
 | Library: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
+| Deleting asks for confirmation: a book (with its file, progress and annotations), a dictionary, a saved model, a Memory card, a written note or the API key | Automated |
 | Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
 | Image folders as books: each folder, or each volume inside it, comes in as a book, with the cover first, a table of contents by chapter and landscape two-page spreads on their own | Automated, and with 40 real manga volumes |
 | Collections on the shelf: a series with its volumes or a topic, with its type, description and cover; a folder with several volumes comes in as a collection, and a new volume joins its own | Automated |

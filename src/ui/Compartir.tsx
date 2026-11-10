@@ -41,7 +41,7 @@ export function compartir(origen: string, datos: DatosTarjeta, nombre: string, e
 
 export function PanelCompartir({ c, alCambiar, alCerrar }: { c: Compartida; alCambiar: (c: Compartida) => void; alCerrar: () => void }) {
   const [url, fijarUrl] = useState('');
-  const [estado, fijarEstado] = useState<'copiando' | 'copiada' | 'sin-copiar' | 'error'>('copiando');
+  const [estado, fijarEstado] = useState<'copiando' | 'copiada' | 'guardada' | 'sin-copiar' | 'error'>('copiando');
   const [error, fijarError] = useState('');
 
   useEffect(() => {
@@ -89,6 +89,7 @@ export function PanelCompartir({ c, alCambiar, alCerrar }: { c: Compartida; alCa
       <div class={`compartir-estado ${estado}`} role="status">
         {estado === 'copiando' && <><span class="giro" /> {tr('Creando la imagen…')}</>}
         {estado === 'copiada' && <><Icono n="check" t={15} /> {tr('Imagen copiada: pégala con Ctrl+V donde quieras.')}</>}
+        {estado === 'guardada' && <><Icono n="check" t={15} /> {tr('Imagen descargada. Está en las descargas del navegador.')}</>}
         {estado === 'sin-copiar' && <><Icono n="info" t={15} /> {tr('No se pudo copiar la imagen. Guárdala con «Guardar imagen».')}</>}
         {estado === 'error' && <><Icono n="aviso" t={15} /> {tr('No se pudo crear la imagen: {0}', error)}</>}
       </div>
@@ -104,7 +105,8 @@ export function PanelCompartir({ c, alCambiar, alCerrar }: { c: Compartida; alCa
         <button class="btn chico" disabled={estado === 'error'} onClick={() => alCambiar({ ...c, copia: copiarImagen(c.imagen) })}>
           <Icono n="copiar" t={14} /> {tr('Copiar')}
         </button>
-        <button class="btn chico" disabled={estado === 'error'} onClick={() => c.imagen.then((b) => guardarImagen(b, c.nombre)).catch(() => {})}>
+        {/* La ventana de Kotonoha no enseña las descargas del navegador: sin decirlo, el botón parecía no hacer nada. */}
+        <button class="btn chico" disabled={estado === 'error'} onClick={() => c.imagen.then((b) => { guardarImagen(b, c.nombre); fijarEstado('guardada'); }).catch(() => {})}>
           <Icono n="descargar" t={14} /> {tr('Guardar imagen')}
         </button>
       </div>

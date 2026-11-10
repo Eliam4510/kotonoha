@@ -87,6 +87,9 @@ export function CategoriaDiccionario({ id, ajustes }: { id: string; ajustes: Aju
     cargar(0);
   }, [id]);
   if (!c) return <Vacio icono="buscar" titulo={tr('Sin resultados')} />;
+  // Donde casi todo son frases (refranes, expresiones), las tarjetas van más anchas: partidas en dos renglones se leen
+  // peor. Solo donde cada carácter ocupa un cuadro entero.
+  const frases = !!filas && lengua.value.lectura.distingue && filas.filter((f) => [...f.termino].length >= 8).length * 2 > filas.length;
   return (
     <div class={`ap-lienzo ap-categoria-vista ${ajustes.diccionarioAncho === 'centrado' ? '' : 'ancho'}`} style={estiloDiccionario(ajustes)}>
       <button class="btn fantasma chico" onClick={() => navegar('diccionario')}><Icono n="atras" t={14} /> {tr('Diccionario')}</button>
@@ -104,7 +107,7 @@ export function CategoriaDiccionario({ id, ajustes }: { id: string; ajustes: Aju
       {filas && filas.length > 0 && (
         <>
           <p class="ayuda">{tr('{0} entradas, las de uso común primero.', numero(total))}</p>
-          <div class="dic-tarjetas">{filas.map((e) => <TarjetaPalabra key={`${e.termino}|${e.lectura}`} e={e} />)}</div>
+          <div class={`dic-tarjetas ${frases ? 'frases' : ''}`}>{filas.map((e) => <TarjetaPalabra key={`${e.termino}|${e.lectura}`} e={e} />)}</div>
           {total > filas.length && <div class="ap-ver-mas"><button class="btn" onClick={() => cargar(filas.length)}>{tr('Ver más ({0})', numero(total - filas.length))}</button></div>}
         </>
       )}

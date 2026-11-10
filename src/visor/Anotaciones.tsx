@@ -7,6 +7,7 @@ import { tr } from '../compartido/i18n';
 import type { AnotacionLibro, ColorAnotacion } from '../compartido/tipos';
 import { notasComoTexto, porPagina } from '../nucleo/anotaciones';
 import type { Caja } from '../nucleo/ocr';
+import { BotonBorrar } from '../app/Piezas';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 
@@ -45,11 +46,14 @@ export function EditorNota({ inicial, etiqueta, alGuardar, alCancelar, alQuitar 
         }}
       />
       <div class="vs-editor-nota-botones">
-        {alQuitar && (
+        {/* Lo escrito no vuelve: quitar una nota con texto se confirma. */}
+        {alQuitar && (inicial.trim() ? (
+          <BotonBorrar etiqueta={tr('Quitar')} texto={tr('Quitar')} t={13} alBorrar={alQuitar} />
+        ) : (
           <button class="btn chico fantasma" onClick={alQuitar}>
             <Icono n="basura" t={13} /> {tr('Quitar')}
           </button>
-        )}
+        ))}
         <button class="btn chico fantasma" onClick={alCancelar}>{tr('Cancelar')}</button>
         <button class="btn chico primario" onClick={() => alGuardar(texto.trim())}>{tr('Guardar')}</button>
       </div>
@@ -178,9 +182,13 @@ export function PanelNotas({ titulo, anotaciones, actual, alIr, alGuardar, alQui
                           <Icono n="lapiz" t={13} />
                         </button>
                       )}
-                      <button class="btn-icono chico" aria-label={tr('Quitar')} data-tip={tr('Quitar')} onClick={() => alQuitar(a.id)}>
-                        <Icono n="basura" t={13} />
-                      </button>
+                      {a.nota ? (
+                        <BotonBorrar etiqueta={tr('Quitar')} clase="btn-icono chico" t={13} consejo={tr('Quitar')} alBorrar={() => alQuitar(a.id)} />
+                      ) : (
+                        <button class="btn-icono chico" aria-label={tr('Quitar')} data-tip={tr('Quitar')} onClick={() => alQuitar(a.id)}>
+                          <Icono n="basura" t={13} />
+                        </button>
+                      )}
                     </span>
                   </>
                 )}

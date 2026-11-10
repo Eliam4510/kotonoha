@@ -223,6 +223,10 @@
 .vs-lienzo-texto { display: block; padding: 18px 24px 0; }
 .vs-vista-texto { max-width: 1320px; margin: 0 auto; }
 .vs-vista-texto .ap-lectura-ficha { top: 0; height: calc(100vh - 150px); }
+/* Con poco ancho la ficha va debajo del texto (app.css): esta altura no debe ganarle. */
+@container lectura (max-width: 900px) {
+  .vs-vista-texto .ap-lectura-ficha { top: auto; height: min(54vh, 540px); }
+}
 .vs-vista-texto-vacia { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 16px; text-align: center; }
 .vs-vista-texto-vacia .ayuda { margin: 0; font-size: 14px; }
 .vs-vista-texto-leyendo { margin: 10px 0 0; text-align: center; }

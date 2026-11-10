@@ -35,3 +35,14 @@ export async function recargarExtension(contexto) {
   }
   throw new Error('El service worker no arrancó tras recargar la extensión');
 }
+
+/**
+ * Confirma un borrado. Lo que se borra y no vuelve pide una segunda pulsación, en el mismo botón o en un diálogo, y el
+ * botón no atiende a un doble clic: entre una y otra hay que esperar un poco.
+ */
+export async function confirmarBorrado(pagina) {
+  const boton = pagina.locator('.confirmar-borrado').first();
+  await boton.waitFor({ timeout: 5000 });
+  await pagina.waitForTimeout(450);
+  await boton.click();
+}

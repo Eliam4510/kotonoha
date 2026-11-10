@@ -6,7 +6,7 @@
 import { mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { confirmarBorrado, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -198,6 +198,8 @@ await esperar(v, () => document.querySelectorAll('.vs-resaltado').length === 2);
 comprobar((await contar(v, '.vs-resaltado')) === 2 && (await contar(v, '.vs-nota-icono')) === 1 && (await contar(v, '.vs-pagina .vs-cinta')) === 1, 'Los resaltados, la nota y el marcador siguen en su sitio');
 await v.click('button[aria-label="Notas y marcadores"]');
 await v.locator('.vs-nota-item.nota [aria-label="Quitar"]').click({ force: true });
+comprobar((await contar(v, '.vs-nota-icono')) === 1 && (await contar(v, '.confirmar-borrado')) === 1, 'Quitar una nota escrita pide confirmación');
+await confirmarBorrado(v);
 comprobar((await contar(v, '.vs-nota-icono')) === 0 && (await contar(v, '.vs-nota-item')) === 3, 'Quitar una nota desde el panel');
 await v.click('[aria-label="Quitar el marcador de esta página"]');
 comprobar((await contar(v, '.vs-pagina .vs-cinta')) === 0, 'Y el marcador, con su botón');
@@ -225,6 +227,8 @@ const cuantas = () =>
 comprobar((await cuantas()) === 2, 'Los dos resaltados están guardados', String(await cuantas()));
 await app.reload();
 await app.locator('button[aria-label="Eliminar acidos"]').click({ force: true });
+comprobar((await cuantas()) === 2 && (await app.locator('.ap-dialogo').innerText()).includes('acidos'), 'Eliminar un libro pregunta antes, con su título');
+await confirmarBorrado(app);
 await app.waitForTimeout(800);
 comprobar((await cuantas()) === 0, 'Se borran con el libro', String(await cuantas()));
 

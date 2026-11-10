@@ -12,7 +12,13 @@
 /* El fondo va aparte para poder crecer con suavidad mientras el texto cambia al instante. */
 .subs-fondo { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); border-radius: calc(var(--base) * 0.56); pointer-events: none; transition: width 0.14s ease-out, height 0.14s ease-out; }
 .subs-bloque.con-sombra .subs-fondo { background: rgba(9, 12, 10, var(--op-sombra, 0.65)); backdrop-filter: blur(16px) saturate(1.35); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 10px 40px rgba(0, 0, 0, 0.22); }
-.subs-contenido { position: relative; display: flex; flex-direction: column; align-items: center; gap: calc(var(--base) * 0.12); padding: calc(var(--base) * 0.06) calc(var(--base) * 0.46) calc(var(--base) * 0.2); }
+/* --letra-obj es el tamaño de la línea que se estudia: con la letra más grande, la caja deja más aire a los lados y
+   abajo. Arriba lo pone la propia línea, en em, para que la lectura no quede pegada al borde. */
+.subs-contenido {
+  --encoge: 1; --letra-obj: var(--base); --de-mas: max(0px, calc(var(--letra-obj) - var(--base)));
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: calc(var(--base) * 0.12);
+  padding: calc(var(--base) * 0.08) calc(var(--base) * 0.46 + var(--de-mas) * 0.16) calc(var(--base) * 0.24 + var(--de-mas) * 0.1);
+}
 .subs-asa { position: absolute; left: 50%; top: 4px; width: 34px; height: 4px; margin-left: -17px; border-radius: 2px; background: rgba(255, 255, 255, 0.34); opacity: 0; transition: opacity 0.15s; z-index: 1; }
 .subs-bloque:hover .subs-asa, .subs-bloque.arrastrando .subs-asa { opacity: 1; }
 .subs-guia { position: absolute; left: 50%; top: 6%; bottom: 6%; width: 1px; background: rgba(255, 255, 255, 0.38); pointer-events: none; }
@@ -27,13 +33,24 @@
 .subs-bloque:not(.con-sombra) .linea-sub { -webkit-text-stroke: 0.1em rgba(4, 7, 5, 0.86); paint-order: stroke fill; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); color: #fff; }
 .subs-bloque:not(.con-sombra) .linea-sub .pal rt { -webkit-text-stroke: 0.14em rgba(4, 7, 5, 0.86); }
 .subs-bloque:not(.con-sombra) .linea-sub.secundaria { -webkit-text-stroke-width: 0.07em; }
-.linea-sub.objetivo { font-family: var(--letra-lengua); font-weight: 700; line-height: 1.3; letter-spacing: 0.01em; padding-top: 0.2em; }
-.linea-sub.objetivo.fur-ninguna { padding-top: 0.08em; }
+.linea-sub.objetivo { font-family: var(--letra-lengua); font-weight: 700; line-height: 1.3; letter-spacing: 0.01em; padding-top: 0.14em; }
+/* Con lecturas, cada renglón deja sitio encima para la suya: en una línea partida en dos, la del renglón de abajo
+   rozaba la raya del de arriba. En el primero, ese sitio es el aire hasta el borde de la caja. */
+.linea-sub.objetivo:not(.fur-ninguna):not(.sin-lecturas) .pal { margin-top: 0.18em; }
+.linea-sub.objetivo.fur-ninguna, .linea-sub.objetivo.sin-lecturas { padding-top: 0.15em; }
+/* Con las lecturas solo al pasar el ratón, su sitio se guarda (si no, el renglón saltaría), pero con menos aire encima:
+   vacío, ese hueco descolgaba el texto. */
+.linea-sub.objetivo.fur-alpasar { padding-top: 0; }
+.linea-sub.objetivo.fur-alpasar .pal { margin-top: 0.08em; }
+/* Solo con la traducción, es ella la que toca el borde de arriba. */
+.subs-contenido > .linea-sub.secundaria:first-child { padding-top: calc(var(--base) * 0.17); }
+.linea-sub.objetivo.sin-lecturas .pal rt:not(.glosa-bajo) { display: none; }
 .linea-sub.secundaria { font-weight: 600; line-height: 1.32; color: rgba(255, 255, 255, 0.84); letter-spacing: 0.002em; }
 .linea-sub.difuminada { filter: blur(0.32em); }
 .linea-sub.difuminada:hover { filter: none; }
 .fila-gram { pointer-events: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-.fila-gram .chip-gram { height: 22px; padding: 0 9px; font-size: 12px; background: rgba(255, 255, 255, 0.09); text-shadow: none; -webkit-text-stroke: 0; }
+/* Las etiquetas de gramática siguen el tamaño de la línea: con la letra al doble, a 12 px no se leían. */
+.fila-gram .chip-gram { height: auto; min-height: 22px; padding: 0.4em 0.75em; font-size: clamp(12px, calc(var(--letra-obj) * 0.27), 22px); background: rgba(255, 255, 255, 0.09); text-shadow: none; -webkit-text-stroke: 0; }
 .fila-gram button.chip-gram:hover { background: rgba(255, 255, 255, 0.17); }
 .subs-bloque:not(.con-sombra) .fila-gram .chip-gram { background: rgba(9, 12, 10, 0.72); }
 
@@ -157,6 +174,8 @@
 
 /* Pistas y sincronización */
 .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* Dos cajas seguidas sin un título entre ellas no se tocan. */
+.grupo + .grupo, .grupo + .columnas, .columnas + .grupo { margin-top: 10px; }
 .columnas-arriba { align-items: start; }
 .columnas.separada { margin-top: 12px; }
 .panel-ia-error.separada { margin-top: 12px; }

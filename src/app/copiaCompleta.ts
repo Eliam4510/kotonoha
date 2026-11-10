@@ -11,6 +11,7 @@ import { archivoDocumento, guardarArchivoDocumento, idsDeDocumentos } from '../c
 import { tr } from '../compartido/i18n';
 import { librosConOcr, ocrDe, restaurarOcr } from '../compartido/paginasOcr';
 import { motor } from '../compartido/rpc';
+import { diaLocal } from '../nucleo/inmersion';
 
 const DATOS = 'kotonoha.json';
 const LEEME = 'LEEME.txt';
@@ -58,7 +59,7 @@ async function subcarpeta(dir: FileSystemDirectoryHandle, nombre: string): Promi
 
 /** Un nombre que no pise una copia anterior del mismo día. */
 async function carpetaNueva(dir: FileSystemDirectoryHandle): Promise<FileSystemDirectoryHandle> {
-  const base = `kotonoha-copia-${new Date().toISOString().slice(0, 10)}`;
+  const base = `kotonoha-copia-${diaLocal(Date.now())}`;
   for (let n = 1; ; n++) {
     const nombre = n === 1 ? base : `${base}-${n}`;
     if (!(await subcarpeta(dir, nombre))) return dir.getDirectoryHandle(nombre, { create: true });

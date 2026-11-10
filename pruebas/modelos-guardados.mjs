@@ -6,7 +6,7 @@ import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { confirmarBorrado, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -86,6 +86,7 @@ await p.screenshot({ path: join(CAPTURAS, 'lista.png') });
 
 // Turbo y Turbo ligero comparten decodificador, configuración y tokenizador.
 await p.locator('button[aria-label="Borrar: Whisper Turbo"]').click();
+await confirmarBorrado(p);
 await p.waitForTimeout(500);
 let archivos = await quedan();
 comprobar(!archivos.includes(TURBO_16), 'Borrar Turbo quita su codificador', archivos.join(' '));
@@ -95,6 +96,7 @@ lista = await filas();
 comprobar(!lista.some((f) => f.includes('Whisper Turbo') && !f.includes('ligero')), 'Ya no aparece en la lista', lista.join(' | '));
 
 await p.locator('button[aria-label="Borrar: Archivos sueltos"]').click();
+await confirmarBorrado(p);
 await p.waitForTimeout(500);
 archivos = await quedan();
 comprobar(!archivos.includes('whisper-large-v3/encoder_model_fp16.onnx'), 'Los archivos sueltos se pueden quitar', archivos.join(' '));
@@ -104,6 +106,7 @@ comprobar(!(await p.locator('#transcripcion').innerText()).includes('En total oc
 
 // El último de un repositorio se lleva lo común.
 await p.locator('button[aria-label="Borrar: Whisper Turbo ligero"]').click();
+await confirmarBorrado(p);
 await p.waitForTimeout(500);
 comprobar((await quedan()).length === 0, 'Al borrar el último no queda nada', (await quedan()).join(' '));
 comprobar(!(await p.locator('#transcripcion').innerText()).includes('Modelos guardados'), 'Y la lista desaparece');
@@ -119,6 +122,7 @@ lista = await filas();
 comprobar(lista.length === 1 && lista[0].includes('narabas, para las moras de la práctica del acento') && lista[0].includes('1,3 GB'), 'El modelo de las moras de la práctica, con su tamaño', lista.join(' | '));
 comprobar(!(await p.locator('#transcripcion').innerText()).includes('Archivos sueltos'), 'Sin tomarlo por un resto de otro modelo');
 await p.locator('button[aria-label="Borrar: narabas"]').click();
+await confirmarBorrado(p);
 await p.waitForTimeout(500);
 comprobar(!(await p.evaluate(() => caches.has('kotonoha-modelo-moras'))), 'Borrarlo quita su caché');
 comprobar(!(await p.locator('#transcripcion').innerText()).includes('Modelos guardados'), 'Y la lista vuelve a desaparecer');

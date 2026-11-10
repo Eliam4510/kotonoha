@@ -24,7 +24,7 @@ import { NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { TarjetaGasto } from './Gasto';
 import { creadorAbierto, estadoAnki, navegar, refrescarAnki } from './estadoApp';
-import { Cabecera, Mensaje, Vacio } from './Piezas';
+import { BotonBorrar, Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
 import { lengua } from '../ui/lengua';
@@ -268,7 +268,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
           <div class="ap-botones">
             <button class="btn primario" disabled={!texto.trim()} onClick={async () => {
               const n = await motor.anadirConocidas(texto);
-              fijarMensaje(tr('{0} palabras añadidas.', numero(n)));
+              fijarMensaje(n === 1 ? tr('1 palabra añadida.') : tr('{0} palabras añadidas.', numero(n)));
               fijarTexto('');
               cargar();
             }}>{tr('Añadir')}</button>
@@ -441,7 +441,7 @@ export function Memoria() {
                 ))}
               </div>
               <div class="ap-repaso-acciones">
-                <button class="btn fantasma chico" onClick={async () => { await motor.memoriaEliminar(t.id); await cargar(); }}><Icono n="basura" t={14} /> {tr('Eliminar esta tarjeta')}</button>
+                <BotonBorrar etiqueta={tr('Eliminar esta tarjeta')} texto={tr('Eliminar esta tarjeta')} clase="btn fantasma chico" alBorrar={async () => { await motor.memoriaEliminar(t.id); await cargar(); }} />
               </div>
             </>
           )}
@@ -552,6 +552,8 @@ export function Palabras({ evaluar = false }: { evaluar?: boolean }) {
   const [sel, fijarSel] = useState<Set<string>>(new Set());
   const [evaluando, fijarEvaluando] = useState(evaluar);
   const [texto, fijarTexto] = useState('');
+  const [anadiendo, fijarAnadiendo] = useState(false);
+  const [anadidas, fijarAnadidas] = useState('');
   const [limite, fijarLimite] = useState(200);
 
   const cargar = async () => {
@@ -615,7 +617,20 @@ export function Palabras({ evaluar = false }: { evaluar?: boolean }) {
           <h2 id="ap-t-pegar">{tr('Añadir conocidas')}</h2>
           <p class="ayuda">{tr(lengua.value.textos.pegarLista)}</p>
           <textarea class="campo ap-campo-lengua" lang={lengua.value.id} aria-label={tr('Añadir palabras conocidas')} placeholder={lengua.value.ejemplos.lista} value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} />
-          <button class="btn bloque" disabled={!texto.trim()} onClick={async () => { await motor.anadirConocidas(texto); fijarTexto(''); await cargar(); }}>{tr('Añadir')}</button>
+          <button class="btn bloque" disabled={!texto.trim() || anadiendo} onClick={async () => {
+            // Con una lista larga tarda: que se vea que está en ello, y al acabar, cuántas entraron.
+            fijarAnadiendo(true);
+            fijarAnadidas('');
+            try {
+              const n = await motor.anadirConocidas(texto);
+              fijarAnadidas(n === 1 ? tr('1 palabra añadida.') : tr('{0} palabras añadidas.', numero(n)));
+              fijarTexto('');
+              await cargar();
+            } finally {
+              fijarAnadiendo(false);
+            }
+          }}>{anadiendo ? tr('Añadiendo…') : tr('Añadir')}</button>
+          {anadidas && <Mensaje>{anadidas}</Mensaje>}
         </section>
       </div>
 

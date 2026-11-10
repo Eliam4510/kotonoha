@@ -73,6 +73,8 @@ import { Anillo, PanelesFlotantes, pestanaVideo } from './Paneles';
 import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas';
 import { numero, tm, tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
+import { clasesPalabras } from '../ui/palabras';
+import { sinCortes } from '../ui/sinCorte';
 import { BotonesEstadoGramatica, BotonOpcionMultiple, VistoEn } from '../ui/EstadoGramatica';
 import { EjercicioDictado } from './Dictado';
 import { reproducir } from './controlador';
@@ -97,13 +99,16 @@ export const cambiarAjuste = (c: Partial<Ajustes>) => {
 
 // ---------- Palabra ----------
 
+/** Las palabras de una línea, cada una con el signo que la cierra o la abre en su mismo renglón. */
+function palabrasDeLinea(l: LineaAnalizada, glosaDebajo?: boolean) {
+  return sinCortes(
+    l.palabras.map((p, k) => <PalabraVista key={k} p={p} l={l} glosaDebajo={glosaDebajo} />),
+    l.palabras.map((p) => (p.esPalabra ? null : lengua.value.escritura.pegarSignos(p.superficie)))
+  );
+}
+
 function clasesRaiz(a: Ajustes) {
-  return [
-    a.mostrarEstado ? '' : 'sin-estado',
-    a.furigana === 'alPasar' ? 'fur-alpasar' : a.furigana === 'ninguna' ? 'fur-ninguna' : a.furigana === 'desconocidas' ? 'fur-desconocidas' : '',
-    a.glosas === 'alPasar' ? 'glosas-alpasar' : a.glosas === 'desconocidas' ? 'glosas-desconocidas' : '',
-    a.colorAcento === 'alPasar' ? 'color-alpasar' : '',
-  ].join(' ');
+  return [clasesPalabras(a), a.glosas === 'alPasar' ? 'glosas-alpasar' : a.glosas === 'desconocidas' ? 'glosas-desconocidas' : ''].join(' ');
 }
 
 let temporizadorCierre: ReturnType<typeof setTimeout> | null = null;
@@ -164,14 +169,34 @@ function alPasarPorPalabra(p: PalabraToken, l: LineaAnalizada | null, el: Elemen
   temporizadorApertura = setTimeout(() => abrirConsulta(p, l, el, false), 130);
 }
 
-export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraToken; l: LineaAnalizada | null }) {
+/** Lo más que ocupa una glosa bajo su palabra: más larga, separaría demasiado las palabras del renglón. */
+const LARGO_GLOSA = 22;
+
+/**
+ * `glosaDebajo`: en los subtítulos, con las glosas en las palabras desconocidas, la glosa va bajo su palabra como una
+ * segunda anotación ruby. Así el navegador le hace sitio, y las de dos palabras seguidas no se pisan como se pisaban
+ * las etiquetas flotantes.
+ */
+export const PalabraVista = memo(function PalabraVista({ p, l, glosaDebajo }: { p: PalabraToken; l: LineaAnalizada | null; glosaDebajo?: boolean }) {
   if (!p.esPalabra) return <span>{lengua.value.escritura.pegarSignos(p.superficie)}</span>;
   const a = ajustes.value;
   const clases = ['pal', `est-${p.estado}`];
+  const debajo = !!glosaDebajo && !!p.glosa && p.estado === 'desconocida';
+  if (debajo) clases.push('con-glosa');
   if (p.rastreada) clases.push('rastreada');
   if (p.patron && a.colorAcento !== 'ninguno') clases.push(`ac-${p.patron}`);
   if (p.lecturaCorregida) clases.push('leida');
   if (p.sentido && p.uso && p.uso !== 'literal') clases.push('con-sentido');
+  const segmentos = p.furigana.map((s, i) =>
+    s.lectura ? (
+      <ruby key={i}>
+        {s.texto}
+        <rt>{lengua.value.lectura.visible(s.lectura, a.formatoLectura)}</rt>
+      </ruby>
+    ) : (
+      <span key={i}>{s.texto}</span>
+    )
+  );
   return (
     <span
       class={clases.join(' ')}
@@ -197,17 +222,15 @@ export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraTok
         abrirConsulta(p, l, e.currentTarget, true);
       }}
     >
-      {p.furigana.map((s, i) =>
-        s.lectura ? (
-          <ruby key={i}>
-            {s.texto}
-            <rt>{lengua.value.lectura.visible(s.lectura, a.formatoLectura)}</rt>
-          </ruby>
-        ) : (
-          <span key={i}>{s.texto}</span>
-        )
+      {debajo ? (
+        <ruby class="glosada">
+          <span class="pal-base">{segmentos}</span>
+          <rt class="glosa-bajo">{p.glosa!.length > LARGO_GLOSA ? `${p.glosa!.slice(0, LARGO_GLOSA - 1).trimEnd()}…` : p.glosa}</rt>
+        </ruby>
+      ) : (
+        segmentos
       )}
-      {p.glosa && <span class="glosa">{p.glosa}</span>}
+      {p.glosa && !debajo && <span class="glosa">{p.glosa}</span>}
     </span>
   );
 });
@@ -216,6 +239,8 @@ export const PalabraVista = memo(function PalabraVista({ p, l }: { p: PalabraTok
 
 const moviendoSubs = signal(false);
 const guiaSubs = signal({ centrado: false, enBase: false });
+/** Lo más que ocupa el bloque de subtítulos del alto del video. */
+const ALTO_MAXIMO_SUBS = 0.7;
 
 function Subtitulos() {
   const zona = useRef<HTMLDivElement>(null);
@@ -249,6 +274,24 @@ function Subtitulos() {
     }
   };
 
+  /**
+   * Con la letra muy grande, una línea larga puede pedir más alto del que hay: el bloque se encoge lo justo para no
+   * pasar de una parte del video. La letra va multiplicada por --encoge, que cada línea empieza en 1.
+   */
+  const ajustarAlAlto = () => {
+    const c = contenido.current;
+    const z = zona.current;
+    if (!c || !z) return;
+    if (c.style.getPropertyValue('--encoge') !== '1') c.style.setProperty('--encoge', '1');
+    const limite = z.clientHeight * ALTO_MAXIMO_SUBS;
+    let k = 1;
+    for (let vuelta = 0; vuelta < 4 && limite > 0 && c.offsetHeight > limite && k > 0.4; vuelta++) {
+      // El alto baja más deprisa que la letra, porque también caben más caracteres por renglón.
+      k *= Math.max(0.6, Math.sqrt(limite / c.offsetHeight)) * 0.98;
+      c.style.setProperty('--encoge', k.toFixed(3));
+    }
+  };
+
   // Antes de pintar: el fondo y la posición siguen al texto en el mismo fotograma, sin saltos.
   useEffect(() => {
     const o = new ResizeObserver(colocar);
@@ -256,7 +299,10 @@ function Subtitulos() {
     if (zona.current) o.observe(zona.current);
     return () => o.disconnect();
   });
-  useLayoutEffect(colocar);
+  useLayoutEffect(() => {
+    ajustarAlAlto();
+    colocar();
+  });
 
   const alPulsar = (e: PointerEvent) => {
     if (e.button !== 0) return;
@@ -358,6 +404,11 @@ function Subtitulos() {
     '--base': `${base}px`,
   };
 
+  const letraObjetivo = linea ? (base * a.escalaObjetivo * factorLargo(linea.texto.length)) / 100 : base;
+  // Con las lecturas solo en las palabras desconocidas, una línea sin ninguna no les guarda el sitio: si no, el texto
+  // queda descolgado, con un hueco encima.
+  const sinLecturas = !!linea && a.furigana === 'desconocidas' && !linea.palabras.some((p) => p.estado === 'desconocida' && p.furigana.some((f) => f.lectura));
+
   return (
     <div class="zona-subs" ref={zona} style={estiloZona}>
       {moviendoSubs.value && guiaSubs.value.centrado && <div class="subs-guia" aria-hidden="true" />}
@@ -383,12 +434,13 @@ function Subtitulos() {
         >
           <div class="subs-fondo" ref={fondoSub} aria-hidden="true" />
           <div class="subs-asa" title={tr('Arrastra para mover los subtítulos. Doble clic para volver a su sitio.')} aria-hidden="true" />
-          <div class="subs-contenido" ref={contenido}>
+          {/* El aire de la caja y las etiquetas de gramática crecen con la letra de la línea, no solo con el video. */}
+          <div class="subs-contenido" ref={contenido} style={{ '--letra-obj': `calc(${letraObjetivo}px * var(--encoge, 1))` }}>
             {linea && (
               <div
-                class={`linea-sub objetivo ${visObjetivo === 'difuminada' ? 'difuminada' : ''} ${consulta.value ? 'consultando' : ''} ${clasesRaiz(a)}`}
+                class={`linea-sub objetivo ${visObjetivo === 'difuminada' ? 'difuminada' : ''} ${consulta.value ? 'consultando' : ''} ${clasesRaiz(a)} ${sinLecturas ? 'sin-lecturas' : ''}`}
                 lang={lengua.value.id}
-                style={{ fontSize: `${(base * a.escalaObjetivo * factorLargo(linea.texto.length)) / 100}px` }}
+                style={{ fontSize: 'var(--letra-obj)' }}
                 onMouseEnter={(e) => {
                   encimaSubtitulo.value = true;
                   if (!ratonQuieto(e)) alEntrarSubtitulo();
@@ -398,7 +450,7 @@ function Subtitulos() {
                   alSalirSubtitulo();
                 }}
               >
-                <div class="linea-texto" key={linea.id}>{linea.palabras.map((p, k) => <PalabraVista key={k} p={p} l={linea} />)}</div>
+                <div class="linea-texto" key={linea.id}>{palabrasDeLinea(linea, a.glosas === 'desconocidas')}</div>
               </div>
             )}
             {linea && a.mostrarGramatica && visObjetivo === 'visible' && gramaticaPorSaber(linea.gramatica).length > 0 && (
@@ -418,7 +470,7 @@ function Subtitulos() {
               </div>
             )}
             {sec && (
-              <div class={`linea-sub secundaria ${visSecundaria === 'difuminada' ? 'difuminada' : ''}`} style={{ fontSize: `${(base * 0.56 * a.escalaSecundario * factorLargo(sec.texto.length, 90)) / 100}px` }}>
+              <div class={`linea-sub secundaria ${visSecundaria === 'difuminada' ? 'difuminada' : ''}`} style={{ fontSize: `calc(${(base * 0.56 * a.escalaSecundario * factorLargo(sec.texto.length, 90)) / 100}px * var(--encoge, 1))` }}>
                 <div class="linea-texto" key={sec.id}>{sec.texto}</div>
               </div>
             )}
@@ -758,7 +810,7 @@ const LineaNavegador = memo(function LineaNavegador({
         <button class="btn-icono chico" title={tr('Sincronizar: esta línea suena ahora')} aria-label={tr('Sincronizar: esta línea suena ahora')} onClick={(e) => { e.stopPropagation(); anclarLinea(l); }}><Icono n="reloj" t={15} /></button>
         <button class="btn-icono chico" title={tr('Crear tarjeta')} aria-label={tr('Crear tarjeta')} onClick={(e) => { e.stopPropagation(); crearUnClic(null, l, fijarOculto); }}><Icono n="rayo" t={15} /></button>
       </div>
-      <div class={`nav-texto ${raiz}`} lang={lengua.value.id}>{l.palabras.map((p, k) => <PalabraVista key={k} p={p} l={l} />)}</div>
+      <div class={`nav-texto ${raiz}`} lang={lengua.value.id}>{palabrasDeLinea(l)}</div>
       {sec && <div class="nav-sec">{sec}</div>}
       {ajustes.value.mostrarGramatica && (l.gramatica?.length ?? 0) > 0 && (
         <div class="nav-gram">

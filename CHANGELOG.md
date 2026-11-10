@@ -2,6 +2,22 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.30.0 · 2026-11-10
+
+Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con muchas mezclas de opciones (tamaños, lecturas, glosas, temas, idiomas de la interfaz, anchos de ventana y letras del diccionario) buscando lo que quedaba cortado, pegado a un borde o encima de otra cosa, y se ha corregido lo encontrado.
+
+- **Subtítulos con aire.** La lectura quedaba a pocos píxeles del borde de arriba del recuadro, y el texto, casi tocando el de abajo. Ahora hay sitio alrededor a cualquier tamaño, del 40 al 250 %, con y sin lecturas, con y sin traducción y sin el fondo. Con la letra muy grande, el bloque se encoge lo justo para no salirse del video. En una ventana estrecha, donde la línea se parte en dos, la lectura del renglón de abajo ya no pisa el de arriba.
+- **La traducción de cada palabra, debajo de ella.** Con **Traducción de palabras** en las desconocidas, las glosas flotaban encima y se pisaban entre sí y con las lecturas. Ahora cada una va bajo su palabra, que le hace sitio.
+- **La lectura ya no toca la palabra.** El navegador compone la lectura pegada a la palabra, y con la letra gótica del diccionario llegaban a tocarse. Ahora queda un espacio entre las dos con las cuatro letras, la lectura no baja de 10 píxeles (en las tarjetas pequeñas y en el navegador de subtítulos medía 8) y tiene aire hasta el borde de su tarjeta.
+- **Las mismas opciones al leer que sobre el video.** En el Cuaderno, la Biblioteca y el visor, la lectura salía en todas las palabras aunque se hubiera elegido verla solo en las desconocidas o al pasar el ratón, y ni el subrayado del estado ni el color del acento seguían lo elegido. Ahora valen igual en todas partes, y la barra del texto trae un selector, **Furigana**, para cambiarlo sin ir a un video.
+- **Ni un punto solo al principio de un renglón.** Al leer, un 「。」 o una coma podía quedar al principio del renglón siguiente, separado de su palabra. Ya no, tampoco en los subtítulos partidos en dos. Y los renglones miden lo mismo lleven lectura o no.
+- **En una ventana estrecha, la ficha va debajo.** En el Cuaderno, la Biblioteca y la vista de texto del visor, con media pantalla de ancho, la ficha de una palabra se montaba sobre el texto y tapaba la frase. Ahora se abre debajo, a lo ancho, y la palabra consultada sube a la vista.
+- **Refranes y frases largas.** En las tarjetas del diccionario, una frase larga se partía por cualquier sitio y dejaba una sílaba suelta en el segundo renglón. Las listas de frases usan ahora tarjetas más anchas y, si aun así hay que partir, se parte entre palabras.
+- **Borrar pide confirmación.** Eliminar un libro, con su archivo, su avance y sus notas, era un clic en un icono pequeño, sin vuelta atrás: ahora pregunta antes. Los diccionarios, los modelos guardados, una tarjeta de Memoria, una nota escrita y la clave de la API piden una segunda pulsación en el mismo botón.
+- **Avisos que faltaban.** **Copiar** confirma que ha copiado; **Añadir conocidas**, en Palabras, dice cuántas entraron; **Pegar**, en el Cuaderno, avisa si el portapapeles está vacío o el navegador no deja leerlo; **Exportar**, la copia de seguridad, y **Guardar imagen** dicen que el archivo se ha descargado, porque la ventana de Kotonoha no enseña las descargas del navegador, y si una imagen o una grabación no se puede bajar para la tarjeta, se dice. La copia de seguridad lleva en su nombre la fecha local, no la de Greenwich.
+- **El índice de Ajustes** marcaba una sección que ya no estaba a la vista al saltar con Av Pág o con la barra de desplazamiento.
+- **Detalles.** Las pestañas de la ficha no se tocan entre sí ni se cortan con puntos suspensivos (en el panel del visor van en dos filas); el título de «¿Qué significa aquí?» no se parte en dos; las rayas de cada nivel en el sendero de la portada, que no se veían, vuelven a estar; los formatos de la Biblioteca se reparten en dos filas parejas, y las imágenes que no cargan en la ficha se quitan en vez de dejar su hueco.
+
 ## 0.29.0 · 2026-11-09
 
 - **El diccionario de kanji.** Un diccionario nuevo, **Kanji (Kanjium y KANJIDIC)**, con 6812 kanji, que se instala desde la propia página de un kanji o en Ajustes (unos 3 MB). Con él, cada kanji dice lo que significa en español, en qué lista oficial está (Jōyō con su curso, Jinmeiyō o fuera de las listas), su nivel del Kanken y su puesto entre los más usados.
@@ -249,6 +265,22 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.30.0 · 2026-11-10
+
+A polish release, with no new features. Every screen was measured under many combinations of options (sizes, readings, glosses, themes, interface languages, window widths and dictionary typefaces), looking for anything cut off, stuck to an edge or on top of something else, and what turned up was fixed.
+
+- **Subtitles with room to breathe.** The reading sat a few pixels from the top edge of the box, and the text almost touched the bottom. There is now space around it at any size, from 40 to 250%, with and without readings, with and without the translation, and without the background. With very large text, the block shrinks just enough to stay inside the video. In a narrow window, where the line wraps, the reading of the second row no longer overlaps the first.
+- **Each word's translation, under the word.** With **Word translation** set to unknown words, the glosses floated above and overlapped each other and the readings. Each one now sits under its word, which makes room for it.
+- **The reading no longer touches the word.** The browser sets the reading flush against the word, and with the dictionary's gothic typeface the two actually touched. There is now a gap between them with all four typefaces, the reading never goes below 10 pixels (it was 8 in the small cards and in the subtitle navigator) and it keeps clear of the edge of its card.
+- **The same options when reading as over the video.** In the Notebook, the Library and the viewer, readings appeared on every word even when they were set to unknown words only or to hover, and neither the status underline nor the accent color followed the setting. They now apply everywhere, and the text toolbar has a **Furigana** selector to change it without opening a video.
+- **No full stop alone at the start of a line.** When reading, a 「。」 or a comma could end up at the start of the next line, away from its word. Not any more, in wrapped subtitles either. And lines are the same height whether or not they carry readings.
+- **In a narrow window, the word card goes below.** In the Notebook, the Library and the viewer's text view, at half a screen's width, the word card covered the text and hid the sentence. It now opens below, full width, and the word being looked up scrolls into view.
+- **Proverbs and long phrases.** In the dictionary cards, a long phrase was broken anywhere, leaving a single syllable on the second line. Lists of phrases now use wider cards and, if a phrase still has to wrap, it wraps between words.
+- **Deleting asks first.** Deleting a book, with its file, its progress and its notes, took one click on a small icon, with no way back: it now asks first. Dictionaries, saved models, a Memory card, a written note and the API key take a second press on the same button.
+- **Missing feedback.** **Copy** confirms that it copied; **Add known words**, in Words, says how many went in; **Paste**, in the Notebook, says when the clipboard is empty or the browser will not let it be read; **Export**, for the backup, and **Save image** say that the file was downloaded, because the Kotonoha window does not show the browser’s downloads, and when an image or a recording cannot be downloaded for the card, it says so. The backup carries the local date in its name, not the Greenwich one.
+- **The Settings index** kept a section marked that was no longer in view after jumping with Page Down or the scrollbar.
+- **Details.** The tabs of the word card no longer touch each other or get cut off with an ellipsis (in the viewer's panel they take two rows); the title of “What does it mean here?” no longer breaks in two; the tick for each level on the home path, which did not show, is back; the Library's formats split into two even rows, and images that fail to load in the card are removed instead of leaving a gap.
 
 ## 0.29.0 · 2026-11-09
 

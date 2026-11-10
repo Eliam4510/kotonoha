@@ -12,6 +12,8 @@ import { momentoLegible } from '../nucleo/momento';
 import { BotonMomento, momentoDe } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
+import { clasesPalabras } from '../ui/palabras';
+import { sinCortes } from '../ui/sinCorte';
 import { buscarPalabra } from './TarjetaPalabra';
 
 /** Las referencias de una entrada (sus opuestos, las que hay que ver), sin repetir y sin ella misma. */
@@ -68,9 +70,9 @@ export function FrasesVistas({ clave, titulo, cargar, resaltar, ajustes, vacio }
             const m = momentoDe(f);
             return (
               <article key={i} class="dic-frase">
-                <p class={`dic-frase-texto fur-${ajustes.furigana}`} lang={id}>
+                <p class={`dic-frase-texto ${clasesPalabras(ajustes)}`} lang={id}>
                   {tokens?.[i]
-                    ? tokens[i].map((t, j) => {
+                    ? sinCortes(tokens[i].map((t, j) => {
                         const contenido = t.furigana?.length
                           ? t.furigana.map((s, k) => (s.lectura && furigana ? <ruby key={k}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby> : <Fragment key={k}>{s.texto}</Fragment>))
                           : t.superficie;
@@ -79,7 +81,7 @@ export function FrasesVistas({ clave, titulo, cargar, resaltar, ajustes, vacio }
                         ) : (
                           <span key={j} class={resaltar(t) ? 'dic-resaltada' : undefined}>{contenido}</span>
                         );
-                      })
+                      }), tokens[i].map((t) => (t.esPalabra ? null : lengua.value.escritura.pegarSignos(t.superficie))))
                     : f.texto}
                 </p>
                 <div class="dic-frase-pie">

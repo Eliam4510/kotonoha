@@ -7,6 +7,7 @@ import { AJUSTES_INICIALES, type Ajustes, type AjustesVozLocal, type AjustesVozN
 import { borrarArchivosSueltos, borrarModeloGuardado, borrarModeloMoras, bytesModeloMoras, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
+import { diaLocal } from '../nucleo/inmersion';
 import { mostrarCombinacion, teclaLatina, textoCombinacion } from '../nucleo/teclas';
 import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../compartido/tipos';
 import { motorDe } from '../lenguas/motor';
@@ -14,7 +15,7 @@ import type { TareaPrompt, TextosLengua } from '../lenguas/tipos';
 import { TAREAS_PERSONALIZABLES } from '../motor/prompts';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { estadoAnki, refrescarAnki } from './estadoApp';
-import { Cabecera, Interruptor, Mensaje } from './Piezas';
+import { BotonBorrar, Cabecera, Interruptor, Mensaje } from './Piezas';
 import { IDIOMAS_INTERFAZ, bcp47Actual, lenguaDe, lenguasExplicacion, lenguasTraduccion, numero, resolverIdioma, tm, tr } from '../compartido/i18n';
 import { PAQUETES } from '../lenguas';
 import { estudiarLengua, lengua } from '../ui/lengua';
@@ -276,11 +277,11 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
               fijarProbando(false);
             }
           }}><Icono n={probando ? 'espera' : 'conectado'} t={14} /> {probando ? tr('Probando…') : tr('Probar la conexión')}</button>
-          {guardada && <button class="btn fantasma chico" onClick={async () => {
+          {guardada && <BotonBorrar etiqueta={tr('Eliminar la clave')} texto={tr('Eliminar la clave')} clase="btn fantasma chico" alBorrar={async () => {
             await chrome.storage.local.remove(CLAVE_API);
             fijarGuardada(false);
             fijarPrueba({ texto: tr('Clave eliminada.') });
-          }}>{tr('Eliminar la clave')}</button>}
+          }} />}
         </div>
         {prueba && <Mensaje error={prueba.error}>{prueba.texto}</Mensaje>}
       </div>
@@ -424,10 +425,10 @@ function TarjetaProveedor({ p, guardada, alGuardarClave, alQuitarClave, alCambia
         <button class="btn chico ia" disabled={ocupado || !p.modelos.length || (p.conClave && !guardada)} onClick={() => conMensaje(async () => tr('Conectado: {0}', await motor.probarProveedor(p.id, p.modelos[0])))}>
           <Icono n={ocupado ? 'espera' : 'conectado'} t={14} /> {tr('Probar la conexión')}
         </button>
-        {p.conClave && guardada && <button class="btn fantasma chico" onClick={async () => {
+        {p.conClave && guardada && <BotonBorrar etiqueta={tr('Eliminar la clave')} texto={tr('Eliminar la clave')} clase="btn fantasma chico" alBorrar={async () => {
           await alQuitarClave();
           fijarMensaje({ texto: tr('Clave eliminada.') });
-        }}>{tr('Eliminar la clave')}</button>}
+        }} />}
       </div>
       {conocido?.nota === 'OLLAMA_ORIGINS' && <p class="ayuda">{tr('Ollama solo atiende a las extensiones si se arranca con la variable OLLAMA_ORIGINS=chrome-extension://*.')}</p>}
       {mensaje && <Mensaje error={mensaje.error}>{mensaje.texto}</Mensaje>}
@@ -564,6 +565,21 @@ const INTENSIDADES: { id: Ajustes['whisperIntensidad']; nombre: string; ayuda: s
 ];
 
 /** Sin el ayudante, un video de internet solo se puede transcribir mientras se reproduce. */
+/** Copia un texto y lo dice: sin esa señal, no se sabe si el clic ha hecho algo. */
+function BotonCopiar({ texto }: { texto: string }) {
+  const [copiado, fijarCopiado] = useState(false);
+  useEffect(() => {
+    if (!copiado) return;
+    const t = setTimeout(() => fijarCopiado(false), 1800);
+    return () => clearTimeout(t);
+  }, [copiado]);
+  return (
+    <button class="btn chico fantasma" onClick={() => navigator.clipboard.writeText(texto).then(() => fijarCopiado(true)).catch(() => {})}>
+      <Icono n={copiado ? 'ok' : 'portapapeles'} t={14} /> <span role="status">{copiado ? tr('Copiado') : tr('Copiar')}</span>
+    </button>
+  );
+}
+
 function AyudanteLocal() {
   const [info, fijarInfo] = useState<InfoAyudante | null | undefined>(undefined);
   const comprobar = () => {
@@ -604,7 +620,7 @@ function AyudanteLocal() {
     >
       <span class="ap-acciones-fila ap-acciones-ayudante">
         <a class="btn chico fantasma" href={URL_ULTIMA_VERSION} target="_blank" rel="noreferrer noopener"><Icono n="descargar" t={14} /> {tr('Descargar')}</a>
-        <button class="btn chico fantasma" onClick={() => navigator.clipboard.writeText(orden).catch(() => {})}><Icono n="portapapeles" t={14} /> {tr('Copiar')}</button>
+        <BotonCopiar texto={orden} />
         <button class="btn chico fantasma" onClick={comprobar}>{tr('Comprobar')}</button>
       </span>
     </Opcion>
@@ -664,17 +680,17 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
           <div class="ap-grupo">
             {moras > 0 && (
               <Opcion titulo={tr('narabas, para las moras de la práctica del acento')} ayuda={textoTamano(moras / 1e6)}>
-                <button class="btn chico fantasma" aria-label={`${tr('Borrar')}: narabas`} onClick={() => borrarModeloMoras().then(releer)}><Icono n="basura" t={14} /> {tr('Borrar')}</button>
+                <BotonBorrar etiqueta={`${tr('Borrar')}: narabas`} texto={tr('Borrar')} alBorrar={() => borrarModeloMoras().then(releer)} />
               </Opcion>
             )}
             {guardados.modelos.map(({ id, bytes }) => (
               <Opcion key={id} titulo={tr(MODELOS_WHISPER[id].nombre)} ayuda={textoTamano(bytes / 1e6)}>
-                <button class="btn chico fantasma" aria-label={`${tr('Borrar')}: ${tr(MODELOS_WHISPER[id].nombre)}`} onClick={() => borrarModeloGuardado(id).then(releer)}><Icono n="basura" t={14} /> {tr('Borrar')}</button>
+                <BotonBorrar etiqueta={`${tr('Borrar')}: ${tr(MODELOS_WHISPER[id].nombre)}`} texto={tr('Borrar')} alBorrar={() => borrarModeloGuardado(id).then(releer)} />
               </Opcion>
             ))}
             {guardados.otrosBytes > 0 && (
               <Opcion titulo={tr('Archivos sueltos')} ayuda={`${tr('De una descarga que no terminó o de un modelo que ya no se ofrece.')} ${textoTamano(guardados.otrosBytes / 1e6)}`}>
-                <button class="btn chico fantasma" aria-label={`${tr('Borrar')}: ${tr('Archivos sueltos')}`} onClick={() => borrarArchivosSueltos().then(releer)}><Icono n="basura" t={14} /> {tr('Borrar')}</button>
+                <BotonBorrar etiqueta={`${tr('Borrar')}: ${tr('Archivos sueltos')}`} texto={tr('Borrar')} alBorrar={() => borrarArchivosSueltos().then(releer)} />
               </Opcion>
             )}
           </div>
@@ -786,7 +802,7 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
         )}
         {borrando.includes(d.id)
           ? <span class="ayuda" role="status">{tr('Eliminando…')}</span>
-          : <button class="btn-icono chico" aria-label={tr('Eliminar {0}', d.titulo)} data-tip={tr('Eliminar')} data-tip-lado="izq" onClick={() => eliminar(d.id)}><Icono n="basura" t={15} /></button>}
+          : <BotonBorrar etiqueta={tr('Eliminar {0}', d.titulo)} clase="btn-icono chico" t={15} consejo={tr('Eliminar')} lado="izq" alBorrar={() => eliminar(d.id)} />}
       </div>
     </div>
   );
@@ -1299,9 +1315,11 @@ function SeccionDatos({ a, cambiar }: PropsSeccion) {
               const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
               const v = document.createElement('a');
               v.href = url;
-              v.download = `kotonoha-copia-${new Date().toISOString().slice(0, 10)}.json`;
+              v.download = `kotonoha-copia-${diaLocal(Date.now())}.json`;
               v.click();
               URL.revokeObjectURL(url);
+              // Esta ventana no enseña las descargas del navegador: sin decirlo, el botón parecía no hacer nada.
+              fijarMensaje({ texto: tr('Copia descargada: {0}. Está en las descargas del navegador.', v.download) });
             }}><Icono n="descargar" t={14} /> {tr('Exportar')}</button>
             <button class="btn chico" onClick={() => entrada.current?.click()}><Icono n="subir" t={14} /> {tr('Restaurar')}</button>
           </span>
@@ -1466,19 +1484,47 @@ export function PantallaAjustes({ a }: { a: Ajustes }) {
     guardarAjustes(c).catch(console.error);
   };
 
-  // Marca en la subnavegación la sección que se está leyendo.
+  // Marca en la subnavegación la sección que se está leyendo: la primera que cruza la franja de arriba. El observador
+  // solo avisa de las que cambian, así que se lleva la cuenta de todas: si no, al saltar (Av Pág, la barra de
+  // desplazamiento) se quedaba marcada una sección que ya no estaba a la vista.
+  const pausa = useRef(0);
+  const pedida = useRef<string | null>(null);
   useEffect(() => {
     const secciones = [...(raiz.current?.querySelectorAll('.ap-ajuste-seccion') ?? [])];
     const contenedor = raiz.current?.closest('.ap-principal') ?? null;
+    const dentro = new Set<Element>();
+    const elegir = () => {
+      if (performance.now() < pausa.current) return;
+      // Al fondo ya no se puede bajar más, y las últimas secciones nunca llegarían a la franja: se marca la que se
+      // pidió en el índice, si se pidió una, y si no, la última.
+      const alFondo = !!contenedor && contenedor.scrollTop > 0 && contenedor.scrollTop + contenedor.clientHeight >= contenedor.scrollHeight - 2;
+      if (!alFondo) pedida.current = null;
+      const vista = alFondo ? secciones.find((x) => x.id === pedida.current) ?? secciones.at(-1) : secciones.find((x) => dentro.has(x));
+      if (vista) fijarVisible(vista.id);
+    };
     const observador = new IntersectionObserver(
       (entradas) => {
-        const vista = entradas.filter((e) => e.isIntersecting).sort((x, y) => x.boundingClientRect.top - y.boundingClientRect.top)[0];
-        if (vista) fijarVisible(vista.target.id);
+        for (const e of entradas) {
+          if (e.isIntersecting) dentro.add(e.target);
+          else dentro.delete(e.target);
+        }
+        elegir();
       },
       { root: contenedor, rootMargin: '-10% 0px -70% 0px' }
     );
-    secciones.forEach((s) => observador.observe(s));
-    return () => observador.disconnect();
+    secciones.forEach((x) => observador.observe(x));
+    // Cuando la página acaba de deslizarse hasta la sección pedida, se vuelve a mirar.
+    const alParar = () => {
+      pausa.current = 0;
+      elegir();
+    };
+    contenedor?.addEventListener('scroll', elegir, { passive: true });
+    contenedor?.addEventListener('scrollend', alParar);
+    return () => {
+      observador.disconnect();
+      contenedor?.removeEventListener('scroll', elegir);
+      contenedor?.removeEventListener('scrollend', alParar);
+    };
   }, []);
 
   return (
@@ -1492,6 +1538,9 @@ export function PantallaAjustes({ a }: { a: Ajustes }) {
               class={visible === s.id ? 'activa' : ''}
               aria-current={visible === s.id ? 'true' : undefined}
               onClick={() => {
+                // Mientras la página se desliza hasta ella, la marca no va saltando por las que pasa.
+                pausa.current = performance.now() + 2500;
+                pedida.current = s.id;
                 fijarVisible(s.id);
                 raiz.current?.querySelector(`#${s.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}

@@ -1,6 +1,7 @@
 // Ficha de una palabra: significado en la frase, definiciones, estado, audio, imágenes, IA y enlaces.
 // Se usa en la ventana emergente sobre el video, en el lector y en el diccionario de la app.
 
+import { Fragment } from 'preact';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { type Ajustes, hayVozSintetica, type PestanaDiccionario, vozLocalActiva, vozNeuronalActiva } from '../compartido/ajustes';
 import { type FlujoCancelable, flujoMotor, fondo, motor } from '../compartido/rpc';
@@ -49,19 +50,58 @@ export function colocarJunto(ancla: { left: number; top: number; width: number; 
   return { estilo, clase: `${arriba ? 'nace-abajo' : 'nace-arriba'} ${haciaDerecha ? 'nace-izq' : 'nace-der'}`, arriba, haciaDerecha };
 }
 
-export function ConFurigana({ texto, lectura }: { texto: string; lectura?: string }) {
+/** Lo más corto que puede ser una palabra para que el renglón se parta delante de ella. */
+const LARGO_PARA_PARTIR = 3;
+const separadores = new Map<string, Intl.Segmenter | null>();
+
+/**
+ * Un tramo sin lectura, en los trozos entre los que se puede partir el renglón: delante de cada palabra de cierto
+ * largo, según el navegador. Las cortas (partículas, terminaciones) se quedan con la de antes, y la primera, con lo
+ * que venga delante, que es de quien cuelga.
+ */
+function trozosPartibles(texto: string, idioma: string): string[] {
+  if (!separadores.has(idioma)) {
+    let s: Intl.Segmenter | null = null;
+    try {
+      s = new Intl.Segmenter(idioma, { granularity: 'word' });
+    } catch {
+      // Sin separador de palabras, el tramo va entero.
+    }
+    separadores.set(idioma, s);
+  }
+  const separador = separadores.get(idioma);
+  if (!separador) return [texto];
+  const trozos: string[] = [];
+  for (const { segment } of separador.segment(texto)) {
+    if (trozos.length && [...segment].length >= LARGO_PARA_PARTIR) trozos.push(segment);
+    else if (trozos.length) trozos[trozos.length - 1] += segment;
+    else trozos.push(segment);
+  }
+  return trozos;
+}
+
+/**
+ * Lo escrito con su lectura encima. Con `partible`, deja partir el renglón solo entre palabras: antes de un tramo con
+ * lectura que siga a uno sin ella (donde acaba una palabra con su terminación y empieza la siguiente) y, dentro de un
+ * tramo sin lectura, delante de sus palabras largas. El navegador sabe partir una frase entre palabras, pero con las
+ * lecturas en medio se pierde y deja sílabas sueltas.
+ */
+export function ConFurigana({ texto, lectura, partible }: { texto: string; lectura?: string; partible?: boolean }) {
   if (!lectura) return <>{texto}</>;
   const seg = lengua.value.lectura.segmentar(texto, lectura);
   return (
     <>
       {seg.map((s, i) =>
         s.lectura ? (
-          <ruby key={i}>
-            {s.texto}
-            <rt>{lengua.value.lectura.visible(s.lectura, formatoLectura.value)}</rt>
-          </ruby>
+          <Fragment key={i}>
+            {partible && i > 0 && !seg[i - 1].lectura && <wbr />}
+            <ruby>
+              {s.texto}
+              <rt>{lengua.value.lectura.visible(s.lectura, formatoLectura.value)}</rt>
+            </ruby>
+          </Fragment>
         ) : (
-          <span key={i}>{s.texto}</span>
+          <span key={i}>{partible ? trozosPartibles(s.texto, lengua.value.id).map((t, k) => <Fragment key={k}>{k > 0 && <wbr />}{t}</Fragment>) : s.texto}</span>
         )
       )}
     </>
@@ -324,8 +364,14 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
           <span class="fila-audio-nombre">{a.etiqueta}</span>
           {enviar && (
             <button class="btn fantasma chico" onClick={async () => {
-              const m = await motor.descargarMedio(a.url);
-              await enviarAlCreador({ audioPalabra: [{ id: a.url, nombre: `kotonoha_${lema}.mp3`, tipo: m.tipo, datos: m.datos, etiqueta: a.etiqueta }] });
+              // Si la grabación no baja, que se diga: sin esto, el botón parecía no hacer nada.
+              fijarError('');
+              try {
+                const m = await motor.descargarMedio(a.url);
+                await enviarAlCreador({ audioPalabra: [{ id: a.url, nombre: `kotonoha_${lema}.mp3`, tipo: m.tipo, datos: m.datos, etiqueta: a.etiqueta }] });
+              } catch (e) {
+                fijarError(e instanceof Error ? e.message : String(e));
+              }
             }}>{tr('Enviar')}</button>
           )}
         </div>
@@ -373,10 +419,13 @@ function PanelImagenes({ lema, frase, enviar, primeraGlosa }: { lema: string; fr
   const [imgs, fijarImgs] = useState<ResultadoImagen[] | null>(null);
   const [meme, fijarMeme] = useState(false);
   const [error, fijarError] = useState('');
+  // Las que no llegan a cargar se quitan: si no, queda el hueco con su título desbordado.
+  const [rotas, fijarRotas] = useState<string[]>([]);
   useEffect(() => {
     let vivo = true;
     fijarImgs(null);
     fijarError('');
+    fijarRotas([]);
     (async () => {
       // Sin IA si el diccionario ya da una palabra; con IA si no hay definición que buscar.
       let consulta = primeraGlosa?.replace(/\([^)]*\)/g, '').split(/[;,]/)[0].trim();
@@ -390,6 +439,7 @@ function PanelImagenes({ lema, frase, enviar, primeraGlosa }: { lema: string; fr
       vivo = false;
     };
   }, [lema, meme]);
+  const visibles = (imgs ?? []).filter((m) => !rotas.includes(m.url));
   return (
     <div class="panel-medios">
       {error && <div class="texto-error">{error}</div>}
@@ -400,16 +450,21 @@ function PanelImagenes({ lema, frase, enviar, primeraGlosa }: { lema: string; fr
           <span class="esqueleto imagen-vacia" />
         </div>
       )}
-      {imgs?.length === 0 && <div class="ayuda">{tr('No se encontraron imágenes.')}</div>}
-      {!!imgs?.length && (
+      {imgs && visibles.length === 0 && <div class="ayuda">{tr('No se encontraron imágenes.')}</div>}
+      {visibles.length > 0 && (
         <div class="imagenes-fila">
-          {imgs.map((m) => (
+          {visibles.map((m) => (
             <button key={m.url} title={enviar ? tr('Enviar al creador de tarjetas') : m.titulo} onClick={async () => {
               if (!enviar) return;
-              const d = await motor.descargarMedio(m.miniatura);
-              await enviarAlCreador({ imagenes: [{ id: m.url, nombre: `kotonoha_${Date.now()}.jpg`, tipo: d.tipo, datos: d.datos }] });
+              fijarError('');
+              try {
+                const d = await motor.descargarMedio(m.miniatura);
+                await enviarAlCreador({ imagenes: [{ id: m.url, nombre: `kotonoha_${Date.now()}.jpg`, tipo: d.tipo, datos: d.datos }] });
+              } catch (e) {
+                fijarError(e instanceof Error ? e.message : String(e));
+              }
             }}>
-              <img src={m.miniatura} alt={m.titulo ?? ''} loading="lazy" referrerpolicy="no-referrer" />
+              <img src={m.miniatura} alt={m.titulo ?? ''} loading="lazy" referrerpolicy="no-referrer" onError={() => fijarRotas((r) => (r.includes(m.url) ? r : [...r, m.url]))} />
             </button>
           ))}
         </div>
@@ -667,7 +722,7 @@ function CorregirLectura({ contexto, textoLinea, superficie, alHecho, alCerrar }
             fijarEstado(e instanceof Error ? e.message : String(e));
           }
         }}><Icono n="ia" t={14} /> {tr('Revisar con Claude')}</button>
-        <span class="ayuda">o</span>
+        <span class="ayuda">{tr('o')}</span>
         <input class="campo" lang={lengua.value.id} placeholder={tr(lengua.value.textos.lecturaCampo)} aria-label={tr('Lectura correcta')} value={manual} onInput={(e) => fijarManual(e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
         <button class="btn chico" disabled={!manual.trim()} onClick={async () => {
           await motor.corregirLectura(textoLinea, { superficie, lectura: manual.trim() });
