@@ -180,6 +180,34 @@ export function leerBancoTerminos(filas: unknown[][], omitir: ReadonlySet<string
   return salida;
 }
 
+/** Un carácter de un diccionario de caracteres en formato Yomitan (KANJIDIC): lecturas, etiquetas, significados y datos. */
+export interface CaracterImportado {
+  caracter: string;
+  on: string[];
+  kun: string[];
+  etiquetas: string[];
+  significados: string[];
+  /** Trazos, curso, frecuencia, índices de libros: lo que el formato llama estadísticas. */
+  datos: Record<string, string>;
+}
+
+/** Un banco de caracteres: ["日", "ニチ ジツ", "ひ -び -か", "jouyou", ["día", "sol"], {"strokes": "4"}]. */
+export function leerBancoCaracteres(filas: unknown[][]): CaracterImportado[] {
+  const palabras = (x: unknown) => String(x ?? '').split(/\s+/).filter(Boolean);
+  const salida: CaracterImportado[] = [];
+  for (const f of filas) {
+    const caracter = String(f[0] ?? '');
+    if (!caracter) continue;
+    const datos: Record<string, string> = {};
+    if (f[5] && typeof f[5] === 'object' && !Array.isArray(f[5])) {
+      for (const [k, v] of Object.entries(f[5] as Record<string, unknown>)) if (v !== null && v !== undefined) datos[k] = String(v);
+    }
+    const significados = Array.isArray(f[4]) ? f[4].filter((s): s is string => typeof s === 'string' && s.trim() !== '').map((s) => s.trim()) : [];
+    salida.push({ caracter, on: palabras(f[1]), kun: palabras(f[2]), etiquetas: palabras(f[3]), significados, datos });
+  }
+  return salida;
+}
+
 /** Una forma flexionada y las palabras de las que sale, según un diccionario. */
 export interface FormaImportada {
   forma: string;

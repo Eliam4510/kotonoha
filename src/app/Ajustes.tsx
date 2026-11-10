@@ -793,7 +793,7 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
 
   const terminos = instalados.filter((d) => d.tipo === 'terminos');
   const frecuencias = instalados.filter((d) => d.tipo === 'frecuencia');
-  const otros = instalados.filter((d) => d.tipo === 'acento');
+  const otros = instalados.filter((d) => d.tipo === 'acento' || d.tipo === 'caracteres');
   const faltan = fuentes.filter((f) => !instalados.some((d) => d.id === f.id));
   const instalandoArchivo = Object.values(progreso).filter((p) => p.id.startsWith('archivo-') && p.fase !== 'listo');
 

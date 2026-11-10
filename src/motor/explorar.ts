@@ -21,12 +21,20 @@ interface Indice {
 
 let indice: Promise<Indice> | null = null;
 
+/** Cuántas filas del diccionario se leen de una vez al hacer el índice. */
+const TANDA_INDICE = 40000;
+
 async function diccionariosDeTerminos() {
   return (await listaDiccionarios()).filter((d) => d.tipo === 'terminos');
 }
 
+/** Cambia cuando cambia lo que se guarda en el índice: lo guardado por una versión anterior se rehace. */
+const VERSION_INDICE = 1;
+
+/** Con los mismos diccionarios, en el mismo orden, y las mismas categorías, el índice es el mismo. */
 async function firmaActual(): Promise<string> {
-  return `${lengua().id}|${(await diccionariosDeTerminos()).map((d) => `${d.id}:${d.filas}:${d.instalado}`).join(',')}`;
+  const categorias = (lengua().categoriasDiccionario ?? []).map((c) => `${c.id}=${c.etiquetas.join('+')}`).join(',');
+  return `${VERSION_INDICE}|${lengua().id}|${(await diccionariosDeTerminos()).map((d) => `${d.id}:${d.filas}:${d.instalado}`).join(',')}|${categorias}`;
 }
 
 type EntradaConOrden = EntradaBreve & { orden: number };
@@ -70,14 +78,26 @@ async function construir(firma: string): Promise<Indice> {
   const comunes = new Map<string, EntradaConOrden>();
   // Cada categoría junta solo las filas con su etiqueta: キー la onomatopeya (un chirrido) no es キー la llave.
   const enCategoria = new Map<string, Map<string, EntradaConOrden>>(categorias.map((c) => [c.id, new Map()]));
-  await db.terminos.each((f) => {
-    const o = orden.get(f.dic);
-    if (o === undefined) return;
-    const etiquetas = f.tags ? f.tags.split(' ') : [];
-    const comun = etiquetas.includes(COMUN);
-    if (comun) anadir(comunes, f, o, true);
-    for (const c of new Set(etiquetas.flatMap((t) => porEtiqueta.get(t) ?? []))) anadir(enCategoria.get(c)!, f, o, comun);
-  });
+  const vale = new Map(categorias.map((c) => [c.id, c.vale]));
+  // Por tandas y no fila a fila: leer casi un millón de filas con un cursor tarda varias veces más. Entre tanda y tanda
+  // se cede el paso, para que el motor siga atendiendo lo que se le pida mientras tanto.
+  let ultima = 0;
+  for (;;) {
+    const filas = await db.terminos.where(':id').above(ultima).limit(TANDA_INDICE).toArray();
+    if (!filas.length) break;
+    for (const f of filas) {
+      const o = orden.get(f.dic);
+      if (o === undefined || !f.tags) continue;
+      const etiquetas = f.tags.split(' ');
+      const comun = etiquetas.includes(COMUN);
+      if (comun) anadir(comunes, f, o, true);
+      for (const c of new Set(etiquetas.flatMap((t) => porEtiqueta.get(t) ?? []))) {
+        if (vale.get(c)?.(f.termino) ?? true) anadir(enCategoria.get(c)!, f, o, comun);
+      }
+    }
+    ultima = filas[filas.length - 1].id ?? Infinity;
+    await new Promise((r) => setTimeout(r, 0));
+  }
   return {
     firma,
     categorias: new Map([...enCategoria].map(([id, m]) => [id, ordenarEntradas([...m.values()].map(sinOrden))])),
@@ -85,13 +105,41 @@ async function construir(firma: string): Promise<Indice> {
   };
 }
 
+const CLAVE_INDICE = 'explorar';
+
+/** El índice ya hecho con estos mismos diccionarios, si se guardó: leerlo es cosa de un instante. */
+async function guardado(firma: string): Promise<Indice | null> {
+  const fila = await db.indices.get(CLAVE_INDICE).catch(() => null);
+  if (!fila || fila.firma !== firma) return null;
+  const d = fila.datos as { categorias: [string, EntradaBreve[]][]; comunes: EntradaBreve[] };
+  return { firma, categorias: new Map(d.categorias), comunes: d.comunes };
+}
+
+async function construirYGuardar(firma: string): Promise<Indice> {
+  // La base de ahora: si se cambia de lengua mientras se hace, se guarda en la suya.
+  const base = db;
+  const nuevo = await construir(firma);
+  // Si no cabe o falla al guardar, se usa igual: solo habrá que rehacerlo la próxima vez.
+  await base.indices.put({ clave: CLAVE_INDICE, firma, datos: { categorias: [...nuevo.categorias], comunes: nuevo.comunes }, creado: Date.now() }).catch(() => {});
+  return nuevo;
+}
+
 async function indiceActual(): Promise<Indice> {
   const firma = await firmaActual();
   const previo = indice ? await indice.catch(() => null) : null;
   if (previo?.firma === firma) return previo;
-  indice = construir(firma);
+  indice = guardado(firma).then((g) => g ?? construirYGuardar(firma));
   indice.catch(() => (indice = null));
   return indice;
+}
+
+/**
+ * Deja el índice listo antes de que haga falta: al arrancar el motor, sin que nadie espere por él. Solo donde se usa, en
+ * las lenguas con categorías para explorar o con página para sus caracteres.
+ */
+export function precalentar(): void {
+  if (!lengua().categoriasDiccionario?.length && !lengua().paginaCaracter) return;
+  indiceActual().catch(() => {});
 }
 
 /** Sin las glosas completas, los sentidos ni las categorías, que solo hacen falta para buscar: viaja más ligera. */
@@ -132,6 +180,16 @@ export async function buscarPorSignificado(texto: string, limite = 30): Promise<
 export async function categoriaDiccionario(id: string, desde = 0, limite = 100): Promise<{ filas: EntradaBreve[]; total: number }> {
   const todas = (await indiceActual()).categorias.get(id) ?? [];
   return { filas: await conEstados(todas.slice(desde, desde + limite).map(ligera)), total: todas.length };
+}
+
+/**
+ * Las palabras de uso común de una categoría que llevan un carácter, sin él solo: las de lectura especial con 今, por
+ * ejemplo. Solo las comunes: las demás suelen ser grafías raras de palabras que se escriben de otra forma.
+ */
+export async function categoriaConCaracter(id: string, caracter: string, limite = 24): Promise<EntradaBreve[]> {
+  const todas = (await indiceActual()).categorias.get(id) ?? [];
+  const con = todas.filter((e) => e.comun && e.termino !== caracter && e.termino.includes(caracter) && e.glosas.length);
+  return conEstados((await porFrecuencia(con.slice(0, limite * 4))).slice(0, limite).map(ligera));
 }
 
 /** Cuántas filas del diccionario se miran como mucho al buscar por el principio: de sobra para las comunes. */

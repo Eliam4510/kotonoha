@@ -10,6 +10,8 @@ import type { DatosTrazos } from '../nucleo/trazos';
 import type {
   AnotacionLibro,
   BorradorTarjeta,
+  CaracterBreve,
+  FichaCaracter,
   CambioBiblioteca,
   ColeccionBiblioteca,
   ContextoIA,
@@ -171,8 +173,18 @@ export interface ApiMotor {
   resultadosDeBusqueda(texto: string, limite?: number): Promise<EntradaBreve[]>;
   /** Las palabras de uso común que llevan un carácter, las más usadas primero, y cuántas hay. */
   palabrasConCaracter(caracter: string, limite?: number): Promise<{ filas: EntradaBreve[]; total: number }>;
+  /** Las palabras de uso común de una categoría del diccionario que llevan un carácter, las más usadas primero. */
+  categoriaConCaracter(id: string, caracter: string, limite?: number): Promise<EntradaBreve[]>;
   /** Unas palabras concretas en breve, con la glosa del primer diccionario: los opuestos de una, por ejemplo. */
   entradasDe(pares: { termino: string; lectura?: string }[]): Promise<EntradaBreve[]>;
+  /** Lo que el diccionario de caracteres sabe de uno. Sin ese diccionario, o si no lo tiene, null. */
+  fichaCaracter(caracter: string): Promise<FichaCaracter | null>;
+  /** Unos caracteres concretos en breve, en ese orden: sus opuestos o sus parecidos, por ejemplo. */
+  caracteresBreves(caracteres: string[]): Promise<CaracterBreve[]>;
+  /** Los caracteres que llevan dentro una pieza, en cualquiera de sus formas, los más usados primero, y cuántos hay. */
+  caracteresConPieza(piezas: string[], excluir: string[], limite?: number): Promise<{ filas: CaracterBreve[]; total: number }>;
+  /** Los caracteres que llevan una pieza para sonar como ella, los más usados primero, y cuántos hay. */
+  familiaFonetica(fonetico: string, limite?: number): Promise<{ filas: CaracterBreve[]; total: number }>;
   muestraEvaluacion(): Promise<{ lema: string; lectura: string; rango: number }[]>;
   aplicarEvaluacion(rangoEstimado: number): Promise<number>;
   importarConocidasAnki(consulta: string, campo: string): Promise<number>;

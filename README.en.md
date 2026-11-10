@@ -136,9 +136,13 @@ The **JLPT** screen brings together the vocabulary, kanji and grammar of each le
 
 The dictionary uses the whole window: the results list on one side; in the center, the word in large type, with its reading above and each sense with its part of speech; and on the other side its kanji, its opposites, the common words with the same meaning, such as 喋る or 会話 for 話す, and the words read the same way. Below are the sentences from your videos where it appeared, with the minute and a button to go back to that moment. It also searches by meaning, such as “dog” → 犬, and finds grammar by its form or its meaning. The start page gathers onomatopoeia, proverbs, four-kanji expressions, and literary, colloquial and respectful words. Size and typeface can be changed from the page itself.
 
-<img src="docs/img/kanji.en.png" alt="The page of the kanji 愛: how it is written, its readings, its components and the words that contain it" width="100%">
+<img src="docs/img/kanji.en.png" alt="The page of the kanji 愛: how it is written, all its readings, its radical, its components, the words that contain it and the kanji that look like it" width="100%">
 
-A single kanji has its own page: how it is written, stroke by stroke; its meaning and readings; its components, with the radical and the one that gives the sound; the words you already know with it and the most used words that contain it; and how it looks in print and by hand.
+A single kanji has its own page: how it is written, stroke by stroke; its meaning; all its readings, including rare and name readings, with the period each one comes from; its radical and its components, with the one that gives the sound and the kanji that share it; the words you already know with it, the most used words that contain it and the ones that are not read like their kanji, such as 今日; the kanji that look like it, its opposites and its old forms; and how it looks in print and by hand.
+
+<img src="docs/img/escritura.en.png" alt="Writing practice for 語: the strokes of 言 already written and the hint for the next stroke" width="100%">
+
+And you practice it right there: you write with the mouse, a pen or your finger, tracing or from memory, and each stroke is checked when you release it. If it goes the other way or it is another of the remaining strokes, it says so, and with **Hint** the stroke draws itself.
 
 ### German too
 
@@ -223,7 +227,7 @@ Each release ships with its tests and its documentation in six languages; [What�
 
 The code is released under the [MIT license](LICENSE). Third-party components, the data downloaded during use and the terms of responsible use are detailed in [AVISOS.md](AVISOS.md#english).
 
-- Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io); for English and German, [Wiktionary](https://www.wiktionary.org) through [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) and [kaikki.org](https://kaikki.org).
+- Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) and KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io); for English and German, [Wiktionary](https://www.wiktionary.org) through [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) and [kaikki.org](https://kaikki.org).
 - Speech: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja and Parakeet, with [Transformers.js](https://github.com/huggingface/transformers.js).
 - Text recognition: [PP-OCRv5 and PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) and a [speech bubble detector](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0.

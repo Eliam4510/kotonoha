@@ -48,10 +48,10 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 
 | 数据 | 来源 | 条件 |
 |---|---|---|
-| JMdict 和 JMnedict | [EDRDG](https://www.edrdg.org/edrdg/licence.html)，[jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) 格式 | CC BY-SA 4.0 |
-| 音调重音 | [Kanjium](https://github.com/mifunetoshiro/kanjium) | 以该项目的说明为准 |
+| JMdict、JMnedict 和 KANJIDIC | [EDRDG](https://www.edrdg.org/edrdg/licence.html)，[jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) 格式 | CC BY-SA 4.0 |
+| 音调重音和汉字词典 | [Kanjium](https://github.com/mifunetoshiro/kanjium)，作者 Uros O.：音调标记、声旁、同训字以及对 EDICT、KANJIDIC 和 KRADFILE 的其他增补和修改来自他的自由数据库，其余部分属于 EDRDG。汉语读音来自 CC-CEDICT，韩语读音来自 libhangul（Choe Hwanjin，BSD 三条款许可） | CC BY-SA 4.0 |
 | 频率 | [JPDB](https://jpdb.io)，[yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) 格式 | 以该项目的说明为准 |
-| 笔顺 | [KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，原始文件由 jsDelivr 提供 | CC BY-SA 3.0 |
+| 笔顺 | [KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，原始文件由 jsDelivr 提供；它没有的文件由该项目的 GitHub 仓库提供 | CC BY-SA 3.0 |
 | 单词音频 | JapanesePod101 和 [Lingua Libre](https://lingualibre.org) | 以各来源为准 |
 | 图片 | [Openverse](https://openverse.org) | 以每张图片的许可证为准 |
 | 英语和德语词典和发音 | [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 根据 [kaikki.org](https://kaikki.org) 整理，从 Hugging Face 提供 | CC BY-SA 4.0 |

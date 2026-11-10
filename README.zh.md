@@ -136,9 +136,13 @@ flowchart LR
 
 词典占满整个窗口：一侧是结果列表；中间是大字显示的词条，读音标在上方，每个义项都标出词性；另一侧是它的汉字、反义词、意思相同的常用词（比如 話す 对应的 喋る 和 会話）以及读音相同的词。下方列出你看过的视频里出现过它的句子，附出现的时间和一个回到那个时刻的按钮。词典还能按意思搜索，比如“dog” → 犬，并能按形式或意思查找语法。首页汇集了拟声拟态词、谚语、四字熟语，以及书面语、口语和敬语。文字大小和字体可以直接在页面上调整。
 
-<img src="docs/img/kanji.zh.png" alt="汉字 愛 的专页：写法、读音、部件和含有它的词" width="100%">
+<img src="docs/img/kanji.zh.png" alt="汉字 愛 的专页：写法、全部读音、部首、部件、含有它的词和形近字" width="100%">
 
-单个汉字有自己的专页：逐笔演示的写法；含义和读音；标出部首和表音部分的部件；你已经认识的含有它的词和最常用的含有它的词；以及它的印刷体和手写体。
+单个汉字有自己的专页：逐笔演示的写法；含义；全部读音，包括罕见读音和人名读法，并标明每个读音来自哪个时期；部首和部件，标出表音的部件以及同声旁的汉字；你已经认识的含有它的词、最常用的含有它的词，以及不按汉字读音来读的词，比如今日；形近字、反义汉字和旧字形；还有它的印刷体和手写体。
+
+<img src="docs/img/escritura.zh.png" alt="练习书写 語：言 的笔画已经写好，并显示下一画的提示" width="100%">
+
+还可以直接在这里练习：用鼠标、手写笔或手指书写，可以描红，也可以默写，每一画在松开时判定。方向反了，或者写成了后面的某一画，都会指出来；点**提示**，这一画会自动演示。
 
 ### 也能学英语
 
@@ -225,7 +229,7 @@ flowchart LR
 
 代码以 [MIT 许可](LICENSE)发布。第三方组件、使用时下载的数据以及负责任使用的条件详见[声明](docs/zh/notices.md)。
 
-- 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)；英语和德语使用 [Wiktionary](https://www.wiktionary.org)，经 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理。
+- 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) 和 KANJIDIC（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)；英语和德语使用 [Wiktionary](https://www.wiktionary.org)，经 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理。
 - 语音：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja 和 Parakeet，借助 [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 文字识别：[PP-OCRv5 和 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr) 和[对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0。

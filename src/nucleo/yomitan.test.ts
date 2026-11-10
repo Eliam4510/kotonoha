@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extraerGlosas, leerBancoMeta, leerBancoTerminos, leerKanjium } from './yomitan';
+import { extraerGlosas, leerBancoCaracteres, leerBancoMeta, leerBancoTerminos, leerKanjium } from './yomitan';
 
 describe('banco de términos', () => {
   it('lee el formato sencillo de JMdict en español', () => {
@@ -21,6 +21,26 @@ describe('banco de términos', () => {
 
   it('descarta filas sin glosas', () => {
     expect(leerBancoTerminos([['x', 'x', '', '', 0, [], 1, '']])).toEqual([]);
+  });
+});
+
+describe('banco de caracteres', () => {
+  it('lee lecturas, etiquetas, significados y datos de KANJIDIC', () => {
+    const [k] = leerBancoCaracteres([['日', 'ニチ ジツ', 'ひ -び -か', 'jouyou', ['día', 'sol', ''], { strokes: '4', freq: 1 }]]);
+    expect(k).toEqual({
+      caracter: '日',
+      on: ['ニチ', 'ジツ'],
+      kun: ['ひ', '-び', '-か'],
+      etiquetas: ['jouyou'],
+      significados: ['día', 'sol'],
+      datos: { strokes: '4', freq: '1' },
+    });
+  });
+
+  it('aguanta filas a medias y salta las que no traen carácter', () => {
+    expect(leerBancoCaracteres([['', 'ア', '', '', [], {}], ['亜', '', '', '', null, null] as unknown[]])).toEqual([
+      { caracter: '亜', on: [], kun: [], etiquetas: [], significados: [], datos: {} },
+    ]);
   });
 });
 

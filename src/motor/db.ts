@@ -4,7 +4,7 @@ import Dexie, { type Table } from 'dexie';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
-import type { AnotacionLibro, ColeccionBiblioteca, ElementoBiblioteca, EstadoGramatica, EstadoPalabra, GramaticaVista, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
+import type { AnotacionLibro, ColeccionBiblioteca, ElementoBiblioteca, EstadoGramatica, EstadoPalabra, FichaCaracter, GramaticaVista, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
 import type { FormaFlexionada, Transcripcion } from '../lenguas/tipos';
 import type { FilaInmersion } from '../nucleo/inmersion';
 import type { DatosTrazos } from '../nucleo/trazos';
@@ -117,6 +117,17 @@ export interface FilaTrazos {
   datos: DatosTrazos | null;
 }
 
+/**
+ * Un índice que cuesta hacer (hay que recorrer todos los diccionarios) y que solo cambia con ellos: se guarda con la
+ * firma de lo que había al hacerlo, y mientras coincida no se rehace al arrancar.
+ */
+export interface FilaIndice {
+  clave: string;
+  firma: string;
+  datos: unknown;
+  creado: number;
+}
+
 class BaseKotonoha extends Dexie {
   diccionarios!: Table<InfoDiccionario, string>;
   terminos!: Table<FilaTermino, number>;
@@ -139,6 +150,8 @@ class BaseKotonoha extends Dexie {
   inmersion!: Table<FilaInmersion, [string, string, string]>;
   gramatica!: Table<FilaGramatica, string>;
   gramaticaVista!: Table<FilaGramaticaVista, string>;
+  caracteres!: Table<FichaCaracter, string>;
+  indices!: Table<FilaIndice, string>;
 
   constructor(nombre: string) {
     super(nombre);
@@ -168,6 +181,10 @@ class BaseKotonoha extends Dexie {
     this.version(9).stores({ inmersion: '[dia+tipo+fuente], dia' });
     // La gramática con estados (0.21.0): el de cada punto, y en qué videos se vio.
     this.version(10).stores({ gramatica: 'patron, estado', gramaticaVista: 'clave, patron, ultima' });
+    // El diccionario de caracteres (0.29.0): una ficha por kanji. Por sus piezas y la que le da el sonido se encuentra
+    // su familia.
+    // Y los índices del diccionario ya hechos, para no recorrerlo entero cada vez que arranca el motor.
+    this.version(11).stores({ caracteres: 'caracter, fonetico, *piezas', indices: 'clave' });
   }
 }
 

@@ -2,6 +2,18 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.29.0 · 2026-11-09
+
+- **El diccionario de kanji.** Un diccionario nuevo, **Kanji (Kanjium y KANJIDIC)**, con 6812 kanji, que se instala desde la propia página de un kanji o en Ajustes (unos 3 MB). Con él, cada kanji dice lo que significa en español, en qué lista oficial está (Jōyō con su curso, Jinmeiyō o fuera de las listas), su nivel del Kanken y su puesto entre los más usados.
+- **Todas las lecturas.** Las de la lista oficial primero y, aparte, las que no están en ella y las que solo se usan en nombres. Cada on'yomi dice de qué época viene (Go-on, Kan-on, Tō-on), y las oficiales que casi no se usan van señaladas.
+- **Radical, origen y formas antiguas.** El radical con el nombre que se le da en clase (さんずい) y su número, cómo se formó el kanji (pictograma, indicativo, compuesto de ideas o fonosemántico) y sus formas antiguas y variantes: 國 para 国. La página de una forma antigua avisa de cómo se escribe hoy.
+- **Los kanji que lo rodean.** Su familia por el sonido (晴, 清 y 精 con 青), los que lo llevan dentro, los que se le parecen y se confunden al leer, sus opuestos, los de significado parecido y los que se leen igual (神, 紙 y 髪 para かみ), con si se distinguen por el acento.
+- **Lecturas especiales.** Las palabras de uso común que no se leen como sus kanji, como 今日, 大人 o 寿司 (el jukujikun y el ateji de JMdict), en la página de cada kanji y como categoría nueva en **Explorar el diccionario**.
+- **Practicar la escritura.** En la página de un kanji, **Practicar** deja escribirlo con el ratón, un lápiz o el dedo, **Calcando** o **De memoria**. Cada trazo se corrige al soltarlo: si va al revés, si es otro de los que faltan o si no se parece, lo dice. Al segundo fallo, o con **Pista**, el trazo se dibuja solo, y al terminar dice qué trazos conviene repasar.
+- **Las listas del diccionario salen al momento.** El índice que usan las palabras con un kanji, los sinónimos, la búsqueda por significado y las categorías se hacía cada vez que arrancaba el navegador y tardaba unos 16 segundos. Ahora se hace más de tres veces más rápido, se guarda y se deja listo al arrancar: la primera lista sale en menos de medio segundo.
+- **Trazos de los kanji menos comunes.** El servidor de los trazos no daba los de los kanji que no tenía guardados, como 國, y salían «sin datos de trazos». Ahora se piden al repositorio de KanjiVG.
+- **La lectura, lejos del borde.** En las tarjetas del diccionario, la lectura quedaba a 3 píxeles del borde de arriba; ahora tiene aire. Las palabras largas se escriben más pequeñas en vez de partirse en dos renglones, y las piezas repetidas de un kanji (los tres 一 de 三) salen una vez.
+
 ## 0.28.0 · 2026-11-09
 
 - **Un diccionario completo, a toda la ventana.** La página del diccionario usa todo el ancho: la lista de resultados a la izquierda, la palabra en el centro y, a la derecha, sus kanji, sus opuestos, las que significan lo mismo y las que se leen igual. Con menos ancho pasa a dos columnas y, en una ventana estrecha, a una. Las palabras se leen mucho mejor: más grandes, con una letra gótica de lectura fácil y la lectura siempre encima. Cada sentido junta sus glosas y lleva encima su clase de palabra (verbo godan, transitivo, coloquial), separado por diccionario, y la página abre sin ninguna pestaña: ni audio ni Claude hasta que se piden.
@@ -237,6 +249,18 @@ Un resumen de cada versión. Las notas completas, con lo probado y los paquetes,
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.29.0 · 2026-11-09
+
+- **The kanji dictionary.** A new dictionary, **Kanji (Kanjium and KANJIDIC)**, with 6,812 kanji, installed from a kanji's own page or in Settings (about 3 MB). With it, each kanji shows the official list it belongs to (Jōyō with its school grade, Jinmeiyō or outside the lists), its Kanken level and its rank among the most used; with the interface in Spanish, about 2,500 kanji have their meaning in Spanish.
+- **All the readings.** Those on the official list first and, separately, the ones that are not on it and the ones used only in names. Each on reading says which period it comes from (Go-on, Kan-on, Tō-on), and the official ones that are hardly used are marked.
+- **Radical, origin and old forms.** The radical with the name it is given in class (さんずい) and its number, how the kanji was formed (pictograph, simple ideograph, compound ideograph or phono-semantic compound) and its old forms and variants: 國 for 国. The page of an old form tells you how it is written today.
+- **The kanji around it.** Its sound family (晴, 清 and 精 with 青), the kanji that contain it, the ones that look like it and are easy to confuse, its opposites, the ones with a similar meaning and the ones read the same way (神, 紙 and 髪 for かみ), with whether their accent tells them apart.
+- **Special readings.** The common words that are not read like their kanji, such as 今日, 大人 or 寿司 (jukujikun and ateji from JMdict), on each kanji's page and as a new category in **Explore the dictionary**.
+- **Writing practice.** On a kanji's page, **Practice** lets you write it with the mouse, a pen or your finger, **Tracing** or **From memory**. Each stroke is checked when you release it: if it goes the other way, if it is another of the remaining strokes or if it does not match, it says so. After the second mistake, or with **Hint**, the stroke draws itself, and at the end it tells you which strokes to review.
+- **Dictionary lists appear at once.** The index used by the words with a kanji, the synonyms, the search by meaning and the categories was rebuilt every time the browser started and took about 16 seconds. It is now built more than three times faster, saved, and made ready at startup: the first list appears in under half a second.
+- **Strokes for less common kanji.** The stroke server did not return the kanji it had not cached, such as 國, and they showed “no stroke data”. They are now requested from the KanjiVG repository.
+- **The reading, away from the edge.** On the dictionary cards, the reading sat 3 pixels from the top edge; it now has room. Long words are written smaller instead of breaking into two lines, and a kanji's repeated components (the three 一 in 三) appear once.
 
 ## 0.28.0 · 2026-11-09
 

@@ -48,10 +48,10 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 
 | データ | 出所 | 条件 |
 |---|---|---|
-| JMdict と JMnedict | [EDRDG](https://www.edrdg.org/edrdg/licence.html)、[jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) の形式 | CC BY-SA 4.0 |
-| ピッチアクセント | [Kanjium](https://github.com/mifunetoshiro/kanjium) | プロジェクトの定めるとおり |
+| JMdict、JMnedict、KANJIDIC | [EDRDG](https://www.edrdg.org/edrdg/licence.html)、[jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) の形式 | CC BY-SA 4.0 |
+| ピッチアクセントと漢字辞典 | Uros O. 氏の [Kanjium](https://github.com/mifunetoshiro/kanjium)：アクセント表記、音符、同訓異字、および EDICT、KANJIDIC、KRADFILE へのその他の追加・変更は同氏のフリーデータベースによるもので、それ以外は EDRDG のものです。中国語の読みは CC-CEDICT、韓国語の読みは libhangul（Choe Hwanjin、三条項 BSD）によります | CC BY-SA 4.0 |
 | 頻度 | [JPDB](https://jpdb.io)、[yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) の形式 | プロジェクトの定めるとおり |
-| 書き順 | [KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、jsDelivr が配信する元のファイル | CC BY-SA 3.0 |
+| 書き順 | [KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、jsDelivr が配信する元のファイル（ない場合はプロジェクトの GitHub リポジトリから取得） | CC BY-SA 3.0 |
 | 単語の音声 | JapanesePod101 と [Lingua Libre](https://lingualibre.org) | 各出所の条件 |
 | 画像 | [Openverse](https://openverse.org) | 各画像のライセンス |
 | 英語とドイツ語の辞書と発音 | [Wiktionary](https://www.wiktionary.org)。[kaikki.org](https://kaikki.org) をもとに [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) が整形し、Hugging Face から配信 | CC BY-SA 4.0 |

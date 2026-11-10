@@ -10,6 +10,7 @@ import { alinearFurigana, kataAHira, lecturaVisible, nombreFlexion, patronAcento
 import { caracteresConTrazos, kanjiDe } from './trazos';
 import { referenciaEnGlosa } from './referencias';
 import { etiquetaDiccionario } from './etiquetas';
+import { DICCIONARIO_KANJI } from './paginaKanji';
 
 function saludo(hora: number, nombre: string): string {
   const base = hora >= 5 && hora < 11 ? 'おはようございます' : hora >= 11 && hora < 18 ? 'こんにちは' : 'こんばんは';
@@ -116,6 +117,16 @@ export const JAPONES: PaqueteLengua = {
   },
   categoriasDiccionario: [
     { id: 'onomatopeyas', nombre: tm('Onomatopeyas'), descripcion: tm('Palabras que imitan un sonido o dicen cómo es algo: どきどき, ふわふわ, ざあざあ.'), etiquetas: ['on-mim'], icono: 'ondas' },
+    // Las etiquetas de JMdict para el jukujikun (今日, 大人) y el ateji (寿司, 素敵). Las llevan también las filas de la
+    // misma palabra escrita en kana, que aquí no dicen nada.
+    {
+      id: 'lecturas-especiales',
+      nombre: tm('Lecturas especiales'),
+      descripcion: tm('Palabras que no se leen como sus kanji y hay que aprender enteras: 今日, 大人, 寿司.'),
+      etiquetas: ['gikun', 'ateji'],
+      icono: 'sello',
+      vale: (termino) => kanjiDe(termino).length > 0,
+    },
     { id: 'yojijukugo', nombre: tm('Expresiones de cuatro kanji'), descripcion: tm('Los yojijukugo, frases hechas de cuatro kanji: 一期一会, 十人十色.'), etiquetas: ['yoji'], icono: 'cuadricula' },
     { id: 'refranes', nombre: tm('Refranes'), descripcion: tm('Refranes y dichos: 猿も木から落ちる.'), etiquetas: ['proverb'], icono: 'pergamino' },
     { id: 'modismos', nombre: tm('Expresiones idiomáticas'), descripcion: tm('Frases cuyo sentido no sale de sus palabras: 猫の手も借りたい.'), etiquetas: ['id'], icono: 'charla' },
@@ -138,6 +149,12 @@ export const JAPONES: PaqueteLengua = {
       // GlyphWiki enseña sus formas antiguas y sus variantes.
       { nombre: 'GlyphWiki', url: (c) => `https://glyphwiki.org/wiki/u${c.codePointAt(0)!.toString(16)}` },
     ],
+    diccionario: DICCIONARIO_KANJI,
+    lecturasEspeciales: {
+      categoria: 'lecturas-especiales',
+      titulo: tm('Lecturas especiales con {0}'),
+      ayuda: tm('No se leen como sus kanji: o la lectura es de la palabra entera (jukujikun), o los kanji solo ponen el sonido (ateji). Se aprenden enteras.'),
+    },
   },
   referenciaEnGlosa,
   etiquetaDiccionario,

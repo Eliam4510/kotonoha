@@ -32,9 +32,12 @@ export function TarjetaPalabra({ e, activa, alElegir }: { e: PalabraBreve; activ
   const paquete = lengua.value;
   const conLectura = paquete.lectura.distingue && !!e.lectura && e.lectura !== e.termino;
   const estado = e.estado && e.estado !== 'desconocida' ? e.estado : undefined;
+  // Una palabra larga se escribe más pequeña: partida en dos renglones, la tarjeta crece y descuadra la fila. Solo donde
+  // cada carácter ocupa un cuadro entero; con alfabeto caben muchas más letras.
+  const largo = paquete.lectura.distingue ? [...e.termino].length : 0;
   return (
     <button class={`dic-tarjeta ${activa ? 'activa' : ''} ${estado ? `est-${estado}` : ''}`} aria-current={activa ? 'true' : undefined} onClick={alElegir ?? (() => buscarPalabra(e.termino))}>
-      <span class="dic-tarjeta-palabra" lang={paquete.id}>{conLectura ? <ConFurigana texto={e.termino} lectura={e.lectura} /> : e.termino}</span>
+      <span class={`dic-tarjeta-palabra ${largo >= 8 ? 'muy-larga' : largo >= 6 ? 'larga' : ''}`} lang={paquete.id}>{conLectura ? <ConFurigana texto={e.termino} lectura={e.lectura} /> : e.termino}</span>
       {e.glosa && <span class="dic-tarjeta-glosa">{e.glosa}</span>}
       {(e.comun || estado) && (
         <span class="dic-tarjeta-marcas">

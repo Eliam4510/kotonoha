@@ -140,9 +140,13 @@ La pantalla **JLPT** reúne el vocabulario, los kanji y la gramática de cada ni
 
 El diccionario usa toda la ventana: a un lado, la lista de resultados; en el centro, la palabra en grande, con la lectura encima y cada sentido con su clase de palabra, y al otro lado sus kanji, sus opuestos, las de uso común que significan lo mismo, como 喋る o 会話 para 話す, y las que se leen igual. Debajo van las frases de tus videos donde apareció, con el minuto y un botón para volver a ese momento. Busca también por significado, como «perro» → 犬, y encuentra la gramática por su forma o por su sentido. La portada reúne onomatopeyas, refranes, expresiones de cuatro kanji y palabras literarias, coloquiales y respetuosas. El tamaño y la letra se cambian desde la propia página.
 
-<img src="docs/img/kanji.png" alt="La página del kanji 愛: cómo se escribe, sus lecturas, sus piezas y las palabras que lo llevan" width="100%">
+<img src="docs/img/kanji.png" alt="La página del kanji 愛: cómo se escribe, todas sus lecturas, su radical, sus piezas, las palabras que lo llevan y los kanji que se le parecen" width="100%">
 
-Un kanji suelto tiene su propia página: cómo se escribe, trazo a trazo; su significado y sus lecturas; sus piezas, con el radical y la que le da el sonido; las palabras que ya conoces con él y las más usadas que lo llevan, y cómo se ve impreso y a mano.
+Un kanji suelto tiene su propia página: cómo se escribe, trazo a trazo; su significado; todas sus lecturas, también las raras y las de nombres, con la época de la que viene cada una; su radical y sus piezas, con la que le da el sonido y los kanji que la comparten; las palabras que ya conoces con él, las más usadas que lo llevan y las que no se leen como sus kanji, como 今日; los kanji que se le parecen, sus opuestos y sus formas antiguas, y cómo se ve impreso y a mano.
+
+<img src="docs/img/escritura.png" alt="Practicar la escritura de 語: los trazos de 言 ya escritos y la pista del trazo que toca" width="100%">
+
+Y se practica ahí mismo: se escribe con el ratón, un lápiz o el dedo, calcando o de memoria, y cada trazo se corrige al soltarlo. Si va al revés o es otro de los que faltan, lo dice, y con **Pista** el trazo se dibuja solo.
 
 ### Inglés y alemán
 
@@ -229,7 +233,7 @@ Las versiones salen con sus pruebas y su documentación en los seis idiomas; las
 
 El código se publica bajo la [licencia MIT](LICENSE). Los componentes de terceros, los datos que se descargan al usarla y las condiciones de uso responsable se detallan en [AVISOS.md](AVISOS.md).
 
-- Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io); para el inglés y el alemán, [Wiktionary](https://www.wiktionary.org) mediante [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org).
+- Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) y KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io); para el inglés y el alemán, [Wiktionary](https://www.wiktionary.org) mediante [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org).
 - Voz: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja y Parakeet, con [Transformers.js](https://github.com/huggingface/transformers.js).
 - Reconocimiento de texto: [PP-OCRv5 y PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) y un [detector de globos de texto](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0.

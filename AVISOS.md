@@ -49,10 +49,10 @@ Ninguno de estos datos forma parte del repositorio. La extensión los descarga b
 
 | Datos | Procedencia | Condiciones |
 |---|---|---|
-| JMdict y JMnedict | [EDRDG](https://www.edrdg.org/edrdg/licence.html), en el formato de [jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) | CC BY-SA 4.0 |
-| Acento tonal | [Kanjium](https://github.com/mifunetoshiro/kanjium) | Las indicadas por el proyecto |
+| JMdict, JMnedict y KANJIDIC | [EDRDG](https://www.edrdg.org/edrdg/licence.html), en el formato de [jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) | CC BY-SA 4.0 |
+| Acento tonal y diccionario de kanji | [Kanjium](https://github.com/mifunetoshiro/kanjium), de Uros O.: la notación del acento, las partes fonéticas, los homónimos y los demás añadidos y cambios sobre EDICT, KANJIDIC y KRADFILE son de su base de datos libre; el resto es del EDRDG. La lectura en chino viene de CC-CEDICT y la coreana, de libhangul (Choe Hwanjin, BSD de 3 cláusulas) | CC BY-SA 4.0 |
 | Frecuencias | [JPDB](https://jpdb.io), en el formato de [yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) | Las indicadas por el proyecto |
-| Orden de los trazos | [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, con los archivos originales servidos por jsDelivr | CC BY-SA 3.0 |
+| Orden de los trazos | [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, con los archivos originales servidos por jsDelivr o, si no los tiene, por el repositorio del proyecto en GitHub | CC BY-SA 3.0 |
 | Audio de palabras | JapanesePod101 y [Lingua Libre](https://lingualibre.org) | Las de cada fuente |
 | Imágenes | [Openverse](https://openverse.org) | La licencia de cada imagen |
 | Diccionarios y pronunciación del inglés y del alemán | [Wiktionary](https://www.wiktionary.org), preparados por [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) a partir de [kaikki.org](https://kaikki.org), y servidos desde Hugging Face | CC BY-SA 4.0 |
@@ -123,10 +123,10 @@ None of this data is part of the repository. The extension downloads it on deman
 
 | Data | Source | Terms |
 |---|---|---|
-| JMdict and JMnedict | [EDRDG](https://www.edrdg.org/edrdg/licence.html), in the format of [jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) | CC BY-SA 4.0 |
-| Pitch accent | [Kanjium](https://github.com/mifunetoshiro/kanjium) | As stated by the project |
+| JMdict, JMnedict and KANJIDIC | [EDRDG](https://www.edrdg.org/edrdg/licence.html), in the format of [jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) | CC BY-SA 4.0 |
+| Pitch accent and kanji dictionary | [Kanjium](https://github.com/mifunetoshiro/kanjium), by Uros O.: the pitch accent notation, phonetics, homonyms and other additions or modifications to EDICT, KANJIDIC or KRADFILE were provided by Uros O. through his free database; the rest belongs to the EDRDG. The Chinese reading comes from CC-CEDICT and the Korean one from libhangul (Choe Hwanjin, BSD 3-clause) | CC BY-SA 4.0 |
 | Frequencies | [JPDB](https://jpdb.io), in the format of [yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) | As stated by the project |
-| Stroke order | [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, with the original files served by jsDelivr | CC BY-SA 3.0 |
+| Stroke order | [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, with the original files served by jsDelivr or, when it does not have them, by the project's repository on GitHub | CC BY-SA 3.0 |
 | Word audio | JapanesePod101 and [Lingua Libre](https://lingualibre.org) | Those of each source |
 | Images | [Openverse](https://openverse.org) | The license of each image |
 | English and German dictionaries and pronunciation | [Wiktionary](https://www.wiktionary.org), prepared by [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) from [kaikki.org](https://kaikki.org), and served from Hugging Face | CC BY-SA 4.0 |

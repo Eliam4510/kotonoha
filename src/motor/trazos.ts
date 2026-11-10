@@ -16,7 +16,10 @@ export async function trazosDe(caracter: string): Promise<DatosTrazos | null> {
 }
 
 async function descargar(caracter: string, fuente: NonNullable<ReturnType<typeof motorLengua>['trazos']>): Promise<DatosTrazos | null> {
-  const r = await fetch(fuente.url(caracter));
+  let r = await fetch(fuente.url(caracter)).catch(() => null);
+  // Si la primera fuente falla o lo niega (no es que no exista), se prueba la otra.
+  if ((!r || (!r.ok && r.status !== 404)) && fuente.urlAlternativa) r = await fetch(fuente.urlAlternativa(caracter)).catch(() => r);
+  if (!r) throw new Error(tr('No se pudieron descargar los trazos ({0})', 0));
   // Lo que la fuente no tiene tampoco lo tendrá mañana: se recuerda, para no volver a preguntar.
   if (r.status === 404) {
     await db.trazos.put({ caracter, datos: null });
