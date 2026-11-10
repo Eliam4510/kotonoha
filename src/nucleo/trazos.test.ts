@@ -93,6 +93,11 @@ describe('piezas de un carácter', () => {
     expect(d?.fonetico).toBe('𦰩');
   });
 
+  it('una pieza repetida dentro de un grupo sin nombre cuenta una vez', () => {
+    const tres = `<svg><g kvg:element="三"><g kvg:element="一" kvg:radical="general"><path id="t-s1" d="M1,1"/></g><g kvg:position="bottom"><g kvg:element="一"><path id="t-s2" d="M2,2"/></g><g kvg:element="一"><path id="t-s3" d="M3,3"/></g></g></g></svg>`;
+    expect(leerTrazos(tres)?.componentes).toEqual([{ caracter: '一', radical: true, piezas: [] }]);
+  });
+
   it('una pieza partida en dos cuenta una vez, y lo que no es un carácter se descarta', () => {
     const partida = `<svg><g kvg:element="衷"><g kvg:element="衣" kvg:part="1"><path id="a-s1" d="M1,1"/></g><g kvg:element="中"><path id="a-s2" d="M2,2"/></g><g kvg:element="衣" kvg:part="2"><path id="a-s3" d="M3,3"/></g><g kvg:element="&lt;b&gt;"><path id="a-s4" d="M4,4"/></g></g></svg>`;
     expect(leerTrazos(partida)?.componentes?.map((p) => p.caracter)).toEqual(['衣', '中']);

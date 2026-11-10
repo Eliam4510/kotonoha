@@ -6,12 +6,12 @@
 // MotorLengua trae lo que pesa más (analizador, reglas, prompts) y solo se carga donde hace falta.
 
 import type { AjustesLengua, ModoLectura, PromptPersonalizado } from '../compartido/ajustes';
-import type { EntradaDiccionario, FuenteBiblioteca, PalabraToken, ResultadoAudio } from '../compartido/tipos';
+import type { EntradaDiccionario, FichaCaracter, FuenteBiblioteca, PalabraToken, ResultadoAudio } from '../compartido/tipos';
 import type { TipoMoraEspecial } from '../nucleo/alineacion';
 import type { FormasAnki } from '../nucleo/gramaticaAnki';
 import type { FraseAcentual } from '../nucleo/practicaAcento';
 import type { ReglasTranscripcion } from '../nucleo/transcripcion';
-import type { FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
+import type { CaracterImportado, FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
 import type { DatosTrazos } from '../nucleo/trazos';
 
 // ---------- Palabras ----------
@@ -214,6 +214,8 @@ export interface CategoriaDiccionario {
   descripcion: string;
   /** Las etiquetas de las entradas del diccionario que entran en la categoría. */
   etiquetas: string[];
+  /** Si una palabra con esas etiquetas entra de verdad: las de lectura especial, solo si se escriben con sus caracteres. */
+  vale?(termino: string): boolean;
   /** Un icono de la interfaz. */
   icono: string;
 }
@@ -271,6 +273,40 @@ export interface PaginaCaracterLengua {
   preguntaOrigen: string;
   /** Páginas donde consultarlo, como carácter y no como palabra. */
   enlaces: { nombre: string; url(caracter: string): string }[];
+  /** Las palabras que lo llevan y no se leen como él: de qué categoría del diccionario salen y cómo se presentan. */
+  lecturasEspeciales?: { categoria: string; titulo: string; ayuda: string };
+  /** Cómo se enseña lo que trae el diccionario de caracteres. Sin esto, la página no lo usa. */
+  diccionario?: DiccionarioCaracteresLengua;
+}
+
+/** Un rótulo con lo que conviene saber de él, para enseñarlo al pasar por encima. */
+export interface RotuloConAyuda {
+  nombre: string;
+  ayuda: string;
+}
+
+/** Los rótulos de lo que el diccionario de caracteres sabe de uno: sus listas oficiales, sus lecturas, su origen. */
+export interface DiccionarioCaracteresLengua {
+  /** La lista oficial en que está, como se guarda (kyoiku-4, jinmeiyo…). `dato` va en el `{0}` del nombre. */
+  lista(valor: string): (RotuloConAyuda & { dato?: string | number }) | undefined;
+  /** El examen de caracteres y cómo se escribe uno de sus niveles. */
+  examen: RotuloConAyuda & { nivel(valor: string): string };
+  /** De dónde viene una lectura, por la marca que trae: en japonés, la época en que llegó de China. */
+  origenes: Record<string, RotuloConAyuda>;
+  /** Cómo se formó el carácter: pictograma, indicativo, compuesto o fonosemántico. */
+  formaciones: Record<string, RotuloConAyuda>;
+  /** Las lecturas fuera de la lista oficial. */
+  otras: RotuloConAyuda;
+  /** Las lecturas que solo se usan en nombres de persona. */
+  nombres: RotuloConAyuda;
+  radical: RotuloConAyuda;
+  /** Lo que se cuenta de las formas antiguas. */
+  antiguas: string;
+  /** Los títulos de las listas de caracteres emparentados. */
+  titulos: { contienen: string; contienenOtros: string; parecidos: string; opuestos: string; sinonimos: string; homonimos: string };
+  /** Lo que se gana instalando el diccionario, para invitar a hacerlo. */
+  instalar: string;
+  credito: { nombre: string; url: string; licencia: string };
 }
 
 /** Una página donde consultar una palabra. Con sus entradas de diccionario puede abrir justo la acepción. */
@@ -513,6 +549,8 @@ export interface MotorLengua {
   audios(lema: string, lectura: string): Promise<ResultadoAudio[]>;
   trazos?: {
     url(caracter: string): string;
+    /** Otra dirección con los mismos archivos, por si la primera no responde o no tiene ese carácter a mano. */
+    urlAlternativa?(caracter: string): string;
     leer(archivo: string): DatosTrazos | null;
   };
   /** Los diccionarios que una versión anterior dejó mal: se reinstalan solos, en segundo plano. */
@@ -536,4 +574,16 @@ export interface MotorLengua {
   seccionesOmitidas?: ReadonlySet<string>;
   /** Convierte lo que trae un diccionario de pronunciación en lo que se guarda de cada palabra. */
   filaPronunciacion?(p: PronunciacionImportada): { termino: string; lectura: string; posiciones: number[]; transcripciones: Transcripcion[] } | null;
+  /** El diccionario de caracteres (el de kanji): qué archivos lo forman y cómo se juntan en una ficha por carácter. */
+  diccionarioCaracteres?: {
+    archivos: ArchivoDiccionario[];
+    leer(textos: Record<string, string>, bancos: Record<string, CaracterImportado[]>): FichaCaracter[];
+  };
+}
+
+/** Uno de los archivos de un diccionario hecho de varios. Los .zip traen bancos de caracteres en formato Yomitan. */
+export interface ArchivoDiccionario {
+  nombre: string;
+  url: string;
+  zip?: boolean;
 }

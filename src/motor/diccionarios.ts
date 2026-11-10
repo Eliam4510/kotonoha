@@ -4,7 +4,7 @@ import type { Table } from 'dexie';
 import { strFromU8, unzipSync } from 'fflate';
 import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../compartido/tipos';
 import { fondo } from '../compartido/rpc';
-import { type FormaImportada, type FrecuenciaImportada, leerBancoFormas, leerBancoMeta, leerBancoTerminos, leerKanjium, leerListaFrecuencia } from '../nucleo/yomitan';
+import { type CaracterImportado, type FormaImportada, type FrecuenciaImportada, leerBancoCaracteres, leerBancoFormas, leerBancoMeta, leerBancoTerminos, leerKanjium, leerListaFrecuencia } from '../nucleo/yomitan';
 import { db } from './db';
 import { tr } from '../compartido/i18n';
 import { motorLengua } from './lengua';
@@ -63,6 +63,49 @@ async function borrarFilas(id: string, tipo?: InfoDiccionario['tipo']) {
   }
   if (tipo === 'frecuencia' || !tipo) await borrarPorTandas(db.frecuencias, id);
   if (tipo === 'acento' || !tipo) await db.acentos.clear();
+  if (tipo === 'caracteres' || !tipo) await db.caracteres.clear();
+}
+
+/** Los caracteres de un .zip en formato Yomitan, de todos sus bancos. */
+function bancosDeCaracteres(zip: Uint8Array): CaracterImportado[] {
+  const archivos = unzipSync(zip, { filter: (f) => /^kanji_bank_\d+\.json$/.test(f.name) });
+  return Object.values(archivos).flatMap((d) => leerBancoCaracteres(JSON.parse(strFromU8(d)) as unknown[][]));
+}
+
+/** Un diccionario de caracteres: varios archivos que la lengua junta en una ficha por carácter. */
+async function instalarCaracteres(f: FuenteBiblioteca, progreso: (fase: ProgresoInstalacion['fase'], avance: number) => void) {
+  const dc = motorLengua().diccionarioCaracteres;
+  if (!dc) throw new Error(tr('Fuente de diccionario desconocida'));
+  const textos: Record<string, string> = {};
+  const bancos: Record<string, CaracterImportado[]> = {};
+  // Son archivos pequeños: se piden a la vez y el avance cuenta los que ya han llegado.
+  let llegados = 0;
+  progreso('descargando', 0);
+  await Promise.all(
+    dc.archivos.map(async (a) => {
+      const datos = await descargar(a.url, () => {});
+      if (a.zip) bancos[a.nombre] = bancosDeCaracteres(datos);
+      else textos[a.nombre] = new TextDecoder().decode(datos);
+      progreso('descargando', ++llegados / dc.archivos.length);
+    })
+  );
+  progreso('guardando', 0);
+  const fichas = dc.leer(textos, bancos);
+  if (!fichas.length) throw new Error(tr('No se pudo leer el diccionario de caracteres'));
+  await db.caracteres.clear();
+  for (let j = 0; j < fichas.length; j += LOTE) {
+    await db.caracteres.bulkPut(fichas.slice(j, j + LOTE));
+    progreso('guardando', j / fichas.length);
+  }
+  await db.diccionarios.put({
+    id: f.id,
+    titulo: f.titulo,
+    tipo: 'caracteres',
+    orden: await siguienteOrden(),
+    filas: fichas.length,
+    fuente: f.url,
+    instalado: Date.now(),
+  });
 }
 
 /** Importa un .zip de Yomitan ya descargado. Devuelve el tipo detectado por su contenido. */
@@ -170,6 +213,8 @@ export async function instalarDesdeBiblioteca(idFuente: string): Promise<void> {
         fuente: f.url,
         instalado: Date.now(),
       });
+    } else if (f.formato === 'caracteres') {
+      await instalarCaracteres(f, progreso);
     } else if (f.formato === 'lista') {
       const leidas = leerListaFrecuencia(new TextDecoder().decode(datos));
       const filas = (await motorLengua().prepararFrecuencias?.(leidas)) ?? leidas;

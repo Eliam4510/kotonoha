@@ -16,6 +16,7 @@ import { renderizadoPorSoftware } from '../nucleo/medios';
 import type { Linea } from '../nucleo/subtitulos';
 import * as analisis from './analisis';
 import * as anki from './anki';
+import * as caracteres from './caracteres';
 import { consultarAyudante } from './ayudante';
 import { baseDe, baseGeneral, db, existeBaseDe, type FilaFrecuencia } from './db';
 import * as dics from './diccionarios';
@@ -62,6 +63,22 @@ function alCambiarLengua() {
   analisis.recargarTerminos().catch((e) => console.error('Términos:', e));
   repararDiccionarios().catch((e) => console.warn('Diccionarios:', e));
   ia.limpiarCache().catch(() => {});
+  programarIndice();
+}
+
+/** Lo que se espera a tener cargado lo que hace falta para leer un video antes de preparar el índice del diccionario. */
+const ESPERA_INDICE_MS = 5000;
+/** Tras instalar, quitar u ordenar un diccionario suelen venir más cambios: se espera a que acaben. */
+const ESPERA_INDICE_TRAS_CAMBIO_MS = 20000;
+let esperaIndice: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Deja listo el índice del diccionario un rato después, sin que nadie espere por él: así, al abrir el diccionario, las
+ * listas salen al momento. Cada llamada aplaza la anterior.
+ */
+function programarIndice(espera = ESPERA_INDICE_MS) {
+  clearTimeout(esperaIndice);
+  esperaIndice = setTimeout(() => explorar.precalentar(), espera);
 }
 
 async function arrancar() {
@@ -73,6 +90,7 @@ async function arrancar() {
   analisis.recargarTerminos().catch((e) => console.error('Términos:', e));
   repararDiccionarios().catch((e) => console.warn('Diccionarios:', e));
   ia.limpiarCache().catch(() => {});
+  programarIndice();
 }
 
 /**
@@ -285,7 +303,12 @@ const api: ApiMotor = {
   sinonimos: (lema, lectura) => explorar.sinonimos(lema, lectura),
   resultadosDeBusqueda: (texto, limite) => explorar.resultadosDeBusqueda(texto, limite),
   palabrasConCaracter: (caracter, limite) => explorar.palabrasConCaracter(caracter, limite),
+  categoriaConCaracter: (id, caracter, limite) => explorar.categoriaConCaracter(id, caracter, limite),
   entradasDe: (pares) => explorar.entradasDe(pares),
+  fichaCaracter: (caracter) => caracteres.fichaCaracter(caracter),
+  caracteresBreves: (lista) => caracteres.caracteresBreves(lista),
+  caracteresConPieza: (piezas, excluir, limite) => caracteres.caracteresConPieza(piezas, excluir, limite),
+  familiaFonetica: (fonetico, limite) => caracteres.familiaFonetica(fonetico, limite),
 
   async estadosGramatica(estudio) {
     const filas = await baseDeEstudio(estudio).gramatica.toArray();
@@ -435,20 +458,24 @@ const api: ApiMotor = {
     await dics.instalarDesdeBiblioteca(id);
     await analisis.recargarTerminos();
     await fondo.difundir({ tipo: 'diccionarios' });
+    programarIndice(ESPERA_INDICE_TRAS_CAMBIO_MS);
   },
   async instalarArchivo(url, nombre) {
     await dics.instalarDesdeArchivo(url, nombre);
     await analisis.recargarTerminos();
     await fondo.difundir({ tipo: 'diccionarios' });
+    programarIndice(ESPERA_INDICE_TRAS_CAMBIO_MS);
   },
   async eliminarDiccionario(id) {
     await dics.eliminarDiccionario(id);
     await analisis.recargarTerminos();
     await fondo.difundir({ tipo: 'diccionarios' });
+    programarIndice(ESPERA_INDICE_TRAS_CAMBIO_MS);
   },
   async ordenarDiccionarios(ids) {
     await dics.ordenarDiccionarios(ids);
     await fondo.difundir({ tipo: 'diccionarios' });
+    programarIndice(ESPERA_INDICE_TRAS_CAMBIO_MS);
   },
 
   async anki() {

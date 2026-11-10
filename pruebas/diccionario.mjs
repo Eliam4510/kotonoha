@@ -109,7 +109,7 @@ const sinLectura = (loc) => loc.evaluateAll((xs) => xs.map((x) => [...x.childNod
 
 await ir('');
 await p.locator('.ap-categoria').first().waitFor({ timeout: 15000 });
-comprobar((await p.locator('.ap-categoria').count()) === 7, 'Siete categorías para explorar', await p.locator('.ap-categoria').count());
+comprobar((await p.locator('.ap-categoria').count()) === 8, 'Ocho categorías para explorar', await p.locator('.ap-categoria').count());
 comprobar((await p.locator('.ap-categoria').first().innerText()).includes('Onomatopeyas'), 'La primera, las onomatopeyas');
 await p.screenshot({ path: join(CAPTURAS, '1-portada.png') });
 
@@ -157,7 +157,7 @@ comprobar((await p.locator('.dic-ficha .ficha-panel').innerText()).trim() === ''
 const kanji = p.locator('.dic-lateral .dic-caracter-tarjeta').first();
 await kanji.waitFor({ timeout: 15000 });
 const textoKanji = await kanji.innerText();
-comprobar(textoKanji.includes('橋') && /N\d/.test(textoKanji) && /bridge/i.test(textoKanji), 'A su lado, sus kanji con su nivel y su significado', textoKanji.replace(/\n/g, ' | '));
+comprobar(textoKanji.includes('橋') && /N\d/.test(textoKanji) && /bridge|puente/i.test(textoKanji), 'A su lado, sus kanji con su nivel y su significado', textoKanji.replace(/\n/g, ' | '));
 await tarjetas('Se leen igual').first().waitFor({ timeout: 15000 });
 const homofonos = await sinLectura(tarjetas('Se leen igual'));
 comprobar(homofonos.includes('箸') && homofonos.includes('端'), 'Y las palabras que se leen igual, en tarjetas: 箸 y 端', homofonos.join(' '));
@@ -243,7 +243,8 @@ await borrarFrases();
 
 await ir('愛');
 await p.locator('.dic-caracter').waitFor({ timeout: 20000 });
-comprobar(/love/i.test(await p.locator('.dic-caracter-significado').innerText()), 'Un kanji suelto tiene su página: lo que significa');
+// Con el diccionario de kanji instalado, lo dice en el idioma de la interfaz; sin él, como en las listas, en inglés.
+comprobar(/love|amor/i.test(await p.locator('.dic-caracter-significado').innerText()), 'Un kanji suelto tiene su página: lo que significa');
 comprobar((await p.locator('.dic-lecturas').innerText()).includes('アイ'), 'Sus lecturas');
 await p.locator('.dic-pieza').first().waitFor({ timeout: 20000 }).catch(() => {});
 const piezas = await p.locator('.dic-pieza b').allTextContents();

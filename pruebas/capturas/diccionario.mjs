@@ -1,8 +1,9 @@
 // Las imágenes del diccionario del README en cada idioma de la interfaz que estudia japonés (en el README japonés se
 // estudia inglés, que no tiene sinónimos ni categorías de JMdict): la página de はなす, con la lista de resultados, 話す
 // con sus sentidos, las frases donde se vio con su minuto y, al lado, su kanji, las que significan lo mismo y las que se
-// leen igual; y la página del kanji 愛. Como en pruebas/capturas/readme.mjs, con los diccionarios que tendría quien lee
-// cada README: el suyo y, de respaldo, el inglés. Las frases de ejemplo se añaden para la imagen y se borran al acabar.
+// leen igual; la página del kanji 愛, con el diccionario de kanji instalado, y la práctica de escritura de 語, a medio
+// escribir y con la pista del trazo que toca. Como en pruebas/capturas/readme.mjs, con los diccionarios que tendría quien
+// lee cada README: el suyo y, de respaldo, el inglés. Las frases de ejemplo se añaden para la imagen y se borran al acabar.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/capturas/diccionario.mjs [es de en zh ko]
 
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
@@ -19,6 +20,9 @@ const IMAGENES = join(RAIZ, 'docs', 'img');
 const IDIOMAS = process.argv.slice(2).length ? process.argv.slice(2) : ['es', 'de', 'en', 'zh', 'ko'];
 const BUSQUEDA = 'はなす';
 const KANJI = '愛';
+/** El kanji de la imagen de la práctica, y cuántos trazos lleva ya escritos: los de 言, su radical. */
+const PRACTICA = '語';
+const TRAZOS_HECHOS = 7;
 /** Las frases de ejemplo llevan esta fuente: con ella se borran al acabar. */
 const FUENTE = '日本語の会話';
 
@@ -65,6 +69,11 @@ async function diccionarios(terminos) {
     await motor('instalarDiccionario', t);
     console.log(`  instalado ${t} en ${Math.round((Date.now() - t0) / 1000)} s`);
   }
+  // El de kanji va con todos: es de los recomendados.
+  if (!ya.has('kanji')) {
+    await motor('instalarDiccionario', 'kanji');
+    console.log('  instalado kanji');
+  }
   const resto = (await instalados()).filter((d) => !terminos.includes(d.id)).map((d) => d.id);
   await motor('ordenarDiccionarios', [...terminos, ...resto]).catch(() => {});
 }
@@ -93,13 +102,39 @@ const borrarFrases = () =>
     FUENTE
   );
 
-const guardar = async (nombre, idioma) => {
+const guardar = async (nombre, idioma, recorte) => {
   await p.mouse.move(5, 5);
   await p.waitForTimeout(1200);
   const archivo = join(IMAGENES, idioma === 'es' ? `${nombre}.png` : `${nombre}.${idioma}.png`);
-  await sharp(await p.screenshot()).png({ palette: true, quality: 92, effort: 10 }).toFile(archivo);
+  await sharp(await (recorte ?? p).screenshot()).png({ palette: true, quality: 92, effort: 10 }).toFile(archivo);
   console.log('imagen:', archivo.slice(RAIZ.length + 1));
 };
+
+/** Escribe con el ratón, en el lienzo de la práctica, los primeros trazos de un kanji tal como son. */
+async function escribirTrazos(kanji, cuantos) {
+  const lienzo = p.locator('.escritura-lienzo');
+  const trazos = await p.evaluate(async (k) => {
+    const r = await chrome.runtime.sendMessage({ canal: 'motor', metodo: 'trazos', args: [k] });
+    return r.valor.trazos.map((d) => {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      const largo = path.getTotalLength();
+      return Array.from({ length: 12 }, (_, i) => {
+        const pt = path.getPointAtLength((largo * i) / 11);
+        return { x: pt.x, y: pt.y };
+      });
+    });
+  }, kanji);
+  for (const puntos of trazos.slice(0, cuantos)) {
+    const c = await lienzo.boundingBox();
+    const ps = puntos.map((q) => ({ x: c.x + (q.x / 109) * c.width, y: c.y + (q.y / 109) * c.height }));
+    await p.mouse.move(ps[0].x, ps[0].y);
+    await p.mouse.down();
+    for (const q of ps.slice(1)) await p.mouse.move(q.x, q.y, { steps: 2 });
+    await p.mouse.up();
+    await p.waitForTimeout(120);
+  }
+}
 
 for (const idioma of IDIOMAS) {
   // Primero los ajustes: el catálogo de diccionarios es el de la lengua que se estudia.
@@ -125,7 +160,21 @@ for (const idioma of IDIOMAS) {
   await p.locator('.dic-caracter').waitFor({ timeout: 30000 });
   await p.locator('.dic-pieza').first().waitFor({ timeout: 30000 }).catch(() => {});
   await p.locator('.dic-caracter .dic-tarjeta').first().waitFor({ timeout: 90000 });
+  await p.locator('.dic-kanji').first().waitFor({ timeout: 30000 }).catch(() => {});
   await guardar('kanji', idioma);
+
+  // La práctica: los trazos del radical ya escritos y la pista del que toca. Con menos movimiento, la pista sale entera.
+  await p.evaluate(() => localStorage.setItem('kk-modoEscritura', '"calcar"'));
+  await p.goto(`chrome-extension://${id}/app.html#/diccionario?q=${encodeURIComponent(PRACTICA)}`);
+  await p.reload();
+  await p.locator('.dic-trazos-vista').waitFor({ timeout: 30000 });
+  await p.locator('.dic-pieza').first().waitFor({ timeout: 30000 }).catch(() => {});
+  await p.locator('.dic-trazos-vista button').nth(1).click();
+  await p.locator('.escritura-lienzo').waitFor({ timeout: 30000 });
+  await escribirTrazos(PRACTICA, TRAZOS_HECHOS);
+  await p.locator('.escritura-controles .btn').first().click();
+  await guardar('escritura', idioma, p.locator('.dic-caracter-cab'));
+  await p.evaluate(() => localStorage.removeItem('kk-modoEscritura'));
   await p.emulateMedia({ reducedMotion: 'no-preference' });
   await borrarFrases();
 }

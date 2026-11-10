@@ -6,9 +6,10 @@ import { ANALIZADOR } from './analizador';
 import { audiosJapones } from './audio';
 import { diccionariosPorReparar, FUENTES } from './diccionarios';
 import { detectarGramatica, puntosGramatica } from './gramatica';
+import { ARCHIVOS_KANJI, leerDiccionarioKanji } from './kanji';
 import { PROMPTS_JAPONES } from './prompts';
 import { REGLAS_TRANSCRIPCION } from './transcripcion';
-import { urlTrazos } from './trazos';
+import { urlTrazos, urlTrazosAlternativa } from './trazos';
 
 export const MOTOR_JAPONES: MotorLengua = {
   analizador: ANALIZADOR,
@@ -19,6 +20,7 @@ export const MOTOR_JAPONES: MotorLengua = {
   transcripcion: { idioma: 'japanese', reglas: REGLAS_TRANSCRIPCION },
   diccionarios: FUENTES,
   audios: audiosJapones,
-  trazos: { url: urlTrazos, leer: leerTrazos },
+  trazos: { url: urlTrazos, urlAlternativa: urlTrazosAlternativa, leer: leerTrazos },
   diccionariosPorReparar,
+  diccionarioCaracteres: { archivos: ARCHIVOS_KANJI, leer: leerDiccionarioKanji },
 };

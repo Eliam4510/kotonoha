@@ -104,7 +104,8 @@ export interface ResultadoBusqueda {
 export interface InfoDiccionario {
   id: string;
   titulo: string;
-  tipo: 'terminos' | 'frecuencia' | 'acento';
+  /** Los de caracteres son los de kanji: una ficha por carácter, no por palabra. */
+  tipo: 'terminos' | 'frecuencia' | 'acento' | 'caracteres';
   idioma?: string;
   orden: number;
   filas: number;
@@ -119,7 +120,8 @@ export interface FuenteBiblioteca {
   tipo: InfoDiccionario['tipo'];
   idioma?: string;
   url: string;
-  formato: 'yomitan' | 'kanjium' | 'lista';
+  /** `caracteres`: varios archivos que la lengua sabe juntar en fichas de carácter. */
+  formato: 'yomitan' | 'kanjium' | 'lista' | 'caracteres';
   recomendado: boolean;
   licencia: string;
 }
@@ -175,6 +177,84 @@ export interface CaracterConNivel {
   on: string;
   kun: string;
   glosa: string;
+}
+
+/** Una lectura de un carácter, con un punto donde empieza lo que va tras él: あ.げる. */
+export interface LecturaCaracter {
+  texto: string;
+  /** De dónde viene, como lo nombra la lengua: en japonés, la época en que llegó de China (呉, 漢, 唐) o 慣. */
+  origen?: string;
+  /** Oficial, pero solo para unas pocas palabras. */
+  poco?: boolean;
+}
+
+/** Las lecturas de una clase: las de la lista oficial de la lengua y las demás. */
+export interface LecturasCaracter {
+  oficiales: LecturaCaracter[];
+  otras: LecturaCaracter[];
+}
+
+/** Lo que el diccionario de caracteres sabe de uno: el de kanji, en japonés. */
+export interface FichaCaracter {
+  caracter: string;
+  /** Por idioma de la interfaz. El inglés casi siempre está; los demás, según el diccionario. */
+  significados: Record<string, string[]>;
+  on: LecturasCaracter;
+  kun: LecturasCaracter;
+  /** Las lecturas que solo se usan en nombres de persona. */
+  nombres: string[];
+  trazos?: number;
+  /** En qué lista oficial está: kyoiku-1 a kyoiku-6, joyo, jinmeiyo, jinmeiyo-antigua, hyogai o hyogai-antigua. */
+  lista?: string;
+  nivel?: string;
+  /** El nivel del examen de kanji: de 10 (el más fácil) a 1, con pre-2 y pre-1 entre medias. */
+  kanken?: string;
+  /** Su puesto entre los más usados. */
+  frecuencia?: number;
+  /** Cómo se formó: pictograma, indicativo, compuesto o fonosemantico. */
+  formacion?: string;
+  radical?: {
+    caracter: string;
+    /** La forma que toma en este carácter, si no es la de siempre: 氵 en 漢. */
+    forma?: string;
+    numero: number;
+    nombres: string[];
+    significado: string;
+  };
+  /** La pieza que le da el sonido. Si es él mismo, es que da su sonido a otros. */
+  fonetico?: string;
+  /** Si da su sonido a otros: qué sonido y si se cumple siempre, casi siempre o con varias lecturas. */
+  daSonido?: { lecturas: string[]; tipo: 'siempre' | 'casi' | 'varias' };
+  variantes: {
+    /** Las formas de antes de la reforma de 1946 (旧字体). */
+    antiguas: string[];
+    /** Si él es una forma antigua: la de hoy. */
+    nuevas: string[];
+    otras: string[];
+    /** En chino, si se escribe distinto: la tradicional (Taiwán) y la simplificada (China continental). */
+    tradicional?: string;
+    simplificada?: string;
+  };
+  /** Las piezas que lleva dentro, a cualquier profundidad: así se encuentran los caracteres que llevan una. */
+  piezas: string[];
+  /** Si es un radical, las formas que toma como pieza: 氵 y 氺 de 水. */
+  formasComoPieza: string[];
+  opuestos: string[];
+  sinonimos: string[];
+  parecidos: string[];
+  /** Los que se leen igual con una de sus lecturas propias de la lengua: あがる, con 挙 y 揚. */
+  homonimos: { lectura: string; caracteres: string[]; mismoAcento: boolean }[];
+  /** Cómo se lee en otras lenguas que lo usan, por idioma: el pinyin en chino, el hangul en coreano. */
+  enOtrasLenguas: Record<string, string>;
+}
+
+/** Un carácter emparentado con otro, con lo justo para reconocerlo: su lectura principal y lo que significa. */
+export interface CaracterBreve {
+  caracter: string;
+  lectura?: string;
+  significados: Record<string, string[]>;
+  frecuencia?: number;
+  lista?: string;
 }
 
 /** Un punto de gramática encontrado al buscar, con su nivel. */

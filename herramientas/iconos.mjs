@@ -103,6 +103,7 @@ export const CATALOGO = {
   copiar: 'copy',
   basura: 'trash',
   lapiz: 'pencil-simple',
+  goma: 'eraser',
   'nota-lapiz': 'note-pencil',
   // El editor del Cuaderno
   cuaderno: 'notebook',

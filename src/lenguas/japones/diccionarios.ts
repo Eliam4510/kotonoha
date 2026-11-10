@@ -49,6 +49,16 @@ export const FUENTES: FuenteBiblioteca[] = [
     licencia: 'CC BY-SA 4.0',
   },
   {
+    id: 'kanji',
+    titulo: tm('Kanji (Kanjium y KANJIDIC)'),
+    descripcion: tm('Todas las lecturas de cada kanji, también las raras y las de nombres, con sus formas antiguas, su radical, la pieza que le da el sonido, opuestos, parecidos y los que se leen igual.'),
+    tipo: 'caracteres',
+    url: 'https://github.com/mifunetoshiro/kanjium',
+    formato: 'caracteres',
+    recomendado: true,
+    licencia: 'CC BY-SA 4.0 (Kanjium, EDRDG)',
+  },
+  {
     id: 'jpdb-frecuencia',
     titulo: tm('Frecuencia JPDB'),
     descripcion: tm('Posición de cada palabra según anime, series, novelas y juegos.'),

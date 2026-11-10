@@ -136,9 +136,13 @@ Die Ansicht **JLPT** vereint Wortschatz, Kanji und Grammatik jeder Stufe von N5 
 
 Das Wörterbuch nutzt das ganze Fenster: auf der einen Seite die Ergebnisliste; in der Mitte das Wort, groß, mit der Lesung darüber und jeder Bedeutung mit ihrer Wortart; auf der anderen Seite seine Kanji, seine Gegenteile, die gebräuchlichen Wörter gleicher Bedeutung, etwa 喋る oder 会話 für 話す, und die gleich gelesenen. Darunter stehen die Sätze aus deinen Videos, in denen es vorkam, mit der Minute und einem Knopf, um zu dieser Stelle zurückzukehren. Es sucht auch nach Bedeutung, etwa „Hund“ → 犬, und findet Grammatik nach Form oder Sinn. Die Startseite versammelt Lautmalereien, Sprichwörter, Ausdrücke aus vier Kanji sowie literarische, umgangssprachliche und höfliche Wörter. Größe und Schrift lassen sich auf der Seite selbst ändern.
 
-<img src="docs/img/kanji.de.png" alt="Die Seite des Kanji 愛: wie es geschrieben wird, seine Lesungen, seine Bestandteile und die Wörter, die es enthalten" width="100%">
+<img src="docs/img/kanji.de.png" alt="Die Seite des Kanji 愛: wie es geschrieben wird, alle Lesungen, sein Radikal, seine Bestandteile, die Wörter, die es enthalten, und ähnlich aussehende Kanji" width="100%">
 
-Ein einzelnes Kanji hat seine eigene Seite: wie es geschrieben wird, Strich für Strich; seine Bedeutung und Lesungen; seine Bestandteile, mit dem Radikal und dem Teil, der den Laut gibt; die Wörter, die du damit schon kennst, und die häufigsten, die es enthalten; und wie es gedruckt und von Hand aussieht.
+Ein einzelnes Kanji hat seine eigene Seite: wie es geschrieben wird, Strich für Strich; seine Bedeutung; alle Lesungen, auch die seltenen und die Namenslesungen, mit der Epoche, aus der jede stammt; sein Radikal und seine Bestandteile, mit dem Teil, der den Laut gibt, und den Kanji, die ihn teilen; die Wörter, die du damit schon kennst, die häufigsten, die es enthalten, und die, die nicht wie ihre Kanji gelesen werden, etwa 今日; ähnlich aussehende Kanji, Gegensätze und alte Formen; und wie es gedruckt und von Hand aussieht.
+
+<img src="docs/img/escritura.de.png" alt="Schreiben üben mit 語: Die Striche von 言 sind schon geschrieben, dazu der Tipp für den nächsten Strich" width="100%">
+
+Und geübt wird gleich dort: Man schreibt mit Maus, Stift oder Finger, nachzeichnend oder aus dem Gedächtnis, und jeder Strich wird beim Loslassen geprüft. Stimmt die Richtung nicht oder ist es ein anderer der fehlenden Striche, wird das gesagt, und mit **Tipp** zeichnet sich der Strich von selbst.
 
 ### Auch Englisch
 
@@ -225,7 +229,7 @@ Jede Version erscheint mit ihren Tests und ihrer Dokumentation in sechs Sprachen
 
 Der Code steht unter der [MIT-Lizenz](LICENSE). Komponenten Dritter, die bei der Nutzung heruntergeladenen Daten und die Bedingungen für einen verantwortungsvollen Gebrauch stehen in den [Hinweisen](docs/de/notices.md).
 
-- Wörterbücher: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) und [JPDB](https://jpdb.io); für Englisch und Deutsch [Wiktionary](https://www.wiktionary.org) über [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) und [kaikki.org](https://kaikki.org).
+- Wörterbücher: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) und KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) und [JPDB](https://jpdb.io); für Englisch und Deutsch [Wiktionary](https://www.wiktionary.org) über [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) und [kaikki.org](https://kaikki.org).
 - Sprache: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja und Parakeet, mit [Transformers.js](https://github.com/huggingface/transformers.js).
 - Texterkennung: [PP-OCRv5 und PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) und ein [Sprechblasen-Detektor](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Strichfolge: [KanjiVG](https://kanjivg.tagaini.net), von Ulrich Apel, CC BY-SA 3.0.

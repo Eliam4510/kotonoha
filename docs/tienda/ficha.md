@@ -24,7 +24,8 @@ Subtítulos interactivos
 Diccionario
 • A toda la ventana: la palabra con sus sentidos, sus kanji, opuestos, sinónimos y homófonos.
 • Las frases de tus videos donde apareció, con el minuto para volver a ese momento.
-• Página propia de cada kanji: trazos, lecturas, piezas y las palabras que lo llevan.
+• Página propia de cada kanji: trazos, todas sus lecturas, radical, formas antiguas, los kanji que se le parecen y las palabras que lo llevan.
+• Practica la escritura de cada kanji, calcando o de memoria: cada trazo se corrige al soltarlo.
 
 Biblioteca
 • Visor de libros, PDF y manga con OCR en el propio navegador.
@@ -66,7 +67,8 @@ Interactive subtitles
 Dictionary
 • Across the whole window: the word with its senses, its kanji, opposites, synonyms and homophones.
 • The sentences from your videos where it appeared, with the minute to go back to that moment.
-• Each kanji's own page: strokes, readings, components and the words that contain it.
+• Each kanji's own page: strokes, all its readings, radical, old forms, look-alike kanji and the words that contain it.
+• Practice writing each kanji, tracing or from memory: every stroke is checked as you release it.
 
 Library
 • A viewer for books, PDFs and manga with OCR in the browser itself.

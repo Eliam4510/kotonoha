@@ -50,7 +50,8 @@ function piezasDe(g: Grupo, profundidad = 0): PiezaCaracter[] {
   const salida: PiezaCaracter[] = [];
   for (const h of g.hijos) {
     if (!h.caracter) {
-      salida.push(...piezasDe(h, profundidad));
+      // Lo que sale de un grupo sin nombre tampoco se repite: los tres 一 de 三 son una sola pieza.
+      for (const x of piezasDe(h, profundidad)) if (!salida.some((y) => y.caracter === x.caracter)) salida.push(x);
       continue;
     }
     // Una pieza partida en dos (衣 alrededor de otra) aparece dos veces: cuenta una.

@@ -58,7 +58,7 @@ export function Explorar() {
           <button key={c.id} class="tarjeta ap-categoria" onClick={() => navegar(`diccionario?cat=${c.id}`)}>
             <span class="hoja-icono chica"><Icono n={c.icono as NombreIcono} t={18} /></span>
             <b>{tr(c.nombre)}</b>
-            <span class="ayuda" lang={lengua.value.id === 'ja' ? undefined : undefined}>{tr(c.descripcion)}</span>
+            <span class="ayuda">{tr(c.descripcion)}</span>
           </button>
         ))}
       </div>

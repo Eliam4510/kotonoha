@@ -136,9 +136,13 @@ flowchart LR
 
 사전은 창 전체를 씁니다. 한쪽에는 결과 목록, 가운데에는 읽는 법을 위에 단 큰 글씨의 단어와 품사가 붙은 각 뜻, 다른 쪽에는 그 한자, 반대말, 같은 뜻의 자주 쓰는 말(예: 話す의 喋る, 会話), 읽는 법이 같은 말이 있습니다. 아래에는 그 단어가 나온 내 동영상의 문장이 시간, 그리고 그 순간으로 돌아가는 버튼과 함께 나옵니다. 뜻으로도 검색하고(예: “dog” → 犬), 문법을 형태나 뜻으로 찾습니다. 첫 화면에는 의성어·의태어, 속담, 사자성어, 문어, 구어, 경어가 모여 있습니다. 크기와 글꼴은 페이지에서 바로 바꿀 수 있습니다.
 
-<img src="docs/img/kanji.ko.png" alt="한자 愛의 페이지: 쓰는 법, 읽는 법, 구성 요소, 그 한자가 들어간 단어" width="100%">
+<img src="docs/img/kanji.ko.png" alt="한자 愛의 페이지: 쓰는 법, 모든 읽기, 부수, 구성 요소, 그 한자가 들어간 단어, 모양이 비슷한 한자" width="100%">
 
-한자 한 글자에는 따로 페이지가 있습니다. 한 획씩 보여 주는 쓰는 법, 뜻과 읽는 법, 부수와 소리 부분을 표시한 구성 요소, 그 한자로 이미 아는 단어와 그 한자가 들어간 많이 쓰는 단어, 인쇄체와 손글씨로 본 모양이 있습니다.
+한자 한 글자에는 따로 페이지가 있습니다. 한 획씩 보여 주는 쓰는 법, 뜻, 드문 읽기와 이름 읽기를 포함한 모든 읽기와 각 읽기가 들어온 시대, 부수와 구성 요소(소리를 주는 부분과 그 부분을 함께 가진 한자 포함), 그 한자로 이미 아는 단어와 그 한자가 들어간 많이 쓰는 단어, 今日처럼 한자 읽기대로 읽지 않는 단어, 모양이 비슷한 한자와 반대 뜻의 한자, 옛 글자체, 인쇄체와 손글씨로 본 모양이 있습니다.
+
+<img src="docs/img/escritura.ko.png" alt="語 쓰기 연습: 言의 획은 이미 썼고, 다음 획의 힌트가 보입니다" width="100%">
+
+그 자리에서 바로 연습할 수도 있습니다. 마우스, 펜, 손가락으로 따라 쓰거나 외워서 쓰며, 획은 손을 뗄 때마다 확인합니다. 방향이 반대이거나 아직 차례가 아닌 획이면 알려 주고, **힌트**를 누르면 그 획을 직접 그려서 보여 줍니다.
 
 ### 영어도 배울 수 있습니다
 
@@ -225,7 +229,7 @@ TypeScript, Preact, Dexie, esbuild를 쓰며, 음성과 OCR에는 WebGPU 위의 
 
 코드는 [MIT 라이선스](LICENSE)로 공개합니다. 서드파티 구성 요소, 사용 중 내려받는 데이터, 책임 있는 사용 조건은 [고지](docs/ko/notices.md)에 자세히 있습니다.
 
-- 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io). 영어와 독일어는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org)를 거친 [Wiktionary](https://www.wiktionary.org).
+- 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)와 KANJIDIC(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io). 영어와 독일어는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org)를 거친 [Wiktionary](https://www.wiktionary.org).
 - 음성: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja, Parakeet과 [Transformers.js](https://github.com/huggingface/transformers.js).
 - 문자 인식: [PP-OCRv5와 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr), [말풍선 검출기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - 획순: Ulrich Apel의 [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0.

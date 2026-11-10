@@ -54,7 +54,7 @@ export const TEXTOS: TextosLengua = {
   compuestosAyuda: tm('Palabras formadas con la siguiente'),
   flexionDe: tm('Conjugación de'),
   flexiones: tm('Conjugación'),
-  frecuenciaYAcento: tm('Frecuencia y acento'),
+  frecuenciaYAcento: tm('Frecuencia, acento y kanji'),
 
   // Nivel y primeros pasos
   nivelPregunta: tm('¿Qué nivel de japonés tienes?'),

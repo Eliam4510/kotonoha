@@ -48,10 +48,10 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 
 | 데이터 | 출처 | 조건 |
 |---|---|---|
-| JMdict와 JMnedict | [EDRDG](https://www.edrdg.org/edrdg/licence.html), [jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) 형식 | CC BY-SA 4.0 |
-| 고저 악센트 | [Kanjium](https://github.com/mifunetoshiro/kanjium) | 프로젝트가 명시한 조건 |
+| JMdict, JMnedict, KANJIDIC | [EDRDG](https://www.edrdg.org/edrdg/licence.html), [jmdict-yomitan](https://github.com/yomidevs/jmdict-yomitan) 형식 | CC BY-SA 4.0 |
+| 고저 악센트와 한자 사전 | Uros O.의 [Kanjium](https://github.com/mifunetoshiro/kanjium): 악센트 표기, 소리 부분, 동훈이자, 그리고 EDICT, KANJIDIC, KRADFILE에 대한 그 밖의 추가와 수정은 그의 자유 데이터베이스에서 온 것이며, 나머지는 EDRDG의 것입니다. 중국어 읽기는 CC-CEDICT, 한국어 읽기는 libhangul(Choe Hwanjin, BSD 3조항)에서 왔습니다 | CC BY-SA 4.0 |
 | 빈도 | [JPDB](https://jpdb.io), [yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) 형식 | 프로젝트가 명시한 조건 |
-| 획순 | [KanjiVG](https://kanjivg.tagaini.net), Ulrich Apel, jsDelivr가 제공하는 원본 파일 | CC BY-SA 3.0 |
+| 획순 | [KanjiVG](https://kanjivg.tagaini.net), Ulrich Apel, jsDelivr가 제공하는 원본 파일(없는 파일은 프로젝트의 GitHub 저장소에서 제공) | CC BY-SA 3.0 |
 | 단어 오디오 | JapanesePod101과 [Lingua Libre](https://lingualibre.org) | 각 출처의 조건 |
 | 이미지 | [Openverse](https://openverse.org) | 각 이미지의 라이선스 |
 | 영어와 독일어 사전과 발음 | [Wiktionary](https://www.wiktionary.org), [kaikki.org](https://kaikki.org)를 바탕으로 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)이 정리, Hugging Face에서 제공 | CC BY-SA 4.0 |
