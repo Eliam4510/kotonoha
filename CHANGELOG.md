@@ -2,6 +2,13 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.30.1 · 2026-11-10
+
+- **De una palabra a otra, sin fantasmas.** Al abrir otra palabra en el diccionario (otro resultado de la lista, una de las que significan lo mismo, una palabra de «Donde la has visto» o un kanji) se veía la anterior, luego la página vacía con esqueletos y luego la nueva llegando a trozos, con la página cambiando de alto en cada uno. Ahora la nueva se prepara mientras sigue a la vista la anterior y entra de una vez, con un fundido corto. Si tarda, la anterior se atenúa y una barra fina dice que algo llega. Las frases de «Donde la has visto» llegan ya con su lectura, en vez de aparecer sin ella y crecer un momento después, y una palabra abierta desde abajo de la página se ve desde su principio.
+- **Claude ya no avisa de que «la frase llegó vacía».** Al explicar una palabra buscada suelta en el diccionario, o al preguntar por las palabras parecidas, la petición llevaba una frase vacía, 「」, y la respuesta empezaba por ahí. Ahora se le dice que la palabra se consulta suelta. Las respuestas que se guardaron así se vuelven a pedir una vez.
+- **Sin barras de desplazamiento de sobra.** La pista de la estrella «De uso común», aunque no se viera, asomaba por la derecha de su tarjeta y hacía salir una barra bajo la lista de resultados; otras pistas hacían lo mismo junto al borde de una página. Las pistas ya no existen mientras no se ven, y las de las marcas de una tarjeta se abren hacia dentro.
+- El botón **Buscar** ya no parpadea con «Buscando…» en cada búsqueda, y las búsquedas recientes de la portada no se mueven antes de tiempo.
+
 ## 0.30.0 · 2026-11-10
 
 Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con muchas mezclas de opciones (tamaños, lecturas, glosas, temas, idiomas de la interfaz, anchos de ventana y letras del diccionario) buscando lo que quedaba cortado, pegado a un borde o encima de otra cosa, y se ha corregido lo encontrado.
@@ -265,6 +272,13 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.30.1 · 2026-11-10
+
+- **From one word to another, with no ghosts.** Opening another word in the dictionary (another result in the list, one of the words that mean the same, a word from “Where you've seen it” or a kanji) showed the previous one, then the empty page with skeletons, then the new one arriving in pieces, with the page changing height at each step. The new word is now prepared while the previous one stays in view, and it comes in all at once with a short fade. If it takes a while, the previous one dims and a thin bar shows that something is on its way. The sentences in “Where you've seen it” arrive with their readings, instead of appearing without them and growing a moment later, and a word opened from the bottom of the page is shown from its top.
+- **Claude no longer says “the sentence arrived empty”.** When explaining a word looked up on its own in the dictionary, or asking about similar words, the request carried an empty sentence, 「」, and the answer began by pointing it out. Claude is now told that the word is being looked up on its own. Answers saved that way are requested again once.
+- **No more stray scrollbars.** The tooltip of the “In common use” star, even while invisible, stuck out to the right of its card and brought up a scrollbar under the results list; other tooltips did the same near the edge of a page. Tooltips no longer exist while they are not shown, and those of a card’s marks open inwards.
+- The **Search** button no longer flickers with “Searching…” on every search, and the recent searches on the start page no longer move ahead of time.
 
 ## 0.30.0 · 2026-11-10
 

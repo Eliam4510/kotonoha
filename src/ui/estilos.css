@@ -287,20 +287,25 @@ button.chip:hover, a.chip:hover { background: var(--superficie-4); color: var(--
 .esqueleto { display: block; height: 0.85em; margin: 0.45em 0; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--superficie-3) 25%, var(--superficie-4) 50%, var(--superficie-3) 75%); background-size: 200% 100%; animation: kk-reflejo 1.5s linear infinite; }
 @keyframes kk-reflejo { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
-/* Información sobre herramientas: <button data-tip="Texto"> y data-tip-lado="arriba|abajo|izq|der". */
+/* Información sobre herramientas: <button data-tip="Texto"> y data-tip-lado="arriba|abajo|izq|der". Sin el ratón encima
+   no existe: transparente, también ocupaba su sitio, y cerca de un borde hacía salir una barra de desplazamiento. */
 [data-tip] { position: relative; }
 [data-tip]::after {
-  content: attr(data-tip); position: absolute; z-index: 60; left: 50%; top: calc(100% + 8px);
+  content: attr(data-tip); display: none; position: absolute; z-index: 60; left: 50%; top: calc(100% + 8px);
   padding: 5px 10px; border-radius: 10px; background: #050806; color: #F2F5EE; box-shadow: var(--sombra-2);
   font: 700 12px/1.3 var(--letra); letter-spacing: 0; white-space: nowrap; pointer-events: none;
-  opacity: 0; transform: translate(-50%, -3px); transition: opacity 0.12s, transform 0.12s;
+  opacity: 1; transform: translate(-50%, 0); transition: opacity 0.12s 0.32s, transform 0.12s 0.32s;
 }
-[data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0); transition-delay: 0.32s; }
+[data-tip]:hover::after, [data-tip]:focus-visible::after { display: block; }
 [data-tip-lado='arriba']::after { top: auto; bottom: calc(100% + 8px); }
-[data-tip-lado='der']::after { left: calc(100% + 10px); top: 50%; transform: translate(-3px, -50%); }
-[data-tip-lado='der']:hover::after, [data-tip-lado='der']:focus-visible::after { transform: translate(0, -50%); }
-[data-tip-lado='izq']::after { left: auto; right: calc(100% + 10px); top: 50%; transform: translate(3px, -50%); }
-[data-tip-lado='izq']:hover::after, [data-tip-lado='izq']:focus-visible::after { transform: translate(0, -50%); }
+[data-tip-lado='der']::after { left: calc(100% + 10px); top: 50%; transform: translate(0, -50%); }
+[data-tip-lado='izq']::after { left: auto; right: calc(100% + 10px); top: 50%; transform: translate(0, -50%); }
+/* Aparece con un fundido, un momento después de llegar el ratón. */
+@starting-style {
+  [data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 0; transform: translate(-50%, -3px); }
+  [data-tip-lado='der']:hover::after, [data-tip-lado='der']:focus-visible::after { transform: translate(-3px, -50%); }
+  [data-tip-lado='izq']:hover::after, [data-tip-lado='izq']:focus-visible::after { transform: translate(3px, -50%); }
+}
 
 /* Entradas */
 @keyframes kk-aparecer { from { opacity: 0; transform: translateY(6px) scale(0.985); } }

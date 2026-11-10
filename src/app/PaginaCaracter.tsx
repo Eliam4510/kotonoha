@@ -15,6 +15,7 @@ import type { DatosTrazos, PiezaCaracter } from '../nucleo/trazos';
 import { PanelFlujo } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
+import { useEsperar } from '../ui/preparacion';
 import { PanelTrazos } from '../ui/Trazos';
 import { type ModoEscritura, PracticaEscritura } from './Escritura';
 import { guardarPreferencia, leerPreferencia } from './estadoApp';
@@ -283,29 +284,30 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
   // Cada carácter se abre enseñando cómo se escribe: practicar es algo que se pide.
   const [vista, fijarVista] = useState<VistaTrazos>('orden');
   const [modo, fijarModo] = useState<ModoEscritura>(() => leerPreferencia<ModoEscritura>('modoEscritura', 'calcar'));
+  // Lo que la página carga al abrirse: en el diccionario, se enseña cuando lo tiene todo (ui/preparacion.tsx).
+  const esperar = useEsperar();
 
   // Al terminar de instalar el diccionario, la página se completa sola.
   useEffect(() => alRecibirEvento((e) => e.tipo === 'diccionarios' && fijarRecarga((n) => n + 1)), []);
 
   useEffect(() => {
     let vivo = true;
-    if (listas) motor.caracteresConNivel(listas.carpeta, [caracter]).then(([k]) => vivo && fijarInfo(k ?? null)).catch(() => {});
-    motor.trazos(caracter).then((x) => vivo && fijarTrazos(x)).catch(() => vivo && fijarTrazos(null));
-    motor
-      .palabrasConCaracteres([caracter], caracter, 24)
+    if (listas) esperar(motor.caracteresConNivel(listas.carpeta, [caracter])).then(([k]) => vivo && fijarInfo(k ?? null)).catch(() => {});
+    esperar(motor.trazos(caracter)).then((x) => vivo && fijarTrazos(x)).catch(() => vivo && fijarTrazos(null));
+    esperar(motor.palabrasConCaracteres([caracter], caracter, 24))
       .then(async (l) => {
         const ps = l[caracter] ?? [];
-        const xs = ps.length ? await motor.entradasDe(ps.map((p) => ({ termino: p.lema, lectura: p.lectura }))) : [];
+        const xs = ps.length ? await esperar(motor.entradasDe(ps.map((p) => ({ termino: p.lema, lectura: p.lectura })))) : [];
         if (vivo) fijarTuyas(xs);
       })
       .catch(() => vivo && fijarTuyas([]));
-    if (pc.lecturasEspeciales) motor.categoriaConCaracter(pc.lecturasEspeciales.categoria, caracter, 24).then((x) => vivo && fijarEspeciales(x)).catch(() => {});
-    motor
-      .buscar(caracter)
-      .then((r) => {
+    if (pc.lecturasEspeciales) esperar(motor.categoriaConCaracter(pc.lecturasEspeciales.categoria, caracter, 24)).then((x) => vivo && fijarEspeciales(x)).catch(() => {});
+    esperar(
+      motor.buscar(caracter).then((r) => {
         const refs = referenciasDe(r).filter((x) => x.tipo === 'opuesto');
         return refs.length ? motor.entradasDe(refs) : [];
       })
+    )
       .then((x) => vivo && fijarOpuestos(x))
       .catch(() => {});
     return () => {
@@ -321,20 +323,19 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
       fijarFicha(null);
       return;
     }
-    motor.estado().then((e) => vivo && fijarHayDic(e.diccionarios.some((x) => x.tipo === 'caracteres'))).catch(() => {});
-    motor
-      .fichaCaracter(caracter)
+    esperar(motor.estado()).then((e) => vivo && fijarHayDic(e.diccionarios.some((x) => x.tipo === 'caracteres'))).catch(() => {});
+    esperar(motor.fichaCaracter(caracter))
       .then((f) => {
         if (!vivo) return;
         fijarFicha(f);
         if (!f) return;
         const emparentados = [f.radical?.caracter, ...f.opuestos, ...f.sinonimos, ...f.parecidos, ...f.homonimos.flatMap((h) => h.caracteres)];
         const unicos = [...new Set(emparentados.filter((x): x is string => !!x && x !== caracter))];
-        motor.caracteresBreves(unicos).then((xs) => vivo && fijarBreves(new Map(xs.map((x) => [x.caracter, x])))).catch(() => {});
+        esperar(motor.caracteresBreves(unicos)).then((xs) => vivo && fijarBreves(new Map(xs.map((x) => [x.caracter, x])))).catch(() => {});
         // Si él da el sonido a otros, su familia es la suya; si lo recibe de otra pieza, la de esa pieza.
         const cabeza = f.fonetico && f.fonetico !== caracter ? f.fonetico : f.daSonido ? caracter : null;
         if (cabeza) {
-          Promise.all([motor.familiaFonetica(cabeza, 48), cabeza === caracter ? Promise.resolve(f) : motor.fichaCaracter(cabeza)])
+          esperar(Promise.all([motor.familiaFonetica(cabeza, 48), cabeza === caracter ? Promise.resolve(f) : motor.fichaCaracter(cabeza)]))
             .then(([fam, fc]) => {
               if (!vivo) return;
               const filas = fam.filas.filter((x) => x.caracter !== caracter);
@@ -357,8 +358,7 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
     }
     // Los de su familia por el sonido ya salen en su lista: aquí van los demás.
     const deFamilia = familia?.cabeza === caracter ? familia.filas.map((x) => x.caracter) : [];
-    motor
-      .caracteresConPieza([caracter, ...ficha.formasComoPieza], [caracter, ...deFamilia], limiteContienen)
+    esperar(motor.caracteresConPieza([caracter, ...ficha.formasComoPieza], [caracter, ...deFamilia], limiteContienen))
       .then((x) => vivo && fijarContienen(x))
       .catch(() => {});
     return () => {
@@ -368,7 +368,7 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
 
   useEffect(() => {
     let vivo = true;
-    motor.palabrasConCaracter(caracter, limite).then((x) => vivo && fijarComunes(x)).catch(() => vivo && fijarComunes({ filas: [], total: 0 }));
+    esperar(motor.palabrasConCaracter(caracter, limite)).then((x) => vivo && fijarComunes(x)).catch(() => vivo && fijarComunes({ filas: [], total: 0 }));
     return () => {
       vivo = false;
     };

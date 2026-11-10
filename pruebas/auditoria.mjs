@@ -236,6 +236,16 @@ export function medirEnPagina({ minimo = 6, minimoLectura = 5, marcar = false, r
   // 5) Lo que hace más ancha la página que la ventana.
   const raiz = document.scrollingElement ?? document.documentElement;
   if (raiz.scrollWidth > raiz.clientWidth + 1) anotar('la página se sale a lo ancho', raiz, null, raiz.clientWidth - raiz.scrollWidth, '', null);
+  // 6) Una caja que se desplaza en vertical y, por poco, también a lo ancho: sale una barra de desplazamiento que nadie
+  // quiere (la de la lista de resultados la sacaba la pista invisible de una estrella). Lo que se desliza a lo ancho a
+  // propósito, como una fila de tarjetas, se pasa de largo: le sobra mucho más que eso.
+  for (const e of elementos) {
+    if (!visible(e) || e === raiz) continue;
+    const sx = estilo(e);
+    if (!/auto|scroll/.test(sx.overflowX) || !/auto|scroll/.test(sx.overflowY)) continue;
+    const sobra = e.scrollWidth - e.clientWidth;
+    if (sobra > 1 && sobra <= Math.max(48, e.clientWidth * 0.25)) anotar('barra de desplazamiento de sobra', e, e, -sobra, '', e.getBoundingClientRect());
+  }
 
   if (marcar) {
     const capa = document.createElement('div');

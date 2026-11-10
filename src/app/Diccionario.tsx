@@ -2,8 +2,11 @@
 // las frases donde la has visto y el minuto de cada una, y en otra columna lo que la rodea (sus kanji, sus opuestos, las
 // que significan lo mismo, las que se leen igual). Un carácter suelto tiene su propia página: sus lecturas, sus piezas,
 // las palabras que lo llevan y dónde lo has visto. Con poco ancho, todo queda en una columna.
+//
+// Pasar de una palabra a otra no deja ver la de antes a medio quitar ni la nueva a medio llegar: la nueva se prepara a
+// escondidas mientras se ve la anterior (ui/preparacion.tsx) y entra de una vez, con un fundido corto.
 
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { type Ajustes, guardarAjustes, TAMANO_DICCIONARIO } from '../compartido/ajustes';
 import { idiomaActual, numero, tr } from '../compartido/i18n';
 import { motor } from '../compartido/rpc';
@@ -13,6 +16,7 @@ import { enviarAlCreador } from '../ui/borrador';
 import { Ficha, PanelFlujo } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
+import { conFundido, Preparar, useEsperar } from '../ui/preparacion';
 import { Explorar, ResultadosGramatica } from './DiccionarioMas';
 import { FrasesVistas, referenciasDe } from './FrasesVistas';
 import { PaginaCaracter, significadoDe } from './PaginaCaracter';
@@ -31,6 +35,19 @@ interface Busqueda {
   caracter: string | null;
   /** Si ese carácter es también una palabra: entonces se puede ver como tal. */
   caracterEsPalabra: boolean;
+}
+
+/**
+ * Lo que se ve de una búsqueda: qué palabra de la lista está abierta y si un carácter se ve como tal o como palabra. Cada
+ * cambio es una vista nueva, que se prepara mientras se ve la anterior.
+ */
+interface Vista {
+  id: number;
+  busqueda: Busqueda;
+  elegida: number;
+  comoPalabra: boolean;
+  /** Viene de otra búsqueda, no de elegir en la misma lista: al enseñarla, la página vuelve arriba. */
+  nueva: boolean;
 }
 
 /** La primera definición de verdad de una entrada: las referencias no cuentan. */
@@ -65,15 +82,55 @@ function juntar(buscado: string, lista: EntradaBreve[], libres: ResultadoBusqued
 export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta: string }) {
   const [texto, fijarTexto] = useState(consulta);
   const [frase, fijarFrase] = useState('');
-  const [busqueda, fijarBusqueda] = useState<Busqueda | null>(null);
-  const [elegida, fijarElegida] = useState(0);
-  const [comoPalabra, fijarComoPalabra] = useState(false);
+  // La vista que se ve y la que se pide: son la misma salvo mientras la pedida se prepara.
+  const [vista, fijarVista] = useState<Vista | null>(null);
+  const [pedida, fijarPedida] = useState<Vista | null>(null);
   const [cargando, fijarCargando] = useState(false);
   const [preparando, fijarPreparando] = useState(false);
   const [recientes, fijarRecientes] = useState<string[]>(() => leerPreferencia('busquedas', []));
   const [hayDics, fijarHayDics] = useState(true);
+  // Las búsquedas que llegan tarde, porque ya se pidió otra, no cuentan.
+  const turno = useRef(0);
+  const numeroVista = useRef(0);
+  const ultimaPedida = useRef<Vista | null>(null);
+  ultimaPedida.current = pedida;
+  // Mientras no haya una búsqueda que enseñar, sigue la portada: así no se queda la página en blanco al buscar desde ella.
+  const conPortada = useRef(!consulta);
+
+  const pedirVista = (v: Omit<Vista, 'id'>) => fijarPedida({ ...v, id: ++numeroVista.current });
+
+  /** Enseña la vista que se preparaba, si sigue siendo la que se pidió. */
+  const ensenar = (id: number) => {
+    const v = ultimaPedida.current;
+    if (!v || v.id !== id) return;
+    conFundido(
+      () => {
+        conPortada.current = false;
+        fijarVista(v);
+        // Las búsquedas recientes de la portada cambian al enseñar la búsqueda, no antes: si no, se movían mientras tanto.
+        if (v.nueva) {
+          const nuevas = [v.busqueda.texto, ...recientes.filter((x) => x !== v.busqueda.texto)].slice(0, 8);
+          fijarRecientes(nuevas);
+          guardarPreferencia('busquedas', nuevas);
+        }
+      },
+      () => {
+        const p = document.querySelector<HTMLElement>('.ap-principal');
+        if (!p) return;
+        if (v.nueva) {
+          p.scrollTop = 0;
+          return;
+        }
+        // Elegida otra de la lista con la página bajada: la palabra nueva se lee desde su principio.
+        const cuerpo = document.querySelector('.dic-pantalla:not(.preparando)');
+        const arriba = cuerpo ? cuerpo.getBoundingClientRect().top - p.getBoundingClientRect().top : 0;
+        if (arriba < 0) p.scrollTop += arriba - 12;
+      }
+    );
+  };
 
   const buscar = async (limpio: string) => {
+    const t = ++turno.current;
     fijarCargando(true);
     const paquete = lengua.value;
     const caracter = paquete.paginaCaracter?.es(limpio) ? limpio.trim() : null;
@@ -87,16 +144,19 @@ export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; con
         significado ? motor.buscarPorSignificado(limpio).catch(() => [] as EntradaBreve[]) : Promise.resolve([] as EntradaBreve[]),
         paquete.listasNivel ? motor.buscarGramatica(paquete.listasNivel.carpeta, limpio, idiomaActual()).catch(() => [] as PuntoEncontrado[]) : Promise.resolve([] as PuntoEncontrado[]),
       ]);
+      if (t !== turno.current) return;
       const { candidatos, porSignificado } = juntar(limpio, lista, libres, sentido);
-      fijarBusqueda({ texto: limpio, candidatos, porSignificado, gramatica: puntos, caracter, caracterEsPalabra: !!caracter && libres.some((r) => r.lema === caracter && r.entradas.length > 0) });
-      fijarElegida(0);
-      fijarComoPalabra(false);
-      const nuevas = [limpio, ...recientes.filter((x) => x !== limpio)].slice(0, 8);
-      fijarRecientes(nuevas);
-      guardarPreferencia('busquedas', nuevas);
+      pedirVista({
+        busqueda: { texto: limpio, candidatos, porSignificado, gramatica: puntos, caracter, caracterEsPalabra: !!caracter && libres.some((r) => r.lema === caracter && r.entradas.length > 0) },
+        elegida: 0,
+        comoPalabra: false,
+        nueva: true,
+      });
     } finally {
-      fijarCargando(false);
-      fijarPreparando(false);
+      if (t === turno.current) {
+        fijarCargando(false);
+        fijarPreparando(false);
+      }
     }
   };
 
@@ -113,20 +173,29 @@ export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; con
   }, []);
   useEffect(() => {
     fijarTexto(consulta);
-    if (consulta) buscar(consulta);
-    else fijarBusqueda(null);
+    if (consulta) {
+      buscar(consulta);
+      return;
+    }
+    turno.current++;
+    conPortada.current = true;
+    fijarVista(null);
+    fijarPedida(null);
+    fijarCargando(false);
   }, [consulta]);
 
   const paquete = lengua.value;
-  const inicial = busqueda === null && !cargando;
+  const cambiando = !!pedida && pedida.id !== vista?.id;
+  const inicial = !consulta || (!vista && conPortada.current);
   const atajos = recientes.length ? recientes : paquete.ejemplos.sugerencias;
   const estilo = estiloDiccionario(ajustes);
-  const c = busqueda?.candidatos[elegida];
-  const verCaracter = !!busqueda?.caracter && !comoPalabra;
-  const nada = !!busqueda && !busqueda.caracter && !busqueda.candidatos.length && !busqueda.gramatica.length;
+  // En la lista y en «Ver como», lo pulsado se marca al momento, aunque la palabra tarde un poco en llegar.
+  const marcas = (v: Vista) => (cambiando && pedida!.busqueda === v.busqueda ? pedida! : v);
+  const base = pedida ?? vista;
 
   return (
     <div class={`dic ${ajustes.diccionarioAncho === 'centrado' ? 'centrado' : ''} ${inicial ? 'inicial' : ''}`} style={estilo}>
+      {cambiando && <div class="dic-progreso" role="progressbar" aria-label={tr('Cargando…')} />}
       {inicial && (
         <div class="ap-dic-portada">
           <span class="hoja-icono"><Icono n="diccionario" t={24} /></span>
@@ -136,10 +205,11 @@ export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; con
       )}
       <div class="dic-barra">
         <div class="dic-barra-busqueda">
+          {/* El botón no cambia de texto ni se desactiva al buscar: con búsquedas de un instante, solo parpadeaba. */}
           <form class="ap-buscador" role="search" onSubmit={(e) => { e.preventDefault(); pedir(texto); }}>
             <Icono n="buscar" t={20} />
             <input lang={paquete.id} aria-label={tr('Buscar en el diccionario')} placeholder={paquete.ejemplos.busqueda} value={texto} onInput={(e) => fijarTexto(e.currentTarget.value)} autoFocus />
-            <button class="btn primario" type="submit" disabled={!texto.trim() || cargando}>{cargando ? tr('Buscando…') : tr('Buscar')}</button>
+            <button class="btn primario" type="submit" disabled={!texto.trim()}>{tr('Buscar')}</button>
           </form>
           <label class="ap-contexto">
             <Icono n="ia" t={15} />
@@ -162,30 +232,78 @@ export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; con
       )}
       {cargando && preparando && <p class="ayuda ap-dic-preparando"><span class="giro" /> {tr('Preparando el diccionario para buscar por significado: la primera vez tarda unos segundos.')}</p>}
 
-      {busqueda?.caracter && busqueda.caracterEsPalabra && (
+      {[vista, cambiando ? pedida : null].map((v) => {
+        if (!v) return null;
+        const aLaVista = v === vista;
+        return (
+          <div key={v.id} class={`dic-pantalla ${aLaVista ? (cambiando ? 'esperando' : '') : 'preparando'}`} inert={!aLaVista} aria-hidden={aLaVista ? undefined : 'true'}>
+            <Preparar alListo={() => ensenar(v.id)}>
+              <CuerpoBusqueda
+                v={v}
+                marcas={marcas(v)}
+                ajustes={ajustes}
+                frase={frase}
+                hayDics={hayDics}
+                alElegir={(i) => {
+                  if (base && base.busqueda === v.busqueda && base.elegida === i && !base.comoPalabra) return;
+                  pedirVista({ busqueda: v.busqueda, elegida: i, comoPalabra: false, nueva: false });
+                }}
+                alVerComo={(como) => {
+                  if (base && base.busqueda === v.busqueda && base.comoPalabra === como) return;
+                  pedirVista({ busqueda: v.busqueda, elegida: base?.busqueda === v.busqueda ? base.elegida : v.elegida, comoPalabra: como, nueva: false });
+                }}
+              />
+            </Preparar>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Lo que se ve de una búsqueda: la página del carácter o la de la palabra con su lista, su gramática, o que no hay nada. */
+function CuerpoBusqueda({ v, marcas, ajustes, frase, hayDics, alElegir, alVerComo }: {
+  v: Vista;
+  /** Lo marcado en la lista y en «Ver como»: lo pedido, aunque aún no se vea. */
+  marcas: Pick<Vista, 'elegida' | 'comoPalabra'>;
+  ajustes: Ajustes;
+  frase: string;
+  hayDics: boolean;
+  alElegir: (i: number) => void;
+  alVerComo: (comoPalabra: boolean) => void;
+}) {
+  const paquete = lengua.value;
+  const { busqueda } = v;
+  const c = busqueda.candidatos[v.elegida];
+  const verCaracter = !!busqueda.caracter && !v.comoPalabra;
+  const nada = !busqueda.caracter && !busqueda.candidatos.length && !busqueda.gramatica.length;
+  const conLista = busqueda.candidatos.length > 1 && !v.comoPalabra;
+  return (
+    <>
+      {busqueda.caracter && busqueda.caracterEsPalabra && (
         <div class="segmentado dic-vista" role="radiogroup" aria-label={tr('Ver como')}>
-          <button role="radio" aria-checked={!comoPalabra} class={!comoPalabra ? 'activo' : ''} onClick={() => fijarComoPalabra(false)}>
+          <button role="radio" aria-checked={!marcas.comoPalabra} class={!marcas.comoPalabra ? 'activo' : ''} onClick={() => alVerComo(false)}>
             <span lang={paquete.id}>{busqueda.caracter}</span> {tr(paquete.paginaCaracter!.nombre)}
           </button>
-          <button role="radio" aria-checked={comoPalabra} class={comoPalabra ? 'activo' : ''} onClick={() => fijarComoPalabra(true)}>
+          <button role="radio" aria-checked={marcas.comoPalabra} class={marcas.comoPalabra ? 'activo' : ''} onClick={() => alVerComo(true)}>
             <span lang={paquete.id}>{busqueda.caracter}</span> {tr('Palabra')}
           </button>
         </div>
       )}
 
-      {busqueda && verCaracter && <PaginaCaracter key={busqueda.caracter} caracter={busqueda.caracter!} ajustes={ajustes} />}
+      {verCaracter && <PaginaCaracter key={busqueda.caracter} caracter={busqueda.caracter!} ajustes={ajustes} />}
 
-      {busqueda && !verCaracter && (comoPalabra ? busqueda.caracter : c) && (
-        <div class={`dic-cuerpo ${busqueda.candidatos.length > 1 && !comoPalabra ? 'con-lista' : ''}`}>
-          {busqueda.candidatos.length > 1 && !comoPalabra && (
+      {!verCaracter && (v.comoPalabra ? busqueda.caracter : c) && (
+        <div class={`dic-cuerpo ${conLista ? 'con-lista' : ''}`}>
+          {conLista && (
             <ListaResultados
+              busqueda={busqueda}
               titulo={busqueda.porSignificado ? tr('Palabras que significan «{0}»', busqueda.texto) : tr('Resultados')}
-              candidatos={busqueda.candidatos}
-              elegida={elegida}
-              alElegir={fijarElegida}
+              elegida={marcas.comoPalabra ? -1 : marcas.elegida}
+              alElegir={alElegir}
             />
           )}
-          {comoPalabra ? (
+          {v.comoPalabra ? (
             <PalabraEnPagina key={`caracter|${busqueda.caracter}`} termino={busqueda.caracter!} ajustes={ajustes} frase={frase} />
           ) : (
             <PalabraEnPagina key={`${c!.termino}|${c!.lectura}`} termino={c!.termino} lectura={c!.lectura} ajustes={ajustes} frase={frase} />
@@ -193,15 +311,15 @@ export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; con
         </div>
       )}
 
-      {busqueda && !cargando && <div class="dic-gramatica"><ResultadosGramatica key={busqueda.texto} puntos={busqueda.gramatica} /></div>}
+      <div class="dic-gramatica"><ResultadosGramatica key={busqueda.texto} puntos={busqueda.gramatica} /></div>
 
-      {nada && !cargando && (
+      {nada && (
         <Vacio icono="buscar" titulo={hayDics ? tr('Sin resultados') : tr('Aún no hay diccionarios')}>
           <p>{hayDics ? tr('No hay nada para «{0}». Comprueba la escritura o busca solo la raíz de la palabra.', busqueda.texto) : tr('Instálalos en Ajustes para poder buscar.')}</p>
           {!hayDics && <button class="btn primario" onClick={() => navegar('ajustes')}>{tr('Ir a Ajustes')}</button>}
         </Vacio>
       )}
-    </div>
+    </>
   );
 }
 
@@ -225,15 +343,30 @@ function AjustesPagina({ ajustes }: { ajustes: Ajustes }) {
   );
 }
 
-function ListaResultados({ titulo, candidatos, elegida, alElegir }: { titulo: string; candidatos: PalabraBreve[]; elegida: number; alElegir: (i: number) => void }) {
+/**
+ * Por dónde iba la lista de cada búsqueda. Al elegir otra palabra, la lista se pinta de nuevo con la vista nueva: así
+ * sigue en el mismo sitio en vez de volver al principio.
+ */
+const desplazamientos = new WeakMap<Busqueda, { x: number; y: number }>();
+
+function ListaResultados({ busqueda, titulo, elegida, alElegir }: { busqueda: Busqueda; titulo: string; elegida: number; alElegir: (i: number) => void }) {
+  const caja = useRef<HTMLElement>(null);
+  const fila = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const d = desplazamientos.get(busqueda);
+    if (!d) return;
+    if (caja.current) caja.current.scrollTop = d.y;
+    if (fila.current) fila.current.scrollLeft = d.x;
+  }, []);
+  const recordar = () => desplazamientos.set(busqueda, { x: fila.current?.scrollLeft ?? 0, y: caja.current?.scrollTop ?? 0 });
   return (
-    <nav class="dic-lista" aria-label={titulo}>
+    <nav ref={caja} class="dic-lista" aria-label={titulo} onScroll={recordar}>
       <h2 class="dic-lista-titulo">
         <span>{titulo}</span>
-        <span class="dic-cuenta num">{numero(candidatos.length)}</span>
+        <span class="dic-cuenta num">{numero(busqueda.candidatos.length)}</span>
       </h2>
-      <div class="dic-lista-items">
-        {candidatos.map((c, i) => <TarjetaPalabra key={`${c.termino}|${c.lectura}`} e={c} activa={i === elegida} alElegir={() => alElegir(i)} />)}
+      <div ref={fila} class="dic-lista-items" onScroll={recordar}>
+        {busqueda.candidatos.map((c, i) => <TarjetaPalabra key={`${c.termino}|${c.lectura}`} e={c} activa={i === elegida} alElegir={() => alElegir(i)} />)}
       </div>
     </nav>
   );
@@ -264,53 +397,70 @@ function PalabraEnPagina({ termino, lectura, ajustes, frase }: { termino: string
   );
 }
 
-/** Lo que rodea a una palabra: sus kanji, sus opuestos, las que significan lo mismo, las que hay que ver y las que se leen igual. */
+/** Lo que rodea a una palabra, salvo las que significan lo mismo, que pueden tardar más y van aparte. */
+interface Alrededor {
+  kanji: CaracterConNivel[];
+  breves: Map<string, CaracterBreve>;
+  opuestos: EntradaBreve[];
+  ver: EntradaBreve[];
+  homofonos: EntradaBreve[];
+}
+
+async function cargarAlrededor(r: ResultadoBusqueda): Promise<Alrededor> {
+  const paquete = lengua.value;
+  const listas = paquete.listasNivel;
+  const caracteres = paquete.trazos?.conocidas?.caracteres(r.lema) ?? [];
+  const refs = referenciasDe(r);
+  const op = refs.filter((x) => x.tipo === 'opuesto');
+  const vs = refs.filter((x) => x.tipo === 'ver');
+  const [kanji, breves, opuestos, ver, homofonos] = await Promise.all([
+    listas && caracteres.length ? motor.caracteresConNivel(listas.carpeta, caracteres).catch(() => [] as CaracterConNivel[]) : ([] as CaracterConNivel[]),
+    // Con el diccionario de caracteres, lo que significan en el idioma de la interfaz; las listas solo lo traen en inglés.
+    caracteres.length ? motor.caracteresBreves(caracteres).catch(() => [] as CaracterBreve[]) : ([] as CaracterBreve[]),
+    op.length ? motor.entradasDe(op).catch(() => [] as EntradaBreve[]) : ([] as EntradaBreve[]),
+    vs.length ? motor.entradasDe(vs).catch(() => [] as EntradaBreve[]) : ([] as EntradaBreve[]),
+    paquete.lectura.distingue && r.lectura ? motor.homofonos(r.lectura, r.lema).catch(() => [] as EntradaBreve[]) : ([] as EntradaBreve[]),
+  ]);
+  return { kanji, breves: new Map(breves.map((x) => [x.caracter, x])), opuestos, ver, homofonos };
+}
+
+/**
+ * Lo que rodea a una palabra: sus kanji, sus opuestos, las que significan lo mismo, las que hay que ver y las que se leen
+ * igual. Llega todo de una vez, salvo las que significan lo mismo: sin el índice del diccionario aún hecho tardan unos
+ * segundos, y lo demás no las espera.
+ */
 function Lateral({ r, frase }: { r: ResultadoBusqueda | null; frase: string }) {
   const paquete = lengua.value;
   const listas = paquete.listasNivel;
-  const [kanji, fijarKanji] = useState<CaracterConNivel[]>([]);
-  const [breves, fijarBreves] = useState<Map<string, CaracterBreve>>(new Map());
-  const [opuestos, fijarOpuestos] = useState<EntradaBreve[]>([]);
-  const [ver, fijarVer] = useState<EntradaBreve[]>([]);
+  const esperar = useEsperar();
+  const [alrededor, fijarAlrededor] = useState<Alrededor | null>(null);
   const [sinonimos, fijarSinonimos] = useState<EntradaBreve[] | null>(null);
-  const [homofonos, fijarHomofonos] = useState<EntradaBreve[]>([]);
   const [parecidas, fijarParecidas] = useState(false);
 
   useEffect(() => {
     if (!r) return;
     let vivo = true;
     fijarParecidas(false);
-    fijarKanji([]);
-    fijarOpuestos([]);
-    fijarVer([]);
+    fijarAlrededor(null);
     fijarSinonimos(null);
-    fijarHomofonos([]);
-    const caracteres = paquete.trazos?.conocidas?.caracteres(r.lema) ?? [];
-    if (listas && caracteres.length) motor.caracteresConNivel(listas.carpeta, caracteres).then((k) => vivo && fijarKanji(k)).catch(() => {});
-    // Con el diccionario de caracteres, lo que significan en el idioma de la interfaz; las listas solo lo traen en inglés.
-    if (caracteres.length) motor.caracteresBreves(caracteres).then((xs) => vivo && fijarBreves(new Map(xs.map((x) => [x.caracter, x])))).catch(() => {});
-    const refs = referenciasDe(r);
-    const op = refs.filter((x) => x.tipo === 'opuesto');
-    const vs = refs.filter((x) => x.tipo === 'ver');
-    if (op.length) motor.entradasDe(op).then((x) => vivo && fijarOpuestos(x)).catch(() => {});
-    if (vs.length) motor.entradasDe(vs).then((x) => vivo && fijarVer(x)).catch(() => {});
-    if (paquete.categoriasDiccionario?.length) motor.sinonimos(r.lema, r.lectura ?? '').then((s) => vivo && fijarSinonimos(s)).catch(() => vivo && fijarSinonimos([]));
-    else fijarSinonimos([]);
-    if (paquete.lectura.distingue && r.lectura) motor.homofonos(r.lectura, r.lema).then((h) => vivo && fijarHomofonos(h)).catch(() => {});
+    esperar(cargarAlrededor(r)).then((x) => vivo && fijarAlrededor(x));
+    const sinon = paquete.categoriasDiccionario?.length ? motor.sinonimos(r.lema, r.lectura ?? '').catch(() => [] as EntradaBreve[]) : Promise.resolve([] as EntradaBreve[]);
+    esperar(sinon).then((s) => vivo && fijarSinonimos(s));
     return () => {
       vivo = false;
     };
   }, [r?.lema, r?.lectura]);
 
   if (!r) return <aside class="dic-lateral" aria-busy="true" />;
+  const kanji = alrededor?.kanji ?? [];
   return (
-    <aside class="dic-lateral" aria-label={tr('Relacionadas')}>
+    <aside class="dic-lateral" aria-label={tr('Relacionadas')} aria-busy={alrededor ? undefined : 'true'}>
       {kanji.length > 0 && (
         <section class="dic-seccion" aria-label={tr(listas?.caracteres ?? '')}>
           <h3 class="dic-seccion-titulo">{tr(listas?.caracteres ?? '')}</h3>
           <div class="dic-caracteres">
             {kanji.map((k) => {
-              const b = breves.get(k.caracter);
+              const b = alrededor!.breves.get(k.caracter);
               const s = b ? significadoDe(b.significados) : { textos: k.glosa ? [k.glosa] : [], lang: 'en' };
               const glosa = s.textos.slice(0, 3).join(', ');
               return (
@@ -327,10 +477,10 @@ function Lateral({ r, frase }: { r: ResultadoBusqueda | null; frase: string }) {
           </div>
         </section>
       )}
-      <SeccionTarjetas titulo={tr('Opuestos')} xs={opuestos} />
+      <SeccionTarjetas titulo={tr('Opuestos')} xs={alrededor?.opuestos ?? []} />
       <SeccionTarjetas titulo={tr('Significan lo mismo')} xs={sinonimos} cargando={sinonimos === null} />
-      <SeccionTarjetas titulo={tr('Ver también')} xs={ver} />
-      <SeccionTarjetas titulo={tr('Se leen igual')} xs={homofonos} />
+      <SeccionTarjetas titulo={tr('Ver también')} xs={alrededor?.ver ?? []} />
+      <SeccionTarjetas titulo={tr('Se leen igual')} xs={alrededor?.homofonos ?? []} />
       <section class="dic-seccion">
         {parecidas ? (
           <PanelFlujo
