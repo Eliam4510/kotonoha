@@ -88,9 +88,13 @@ En noticias, blogs, wikis o en un chat como el de Claude, el texto japonés reci
 
 La **Biblioteca** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras. La estantería agrupa los libros en colecciones, como una serie con sus tomos, con su portada y una descripción, y muestra cuánto se ha leído de cada libro y de cada colección. En el visor se marcan páginas, se resalta o subraya el texto con un comentario y se dejan notas sobre la página, como en un lector de PDF. Se busca una palabra en todo el libro, cada página se puede leer como texto, con la ayuda de lectura, y Claude puede revisar el texto que leyó el OCR comparándolo con la imagen de la página.
 
-<img src="docs/img/ocr.png" alt="Página escaneada con su texto reconocido y el panel de la línea con la ficha de 週末" width="100%">
+<img src="docs/img/ocr.png" alt="Página escaneada de un libro de química orgánica, con su texto reconocido y el panel de la línea con la ficha de 結合" width="100%">
 
 Las páginas que son imágenes, como los mangas, los libros escaneados y muchos PDF, se leen con reconocimiento de texto (OCR) en el propio equipo y con la tarjeta gráfica. Hay un modo para libros impresos y otro para manga, que lee los globos de texto vertical sin confundir el furigana con el texto. Al tocar una palabra en la página se abre su línea con furigana y su ficha. Cada página se lee una sola vez y queda guardada.
+
+<img src="docs/img/manga.png" alt="Página de 【推しの子】 leída en modo Manga, con el globo abierto en el panel y la ficha de 愛" width="100%">
+
+<sub>Páginas de ejemplo: 『改訂版 ここで差がつく 有機化合物の構造決定問題の要点・演習』, de 西村能一 y 黒澤孝朋 (KADOKAWA, 2024), y 【推しの子】 1, de 赤坂アカ y 横槍メンゴ (集英社, 2020). Se muestra una sola página de cada obra, para ilustrar el visor; los derechos pertenecen a sus autores y editoriales.</sub>
 
 ### Un cuaderno para escribir y leer
 

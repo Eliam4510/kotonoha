@@ -84,9 +84,13 @@ Auf Nachrichtenseiten, Blogs, Wikis oder in einem Chat wie dem von Claude bekomm
 
 Die **Bibliothek** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Doppelseiten, fortlaufendes Scrollen, Inhaltsverzeichnis, Miniaturen und die Seite, an der jedes Buch zuletzt aufgeschlagen war. Ein Text-EPUB wie ein Roman behält sein eigenes Layout, seine Ruby und seine vertikale Schrift, mit dem Seiten-Reader darüber: Farben, Furigana und Wortfenster wie im Web. Ein PDF, das Text enthält, lässt sich sofort Wort für Wort lesen. Manga in Bilderordnern werden durch Auswahl des Ordners importiert: Jeder Band wird ein Buch, mit der Titelseite vorn und den Farbdoppelseiten im Ganzen. Das Regal ordnet die Bücher in Sammlungen, etwa eine Reihe mit ihren Bänden, mit Titelbild und Beschreibung, und zeigt, wie viel von jedem Buch und jeder Sammlung gelesen ist. Im Betrachter lassen sich Seiten markieren, Text mit Kommentar hervorheben oder unterstreichen und Notizen auf der Seite hinterlassen, wie in einem PDF-Reader. Ein Wort lässt sich im ganzen Buch suchen, jede Seite als Text mit der Lesehilfe lesen, und Claude kann den von der Texterkennung gelesenen Text prüfen, indem es ihn mit dem Seitenbild vergleicht.
 
-<img src="docs/img/ocr.de.png" alt="Eingescannte Seite mit erkanntem Text und dem Zeilenfenster zum Wort 週末" width="100%">
+<img src="docs/img/ocr.de.png" alt="Eingescannte Seite eines Buchs über organische Chemie, mit erkanntem Text und dem Zeilenfenster zum Wort 結合" width="100%">
 
 Seiten, die Bilder sind, wie Manga, eingescannte Bücher und viele PDFs, werden mit Texterkennung (OCR) auf dem eigenen Rechner und der Grafikkarte gelesen. Es gibt einen Modus für gedruckte Bücher und einen für Manga, der vertikale Sprechblasen liest, ohne Furigana mit dem Text zu verwechseln. Ein Tippen auf ein Wort der Seite öffnet seine Zeile mit Furigana und sein Wortfenster. Jede Seite wird nur einmal gelesen und gespeichert.
+
+<img src="docs/img/manga.de.png" alt="Eine Seite von 【推しの子】, im Manga-Modus gelesen, mit der Sprechblase im Fenster und dem Wort 愛" width="100%">
+
+<sub>Beispielseiten: 『改訂版 ここで差がつく 有機化合物の構造決定問題の要点・演習』 von Yoshikazu Nishimura und Takatomo Kurosawa (KADOKAWA, 2024) und 【推しの子】 (Oshi no Ko) Band 1 von Aka Akasaka und Mengo Yokoyari (Shueisha, 2020). Von jedem Werk wird eine einzige Seite gezeigt, um den Betrachter zu veranschaulichen; alle Rechte liegen bei den Autoren und Verlagen.</sub>
 
 ### Ein Notizbuch zum Schreiben und Lesen
 

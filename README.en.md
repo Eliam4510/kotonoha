@@ -84,9 +84,13 @@ On news sites, blogs, wikis or in a chat such as Claude’s, Japanese text gets 
 
 The **Library** is a complete viewer, like a PDF reader: zoom, two-page spreads, continuous scrolling, table of contents, thumbnails and the page where you left each book. A text EPUB, such as a novel, keeps its own formatting, ruby and vertical writing, with the page reader on top: colours, furigana and word panels, as on the web. A PDF that contains text can be read word by word right away. Manga that comes in image folders is imported by choosing the folder: each volume becomes a book, with its cover first and its colour spreads whole. The shelf groups books into collections, such as a series with its volumes, each with its cover and a description, and shows how much of each book and each collection has been read. In the viewer, pages can be bookmarked, text highlighted or underlined with a comment, and notes left on the page, as in a PDF reader. A word can be searched for in the whole book, each page can be read as text with the reading help, and Claude can review the text read by OCR by comparing it with the page image.
 
-<img src="docs/img/ocr.en.png" alt="Scanned page with its recognised text and the line panel showing the word 週末" width="100%">
+<img src="docs/img/ocr.en.png" alt="Scanned page from an organic chemistry book, with its recognised text and the line panel showing the word 結合" width="100%">
 
 Pages that are images, such as manga, scanned books and many PDFs, are read with on-device text recognition (OCR) on the graphics card. There is a mode for printed books and another for manga, which reads vertical speech bubbles without mistaking furigana for text. Tapping a word on the page opens its line with furigana and its word panel. Each page is read only once and saved.
+
+<img src="docs/img/manga.en.png" alt="A page of 【推しの子】 read in Manga mode, with the speech bubble open in the panel and the word 愛" width="100%">
+
+<sub>Sample pages: 『改訂版 ここで差がつく 有機化合物の構造決定問題の要点・演習』 by Yoshikazu Nishimura and Takatomo Kurosawa (KADOKAWA, 2024), and 【推しの子】 (Oshi no Ko) vol. 1 by Aka Akasaka and Mengo Yokoyari (Shueisha, 2020). A single page of each work is shown to illustrate the viewer; all rights belong to their authors and publishers.</sub>
 
 ### A notebook to write and read
 
