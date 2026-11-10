@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { confirmarBorrado, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -157,6 +157,7 @@ await app.waitForSelector('.ap-libro, .ap-vacio', { timeout: 15000 });
 const libros = () => app.locator('.ap-libro').count();
 for (let n = await libros(); n > 0; n = await libros()) {
   await app.locator('.ap-libro-quitar').first().click({ force: true });
+  await confirmarBorrado(app);
   await app.waitForFunction((antes) => document.querySelectorAll('.ap-libro').length < antes, n, { timeout: 15000 });
 }
 const ARCHIVO = 'input[type=file][aria-label="Importar archivos"]';

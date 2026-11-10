@@ -447,10 +447,12 @@ type Dialogo =
   | { tipo: 'coleccion'; coleccion?: ColeccionBiblioteca; libros?: string[] }
   | { tipo: 'mover'; libro: ElementoBiblioteca }
   | { tipo: 'anadir'; coleccion: ColeccionBiblioteca }
-  | { tipo: 'portada'; coleccion: ColeccionBiblioteca };
+  | { tipo: 'portada'; coleccion: ColeccionBiblioteca }
+  | { tipo: 'eliminar'; libro: ElementoBiblioteca };
 
 function Modal({ titulo, alCerrar, children }: { titulo: string; alCerrar: () => void; children: ComponentChildren }) {
-  useEffect(() => {
+  // Antes de pintar: un diálogo que ya se ve tiene que atender a Escape desde el primer momento.
+  useLayoutEffect(() => {
     const tecla = (e: KeyboardEvent) => e.key === 'Escape' && alCerrar();
     window.addEventListener('keydown', tecla);
     return () => window.removeEventListener('keydown', tecla);
@@ -463,6 +465,29 @@ function Modal({ titulo, alCerrar, children }: { titulo: string; alCerrar: () =>
         {children}
       </div>
     </div>
+  );
+}
+
+/** Antes de borrar un libro: con él se van su archivo, lo leído y lo anotado, y no hay vuelta. */
+function DialogoEliminar({ libro, alCerrar, alEliminar }: { libro: ElementoBiblioteca; alCerrar: () => void; alEliminar: () => Promise<void> }) {
+  const [borrando, fijarBorrando] = useState(false);
+  const cancelar = useRef<HTMLButtonElement>(null);
+  // El foco, en «Cancelar» desde que aparece: Intro no borra nada sin querer.
+  useLayoutEffect(() => {
+    cancelar.current?.focus();
+  }, []);
+  return (
+    <Modal titulo={tr('Eliminar de la biblioteca')} alCerrar={alCerrar}>
+      <p class="ap-dialogo-libro" lang={langDe(libro.titulo)}>{libro.titulo}</p>
+      <p class="ayuda">{tr('Se borra de este navegador con tu avance de lectura y lo que hayas anotado en él: notas, resaltados y marcadores. No se puede deshacer.')}</p>
+      <div class="ap-dialogo-botones">
+        <button ref={cancelar} class="btn fantasma" onClick={alCerrar}>{tr('Cancelar')}</button>
+        <button class="btn peligro confirmar-borrado" disabled={borrando} onClick={async () => {
+          fijarBorrando(true);
+          await alEliminar();
+        }}><Icono n="basura" t={15} /> {borrando ? tr('Eliminando…') : tr('Eliminar')}</button>
+      </div>
+    </Modal>
   );
 }
 
@@ -903,11 +928,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
       e={e}
       colecciones={colecciones}
       alAbrir={() => abrirLibro(e)}
-      alEliminar={async () => {
-        pausar(e.id);
-        await motor.bibliotecaEliminar(e.id);
-        cargar();
-      }}
+      alEliminar={() => fijarDialogo({ tipo: 'eliminar', libro: e })}
       alCambiar={cargar}
       alMover={() => fijarDialogo({ tipo: 'mover', libro: e })}
     />
@@ -949,6 +970,18 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
           lista={lista}
           alCerrar={cerrarDialogo}
           alHecho={() => {
+            cerrarDialogo();
+            cargar();
+          }}
+        />
+      )}
+      {dialogo.tipo === 'eliminar' && (
+        <DialogoEliminar
+          libro={dialogo.libro}
+          alCerrar={cerrarDialogo}
+          alEliminar={async () => {
+            pausar(dialogo.libro.id);
+            await motor.bibliotecaEliminar(dialogo.libro.id);
             cerrarDialogo();
             cargar();
           }}

@@ -16,6 +16,7 @@ import { cargarFuentes } from '../ui/fuentes';
 import { Icono } from '../ui/iconos';
 import { aplicarLengua, lecturaDeTarjeta, lengua } from '../ui/lengua';
 import { variablesPaleta } from '../ui/paletas';
+import { MODOS_LECTURA } from '../ui/palabras';
 import { avisar, avisos } from './estado';
 import { type Bloque, contenedorDe, esAparte, IndicePagina, rangoDe, type TokenPagina } from './lector/indice';
 import { Pintor } from './lector/pintor';
@@ -552,8 +553,8 @@ function ControlLector() {
           <div class="lector-grupo">
             <b>{tr(lengua.value.textos.lectura)}</b>
             <div class="segmentado" role="radiogroup" aria-label={tr(lengua.value.textos.lectura)}>
-              {([['todas', tr('Todo')], ['desconocidas', tr('Nuevas')], ['alPasar', tr('Al pasar')], ['ninguna', tr('Nada')]] as const).map(([v, n]) => (
-                <button key={v} role="radio" aria-checked={a.lectorFurigana === v} class={a.lectorFurigana === v ? 'activo' : ''} onClick={() => cambiar({ lectorFurigana: v })}>{n}</button>
+              {MODOS_LECTURA.map(([v, n]) => (
+                <button key={v} role="radio" aria-checked={a.lectorFurigana === v} class={a.lectorFurigana === v ? 'activo' : ''} onClick={() => cambiar({ lectorFurigana: v })}>{tr(n)}</button>
               ))}
             </div>
           </div>

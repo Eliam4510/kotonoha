@@ -16,6 +16,8 @@ import { enviarAlCreador } from '../ui/borrador';
 import { Ficha } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
+import { clasesPalabras } from '../ui/palabras';
+import { sinCortes } from '../ui/sinCorte';
 import { COLORES, EditorNota, resaltarEn } from './Anotaciones';
 
 /** El tramo del texto de la línea que se ha seleccionado en el panel, de palabra en palabra. */
@@ -188,14 +190,14 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
       ) : (
       <p
         ref={texto}
-        class="vs-linea-texto"
+        class={`vs-linea-texto ${clasesPalabras(ajustes)}`}
         lang={lengua.value.id}
         // Seleccionar con el ratón unas palabras deja elegido ese tramo para resaltarlo.
         onMouseUp={() => texto.current && fijarSeleccion(tramoSeleccionado(texto.current, sitios))}
         onKeyUp={() => texto.current && fijarSeleccion(tramoSeleccionado(texto.current, sitios))}
       >
         {tokens.length
-          ? tokens.map((p, k) =>
+          ? sinCortes(tokens.map((p, k) =>
               p.esPalabra ? (
                 <span
                   key={k}
@@ -217,7 +219,7 @@ export function PanelLinea({ lineas, indice, caracter, ajustes, titulo, alMover,
               ) : (
                 <span key={k} data-k={k}>{lengua.value.escritura.pegarSignos(p.superficie)}</span>
               )
-            )
+            ), tokens.map((p) => (p.esPalabra ? null : lengua.value.escritura.pegarSignos(p.superficie))))
           : linea.texto}
       </p>
       )}

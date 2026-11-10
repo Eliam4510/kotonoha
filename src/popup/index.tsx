@@ -12,6 +12,7 @@ import css from './popup.css';
 import { bcp47Actual, fijarIdioma, numero, tm, tr } from '../compartido/i18n';
 import { PAQUETES } from '../lenguas';
 import { aplicarLengua, estudiarLengua, lengua } from '../ui/lengua';
+import { MODOS_LECTURA } from '../ui/palabras';
 import { buscarVersionNueva, type VersionPublicada } from '../compartido/actualizaciones';
 import { Bandera } from '../app/SelectorLengua';
 
@@ -26,7 +27,6 @@ const RUTAS: [string, NombreIcono, string][] = [
   ['ajustes', 'ajustes', tm('Ajustes')],
 ];
 
-const MODOS_FURIGANA: [Ajustes['lectorFurigana'], string][] = [['todas', tm('Todo')], ['desconocidas', tm('Nuevas')], ['alPasar', tm('Al pasar')], ['ninguna', tm('Nada')]];
 
 function Popup() {
   const [a, fijarA] = useState<Ajustes | null>(null);
@@ -147,7 +147,7 @@ function Popup() {
               <b>{tr(lengua.value.textos.lectura)}</b>
             </div>
             <div class="segmentado" role="radiogroup" aria-label={tr(lengua.value.textos.lectura)}>
-              {MODOS_FURIGANA.map(([v, n]) => (
+              {MODOS_LECTURA.map(([v, n]) => (
                 <button key={v} role="radio" aria-checked={a.lectorFurigana === v} class={a.lectorFurigana === v ? 'activo' : ''} onClick={() => cambiar({ lectorFurigana: v })}>{tr(n)}</button>
               ))}
             </div>

@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
-import { recargarExtension } from '../extension.mjs';
+import { confirmarBorrado, recargarExtension } from '../extension.mjs';
 import { iniciarMock } from '../mock-claude.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..', '..');
@@ -268,6 +268,7 @@ async function biblioteca(datos) {
   const libros = () => b.locator('.ap-libro').count();
   for (let n = await libros(); n > 0; n = await libros()) {
     await b.locator('.ap-libro-quitar').first().click({ force: true });
+    await confirmarBorrado(b);
     await b.waitForFunction((antes) => document.querySelectorAll('.ap-libro').length < antes, n, { timeout: 15000 });
   }
   const imagen = await pagina({ ...datos.pagina, numero: 12 });

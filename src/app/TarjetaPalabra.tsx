@@ -24,8 +24,9 @@ export const buscarPalabra = (t: string) => navegar(`diccionario?q=${encodeURICo
 /** El tamaño y la letra de lo escrito en la lengua en las páginas del diccionario, como variables de CSS. */
 export function estiloDiccionario(ajustes: Ajustes): Record<string, string | number> {
   const paquete = lengua.value;
-  const letra = ajustes.diccionarioLetra === 'redondeada' ? undefined : paquete.letras?.[ajustes.diccionarioLetra] ?? paquete.letras?.gotica;
-  return { '--escala-dic': ajustes.diccionarioTamano / 100, ...(letra ? { '--letra-lengua': letra } : {}) };
+  const elegida = ajustes.diccionarioLetra === 'redondeada' ? undefined : paquete.letras?.[ajustes.diccionarioLetra] ? ajustes.diccionarioLetra : 'gotica';
+  const letra = elegida && paquete.letras?.[elegida];
+  return { '--escala-dic': ajustes.diccionarioTamano / 100, ...(letra ? { '--letra-lengua': letra, '--aire-lectura': paquete.aireLectura?.[elegida] ?? 0 } : {}) };
 }
 
 export function TarjetaPalabra({ e, activa, alElegir }: { e: PalabraBreve; activa?: boolean; alElegir?: () => void }) {
@@ -37,7 +38,7 @@ export function TarjetaPalabra({ e, activa, alElegir }: { e: PalabraBreve; activ
   const largo = paquete.lectura.distingue ? [...e.termino].length : 0;
   return (
     <button class={`dic-tarjeta ${activa ? 'activa' : ''} ${estado ? `est-${estado}` : ''}`} aria-current={activa ? 'true' : undefined} onClick={alElegir ?? (() => buscarPalabra(e.termino))}>
-      <span class={`dic-tarjeta-palabra ${largo >= 8 ? 'muy-larga' : largo >= 6 ? 'larga' : ''}`} lang={paquete.id}>{conLectura ? <ConFurigana texto={e.termino} lectura={e.lectura} /> : e.termino}</span>
+      <span class={`dic-tarjeta-palabra ${conLectura ? 'con-lectura' : ''} ${largo >= 11 ? 'frase' : largo >= 8 ? 'muy-larga' : largo >= 6 ? 'larga' : ''}`} lang={paquete.id}>{conLectura ? <ConFurigana texto={e.termino} lectura={e.lectura} partible /> : e.termino}</span>
       {e.glosa && <span class="dic-tarjeta-glosa">{e.glosa}</span>}
       {(e.comun || estado) && (
         <span class="dic-tarjeta-marcas">

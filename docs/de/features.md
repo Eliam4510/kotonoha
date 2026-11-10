@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.29.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.30.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -24,6 +24,7 @@ Stand jeder Funktion in Version 0.29.0 und die Art ihrer Überprüfung.
 | Eine Zeile, die unter einer ruhenden Maus erscheint, öffnet kein Wortfenster und hält das Video nicht an | Automatisch |
 | Untertitel mit Furigana, Farbe nach Tonhöhenakzent und Unterstreichung nach Status | Automatisch |
 | Modi für Furigana, Glossen und Farbe: immer, beim Überfahren, unbekannte, nie | Automatisch |
+| Der Untertitelkasten lässt an allen vier Seiten Luft und nichts überlappt sich, bei jeder Kombination aus Größe (70 bis 250 %), Lesungen, Glossen, Übersetzung und Hintergrund, im breiten wie im schmalen Fenster; die Übersetzung jedes unbekannten Wortes steht darunter | Automatisch |
 | Wortfenster: Definitionen, Status, Häufigkeit, Audio, Bilder, Beispiele und Links | Automatisch |
 | Strichfolge jedes Kanji, animiert und in einer Schleife, mit Pause und Einzelschritten | Automatisch, mit echten KanjiVG-Daten |
 | Kanji, die du schon kennst: neben den Strichen die bekannten oder gerade gelernten Wörter mit jedem Kanji des Worts, die bekannten zuerst | Automatisch, mit in die Datenbank gesetzten Wörtern |
@@ -122,12 +123,14 @@ Stand jeder Funktion in Version 0.29.0 und die Art ihrer Überprüfung.
 | Notizbuch: ein Editor über die ganze Breite mit Überschriften, Listen mit Unterpunkten, Zitaten, Code und Fettdruck, mit Schaltflächen und Kürzeln (# , - , ・ , 1. , > , Tab, Strg+B); Bearbeiten und Lesen auf derselben Seite; Eingefügtes behält seine Struktur; speichert von selbst und auf Wunsch in der Bibliothek, und ein Text der Bibliothek lässt sich wieder bearbeiten | Automatisch: Schreiben mit Kürzeln und Schaltflächen, Lesen, Speichern in der Bibliothek und erneutes Öffnen von dort |
 | Ordnen: Claude gibt einem am Stück eingefügten Text Titel, Zwischenüberschriften, Absätze und Listen; es warnt, wenn sich ein Wort geändert hat, und Strg+Z macht es rückgängig | Automatisch, mit einem simulierten Claude |
 | Vorlesen mit Geschwindigkeit (0,6× bis 1,2×) und Modus (am Stück, Satz für Satz oder den Satz wiederholend); jeden markierten Teil anhören oder üben, ohne seine Furigana | Automatisch |
+| Beim Lesen gelten dieselben Modi für Furigana, Status und Farbe wie über dem Video, mit einer Auswahl in der Textleiste; kein schließendes Satzzeichen beginnt eine Zeile; im schmalen Fenster öffnet sich die Wortkarte unter dem Text | Automatisch |
 | Die Sprachmodelle laden während der Aufnahme (Diktat und Übung): Die zweite Aufnahme der Übung wird in 0,2 s analysiert, und das Diktat eine Sekunde nach dem Ende transkribiert | Automatisch, auf der GPU des Entwicklungsrechners |
 | Die Aufnahme jedes Diktats über ihrem Absatz, zum erneuten Anhören; sie geht mit dem Text in die Bibliothek, und eine, die kein Text nutzt, wird nach einer Woche gelöscht | Automatisch |
 | Tonhöhenakzent üben im Notizbuch, den Texten der Bibliothek und der Textansicht: der Akzent jedes Worts gezeichnet, die Aufnahme, die Tonhöhenkurve über dem erwarteten Akzent, eine Bewertung pro Wort und lange Pausen | Automatisch, mit einer synthetischen Stimme |
 | Die Tonhöhe der Stimme im Browser gemessen (YIN), die Moren anhand der Stimme und der Transkription verortet und wo die Tonhöhe in jedem Wort fällt, auch bei verzögertem Gipfel und entstimmten Moren | Automatisch; abgestimmt mit Minimalpaaren (箸, 橋 und 端; 雨 und 飴), gelesen von einer synthetischen Stimme, und mit einer echten Aufnahme |
 | Besondere Moren in der Übung, mit narabas: ein fehlendes oder überzähliges っ, ん oder langer Vokal, mit markierter Mora; der Download des Modells mit seiner SHA-256 geprüft, die GPU nur, wenn sie wie der Prozessor rechnet, und keine Bewertung für ein っ vor einem Reibelaut, für anders gesprochene Phrasen oder für Zögerer am Wortende | Automatisch, mit einer synthetischen Stimme; gemessen mit Minimalpaaren (おばあさん und おばさん, きって und きて…), gesprochen von zwei synthetischen Stimmen: 17 von 22 fehlenden Moren und 10 von 10 überzähligen, ohne Hinweise bei 22 von 24 richtig gesprochenen Sätzen |
 | Bibliothek: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
+| Löschen verlangt eine Bestätigung: ein Buch (mit Datei, Lesefortschritt und Anmerkungen), ein Wörterbuch, ein gespeichertes Modell, eine Karte im Gedächtnis, eine geschriebene Notiz oder der API-Schlüssel | Automatisch |
 | Betrachter für Seitenbücher: EPUB aus Bildern, CBZ und PDF in einem eigenen Tab, mit Zoom, Anpassung an Breite oder Seite, Einzelseite, Doppelseite und fortlaufendem Bildlauf | Automatisch |
 | Bilderordner als Bücher: Jeder Ordner, oder jeder Band darin, wird ein Buch, mit der Titelseite vorn, einem Inhaltsverzeichnis nach Kapiteln und querformatigen Doppelseiten für sich | Automatisch, und mit 40 echten Manga-Bänden |
 | Sammlungen im Regal: eine Reihe mit ihren Bänden oder ein Thema, mit Art, Beschreibung und Titelbild; ein Ordner mit mehreren Bänden kommt als Sammlung herein, und ein neuer Band kommt in seine | Automatisch |

@@ -217,6 +217,19 @@ await v.locator('.vs-vista-texto .ap-papel .pal').nth(1).click();
 await v.waitForSelector('.vs-vista-texto .ap-lectura-ficha', { timeout: 8000 }).catch(() => {});
 comprobar((await contar(v, '.vs-vista-texto .ap-lectura-ficha')) === 1, 'Tocar una palabra abre su ficha');
 await v.screenshot({ path: join(CAPTURAS, '2-vista-texto.png') });
+// En una ventana estrecha, la ficha va debajo del texto, a lo ancho, y no tapa la palabra consultada.
+const ventana = v.viewportSize();
+await v.setViewportSize({ width: 860, height: 900 });
+await v.waitForTimeout(700);
+const estrecha = await v.evaluate(() => {
+  const ficha = document.querySelector('.vs-vista-texto .ap-lectura-ficha').getBoundingClientRect();
+  const elegida = document.querySelector('.vs-vista-texto .ap-elegida')?.getBoundingClientRect();
+  const papel = document.querySelector('.vs-vista-texto .ap-papel').getBoundingClientRect();
+  return { debajo: ficha.width >= papel.width - 4 && ficha.height <= innerHeight * 0.6 && ficha.top >= papel.top, aLaVista: !!elegida && elegida.bottom <= ficha.top, ficha: [Math.round(ficha.top), Math.round(ficha.height)] };
+});
+comprobar(estrecha.debajo && estrecha.aLaVista, 'En una ventana estrecha, la ficha va debajo del texto y no tapa la palabra', JSON.stringify(estrecha));
+await v.setViewportSize(ventana);
+await v.waitForTimeout(400);
 await v.keyboard.press('Escape');
 await v.click('.vs-barra .vs-titulo');
 await v.keyboard.press('ArrowRight');
