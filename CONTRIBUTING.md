@@ -129,7 +129,7 @@ La documentación nombra los botones y las pantallas tal como aparecen en la int
 | Orden | Qué genera |
 |---|---|
 | `node herramientas/banner.mjs` | El banner del README en cada idioma |
-| `node pruebas/capturas/readme.mjs` | La ficha sobre el video, el EPUB de texto, la página con OCR y, en japonés, el Cuaderno en inglés, en cada idioma de la interfaz |
+| `node pruebas/capturas/readme.mjs` | La ficha sobre el video, el EPUB de texto, la página con OCR y, en japonés, el Cuaderno en inglés, en cada idioma de la interfaz. Las páginas reales del OCR y del manga salen de libros que no están en el repositorio: `KK_ESCANEO` y `KK_MANGA`, con el formato `ruta\|página\|palabra`; sin ellas se usa una página escrita para esto y no hay imagen del manga |
 | `node pruebas/capturas/cuaderno.mjs` | La imagen del Cuaderno del README en cada idioma de la interfaz, con una nota de dominio público; en japonés, en inglés |
 | `node pruebas/capturas/tarjeta.mjs` | La tarjeta para compartir del README en cada idioma de la interfaz, copiada del portapapeles; en japonés, la de una palabra inglesa |
 | `node pruebas/capturas/niveles.mjs` | La imagen de la pantalla JLPT del README en cada idioma de la interfaz, con unas palabras marcadas que luego se devuelven a «Desconocida» |
@@ -252,7 +252,7 @@ The Spanish text is the key of each translation: it is written with `tr('…')` 
 
 ## Documentation images
 
-`node herramientas/banner.mjs` draws the README banners, and `node pruebas/capturas/readme.mjs` takes the README screenshots in every interface language, with public-domain texts and a simulated Claude API. With the interface in Japanese, the screenshots study English: Japanese speakers are not taught Japanese. `node pruebas/capturas/cuaderno.mjs` redraws the Notebook image in each interface language. `node pruebas/capturas/tarjeta.mjs` redraws the README share card in each interface language. `node pruebas/capturas/niveles.mjs` redraws the README image of the JLPT screen, and `node herramientas/jlpt.mjs` regenerates `publico/datos/jlpt` from Jonathan Waller’s lists (Internet Archive copies, CC BY) and `herramientas/jlpt/gramatica.tsv`.
+`node herramientas/banner.mjs` draws the README banners, and `node pruebas/capturas/readme.mjs` takes the README screenshots in every interface language, with public-domain texts and a simulated Claude API. The real OCR and manga pages come from books that are not in the repository, given as `KK_ESCANEO` and `KK_MANGA` in the form `path|page|word`; without them a page written for the purpose is used and there is no manga image. With the interface in Japanese, the screenshots study English: Japanese speakers are not taught Japanese. `node pruebas/capturas/cuaderno.mjs` redraws the Notebook image in each interface language. `node pruebas/capturas/tarjeta.mjs` redraws the README share card in each interface language. `node pruebas/capturas/niveles.mjs` redraws the README image of the JLPT screen, and `node herramientas/jlpt.mjs` regenerates `publico/datos/jlpt` from Jonathan Waller’s lists (Internet Archive copies, CC BY) and `herramientas/jlpt/gramatica.tsv`.
 
 ## Code style
 

@@ -1,7 +1,11 @@
-// Las imágenes del README en cada idioma de la interfaz: la ficha sobre el video, un EPUB de texto en el visor y una
-// página leída con el OCR. Con la interfaz en japonés se estudia inglés, que es lo que tiene sentido para quien habla
-// japonés. Los textos son de dominio público (Natsume Sōseki, Lewis Carroll) o están escritos para esto; la API de
-// Claude es la simulada y los diccionarios, los del perfil base.
+// Las imágenes del README en cada idioma de la interfaz: la ficha sobre el video, un EPUB de texto en el visor, una
+// página leída con el OCR y una de manga. Con la interfaz en japonés se estudia inglés, que es lo que tiene sentido para
+// quien habla japonés. Los textos del video y del EPUB son de dominio público (Natsume Sōseki, Lewis Carroll) o están
+// escritos para esto; la API de Claude es la simulada y los diccionarios, los del perfil base.
+// Las páginas reales salen de libros que no están en el repositorio, con KK_ESCANEO="<pdf>|<página>|<palabra>" (un
+// libro escaneado, en modo Libro) y KK_MANGA="<epub o pdf>|<página>|<palabra>" (en modo Manga): la página, contada
+// desde 1 como en el visor, y la palabra cuya ficha se abre. Sin KK_ESCANEO se lee una página escrita para esto, y sin
+// KK_MANGA no hay imagen del manga. Con la interfaz en japonés siempre se usa la página escrita, que está en inglés.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/capturas/readme.mjs [es en de zh ko ja]
 
 import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
@@ -28,6 +32,17 @@ if (!existsSync(PERFIL) && existsSync(join(RAIZ, '.perfil-base', 'Default', 'Ind
 const NOMBRE = { es: 'español', en: 'inglés', de: 'alemán', zh: 'chino simplificado', ko: 'coreano', ja: 'japonés' };
 const tabla = (id) => (id === 'es' ? {} : JSON.parse(readFileSync(join(RAIZ, 'idiomas', `${id}.json`), 'utf8')));
 const nombreArchivo = (base, id) => join(IMAGENES, id === 'es' ? `${base}.png` : `${base}.${id}.png`);
+
+/** Un libro real para una captura, de su variable: «ruta|página|palabra». */
+function libroReal(variable, modo, base) {
+  const valor = process.env[variable];
+  if (!valor) return null;
+  const [ruta, pagina, palabra] = valor.split('|');
+  if (!existsSync(ruta) || !(Number(pagina) > 0) || !palabra) throw new Error(`${variable} tiene que ser «ruta|página|palabra», con un archivo que exista`);
+  return { ruta: resolve(ruta), pagina: Number(pagina), palabra, modo, base };
+}
+const ESCANEO = libroReal('KK_ESCANEO', 'libro', 'ocr');
+const MANGA = libroReal('KK_MANGA', 'manga', 'manga');
 
 /** Guarda la captura como PNG de paleta: se ve igual y pesa varias veces menos. */
 async function guardar(p, base, id) {
@@ -259,7 +274,20 @@ async function video(id) {
 
 // ---------- Los libros ----------
 
-async function biblioteca(datos) {
+/** Las etiquetas de las tapas de la estantería («Leer …», en el idioma de la interfaz). */
+const tapas = (b) => b.locator('button.ap-tapa').evaluateAll((l) => l.map((x) => x.getAttribute('aria-label')));
+
+/** Importa unos archivos (rutas o contenidos) y devuelve las etiquetas de las tapas nuevas. */
+async function importar(b, archivos) {
+  const antes = await tapas(b);
+  await b.setInputFiles('input[type=file][accept*=".epub"]', archivos);
+  await b.waitForFunction((n) => document.querySelectorAll('button.ap-tapa').length >= n, antes.length + archivos.length, { timeout: 120000 });
+  return (await tapas(b)).filter((t) => !antes.includes(t));
+}
+
+/** La estantería con los libros de esta captura: los de muestra y, si los hay, los reales. Devuelve la página y las
+ *  etiquetas de las tapas de los reales, por su imagen («ocr», «manga»). */
+async function biblioteca(datos, reales) {
   const b = await contexto.newPage();
   await b.setViewportSize({ width: 1280, height: 800 });
   await b.goto(`chrome-extension://${idExt}/app.html#/biblioteca`);
@@ -271,18 +299,26 @@ async function biblioteca(datos) {
     await confirmarBorrado(b);
     await b.waitForFunction((antes) => document.querySelectorAll('.ap-libro').length < antes, n, { timeout: 15000 });
   }
-  const imagen = await pagina({ ...datos.pagina, numero: 12 });
-  await b.setInputFiles('input[type=file]', [
-    { name: datos.epub.archivo, mimeType: 'application/epub+zip', buffer: Buffer.from(datos.epub.datos) },
-    { name: datos.pagina.archivo, mimeType: 'application/zip', buffer: Buffer.from(cbz(datos.pagina.titulo, imagen)) },
-  ]);
-  await b.waitForFunction(() => document.querySelectorAll('.ap-libro').length >= 2, null, { timeout: 30000 });
-  return b;
+  const propios = [{ name: datos.epub.archivo, mimeType: 'application/epub+zip', buffer: Buffer.from(datos.epub.datos) }];
+  if (!reales.some((r) => r.base === 'ocr')) {
+    const imagen = await pagina({ ...datos.pagina, numero: 12 });
+    propios.push({ name: datos.pagina.archivo, mimeType: 'application/zip', buffer: Buffer.from(cbz(datos.pagina.titulo, imagen)) });
+  }
+  await importar(b, propios);
+  // Los reales, de uno en uno: así se sabe qué tapa es de cuál, se llame como se llame el libro.
+  const etiquetas = {};
+  for (const r of reales) {
+    const [etiqueta] = await importar(b, [r.ruta]);
+    if (!etiqueta) throw new Error(`No apareció en la estantería: ${r.ruta}`);
+    etiquetas[r.base] = etiqueta;
+  }
+  return { b, etiquetas };
 }
 
-async function abrir(b, titulo) {
+/** Abre en el visor el libro cuya tapa tiene ese título, o justo esa etiqueta. */
+async function abrir(b, titulo, exacta = false) {
   const nueva = contexto.waitForEvent('page', { timeout: 20000 });
-  await b.locator(`button.ap-tapa[aria-label*="${titulo}"]`).first().click();
+  await b.locator(`button.ap-tapa[aria-label${exacta ? '' : '*'}="${titulo}"]`).first().click();
   const v = await nueva;
   await v.setViewportSize({ width: 1280, height: 800 });
   return v;
@@ -345,6 +381,64 @@ async function paginaConOcr(b, datos, id) {
   await v.close();
 }
 
+/** Una página de un libro real, leída con el OCR: la de un libro escaneado en modo Libro, ajustada al ancho para que se
+ *  lea, o la de un manga en modo Manga, entera. Se abre el primer renglón o globo que tenga la palabra, y su ficha. */
+async function paginaReal(b, etiqueta, real, id) {
+  const t = tabla(id);
+  const tr = (s) => t[s] ?? s;
+  const v = await abrir(b, etiqueta, true);
+  await v.waitForSelector('.vs-pagina img', { timeout: 60000 });
+  const ir = v.locator(`input[aria-label="${tr('Ir a la página')}"]`);
+  await ir.fill(String(real.pagina));
+  await ir.press('Enter');
+  const hoja = `.vs-pagina[data-pagina="${real.pagina}"]`;
+  await v.waitForSelector(`${hoja} img`, { timeout: 60000 });
+  const pulsar = async (etiquetaBoton) => {
+    const x = v.locator(`.vs-barra [aria-label="${tr(etiquetaBoton)}"]`).first();
+    if ((await x.getAttribute('aria-pressed')) !== 'true') await x.click();
+  };
+  await pulsar('Una página');
+  await pulsar(real.modo === 'libro' ? 'Ajustar al ancho' : 'Página completa');
+  await pulsar('Leer el texto de las páginas');
+  const modo = v.locator('.vs-modos button', { hasText: tr(real.modo === 'libro' ? 'Libro' : 'Manga') }).first();
+  if ((await modo.getAttribute('aria-pressed')) !== 'true') await modo.click();
+  // La primera vez se descargan los modelos del modo: puede tardar.
+  await v.waitForFunction((s) => document.querySelectorAll(s).length >= 3, `${hoja} .vs-linea`, { timeout: 900000 });
+  await v.waitForTimeout(1000);
+  const caja = await v.evaluate(
+    ({ s, palabra, libro }) => {
+      const l = [...document.querySelectorAll(s)].filter((x) => x.getAttribute('aria-label')?.includes(palabra)).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+      if (!l) return null;
+      const c = l.getBoundingClientRect();
+      if (!libro) return { x: c.left + c.width / 2, y: c.top + c.height / 2 };
+      // En un renglón horizontal, la palabra está más o menos donde le toca por su posición en el texto.
+      const texto = l.getAttribute('aria-label');
+      const k = texto.indexOf(palabra) + palabra.length / 2;
+      return { x: c.left + (c.width * k) / texto.length, y: c.top + c.height / 2 };
+    },
+    { s: `${hoja} .vs-linea`, palabra: real.palabra, libro: real.modo === 'libro' },
+  );
+  if (!caja) throw new Error(`El OCR no leyó «${real.palabra}»: ${await v.evaluate((s) => [...document.querySelectorAll(s)].map((x) => x.getAttribute('aria-label')).join(' | '), `${hoja} .vs-linea`)}`);
+  await v.mouse.click(caja.x, caja.y);
+  await v.waitForSelector('.vs-panel-linea .pal', { timeout: 20000 });
+  if (real.modo === 'manga') {
+    // Un globo se abre entero: la palabra se elige en el panel, sin su furigana.
+    await v.waitForTimeout(500);
+    const indice = await v.evaluate((palabra) => [...document.querySelectorAll('.vs-panel-linea .pal')].findIndex((p) => {
+      const copia = p.cloneNode(true);
+      copia.querySelectorAll('rt, rp').forEach((r) => r.remove());
+      return copia.textContent.trim() === palabra;
+    }), real.palabra);
+    if (indice < 0) throw new Error(`En el globo no está la palabra «${real.palabra}»`);
+    await v.locator('.vs-panel-linea .pal').nth(indice).click();
+  }
+  await v.waitForSelector('.vs-panel-linea .vs-ficha .ficha', { timeout: 20000 });
+  await v.mouse.move(640, 790);
+  await v.waitForTimeout(2000);
+  await guardar(v, real.base, id);
+  await v.close();
+}
+
 // ---------- El Portapapeles en inglés, para quien habla japonés ----------
 
 const PORTAPAPELES_EN =
@@ -392,9 +486,11 @@ for (const id of IDIOMAS) {
   if (estudia === 'ja') await video(id);
   else await portapapeles(id);
   const datos = LIBROS[estudia];
-  const b = await biblioteca(datos);
+  const reales = estudia === 'ja' ? [ESCANEO, MANGA].filter(Boolean) : [];
+  const { b, etiquetas } = await biblioteca(datos, reales);
   await libroDeTexto(b, datos, id);
-  await paginaConOcr(b, datos, id);
+  if (!etiquetas.ocr) await paginaConOcr(b, datos, id);
+  for (const r of reales) await paginaReal(b, etiquetas[r.base], r, id);
   await b.close();
 }
 
