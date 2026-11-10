@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.30.0, along with how it has been verified.
+Status of each feature in version 0.30.1, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -32,6 +32,7 @@ Status of each feature in version 0.30.0, along with how it has been verified.
 | JLPT: vocabulary (8,354 words), kanji (2,211) and grammar (501 points) from N5 to N1 with what you know of each level; change the status one by one or all selected; kanji card with strokes and words of the level; examples of each grammar point among the sentences you have seen, and its explanation by Claude | Automated, with a simulated Claude |
 | Dictionary: search by meaning among common words, with the matching gloss; JLPT grammar by form or meaning; under each word, its kanji with their level, common words with the same meaning, homophones and similar words (Claude); eight categories to explore from the JMdict tags | Automated, with the test profile dictionaries and a simulated Claude |
 | Full-width dictionary page: results list, word and related words in columns depending on the width (or a centered column); senses with their glosses together and their part of speech; cards with the reading above; opposites and “see also” from JMdict; size and typeface in Settings and next to the search box | Automated, with the test profile dictionaries |
+| Going from one word to another in the dictionary without seeing the previous one half gone or the new one half loaded: it is prepared while the previous one stays in view and comes in all at once, with a bar if it takes a while | Automated, frame by frame |
 | The sentences where a word was seen, with their reading, the word highlighted even when conjugated, the minute in the video and “Back to…”, which brings up the video’s tab or opens it and jumps to that moment (also in the word panel’s Examples tab) | Automated: the address with the minute on YouTube and the pending jump on other sites |
 | Kanji page: large strokes, meaning, level, stroke count, on and kun readings, KanjiVG components with the radical and the phonetic part, your words with it, the common words that contain it, where it was seen, print, book and handwritten type, and its origin with Claude | Automated |
 | Kanji dictionary (Kanjium and KANJIDIC, 6,812 kanji), installed from the kanji page: official list, Kanken level and rank; official readings, the others and name readings, with the period of each on reading; radical with its name, how it was formed, sound family, kanji that contain it, look-alikes, opposites, kanji with a similar meaning and kanji read the same way; old forms and variants; meanings in Spanish with the interface in Spanish | Automated, downloading the dictionary |

@@ -13,7 +13,7 @@ import type { PuntoGramatica, TareaPrompt } from '../lenguas/tipos';
 import { baseGeneral, db } from './db';
 import { tr } from '../compartido/i18n';
 import { lengua, motorLengua } from './lengua';
-import { rellenar, type VariablesPrompt } from './prompts';
+import { rellenar, sinFraseVacia, type VariablesPrompt } from './prompts';
 import * as compatible from './compatible';
 import { separarModelo, valorDeModelo } from '../compartido/proveedores';
 import { usoDeCompatible } from '../nucleo/compatible';
@@ -305,15 +305,24 @@ function preparar(a: Ajustes, tarea: TareaTexto, c: ContextoIA, extra: Partial<V
     a,
     tarea: tarea === 'gramatica' ? 'explicar' : tarea,
     sistema: rellenar(p.sistema, a, v),
-    usuario: rellenar(p.usuario, a, v),
+    usuario: rellenar(sinFrase(tarea, c) ? sinFraseVacia(p.usuario) : p.usuario, a, v),
     guion: c.guion,
     titulo: c.titulo,
     profundo,
   };
 }
 
-/** Qué hace que dos consultas sean la misma: lo que se pregunta, no el texto de alrededor. */
-const identidad = (a: Ajustes, tarea: TareaTexto, c: ContextoIA, ...resto: unknown[]) => [tarea, a.nivel, a.idiomaExplicaciones, plantilla(a, tarea), c.lema, c.lectura, c.superficie, c.frase, ...resto];
+/** Las tareas que se pueden pedir de una palabra suelta, en el diccionario, sin la frase donde apareció. */
+const sinFrase = (tarea: TareaTexto, c: ContextoIA) => (tarea === 'explicar' || tarea === 'preguntar') && !c.frase?.trim();
+
+/**
+ * Qué hace que dos consultas sean la misma: lo que se pregunta, no el texto de alrededor. Las de una palabra suelta
+ * llevan una marca: las guardadas antes de quitarles la frase vacía empezaban diciendo que llegó vacía, y se vuelven a
+ * pedir una vez.
+ */
+const identidad = (a: Ajustes, tarea: TareaTexto, c: ContextoIA, ...resto: unknown[]) => [
+  tarea, a.nivel, a.idiomaExplicaciones, plantilla(a, tarea), c.lema, c.lectura, c.superficie, c.frase, ...resto, ...(sinFrase(tarea, c) ? ['sin frase'] : []),
+];
 
 export const flujos = {
   explicar: (a: Ajustes, c: ContextoIA, recargar: boolean, profundo: boolean, emitir: (t: string) => void, senal: AbortSignal) =>

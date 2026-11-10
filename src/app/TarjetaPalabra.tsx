@@ -42,8 +42,9 @@ export function TarjetaPalabra({ e, activa, alElegir }: { e: PalabraBreve; activ
       {e.glosa && <span class="dic-tarjeta-glosa">{e.glosa}</span>}
       {(e.comun || estado) && (
         <span class="dic-tarjeta-marcas">
-          {estado && <span class={`dic-marca-estado ${estado}`} data-tip={tr(NOMBRE_ESTADO[estado])} aria-label={tr(NOMBRE_ESTADO[estado])} />}
-          {e.comun && <span class="dic-marca-comun" data-tip={tr('De uso común')} aria-label={tr('De uso común')}><Icono n="estrella" t={12} /></span>}
+          {/* Las marcas van en la esquina de la derecha: su pista se abre hacia dentro, hacia la izquierda. */}
+          {estado && <span class={`dic-marca-estado ${estado}`} data-tip={tr(NOMBRE_ESTADO[estado])} data-tip-lado="izq" aria-label={tr(NOMBRE_ESTADO[estado])} />}
+          {e.comun && <span class="dic-marca-comun" data-tip={tr('De uso común')} data-tip-lado="izq" aria-label={tr('De uso común')}><Icono n="estrella" t={12} /></span>}
         </span>
       )}
     </button>

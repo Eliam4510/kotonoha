@@ -32,6 +32,27 @@ export function rellenar(plantilla: string, a: Pick<Ajustes, 'nivel' | 'idiomaEx
     .replaceAll('[PREGUNTA]', v.pregunta ?? '');
 }
 
+/** Lo que se le dice a Claude cuando la palabra se consulta suelta, sin la frase donde apareció. */
+export const AVISO_SIN_FRASE = 'No hay frase: la palabra se consulta suelta, en el diccionario. Responde sobre su uso general, sin mencionar que falta la frase.';
+
+/**
+ * Sin frase (una palabra buscada en el diccionario), la plantilla quedaba con «Frase: 「」» y Claude empezaba avisando de
+ * que la frase llegó vacía. Se quitan las líneas que solo dan la frase y la mención a cómo aparece en ella, y se le dice
+ * que la palabra va suelta. Vale para las plantillas de cada lengua y para las personalizadas.
+ */
+export function sinFraseVacia(usuario: string): string {
+  const lineas = usuario.split('\n').flatMap((l) => {
+    // «Frase: 「[FRASE]」», «Frase: “[FRASE]”», «Traduce: [FRASE]»: un rótulo corto y la frase, nada más.
+    const sola = /^\s*(\[ENTORNO\])?[^\n[\]]{0,24}:\s*[「“"«']?\[FRASE\][」”"»']?\s*$/.exec(l);
+    if (!sola) return [l];
+    return sola[1] ? [sola[1]] : [];
+  });
+  const texto = lineas
+    .join('\n')
+    .replace(/\s*\(en la frase aparece como [「“"«']?\[SUPERFICIE\][」”"»']?, lectura \[LECTURA\]\)/g, ' (lectura [LECTURA])');
+  return `${texto.trim()}\n\n${AVISO_SIN_FRASE}`;
+}
+
 export const TAREAS_PERSONALIZABLES: { id: TareaPrompt; nombre: string }[] = [
   { id: 'explicar', nombre: tm('Explicación de palabra') },
   { id: 'desglosar', nombre: tm('Desglose de frase') },

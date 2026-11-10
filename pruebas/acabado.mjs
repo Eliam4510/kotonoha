@@ -8,8 +8,9 @@
 //   3. Los detalles: que la lectura no toque la palabra con ninguna letra del diccionario (medido en la tinta), que una
 //      frase larga no se parta dejando una sílaba suelta, que los modos de lectura valgan al leer como sobre el video,
 //      que el texto lleve el mismo compás con y sin lecturas, que ningún punto empiece un renglón, que en una ventana
-//      estrecha la ficha no tape lo que se lee, que lo que se borra pida confirmación y que el índice de Ajustes
-//      marque la sección que se lee.
+//      estrecha la ficha no tape lo que se lee, que lo que se borra pida confirmación, que el índice de Ajustes
+//      marque la sección que se lee y que al pasar de una palabra a otra no se vea ni la anterior a medio quitar ni la
+//      nueva a medio llegar.
 // Con KK_INFORME=carpeta guarda una captura de cada pantalla con lo encontrado señalado, y el informe completo.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/acabado.mjs [subtitulos] [pantallas] [detalles]
 
@@ -247,7 +248,7 @@ if (quiere('pantallas')) {
     await p.waitForTimeout(tiempo);
   };
   // Lo que cuenta como fallo. «Pegado» solo si de verdad toca: a 3 px de su caja o menos.
-  const GRAVES = /cortad|al límite|lectura pegada|pisan|sobre otro texto|se sale a lo ancho/;
+  const GRAVES = /cortad|al límite|lectura pegada|pisan|sobre otro texto|se sale a lo ancho|barra de desplazamiento de sobra/;
   const informe = [];
   /** Audita la pantalla tal como está: devuelve lo grave, y guarda la captura si se pidió el informe. */
   const revisar = async (nombre) => {
@@ -305,7 +306,11 @@ if (quiere('pantallas')) {
   }
   if (INFORME) writeFileSync(join(INFORME, 'informe.txt'), `${informe.join('\n')}\n`);
 
-  // Las frases de prueba se borran: el perfil queda como estaba.
+  await borrarFrases(FUENTE);
+}
+
+/** Borra las frases de prueba de una fuente: el perfil queda como estaba. */
+async function borrarFrases(fuente) {
   await p.evaluate(
     (fuente) =>
       new Promise((ok) => {
@@ -325,7 +330,7 @@ if (quiere('pantallas')) {
         };
         r.onerror = () => ok(false);
       }),
-    FUENTE
+    fuente
   ).catch(() => {});
 }
 
@@ -333,6 +338,8 @@ if (quiere('pantallas')) {
 
 if (quiere('detalles')) {
   console.log('\n== Los detalles ==');
+  // Las frases que se añaden para mirar el cambio de palabra: se borran al acabar.
+  const FUENTE_CAMBIO = 'Video de prueba del acabado (cambio de palabra)';
   await p.setViewportSize({ width: ANCHO, height: ALTO });
   const ir = async (ruta, esperar, tiempo = 900) => {
     await p.goto('about:blank');
@@ -522,6 +529,66 @@ if (quiere('detalles')) {
     await p.setViewportSize({ width: ANCHO, height: ALTO });
   }
 
+  // Al pasar de una palabra a otra en el diccionario, quien mira ve la anterior y luego la nueva, entera: ni la página
+  // vacía con esqueletos ni la nueva llegando a trozos. Se mira fotograma a fotograma lo que se ve.
+  await motor('analizarLineas', [
+    { id: 'a', inicio: 754_000, fin: 757_000, texto: '友達と話すのが好きです。' },
+    { id: 'b', inicio: 1_261_000, fin: 1_264_000, texto: '先生とゆっくり話してみました。' },
+  ], { titulo: FUENTE_CAMBIO, url: 'https://www.youtube.com/watch?v=kotonohaCambio', idVideo: 'kotonohaCambio' }).catch(() => {});
+  const fotogramas = (pulsar) =>
+    p.evaluate(
+      () =>
+        new Promise((listo) => {
+          const vis = (e) => !!e && e.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) && !e.closest('[aria-hidden="true"], [inert]');
+          const sinLecturas = (e) => {
+            let t = '';
+            const andar = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+            for (let n = andar.nextNode(); n; n = andar.nextNode()) if (!n.parentElement.closest('rt')) t += n.data;
+            return t.trim();
+          };
+          const estados = [];
+          const t0 = performance.now();
+          const tomar = () => {
+            const ficha = [...document.querySelectorAll('.dic-ficha .ficha-palabra')].find(vis);
+            const caracter = [...document.querySelectorAll('.dic-caracter-cab')].find(vis);
+            const lateral = [...document.querySelectorAll('.dic-lateral')].find(vis);
+            const frases = [...document.querySelectorAll('.dic-frase')].filter(vis);
+            const firma = [
+              ficha ? sinLecturas(ficha) : caracter ? 'kanji' : '—',
+              [...document.querySelectorAll('.esqueleto')].filter(vis).length,
+              lateral ? [...lateral.querySelectorAll(':scope > .dic-seccion')].filter(vis).length : '—',
+              `${frases.length}/${frases.filter((f) => f.querySelector('ruby')).length}`,
+            ].join(' | ');
+            if (estados.at(-1) !== firma) estados.push(firma);
+            if (performance.now() - t0 < 2200) requestAnimationFrame(tomar);
+            else listo(estados);
+          };
+          requestAnimationFrame(tomar);
+        })
+    ).then((x) => x);
+  const cambios = [];
+  for (const [nombre, pulsar] of [
+    ['otro resultado de la lista', () => p.locator('.dic-lista-items .dic-tarjeta').nth(1).click()],
+    ['una palabra de las que significan lo mismo', () => p.locator('.dic-lateral .dic-tarjetas .dic-tarjeta').first().click()],
+    ['un kanji de la palabra', () => p.locator('.dic-lateral .dic-caracter-tarjeta').first().click()],
+  ]) {
+    await ir(`diccionario?q=${encodeURIComponent('はなす')}`, '.dic-ficha .ficha-palabra', 2500);
+    const pendiente = fotogramas();
+    await p.waitForTimeout(80);
+    await pulsar();
+    const estados = await pendiente;
+    if (estados.length !== 2 || estados.some((e) => !e.split(' | ')[1].startsWith('0'))) cambios.push(`${nombre}: ${estados.join(' → ')}`);
+  }
+  comprobar(!cambios.length, 'Al pasar de una palabra a otra se ve la anterior y luego la nueva entera, sin esqueletos ni trozos', cambios.join(' ¦ '));
+  // Desde abajo de la página, la palabra nueva se ve desde su principio.
+  await ir(`diccionario?q=${encodeURIComponent('はなす')}`, '.dic-ficha .ficha-palabra', 2500);
+  await p.evaluate(() => document.querySelector('.ap-principal').scrollTo(0, 99999));
+  await p.waitForTimeout(300);
+  await p.locator('.dic-lateral .dic-tarjetas .dic-tarjeta').last().click();
+  await p.waitForTimeout(1200);
+  const arriba = await p.evaluate(() => document.querySelector('.ap-principal').scrollTop);
+  comprobar(arriba === 0, 'Y si se pulsa desde abajo de la página, la nueva se ve desde arriba', String(arriba));
+
   // El sendero de la portada: cada nivel con su raya en la pista y su rótulo debajo, sin tocarla.
   await ir('inicio', '.ap-sendero-pista', 1200);
   const sendero = await p.evaluate(() => {
@@ -604,6 +671,7 @@ if (quiere('detalles')) {
   } finally {
     await motor('cambiarPalabras', nueva).catch(() => {});
   }
+  await borrarFrases(FUENTE_CAMBIO);
 }
 
 comprobar(errores.length === 0, 'Sin errores en las páginas', [...new Set(errores)].join(' | '));

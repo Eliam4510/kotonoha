@@ -10,6 +10,7 @@ import { NOMBRES_USO } from '../nucleo/analisisProfundo';
 import { claveDeVideo, momentoLegible } from '../nucleo/momento';
 import type { PuntoGramatica } from '../lenguas/tipos';
 import { enviarAlCreador } from './borrador';
+import { useEsperar } from './preparacion';
 import { type Compartida, compartir, PanelCompartir } from './Compartir';
 import { Icono, type NombreIcono } from './iconos';
 import { formatoLectura, lengua } from './lengua';
@@ -640,6 +641,7 @@ function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegi
   const { s, cargando, error } = estado.clave === clave ? estado : ({ clave } as typeof estado);
   const vigente = useRef(clave);
   vigente.current = clave;
+  const esperar = useEsperar();
 
   const pedir = () => {
     fijarEstado({ clave, cargando: true });
@@ -660,8 +662,7 @@ function ConSentido({ contexto, definiciones, previo, automatico, listo, alElegi
   useEffect(() => {
     if (!listo || !contexto.frase) return;
     let vivo = true;
-    motor
-      .sentidoGuardado(contexto, definiciones)
+    esperar(motor.sentidoGuardado(contexto, definiciones))
       .then((r) => {
         if (!vivo) return;
         if (r) {
@@ -798,6 +799,7 @@ export function Ficha(p: PropsFicha) {
   const [explicacionPatron, fijarExplicacionPatron] = useState<{ patron: string; texto: string } | null>(null);
   const cuerpo = useRef<HTMLDivElement>(null);
   const zonaPestana = useRef<HTMLDivElement>(null);
+  const esperar = useEsperar();
 
   useEffect(() => {
     let vivo = true;
@@ -810,7 +812,7 @@ export function Ficha(p: PropsFicha) {
     fijarAltoPanel(0);
     fijarCompartida(null);
     cuerpo.current?.scrollTo({ top: 0 });
-    motor.buscar(p.lema, p.lectura).then((x) => {
+    esperar(motor.buscar(p.lema, p.lectura)).then((x) => {
       if (vivo) {
         fijarR(x);
         fijarBuscada(claveBusqueda);
@@ -824,7 +826,7 @@ export function Ficha(p: PropsFicha) {
       fijarExtras([]);
     }
     if (p.ajustes.destino === 'anki') {
-      motor.ankiTieneTarjeta(p.lema).then((n) => vivo && fijarTieneTarjeta(n.length > 0)).catch(() => vivo && fijarTieneTarjeta(false));
+      esperar(motor.ankiTieneTarjeta(p.lema)).then((n) => vivo && fijarTieneTarjeta(n.length > 0)).catch(() => vivo && fijarTieneTarjeta(false));
     }
     return () => {
       vivo = false;

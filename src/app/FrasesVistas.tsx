@@ -13,6 +13,7 @@ import { BotonMomento, momentoDe } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { clasesPalabras } from '../ui/palabras';
+import { useEsperar } from '../ui/preparacion';
 import { sinCortes } from '../ui/sinCorte';
 import { buscarPalabra } from './TarjetaPalabra';
 
@@ -22,6 +23,21 @@ export function referenciasDe(r: ResultadoBusqueda): ReferenciaGlosa[] {
   if (!refDe) return [];
   const xs = r.entradas.flatMap((e) => e.glosas).flatMap((g) => refDe(g) ?? []);
   return xs.filter((x, i) => x.termino !== r.lema && xs.findIndex((y) => y.tipo === x.tipo && y.termino === x.termino) === i);
+}
+
+interface FrasesConLecturas {
+  filas: FraseEjemplo[];
+  /** El análisis de cada frase, para pintarla con sus lecturas; null si no se pudo hacer. */
+  tokens: PalabraToken[][] | null;
+}
+
+/** Las frases y su análisis, juntos: antes salían sin lecturas y un momento después con ellas, y cada una crecía. */
+async function conLecturas(cargar: () => Promise<FraseEjemplo[]>): Promise<FrasesConLecturas> {
+  const filas = await cargar();
+  if (!filas.length) return { filas, tokens: null };
+  // Una línea por frase: el análisis las devuelve en el mismo orden.
+  const t = await motor.analizarTexto(filas.map((f) => f.texto.replace(/\s*\r?\n\s*/g, ' ')).join('\n')).catch(() => null);
+  return { filas, tokens: t && t.length === filas.length ? t : null };
 }
 
 /**
@@ -36,26 +52,20 @@ export function FrasesVistas({ clave, titulo, cargar, resaltar, ajustes, vacio }
   ajustes: Ajustes;
   vacio: string;
 }) {
-  const [filas, fijarFilas] = useState<FraseEjemplo[] | null>(null);
-  const [tokens, fijarTokens] = useState<PalabraToken[][] | null>(null);
+  const esperar = useEsperar();
+  const [datos, fijarDatos] = useState<FrasesConLecturas | null>(null);
   useEffect(() => {
     let vivo = true;
-    fijarFilas(null);
-    fijarTokens(null);
-    cargar()
-      .then(async (fs) => {
-        if (!vivo) return;
-        fijarFilas(fs);
-        if (!fs.length) return;
-        // Una línea por frase: el análisis las devuelve en el mismo orden.
-        const t = await motor.analizarTexto(fs.map((f) => f.texto.replace(/\s*\r?\n\s*/g, ' ')).join('\n')).catch(() => null);
-        if (vivo && t && t.length === fs.length) fijarTokens(t);
-      })
-      .catch(() => vivo && fijarFilas([]));
+    fijarDatos(null);
+    esperar(conLecturas(cargar))
+      .then((d) => vivo && fijarDatos(d))
+      .catch(() => vivo && fijarDatos({ filas: [], tokens: null }));
     return () => {
       vivo = false;
     };
   }, [clave]);
+  const filas = datos?.filas ?? null;
+  const tokens = datos?.tokens ?? null;
 
   const id = lengua.value.id;
   const furigana = ajustes.furigana !== 'ninguna';

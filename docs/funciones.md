@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.30.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.30.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -32,6 +32,7 @@ Estado de cada función en la versión 0.30.0, con la forma en que se ha verific
 | JLPT: vocabulario (8354 palabras), kanji (2211) y gramática (501 puntos) de N5 a N1 con lo que se conoce de cada nivel; cambiar el estado una a una o todas las elegidas; ficha del kanji con trazos y palabras del nivel; ejemplos de cada punto de gramática entre las frases vistas, y su explicación con Claude | Automática, con un Claude simulado |
 | Diccionario: buscar por significado entre las palabras de uso común, con la glosa que encaja; la gramática del JLPT por su forma o su significado; bajo cada palabra, sus kanji con su nivel, las de uso común que significan lo mismo, los homófonos y las palabras parecidas (Claude); ocho categorías para explorar según las etiquetas de JMdict | Automática, con los diccionarios del perfil de pruebas y un Claude simulado |
 | Página del diccionario a todo el ancho: lista de resultados, palabra y relacionadas en columnas según el ancho (o una columna centrada); sentidos con sus glosas juntas y su clase de palabra; tarjetas con la lectura encima; opuestos y «ver también» de JMdict; tamaño y letra en Ajustes y junto al buscador | Automática, con los diccionarios del perfil de pruebas |
+| Pasar de una palabra a otra en el diccionario sin ver la anterior a medio quitar ni la nueva a medio llegar: se prepara mientras se ve la anterior y entra de una vez, con una barra si tarda | Automática, fotograma a fotograma |
 | Las frases donde se ha visto una palabra, con su lectura, la palabra resaltada aunque esté conjugada, el minuto del video y «Volver a…», que trae la pestaña del video o lo abre y salta a ese momento (también en la pestaña Ejemplos de la ficha) | Automática: la dirección con el minuto en YouTube y el salto que queda pendiente en otros sitios |
 | Página de un kanji: trazos en grande, significado, nivel, trazos, lecturas on y kun, piezas de KanjiVG con el radical y la parte fonética, tus palabras con él, las de uso común que lo llevan, dónde se ha visto, letra impresa, de libro y a mano, y su origen con Claude | Automática |
 | Diccionario de kanji (Kanjium y KANJIDIC, 6812 kanji), que se instala desde la página del kanji: significado en español, lista oficial, nivel del Kanken y puesto; lecturas oficiales, las demás y las de nombres, con la época de cada on'yomi; radical con su nombre, cómo se formó, familia por el sonido, kanji que lo llevan dentro, parecidos, opuestos, de significado parecido y que se leen igual; formas antiguas y variantes | Automática, bajando el diccionario |
