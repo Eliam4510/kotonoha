@@ -173,6 +173,28 @@ if (quiere('barra')) {
   comprobar(!(await barraVisible()), 'Si no vuelves, se va');
   comprobar((await cambios()) === 2, 'En total, una vez aparecer y una irse', `${await cambios()} cambios`);
 
+  // En una ventana, lo alto es la cabecera del sitio (aquí, 56 px) y al subir el ratón se la salta: también vale
+  // detenerse en el borde de arriba del video. En medio de la cabecera, donde está el buscador del sitio, no.
+  await p.mouse.move(800, 30);
+  await p.waitForTimeout(350);
+  comprobar(!(await barraVisible()), 'En medio de la cabecera del sitio no aparece');
+  await p.mouse.move(800, 300);
+  await p.waitForTimeout(200);
+  await p.mouse.move(800, 64, { steps: 4 });
+  await p.waitForTimeout(260);
+  comprobar(await barraVisible(), 'Al detenerse en el borde de arriba del video, aparece');
+  await p.mouse.move(800, 30, { steps: 4 });
+  await p.waitForTimeout(800);
+  comprobar(await barraVisible(), 'Y se puede subir hasta ella sin que se vaya');
+  await p.mouse.move(800, 500);
+  await p.waitForTimeout(1000);
+  comprobar(!(await barraVisible()), 'Al alejarse, se va');
+  await p.mouse.move(800, 300);
+  await p.mouse.move(800, 64);
+  await p.mouse.move(800, 300);
+  await p.waitForTimeout(350);
+  comprobar(!(await barraVisible()), 'Pasar de largo por el borde del video tampoco la despierta');
+
   await p.evaluate(() => window.scrollTo(0, 1200));
   await p.waitForTimeout(150);
   await p.mouse.move(800, 5);
@@ -492,6 +514,67 @@ if (quiere('tamanos')) {
   await p.evaluate(() => { const j = document.getElementById('movie_player'); j.style.width = '1280px'; j.style.height = '600px'; });
   await p.setViewportSize({ width: 1600, height: 900 });
   await p.waitForTimeout(400);
+}
+
+// ---------- El panel deja ver los subtítulos ----------
+
+if (quiere('asomar')) {
+  console.log('\n== El panel deja ver los subtítulos ==');
+  await p.mouse.move(100, 850);
+  await irA(1.5);
+  await hasta((r) => r.querySelector('.subs-bloque:not(.saliendo) .pal') != null);
+  const estado = () => enOverlay((r) => ({
+    asomando: !!r.querySelector('.panel-flotante.asomando'),
+    fila: r.querySelector('.panel-flotante .fila.usando')?.querySelector('.etq')?.textContent ?? null,
+    letra: parseFloat(getComputedStyle(r.querySelector('.linea-sub.objetivo')).fontSize),
+  }));
+  await p.mouse.move(800, 5);
+  await p.waitForTimeout(300);
+  await enOverlay((r) => r.querySelector('.barra button[aria-label="Ajustes de video"]')?.click());
+  await p.waitForTimeout(300);
+  await enOverlay((r) => [...r.querySelectorAll('.panel-flotante [role=tab]')].find((t) => t.textContent.includes('Subtítulos'))?.click());
+  await p.waitForTimeout(300);
+  const tapados = await enOverlay((r) => {
+    const a = r.querySelector('.panel-flotante').getBoundingClientRect();
+    const b = r.querySelector('.subs-bloque:not(.saliendo)').getBoundingClientRect();
+    return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  });
+  comprobar(tapados, 'En esta ventana, el panel de subtítulos tapa los subtítulos');
+  const boton = (n) => enOverlay((r, k) => {
+    const f = [...r.querySelectorAll('.panel-flotante .fila')].find((x) => x.querySelector('.etq')?.textContent === 'Tamaño');
+    const c = f.querySelectorAll('.paso button')[k].getBoundingClientRect();
+    return { x: c.left + c.width / 2, y: c.top + c.height / 2 };
+  }, n);
+  const antes = await estado();
+  comprobar(!antes.asomando, 'Al abrirlo se ve entero');
+  const mas = await boton(1);
+  await p.mouse.click(mas.x, mas.y);
+  // El panel se aparta en el fotograma siguiente y se desvanece en 0,16 s.
+  await p.waitForTimeout(320);
+  const durante = await estado();
+  comprobar(durante.asomando && durante.fila === 'Tamaño', 'Al cambiar el tamaño, se aparta y deja solo esa fila', JSON.stringify(durante));
+  comprobar(durante.letra > antes.letra, 'Y los subtítulos ya tienen el tamaño nuevo', `${antes.letra} → ${durante.letra} px`);
+  const libres = await enOverlay((r) => [...r.querySelectorAll('.panel-flotante .fila:not(.usando)')].every((f) => getComputedStyle(f).opacity === '0' || getComputedStyle(f.parentElement).opacity === '0' || getComputedStyle(f.parentElement.parentElement).opacity === '0'));
+  comprobar(libres, 'Las demás filas no se ven');
+  await p.waitForTimeout(1900);
+  comprobar(!(await estado()).asomando, 'Al dejarlo, el panel vuelve solo');
+  const menos = await boton(0);
+  await p.mouse.click(menos.x, menos.y);
+  await p.waitForTimeout(200);
+  await p.mouse.move(menos.x, menos.y - 220, { steps: 3 });
+  await p.waitForTimeout(400);
+  comprobar(!(await estado()).asomando, 'Y al salir de la fila, enseguida');
+  comprobar((await leerAjustes()).escalaObjetivo === 100, 'El tamaño queda como estaba');
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(300);
+  await p.mouse.move(800, 5);
+  await p.waitForTimeout(300);
+  await enOverlay((r) => r.querySelector('.barra button[aria-label="Ajustes de visualización"]')?.click());
+  await p.waitForTimeout(300);
+  comprobar(!(await estado()).asomando, 'Otro panel se abre entero');
+  await p.keyboard.press('Escape');
+  await p.mouse.move(800, 500);
+  await p.waitForTimeout(1000);
 }
 
 // ---------- Párrafos ----------

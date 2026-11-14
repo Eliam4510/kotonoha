@@ -184,6 +184,12 @@ export function videoEnPantalla(): boolean {
   return !!r && r.bottom > 80 && r.top < innerHeight;
 }
 
+/** Los lados y el borde de arriba del video en la ventana, para saber si el ratón se detiene sobre él (presentacion.ts). */
+export function bordeVideo(): { izq: number; der: number; arriba: number } | null {
+  const r = control?.video()?.getBoundingClientRect();
+  return r && r.width > 0 ? { izq: r.left, der: r.right, arriba: r.top } : null;
+}
+
 function enlazarVideo(v: HTMLVideoElement) {
   if (v === videoActual) return;
   videoActual = v;

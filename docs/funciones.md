@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.32.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.32.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -18,6 +18,8 @@ Estado de cada función en la versión 0.32.0, con la forma en que se ha verific
 |---|---|
 | Barra flotante con palabras conocidas, comprensión y frases recomendadas | Automática |
 | La barra aparece al detener el ratón arriba, se queda mientras siga cerca y no se despierta al pasar de largo | Automática y sesión real |
+| En una ventana, también aparece al detener el ratón en el borde de arriba del video, bajo la cabecera del sitio (como la de YouTube), y no en medio de esa cabecera, donde está su buscador | Automática |
+| Al cambiar el tamaño, el fondo o las lecturas con un panel abierto encima de los subtítulos, el panel se aparta un momento y deja ver el cambio; solo queda a la vista la fila que se está usando | Automática |
 | Subtítulos que se arrastran a cualquier punto del video, con imanes y sin salirse de él | Automática y sesión real |
 | Cambio de línea sin parpadeos, y letra algo menor en los párrafos largos | Automática y sesión real |
 | Los subtítulos acompañan al video al desplazar la página, sin temblar | Página imitada y sesión real |
@@ -32,7 +34,7 @@ Estado de cada función en la versión 0.32.0, con la forma en que se ha verific
 | Compartir como imagen: la tarjeta de la palabra (furigana, acento, lo que significa en la frase o el diccionario, la frase con la palabra resaltada) o de un punto de gramática, copiada al portapapeles al pulsar; Tinta o Papel; Guardar imagen | Automática, con un Claude simulado, leyendo el portapapeles |
 | JLPT: vocabulario (8354 palabras), kanji (2211) y gramática (501 puntos) de N5 a N1 con lo que se conoce de cada nivel; cambiar el estado una a una o todas las elegidas; ficha del kanji con trazos y palabras del nivel; ejemplos de cada punto de gramática entre las frases vistas, y su explicación con Claude | Automática, con un Claude simulado |
 | Diccionario: buscar por significado entre las palabras de uso común, con la glosa que encaja; la gramática del JLPT por su forma o su significado; bajo cada palabra, sus kanji con su nivel, las de uso común que significan lo mismo, los homófonos y las palabras parecidas (Claude); ocho categorías para explorar según las etiquetas de JMdict | Automática, con los diccionarios del perfil de pruebas y un Claude simulado |
-| Página del diccionario a todo el ancho: lista de resultados, palabra y relacionadas en columnas según el ancho (o una columna centrada); sentidos con sus glosas juntas y su clase de palabra; tarjetas con la lectura encima; opuestos y «ver también» de JMdict; tamaño y letra en Ajustes y junto al buscador | Automática, con los diccionarios del perfil de pruebas |
+| Página del diccionario a todo el ancho: lista de resultados, palabra y relacionadas en columnas según el ancho (o una columna centrada); sentidos con sus glosas juntas y su clase de palabra; tarjetas con la lectura encima; opuestos y «ver también» de JMdict; tamaño y letra en Ajustes, con una muestra que cambia al momento, y junto al buscador | Automática, con los diccionarios del perfil de pruebas |
 | Pasar de una palabra a otra en el diccionario sin ver la anterior a medio quitar ni la nueva a medio llegar: se prepara mientras se ve la anterior y entra de una vez, con una barra si tarda | Automática, fotograma a fotograma |
 | Las frases donde se ha visto una palabra, con su lectura, la palabra resaltada aunque esté conjugada, el minuto del video y «Volver a…», que trae la pestaña del video o lo abre y salta a ese momento (también en la pestaña Ejemplos de la ficha) | Automática: la dirección con el minuto en YouTube y el salto que queda pendiente en otros sitios |
 | Página de un kanji: trazos en grande, significado, nivel, trazos, lecturas on y kun, piezas de KanjiVG con el radical y la parte fonética, tus palabras con él, las de uso común que lo llevan, dónde se ha visto, letra impresa, de libro y a mano, y su origen con Claude | Automática |

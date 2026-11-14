@@ -29,6 +29,7 @@ import {
   irALinea,
   pausasEnLinea,
   refrescarAnalisis,
+  bordeVideo,
   videoEnPantalla,
 } from './controlador';
 import {
@@ -69,7 +70,7 @@ import {
   verTemporal,
   whisper,
 } from './estado';
-import { Anillo, PanelesFlotantes, pestanaVideo } from './Paneles';
+import { Anillo, asomar, PanelesFlotantes, pestanaVideo } from './Paneles';
 import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas';
 import { numero, tm, tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
@@ -95,6 +96,7 @@ const fijarOculto = (v: boolean) => {
 export const cambiarAjuste = (c: Partial<Ajustes>) => {
   ajustes.value = { ...ajustes.value, ...c };
   guardarAjustes(c).catch(console.error);
+  asomar(c);
 };
 
 // ---------- Palabra ----------
@@ -644,10 +646,11 @@ function Barra() {
       if (!el) return;
       const r = el.getBoundingClientRect();
       const caja = { izq: r.left, der: r.right, abajo: 12 + r.height };
+      const video = bordeVideo();
       if (barraVisible.value) {
-        if (enZonaSegura(e.clientX, e.clientY, caja)) cancelarOcultar();
+        if (enZonaSegura(e.clientX, e.clientY, caja, video)) cancelarOcultar();
         else programarOcultar();
-      } else if (enZonaActivacion(e.clientX, e.clientY, caja) && videoEnPantalla()) {
+      } else if (enZonaActivacion(e.clientX, e.clientY, caja, video) && videoEnPantalla()) {
         mostrando ??= setTimeout(() => {
           mostrando = null;
           barraVisible.value = true;

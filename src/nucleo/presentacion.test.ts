@@ -26,6 +26,49 @@ describe('barra superior', () => {
   it('la zona segura contiene a la de activación en altura: nunca se muestra para ocultarse al instante', () => {
     for (const y of [0, 5, 14]) expect(enZonaSegura(900, y, caja)).toBe(true);
   });
+
+  it('y también a los lados', () => {
+    for (const x of [caja.izq - 80, caja.izq - 40, caja.der + 40, caja.der + 80]) {
+      expect(enZonaActivacion(x, 5, caja)).toBe(true);
+      expect(enZonaSegura(x, 5, caja)).toBe(true);
+    }
+  });
+
+  // Como YouTube en una ventana: la cabecera del sitio ocupa los 56 px de arriba y el video empieza debajo.
+  const video = { izq: 160, der: 1440, arriba: 56 };
+
+  it('con la cabecera de un sitio encima, despierta también en el borde de arriba del video', () => {
+    expect(enZonaActivacion(900, 56, caja, video)).toBe(true);
+    expect(enZonaActivacion(900, 48, caja, video)).toBe(true);
+    expect(enZonaActivacion(900, 80, caja, video)).toBe(true);
+  });
+
+  it('pero no en medio de la cabecera, donde está el buscador del sitio, ni más abajo en el video', () => {
+    expect(enZonaActivacion(900, 30, caja, video)).toBe(false);
+    expect(enZonaActivacion(900, 120, caja, video)).toBe(false);
+  });
+
+  it('el borde del video solo cuenta dentro del video y a la altura de la barra', () => {
+    const estrecho = { izq: 700, der: 1100, arriba: 56 };
+    expect(enZonaActivacion(650, 60, caja, estrecho)).toBe(false);
+    expect(enZonaActivacion(900, 60, caja, estrecho)).toBe(true);
+    expect(enZonaActivacion(100, 60, caja, video)).toBe(false);
+  });
+
+  it('no cuenta con el video arriba del todo (pantalla completa) ni lejos de lo alto', () => {
+    expect(enZonaActivacion(900, 20, caja, { ...video, arriba: 0 })).toBe(false);
+    expect(enZonaActivacion(900, 405, caja, { ...video, arriba: 400 })).toBe(false);
+  });
+
+  it('la zona segura contiene la franja del video, con el video donde sea', () => {
+    for (const arriba of [15, 56, 120, 160]) {
+      const v = { ...video, arriba };
+      for (let y = arriba - 12; y <= arriba + 30; y += 6) {
+        if (enZonaActivacion(900, y, caja, v)) expect(enZonaSegura(900, y, caja, v)).toBe(true);
+      }
+      expect(enZonaActivacion(900, arriba + 30, caja, v)).toBe(true);
+    }
+  });
 });
 
 describe('posición de los subtítulos', () => {

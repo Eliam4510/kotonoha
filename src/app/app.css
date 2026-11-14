@@ -418,9 +418,14 @@ section .ap-botones { margin-top: 10px; }
 .ap-tamano .btn-icono { width: 26px; height: 26px; }
 .ap-tamano .ap-tamano-valor { width: auto; min-width: 52px; font-family: var(--letra); font-size: 13px; }
 .ap-letras span[lang] { margin-right: 3px; font-size: 16px; font-weight: 700; }
-/* Cuatro letras con su muestra no caben en una fila en una ventana estrecha: van de dos en dos. */
+/* La muestra del tamaño y la letra del diccionario, en Ajustes: la palabra y una frase, con las clases del diccionario. */
+.ap-muestra-dic { display: flex; flex-direction: column; gap: 8px; padding: 12px 18px 16px; border-top: 1px solid var(--borde); }
+.ap-muestra-dic-titulo { font-size: 12px; font-weight: 700; color: var(--texto-3); }
+.ap-muestra-dic-hoja { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; padding: 12px 18px 14px; border-radius: var(--r-3); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); overflow: hidden; }
+.ap-muestra-dic-hoja .dic-tarjeta-palabra { max-width: 100%; }
+/* Cuatro letras con su muestra no caben en una fila de Ajustes: van de dos en dos. Antes pasaban a una sola fila según
+   el ancho de la ventana, pero el grupo de Ajustes es más estrecho (tiene el índice al lado) y «A mano» quedaba cortada. */
 .segmentado.ap-letras { display: inline-grid; grid-template-columns: repeat(2, auto); border-radius: 18px; }
-@container lienzo (min-width: 1180px) { .segmentado.ap-letras { grid-template-columns: repeat(4, auto); border-radius: var(--r-pill); } }
 /* El interlineado deja sitio a la lectura: si no cabe en él, los renglones que la llevan salen más altos que los que
    no, y el texto pierde el compás. La lectura no baja de 10 px, así que con letra pequeña pide más en proporción. */
 .ap-papel { position: relative; padding: 44px 56px 52px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-1); font-family: var(--letra-lengua); font-weight: 500; line-height: max(2.4em, calc(1.62em + 16.5px)); }
