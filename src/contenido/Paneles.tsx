@@ -90,9 +90,62 @@ function Cabecera({ titulo, icono, detalle, ia }: { titulo: string; icono: Nombr
   );
 }
 
+// ---------- Ver los subtítulos a través del panel ----------
+//
+// Los paneles van arriba y en el centro, y en una ventana tapan los subtítulos: el tamaño, el fondo o las lecturas
+// cambiaban detrás del panel y no se veía nada hasta cerrarlo. Ahora, al cambiar algo de cómo se ven con el panel
+// encima, el panel deja verlos un momento: solo queda a la vista la fila que se está usando.
+
+/** Lo que cambia cómo se ven los subtítulos. */
+const AJUSTES_A_LA_VISTA = new Set<keyof Ajustes>([
+  'escalaObjetivo', 'escalaSecundario', 'ocultarObjetivo', 'ocultarSecundario', 'sombra', 'opacidadSombra', 'subsPosicion',
+  'mostrarEstado', 'furigana', 'glosas', 'colorAcento', 'resaltarFrase', 'particulasConocidas', 'mostrarGramatica', 'formatoLectura',
+]);
+const ASOMO_MS = 1600;
+const asomando = signal(false);
+let finAsomo: ReturnType<typeof setTimeout> | null = null;
+
+const seTocan = (a: DOMRect, b: DOMRect) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+
+function dejarDeAsomar() {
+  if (finAsomo) clearTimeout(finAsomo);
+  finAsomo = null;
+  asomando.value = false;
+}
+
+/** Un solo temporizador: volver a la fila y cambiar otra vez alarga el asomo en vez de cortarlo. */
+function acabarAsomoEn(ms: number) {
+  if (finAsomo) clearTimeout(finAsomo);
+  finAsomo = setTimeout(dejarDeAsomar, ms);
+}
+
+/** Tras un cambio de ajustes: si toca a cómo se ven los subtítulos y el panel abierto los tapa, el panel se aparta. */
+export function asomar(c: Partial<Ajustes>) {
+  if (!panel.value || !Object.keys(c).some((k) => AJUSTES_A_LA_VISTA.has(k as keyof Ajustes))) return;
+  // En el fotograma siguiente: los subtítulos ya tienen su tamaño nuevo.
+  requestAnimationFrame(() => {
+    const raiz = document.querySelector('kotonoha-overlay')?.shadowRoot ?? document;
+    const p = raiz.querySelector('.panel-flotante')?.getBoundingClientRect();
+    const s = raiz.querySelector('.subs-bloque:not(.saliendo)')?.getBoundingClientRect();
+    if (!p || !s || !seTocan(p, s)) return;
+    asomando.value = true;
+    acabarAsomoEn(ASOMO_MS);
+  });
+}
+
+/** La fila que se está usando es la que sigue a la vista mientras el panel deja ver los subtítulos. */
+function usarFila(f: HTMLElement) {
+  f.closest('.panel-flotante')?.querySelectorAll('.fila.usando').forEach((x) => x !== f && x.classList.remove('usando'));
+  f.classList.add('usando');
+}
+
+/** Las clases de cada panel: más estrecho con el navegador de líneas abierto, y transparente mientras deja ver. */
+const clasesPanel = () => `${ajustes.value.navegadorAbierto ? 'con-nav' : ''} ${asomando.value ? 'asomando' : ''}`;
+
 function Fila({ etq, ayuda, teclas, children }: { etq: string; ayuda?: string; teclas?: string[]; children: preact.ComponentChildren }) {
   return (
-    <div class="fila">
+    // Al salir de la fila, el panel vuelve enseguida: se va a usar otra cosa.
+    <div class="fila" onPointerDown={(e) => usarFila(e.currentTarget)} onPointerLeave={() => asomando.value && acabarAsomoEn(250)}>
       <span class="etq">
         {ayuda ? <span class="etq-doble">{etq}<small>{ayuda}</small></span> : etq}
         {teclas && <Teclas t={teclas} />}
@@ -125,14 +178,12 @@ function TituloGrupo({ children, icono, ia }: { children: preact.ComponentChildr
   return <div class={`titulo-grupo ${ia ? 'ia' : ''}`}>{icono && <Icono n={icono} t={14} />}{children}</div>;
 }
 
-const claseNavegador = () => (ajustes.value.navegadorAbierto ? 'con-nav' : '');
-
 // ---------- Visualización ----------
 
 function PanelVisual() {
   const a = ajustes.value;
   return (
-    <div class={`panel-flotante panel-visual ${claseNavegador()}`} role="dialog" aria-label={tr('Ajustes de visualización')}>
+    <div class={`panel-flotante panel-visual ${clasesPanel()}`} role="dialog" aria-label={tr('Ajustes de visualización')}>
       <Cabecera titulo={tr('Visualización')} icono="ojo" />
       <div class="grupo">
         <Fila etq={tr('Estado de aprendizaje')} teclas={[tr('Alt'), '+', 'L']}>
@@ -320,7 +371,7 @@ function PanelVideo() {
   const setPersonal = (c: ConfigModo) => cambiarAjuste({ modoPersonalizado: c });
   const p = pestanaVideo.value;
   return (
-    <div class={`panel-flotante panel-video ${claseNavegador()}`} role="dialog" aria-label={tr('Ajustes de video')}>
+    <div class={`panel-flotante panel-video ${clasesPanel()}`} role="dialog" aria-label={tr('Ajustes de video')}>
       <Cabecera titulo={tr('Video y subtítulos')} icono="subtitulos" />
       <div class="segmentado panel-pestanas" role="tablist" aria-label={tr('Secciones')}>
         {PESTANAS_VIDEO.map(([id, nombre, icono]) => (
@@ -573,7 +624,7 @@ const atajosDe = (textos: TextosLengua): { titulo: string; filas: [string, strin
 
 function PanelAtajos() {
   return (
-    <div class={`panel-flotante panel-atajos ${claseNavegador()}`} role="dialog" aria-label={tr('Atajos de teclado')}>
+    <div class={`panel-flotante panel-atajos ${clasesPanel()}`} role="dialog" aria-label={tr('Atajos de teclado')}>
       <Cabecera titulo={tr('Atajos de teclado')} icono="teclado" />
       <div class="columnas-atajos">
         {atajosDe(lengua.value.textos).map((col, i) => (
@@ -744,7 +795,7 @@ function PanelGenerar() {
     </>
   );
   return (
-    <div class={`panel-flotante panel-generar ${claseNavegador()}`} role="dialog" aria-label={tr('Generar subtítulos')}>
+    <div class={`panel-flotante panel-generar ${clasesPanel()}`} role="dialog" aria-label={tr('Generar subtítulos')}>
       <Cabecera titulo={tr('Subtítulos con IA')} icono="varita" />
 
       {!hayObjetivo && generarConVoz}
@@ -869,7 +920,7 @@ function PanelTraductor() {
     }
   };
   return (
-    <div class={`panel-flotante panel-traductor ${claseNavegador()}`} role="dialog" aria-label={tr('Traductor')}>
+    <div class={`panel-flotante panel-traductor ${clasesPanel()}`} role="dialog" aria-label={tr('Traductor')}>
       <Cabecera titulo={tr('Traductor')} icono="traducir" ia />
       <textarea class="campo" lang={lengua.value.id} aria-label={tr('Texto a traducir')} placeholder={lengua.value.ejemplos.escribir} value={texto.value} onInput={(e) => (texto.value = e.currentTarget.value)} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) traducir(); e.stopPropagation(); }} />
       <div class="accion-traducir">
@@ -903,7 +954,7 @@ function PanelComprension() {
   const total = Math.max(u.conocidas + u.desconocidas + u.ignoradas, 1);
   const prioritarias = palabrasPrioritarias(lineasObjetivo.value, 12);
   return (
-    <div class={`panel-flotante panel-comprension ${claseNavegador()}`} role="dialog" aria-label={tr('Comprensión')}>
+    <div class={`panel-flotante panel-comprension ${clasesPanel()}`} role="dialog" aria-label={tr('Comprensión')}>
       <Cabecera titulo={tr('Comprensión')} icono="rosca" />
       <div class="comp-hero">
         <Anillo valor={e.comprension} t={88} grosor={8}>{e.comprension}<small>%</small></Anillo>
@@ -978,6 +1029,8 @@ function ResumenGramatica() {
 }
 
 export function PanelesFlotantes() {
+  // Otro panel, o ninguno, empieza entero a la vista.
+  useEffect(() => dejarDeAsomar, [panel.value]);
   switch (panel.value) {
     case 'visual':
       return <PanelVisual />;

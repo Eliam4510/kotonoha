@@ -49,7 +49,7 @@ Die Erweiterung funktioniert ohne Claude-Schlüssel: Untertitel, Wörterbuch, Fu
 
 ## Über dem Video
 
-Beim Öffnen eines Videos mit japanischen Untertiteln erscheint oben eine schwebende Leiste. Sie zeigt den geschätzten Verständnisgrad, die empfohlenen Sätze, die bekannten Wörter und den Wiedergabemodus. Sie blendet sich selbst aus, erscheint wieder, wenn die Maus am oberen Rand verweilt, und bleibt, solange die Maus in der Nähe ist.
+Beim Öffnen eines Videos mit japanischen Untertiteln erscheint oben eine schwebende Leiste. Sie zeigt den geschätzten Verständnisgrad, die empfohlenen Sätze, die bekannten Wörter und den Wiedergabemodus. Sie blendet sich selbst aus und erscheint wieder, wenn die Maus am oberen Rand des Fensters verweilt oder, wenn die Seite ihre Kopfzeile über dem Video hat (wie YouTube in einem Fenster), am oberen Rand des Videos; sie bleibt, solange die Maus in der Nähe ist.
 
 **Untertitel.** Jedes Wort trägt Furigana, eine Farbe nach seinem Tonhöhenakzent und eine Unterstreichung nach seinem Status: unbekannt, verfolgt, bekannt oder ignoriert. Erkannte Grammatikpunkte erscheinen als Etiketten. Steht **Wortübersetzung** in den Anzeigeeinstellungen auf **Unbekannt**, steht die Übersetzung jedes neuen Wortes direkt darunter.
 
@@ -87,7 +87,7 @@ Szenen ohne Dialog lassen sich über den Videobereich beschleunigen oder übersp
 
 ### Spuren wählen
 
-Der Bereich **Video und Untertitel**, Tab **Untertitel**, erlaubt die Wahl der japanischen Spur und der Zweituntertitel. Standardmäßig werden von Hand erstellte Untertitel den automatischen vorgezogen, und importierte haben Vorrang vor allen anderen.
+Der Bereich **Video und Untertitel**, Tab **Untertitel**, erlaubt die Wahl der japanischen Spur und der Zweituntertitel. Standardmäßig werden von Hand erstellte Untertitel den automatischen vorgezogen, und importierte haben Vorrang vor allen anderen. Im selben Tab stehen Größe, Hintergrund und Position; verdeckt der Bereich beim Ändern die Untertitel, tritt er kurz zur Seite, damit die Änderung zu sehen ist, und nur die benutzte Zeile bleibt sichtbar.
 
 ### Mit Claude übersetzen
 
@@ -287,7 +287,7 @@ Nichts davon fügt dem Inhalt der Seite etwas hinzu. Die Farben verwenden die CS
 
 **Nach Bedeutung und nach Kategorie.** Auf Englisch oder Spanisch geschrieben, etwa „dog“, liefert das Wörterbuch die gebräuchlichen japanischen Wörter mit dieser Bedeutung. Die Suche wird außerdem mit der JLPT-Grammatik verglichen, nach der Form (わけ) oder nach der Bedeutung („although“), und jeder Punkt öffnet sich mit Beispielen und Erklärung. Auf der Startseite vereint **Das Wörterbuch erkunden** Lautmalereien, Wörter mit besonderen Lesungen, Ausdrücke aus vier Kanji, Sprichwörter, Redewendungen, literarische und veraltete Wörter, Umgangssprache und höfliche Sprache nach den JMdict-Kennzeichnungen, als Karten und die gebräuchlichen zuerst. Der Index für die Suche nach Bedeutung, die Kategorien und die Wörter mit einem Kanji wird einmal in wenigen Sekunden erstellt und gespeichert: Er wird nur neu erstellt, wenn sich die Wörterbücher ändern.
 
-**Größe und Schrift.** Neben dem Suchfeld ändern **−** und **+** die Größe der Wörter, und der Knopf daneben wechselt zwischen voller Breite und einer zentrierten Spalte. Unter **Einstellungen, Wörterbücher, Wörterbuchseite** steht auch die **Schrift** des japanischen Textes: **Grotesk**, bei komplizierten Kanji besser lesbar und voreingestellt; **Abgerundet**, die von Kotonoha; **Buchschrift**; oder **Handschrift**, die der japanischen Schulbücher, die den Strichen folgt. Es sind Systemschriften: Fehlt eine, wird die ähnlichste verwendet.
+**Größe und Schrift.** Neben dem Suchfeld ändern **−** und **+** die Größe der Wörter, und der Knopf daneben wechselt zwischen voller Breite und einer zentrierten Spalte. Unter **Einstellungen, Wörterbücher, Wörterbuchseite** steht auch die **Schrift** des japanischen Textes: **Grotesk**, bei komplizierten Kanji besser lesbar und voreingestellt; **Abgerundet**, die von Kotonoha; **Buchschrift**; oder **Handschrift**, die der japanischen Schulbücher, die den Strichen folgt. Es sind Systemschriften: Fehlt eine, wird die ähnlichste verwendet. Darunter zeigt ein Muster, wie ein Wort und ein Satz mit der gewählten Größe und Schrift aussehen, und ändert sich sofort.
 
 **Grammatik, die du schon kannst.** Jeder Grammatikpunkt wird als **Neu**, **Im Lernen** oder **Gelernt** markiert: in der Blase, die sich beim Antippen unter einem Untertitel öffnet, im Wortfenster, in der Ansicht **JLPT** und im Wörterbuch. Gelernte Punkte werden unter Untertiteln nicht mehr markiert, und die im Lernen erhalten eine gelbe Linie. Jedes Mal, wenn eine Videozeile einen Punkt enthält, notiert Kotonoha das: **Wo du es gesehen hast** zeigt die Videos und den letzten Satz, in dem er vorkam. **Multiple-Choice-Karte** bereitet im Kartenersteller eine Karte vor mit dem Satz mit einer Lücke und vier Optionen, drei davon von Claude gewählte, leicht verwechselbare Punkte, und auf der Rückseite die Antwort mit dem Grund, warum die anderen nicht passen. Unter **Einstellungen, Anki** sucht **Grammatik aus Anki importieren** in einem Feld eines Decks nach den Punkten, die Kotonoha kennt, den 501 der JLPT-Listen: Die auf Karten mit einem Intervall von 21 Tagen oder mehr gelten als gelernt.
 

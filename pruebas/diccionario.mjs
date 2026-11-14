@@ -271,6 +271,32 @@ await p.getByRole('button', { name: 'A todo el ancho' }).click();
 await p.waitForTimeout(500);
 comprobar(await p.locator('.dic.centrado').isVisible(), 'Y el ancho: a todo lo ancho o en una columna centrada');
 
+// ---------- En Ajustes, con su muestra ----------
+
+await p.goto(`chrome-extension://${id}/app.html#/ajustes`);
+await p.reload();
+const muestra = p.locator('main.ap-principal:not(.ap-preparando) .ap-muestra-dic');
+await muestra.waitFor({ timeout: 15000 });
+await muestra.scrollIntoViewIfNeeded();
+const enMuestra = () => muestra.locator('.dic-tarjeta-palabra').evaluate((x) => ({ tam: parseFloat(getComputedStyle(x).fontSize), letra: getComputedStyle(x).fontFamily }));
+const grupoDic = p.locator('main.ap-principal:not(.ap-preparando) .ap-grupo:has(.ap-muestra-dic)');
+const m0 = await enMuestra();
+await grupoDic.getByRole('button', { name: 'Palabras más grandes' }).click();
+await p.waitForTimeout(300);
+const m1 = await enMuestra();
+comprobar(m1.tam > m0.tam, 'En Ajustes, la muestra crece al momento con el tamaño de las palabras', `${m0.tam} → ${m1.tam} px`);
+await grupoDic.getByRole('radio', { name: /De libro/ }).click();
+await p.waitForTimeout(300);
+const m2 = await enMuestra();
+comprobar(m2.letra !== m1.letra && /Mincho|Serif/i.test(m2.letra), 'Y cambia de letra al momento', m2.letra.slice(0, 40));
+const caben = await grupoDic.locator('.ap-letras button').evaluateAll((bs) => bs.every((b) => {
+  const o = b.closest('.ap-opcion').getBoundingClientRect();
+  const r = b.getBoundingClientRect();
+  return r.right <= o.right + 1 && r.left >= o.left - 1;
+}));
+comprobar(caben, 'Todas las letras caben en su fila, también «A mano»');
+await p.screenshot({ path: join(CAPTURAS, '5b-ajustes-muestra.png') });
+
 // ---------- Categorías ----------
 
 await ir('');

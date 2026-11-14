@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.32.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.32.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -18,6 +18,8 @@ Stand jeder Funktion in Version 0.32.0 und die Art ihrer Überprüfung.
 |---|---|
 | Schwebende Leiste mit bekannten Wörtern, Verständnisgrad und empfohlenen Sätzen | Automatisch |
 | Die Leiste erscheint, wenn die Maus oben verweilt, bleibt, solange sie in der Nähe ist, und reagiert nicht auf bloßes Vorbeifahren | Automatisch und echte Sitzung |
+| In einem Fenster erscheint sie auch, wenn die Maus am oberen Rand des Videos verweilt, unter der Kopfzeile der Seite (wie der von YouTube), aber nicht mitten in dieser Kopfzeile, wo ihr Suchfeld ist | Automatisch |
+| Wer Größe, Hintergrund oder Lesungen ändert, während ein Bereich über den Untertiteln offen ist, sieht die Änderung sofort: Der Bereich tritt kurz zur Seite, nur die benutzte Zeile bleibt sichtbar | Automatisch |
 | Untertitel, die sich an jede Stelle des Videos ziehen lassen, mit Magneten und ohne es zu verlassen | Automatisch und echte Sitzung |
 | Zeilenwechsel ohne Flackern und etwas kleinere Schrift bei langen Absätzen | Automatisch und echte Sitzung |
 | Die Untertitel folgen dem Video beim Scrollen der Seite, ohne zu zittern | Nachgebildete Seite und echte Sitzung |
@@ -32,7 +34,7 @@ Stand jeder Funktion in Version 0.32.0 und die Art ihrer Überprüfung.
 | Als Bild teilen: eine Karte des Wortes (Furigana, Akzent, Bedeutung im Satz oder das Wörterbuch, der Satz mit dem hervorgehobenen Wort) oder eines Grammatikpunkts, beim Klicken in die Zwischenablage kopiert; Tinte oder Papier; Bild speichern | Automatisch, mit einem simulierten Claude, über die Zwischenablage |
 | JLPT: Wortschatz (8354 Wörter), Kanji (2211) und Grammatik (501 Punkte) von N5 bis N1 mit dem, was du von jeder Stufe kennst; Status einzeln oder für alle ausgewählten ändern; Kanji-Karte mit Strichen und Wörtern der Stufe; Beispiele jedes Grammatikpunkts aus gesehenen Sätzen und seine Erklärung durch Claude | Automatisch, mit einem simulierten Claude |
 | Wörterbuch: Suche nach Bedeutung unter gebräuchlichen Wörtern mit passender Glosse; JLPT-Grammatik nach Form oder Bedeutung; unter jedem Wort seine Kanji mit Stufe, gebräuchliche Wörter gleicher Bedeutung, Homophone und ähnliche Wörter (Claude); acht Kategorien zum Erkunden nach den JMdict-Kennzeichnungen | Automatisch, mit den Wörterbüchern des Testprofils und einem simulierten Claude |
-| Wörterbuchseite in voller Breite: Ergebnisliste, Wort und verwandte Wörter je nach Breite in Spalten (oder eine zentrierte Spalte); Bedeutungen mit ihren Glossen zusammen und ihrer Wortart; Karten mit der Lesung darüber; Gegenteile und „Siehe auch“ aus JMdict; Größe und Schrift in den Einstellungen und neben dem Suchfeld | Automatisch, mit den Wörterbüchern des Testprofils |
+| Wörterbuchseite in voller Breite: Ergebnisliste, Wort und verwandte Wörter je nach Breite in Spalten (oder eine zentrierte Spalte); Bedeutungen mit ihren Glossen zusammen und ihrer Wortart; Karten mit der Lesung darüber; Gegenteile und „Siehe auch“ aus JMdict; Größe und Schrift in den Einstellungen, mit einem Muster, das sich sofort ändert, und neben dem Suchfeld | Automatisch, mit den Wörterbüchern des Testprofils |
 | Im Wörterbuch von einem Wort zum nächsten, ohne das vorige halb verschwunden oder das neue halb geladen zu sehen: Es wird vorbereitet, während das vorige sichtbar bleibt, und erscheint auf einmal, mit einem Balken, wenn es dauert | Automatisch, Bild für Bild |
 | Die Sätze, in denen ein Wort vorkam, mit Lesung, dem Wort hervorgehoben auch konjugiert, der Minute im Video und „Zurück zu…“, das den Tab des Videos holt oder es öffnet und an diese Stelle springt (auch im Reiter Beispiele des Wortfensters) | Automatisch: die Adresse mit der Minute bei YouTube und der vorgemerkte Sprung auf anderen Seiten |
 | Kanji-Seite: große Striche, Bedeutung, Stufe, Strichzahl, On- und Kun-Lesungen, Bestandteile aus KanjiVG mit Radikal und Lautteil, deine Wörter damit, gebräuchliche Wörter, die es enthalten, wo es vorkam, Druck-, Buch- und Handschrift und seine Herkunft mit Claude | Automatisch |

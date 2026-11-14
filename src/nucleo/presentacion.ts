@@ -13,19 +13,49 @@ export interface CajaBarra {
   abajo: number;
 }
 
+/** El video en la ventana: sus lados y su borde de arriba. */
+export interface BordeVideo {
+  izq: number;
+  der: number;
+  arriba: number;
+}
+
 const ALTO_ACTIVACION = 14;
 const MARGEN_ACTIVACION = 80;
-const MARGEN_LADOS = 72;
+/** Más ancho que el de activación: si no, la barra podía despertar a un lado y esconderse sin que el ratón se moviera. */
+const MARGEN_LADOS = 88;
 const MARGEN_ABAJO = 72;
+
+/**
+ * En una ventana, lo alto suele ser la cabecera del sitio (la de YouTube mide 56 px) y el ratón, al subir, se salta la
+ * franja de arriba y acaba en las pestañas del navegador. Por eso también vale detenerse en el borde de arriba del
+ * video, si empieza cerca de lo alto: un poco por encima y un poco por dentro.
+ */
+const VIDEO_CERCA_DE_ARRIBA = 160;
+const BANDA_ENCIMA = 12;
+const BANDA_DENTRO = 30;
 
 /** Lo que tarda en aparecer: pasar de largo por arriba, camino de otra cosa, no la despierta. */
 export const ESPERA_MOSTRAR_MS = 110;
 /** Lo que aguanta tras salir de su zona: da tiempo a volver sin que se esconda. */
 export const ESPERA_OCULTAR_MS = 650;
 
-export const enZonaActivacion = (x: number, y: number, c: CajaBarra) => y <= ALTO_ACTIVACION && x >= c.izq - MARGEN_ACTIVACION && x <= c.der + MARGEN_ACTIVACION;
+/** La franja del borde de arriba del video, si cuenta: no cuando el video ya empieza arriba del todo, ni lejos de lo alto. */
+function bandaDelVideo(v?: BordeVideo | null): { arriba: number; abajo: number } | null {
+  if (!v || v.arriba <= ALTO_ACTIVACION || v.arriba > VIDEO_CERCA_DE_ARRIBA) return null;
+  return { arriba: v.arriba - BANDA_ENCIMA, abajo: v.arriba + BANDA_DENTRO };
+}
 
-export const enZonaSegura = (x: number, y: number, c: CajaBarra) => y <= c.abajo + MARGEN_ABAJO && x >= c.izq - MARGEN_LADOS && x <= c.der + MARGEN_LADOS;
+export function enZonaActivacion(x: number, y: number, c: CajaBarra, v?: BordeVideo | null): boolean {
+  if (x < c.izq - MARGEN_ACTIVACION || x > c.der + MARGEN_ACTIVACION) return false;
+  if (y <= ALTO_ACTIVACION) return true;
+  const b = bandaDelVideo(v);
+  return !!b && y >= b.arriba && y <= b.abajo && x >= v!.izq && x <= v!.der;
+}
+
+/** Contiene siempre a la de activación: nunca se muestra para esconderse al instante. */
+export const enZonaSegura = (x: number, y: number, c: CajaBarra, v?: BordeVideo | null) =>
+  y <= Math.max(c.abajo + MARGEN_ABAJO, bandaDelVideo(v)?.abajo ?? 0) && x >= c.izq - MARGEN_LADOS && x <= c.der + MARGEN_LADOS;
 
 // ---------- Subtítulos ----------
 

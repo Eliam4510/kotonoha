@@ -2,6 +2,15 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.32.1 · 2026-11-14
+
+La barra de arriba, al alcance, y los cambios de tamaño y de letra, a la vista.
+
+- **La barra de arriba, también en una ventana.** Solo aparecía al detener el ratón en los 14 px más altos de la página. En una ventana, esa franja es la cabecera del sitio (la de YouTube mide 56 px) y, al subir, el ratón se la salta y acaba en las pestañas del navegador: la barra no salía. Ahora también aparece al detenerse en el borde de arriba del video, un poco por encima o por dentro, si el video empieza cerca de lo alto. En medio de la cabecera, donde está el buscador del sitio, no, y pasar de largo sigue sin despertarla.
+- **El tamaño de los subtítulos, a la vista mientras se cambia.** El panel **Video y subtítulos** tapaba los subtítulos en una ventana (medido: del todo a 1366, 1600 y 1920 px de ancho), así que el tamaño, el fondo o las lecturas cambiaban detrás y no se veía nada hasta cerrarlo. Ahora, al cambiar algo de cómo se ven, el panel se aparta un momento y deja a la vista solo la fila que se está usando; vuelve solo al dejarlo o al salir de la fila. Lo mismo en el panel **Visualización**.
+- **El tamaño y la letra del diccionario, con muestra.** En **Ajustes, Diccionarios, Página del diccionario**, una muestra enseña cómo quedan una palabra y una frase con el tamaño y la letra elegidos, y cambia al momento. Antes nada de la página se movía al cambiarlos, y parecía que no hacían nada.
+- **«A mano» ya no asoma fuera.** En una ventana ancha, las cuatro letras pasaban a una sola fila que no cabía en la de Ajustes, y la última, **A mano**, se salía del recuadro. Ahora van siempre de dos en dos.
+
 ## 0.32.0 · 2026-11-14
 
 El vocabulario de un libro, antes de leerlo.
@@ -297,6 +306,15 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.32.1 · 2026-11-14
+
+The top bar within reach, and size and typeface changes in view.
+
+- **The top bar, also in a window.** It only appeared when the pointer rested in the top 14 px of the page. In a window, that strip is the site's header (YouTube's is 56 px tall) and, moving up, the pointer skips it and ends up on the browser's tabs: the bar did not show. Now it also appears when the pointer rests on the top edge of the video, slightly above or inside it, if the video starts near the top. Not in the middle of the header, where the site's search box is, and passing by still does not wake it.
+- **Subtitle size in view while changing it.** The **Video and subtitles** panel covered the subtitles in a window (measured: completely at 1366, 1600 and 1920 px wide), so size, background or readings changed behind it and nothing could be seen until it was closed. Now, when something about how they look changes, the panel steps aside for a moment and only the row in use stays visible; it comes back by itself when you stop or leave the row. The same in the **Display** panel.
+- **Dictionary size and typeface, with a sample.** In **Settings, Dictionaries, Dictionary page**, a sample shows how a word and a sentence look with the chosen size and typeface, and changes at once. Before, nothing on the page moved when changing them, and they seemed to do nothing.
+- **"Handwritten" no longer sticks out.** In a wide window, the four typefaces went into a single row that did not fit in the Settings row, and the last one, **Handwritten**, stuck out of its box. Now they always go two by two.
 
 ## 0.32.0 · 2026-11-14
 

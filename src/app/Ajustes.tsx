@@ -27,6 +27,8 @@ import { nombreCorto } from '../nucleo/voces';
 import { CLAVES_PROVEEDORES, idParaProveedor, type ProveedorConocido, type ProveedorIA, PROVEEDORES_CONOCIDOS, separarModelo, valorDeModelo } from '../compartido/proveedores';
 import { decirConNavegador, vocesDeLaLengua } from '../ui/vozNavegador';
 import { useEsperar } from '../ui/preparacion';
+import { ConFurigana } from '../ui/Ficha';
+import { estiloDiccionario } from './TarjetaPalabra';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -950,6 +952,32 @@ function PaginaDelDiccionario({ a, cambiar }: PropsSeccion) {
           </div>
         </Opcion>
       )}
+      <MuestraDiccionario a={a} />
+    </div>
+  );
+}
+
+/** La primera frase del texto de ejemplo de la lengua, sin pasar de un renglón largo. */
+function fraseDeMuestra(texto: string): string {
+  const f = texto.split('\n')[0].split(/(?<=[。．.!?！？])\s*/)[0] ?? '';
+  return f.length > 64 ? `${f.slice(0, 63).replace(/[\s,;:]+\S*$/, '')}…` : f;
+}
+
+/**
+ * Cómo quedan las palabras del diccionario con el tamaño y la letra elegidos, con las mismas piezas que el diccionario.
+ * Cambia al momento: sin ella, nada de esta página se movía al cambiarlos y parecía que no hacían nada.
+ */
+function MuestraDiccionario({ a }: { a: Ajustes }) {
+  const paquete = lengua.value;
+  const { palabra, lectura, texto } = paquete.ejemplos;
+  const conLectura = paquete.lectura.distingue && !!lectura && lectura !== palabra;
+  return (
+    <div class="ap-muestra-dic" style={estiloDiccionario(a)}>
+      <span class="ap-muestra-dic-titulo">{tr('Así se ve')}</span>
+      <div class="ap-muestra-dic-hoja" aria-hidden="true">
+        <span class={`dic-tarjeta-palabra ${conLectura ? 'con-lectura' : ''}`} lang={paquete.id}>{conLectura ? <ConFurigana texto={palabra} lectura={lectura} /> : palabra}</span>
+        <p class="dic-frase-texto" lang={paquete.id}>{fraseDeMuestra(texto)}</p>
+      </div>
     </div>
   );
 }

@@ -108,9 +108,18 @@
   background: var(--vidrio-denso); backdrop-filter: blur(30px) saturate(1.5);
   box-shadow: var(--sombra-3), inset 0 0 0 1px var(--borde-2);
   animation: panel-entra 0.26s var(--resorte);
+  transition: background 0.16s ease, box-shadow 0.16s ease;
 }
 @keyframes panel-entra { from { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.98); } }
 .panel-flotante.con-nav { left: calc((100vw - 380px) / 2); max-width: calc(100vw - 404px); }
+/* Al cambiar cómo se ven los subtítulos con el panel encima, el panel los deja ver un momento: solo queda la fila que
+   se está usando (Paneles.tsx, asomar). Lo demás se desvanece y no se puede pulsar mientras tanto. */
+.panel-flotante :is(.panel-cab, .panel-pestanas, .titulo-grupo, .grupo, .columnas, .fila, .leyenda, .nota-grupo, .panel-intro) { transition: opacity 0.16s ease; }
+.panel-flotante.asomando { background: transparent; box-shadow: none; backdrop-filter: none; }
+.panel-flotante.asomando > :not(.usando):not(:has(.usando)),
+.panel-flotante.asomando :has(.usando) > :not(.usando):not(:has(.usando)) { opacity: 0; pointer-events: none; }
+.panel-flotante.asomando :has(.usando) { background: none; box-shadow: none; }
+.panel-flotante.asomando .fila.usando { border-top-color: transparent; border-radius: var(--r-3); background: var(--vidrio-denso); box-shadow: var(--sombra-3), inset 0 0 0 1px var(--borde-2); }
 .panel-visual { width: 420px; }
 .panel-generar { width: 440px; }
 .panel-video { width: 780px; }
