@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.30.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.31.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -23,6 +23,7 @@ Estado de cada función en la versión 0.30.1, con la forma en que se ha verific
 | Los subtítulos acompañan al video al desplazar la página, sin temblar | Página imitada y sesión real |
 | Una línea que aparece bajo un ratón quieto no abre fichas ni pausa el video | Automática |
 | Subtítulos con furigana, color por acento tonal y subrayado por estado | Automática |
+| Lecturas que IPADIC trae mal, corregidas: 環 suelto (かん, no たまき) y los kanji que van pegados como sufijo, como en 官能基, 電子殻 o 炭素鎖 | Automática |
 | Modos de furigana, glosas y color: siempre, al pasar, desconocidas, nunca | Automática |
 | El recuadro de los subtítulos deja aire en los cuatro lados y nada se pisa, con cualquier mezcla de tamaño (del 70 al 250 %), lecturas, glosas, traducción y fondo, en ventana ancha y estrecha; la traducción de cada palabra desconocida va debajo de ella | Automática |
 | Ficha de palabra: definiciones, estado, frecuencia, audio, imágenes, ejemplos y enlaces | Automática |
@@ -48,6 +49,7 @@ Estado de cada función en la versión 0.30.1, con la forma en que se ha verific
 | Gramática JLPT: unas 100 reglas confirmadas por Claude, con un resumen por video | Simulador |
 | Palabras prioritarias: las desconocidas que más se repiten en el video | Automática |
 | Modos de reproducción: escucha y lectura intensivas, híbrido, enfoque en una palabra y personalizado | Automática |
+| Con la pausa automática y **Reanudar tras un tiempo**, una ficha abierta detiene la cuenta atrás, que vuelve a empezar al cerrarla; con **Al pasar por el subtítulo**, también el ratón encima. Las opciones que no aplican no se muestran, y las dos formas de reanudar no pueden ir juntas | Automática |
 | Velos sobre los subtítulos | Automática |
 | Aceleración o salto de escenas sin diálogo | Automática |
 | Navegador de subtítulos: filtros, marcadores, selección y unión de líneas | Automática |
@@ -114,6 +116,7 @@ Estado de cada función en la versión 0.30.1, con la forma en que se ha verific
 
 | Función | Verificación |
 |---|---|
+| Cambiar de sección sin pasar por el fondo vacío: la nueva se prepara mientras se ve la anterior y entra de una vez, con una barra si tarda | Automática, fotograma a fotograma |
 | Inicio con resumen de vocabulario y repaso | Automática |
 | Gasto en Claude: total del mes, gráfica por días y modelos, tareas y registro de peticiones | Simulador |
 | Diccionario con búsqueda libre y formas conjugadas | Automática |
@@ -133,6 +136,8 @@ Estado de cada función en la versión 0.30.1, con la forma en que se ha verific
 | Biblioteca: TXT, HTML y SRT, con los títulos, párrafos y listas de cada capítulo | Automática |
 | Eliminar pide confirmación: un libro (con su archivo, su avance y lo anotado), un diccionario, un modelo guardado, una tarjeta de Memoria, una nota escrita o la clave de la API | Automática |
 | Visor de libros de páginas: EPUB de imágenes, CBZ y PDF en su propia pestaña, con zoom, ajuste al ancho o a la página, una página, doble página y desplazamiento continuo | Automática |
+| Pasar páginas en el visor sin ver el fondo entre una y otra: la nueva entra con su imagen lista y, si tarda, se queda la anterior con una barra | Automática, fotograma a fotograma |
+| El OCR suelta sus modelos tras dos minutos sin leer, con el libro abierto: unos 470 MB de memoria y entre 0,7 y 1 GB de la tarjeta gráfica | Medida, con un manga real |
 | Carpetas de imágenes como libros: cada carpeta, o cada tomo dentro de ella, entra como un libro, con la portada delante, el índice por capítulos y las dobles páginas apaisadas solas | Automática, y con 40 tomos reales de manga |
 | Colecciones en la estantería: una serie con sus tomos o un tema, con su tipo, su descripción y su portada; una carpeta con varios tomos entra ya como una colección, y un tomo nuevo se añade a la suya | Automática |
 | Progreso de lectura: cuánto se lleva de cada libro y de cada colección, «Terminado» al llegar al final o a mano, «Seguir leyendo» y filtros por estado | Automática |
@@ -253,6 +258,8 @@ Estado de cada función en la versión 0.30.1, con la forma en que se ha verific
 | Claude solo cuando hace falta | La ficha abre con el diccionario, y la revisión cubre el tramo que está por verse en lugar del video entero |
 | Empezar por lo que se ve | Traducción, corrección y revisión ordenan los tramos según el punto de reproducción |
 | El equipo sigue siendo usable | La transcripción descansa, se adapta al uso y se detiene ante fallos repetidos |
+| Sin parpadeos | Lo que cambia entero (una sección, una página del visor, una palabra del diccionario) se prepara mientras se ve lo anterior y entra de una vez; si tarda, una barra fina lo dice |
+| Memoria contenida | El analizador del japonés carga su diccionario sin relleno y lo descomprime el navegador; el OCR suelta sus modelos cuando deja de leer, y Whisper tres minutos después de transcribir |
 | Las páginas no se reescriben | El subrayado web usa la CSS Custom Highlight API, sin añadir nada al contenido. Solo se abre el interlineado donde el furigana no cabe |
 | Datos locales | Todo queda en el navegador, y el audio de la transcripción no sale del equipo |
 
@@ -260,6 +267,7 @@ Estado de cada función en la versión 0.30.1, con la forma en que se ha verific
 
 | Limitación | Detalle |
 |---|---|
+| PDF muy grandes | Mientras está abierto, un PDF reserva tanta memoria como pesa el archivo (así trabaja pdf.js): uno de 550 MB aparece con más de 1 GB en el administrador de tareas, aunque solo se use de verdad la parte leída. Al cerrarlo se libera |
 | Idioma de estudio | Japonés, inglés y alemán. Cada idioma nuevo necesita su propio paquete, en `src/lenguas` |
 | Análisis del inglés | Lo hace un modelo pequeño, que cabe en la extensión. En frases ambiguas puede equivocarse de categoría, y con ella de traducción bajo la palabra. La ficha sigue mostrando todas las definiciones |
 | Análisis del alemán | Sale de las formas de los diccionarios: sin el alemán–inglés, cada palabra es su propia forma. Entre dos palabras posibles decide la frecuencia, sin mirar la frase; Claude corrige lo que falle al revisar la línea |

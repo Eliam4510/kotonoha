@@ -295,7 +295,9 @@ button.chip-gram:active { transform: scale(0.96); }
 .panel-medios > .subtitulo-def:first-child { margin-top: 0; }
 .fila-audio { display: flex; align-items: center; gap: 10px; min-height: 36px; }
 .fila-audio-nombre { flex: 1; min-width: 0; font-size: 13.5px; }
-.imagenes-fila { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+/* Solo se desplaza a lo ancho: con overflow-x a secas, el alto también quedaba en auto y una imagen agrandada al pasar
+   el ratón sacaba una barra vertical. */
+.imagenes-fila { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; padding-bottom: 6px; }
 .imagenes-fila button { flex: none; height: 120px; border-radius: var(--r-3); overflow: hidden; box-shadow: inset 0 0 0 1px var(--borde); transition: transform 0.18s var(--resorte); }
 .imagenes-fila button:hover { transform: scale(1.02); }
 .imagenes-fila img { height: 120px; display: block; }

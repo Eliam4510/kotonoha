@@ -447,7 +447,8 @@ function PanelVideo() {
             <TituloGrupo>{tr('Diccionario emergente')}</TituloGrupo>
             <div class="grupo">
               <Fila etq={tr('Abrir al pasar el ratón')}><Interruptor on={a.popupAlPasar} etiqueta={tr('Abrir al pasar el ratón')} alCambiar={(v) => cambiarAjuste({ popupAlPasar: v })} /></Fila>
-              <Fila etq={tr('Solo con palabras desconocidas')}><Interruptor on={a.popupSoloDesconocidas} etiqueta={tr('Solo con palabras desconocidas')} alCambiar={(v) => cambiarAjuste({ popupSoloDesconocidas: v })} /></Fila>
+              {/* Solo cuenta al abrir al pasar el ratón: con un clic, la ficha se abre siempre. */}
+              {a.popupAlPasar && <Fila etq={tr('Solo con palabras desconocidas')}><Interruptor on={a.popupSoloDesconocidas} etiqueta={tr('Solo con palabras desconocidas')} alCambiar={(v) => cambiarAjuste({ popupSoloDesconocidas: v })} /></Fila>}
               <Fila etq={tr('Consultar al pausar')} ayuda={tr('Abre la primera palabra desconocida')}><Interruptor on={a.autoConsultaAlPausar} etiqueta={tr('Consultar al pausar')} alCambiar={(v) => cambiarAjuste({ autoConsultaAlPausar: v })} /></Fila>
             </div>
             <TituloGrupo>{tr('Pausar al interactuar')}</TituloGrupo>
@@ -455,16 +456,18 @@ function PanelVideo() {
               <Fila etq={tr('Cuándo')}>
                 <Selector etiqueta={tr('Pausar al interactuar')} valor={a.pausaInteraccion} opciones={[['nunca', tr('Nunca')], ['alPasarSubtitulo', tr('Al pasar por el subtítulo')], ['consultaPalabra', tr('Al consultar una palabra')]]} alCambiar={(v) => cambiarAjuste({ pausaInteraccion: v })} />
               </Fila>
-              <Fila etq={tr('Reanudar al terminar')}><Interruptor on={a.reanudarAlTerminar} etiqueta={tr('Reanudar al terminar')} alCambiar={(v) => cambiarAjuste({ reanudarAlTerminar: v })} /></Fila>
-              <Fila etq={tr('Esperar al final de la línea')}><Interruptor on={a.pausaDiferida} etiqueta={tr('Pausar al final de la línea')} alCambiar={(v) => cambiarAjuste({ pausaDiferida: v })} /></Fila>
+              {/* Con «Nunca» no hay pausa que reanudar; esperar al final de la línea solo vale al consultar una palabra. */}
+              {a.pausaInteraccion !== 'nunca' && <Fila etq={tr('Reanudar al terminar')}><Interruptor on={a.reanudarAlTerminar} etiqueta={tr('Reanudar al terminar')} alCambiar={(v) => cambiarAjuste({ reanudarAlTerminar: v })} /></Fila>}
+              {a.pausaInteraccion === 'consultaPalabra' && <Fila etq={tr('Esperar al final de la línea')}><Interruptor on={a.pausaDiferida} etiqueta={tr('Pausar al final de la línea')} alCambiar={(v) => cambiarAjuste({ pausaDiferida: v })} /></Fila>}
             </div>
           </div>
           <div>
             <TituloGrupo>{tr('Pausa automática')}</TituloGrupo>
             <div class="grupo">
-              <Fila etq={tr('Reanudar tras un tiempo')}><Interruptor on={a.reanudarTras} etiqueta={tr('Reanudar tras un tiempo')} alCambiar={(v) => cambiarAjuste({ reanudarTras: v })} /></Fila>
-              {a.reanudarTras && <Fila etq={tr('Segundos')}><Paso etiqueta="segundos" valor={a.reanudarSegundos} paso={1} min={1} max={60} alCambiar={(v) => cambiarAjuste({ reanudarSegundos: v })} /></Fila>}
-              <Fila etq={tr('Según lo que tardas en leer')}><Interruptor on={a.reanudarDinamico} etiqueta={tr('Reanudar dinámico')} alCambiar={(v) => cambiarAjuste({ reanudarDinamico: v })} /></Fila>
+              {/* Una cosa u otra: con las dos encendidas mandaba la segunda, y los segundos de la primera no hacían nada. */}
+              <Fila etq={tr('Reanudar tras un tiempo')}><Interruptor on={a.reanudarTras && !a.reanudarDinamico} etiqueta={tr('Reanudar tras un tiempo')} alCambiar={(v) => cambiarAjuste({ reanudarTras: v, ...(v ? { reanudarDinamico: false } : {}) })} /></Fila>
+              {a.reanudarTras && !a.reanudarDinamico && <Fila etq={tr('Segundos')}><Paso etiqueta="segundos" valor={a.reanudarSegundos} paso={1} min={1} max={60} alCambiar={(v) => cambiarAjuste({ reanudarSegundos: v })} /></Fila>}
+              <Fila etq={tr('Según lo que tardas en leer')}><Interruptor on={a.reanudarDinamico} etiqueta={tr('Reanudar dinámico')} alCambiar={(v) => cambiarAjuste({ reanudarDinamico: v, ...(v ? { reanudarTras: false } : {}) })} /></Fila>
               {a.reanudarDinamico && (
                 <>
                   <Fila etq={tr('Palabras por segundo')}><Paso etiqueta={tr('palabras por segundo')} valor={a.velocidadLectura} paso={1} min={1} max={15} alCambiar={(v) => cambiarAjuste({ velocidadLectura: v })} /></Fila>

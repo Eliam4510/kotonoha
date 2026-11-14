@@ -14,6 +14,7 @@ import { leerEstructura, normalizarTextoPlano, textoConEstructura, textoPlano } 
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { useRelojLectura } from '../ui/relojLectura';
+import { useEsperar } from '../ui/preparacion';
 import { Dictado, limpiarDictadosSiToca } from './Dictado';
 import { navegar } from './estadoApp';
 import { type ApiEditor, EditorCuaderno } from './EditorCuaderno';
@@ -81,6 +82,7 @@ export async function abrirEnCuaderno(e: ElementoBiblioteca): Promise<void> {
 export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { ajustes: Ajustes; inicial: string; editar?: boolean; web?: boolean }) {
   /** Lo que se enseña al leer y con lo que empieza el editor. null mientras se carga. */
   const [texto, fijarTexto] = useState<string | null>(null);
+  const esperar = useEsperar();
   const [modo, fijarModo] = useState<'editar' | 'leer'>('leer');
   /** La nota de la biblioteca en la que se guarda, si se guardó. */
   const [nota, fijarNota] = useState<string | null>(null);
@@ -99,7 +101,9 @@ export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { aj
 
   useRelojLectura(modo === 'leer' && texto?.trim() ? 'portapapeles' : null, '', ajustes.idiomaObjetivo);
 
-  const alFinal = () => setTimeout(() => document.querySelector('.ap-principal')?.scrollTo({ top: 1e9, behavior: 'smooth' }), 350);
+  // La pantalla de este Cuaderno: mientras se prepara a escondidas, la primera de la página es la de antes.
+  const raiz = useRef<HTMLDivElement>(null);
+  const alFinal = () => setTimeout(() => raiz.current?.closest('.ap-principal')?.scrollTo({ top: 1e9, behavior: 'smooth' }), 350);
 
   /** Guarda lo escrito: en el Cuaderno siempre, y en su nota de la biblioteca si la tiene. */
   const guardar = async (md: string) => {
@@ -138,6 +142,9 @@ export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { aj
   // final, como lo que se copia con «Seguir lo copiado».
   useEffect(() => {
     let vivo = true;
+    // La pantalla se enseña con el texto ya puesto: hasta entonces se ve la de antes.
+    let listo = () => {};
+    void esperar(new Promise<void>((ok) => (listo = ok)));
     Promise.all([leerTextoLector(), leerNotaCuaderno()]).then(async ([guardado, id]) => {
       if (!vivo) return;
       let t = guardado;
@@ -158,7 +165,7 @@ export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { aj
         guardar(t).catch(console.error);
         alFinal();
       }
-    });
+    }).finally(listo);
     return () => {
       vivo = false;
     };
@@ -306,7 +313,7 @@ export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { aj
   const hayTexto = conTexto;
 
   return (
-    <div class={`ap-lienzo cu-pagina ${modo}`}>
+    <div ref={raiz} class={`ap-lienzo cu-pagina ${modo}`}>
       <header class="cu-cabeza">
         <div class="cu-nombre">
           <h1>{tr('Cuaderno')}</h1>

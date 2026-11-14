@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.30.1, along with how it has been verified.
+Status of each feature in version 0.31.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -23,6 +23,7 @@ Status of each feature in version 0.30.1, along with how it has been verified.
 | Subtitles stay with the video when the page scrolls, without jitter | Imitation page and real session |
 | A line appearing under a resting pointer neither opens a card nor pauses the video | Automated |
 | Subtitles with furigana, pitch accent colors and status underlines | Automated |
+| Readings that IPADIC gets wrong, corrected: 環 on its own (かん, not たまき) and kanji attached as a suffix, as in 官能基, 電子殻 or 炭素鎖 | Automated |
 | Furigana, gloss and color modes: always, on hover, unknown only, never | Automated |
 | The subtitle box keeps space on all four sides and nothing overlaps, under any combination of size (70 to 250%), readings, glosses, translation and background, in wide and narrow windows; each unknown word’s translation sits under the word | Automated |
 | Word panel: definitions, status, frequency, audio, images, examples and links | Automated |
@@ -48,6 +49,7 @@ Status of each feature in version 0.30.1, along with how it has been verified.
 | JLPT grammar: about 100 rules confirmed by Claude, with a per-video summary | Simulator |
 | Priority words: the unknown words repeated most in the video | Automated |
 | Playback modes: intensive listening and reading, hybrid, single-word focus and custom | Automated |
+| With the automatic pause and **Resume after a while**, an open word panel stops the countdown, which starts again when it is closed; with **When hovering over the subtitle**, so does the mouse over it. Options that do not apply are hidden, and the two ways of resuming cannot be on together | Automated |
 | Veils over the subtitles | Automated |
 | Speeding up or skipping scenes without dialogue | Automated |
 | Subtitle navigator: filters, bookmarks, selection and line merging | Automated |
@@ -114,6 +116,7 @@ Status of each feature in version 0.30.1, along with how it has been verified.
 
 | Feature | Verification |
 |---|---|
+| Switching sections without going through an empty background: the new one is prepared while the previous one stays in view and comes in all at once, with a bar if it takes a while | Automated, frame by frame |
 | Home with vocabulary and review summary | Automated |
 | Claude spending: monthly total, chart by day and model, tasks and request log | Simulator |
 | Dictionary with free search and conjugated forms | Automated |
@@ -133,6 +136,8 @@ Status of each feature in version 0.30.1, along with how it has been verified.
 | Library: TXT, HTML and SRT, with the headings, paragraphs and lists of each chapter | Automated |
 | Deleting asks for confirmation: a book (with its file, progress and annotations), a dictionary, a saved model, a Memory card, a written note or the API key | Automated |
 | Page-based book viewer: image-based EPUB, CBZ and PDF in their own tab, with zoom, fit to width or to the page, single page, two-page spread and continuous scrolling | Automated |
+| Turning pages in the viewer without seeing the background between them: the new page comes in with its image ready and, if it takes a while, the previous one stays with a bar | Automated, frame by frame |
+| OCR releases its models after two minutes without reading, with the book still open: about 470 MB of memory and 0.7 to 1 GB on the graphics card | Measured, with a real manga |
 | Image folders as books: each folder, or each volume inside it, comes in as a book, with the cover first, a table of contents by chapter and landscape two-page spreads on their own | Automated, and with 40 real manga volumes |
 | Collections on the shelf: a series with its volumes or a topic, with its type, description and cover; a folder with several volumes comes in as a collection, and a new volume joins its own | Automated |
 | Reading progress: how much of each book and each collection has been read, "Finished" at the end or by hand, "Keep reading" and filters by state | Automated |
@@ -253,6 +258,8 @@ Status of each feature in version 0.30.1, along with how it has been verified.
 | Claude only when needed | The word panel opens with the dictionary, and the review covers the stretch about to be watched instead of the whole video |
 | Start with what is on screen | Translation, correction and review order their batches by the playback position |
 | The computer stays usable | Transcription rests, adapts to use and stops on repeated failures |
+| No flicker | Whatever changes as a whole (a section, a viewer page, a dictionary word) is prepared while the previous one stays in view and comes in all at once; if it takes a while, a thin bar says so |
+| Memory kept in check | The Japanese analyser loads its dictionary without padding, decompressed by the browser; OCR releases its models when it stops reading, and Whisper three minutes after transcribing |
 | Pages are not rewritten | Web underlining uses the CSS Custom Highlight API, adding nothing to the content. Only line spacing is opened where furigana does not fit |
 | Local data | Everything stays in the browser, and transcription audio never leaves the computer |
 
@@ -260,6 +267,7 @@ Status of each feature in version 0.30.1, along with how it has been verified.
 
 | Limitation | Detail |
 |---|---|
+| Very large PDFs | While open, a PDF reserves as much memory as the file takes up (that is how pdf.js works): a 550 MB file shows more than 1 GB in the task manager, although only the part read is really used. It is released when closed |
 | Study language | Japanese, English and German. Each new language needs its own package, in `src/lenguas` |
 | English analysis | It is done by a small model that fits in the extension. In ambiguous sentences it can pick the wrong category, and with it the wrong translation under the word. The word panel still shows every definition |
 | German analysis | It comes from the dictionaries' forms: without German–English, each word is its own form. Between two possible words, frequency decides, without looking at the sentence; Claude fixes what goes wrong when it reviews the line |

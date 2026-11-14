@@ -241,3 +241,10 @@
   .vs-panel { width: 150px; }
   .vs-lienzo { padding: 8px; }
 }
+
+/* La página pedida que tarda: una barra fina arriba, solo si pasa de un instante (VisorPaginas, enPantalla). */
+.vs-progreso { position: sticky; top: 0; left: 0; z-index: 5; height: 3px; margin-bottom: -3px; overflow: hidden; pointer-events: none; opacity: 0; animation: vs-progreso-entra 0.2s 0.15s forwards; }
+.vs-progreso::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 32%; border-radius: var(--r-pill); background: var(--hoja); animation: vs-progreso 1.1s ease-in-out infinite; }
+@keyframes vs-progreso { from { transform: translateX(-100%); } to { transform: translateX(320%); } }
+@keyframes vs-progreso-entra { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .vs-progreso::before { animation-duration: 2.4s; } }

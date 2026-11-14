@@ -77,7 +77,8 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
   hallado?: Caja[];
   alTocar?: (indice: number, caracter?: number) => void;
 } & PropsAnotaciones) {
-  const [imagen, fijarImagen] = useState<PaginaImagen | null>(null);
+  // La página que ya está lista se monta con su imagen: sin un fotograma vacío antes.
+  const [imagen, fijarImagen] = useState<PaginaImagen | null>(() => paginador.imagenYa?.(n) ?? null);
   const [fallo, fijarFallo] = useState('');
   const primerHallado = useRef<HTMLSpanElement>(null);
   useEffect(() => {
@@ -85,9 +86,9 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
   }, [hallado, !!imagen]);
   useEffect(() => {
     let vivo = true;
-    fijarImagen(null);
-    paginador
-      .imagen(n)
+    const ya = paginador.imagenYa?.(n);
+    fijarImagen(ya ?? null);
+    (paginador.imagenParaVer?.(n) ?? paginador.imagen(n))
       .then((p) => {
         if (!vivo) return;
         fijarImagen(p);
@@ -101,7 +102,7 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
   const t = imagen ?? paginador.tamano(n) ?? PAGINA_SUPUESTA;
   return (
     <div class="vs-pagina" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * escala)}px`, height: `${Math.round(t.alto * escala)}px` }}>
-      {imagen ? <img src={imagen.url} alt={tr('Página {0}', n + 1)} draggable={false} /> : fallo ? <span class="vs-fallo">{fallo}</span> : <span class="vs-cargando" />}
+      {imagen ? <img src={imagen.url} alt={tr('Página {0}', n + 1)} draggable={false} decoding="sync" /> : fallo ? <span class="vs-fallo">{fallo}</span> : <span class="vs-cargando" />}
       {imagen && anotaciones && anotaciones.length > 0 && <Resaltados anotaciones={anotaciones} />}
       {imagen && lineas && (
         <div class="vs-texto">
@@ -288,8 +289,26 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const rtl = direccion === 'rtl';
   const lista = useMemo(() => pliegos(total, vista === 'doble', portadaSola, new Set(anchas ?? [])), [total, vista, portadaSola, anchas]);
   const actual = pliegoDe(lista, pagina);
+  // El pliego que se ve: el pedido en cuanto sus páginas están pintadas y decodificadas; mientras, el de antes, en vez de
+  // un fondo vacío que enseguida se llena. Al abrir el libro, o si lo de antes tampoco estaba listo, el pedido.
+  const [mostrada, fijarMostrada] = useState(0);
+  const listo = (p: number) => !!paginador && (lista[pliegoDe(lista, p)] ?? [p]).every((n) => !!paginador.imagenYa?.(n));
+  const pedidoListo = vista === 'continua' || listo(pagina);
+  const enPantalla = pedidoListo || !listo(mostrada) ? pagina : mostrada;
+  const actualVisible = pliegoDe(lista, enPantalla);
+  useEffect(() => {
+    if (!paginador || pedidoListo) {
+      fijarMostrada(pagina);
+      return;
+    }
+    let vivo = true;
+    Promise.all((lista[actual] ?? [pagina]).map((n) => (paginador.imagenParaVer?.(n) ?? paginador.imagen(n)).catch(() => null))).then(() => vivo && fijarMostrada(pagina));
+    return () => {
+      vivo = false;
+    };
+  }, [pagina, pedidoListo, paginador, lista]);
   const medida = (n: number) => paginador?.tamano(n) ?? PAGINA_SUPUESTA;
-  const escala = paginador ? escalaDe((lista[actual] ?? [pagina]).map(medida), hueco, zoom) : 1;
+  const escala = paginador ? escalaDe((lista[actualVisible] ?? [enPantalla]).map(medida), hueco, zoom) : 1;
   const porcentaje = Math.round(escala * 100);
 
   // La página al instante: con la flecha pulsada llegan varias teclas antes de que se vuelva a pintar, y cada una tiene que
@@ -346,13 +365,15 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   useEffect(() => {
     const el = lienzo.current;
     if (!el || !paginador) return;
-    if (vista !== 'continua') {
-      el.scrollTo({ top: 0, left: rtl ? el.scrollWidth : 0 });
-      // Las siguientes ya se van leyendo, para pasar de página sin esperas.
-      for (const n of lista[actual + 1] ?? []) paginador.imagen(n).catch(() => {});
-    } else if (!desdeDesplazamiento.current) el.querySelector(`[data-pagina="${pagina + 1}"]`)?.scrollIntoView({ block: 'start' });
+    if (vista !== 'continua') el.scrollTo({ top: 0, left: rtl ? el.scrollWidth : 0 });
+    else if (!desdeDesplazamiento.current) el.querySelector(`[data-pagina="${pagina + 1}"]`)?.scrollIntoView({ block: 'start' });
     desdeDesplazamiento.current = false;
-  }, [pagina, vista, paginador]);
+  }, [enPantalla, vista, paginador]);
+  // Las siguientes ya se van pintando y decodificando, para pasar de página sin esperas. Las de atrás ya se vieron.
+  useEffect(() => {
+    if (!paginador || vista === 'continua') return;
+    for (const n of lista[actual + 1] ?? []) (paginador.imagenParaVer?.(n) ?? paginador.imagen(n)).catch(() => {});
+  }, [pagina, vista, paginador, lista]);
 
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
@@ -718,7 +739,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       );
     return (
       <div class={`vs-pliego ${rtl ? 'rtl' : ''}`}>
-        {(lista[actual] ?? []).map((n) => (
+        {(lista[actualVisible] ?? []).map((n) => (
           <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
         ))}
       </div>
@@ -937,6 +958,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             zoomPaso(e.deltaY < 0);
           }}
         >
+          {/* Si la página pedida tarda, una barra fina lo dice mientras se ve la de antes. */}
+          {paginador && !vistaTexto && enPantalla !== pagina && <div class="vs-progreso" role="progressbar" aria-label={tr('Cargando…')} />}
           {contenido()}
         </main>
         {!vistaTexto && abierta && lineasAbiertas?.[abierta.indice] && (

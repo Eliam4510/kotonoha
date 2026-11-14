@@ -43,8 +43,16 @@ interface Tarea {
   promesa: Promise<LineaOcr[]>;
 }
 
+/**
+ * Sin páginas que leer durante este rato, el trabajador se cierra y suelta sus modelos: unos 470 MB de memoria y otros
+ * tantos de la tarjeta gráfica, que antes seguían ocupados mientras el libro estuviera abierto. Si hace falta otra vez,
+ * se cargan de la caché en unos segundos.
+ */
+const LIBERAR_TRAS_MS = 2 * 60 * 1000;
+
 export class LectorOcr {
   private trabajador: Worker | null = null;
+  private temporizadorLiberar: ReturnType<typeof setTimeout> | null = null;
   private pendientes = new Map<number, { ok: (l: LineaOcr[]) => void; mal: (e: Error) => void }>();
   private siguienteId = 1;
   /** Las páginas pedidas que aún no han terminado, esperen turno o se estén leyendo. */
@@ -57,6 +65,8 @@ export class LectorOcr {
   constructor(private alDescargar: (d: Descarga) => void) {}
 
   private trabajadorListo(): Worker {
+    if (this.temporizadorLiberar) clearTimeout(this.temporizadorLiberar);
+    this.temporizadorLiberar = null;
     if (this.trabajador) return this.trabajador;
     const t = new Worker(chrome.runtime.getURL('ocr.js'), { type: 'module' });
     t.onmessage = (e: MessageEvent<RespuestaOcr>) => {
@@ -133,9 +143,27 @@ export class LectorOcr {
     }
   }
 
+  /** Con todo leído, el trabajador se cierra pasado un rato si no llega nada más. */
+  private programarLiberacion() {
+    if (this.temporizadorLiberar) clearTimeout(this.temporizadorLiberar);
+    this.temporizadorLiberar = null;
+    if (!this.trabajador || this.cerrado) return;
+    this.temporizadorLiberar = setTimeout(() => {
+      this.temporizadorLiberar = null;
+      if (this.ocupado || this.esperando.length || this.pendientes.size) return;
+      console.debug('Kotonoha OCR: se sueltan los modelos tras un rato sin leer');
+      this.trabajador?.terminate();
+      this.trabajador = null;
+    }, LIBERAR_TRAS_MS);
+  }
+
   /** Lee la página más urgente de las que esperan, y después la siguiente. */
   private async seguir(): Promise<void> {
-    if (this.ocupado || !this.esperando.length) return;
+    if (this.ocupado) return;
+    if (!this.esperando.length) {
+      this.programarLiberacion();
+      return;
+    }
     this.ocupado = true;
     this.esperando.sort((a, b) => a.prioridad - b.prioridad || a.orden - b.orden);
     const t = this.esperando.shift()!;
@@ -170,6 +198,8 @@ export class LectorOcr {
 
   cerrar() {
     this.cerrado = true;
+    if (this.temporizadorLiberar) clearTimeout(this.temporizadorLiberar);
+    this.temporizadorLiberar = null;
     for (const t of this.tareas.values()) if (!t.enMarcha) t.mal(cancelada());
     this.tareas.clear();
     this.esperando = [];

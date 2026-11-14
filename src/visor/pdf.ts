@@ -170,28 +170,31 @@ export async function paginadorDePdf(archivo: Blob): Promise<Paginador> {
     );
     return { imagen, marco: r.marco };
   };
+  const pintar = (n: number) => () =>
+    usar(n, async (pagina) => {
+      const natural = pagina.getViewport({ scale: PUNTO });
+      const viewport = pagina.getViewport({ scale: PUNTO * NITIDEZ });
+      const lienzo = document.createElement('canvas');
+      lienzo.width = Math.ceil(viewport.width);
+      lienzo.height = Math.ceil(viewport.height);
+      await pagina.render({ canvas: lienzo, viewport }).promise;
+      // JPEG de calidad alta: en PNG cada página ocuparía varios MB en memoria. El OCR no lee esto si hay escaneo.
+      const blob = await new Promise<Blob>((ok, mal) => lienzo.toBlob((b) => (b ? ok(b) : mal(new Error('toBlob'))), 'image/jpeg', 0.94));
+      // El lienzo suelta su memoria ya: si no, cada página pintada retenía decenas de MB hasta la recolección.
+      lienzo.width = lienzo.height = 0;
+      const t = { ancho: Math.round(natural.width), alto: Math.round(natural.height) };
+      tamanos.set(n, t);
+      return { url: URL.createObjectURL(blob), ...t };
+    });
   return {
     total: doc.numPages,
     indice: await indiceDe(doc),
     direccion,
     direccionDelArchivo: !!declarada,
     tamano: (n) => tamanos.get(n) ?? tamanos.get(0) ?? null,
-    imagen: (n) =>
-      cache.obtener(n, () =>
-        usar(n, async (pagina) => {
-          const natural = pagina.getViewport({ scale: PUNTO });
-          const viewport = pagina.getViewport({ scale: PUNTO * NITIDEZ });
-          const lienzo = document.createElement('canvas');
-          lienzo.width = Math.ceil(viewport.width);
-          lienzo.height = Math.ceil(viewport.height);
-          await pagina.render({ canvas: lienzo, viewport }).promise;
-          // JPEG de calidad alta: en PNG cada página ocuparía varios MB en memoria. El OCR no lee esto si hay escaneo.
-          const blob = await new Promise<Blob>((ok, mal) => lienzo.toBlob((b) => (b ? ok(b) : mal(new Error('toBlob'))), 'image/jpeg', 0.94));
-          const t = { ancho: Math.round(natural.width), alto: Math.round(natural.height) };
-          tamanos.set(n, t);
-          return { url: URL.createObjectURL(blob), ...t };
-        })
-      ),
+    imagen: (n) => cache.obtener(n, pintar(n)),
+    imagenParaVer: (n) => cache.preparar(n, pintar(n)),
+    imagenYa: (n) => cache.ya(n),
     imagenOcr: (n) => usar(n, escaneo),
     textoPropio: (n) => {
       let t = textos.get(n);

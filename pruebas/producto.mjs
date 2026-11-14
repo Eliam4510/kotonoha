@@ -76,7 +76,9 @@ comprobar((await selector.locator('svg.ap-bandera').count()) === 3, 'Cada una co
 await selector.locator('[data-lengua="en"]').click();
 await p.waitForFunction(() => document.querySelector('.ap-lengua-segmentado [aria-checked="true"]')?.textContent?.includes('English'), null, { timeout: 8000 }).catch(() => {});
 comprobar((await ajustes()).idiomaObjetivo === 'en', 'Elegir English pasa a estudiar inglés');
-const saludo = await p.locator('.ap-saludo h1').innerText();
+// La pantalla en la otra lengua se prepara junto a la de antes y entra cuando está lista: se lee la que queda.
+await p.waitForFunction(() => document.querySelectorAll('.ap-principal').length === 1, null, { timeout: 8000 }).catch(() => {});
+const saludo = await p.locator('.ap-principal:not(.ap-preparando) .ap-saludo h1').first().innerText();
 comprobar(/^Good (morning|afternoon|evening)/.test(saludo), 'Y el saludo es en inglés', saludo);
 await p.screenshot({ path: join(CAPTURAS, '2-ingles.png') });
 

@@ -14,6 +14,7 @@ import { lengua } from '../ui/lengua';
 import { PanelTrazos } from '../ui/Trazos';
 import { BotonesEstadoGramatica, VistoEn } from '../ui/EstadoGramatica';
 import { estadoGramatica, estadosGramatica, NOMBRE_ESTADO_GRAMATICA } from '../ui/gramatica';
+import { useEsperar } from '../ui/preparacion';
 import type { EstadoGramatica } from '../compartido/tipos';
 import { guardarPreferencia, leerPreferencia, navegar } from './estadoApp';
 import { Cabecera, Vacio } from './Piezas';
@@ -110,6 +111,7 @@ function PantallaNiveles({ listas, ajustes }: { listas: ListasNivelLengua; ajust
   const [limite, fijarLimite] = useState(POR_PAGINA);
   const [caracter, fijarCaracter] = useState<CaracterNivel | null>(null);
   const [abierta, fijarAbierta] = useState<string | null>(null);
+  const esperar = useEsperar();
 
   const cargar = async (n = nivel) => {
     try {
@@ -127,7 +129,7 @@ function PantallaNiveles({ listas, ajustes }: { listas: ListasNivelLengua; ajust
     fijarLimite(POR_PAGINA);
     fijarCaracter(null);
     fijarAbierta(null);
-    cargar(nivel).catch(console.error);
+    esperar(cargar(nivel)).catch(console.error);
   }, [nivel]);
 
   const elegirNivel = (n: string) => {

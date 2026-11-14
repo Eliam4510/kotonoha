@@ -1,5 +1,5 @@
 // Prueba el acabado (0.30.0): que lo escrito no quede pegado al borde de su caja ni cortado, con distintas mezclas de
-// opciones. Tres partes:
+// opciones. Cuatro partes:
 //   1. Los subtítulos sobre el video. Con cada mezcla (tamaños, lecturas, glosas, sin traducción, sin fondo…) mide el
 //      aire entre la tinta y el borde de la caja: arriba, donde va la lectura, abajo y a los lados; que el bloque quepa
 //      en el video, y que ninguna lectura ni glosa pise otro texto.
@@ -11,8 +11,10 @@
 //      estrecha la ficha no tape lo que se lee, que lo que se borra pida confirmación, que el índice de Ajustes
 //      marque la sección que se lee y que al pasar de una palabra a otra no se vea ni la anterior a medio quitar ni la
 //      nueva a medio llegar.
+//   4. Las transiciones (0.31.0), en fotogramas de verdad: que al cambiar de sección no se vea el fondo vacío entre la
+//      de antes y la nueva, y que al pasar páginas en el visor no se vea el fondo entre una y otra.
 // Con KK_INFORME=carpeta guarda una captura de cada pantalla con lo encontrado señalado, y el informe completo.
-// Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/acabado.mjs [subtitulos] [pantallas] [detalles]
+// Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/acabado.mjs [subtitulos] [pantallas] [detalles] [transiciones]
 
 import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -672,6 +674,148 @@ if (quiere('detalles')) {
     await motor('cambiarPalabras', nueva).catch(() => {});
   }
   await borrarFrases(FUENTE_CAMBIO);
+}
+
+// ---------- 4. Las transiciones, fotograma a fotograma ----------
+// Lo que se ve de verdad (CDP screencast) al cambiar de sección y al pasar páginas en el visor. Antes, la sección nueva
+// aparecía desde el fondo vacío (un fotograma oscuro y casi liso y un fundido desde él) y entre una página y otra se
+// veía el fondo del visor.
+
+if (quiere('transiciones')) {
+  const { default: sharp } = await import('sharp');
+  const { strToU8, zipSync } = await import('fflate');
+  const grabador = async (pagina) => {
+    const cdp = await contexto.newCDPSession(pagina);
+    const fotos = [];
+    cdp.on('Page.screencastFrame', (f) => {
+      fotos.push({ t: f.metadata.timestamp * 1000, datos: f.data });
+      cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {});
+    });
+    return async (accion, ms = 1200) => {
+      fotos.length = 0;
+      await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 80, everyNthFrame: 1 });
+      await pagina.waitForTimeout(400);
+      const desde = Math.max(0, fotos.length - 1);
+      const t0 = Date.now();
+      await accion();
+      await pagina.waitForTimeout(ms);
+      await cdp.send('Page.stopScreencast');
+      return { t0, fotos: fotos.slice(desde) };
+    };
+  };
+  /** Luminancia media y desviación de una zona en cada fotograma; el primero es el de antes del cambio. */
+  const medir = async ({ t0, fotos }, zona) => {
+    const filas = [];
+    for (const f of fotos) {
+      const img = Buffer.from(f.datos, 'base64');
+      const { width, height } = await sharp(img).metadata();
+      const e = width / zona.vista;
+      const left = Math.round(zona.x * e);
+      const top = Math.round(zona.y * e);
+      const s = await sharp(img).extract({ left, top, width: Math.min(width - left, Math.round(zona.ancho * e)), height: Math.min(height - top, Math.round(zona.alto * e)) }).greyscale().stats();
+      filas.push({ t: Math.round(f.t - t0), media: s.channels[0].mean, desv: s.channels[0].stdev });
+    }
+    return filas;
+  };
+
+  /** Los grises de una zona del fotograma, en pequeño, para compararlos. */
+  const grises = async (foto, zona) => {
+    const img = Buffer.from(foto.datos, 'base64');
+    const { width, height } = await sharp(img).metadata();
+    const e = width / zona.vista;
+    const left = Math.round(zona.x * e);
+    const top = Math.round(zona.y * e);
+    const crudo = await sharp(img).extract({ left, top, width: Math.min(width - left, Math.round(zona.ancho * e)), height: Math.min(height - top, Math.round(zona.alto * e)) }).resize(200, 120, { fit: 'fill' }).greyscale().raw().toBuffer();
+    return Float64Array.from(crudo);
+  };
+  /**
+   * Cuánto contenido tiene un fotograma, como mezcla de la pantalla de antes (A) y la de después (B): se ajusta
+   * f ≈ a·A + b·B + c y se devuelve a + b. Un fundido entre las dos da cerca de 1; la de antes atenuada mientras se
+   * espera, algo más de la mitad; el fondo vacío o una pantalla que aparece desde él, cerca de 0.
+   */
+  const contenido = (A, B, f) => {
+    const n = f.length;
+    let aa = 0, bb = 0, ab = 0, sa = 0, sb = 0, af = 0, bf = 0, sf = 0;
+    for (let i = 0; i < n; i++) {
+      aa += A[i] * A[i]; bb += B[i] * B[i]; ab += A[i] * B[i]; sa += A[i]; sb += B[i];
+      af += A[i] * f[i]; bf += B[i] * f[i]; sf += f[i];
+    }
+    const r = 1e-6 * (aa + bb + n);
+    const M = [[aa + r, ab, sa], [ab, bb + r, sb], [sa, sb, n + r]];
+    const v = [af, bf, sf];
+    const det = (m) => m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+    const d = det(M);
+    const con = (k) => det(M.map((fila, i) => fila.map((x, j) => (j === k ? v[i] : x))));
+    return (con(0) + con(1)) / d;
+  };
+
+  // Las secciones: cada fotograma tiene que conservar el contenido de la de antes o de la nueva (un fundido entre las
+  // dos, o la de antes atenuada), nunca quedarse en el fondo vacío.
+  await p.goto('about:blank');
+  await p.goto(app('inicio'));
+  await p.locator('.ap-principal .ap-lienzo').first().waitFor({ timeout: 30000 });
+  await p.waitForTimeout(2500);
+  const grabar = await grabador(p);
+  const caja = await p.locator('.ap-principal').first().boundingBox();
+  const zona = { x: caja.x, y: caja.y, ancho: caja.width, alto: Math.min(caja.height, ALTO - caja.y), vista: ANCHO };
+  const vacios = [];
+  for (const r of ['diccionario', 'lector', 'biblioteca', 'memoria', 'palabras', 'niveles', 'ajustes', 'inicio']) {
+    const { t0, fotos } = await grabar(() => p.evaluate((h) => (location.hash = h), `#/${r}`));
+    const A = await grises(fotos[0], zona);
+    const B = await grises(fotos.at(-1), zona);
+    const malos = [];
+    for (const f of fotos.slice(1, -1)) {
+      const c = contenido(A, B, await grises(f, zona));
+      if (c < 0.45) malos.push(`${Math.round(f.t - t0)} ms ${c.toFixed(2)}`);
+    }
+    if (malos.length) vacios.push(`${r}: ${malos.join(', ')}`);
+  }
+  comprobar(!vacios.length, 'Al cambiar de sección no se ve el fondo vacío: la de antes sigue hasta que la nueva está lista', vacios.join(' ¦ '));
+  const pantallas = await p.locator('.ap-principal').count();
+  comprobar(pantallas === 1, 'Y al acabar queda una sola pantalla, sin la que se preparaba', String(pantallas));
+
+  // El visor: un libro de páginas claras, y ningún fotograma oscuro al pasarlas.
+  const paginaClara = (n) =>
+    sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754"><rect width="100%" height="100%" fill="#f6f1e6"/>${Array.from({ length: 14 }, (_, i) => `<rect x="150" y="${220 + i * 100}" width="${600 + ((i * 97 + n * 31) % 340)}" height="34" fill="#26221d"/>`).join('')}<text x="560" y="1650" font-size="48" fill="#26221d">${n}</text></svg>`))
+      .jpeg({ quality: 88 })
+      .toBuffer();
+  const archivos = { 'ComicInfo.xml': strToU8('<ComicInfo><Title>Transiciones del acabado</Title><Manga>No</Manga></ComicInfo>') };
+  for (let n = 1; n <= 10; n++) archivos[`p${String(n).padStart(3, '0')}.jpg`] = new Uint8Array(await paginaClara(n));
+  await p.goto('about:blank');
+  await p.goto(app('biblioteca'));
+  await p.waitForSelector('.ap-libro, .ap-vacio', { timeout: 20000 });
+  const tapa = () => p.locator('button.ap-tapa[aria-label*="Transiciones del acabado"]').first();
+  if (!(await tapa().count())) {
+    await p.setInputFiles('input[type=file][accept*=".epub"]', [{ name: 'transiciones.cbz', mimeType: 'application/zip', buffer: Buffer.from(zipSync(archivos)) }]);
+    await tapa().waitFor({ timeout: 30000 });
+  }
+  const nueva = contexto.waitForEvent('page', { timeout: 20000 });
+  await tapa().click();
+  const v = await nueva;
+  try {
+    await v.setViewportSize({ width: ANCHO, height: ALTO });
+    v.on('pageerror', (e) => errores.push(e.message));
+    await v.waitForSelector('.vs-pagina img', { timeout: 60000 });
+    await v.locator('.vs-barra [aria-label="Primera página"]').first().click();
+    const una = v.locator('.vs-barra [aria-label="Una página"]').first();
+    if ((await una.getAttribute('aria-pressed')) !== 'true') await una.click();
+    await v.waitForTimeout(1500);
+    const barra = await v.locator('.vs-barra').boundingBox();
+    const hoja = await v.locator('.vs-pagina').first().boundingBox();
+    const zonaHoja = { x: hoja.x + hoja.width * 0.1, y: Math.max(hoja.y, barra.y + barra.height) + 10, ancho: hoja.width * 0.8, alto: Math.min(hoja.height, ALTO - hoja.y) * 0.6, vista: ANCHO };
+    const grabarVisor = await grabador(v);
+    const oscuros = [];
+    const siguiente = v.locator('.vs-barra [aria-label="Página siguiente"]').first();
+    for (let i = 0; i < 6; i++) {
+      const filas = await medir(await grabarVisor(() => siguiente.click(), 900), zonaHoja);
+      // El fondo del visor es oscuro: un fotograma sin la página queda muy por debajo de la página ya puesta.
+      const malos = filas.filter((f) => f.t >= 0 && f.media < filas.at(-1).media * 0.6);
+      if (malos.length) oscuros.push(`paso ${i + 1}: ${malos.map((f) => `${f.t} ms media ${Math.round(f.media)}`).join(', ')}`);
+    }
+    comprobar(!oscuros.length, 'Al pasar páginas en el visor no se ve el fondo entre una y otra', oscuros.join(' ¦ '));
+  } finally {
+    await v.close();
+  }
 }
 
 comprobar(errores.length === 0, 'Sin errores en las páginas', [...new Set(errores)].join(' | '));

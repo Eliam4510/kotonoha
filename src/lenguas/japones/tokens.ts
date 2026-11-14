@@ -145,7 +145,26 @@ const CAT_NO_PALABRA = new Set(['記号', 'BOS/EOS']);
  * 1. Compuestos que existen en el diccionario (泥 + だらけ, お + 茶).
  * 2. Conjugaciones con su verbo o adjetivo (咲い + た, 食べ + て + いる).
  */
-export function unirTokens(crudos: TokenCrudo[], existe?: (termino: string) => boolean, opciones?: OpcionesAnalisis): TokenUnido[] {
+/**
+ * Lecturas de IPADIC que no valen. 環 sale siempre como タマキ, un nombre, también en ベンゼン環. Y unos kanji que van
+ * pegados a otro sustantivo, como en 官能基, 電子殻 o 炭素鎖, salen con la lectura de la palabra suelta (モト, カラ,
+ * クサリ): ahí se leen como sufijo. Los que dependen del sentido (値, 球, 根) se dejan como estén.
+ */
+const LECTURA_SUELTA: Record<string, string> = { 環: 'カン' };
+const LECTURA_SUFIJO: Record<string, string> = { 環: 'カン', 基: 'キ', 殻: 'カク', 鎖: 'サ' };
+
+export function corregirLecturas(crudos: TokenCrudo[]): TokenCrudo[] {
+  return crudos.map((t, i) => {
+    if (t.pos !== '名詞' || t.pos_detail_1 === '固有名詞') return t;
+    const previo = crudos[i - 1];
+    const sufijo = !!previo && previo.pos === '名詞' && previo.pos_detail_1 !== '数' && tieneJapones(previo.surface_form);
+    const r = (sufijo ? LECTURA_SUFIJO[t.surface_form] : undefined) ?? LECTURA_SUELTA[t.surface_form];
+    return r && r !== t.reading ? { ...t, reading: r, pronunciation: r } : t;
+  });
+}
+
+export function unirTokens(entrada: TokenCrudo[], existe?: (termino: string) => boolean, opciones?: OpcionesAnalisis): TokenUnido[] {
+  const crudos = corregirLecturas(entrada);
   const salida: TokenUnido[] = [];
   let i = 0;
   while (i < crudos.length) {

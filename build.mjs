@@ -5,6 +5,7 @@ import { copyFile, cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/p
 import { join } from 'node:path';
 import { generarIconos } from './herramientas/iconos.mjs';
 import { prepararFonetizador } from './herramientas/fonetizador.mjs';
+import { prepararKuromoji } from './herramientas/kuromoji.mjs';
 import { escribirLicencias } from './herramientas/licencias.mjs';
 import { MENSAJES, manifiesto } from './manifiesto.mjs';
 
@@ -103,11 +104,9 @@ async function estaticos() {
     await cp(`node_modules/pdfjs-dist/${carpeta}`, join(SALIDA, 'pdfjs', carpeta), { recursive: true, filter: (f) => !/quickjs/i.test(f) });
   }
 
-  // Kuromoji se carga como script clásico y sus diccionarios se leen con rutas relativas al documento.
-  await copyFile('node_modules/kuromoji/build/kuromoji.js', join(SALIDA, 'kuromoji.js'));
-  for (const archivo of await readdir('node_modules/kuromoji/dict')) {
-    await copyFile(join('node_modules/kuromoji/dict', archivo), join(SALIDA, 'dict', archivo));
-  }
+  // Kuromoji se carga como script clásico y sus diccionarios se leen con rutas relativas al documento. Se empaqueta desde
+  // sus fuentes, con el diccionario recortado: herramientas/kuromoji.mjs.
+  await prepararKuromoji(SALIDA);
 
   // Una tabla por idioma, aparte: el content script solo carga la que hace falta.
   for (const [idioma, textos] of Object.entries(MENSAJES)) {

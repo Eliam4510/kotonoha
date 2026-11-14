@@ -1,7 +1,7 @@
 // Ventana de la app: barra lateral, pantallas y el panel del creador de tarjetas.
 
 import { render } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { AJUSTES_INICIALES, type Ajustes, alCambiarAjustes, leerAjustes } from '../compartido/ajustes';
 import { motor } from '../compartido/rpc';
 import overlay from '../contenido/overlay.css';
@@ -25,6 +25,7 @@ import { ReproductorLocal } from './ReproductorLocal';
 import { MenuLengua } from './SelectorLengua';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
 import { seguirEstadosGramatica } from '../ui/gramatica';
+import { conFundido, Preparar } from '../ui/preparacion';
 
 interface Ruta {
   id: string;
@@ -164,12 +165,90 @@ function Lateral({ ruta, a }: { ruta: string; a: Ajustes }) {
   );
 }
 
+/**
+ * Una pantalla de la ventana. La clave dice cuándo es otra pantalla y no la misma con otros parámetros: la ruta y la
+ * lengua que se estudia, salvo el reproductor, cuyo video sigue abierto al cambiar de lengua y solo cambian sus pistas.
+ */
+interface Vista {
+  id: number;
+  clave: string;
+  ruta: string;
+  params: URLSearchParams;
+}
+let ultimaVista = 0;
+const claveDe = (ruta: string, objetivo: string) => (ruta === 'reproductor' ? ruta : `${ruta}:${objetivo}`);
+const vistaDe = (r: { ruta: string; params: URLSearchParams }, objetivo: string): Vista => ({ id: ++ultimaVista, clave: claveDe(r.ruta, objetivo), ...r });
+
+function Pantalla({ v, a }: { v: Vista; a: Ajustes }) {
+  const { ruta, params } = v;
+  return (
+    <>
+      {ruta === 'inicio' && <Inicio ajustes={a} />}
+      {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} categoria={params.get('cat') ?? undefined} />}
+      {ruta === 'lector' && <Cuaderno ajustes={a} inicial={params.get('t') ?? ''} editar={params.get('editar') === '1'} />}
+      {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
+      {ruta === 'reproductor' && <ReproductorLocal a={a} />}
+      {ruta === 'memoria' && <Memoria />}
+      {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}
+      {ruta === 'niveles' && <Niveles ajustes={a} />}
+      {ruta === 'practicar' && <PracticarFrase frase={params.get('t') ?? ''} ajustes={a} />}
+      {ruta === 'ajustes' && <PantallaAjustes a={a} />}
+    </>
+  );
+}
+
 function App() {
   const [a, fijarA] = useState<Ajustes>(() => ({ ...AJUSTES_INICIALES, tema: leerPreferencia('tema', AJUSTES_INICIALES.tema) }));
-  const [{ ruta, params }, fijarRuta] = useState(leerRuta());
   const tema = useTema(a.tema);
   const [cargados, fijarCargados] = useState(false);
   aplicarLengua(a);
+
+  // La pantalla que se ve y la pedida, que se prepara a escondidas junto a ella: entra cuando ya tiene lo suyo, con un
+  // fundido corto desde la anterior. Antes, la nueva aparecía desde el fondo vacío y se iba llenando a trozos.
+  const [vista, fijarVista] = useState<Vista | null>(null);
+  const [pedida, fijarPedida] = useState<Vista | null>(null);
+  const [cajaPedida, fijarCajaPedida] = useState<{ left: string; width: string } | null>(null);
+  const principal = useRef<HTMLElement>(null);
+  const vistaActual = useRef<Vista | null>(null);
+  vistaActual.current = vista;
+  const ultimaPedida = useRef<Vista | null>(null);
+  const objetivo = useRef(a.idiomaObjetivo);
+  objetivo.current = a.idiomaObjetivo;
+
+  const pedir = (r: { ruta: string; params: URLSearchParams }) => {
+    const actual = vistaActual.current;
+    const clave = claveDe(r.ruta, objetivo.current);
+    if (!actual) {
+      fijarVista(vistaDe(r, objetivo.current));
+      return;
+    }
+    if (actual.clave === clave) {
+      // La misma pantalla con otros parámetros (otra búsqueda del diccionario, otro texto del Cuaderno): los recibe.
+      ultimaPedida.current = null;
+      fijarPedida(null);
+      if (actual.params.toString() !== r.params.toString()) fijarVista({ ...actual, ...r });
+      return;
+    }
+    const previa = ultimaPedida.current;
+    const p = previa?.clave === clave ? { ...previa, ...r } : vistaDe(r, objetivo.current);
+    ultimaPedida.current = p;
+    const el = principal.current;
+    if (el) fijarCajaPedida({ left: `${el.offsetLeft}px`, width: `${el.offsetWidth}px` });
+    fijarPedida(p);
+  };
+
+  const ensenar = (id: number) => {
+    const p = ultimaPedida.current;
+    if (!p || p.id !== id) return;
+    // Lo que anima su entrada ya ha corrido a escondidas: se acaba, para no ver su final al enseñarla.
+    const el = document.querySelector<HTMLElement>(`.ap-principal[data-vista="${id}"]`);
+    for (const x of el?.getAnimations({ subtree: true }) ?? []) if (x.effect?.getComputedTiming().iterations !== Infinity) x.finish();
+    conFundido(() => {
+      ultimaPedida.current = null;
+      fijarVista(p);
+      fijarPedida(null);
+    });
+  };
 
   useEffect(() => {
     leerAjustes().then((x) => {
@@ -179,13 +258,22 @@ function App() {
     cargarFuentes().catch(() => {});
     seguirEstadosGramatica(() => lengua.value.id);
     const quitar = alCambiarAjustes(fijarA);
-    const alCambiarHash = () => fijarRuta(leerRuta());
+    const alCambiarHash = () => {
+      if (vistaActual.current) pedir(leerRuta());
+    };
     window.addEventListener('hashchange', alCambiarHash);
     return () => {
       quitar();
       window.removeEventListener('hashchange', alCambiarHash);
     };
   }, []);
+
+  // La primera pantalla, con los ajustes ya leídos (con los de omisión se montaría en otra lengua); y otra lengua de
+  // estudio, la misma pantalla de nuevo.
+  useEffect(() => {
+    if (cargados) pedir(leerRuta());
+  }, [cargados, a.idiomaObjetivo]);
+  const ruta = (pedida ?? vista)?.ruta ?? leerRuta().ruta;
 
   useEffect(() => {
     // Antes de leer los ajustes, `a` trae los valores por omisión: pedir ese idioma solo haría parpadear la ventana.
@@ -207,19 +295,26 @@ function App() {
     <div class="kk-raiz ap-app" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
       <style>{base + overlay + appCss}</style>
       <Lateral ruta={ruta} a={a} />
-      {/* Cada pantalla empieza de nuevo con otra lengua, salvo el reproductor: el video sigue abierto y solo cambian sus pistas. */}
-      <main class={`ap-principal ${ruta === 'reproductor' ? 'sin-scroll' : ''}`} key={ruta === 'reproductor' ? ruta : `${ruta}:${a.idiomaObjetivo}`}>
-        {ruta === 'inicio' && <Inicio ajustes={a} />}
-        {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} categoria={params.get('cat') ?? undefined} />}
-        {ruta === 'lector' && <Cuaderno ajustes={a} inicial={params.get('t') ?? ''} editar={params.get('editar') === '1'} />}
-        {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
-        {ruta === 'reproductor' && <ReproductorLocal a={a} />}
-        {ruta === 'memoria' && <Memoria />}
-        {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}
-        {ruta === 'niveles' && <Niveles ajustes={a} />}
-        {ruta === 'practicar' && <PracticarFrase frase={params.get('t') ?? ''} ajustes={a} />}
-        {ruta === 'ajustes' && <PantallaAjustes a={a} />}
-      </main>
+      {[vista, pedida].map((v) => {
+        if (!v) return null;
+        const aLaVista = v === vista;
+        return (
+          <main
+            key={v.id}
+            ref={aLaVista ? principal : undefined}
+            data-vista={v.id}
+            class={`ap-principal ${v.ruta === 'reproductor' ? 'sin-scroll' : ''} ${aLaVista ? (pedida ? 'cambiando' : '') : 'ap-preparando'}`}
+            style={aLaVista ? undefined : (cajaPedida ?? undefined)}
+            inert={!aLaVista}
+            aria-hidden={aLaVista ? undefined : 'true'}
+          >
+            {aLaVista && pedida && <div class="ap-progreso" role="progressbar" aria-label={tr('Cargando…')} />}
+            <Preparar alListo={() => ensenar(v.id)}>
+              <Pantalla v={v} a={a} />
+            </Preparar>
+          </main>
+        );
+      })}
       <Creador ajustes={a} />
       {cargados && !a.bienvenidaVista && <Bienvenida a={a} />}
     </div>
