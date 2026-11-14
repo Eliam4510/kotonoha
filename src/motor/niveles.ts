@@ -5,6 +5,7 @@ import type { CaracterConNivel, FraseEjemplo, ListaNivel, PuntoEncontrado, Resum
 import { buscarGramatica as buscarEnGramatica } from '../nucleo/explorar';
 import {
   caracteresDelNivel,
+  clavesDe,
   type DatosNivel,
   type FilaCaracter,
   type FilaGramatica,
@@ -64,6 +65,26 @@ export async function resumenNiveles(carpeta: string, niveles: string[]): Promis
   return niveles.map((nivel) =>
     resumirNivel(nivel, palabrasDelNivel(l.vocabulario.niveles[nivel] ?? [], mapa), caracteresDelNivel(l.kanji?.niveles[nivel] ?? [], todas), l.gramatica?.niveles[nivel]?.length ?? 0)
   );
+}
+
+const nivelesPorCarpeta = new Map<string, Promise<Map<string, string>>>();
+
+/**
+ * El nivel de cada palabra de las listas, por su clave y por las de sus otras formas y lecturas. Una palabra que está en
+ * dos niveles se queda con el más fácil, que es el primero de la lista.
+ */
+export function nivelesDeVocabulario(carpeta: string): Promise<Map<string, string>> {
+  let p = nivelesPorCarpeta.get(carpeta);
+  if (!p) {
+    p = leer<DatosNivel<FilaVocabulario>>(`${carpeta}/vocabulario.json`).then((v) => {
+      const salida = new Map<string, string>();
+      for (const [nivel, filas] of Object.entries(v.niveles)) for (const f of filas) for (const c of clavesDe(f)) if (!salida.has(c)) salida.set(c, nivel);
+      return salida;
+    });
+    p.catch(() => nivelesPorCarpeta.delete(carpeta));
+    nivelesPorCarpeta.set(carpeta, p);
+  }
+  return p;
 }
 
 /** Todos los patrones de gramática de las listas, de todos los niveles. */

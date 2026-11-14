@@ -296,6 +296,70 @@ export interface FraseEjemplo {
   inicio?: number;
 }
 
+// ---------- El vocabulario de un libro ----------
+
+/** Un trozo del texto de un libro con el sitio de donde sale: su página, su capítulo o su página de texto, desde 0. */
+export interface TrozoTexto {
+  texto: string;
+  lugar: number;
+}
+
+/** Una frase de un libro donde sale una palabra o un punto de gramática, con su sitio. */
+export interface EjemploTexto {
+  texto: string;
+  lugar: number;
+  /** La palabra como está escrita en esta frase: 食べた, de 食べる. */
+  superficie?: string;
+}
+
+/** Una palabra de un texto: cuántas veces sale, dónde sale por primera vez y unas frases donde sale. */
+export interface PalabraContada {
+  clave: string;
+  lema: string;
+  lectura: string;
+  /** La categoría gramatical del analizador: sirve para elegir la glosa que toca. */
+  categoria: string;
+  veces: number;
+  /** Una partícula o un auxiliar suelto. */
+  gramatica?: boolean;
+  /** Un nombre propio. */
+  nombre?: boolean;
+  /** El sitio de la primera vez que sale. */
+  lugar: number;
+  /** En qué orden aparece por primera vez entre las palabras del texto. */
+  orden: number;
+  /** Las mejores frases donde sale, para ver cómo se usa y para las tarjetas: ni muy largas ni muy cortas. */
+  ejemplos: EjemploTexto[];
+}
+
+/** Un punto de gramática de un texto: en cuántas frases sale y unas frases donde sale. */
+export interface GramaticaContada {
+  patron: string;
+  nivel?: string;
+  significado: string;
+  veces: number;
+  lugar: number;
+  ejemplos: EjemploTexto[];
+}
+
+/** Las palabras y la gramática de un texto, contadas. */
+export interface CuentaTexto {
+  /** Cuántas palabras tiene, contando cada vez que sale cada una. */
+  total: number;
+  frases: number;
+  palabras: PalabraContada[];
+  gramatica: GramaticaContada[];
+}
+
+/** Lo que se sabe de una palabra contada: su estado, su puesto en la lista de frecuencia y su nivel. */
+export interface DatoPalabra {
+  estado: EstadoPalabra;
+  rastreada: boolean;
+  rango?: number;
+  /** Su nivel en las listas del examen de la lengua (N5…N1), si está en ellas. */
+  nivel?: string;
+}
+
 /** Contenido de una tarjeta en el creador. */
 export interface BorradorTarjeta {
   tipo: 'frase' | 'palabra';

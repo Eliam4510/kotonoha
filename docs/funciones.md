@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.31.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.32.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -149,6 +149,9 @@ Estado de cada función en la versión 0.31.0, con la forma en que se ha verific
 | Texto del PDF: en un PDF con la capa de texto de otro programa de OCR, elegir entre ese texto y el OCR de Kotonoha, y que cada libro lo recuerde | Automática, y con un escaneo real |
 | El OCR lee por delante: las páginas siguientes (ocho en un manga, cuatro en un libro) antes de llegar, y deja de lado las que se saltan | Automática |
 | Procesar: leer con el OCR un libro entero desde su tarjeta, con el avance, pausa y «Texto listo» al acabar | Automática, y con un tomo real |
+| Vocabulario de un libro o de una colección: sus palabras contadas, las que más salen primero, con lectura, glosa, nivel del JLPT y sus mejores frases del libro con la página; cuánto se entiende y cuántas palabras faltan para el 90, el 95 y el 98 %; cambiar el estado de una o de todas las elegidas; tarjetas de golpe en Memoria o en Anki con la frase del libro, sin Claude; orden por veces, por aparición o por lo comunes que son; nombres propios aparte; la gramática del libro; en una colección, cada tomo con lo que trae de nuevo; leer con el OCR lo que falta desde la misma pantalla | Automática, con un texto, un EPUB de texto, un PDF, un CBZ con lo leído por el OCR y una colección; medido con una novela entera (unas 135 000 palabras en unos cuatro segundos) y con un tomo de manga real |
+| Glosas en japonés elegidas por la clase de palabra: なる como 成る, もの y こと como sustantivos, y ある, くる o いう con la entrada que el diccionario guarda con kanji; entre las que se leen igual, la más usada | Automática (pruebas unitarias), y medida contra la 0.31.0 con 1 900 palabras de una novela: 110 ganan su glosa, ninguna la pierde y las 6 que cambian lo hacen a mejor |
+| Diccionarios de la última versión de yomidevs que llegan vacíos: se baja la versión anterior más reciente que los trae enteros | Automática (pruebas unitarias), y con las versiones rotas reales del 12 y el 14 de noviembre de 2026 |
 | Editar el texto de una línea a mano, guardado aparte de lo leído y con «Restaurar» | Automática |
 | Notas y marcadores, como en un lector de PDF: marcar páginas, resaltar en cuatro colores o subrayar una línea, una palabra o un tramo, con un comentario, y notas sueltas sobre la página; en el panel «Notas y marcadores», todo por páginas, para ir, editar, quitar o copiar como texto | Automática |
 | Buscar en el libro: en el texto del PDF y en el del OCR, con lo editado, sin distinguir anchos ni hiragana y katakana, también una palabra partida entre dos renglones; resultados por páginas y marcados en la página | Automática |
@@ -268,6 +271,7 @@ Estado de cada función en la versión 0.31.0, con la forma en que se ha verific
 | Limitación | Detalle |
 |---|---|
 | PDF muy grandes | Mientras está abierto, un PDF reserva tanta memoria como pesa el archivo (así trabaja pdf.js): uno de 550 MB aparece con más de 1 GB en el administrador de tareas, aunque solo se use de verdad la parte leída. Al cerrarlo se libera |
+| Nombres propios en el vocabulario | Solo se apartan los que IPADIC reconoce como nombres; los de personajes que también son palabras (アイ, ルビー) salen como palabras y se pueden marcar como ignorados. Solo cuenta el texto ya leído: en un libro de imágenes, las páginas leídas con el OCR |
 | Idioma de estudio | Japonés, inglés y alemán. Cada idioma nuevo necesita su propio paquete, en `src/lenguas` |
 | Análisis del inglés | Lo hace un modelo pequeño, que cabe en la extensión. En frases ambiguas puede equivocarse de categoría, y con ella de traducción bajo la palabra. La ficha sigue mostrando todas las definiciones |
 | Análisis del alemán | Sale de las formas de los diccionarios: sin el alemán–inglés, cada palabra es su propia forma. Entre dos palabras posibles decide la frecuencia, sin mirar la frase; Claude corrige lo que falle al revisar la línea |

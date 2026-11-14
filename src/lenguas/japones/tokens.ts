@@ -139,6 +139,8 @@ function esCola(t: TokenCrudo, cabeza: TokenCrudo): boolean {
 }
 
 const CAT_NO_PALABRA = new Set(['記号', 'BOS/EOS']);
+/** Lo que alarga o corta un sonido, suelto: 「返してー」 o un っ que el OCR separó. No es una palabra. */
+const SOLO_ALARGAR = /^[ーｰ〜～っッ]+$/;
 
 /**
  * Une tokens en palabras:
@@ -216,7 +218,7 @@ export function unirTokens(entrada: TokenCrudo[], existe?: (termino: string) => 
     const superficie = grupo.map((t) => t.surface_form).join('');
     const lectura = grupo.map(lecturaDe).join('');
     const categoria = cabeza.pos;
-    const esPalabra = !CAT_NO_PALABRA.has(categoria) && tieneJapones(superficie);
+    const esPalabra = !CAT_NO_PALABRA.has(categoria) && tieneJapones(superficie) && !SOLO_ALARGAR.test(superficie);
     salida.push({
       superficie,
       lema,
@@ -227,6 +229,8 @@ export function unirTokens(entrada: TokenCrudo[], existe?: (termino: string) => 
       flexion,
       furigana: esPalabra ? alinearFurigana(superficie, lectura || superficie) : [{ texto: superficie }],
       inflexionado: superficie !== lema,
+      // Un compuesto del diccionario (日本語) ya no es el nombre que lo empieza.
+      ...(esPalabra && !compuesto && cabeza.pos_detail_1 === '固有名詞' ? { nombre: true } : {}),
     });
     i = fin;
   }

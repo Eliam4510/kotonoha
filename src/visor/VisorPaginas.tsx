@@ -8,7 +8,7 @@ import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
 import { Interruptor } from '../app/Piezas';
 import type { Ajustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
-import { motor } from '../compartido/rpc';
+import { fondo, motor } from '../compartido/rpc';
 import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca } from '../compartido/tipos';
 import { nuevoResaltado, resaltadosDe } from '../nucleo/anotaciones';
 import type { Hallazgo } from '../nucleo/busqueda';
@@ -870,6 +870,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                 alPulsar={() => fijarDireccion(rtl ? 'ltr' : 'rtl')}
               />
               <Boton icono="buscar" etiqueta={tr('Buscar en el libro')} activo={panel === 'buscar'} alPulsar={() => fijarPanel(panel === 'buscar' ? null : 'buscar')} />
+              <Boton icono="palabras" etiqueta={tr('Vocabulario del libro')} alPulsar={() => fondo.abrirApp(`vocabulario?libro=${encodeURIComponent(doc.id)}`).catch(console.error)} />
               <Boton icono="miniaturas" etiqueta={tr('Miniaturas')} activo={panel === 'miniaturas'} alPulsar={() => fijarPanel(panel === 'miniaturas' ? null : 'miniaturas')} />
               {paginador.indice.length > 0 && <Boton icono="indice" etiqueta={tr('Índice')} activo={panel === 'indice'} alPulsar={() => fijarPanel(panel === 'indice' ? null : 'indice')} />}
               <Boton

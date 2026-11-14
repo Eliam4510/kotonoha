@@ -81,6 +81,13 @@ describe('unión de tokens con Kuromoji real', () => {
     expect(p.find((x) => x.superficie === '猫')!.esGramatica).toBe(false);
   });
 
+  it('la marca de alargar suelta no es una palabra, y un nombre propio lo dice', () => {
+    const p = palabras('返してー!東京へ行く');
+    expect(p.filter((x) => x.esPalabra).map((x) => x.superficie)).not.toContain('ー');
+    expect(p.find((x) => x.superficie === '東京')?.nombre).toBe(true);
+    expect(p.find((x) => x.superficie === '行く')?.nombre).toBeUndefined();
+  });
+
   it('no trata el texto latino como palabra', () => {
     const p = palabras('I love 猫');
     expect(p.filter((x) => x.esPalabra).map((x) => x.superficie)).toEqual(['猫']);

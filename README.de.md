@@ -92,6 +92,12 @@ Seiten, die Bilder sind, wie Manga, eingescannte Bücher und viele PDFs, werden 
 
 <sub>Beispielseiten: 『改訂版 ここで差がつく 有機化合物の構造決定問題の要点・演習』 von Yoshikazu Nishimura und Takatomo Kurosawa (KADOKAWA, 2024) und 【推しの子】 (Oshi no Ko) Band 1 von Aka Akasaka und Mengo Yokoyari (Shueisha, 2020). Von jedem Werk wird eine einzige Seite gezeigt, um den Betrachter zu veranschaulichen; alle Rechte liegen bei den Autoren und Verlagen.</sub>
 
+### Der Wortschatz eines Buchs, bevor du es liest
+
+<img src="docs/img/vocabulario.de.png" alt="Wortschatz von 吾輩は猫である: Verständnis, zu lernende Wörter, Ziele von 90, 95 und 98 % und die Liste mit 書生 geöffnet und seinen Sätzen aus dem Buch" width="100%">
+
+Jedes Buch und jede Sammlung hat ihren **Wortschatz**: alle Wörter, gezählt, die häufigsten zuerst, mit Lesung, Glosse, JLPT-Stufe und ihrem besten Satz aus dem Buch. Oben steht, wie viel du schon verstehst und wie viele Wörter dir für 90, 95 oder 98 % fehlen. Die Wörter werden gleich dort als bekannt oder am Lernen markiert, und die ausgewählten gehen auf einmal ins Gedächtnis oder nach Anki, mit ihrem Satz aus dem Buch. Das geht mit Romanen, PDFs, Texten und mit der Texterkennung gelesenem Manga; in einer Reihe zeigt jeder Band, wie viele neue Wörter er bringt. Auch die Grammatik des Buchs ist da, Punkt für Punkt.
+
 ### Ein Notizbuch zum Schreiben und Lesen
 
 <img src="docs/img/lector-web.de.png" alt="Das Notizbuch in einem Tab, mit Absätzen, Furigana und Textverständnis" width="100%">

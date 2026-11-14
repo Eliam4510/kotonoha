@@ -8,7 +8,7 @@ import { Creador } from '../app/Creador';
 import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
 import type { Ajustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
-import { motor } from '../compartido/rpc';
+import { fondo, motor } from '../compartido/rpc';
 import type { ElementoBiblioteca } from '../compartido/tipos';
 import { DEL_LIBRO, DEL_VISOR, type MensajeLibro, type MensajeVisor } from '../libro/mensajes';
 import { type EpubDeTexto, leerEpubDeTexto } from '../nucleo/libro';
@@ -199,6 +199,7 @@ export function VisorTexto({ doc, archivo, ajustes: a }: { doc: ElementoBibliote
             <div class="vs-grupo">
               {(escritura?.verticalPropio || horizontal) && <Boton icono="texto-vertical" etiqueta={tr('Texto vertical')} activo={!horizontal} alPulsar={cambiarHorizontal} />}
               {libro.indice.length > 0 && <Boton icono="indice" etiqueta={tr('Índice')} activo={indiceAbierto} alPulsar={() => fijarIndiceAbierto(!indiceAbierto)} />}
+              <Boton icono="palabras" etiqueta={tr('Vocabulario del libro')} alPulsar={() => fondo.abrirApp(`vocabulario?libro=${encodeURIComponent(doc.id)}`).catch(console.error)} />
               <Boton
                 icono="invertir"
                 etiqueta={tr('Invertir colores')}

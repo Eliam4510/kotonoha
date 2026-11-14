@@ -15,6 +15,8 @@ import type {
   CambioBiblioteca,
   ColeccionBiblioteca,
   ContextoIA,
+  CuentaTexto,
+  DatoPalabra,
   ElementoBiblioteca,
   EstadisticasPalabras,
   EstadoAnki,
@@ -30,6 +32,7 @@ import type {
   ListaNivel,
   PuntoEncontrado,
   OpcionFalsa,
+  PalabraContada,
   PalabraToken,
   ResumenNivel,
   PeticionRevisionOcr,
@@ -39,6 +42,7 @@ import type {
   ResultadoImagen,
   SentidoEnContexto,
   TarjetaMemoria,
+  TrozoTexto,
 } from './tipos';
 
 /** Puerto con el que el motor habla con el ayudante local, a través del service worker. */
@@ -112,6 +116,15 @@ export interface ApiMotor {
   analizarLineas(lineas: Linea[], fuente?: { titulo?: string; url?: string; idVideo?: string }): Promise<LineaAnalizada[]>;
   /** Con `expresiones: false`, las expresiones con partícula quedan en sus palabras: para practicar el acento. */
   analizarTexto(texto: string, opciones?: OpcionesAnalisis): Promise<PalabraToken[][]>;
+  /** Las palabras y la gramática de unos trozos de un libro, contadas, con sus mejores frases: su vocabulario. */
+  contarPalabras(trozos: TrozoTexto[]): Promise<CuentaTexto>;
+  /**
+   * Lo que se sabe de unas palabras contadas, en el mismo orden: tu progreso y, salvo con `soloEstado`, su puesto en la
+   * lista de frecuencia y su nivel del examen.
+   */
+  datosPalabras(palabras: Pick<PalabraContada, 'clave' | 'lema' | 'lectura' | 'categoria' | 'gramatica'>[], soloEstado?: boolean): Promise<DatoPalabra[]>;
+  /** La glosa corta de unas palabras contadas, en el mismo orden; null si no la hay. Va aparte porque tarda. */
+  glosasPalabras(palabras: Pick<PalabraContada, 'clave' | 'lema' | 'lectura' | 'categoria'>[]): Promise<(string | null)[]>;
 
   buscar(lema: string, lectura?: string): Promise<ResultadoBusqueda>;
   /** Cómo se escribe un carácter, trazo a trazo. Sin datos, null. */

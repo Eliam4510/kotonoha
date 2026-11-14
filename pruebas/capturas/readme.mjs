@@ -6,6 +6,9 @@
 // libro escaneado, en modo Libro) y KK_MANGA="<epub o pdf>|<página>|<palabra>" (en modo Manga): la página, contada
 // desde 1 como en el visor, y la palabra cuya ficha se abre. Sin KK_ESCANEO se lee una página escrita para esto, y sin
 // KK_MANGA no hay imagen del manga. Con la interfaz en japonés siempre se usa la página escrita, que está en inglés.
+// El vocabulario es el del mismo EPUB, con las palabras más fáciles marcadas como conocidas mientras se fotografía.
+// KK_SOLO="vocabulario" (o una lista separada por comas de video, libro, ocr, manga y vocabulario) rehace solo esas
+// imágenes: así no se pierden las de los libros reales al rehacer otra.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/capturas/readme.mjs [es en de zh ko ja]
 
 import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
@@ -22,6 +25,8 @@ const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-readme'));
 const IMAGENES = join(RAIZ, 'docs', 'img');
 const IDIOMAS = process.argv.slice(2).length ? process.argv.slice(2) : ['es', 'en', 'zh', 'ko', 'de', 'ja'];
+const SOLO = process.env.KK_SOLO?.split(',').map((x) => x.trim());
+const hacer = (captura) => !SOLO || SOLO.includes(captura);
 
 // La primera vez, el perfil parte de los diccionarios de japonés del perfil base: no hace falta descargarlos otra vez.
 if (!existsSync(PERFIL) && existsSync(join(RAIZ, '.perfil-base', 'Default', 'IndexedDB'))) {
@@ -439,6 +444,39 @@ async function paginaReal(b, etiqueta, real, id) {
   await v.close();
 }
 
+// ---------- El vocabulario del EPUB ----------
+
+/**
+ * El vocabulario del EPUB de muestra, como lo vería quien ya sabe lo más básico: las palabras de N5 y N4, o las 1500
+ * más comunes en inglés, se marcan como conocidas mientras se hace la foto, y después se dejan como estaban.
+ */
+async function vocabularioDeLibro(b, datos, estudia, id) {
+  const libro = (await motor('bibliotecaListar')).find((e) => e.titulo === datos.epub.titulo);
+  if (!libro) throw new Error(`No está en la estantería: ${datos.epub.titulo}`);
+  const texto = (estudia === 'ja' ? SOSEKI : CARROLL).map((p) => p.replace(/<rt>.*?<\/rt>/g, '').replace(/<[^>]+>/g, '')).join('\n');
+  const cuenta = await motor('contarPalabras', [{ texto, lugar: 0 }]);
+  const datosPalabras = await motor('datosPalabras', cuenta.palabras.map(({ clave, lema, lectura, categoria, gramatica }) => ({ clave, lema, lectura, categoria, gramatica })));
+  const faciles = cuenta.palabras.filter((p, i) => {
+    const d = datosPalabras[i];
+    return d.estado === 'desconocida' && (estudia === 'ja' ? d.nivel === 'N5' || d.nivel === 'N4' : (d.rango ?? Infinity) <= 1500);
+  });
+  await motor('cambiarPalabras', faciles.map((p) => ({ clave: p.clave, lema: p.lema, lectura: p.lectura, estado: 'conocida' })));
+  try {
+    await b.setViewportSize({ width: 1280, height: 1080 });
+    await b.goto('about:blank');
+    await b.goto(`chrome-extension://${idExt}/app.html#/vocabulario?libro=${encodeURIComponent(libro.id)}`);
+    await b.waitForSelector('.ap-voc-lista', { timeout: 60000 });
+    await b.waitForFunction(() => !document.querySelector('.ap-voc-esqueleto'), null, { timeout: 30000 });
+    // La primera palabra, abierta: con sus frases del libro.
+    await b.locator('.ap-voc-termino').first().click();
+    await b.waitForTimeout(1200);
+    await guardar(b, 'vocabulario', id);
+  } finally {
+    await motor('cambiarPalabras', faciles.map((p) => ({ clave: p.clave, lema: p.lema, lectura: p.lectura, estado: 'desconocida' })));
+    await b.setViewportSize({ width: 1280, height: 800 });
+  }
+}
+
 // ---------- El Portapapeles en inglés, para quien habla japonés ----------
 
 const PORTAPAPELES_EN =
@@ -483,14 +521,17 @@ for (const id of IDIOMAS) {
   if (estudia === 'ja') await diccionarios('ja', id === 'es' ? ['jmdict-es', 'jmdict-en'] : id === 'de' ? ['jmdict-de', 'jmdict-en'] : ['jmdict-en']);
   else await diccionarios('en', ['wty-en-ja', 'wty-en-ja-gloss'], ['wty-en-ipa', 'frecuencia-subtitulos']);
   await olvidarRespuestas();
-  if (estudia === 'ja') await video(id);
-  else await portapapeles(id);
+  if (hacer('video')) {
+    if (estudia === 'ja') await video(id);
+    else await portapapeles(id);
+  }
   const datos = LIBROS[estudia];
-  const reales = estudia === 'ja' ? [ESCANEO, MANGA].filter(Boolean) : [];
+  const reales = estudia === 'ja' && (hacer('ocr') || hacer('manga')) ? [ESCANEO, MANGA].filter(Boolean) : [];
   const { b, etiquetas } = await biblioteca(datos, reales);
-  await libroDeTexto(b, datos, id);
-  if (!etiquetas.ocr) await paginaConOcr(b, datos, id);
-  for (const r of reales) await paginaReal(b, etiquetas[r.base], r, id);
+  if (hacer('libro')) await libroDeTexto(b, datos, id);
+  if (hacer('ocr') && !etiquetas.ocr) await paginaConOcr(b, datos, id);
+  for (const r of reales) if (hacer(r.base)) await paginaReal(b, etiquetas[r.base], r, id);
+  if (hacer('vocabulario')) await vocabularioDeLibro(b, datos, estudia, id);
   await b.close();
 }
 

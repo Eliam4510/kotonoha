@@ -381,7 +381,7 @@ function ListaGramatica({ gramatica, idioma, abierta, alAbrir }: { gramatica: Gr
 }
 
 /** Una frase con los trozos fijos del patrón resaltados, en orden. */
-function ConPatron({ texto, trozos }: { texto: string; trozos: string[] }) {
+export function ConPatron({ texto, trozos }: { texto: string; trozos: string[] }) {
   const partes: preact.ComponentChildren[] = [];
   let desde = 0;
   for (const t of trozos) {
