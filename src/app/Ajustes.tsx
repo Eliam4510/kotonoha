@@ -26,6 +26,7 @@ import { exportarCopiaCompleta, hayCopiaCompleta, restaurarCopiaCompleta, type R
 import { nombreCorto } from '../nucleo/voces';
 import { CLAVES_PROVEEDORES, idParaProveedor, type ProveedorConocido, type ProveedorIA, PROVEEDORES_CONOCIDOS, separarModelo, valorDeModelo } from '../compartido/proveedores';
 import { decirConNavegador, vocesDeLaLengua } from '../ui/vozNavegador';
+import { useEsperar } from '../ui/preparacion';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -243,8 +244,10 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
   const [guardada, fijarGuardada] = useState(false);
   const [prueba, fijarPrueba] = useState<{ texto: string; error?: boolean } | null>(null);
   const [probando, fijarProbando] = useState(false);
+  const esperar = useEsperar();
   useEffect(() => {
-    chrome.storage.local.get(CLAVE_API).then((d) => fijarGuardada(!!d[CLAVE_API]));
+    // Sin esperarlo, la pantalla se abría diciendo «Aún no hay clave» y cambiaba al momento.
+    esperar(chrome.storage.local.get(CLAVE_API)).then((d) => fijarGuardada(!!d[CLAVE_API]));
   }, []);
   return (
     <Seccion id="claude" icono="ia" ia titulo={tr('Claude')} descripcion={tr('La IA usa tu propia clave de la API. Se guarda solo en este navegador y nunca llega a las páginas que visitas.')}>
@@ -990,7 +993,8 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
             }
           }}><Icono n="conectado" t={14} /> {tr('Conectar con Anki')}</button>
         </Opcion>
-        {e?.conectado && (
+        {/* El mazo, el tipo de nota y sus campos solo cuentan si las tarjetas van a Anki: con «Memoria» no se usan. */}
+        {e?.conectado && a.destino === 'anki' && (
           <>
             <Opcion titulo={tr('Mazo')}>
               <input class="campo ap-campo-corto" list="kk-mazos" aria-label={tr('Mazo de Anki')} value={a.ankiMazo} onInput={(ev) => cambiar({ ankiMazo: ev.currentTarget.value })} />
@@ -1013,7 +1017,7 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
       </div>
       {mensaje && <Mensaje error={mensaje.error}>{mensaje.texto}</Mensaje>}
 
-      {e?.conectado && campos.length > 0 && (
+      {e?.conectado && a.destino === 'anki' && campos.length > 0 && (
         <>
           <Subtitulo>{tr('Campos de')} {a.ankiModelo}</Subtitulo>
           <div class="ap-grupo">

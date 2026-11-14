@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.30.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.31.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -23,6 +23,7 @@ Stand jeder Funktion in Version 0.30.1 und die Art ihrer Überprüfung.
 | Die Untertitel folgen dem Video beim Scrollen der Seite, ohne zu zittern | Nachgebildete Seite und echte Sitzung |
 | Eine Zeile, die unter einer ruhenden Maus erscheint, öffnet kein Wortfenster und hält das Video nicht an | Automatisch |
 | Untertitel mit Furigana, Farbe nach Tonhöhenakzent und Unterstreichung nach Status | Automatisch |
+| Lesungen, die IPADIC falsch liefert, korrigiert: 環 allein (かん, nicht たまき) und Kanji, die als Suffix angehängt sind, wie in 官能基, 電子殻 oder 炭素鎖 | Automatisch |
 | Modi für Furigana, Glossen und Farbe: immer, beim Überfahren, unbekannte, nie | Automatisch |
 | Der Untertitelkasten lässt an allen vier Seiten Luft und nichts überlappt sich, bei jeder Kombination aus Größe (70 bis 250 %), Lesungen, Glossen, Übersetzung und Hintergrund, im breiten wie im schmalen Fenster; die Übersetzung jedes unbekannten Wortes steht darunter | Automatisch |
 | Wortfenster: Definitionen, Status, Häufigkeit, Audio, Bilder, Beispiele und Links | Automatisch |
@@ -48,6 +49,7 @@ Stand jeder Funktion in Version 0.30.1 und die Art ihrer Überprüfung.
 | JLPT-Grammatik: rund 100 von Claude bestätigte Regeln, mit einer Übersicht pro Video | Simulator |
 | Vorrangige Wörter: die unbekannten, die sich im Video am häufigsten wiederholen | Automatisch |
 | Wiedergabemodi: intensives Hören und Lesen, Hybrid, Fokus auf ein Wort und benutzerdefiniert | Automatisch |
+| Mit der automatischen Pause und **Nach einer Weile fortsetzen** hält ein offenes Wortfenster den Countdown an, der beim Schließen neu beginnt; mit **Beim Überfahren des Untertitels** auch die Maus darüber. Optionen, die nicht greifen, werden ausgeblendet, und die beiden Arten fortzusetzen schließen sich aus | Automatisch |
 | Schleier über den Untertiteln | Automatisch |
 | Beschleunigen oder Überspringen von Szenen ohne Dialog | Automatisch |
 | Untertitel-Navigator: Filter, Markierungen, Auswahl und Zusammenführen von Zeilen | Automatisch |
@@ -114,6 +116,7 @@ Stand jeder Funktion in Version 0.30.1 und die Art ihrer Überprüfung.
 
 | Funktion | Überprüfung |
 |---|---|
+| Wechsel zwischen Bereichen ohne leeren Hintergrund dazwischen: Der neue wird vorbereitet, während der vorige sichtbar bleibt, und erscheint auf einmal, mit einem Balken, wenn es dauert | Automatisch, Bild für Bild |
 | Startseite mit Übersicht über Wortschatz und Wiederholung | Automatisch |
 | Kosten für Claude: Monatssumme, Diagramm nach Tagen und Modellen, Aufgaben und Anfrageprotokoll | Simulator |
 | Wörterbuch mit freier Suche und konjugierten Formen | Automatisch |
@@ -133,6 +136,8 @@ Stand jeder Funktion in Version 0.30.1 und die Art ihrer Überprüfung.
 | Bibliothek: TXT, HTML und SRT, mit den Überschriften, Absätzen und Listen jedes Kapitels | Automatisch |
 | Löschen verlangt eine Bestätigung: ein Buch (mit Datei, Lesefortschritt und Anmerkungen), ein Wörterbuch, ein gespeichertes Modell, eine Karte im Gedächtnis, eine geschriebene Notiz oder der API-Schlüssel | Automatisch |
 | Betrachter für Seitenbücher: EPUB aus Bildern, CBZ und PDF in einem eigenen Tab, mit Zoom, Anpassung an Breite oder Seite, Einzelseite, Doppelseite und fortlaufendem Bildlauf | Automatisch |
+| Im Betrachter blättern, ohne zwischen den Seiten den Hintergrund zu sehen: Die neue Seite erscheint mit fertigem Bild, und wenn es dauert, bleibt die vorige mit einem Balken | Automatisch, Bild für Bild |
+| Die Texterkennung gibt ihre Modelle nach zwei Minuten ohne Lesen frei, auch bei geöffnetem Buch: etwa 470 MB Arbeitsspeicher und 0,7 bis 1 GB auf der Grafikkarte | Gemessen, mit einem echten Manga |
 | Bilderordner als Bücher: Jeder Ordner, oder jeder Band darin, wird ein Buch, mit der Titelseite vorn, einem Inhaltsverzeichnis nach Kapiteln und querformatigen Doppelseiten für sich | Automatisch, und mit 40 echten Manga-Bänden |
 | Sammlungen im Regal: eine Reihe mit ihren Bänden oder ein Thema, mit Art, Beschreibung und Titelbild; ein Ordner mit mehreren Bänden kommt als Sammlung herein, und ein neuer Band kommt in seine | Automatisch |
 | Lesefortschritt: wie viel von jedem Buch und jeder Sammlung gelesen ist, „Gelesen“ am Ende oder von Hand, „Weiterlesen“ und Filter nach Stand | Automatisch |
@@ -253,6 +258,8 @@ Stand jeder Funktion in Version 0.30.1 und die Art ihrer Überprüfung.
 | Claude nur, wenn nötig | Das Wortfenster öffnet sich mit dem Wörterbuch, und die Prüfung deckt den kommenden Abschnitt ab statt des ganzen Videos |
 | Zuerst das, was läuft | Übersetzung, Korrektur und Prüfung ordnen die Abschnitte nach der Abspielposition |
 | Der Computer bleibt benutzbar | Die Transkription legt Pausen ein, passt sich der Nutzung an und hält bei wiederholten Ausfällen an |
+| Kein Flackern | Was sich als Ganzes ändert (ein Bereich, eine Seite im Betrachter, ein Wort im Wörterbuch), wird vorbereitet, während das Vorige sichtbar bleibt, und erscheint auf einmal; dauert es, zeigt ein dünner Balken das an |
+| Sparsamer Speicher | Die japanische Analyse lädt ihr Wörterbuch ohne Auffüllung, vom Browser entpackt; die Texterkennung gibt ihre Modelle frei, wenn sie nicht mehr liest, und Whisper drei Minuten nach dem Transkribieren |
 | Seiten werden nicht umgeschrieben | Die Unterstreichung im Web verwendet die CSS Custom Highlight API, ohne dem Inhalt etwas hinzuzufügen. Nur der Zeilenabstand wird geöffnet, wo Furigana nicht passen |
 | Lokale Daten | Alles bleibt im Browser, und das Audio der Transkription verlässt den Computer nicht |
 
@@ -260,6 +267,7 @@ Stand jeder Funktion in Version 0.30.1 und die Art ihrer Überprüfung.
 
 | Einschränkung | Einzelheit |
 |---|---|
+| Sehr große PDFs | Solange es geöffnet ist, reserviert ein PDF so viel Speicher, wie die Datei groß ist (so arbeitet pdf.js): Eine Datei mit 550 MB zeigt im Task-Manager mehr als 1 GB, obwohl nur der gelesene Teil wirklich belegt ist. Beim Schließen wird er freigegeben |
 | Lernsprache | Japanisch, Englisch und Deutsch. Jede neue Sprache braucht ihr eigenes Paket in `src/lenguas` |
 | Analyse des Englischen | Sie erfolgt mit einem kleinen Modell, das in die Erweiterung passt. In mehrdeutigen Sätzen kann es die Wortart falsch bestimmen und damit auch die Übersetzung unter dem Wort. Das Wortfenster zeigt weiterhin alle Definitionen |
 | Analyse des Deutschen | Sie stammt aus den Formen der Wörterbücher: Ohne Deutsch–Englisch ist jedes Wort seine eigene Form. Zwischen zwei möglichen Wörtern entscheidet die Häufigkeit, ohne auf den Satz zu achten; Claude korrigiert Fehler, wenn es die Zeile prüft |

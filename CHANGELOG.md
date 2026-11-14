@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.31.0 · 2026-11-14
+
+Una versión de fluidez, memoria y opciones que chocaban.
+
+- **Sin negro al cambiar de sección.** Al pasar de una sección a otra (Inicio, Diccionario, Biblioteca, Ajustes…), la nueva aparecía desde el fondo vacío, con un fundido de un tercio de segundo, y se iba llenando a trozos. Ahora se prepara a escondidas mientras sigue a la vista la anterior y entra de una vez, con un fundido corto desde ella. Si tarda, la anterior se atenúa y una barra fina dice que algo llega.
+- **Páginas sin hueco en el visor.** Entre una página y la siguiente se veía el fondo del visor durante uno o más fotogramas. Ahora la nueva entra con su imagen lista; si aún no lo está, se queda la anterior a la vista, con una barra fina si tarda.
+- **Menos memoria.** El analizador del japonés (Kuromoji) descomprime su diccionario con el propio navegador, el doble de rápido, y ya no lo carga con el relleno de ceros que traía ni con las unas 150 000 clases de caracteres vacías que creaba: unos 60 MB menos todo el rato. El OCR suelta sus modelos tras dos minutos sin leer, aunque el libro siga abierto: unos 470 MB de memoria y entre 0,7 y 1 GB de la tarjeta gráfica. Las páginas de un PDF sueltan su lienzo en cuanto se pintan.
+- **Opciones que chocaban.** Con la pausa al final de la línea y **Reanudar tras un tiempo**, consultar una palabra no paraba la cuenta atrás y el video arrancaba con la ficha abierta: ahora se detiene mientras la ficha está abierta y vuelve a empezar al cerrarla (con **Al pasar por el subtítulo**, también mientras el ratón está encima). **Reanudar tras un tiempo** y **Según lo que tardas en leer** ya no pueden ir juntas: mandaba la segunda sin decirlo. **Reanudar al terminar** y **Esperar al final de la línea** solo salen cuando sirven, igual que **Solo con palabras desconocidas**, que solo vale con **Abrir al pasar el ratón**; y el mazo, el tipo de nota y los campos de Anki, solo si las tarjetas van a Anki.
+- **Lecturas.** 環 ya no sale como たまき, y 官能基, メチル基, 電子殻 o 炭素鎖 se leen como en química (き, かく, さ) en vez de もと, から o くさり.
+- La fila de imágenes de la ficha ya no saca una barra de desplazamiento vertical al pasar el ratón por una imagen.
+
 ## 0.30.1 · 2026-11-10
 
 - **De una palabra a otra, sin fantasmas.** Al abrir otra palabra en el diccionario (otro resultado de la lista, una de las que significan lo mismo, una palabra de «Donde la has visto» o un kanji) se veía la anterior, luego la página vacía con esqueletos y luego la nueva llegando a trozos, con la página cambiando de alto en cada uno. Ahora la nueva se prepara mientras sigue a la vista la anterior y entra de una vez, con un fundido corto. Si tarda, la anterior se atenúa y una barra fina dice que algo llega. Las frases de «Donde la has visto» llegan ya con su lectura, en vez de aparecer sin ella y crecer un momento después, y una palabra abierta desde abajo de la página se ve desde su principio.
@@ -272,6 +283,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.31.0 · 2026-11-14
+
+A release about smoothness, memory and options that clashed.
+
+- **No black between sections.** Moving from one section to another (Home, Dictionary, Library, Settings…), the new one appeared from an empty background, fading in over a third of a second, and filled up in pieces. It is now prepared out of sight while the previous one stays in view, and comes in all at once with a short fade from it. If it takes a while, the previous one dims and a thin bar shows that something is on its way.
+- **No gap between pages in the viewer.** Between one page and the next, the viewer's background showed for one frame or more. The new page now comes in with its image ready; if it is not ready yet, the previous one stays in view, with a thin bar if it takes a while.
+- **Less memory.** The Japanese analyser (Kuromoji) decompresses its dictionary with the browser itself, twice as fast, and no longer loads it with the zero padding it carried or the roughly 150,000 empty character classes it created: about 60 MB less at all times. OCR releases its models after two minutes without reading, even with the book still open: about 470 MB of memory and 0.7 to 1 GB on the graphics card. PDF pages free their canvas as soon as they are painted.
+- **Options that clashed.** With the pause at the end of each line and **Resume after a while**, looking up a word did not stop the countdown and the video started with the word panel open: the countdown now stops while the panel is open and starts again when it is closed (with **When hovering over the subtitle**, also while the mouse is over it). **Resume after a while** and **Based on how long you take to read** can no longer be on together: the second one won without saying so. **Resume when finished** and **Wait for the end of the line** only show when they apply, as does **Only with unknown words**, which only works with **Open on hover**; and the Anki deck, note type and fields only show when cards go to Anki.
+- **Readings.** 環 is no longer read as たまき, and 官能基, メチル基, 電子殻 or 炭素鎖 are read as in chemistry (き, かく, さ) instead of もと, から or くさり.
+- The row of images in the word panel no longer brings up a vertical scrollbar when the mouse passes over an image.
 
 ## 0.30.1 · 2026-11-10
 

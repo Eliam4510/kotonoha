@@ -93,6 +93,20 @@ describe('unión de tokens con Kuromoji real', () => {
     expect(p[1].superficie).toBe('で');
   });
 
+  it('corrige las lecturas de IPADIC que no valen: 環 suelto y los kanji que van como sufijo', () => {
+    const lectura = (texto: string, superficie: string, existe?: (t: string) => boolean) => palabras(texto, existe).find((p) => p.superficie === superficie)?.lectura;
+    expect(lectura('この環に結合する', '環')).toBe('かん');
+    expect(lectura('ベンゼン環の構造', '環')).toBe('かん');
+    expect(lectura('メチル基が結合', '基')).toBe('き');
+    expect(lectura('電子殻', '殻')).toBe('かく');
+    expect(lectura('炭素鎖が長い', '鎖')).toBe('さ');
+    // Con el compuesto en el diccionario, su lectura sale entera y bien.
+    expect(lectura('官能基を持つ', '官能基', (t) => t === '官能基')).toBe('かんのうき');
+    // Suelto o tras una partícula, la palabra de siempre.
+    expect(lectura('卵の殻を割る', '殻')).toBe('から');
+    expect(lectura('鎖につながれた', '鎖')).toBe('くさり');
+  });
+
   it('une compuestos conjugados usando el lema final', () => {
     const existe = (t: string) => t === '読み始める';
     const p = palabras('読み始めた', existe);

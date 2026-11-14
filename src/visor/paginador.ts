@@ -28,6 +28,13 @@ export interface Paginador {
   tamano(n: number): Tamano | null;
   imagen(n: number): Promise<PaginaImagen>;
   /**
+   * La página pintada y además decodificada, para enseñarla: solo las que se van a ver, porque cada una decodificada
+   * ocupa decenas de MB (el OCR y las miniaturas piden la imagen sin más).
+   */
+  imagenParaVer?(n: number): Promise<PaginaImagen>;
+  /** La página ya lista para ver, sin esperar: así se enseña en el mismo fotograma, sin fondo vacío antes. */
+  imagenYa?(n: number): PaginaImagen | undefined;
+  /**
    * Lo que conviene leer con el OCR, si no es la página tal como se ve: en un PDF escaneado, la imagen escaneada tal cual.
    * Null si la página no es solo eso.
    */
@@ -56,8 +63,29 @@ const LIMITE_CACHE = 40;
 
 export class CachePaginas {
   private mapa = new Map<number, Promise<PaginaImagen>>();
+  private listas = new Map<number, PaginaImagen>();
 
-  obtener(n: number, crear: () => Promise<PaginaImagen>): Promise<PaginaImagen> {
+  /** La página ya lista, o nada si aún no lo está. */
+  ya(n: number): PaginaImagen | undefined {
+    return this.listas.get(n);
+  }
+
+  /**
+   * La página para verla: cuando llega, queda apuntada como lista y el visor la puede montar en el mismo fotograma. La
+   * decodifica el navegador al pintarla (decoding="sync" en el visor), a la escala a que se ve: decodificarla antes
+   * aquí, a su tamaño entero, costaba unos 40 MB por página sin evitar nada.
+   */
+  preparar(n: number, hacer: () => Promise<PaginaImagen>): Promise<PaginaImagen> {
+    const promesa = this.obtener(n, hacer);
+    if (this.listas.has(n)) return promesa;
+    return promesa.then((p) => {
+      // Si se soltó mientras se pintaba (o la sustituyó otra), no se da por lista: su dirección ya no vale.
+      if (this.mapa.get(n) === promesa) this.listas.set(n, p);
+      return p;
+    });
+  }
+
+  obtener(n: number, hacer: () => Promise<PaginaImagen>): Promise<PaginaImagen> {
     const guardada = this.mapa.get(n);
     if (guardada) {
       // La usada se pasa al final: así se suelta antes la que lleva más tiempo sin verse.
@@ -65,12 +93,13 @@ export class CachePaginas {
       this.mapa.set(n, guardada);
       return guardada;
     }
-    const nueva = crear();
+    const nueva = hacer();
     this.mapa.set(n, nueva);
     nueva.catch(() => this.mapa.delete(n));
     while (this.mapa.size > LIMITE_CACHE) {
       const [vieja, promesa] = this.mapa.entries().next().value as [number, Promise<PaginaImagen>];
       this.mapa.delete(vieja);
+      this.listas.delete(vieja);
       promesa.then((p) => URL.revokeObjectURL(p.url)).catch(() => {});
     }
     return nueva;
@@ -79,6 +108,7 @@ export class CachePaginas {
   vaciar() {
     for (const p of this.mapa.values()) p.then((x) => URL.revokeObjectURL(x.url)).catch(() => {});
     this.mapa.clear();
+    this.listas.clear();
   }
 }
 
@@ -96,23 +126,24 @@ export async function paginadorDeZip(archivo: Blob, nombre: string, porDefecto: 
   if (!libro) throw new Error(tr('Este EPUB es de texto: se lee desde la Biblioteca, como texto.'));
   const cache = new CachePaginas();
   const tamanos = new Map<number, Tamano>();
+  const leer = (n: number) => async () => {
+    const ruta = libro.paginas[n];
+    const entrada = ruta ? indice.get(ruta) : undefined;
+    if (!entrada) throw new Error(tr('Falta la imagen de la página {0}', n + 1));
+    const bytes = await leerEntrada(f, entrada);
+    const blob = new Blob([bytes as BlobPart], { type: tipoDeImagen(ruta) });
+    const t = tamanoDeImagen(bytes) ?? (await medirConNavegador(blob));
+    tamanos.set(n, t);
+    return { url: URL.createObjectURL(blob), ...t };
+  };
   return {
     total: libro.paginas.length,
     indice: libro.indice,
     direccion: libro.direccion,
     direccionDelArchivo: libro.direccionDelArchivo,
     tamano: (n) => tamanos.get(n) ?? tamanos.values().next().value ?? null,
-    imagen: (n) =>
-      cache.obtener(n, async () => {
-        const ruta = libro.paginas[n];
-        const entrada = ruta ? indice.get(ruta) : undefined;
-        if (!entrada) throw new Error(tr('Falta la imagen de la página {0}', n + 1));
-        const bytes = await leerEntrada(f, entrada);
-        const blob = new Blob([bytes as BlobPart], { type: tipoDeImagen(ruta) });
-        const t = tamanoDeImagen(bytes) ?? (await medirConNavegador(blob));
-        tamanos.set(n, t);
-        return { url: URL.createObjectURL(blob), ...t };
-      }),
+    imagen: (n) => cache.obtener(n, leer(n)),
+    imagenParaVer: (n) => cache.preparar(n, leer(n)),
     // Mide todas las páginas por su cabecera, sin descodificarlas; de paso, el visor ya sabe el tamaño de cada una.
     anchas: async () => {
       const salida: number[] = [];
@@ -126,6 +157,7 @@ export async function paginadorDeZip(archivo: Blob, nombre: string, porDefecto: 
       }
       return salida;
     },
+    imagenYa: (n) => cache.ya(n),
     cerrar: () => cache.vaciar(),
   };
 }

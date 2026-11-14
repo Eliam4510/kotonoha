@@ -71,7 +71,16 @@ export function crearPreparacion(avisar: () => void): Preparacion {
 export function Preparar({ alListo, tope = TOPE_PREPARACION_MS, children }: { alListo: () => void; tope?: number; children: ComponentChildren }) {
   const [aviso] = useState(() => ({ actual: alListo }));
   aviso.actual = alListo;
-  const [p] = useState(() => crearPreparacion(() => aviso.actual()));
+  // Dentro de otra preparación (el diccionario dentro de una pantalla que se prepara), la de fuera espera a esta.
+  const exterior = useContext(Contexto);
+  const [p] = useState(() => {
+    let avisarFuera = () => {};
+    if (exterior) void exterior(new Promise<void>((ok) => (avisarFuera = ok)));
+    return crearPreparacion(() => {
+      avisarFuera();
+      aviso.actual();
+    });
+  });
   useEffect(() => {
     // Los efectos de dentro ya corrieron: si nadie registró nada, la vista está lista.
     p.comprobar();

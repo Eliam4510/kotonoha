@@ -28,6 +28,7 @@ import { BotonBorrar, Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
 import { lengua } from '../ui/lengua';
+import { useEsperar } from '../ui/preparacion';
 
 // ---------- Inicio ----------
 
@@ -140,14 +141,15 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
   const [instalando, fijarInstalando] = useState<ProgresoInstalacion | null>(null);
   const [resumenMemoria, fijarResumen] = useState<{ total: number; pendientes: number; nuevas: number } | null>(null);
   const [ultimoLibro, fijarUltimoLibro] = useState<ElementoBiblioteca | null>(null);
+  const esperar = useEsperar();
 
   const cargar = () => {
-    motor.estado().then(fijarEstado).catch(console.error);
-    motor.estadisticasPalabras().then(fijarPalabras).catch(console.error);
+    esperar(motor.estado()).then(fijarEstado).catch(console.error);
+    esperar(motor.estadisticasPalabras()).then(fijarPalabras).catch(console.error);
     refrescarAnki();
-    motor.memoriaResumen().then(fijarResumen).catch(() => {});
+    esperar(motor.memoriaResumen()).then(fijarResumen).catch(() => {});
     // Lo último que se abrió y aún no se ha terminado.
-    motor.bibliotecaListar().then((l) => fijarUltimoLibro(l.filter((e) => e.abierto && !e.terminado).sort((x, y) => (y.abierto ?? 0) - (x.abierto ?? 0))[0] ?? null)).catch(() => {});
+    esperar(motor.bibliotecaListar()).then((l) => fijarUltimoLibro(l.filter((e) => e.abierto && !e.terminado).sort((x, y) => (y.abierto ?? 0) - (x.abierto ?? 0))[0] ?? null)).catch(() => {});
   };
   useEffect(() => {
     cargar();
@@ -348,6 +350,7 @@ export function Memoria() {
   const [resumen, fijarResumen] = useState<{ total: number; pendientes: number; nuevas: number } | null>(null);
   const [volteada, fijarVolteada] = useState(false);
   const [cargada, fijarCargada] = useState(false);
+  const esperar = useEsperar();
 
   const cargar = async () => {
     fijarCola(await motor.memoriaPendientes(50));
@@ -356,7 +359,7 @@ export function Memoria() {
     fijarCargada(true);
   };
   useEffect(() => {
-    cargar().catch(console.error);
+    esperar(cargar()).catch(console.error);
   }, []);
 
   const t = cola[0];
@@ -555,6 +558,7 @@ export function Palabras({ evaluar = false }: { evaluar?: boolean }) {
   const [anadiendo, fijarAnadiendo] = useState(false);
   const [anadidas, fijarAnadidas] = useState('');
   const [limite, fijarLimite] = useState(200);
+  const esperar = useEsperar();
 
   const cargar = async () => {
     fijarStats(await motor.estadisticasPalabras());
@@ -570,7 +574,7 @@ export function Palabras({ evaluar = false }: { evaluar?: boolean }) {
     fijarCargada(true);
   };
   useEffect(() => {
-    cargar().catch(console.error);
+    esperar(cargar()).catch(console.error);
   }, [estado, orden, busqueda, limite]);
 
   const cambiar = async (claves: string[], nuevo: EstadoPalabra) => {

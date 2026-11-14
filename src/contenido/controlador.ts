@@ -25,6 +25,7 @@ import {
   comoActivarCaptura,
   configModo,
   consulta,
+  encimaSubtitulo,
   correccion,
   errorPista,
   generacion,
@@ -67,6 +68,12 @@ let reproduccionPropia = false;
 let acelerando = false;
 let velocidadPrevia = 1;
 let temporizadorReanudar: ReturnType<typeof setTimeout> | null = null;
+/** La línea de la pausa automática que está contando para reanudar, y la de la cuenta detenida al consultar. */
+let lineaDeLaCuenta = -1;
+let cuentaDetenida = -1;
+/** La consulta que abre «Consultar al pausar» no es de quien mira: no detiene la cuenta atrás. */
+let aperturaAutomatica = false;
+let consultaAutomatica = false;
 let pausadaPorConsulta = false;
 let pausaDiferidaEn = -1;
 let videoActual: HTMLVideoElement | null = null;
@@ -188,6 +195,7 @@ function enlazarVideo(v: HTMLVideoElement) {
     alPausar();
   });
   v.addEventListener('play', () => {
+    cuentaDetenida = -1;
     if (!reproduccionPropia) {
       tipoPausa.value = null;
       cancelarReanudar();
@@ -204,7 +212,13 @@ function alPausar() {
   const i = indiceVisual.value;
   if (i < 0) return;
   const primera = desconocidas(lineasObjetivo.value[i].palabras)[0];
-  if (primera) abrirConsultaDe(primera, lineasObjetivo.value[i]);
+  if (!primera) return;
+  aperturaAutomatica = true;
+  try {
+    abrirConsultaDe(primera, lineasObjetivo.value[i]);
+  } finally {
+    aperturaAutomatica = false;
+  }
 }
 
 // Se resuelve desde la interfaz: necesita el rectángulo de la palabra en pantalla.
@@ -216,6 +230,37 @@ export const fijarAbrirConsulta = (f: typeof abrirConsultaDe) => {
 function cancelarReanudar() {
   if (temporizadorReanudar) clearTimeout(temporizadorReanudar);
   temporizadorReanudar = null;
+  lineaDeLaCuenta = -1;
+}
+
+/**
+ * Si se está leyendo: con una ficha abierta a mano, o con el ratón sobre el subtítulo si así se pidió («Pausar al
+ * interactuar: al pasar por el subtítulo»). Solo el ratón encima, sin más, no cuenta: suele quedarse ahí al cerrar una
+ * ficha, y entonces la pausa no acabaría nunca.
+ */
+const leyendo = () => (!!consulta.value && !consultaAutomatica) || (encimaSubtitulo.value && ajustes.value.pausaInteraccion === 'alPasarSubtitulo');
+
+/**
+ * Mientras se lee, la cuenta atrás de la pausa automática se detiene: antes seguía corriendo y el video arrancaba con
+ * la ficha abierta, en medio de la lectura.
+ */
+function detenerCuentaAtras() {
+  if (!temporizadorReanudar || aperturaAutomatica) return;
+  const i = lineaDeLaCuenta;
+  cancelarReanudar();
+  cuentaDetenida = i;
+}
+
+/** Al terminar, si el video sigue en esa pausa, la cuenta vuelve a empezar entera. */
+function retomarCuentaAtras() {
+  const i = cuentaDetenida;
+  if (i < 0 || !pausado.value) {
+    cuentaDetenida = -1;
+    return;
+  }
+  if (leyendo()) return;
+  cuentaDetenida = -1;
+  programarReanudar(i);
 }
 
 function programarReanudar(indice: number) {
@@ -228,7 +273,15 @@ function programarReanudar(indice: number) {
   } else if (a.reanudarTras) {
     espera = a.reanudarSegundos * 1000;
   }
-  if (espera > 0) temporizadorReanudar = setTimeout(() => reproducir(), espera);
+  if (espera > 0) {
+    // Si ya se está leyendo cuando llega la pausa, la cuenta empieza al terminar de leer.
+    if (leyendo()) {
+      cuentaDetenida = indice;
+      return;
+    }
+    lineaDeLaCuenta = indice;
+    temporizadorReanudar = setTimeout(() => reproducir(), espera);
+  }
 }
 
 export function pausar(tipo: 'manual' | 'auto' = 'auto') {
@@ -338,6 +391,8 @@ function lineasParaSalto(): Linea[] {
 // ---------- Interacción con la consulta de palabras ----------
 
 export function alAbrirConsulta() {
+  consultaAutomatica = aperturaAutomatica;
+  detenerCuentaAtras();
   const a = ajustes.value;
   if (a.pausaInteraccion !== 'consultaPalabra' || pausado.value) return;
   if (a.pausaDiferida) {
@@ -349,12 +404,15 @@ export function alAbrirConsulta() {
 }
 
 export function alCerrarConsulta() {
+  consultaAutomatica = false;
   pausaDiferidaEn = -1;
   if (pausadaPorConsulta && ajustes.value.reanudarAlTerminar) reproducir();
   pausadaPorConsulta = false;
+  retomarCuentaAtras();
 }
 
 export function alEntrarSubtitulo() {
+  if (ajustes.value.pausaInteraccion === 'alPasarSubtitulo') detenerCuentaAtras();
   if (ajustes.value.pausaInteraccion === 'alPasarSubtitulo' && !pausado.value) {
     pausar('manual');
     pausadaPorConsulta = true;
@@ -364,7 +422,9 @@ export function alEntrarSubtitulo() {
 export function alSalirSubtitulo() {
   if (ajustes.value.pausaInteraccion === 'alPasarSubtitulo' && pausadaPorConsulta && !consulta.value) {
     alCerrarConsulta();
+    return;
   }
+  retomarCuentaAtras();
 }
 
 // ---------- Pistas ----------

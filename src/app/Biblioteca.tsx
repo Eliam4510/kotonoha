@@ -18,6 +18,7 @@ import { fuenteDeArchivo, LIMITE_ZIP, leerEntrada } from '../nucleo/zip';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { useRelojLectura } from '../ui/relojLectura';
+import { useEsperar } from '../ui/preparacion';
 import { abrirEnCuaderno } from './Cuaderno';
 import { datosDeZip, miniaturaDe } from '../visor/paginador';
 import { datosDePdf } from '../visor/pdf';
@@ -705,6 +706,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
   const carpeta = useRef<HTMLInputElement>(null);
   /** La colección a la que va lo que se importe desde su página. */
   const destino = useRef<string | undefined>(undefined);
+  const esperar = useEsperar();
 
   const cargar = () =>
     Promise.all([motor.bibliotecaListar(), motor.coleccionesListar()])
@@ -736,7 +738,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
   };
 
   useEffect(() => {
-    cargar().then((l) => {
+    esperar(cargar()).then((l) => {
       const pedido = abrir ? l?.find((e) => e.id === abrir) : undefined;
       if (pedido) abrirLibro(pedido);
     });
