@@ -92,6 +92,12 @@ Pages that are images, such as manga, scanned books and many PDFs, are read with
 
 <sub>Sample pages: 『改訂版 ここで差がつく 有機化合物の構造決定問題の要点・演習』 by Yoshikazu Nishimura and Takatomo Kurosawa (KADOKAWA, 2024), and 【推しの子】 (Oshi no Ko) vol. 1 by Aka Akasaka and Mengo Yokoyari (Shueisha, 2020). A single page of each work is shown to illustrate the viewer; all rights belong to their authors and publishers.</sub>
 
+### A book's vocabulary, before you read it
+
+<img src="docs/img/vocabulario.en.png" alt="Vocabulary of 吾輩は猫である: comprehension, words to learn, goals of 90, 95 and 98 % and the list with 書生 open and its sentences from the book" width="100%">
+
+Every book and every collection has its **vocabulary**: all its words, counted, the most frequent first, with their reading, their gloss, their JLPT level and their best sentence from the book. At the top you see how much you already understand and how many words you need to understand 90, 95 or 98 %. Words are marked as known or learning right there, and the selected ones go straight to Memory or Anki with their sentence from the book. It works with novels, PDFs, texts and manga read with OCR; in a series, each volume shows how many new words it brings. The book's grammar is there too, point by point.
+
 ### A notebook to write and read
 
 <img src="docs/img/lector-web.en.png" alt="Notebook in a tab, with paragraphs, furigana and comprehension" width="100%">

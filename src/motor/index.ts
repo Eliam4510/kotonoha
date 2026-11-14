@@ -178,6 +178,11 @@ const api: ApiMotor = {
   async analizarTexto(texto, opciones) {
     return analisis.analizarTexto(texto, await aj(), opciones);
   },
+  contarPalabras: (trozos) => analisis.contarPalabras(trozos),
+  async datosPalabras(palabras, soloEstado) {
+    return analisis.datosPalabras(palabras, await aj(), soloEstado);
+  },
+  glosasPalabras: (palabras) => analisis.glosasPalabras(palabras),
 
   buscar: (lema, lectura) => analisis.buscar(lema, lectura),
   trazos: (caracter) => trazosDe(caracter),

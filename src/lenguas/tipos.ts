@@ -50,6 +50,8 @@ export interface TokenUnido {
   flexion: string[]; // Colas unidas: た, ない, ている...
   furigana: SegmentoLectura[];
   inflexionado: boolean; // La superficie no coincide con el lema
+  /** Un nombre propio, si el analizador lo sabe: el vocabulario de un libro los aparta. */
+  nombre?: boolean;
 }
 
 /** Cómo se pronuncia una palabra en una zona, en alfabeto fonético: /ɡoʊ/ en «us». */
@@ -574,6 +576,13 @@ export interface MotorLengua {
   recortarGlosa?(glosa: string): string;
   /** Si una entrada de diccionario es de la misma categoría que la palabra analizada, para elegir su traducción. */
   encajaCategoria?(reglas: string, categoria: string): boolean;
+  /**
+   * Para la glosa de una palabra que el diccionario puede guardar con otra forma y la misma lectura (en japonés, la que
+   * va en hiragana: なる es 成る). `busca` dice qué palabras se miran, y `deSuClase`, si una entrada es, por sus
+   * etiquetas, de la clase que el analizador da a la palabra. Si con su forma no hay ninguna de su clase, se miran
+   * también las que se leen igual.
+   */
+  porLectura?: { busca(lema: string): boolean; deSuClase(categoria: string, etiquetas: string): boolean };
   /** Prepara una lista de frecuencia antes de guardarla: por ejemplo, para quedarse con las formas de diccionario. */
   prepararFrecuencias?(filas: FrecuenciaImportada[]): Promise<FrecuenciaImportada[]>;
   /** Lo que en los diccionarios de esta lengua no es la definición, además de lo que nunca lo es. */

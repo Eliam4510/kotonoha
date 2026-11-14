@@ -35,7 +35,8 @@ const ENTREGA = 250;
  * hecho cada poco y, aparte, el texto propio que ha sacado, para que el visor no tenga que sacarlo otra vez.
  */
 export async function leerTextoLibro(o: {
-  paginador: Paginador;
+  /** Solo hace falta saber cuántas páginas tiene y, en un PDF, el texto que trae cada una. */
+  paginador: Pick<Paginador, 'total' | 'textoPropio'>;
   libro: string;
   modo: ModoOcr;
   minima: number;

@@ -2,20 +2,27 @@
 
 import type { Ajustes } from '../compartido/ajustes';
 import type {
+  CuentaTexto,
+  DatoPalabra,
   EntradaDiccionario,
   EstadoPalabra,
   EtiquetaFrecuencia,
   FraseEjemplo,
   LineaAnalizada,
+  PalabraContada,
   PalabraToken,
   ResultadoBusqueda,
+  TrozoTexto,
 } from '../compartido/tipos';
 import type { Linea } from '../nucleo/subtitulos';
 import { type AnalisisLinea, aplicarLecturas } from '../nucleo/analisisProfundo';
+import { partirEnFrases } from '../nucleo/lectorTexto';
+import { type PalabraDeFrase, Recuento } from '../nucleo/vocabulario';
 import type { ConsultasAnalisis, FormaFlexionada, OpcionesAnalisis, PuntoGramatica, TokenUnido, Transcripcion } from '../lenguas/tipos';
 import { db, type FilaPalabraDb, type FilaTermino } from './db';
 import { listaDiccionarios } from './diccionarios';
 import { lengua, motorLengua } from './lengua';
+import { nivelesDeVocabulario } from './niveles';
 
 let terminos: Set<string> | null = null;
 /** En las lenguas que lo usan, de qué palabras sale cada forma flexionada (ging, de gehen) y cuánto se usa cada una. */
@@ -95,6 +102,7 @@ export function recargarTerminos(): Promise<void> {
     rangos = nuevosRangos;
     lenguaTerminos = id;
     cacheTokens.clear();
+    cacheGlosas.clear();
   })();
   return cargaTerminos;
 }
@@ -132,6 +140,7 @@ export function olvidarLengua() {
   cargaTerminos = null;
   cacheTokens.clear();
   cacheLecturaLema.clear();
+  cacheGlosas.clear();
 }
 
 const cacheTokens = new Map<string, TokenUnido[]>();
@@ -191,21 +200,19 @@ function glosaCorta(filas: FilaTermino[], orden: string[], lectura: string, cate
   return undefined;
 }
 
-export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Promise<PalabraToken[][]> {
-  const claves = new Map<string, { lema: string; lectura: string; categoria: string }>();
-  const lecturas = tokensPorLinea.map((linea) =>
-    linea.map((tk) => {
-      if (!tk.esPalabra) return '';
-      const l = lecturaLema(tk);
-      claves.set(claveDe(tk.lema, l), { lema: tk.lema, lectura: l, categoria: tk.categoria });
-      return l;
-    })
-  );
+type DatosDeClave = { fila?: FilaPalabraDb; acentos?: number[]; rango?: number; glosa?: string; transcripciones?: Transcripcion[] };
 
-  const unicas = [...claves.entries()];
+type ClaveConDatos = [string, { lema: string; lectura: string; categoria: string }];
+
+/**
+ * Lo que dicen la base y los diccionarios de unas palabras: tu progreso, su acento, su puesto en la primera lista de
+ * frecuencia y su glosa corta. Sin `acentos` o sin `glosas`, eso no se busca: la glosa es lo que más tarda, porque hay
+ * que leer todas las entradas de cada palabra.
+ */
+async function datosDe(unicas: ClaveConDatos[], o = { acentos: true, glosas: true }): Promise<Map<string, DatosDeClave>> {
   const [filasPalabra, filasAcento, dicFrec, orden] = await Promise.all([
     db.palabras.bulkGet(unicas.map(([k]) => k)),
-    db.acentos.bulkGet(unicas.map(([, v]) => [v.lema, v.lectura] as [string, string])),
+    o.acentos ? db.acentos.bulkGet(unicas.map(([, v]) => [v.lema, v.lectura] as [string, string])) : Promise.resolve([]),
     primerDicFrecuencia(),
     ordenDics(),
   ]);
@@ -226,33 +233,99 @@ export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Pr
     });
   }
 
-  // Donde la pronunciación va aparte, se escribe la de cada forma: went no suena como go.
-  const { lectura: lecturaDeLengua } = lengua();
-  const dePronunciacion = lecturaDeLengua.dePronunciacion;
-  const formas = dePronunciacion ? [...new Set(tokensPorLinea.flat().filter((tk) => tk.esPalabra).map((tk) => tk.superficie.toLowerCase()))] : [];
-  const filasForma = formas.length ? await db.acentos.bulkGet(formas.map((s) => [s, s] as [string, string])) : [];
-  const porForma = new Map(formas.map((s, i) => [s, filasForma[i]?.transcripciones]));
+  const glosas = o.glosas ? await glosasDe(unicas, orden) : [];
 
-  const glosasIA = await db.glosas.bulkGet(unicas.map(([k]) => k));
-  const lemas = [...new Set(unicas.map(([, v]) => v.lema))];
-  const filasTerminos = lemas.length ? await db.terminos.where('termino').anyOf(lemas).toArray() : [];
-  const porTermino = new Map<string, FilaTermino[]>();
-  for (const f of filasTerminos) {
-    const l = porTermino.get(f.termino);
-    if (l) l.push(f);
-    else porTermino.set(f.termino, [f]);
-  }
-
-  const datos = new Map<string, { fila?: FilaPalabraDb; acentos?: number[]; rango?: number; glosa?: string; transcripciones?: Transcripcion[] }>();
+  const datos = new Map<string, DatosDeClave>();
   unicas.forEach(([k, v], i) => {
     datos.set(k, {
       fila: filasPalabra[i],
       acentos: filasAcento[i]?.posiciones,
       transcripciones: filasAcento[i]?.transcripciones,
       rango: filasFrec[i]?.rango ?? frecPorLema.get(v.lema),
-      glosa: glosasIA[i]?.glosa ?? glosaCorta(porTermino.get(v.lema) ?? [], orden, v.lectura, v.categoria),
+      glosa: glosas[i],
     });
   });
+  return datos;
+}
+
+/**
+ * Hasta qué puesto de la lista de frecuencia se cambia una palabra en hiragana que tiene entradas con su forma, pero de
+ * otra clase, por la que se lee igual y sí es de su clase. Medido con JPDB: 事 (15), 成る (16) o 物 (43) entran; 大 (379),
+ * 生む (403) o 門 (1653), que salían por だい, うむ o もん cuando el analizador se equivoca de clase, no.
+ */
+const RANGO_PARA_CAMBIAR = 300;
+/**
+ * Lo mismo con una palabra sin ninguna entrada con su forma, como ある o だけ (丈, 37), que así deja de quedarse sin glosa:
+ * más allá de este puesto, lo que se lee igual suele ser otra cosa (いつか no es 五日, 6361).
+ */
+const RANGO_SIN_ENTRADA = 5000;
+
+/**
+ * La glosa corta de unas palabras: la que dio Claude para esa palabra si la hay, y si no, la del primer diccionario. Una
+ * palabra que puede estar en el diccionario con otra forma (en japonés, la escrita en hiragana) y no tiene por la suya
+ * ninguna entrada de su clase se busca también por su lectura: なる es 成る, もの es 物, y ある o いう, que JMdict solo
+ * guarda con kanji, dejan de quedarse sin glosa.
+ */
+async function glosasDe(unicas: ClaveConDatos[], orden: string[]): Promise<(string | undefined)[]> {
+  const glosasIA = await db.glosas.bulkGet(unicas.map(([k]) => k));
+  const lemas = [...new Set(unicas.map(([, v]) => v.lema))];
+  const filasTerminos = lemas.length ? await db.terminos.where('termino').anyOf(lemas).toArray() : [];
+  const porTermino = new Map<string, FilaTermino[]>();
+  const anadir = (clave: string, f: FilaTermino) => {
+    const l = porTermino.get(clave);
+    if (l) l.push(f);
+    else porTermino.set(clave, [f]);
+  };
+  for (const f of filasTerminos) anadir(f.termino, f);
+  const porSuLectura = motorLengua().porLectura;
+  if (porSuLectura) {
+    const deSuClase = (f: FilaTermino, v: ClaveConDatos[1]) => f.lectura === v.lectura && porSuLectura.deSuClase(v.categoria, f.tags);
+    // Solo las que no tienen, con su forma, ninguna entrada de su clase: かたがた (旁) se queda como está, なる no.
+    const sinLaSuya = new Map<string, ClaveConDatos[1]>();
+    for (const [, v] of unicas) if (porSuLectura.busca(v.lema) && !(porTermino.get(v.lema) ?? []).some((f) => deSuClase(f, v))) sinLaSuya.set(v.lema, v);
+    if (sinLaSuya.size) {
+      const porLectura = new Map<string, FilaTermino[]>();
+      for (const f of await db.terminos.where('lectura').anyOf([...sinLaSuya.keys()]).toArray()) {
+        const v = sinLaSuya.get(f.lectura);
+        if (!v || f.termino === f.lectura || !deSuClase(f, v)) continue;
+        porLectura.set(f.lectura, [...(porLectura.get(f.lectura) ?? []), f]);
+      }
+      // Varias se leen igual y son de la misma clase (成る, 生る, 鳴る): se queda la más usada según la lista de frecuencia.
+      const dicFrec = await primerDicFrecuencia();
+      const pares = [...porLectura].flatMap(([lema, fs]) => [...new Set(fs.map((f) => f.termino))].map((t) => [lema, t] as [string, string]));
+      const rangos = dicFrec && pares.length ? await db.frecuencias.bulkGet(pares.map(([lema, t]) => [dicFrec, t, lema] as [string, string, string])) : [];
+      const rango = new Map(pares.map(([lema, t], i) => [`${lema}|${t}`, rangos[i]?.rango ?? Number.MAX_SAFE_INTEGER]));
+      for (const [lema, fs] of porLectura) {
+        const mejor = [...fs].sort((a, b) => rango.get(`${lema}|${a.termino}`)! - rango.get(`${lema}|${b.termino}`)! || b.puntuacion - a.puntuacion)[0];
+        // Si con su forma hay entradas, aunque de otra clase, solo se cambia por una muy usada: el analizador también se
+        // equivoca de clase, y だい en 誰だい es la partícula, no 大.
+        const tope = porTermino.get(lema)?.length ? RANGO_PARA_CAMBIAR : RANGO_SIN_ENTRADA;
+        if (rango.get(`${lema}|${mejor.termino}`)! > tope) continue;
+        porTermino.set(lema, fs.filter((f) => f.termino === mejor.termino));
+      }
+    }
+  }
+  return unicas.map(([, v], i) => glosasIA[i]?.glosa ?? glosaCorta(porTermino.get(v.lema) ?? [], orden, v.lectura, v.categoria));
+}
+
+export async function enriquecer(tokensPorLinea: TokenUnido[][], a: Ajustes): Promise<PalabraToken[][]> {
+  const claves = new Map<string, { lema: string; lectura: string; categoria: string }>();
+  const lecturas = tokensPorLinea.map((linea) =>
+    linea.map((tk) => {
+      if (!tk.esPalabra) return '';
+      const l = lecturaLema(tk);
+      claves.set(claveDe(tk.lema, l), { lema: tk.lema, lectura: l, categoria: tk.categoria });
+      return l;
+    })
+  );
+  const datos = await datosDe([...claves.entries()]);
+
+  // Donde la pronunciación va aparte, se escribe la de cada forma: went no suena como go.
+  const { lectura: lecturaDeLengua } = lengua();
+  const dePronunciacion = lecturaDeLengua.dePronunciacion;
+  const formas = dePronunciacion ? [...new Set(tokensPorLinea.flat().filter((tk) => tk.esPalabra).map((tk) => tk.superficie.toLowerCase()))] : [];
+  const filasForma = formas.length ? await db.acentos.bulkGet(formas.map((s) => [s, s] as [string, string])) : [];
+  const porForma = new Map(formas.map((s, i) => [s, filasForma[i]?.transcripciones]));
 
   return tokensPorLinea.map((linea, i) =>
     linea.map((tk, j): PalabraToken => {
@@ -340,6 +413,91 @@ export async function analizarLineas(
 export async function analizarTexto(texto: string, a: Ajustes, opciones?: OpcionesAnalisis): Promise<PalabraToken[][]> {
   await preparar();
   return enriquecer(texto.split(/\r?\n/).map((l) => tokensDe(l, opciones)), a);
+}
+
+/** Cada cuántas frases se deja respirar al motor al contar un libro: mientras tanto, el video que se ve sigue analizándose. */
+const FRASES_POR_RESPIRO = 300;
+
+/** Entre dos citas seguidas, 「…」「…」, habla otro: son dos frases aunque la primera no acabe en 。. */
+const ENTRE_CITAS = /(?<=[」』])(?=[「『])/;
+
+/**
+ * Las palabras y la gramática de unos trozos de un libro, contadas: cuántas veces sale cada palabra, dónde sale por
+ * primera vez y sus mejores frases. Sin la caché de líneas, que es para los subtítulos: un libro la vaciaría.
+ */
+export async function contarPalabras(trozos: TrozoTexto[]): Promise<CuentaTexto> {
+  await preparar();
+  const { escritura } = lengua();
+  const m = motorLengua();
+  const existe = terminos ? (x: string) => terminos!.has(x) : undefined;
+  const recuento = new Recuento(!escritura.palabrasSeparadas);
+  let desdeRespiro = 0;
+  for (const t of trozos) {
+    // Las frases como al leer en voz alta: un signo de cierre (」, ”) se queda con su frase y no empieza la siguiente.
+    const frases = t.texto.split(/\r?\n/).flatMap((r) => r.split(ENTRE_CITAS)).flatMap((r) => partirEnFrases(r, escritura.frase));
+    for (const frase of frases) {
+      if (!escritura.tieneTexto(frase)) continue;
+      const palabras: PalabraDeFrase[] = [];
+      for (const tk of m.analizador.analizar(frase, existe, consultas)) {
+        if (!tk.esPalabra) continue;
+        const l = lecturaLema(tk);
+        palabras.push({ clave: claveDe(tk.lema, l), lema: tk.lema, lectura: l, categoria: tk.categoria, superficie: tk.superficie, gramatica: tk.esGramatica, nombre: !!tk.nombre });
+      }
+      recuento.frase(frase, t.lugar, palabras, m.detectarGramatica(frase));
+      if (++desdeRespiro >= FRASES_POR_RESPIRO) {
+        desdeRespiro = 0;
+        await new Promise((ok) => setTimeout(ok, 0));
+      }
+    }
+  }
+  return recuento.resultado();
+}
+
+/**
+ * Lo que se sabe de unas palabras contadas, en el mismo orden: tu progreso y, salvo con `soloEstado`, su puesto en la
+ * lista de frecuencia y su nivel en las listas del examen de la lengua. Sin la glosa, que tarda: va aparte.
+ */
+export async function datosPalabras(
+  palabras: Pick<PalabraContada, 'clave' | 'lema' | 'lectura' | 'categoria' | 'gramatica'>[],
+  a: Ajustes,
+  soloEstado = false
+): Promise<DatoPalabra[]> {
+  const porDefecto = (p: (typeof palabras)[number]): EstadoPalabra => (p.gramatica && a.particulasConocidas ? 'conocida' : 'desconocida');
+  if (soloEstado) {
+    const filas = await db.palabras.bulkGet(palabras.map((p) => p.clave));
+    return palabras.map((p, i) => ({ estado: filas[i]?.estado ?? porDefecto(p), rastreada: filas[i]?.rastreada === 1 }));
+  }
+  const datos = await datosDe(
+    palabras.map((p) => [p.clave, { lema: p.lema, lectura: p.lectura, categoria: p.categoria }]),
+    { acentos: false, glosas: false }
+  );
+  const carpeta = lengua().listasNivel?.carpeta;
+  const niveles = carpeta ? await nivelesDeVocabulario(carpeta).catch(() => null) : null;
+  return palabras.map((p) => {
+    const d = datos.get(p.clave);
+    const nivel = niveles?.get(p.clave);
+    return {
+      estado: d?.fila?.estado ?? porDefecto(p),
+      rastreada: d?.fila?.rastreada === 1,
+      ...(d?.rango !== undefined ? { rango: d.rango } : {}),
+      ...(nivel ? { nivel } : {}),
+    };
+  });
+}
+
+/** Las glosas ya buscadas, por palabra: el vocabulario de una colección repite muchas de un tomo a otro. */
+const cacheGlosas = new Map<string, string | null>();
+
+/** La glosa corta de unas palabras contadas, en el mismo orden; null si no hay. */
+export async function glosasPalabras(palabras: Pick<PalabraContada, 'clave' | 'lema' | 'lectura' | 'categoria'>[]): Promise<(string | null)[]> {
+  const faltan = palabras.filter((p) => !cacheGlosas.has(p.clave));
+  if (faltan.length) {
+    // Salen de la base, no de la lista de términos en memoria: no hay que esperar a que se cargue al arrancar el motor.
+    const glosas = await glosasDe(faltan.map((p) => [p.clave, { lema: p.lema, lectura: p.lectura, categoria: p.categoria }]), await ordenDics());
+    if (cacheGlosas.size > 60000) cacheGlosas.clear();
+    faltan.forEach((p, i) => cacheGlosas.set(p.clave, glosas[i] ?? null));
+  }
+  return palabras.map((p) => cacheGlosas.get(p.clave) ?? null);
 }
 
 /** Texto para el análisis profundo: cada línea con las palabras y lecturas que calculó el analizador. */

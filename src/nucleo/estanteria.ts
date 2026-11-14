@@ -17,6 +17,27 @@ export function aplicarCambio(e: ElementoBiblioteca, c: CambioBiblioteca): Eleme
   return s;
 }
 
+/** Lo que ocupa una página de un texto de la Biblioteca, en letras. */
+export const TAM_PAGINA_TEXTO = 2500;
+
+/** Parte un texto en páginas: entre párrafos si se puede, y si no, al final de una línea. */
+export function paginasDeTexto(texto: string): string[] {
+  const salida: string[] = [];
+  let i = 0;
+  while (i < texto.length) {
+    let fin = Math.min(i + TAM_PAGINA_TEXTO, texto.length);
+    if (fin < texto.length) {
+      const parrafo = texto.lastIndexOf('\n\n', fin);
+      const linea = texto.lastIndexOf('\n', fin);
+      if (parrafo > i + TAM_PAGINA_TEXTO / 2) fin = parrafo + 2;
+      else if (linea > i + TAM_PAGINA_TEXTO / 2) fin = linea + 1;
+    }
+    salida.push(texto.slice(i, fin));
+    i = fin;
+  }
+  return salida.length ? salida : [''];
+}
+
 export interface Avance {
   /** La página, o el capítulo, por el que se va, desde 1. */
   actual: number;

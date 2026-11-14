@@ -10,7 +10,7 @@ import { numero, tm, tr } from '../compartido/i18n';
 import { flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { CambioBiblioteca, ColeccionBiblioteca, ElementoBiblioteca, TipoColeccion } from '../compartido/tipos';
 import { librosDeImagenes } from '../nucleo/carpetas';
-import { type Avance, avanceDe, coleccionesDeImportados, deTomos, enCurso, type FiltroEstanteria, filtrar, type Importado, librosDe, resumenDe } from '../nucleo/estanteria';
+import { type Avance, avanceDe, coleccionesDeImportados, deTomos, enCurso, type FiltroEstanteria, filtrar, type Importado, librosDe, paginasDeTexto, resumenDe, TAM_PAGINA_TEXTO } from '../nucleo/estanteria';
 import { estructuraDeHtml, estructuraDeNodo, type NodoHtml } from '../nucleo/estructura';
 import { IMAGEN, leerEpubDeTexto, leerLibro } from '../nucleo/libro';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
@@ -31,26 +31,6 @@ import { descargaOcr, pausar, procesar, procesos } from './procesos';
 
 /** El idioma de un título: el que se estudia si está escrito en él. */
 export const langDe = (titulo: string) => (lengua.value.escritura.tieneTexto(titulo) ? lengua.value.id : undefined);
-
-const TAM_PAGINA = 2500;
-
-/** Parte el texto en páginas: entre párrafos si se puede, y si no, al final de una línea. */
-function paginas(texto: string): string[] {
-  const salida: string[] = [];
-  let i = 0;
-  while (i < texto.length) {
-    let fin = Math.min(i + TAM_PAGINA, texto.length);
-    if (fin < texto.length) {
-      const parrafo = texto.lastIndexOf('\n\n', fin);
-      const linea = texto.lastIndexOf('\n', fin);
-      if (parrafo > i + TAM_PAGINA / 2) fin = parrafo + 2;
-      else if (linea > i + TAM_PAGINA / 2) fin = linea + 1;
-    }
-    salida.push(texto.slice(i, fin));
-    i = fin;
-  }
-  return salida.length ? salida : [''];
-}
 
 async function textoDeArchivo(f: File): Promise<string> {
   const crudo = await f.text();
@@ -91,7 +71,7 @@ function tonoDe(titulo: string): number {
 }
 
 export const claseTono = (e: ElementoBiblioteca) => (e.origen === 'historia' ? 'claude' : `tono-${tonoDe(e.titulo)}`);
-export const paginasDe = (e: ElementoBiblioteca) => Math.max(1, e.documento ? e.documento.paginas : Math.ceil(e.texto.length / TAM_PAGINA));
+export const paginasDe = (e: ElementoBiblioteca) => Math.max(1, e.documento ? e.documento.paginas : Math.ceil(e.texto.length / TAM_PAGINA_TEXTO));
 const megas = (bytes: number) => `${numero(Math.max(0.1, Math.round(bytes / 1e5) / 10))} MB`;
 /** Cuánto se ha leído de un elemento de la estantería. */
 export const avance = (e: ElementoBiblioteca): Avance => avanceDe(e, paginasDe(e));
@@ -310,6 +290,9 @@ function MenuLibro({ e, colecciones, alCambiar, alMover }: { e: ElementoBibliote
       </button>
       {abierto && (
         <div class="ap-menu-libro" role="menu">
+          <button role="menuitem" onClick={() => { fijarAbierto(false); navegar(`vocabulario?libro=${encodeURIComponent(e.id)}`); }}>
+            <Icono n="palabras" t={15} /> {tr('Vocabulario')}
+          </button>
           <button role="menuitem" onClick={() => { fijarAbierto(false); alMover(); }}>
             <Icono n="pila" t={15} /> {c ? tr('Cambiar de colección…') : tr('Añadir a una colección…')}
           </button>
@@ -764,7 +747,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
   }, [lista]);
 
   // En un texto, ver la última página lo deja terminado.
-  const pags = abierto ? paginas(abierto.texto) : [];
+  const pags = abierto ? paginasDeTexto(abierto.texto) : [];
   useEffect(() => {
     if (!abierto || abierto.terminado || pagina < pags.length - 1) return;
     const terminado = Date.now();
@@ -1055,6 +1038,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
                   <span>{avance(siguiente).empezado ? tr('Seguir con «{0}»', siguiente.titulo) : tr('Empezar «{0}»', siguiente.titulo)}</span> <Icono n="flecha" t={15} />
                 </button>
               )}
+              {total > 0 && <button class="btn" onClick={() => navegar(`vocabulario?coleccion=${encodeURIComponent(vista.id)}`)}><Icono n="palabras" t={15} /> {tr('Vocabulario')}</button>}
               <button class="btn" onClick={() => fijarDialogo({ tipo: 'anadir', coleccion: vista })}><Icono n="mas" t={15} /> {tr('Añadir libros')}</button>
               <button class="btn fantasma" onClick={() => elegirArchivos(vista.id)}><Icono n="subir" t={15} /> {tr('Importar aquí')}</button>
               <button class="btn fantasma" onClick={() => fijarDialogo({ tipo: 'coleccion', coleccion: vista })}><Icono n="lapiz" t={15} /> {tr('Editar')}</button>

@@ -20,6 +20,7 @@ import { Biblioteca } from './Biblioteca';
 import { Cuaderno } from './Cuaderno';
 import { Diccionario, Inicio, Memoria, Palabras } from './Pantallas';
 import { Niveles } from './Niveles';
+import { Vocabulario } from './Vocabulario';
 import { PracticarFrase } from './PracticarFrase';
 import { ReproductorLocal } from './ReproductorLocal';
 import { MenuLengua } from './SelectorLengua';
@@ -176,8 +177,12 @@ interface Vista {
   params: URLSearchParams;
 }
 let ultimaVista = 0;
-const claveDe = (ruta: string, objetivo: string) => (ruta === 'reproductor' ? ruta : `${ruta}:${objetivo}`);
-const vistaDe = (r: { ruta: string; params: URLSearchParams }, objetivo: string): Vista => ({ id: ++ultimaVista, clave: claveDe(r.ruta, objetivo), ...r });
+/** El vocabulario de cada libro es otra pantalla, no la misma con otros parámetros: se prepara entera antes de verse. */
+const claveDe = (r: { ruta: string; params: URLSearchParams }, objetivo: string) =>
+  r.ruta === 'reproductor' ? r.ruta : r.ruta === 'vocabulario' ? `${r.ruta}:${objetivo}:${r.params}` : `${r.ruta}:${objetivo}`;
+const vistaDe = (r: { ruta: string; params: URLSearchParams }, objetivo: string): Vista => ({ id: ++ultimaVista, clave: claveDe(r, objetivo), ...r });
+/** La sección de la barra lateral de cada pantalla: el vocabulario de un libro es de la Biblioteca. */
+const seccionDe = (ruta: string) => (ruta === 'vocabulario' ? 'biblioteca' : ruta);
 
 function Pantalla({ v, a }: { v: Vista; a: Ajustes }) {
   const { ruta, params } = v;
@@ -187,6 +192,7 @@ function Pantalla({ v, a }: { v: Vista; a: Ajustes }) {
       {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} categoria={params.get('cat') ?? undefined} />}
       {ruta === 'lector' && <Cuaderno ajustes={a} inicial={params.get('t') ?? ''} editar={params.get('editar') === '1'} />}
       {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
+      {ruta === 'vocabulario' && <Vocabulario ajustes={a} libro={params.get('libro') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
       {ruta === 'reproductor' && <ReproductorLocal a={a} />}
       {ruta === 'memoria' && <Memoria />}
       {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}
@@ -217,7 +223,7 @@ function App() {
 
   const pedir = (r: { ruta: string; params: URLSearchParams }) => {
     const actual = vistaActual.current;
-    const clave = claveDe(r.ruta, objetivo.current);
+    const clave = claveDe(r, objetivo.current);
     if (!actual) {
       fijarVista(vistaDe(r, objetivo.current));
       return;
@@ -287,14 +293,14 @@ function App() {
   useEffect(() => guardarPreferencia('tema', a.tema), [a.tema]);
 
   useEffect(() => {
-    const nombre = [...GRUPOS.flatMap((g) => g.rutas), { id: 'ajustes', nombre: tr('Ajustes') }].find((r) => r.id === ruta)?.nombre;
+    const nombre = [...GRUPOS.flatMap((g) => g.rutas), { id: 'ajustes', nombre: tm('Ajustes') }, { id: 'vocabulario', nombre: tm('Vocabulario') }].find((r) => r.id === ruta)?.nombre;
     document.title = nombre ? tr('{0} · Kotonoha', tr(nombre)) : 'Kotonoha';
   }, [ruta, a.idiomaInterfaz, idiomaActual()]);
 
   return (
     <div class="kk-raiz ap-app" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
       <style>{base + overlay + appCss}</style>
-      <Lateral ruta={ruta} a={a} />
+      <Lateral ruta={seccionDe(ruta)} a={a} />
       {[vista, pedida].map((v) => {
         if (!v) return null;
         const aLaVista = v === vista;

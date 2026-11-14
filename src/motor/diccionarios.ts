@@ -4,6 +4,7 @@ import type { Table } from 'dexie';
 import { strFromU8, unzipSync } from 'fflate';
 import type { FuenteBiblioteca, InfoDiccionario, ProgresoInstalacion } from '../compartido/tipos';
 import { fondo } from '../compartido/rpc';
+import { apiVersiones, descargaUltima, versionBuena } from '../nucleo/versionesGithub';
 import { type CaracterImportado, type FormaImportada, type FrecuenciaImportada, leerBancoCaracteres, leerBancoFormas, leerBancoMeta, leerBancoTerminos, leerKanjium, leerListaFrecuencia } from '../nucleo/yomitan';
 import { db } from './db';
 import { tr } from '../compartido/i18n';
@@ -37,6 +38,38 @@ async function descargar(url: string, alAvance: (f: number) => void): Promise<Ui
     pos += t.length;
   }
   return salida;
+}
+
+/** Si un ZIP de Yomitan trae algo: bancos de términos, de su información o de caracteres. */
+function tieneBancos(zip: Uint8Array): boolean {
+  let hay = false;
+  try {
+    unzipSync(zip, {
+      filter: (f) => {
+        if (/^(term|term_meta|kanji|kanji_meta)_bank_\d+\.json$/.test(f.name)) hay = true;
+        return false;
+      },
+    });
+  } catch {
+    return false;
+  }
+  return hay;
+}
+
+/**
+ * Baja un diccionario en ZIP. Si es de la última versión de un repositorio de GitHub y llega sin bancos (yomidevs
+ * publica una versión cada día, y algún día sale rota, con el índice y nada más), se baja el mismo archivo de la versión
+ * anterior más reciente que lo traiga entero.
+ */
+async function descargarZip(url: string, alAvance: (f: number) => void): Promise<Uint8Array> {
+  const datos = await descargar(url, alAvance);
+  const ultima = descargaUltima(url);
+  if (!ultima || tieneBancos(datos)) return datos;
+  const r = await fetch(apiVersiones(ultima.repositorio), { headers: { Accept: 'application/vnd.github+json' } }).catch(() => null);
+  const otra = r?.ok ? versionBuena(await r.json(), ultima.archivo) : null;
+  if (!otra) return datos;
+  console.info(`Kotonoha: ${ultima.archivo} llegó vacío en la última versión; se baja el de ${otra}`);
+  return descargar(otra, alAvance);
 }
 
 async function siguienteOrden(): Promise<number> {
@@ -83,7 +116,7 @@ async function instalarCaracteres(f: FuenteBiblioteca, progreso: (fase: Progreso
   progreso('descargando', 0);
   await Promise.all(
     dc.archivos.map(async (a) => {
-      const datos = await descargar(a.url, () => {});
+      const datos = await (a.zip ? descargarZip(a.url, () => {}) : descargar(a.url, () => {}));
       if (a.zip) bancos[a.nombre] = bancosDeCaracteres(datos);
       else textos[a.nombre] = new TextDecoder().decode(datos);
       progreso('descargando', ++llegados / dc.archivos.length);
@@ -195,7 +228,7 @@ export async function instalarDesdeBiblioteca(idFuente: string): Promise<void> {
     emitir({ id: f.id, titulo: f.titulo, fase, avance, error });
   try {
     progreso('descargando', 0);
-    const datos = await descargar(f.url, (a) => progreso('descargando', a));
+    const datos = await (f.formato === 'yomitan' ? descargarZip(f.url, (a) => progreso('descargando', a)) : descargar(f.url, (a) => progreso('descargando', a)));
     progreso('guardando', 0);
     if (f.formato === 'kanjium') {
       const filas = leerKanjium(new TextDecoder().decode(datos));

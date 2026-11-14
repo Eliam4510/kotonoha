@@ -2,6 +2,20 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.32.0 · 2026-11-14
+
+El vocabulario de un libro, antes de leerlo.
+
+- **Vocabulario de un libro.** Desde el menú de cada libro de la Biblioteca, o con el botón **Vocabulario del libro** del visor, se ven todas sus palabras, contadas: las que más salen primero, con su lectura, su glosa, su nivel del JLPT y su mejor frase del libro con la palabra marcada (al abrirla, hasta tres, con la página o el capítulo de cada una). Vale para los textos y las notas, los EPUB de texto, los PDF con su texto y los libros de imágenes ya leídos con el OCR, con lo editado a mano. Arriba, cuánto se entiende ya del libro y cuántas palabras hacen falta para entender el 90, el 95 y el 98 %: al pulsar una meta se eligen esas palabras en la lista.
+- **Estudiarlas o mandarlas a Anki.** Cada palabra se marca como conocida, en aprendizaje o ignorada desde la lista, una a una o todas las elegidas, y la comprensión se pone al día al momento. Las elegidas pasan de golpe a Memoria o a Anki, según los ajustes, cada una con su frase del libro, su lectura y las definiciones del diccionario, sin gastar nada en Claude, y quedan en «Aprendiendo». Una sola, con la frase que se elija, va al creador de tarjetas para completarla.
+- **La lista, como se prefiera.** Por las que más salen, en orden de aparición (para estudiarlas al ritmo de la lectura) o por las más comunes de la lengua; con búsqueda por la palabra, la lectura o la glosa; y con los nombres propios aparte. Las partículas cuentan como sabidas, como en los videos.
+- **Gramática del libro.** Una pestaña con los puntos de gramática que salen, su nivel, cuántas veces y sus frases del libro, para marcarlos como en el JLPT o pedir a Claude que los explique.
+- **Una serie entera.** Cada colección tiene su vocabulario, con todos sus tomos juntos, y la pestaña **Por tomo** dice cuánto se entiende de cada uno y cuántas palabras por aprender trae de nuevo a la serie.
+- **Libros a medio leer con el OCR.** Si un libro de imágenes aún no está leído entero, se dice cuántas páginas faltan, y **Leer el libro entero** las lee desde la misma pantalla; al acabar, la lista se pone al día sola. Una novela entera, unas 135 000 palabras, sale en unos cuatro segundos; las glosas llegan por partes, primero las que se ven.
+- **Glosas mejor elegidas en japonés.** La traducción corta de una palabra escrita en hiragana (bajo los subtítulos, al leer y en el vocabulario) salía de su forma en kana aunque esa entrada fuera de otra clase, y si el diccionario solo la guarda con kanji, no había glosa. Ahora, en esos casos, se toma la palabra que se lee igual, es de su misma clase y está entre las más usadas: なる ya no sale como «that is in» (el sufijo de los textos antiguos) sino como 成る, «convertirse en»; もの y こと, como «cosa», no como partículas; y ある, くる, いう, だけ o まだ ya no se quedan sin glosa. Medido con una novela: 110 de cada 1 900 palabras ganan su glosa, ninguna la pierde y las 6 que cambian lo hacen a mejor.
+- **Diccionarios que se instalan aunque salgan rotos.** El JMdict de yomidevs sale cada día como una versión nueva, y algunos días sale vacío. Kotonoha baja la última, así que esos días no se podía instalar ningún JMdict, tampoco el de inglés: «El archivo no contiene un diccionario de términos reconocible». Ahora, si la última llega vacía, se baja la versión anterior más reciente que lo trae entero.
+- La marca de alargar suelta («ー», como en 「返してー」) ya no cuenta como una palabra.
+
 ## 0.31.0 · 2026-11-14
 
 Una versión de fluidez, memoria y opciones que chocaban.
@@ -283,6 +297,20 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.32.0 · 2026-11-14
+
+A book's vocabulary, before reading it.
+
+- **A book's vocabulary.** From each book's menu in the Library, or with the **Book vocabulary** button in the viewer, you see all its words, counted: the most frequent first, with their reading, their gloss, their JLPT level and their best sentence from the book with the word marked (when opened, up to three, each with its page or chapter). It works with texts and notes, text EPUBs, PDFs with their own text and image books already read with OCR, including hand edits. At the top, how much of the book you already understand and how many words you need to understand 90, 95 and 98 %: clicking a goal selects those words in the list.
+- **Study them or send them to Anki.** Each word can be marked as known, learning or ignored from the list, one by one or all the selected ones, and comprehension updates at once. The selected ones go straight to Memory or to Anki, as set in the settings, each with its sentence from the book, its reading and the dictionary definitions, without spending anything on Claude, and they move to "Learning". A single one, with the sentence you choose, goes to the card creator to be completed.
+- **The list, as you prefer.** By most frequent, in order of appearance (to study them at the pace of reading) or by most common in the language; with search by word, reading or gloss; and with proper names apart. Particles count as known, as in videos.
+- **The book's grammar.** A tab with the grammar points that appear, their level, how often and their sentences from the book, to mark them as in the JLPT screen or ask Claude to explain them.
+- **A whole series.** Each collection has its own vocabulary, with all its volumes together, and the **By volume** tab shows how much of each one you understand and how many new words to learn it brings to the series.
+- **Books half read with OCR.** If an image book has not been read in full yet, you are told how many pages are missing, and **Read all pages with OCR** reads them from the same screen; when it finishes, the list updates by itself. A whole novel, about 135,000 words, comes up in about four seconds; glosses arrive in parts, the visible ones first.
+- **Better glosses in Japanese.** The short translation of a word written in hiragana (under subtitles, while reading and in the vocabulary) came from its kana form even when that entry was of another word class, and if the dictionary only stores it with kanji, there was no gloss. Now, in those cases, the word read the same way, of the same class and among the most used is taken: なる no longer comes up as "that is in" (the suffix of old texts) but as 成る, "to become"; もの and こと as "thing", not as particles; and ある, くる, いう, だけ or まだ no longer go without a gloss. Measured with a novel: 110 out of every 1,900 words gain their gloss, none loses it and the 6 that change do so for the better.
+- **Dictionaries that install even when they come out broken.** yomidevs publishes JMdict as a new release every day, and on some days it comes out empty. Kotonoha downloads the latest one, so on those days no JMdict could be installed, not even the English one: "The file doesn't contain a recognizable term dictionary". Now, if the latest arrives empty, the most recent earlier release that has it in full is downloaded instead.
+- A lone lengthening mark ("ー", as in 「返してー」) no longer counts as a word.
 
 ## 0.31.0 · 2026-11-14
 

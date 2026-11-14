@@ -96,6 +96,12 @@ Las páginas que son imágenes, como los mangas, los libros escaneados y muchos 
 
 <sub>Páginas de ejemplo: 『改訂版 ここで差がつく 有機化合物の構造決定問題の要点・演習』, de 西村能一 y 黒澤孝朋 (KADOKAWA, 2024), y 【推しの子】 1, de 赤坂アカ y 横槍メンゴ (集英社, 2020). Se muestra una sola página de cada obra, para ilustrar el visor; los derechos pertenecen a sus autores y editoriales.</sub>
 
+### El vocabulario de un libro, antes de leerlo
+
+<img src="docs/img/vocabulario.png" alt="Vocabulario de 吾輩は猫である: comprensión, palabras por aprender, metas del 90, 95 y 98 % y la lista con 書生 abierto y sus frases del libro" width="100%">
+
+Cada libro y cada colección tienen su **vocabulario**: todas sus palabras, contadas, las que más salen primero, con su lectura, su glosa, su nivel del JLPT y su mejor frase del libro. Arriba se ve cuánto se entiende ya y cuántas palabras hacen falta para entender el 90, el 95 o el 98 %. Las palabras se marcan aquí mismo como conocidas o en aprendizaje, y las elegidas pasan de golpe a Memoria o a Anki con su frase del libro. Vale para novelas, PDF, textos y manga leído con el OCR; en una serie, cada tomo dice cuántas palabras nuevas trae. También está la gramática del libro, punto por punto.
+
 ### Un cuaderno para escribir y leer
 
 <img src="docs/img/lector-web.png" alt="Cuaderno en una pestaña, con párrafos, furigana y comprensión" width="100%">

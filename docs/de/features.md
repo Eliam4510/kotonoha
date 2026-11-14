@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.31.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.32.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -149,6 +149,9 @@ Stand jeder Funktion in Version 0.31.0 und die Art ihrer Überprüfung.
 | PDF-Text: In einem PDF mit der Textebene eines anderen Texterkennungsprogramms zwischen diesem Text und der Texterkennung von Kotonoha wählen, für jedes Buch gespeichert | Automatisch, und mit einem echten Scan |
 | Die Texterkennung liest voraus: die nächsten Seiten (acht bei einem Manga, vier bei einem Buch), bevor man sie erreicht, und lässt übersprungene liegen | Automatisch |
 | Verarbeiten: ein ganzes Buch von seiner Karte aus mit der Texterkennung lesen, mit Fortschritt, Pause und „Text bereit“ am Ende | Automatisch, und mit einem echten Band |
+| Wortschatz eines Buchs oder einer Sammlung: seine Wörter gezählt, die häufigsten zuerst, mit Lesung, Glosse, JLPT-Stufe und seinen besten Sätzen aus dem Buch mit der Seite; wie viel man versteht und wie viele Wörter für 90, 95 und 98 % fehlen; den Status eines oder aller ausgewählten Wörter ändern; Karten auf einmal im Gedächtnis oder in Anki mit dem Satz aus dem Buch, ohne Claude; Reihenfolge nach Häufigkeit, nach Auftreten oder danach, wie gebräuchlich sie sind; Eigennamen gesondert; die Grammatik des Buchs; in einer Sammlung jeder Band mit dem, was er neu bringt; das Fehlende vom selben Bildschirm aus mit der Texterkennung lesen | Automatisch, mit einem Text, einem Text-EPUB, einem PDF, einem CBZ mit von der Texterkennung gelesenen Seiten und einer Sammlung; gemessen mit einem ganzen Roman (etwa 135.000 Wörter in etwa vier Sekunden) und mit einem echten Manga-Band |
+| Japanische Glossen nach Wortart gewählt: なる als 成る, もの und こと als Substantive, und ある, くる oder いう mit dem Eintrag, den das Wörterbuch mit Kanji führt; unter gleich gelesenen Wörtern das meistgebrauchte | Automatisch (Unit-Tests), und gegen 0.31.0 mit 1.900 Wörtern eines Romans gemessen: 110 bekommen eine Glosse, keines verliert sie, und die 6, die sich ändern, werden besser |
+| Wörterbücher aus der neuesten yomidevs-Version, die leer ankommen: Stattdessen wird die jüngste frühere Version geladen, die sie vollständig enthält | Automatisch (Unit-Tests), und mit den echten defekten Versionen vom 12. und 14. November 2026 |
 | Den Text einer Zeile von Hand bearbeiten, getrennt vom Gelesenen gespeichert und mit „Wiederherstellen“ | Automatisch |
 | Notizen und Lesezeichen wie in einem PDF-Reader: Seiten markieren, eine Zeile, ein Wort oder einen Abschnitt in vier Farben hervorheben oder unterstreichen, mit Kommentar, und Notizen auf der Seite; im Fenster „Notizen und Lesezeichen“ alles nach Seiten, zum Hinspringen, Bearbeiten, Entfernen oder Kopieren als Text | Automatisch |
 | Im Buch suchen: im PDF-Text und im Text der Texterkennung, mit Bearbeitungen, ohne Unterschied bei Zeichenbreite sowie zwischen Hiragana und Katakana, auch ein über zwei Zeilen geteiltes Wort; Ergebnisse nach Seiten und auf der Seite markiert | Automatisch |
@@ -268,6 +271,7 @@ Stand jeder Funktion in Version 0.31.0 und die Art ihrer Überprüfung.
 | Einschränkung | Einzelheit |
 |---|---|
 | Sehr große PDFs | Solange es geöffnet ist, reserviert ein PDF so viel Speicher, wie die Datei groß ist (so arbeitet pdf.js): Eine Datei mit 550 MB zeigt im Task-Manager mehr als 1 GB, obwohl nur der gelesene Teil wirklich belegt ist. Beim Schließen wird er freigegeben |
+| Eigennamen im Wortschatz | Nur die, die IPADIC als Namen erkennt, werden abgesondert; Figurennamen, die auch Wörter sind (アイ, ルビー), erscheinen als Wörter und lassen sich als ignoriert markieren. Gezählt wird nur bereits gelesener Text: in einem Bildbuch die mit der Texterkennung gelesenen Seiten |
 | Lernsprache | Japanisch, Englisch und Deutsch. Jede neue Sprache braucht ihr eigenes Paket in `src/lenguas` |
 | Analyse des Englischen | Sie erfolgt mit einem kleinen Modell, das in die Erweiterung passt. In mehrdeutigen Sätzen kann es die Wortart falsch bestimmen und damit auch die Übersetzung unter dem Wort. Das Wortfenster zeigt weiterhin alle Definitionen |
 | Analyse des Deutschen | Sie stammt aus den Formen der Wörterbücher: Ohne Deutsch–Englisch ist jedes Wort seine eigene Form. Zwischen zwei möglichen Wörtern entscheidet die Häufigkeit, ohne auf den Satz zu achten; Claude korrigiert Fehler, wenn es die Zeile prüft |

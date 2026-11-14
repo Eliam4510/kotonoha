@@ -79,6 +79,7 @@ function palabra(superficie: string, c: TokenCrudo, existe?: (termino: string) =
     flexion: esNombre ? [] : colaDe(superficie, lema, c.pos),
     furigana: [{ texto: superficie }],
     inflexionado: false,
+    ...(esNombre ? { nombre: true } : {}),
   };
 }
 

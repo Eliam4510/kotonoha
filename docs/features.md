@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.31.0, along with how it has been verified.
+Status of each feature in version 0.32.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -149,6 +149,9 @@ Status of each feature in version 0.31.0, along with how it has been verified.
 | PDF text: in a PDF with another OCR program's text layer, choose between that text and Kotonoha's OCR, remembered for each book | Automated, and with a real scan |
 | OCR reads ahead: the next pages (eight in a manga, four in a book) before you reach them, and drops the ones you skip | Automated |
 | Process: read a whole book with OCR from its card, with progress, pause and "Text ready" at the end | Automated, and with a real volume |
+| Vocabulary of a book or a collection: its words counted, most frequent first, with reading, gloss, JLPT level and its best sentences from the book with their page; how much you understand and how many words are missing for 90, 95 and 98 %; change the status of one or all the selected ones; cards in bulk in Memory or Anki with the sentence from the book, without Claude; order by count, by appearance or by how common they are; proper names apart; the book's grammar; in a collection, each volume with what new words it brings; read what is missing with OCR from the same screen | Automated, with a text, a text EPUB, a PDF, a CBZ with OCR-read pages and a collection; measured with a whole novel (about 135,000 words in about four seconds) and with a real manga volume |
+| Japanese glosses chosen by word class: なる as 成る, もの and こと as nouns, and ある, くる or いう with the entry the dictionary stores with kanji; among words read the same way, the most used one | Automated (unit tests), and measured against 0.31.0 with 1,900 words from a novel: 110 gain their gloss, none loses it and the 6 that change do so for the better |
+| Dictionaries from the latest yomidevs release that arrive empty: the most recent earlier release that has them in full is downloaded instead | Automated (unit tests), and with the real broken releases of 12 and 14 November 2026 |
 | Edit a line's text by hand, stored apart from what was read and with Restore | Automated |
 | Notes and bookmarks, as in a PDF reader: bookmark pages, highlight in four colours or underline a line, a word or a stretch, with a comment, and sticky notes on the page; in the "Notes and bookmarks" panel, everything by page, to go to, edit, remove or copy as text | Automated |
 | Search the book: in the PDF text and the OCR text, with edits, ignoring character width and the difference between hiragana and katakana, also a word split across two lines; results by page and marked on the page | Automated |
@@ -268,6 +271,7 @@ Status of each feature in version 0.31.0, along with how it has been verified.
 | Limitation | Detail |
 |---|---|
 | Very large PDFs | While open, a PDF reserves as much memory as the file takes up (that is how pdf.js works): a 550 MB file shows more than 1 GB in the task manager, although only the part read is really used. It is released when closed |
+| Proper names in the vocabulary | Only the ones IPADIC recognizes as names are set apart; character names that are also words (アイ, ルビー) appear as words and can be marked as ignored. Only text already read counts: in an image book, the pages read with OCR |
 | Study language | Japanese, English and German. Each new language needs its own package, in `src/lenguas` |
 | English analysis | It is done by a small model that fits in the extension. In ambiguous sentences it can pick the wrong category, and with it the wrong translation under the word. The word panel still shows every definition |
 | German analysis | It comes from the dictionaries' forms: without German–English, each word is its own form. Between two possible words, frequency decides, without looking at the sentence; Claude fixes what goes wrong when it reviews the line |
