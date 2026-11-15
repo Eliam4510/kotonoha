@@ -1,10 +1,12 @@
 // Content script. En sitios de video monta el reproductor; en el resto, el lector de páginas.
 
+import { effect } from '@preact/signals';
 import { render } from 'preact';
 import { alCambiarAjustes, leerAjustes } from '../compartido/ajustes';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import base from '../ui/estilos';
 import { aplicarLengua, lengua } from '../ui/lengua';
+import { letraElegida } from '../ui/letra';
 import { variablesPaleta } from '../ui/paletas';
 import { cargarFuentes } from '../ui/fuentes';
 import { ejecutarComando, instalarAtajos } from './atajos';
@@ -33,7 +35,13 @@ function montar(): HTMLElement {
   raiz.className = 'kk-raiz';
   raiz.lang = bcp47Actual();
   Object.entries(variablesPaleta(ajustes.value.paleta, true)).forEach(([k, v]) => raiz.style.setProperty(k, v));
-  lengua.subscribe((l) => raiz.style.setProperty('--letra-lengua', l.letra));
+  // La letra elegida para la lengua (Ajustes o el panel de los subtítulos), con el aire que le falta a su lectura: la
+  // misma de las páginas del diccionario, para los subtítulos y las fichas.
+  effect(() => {
+    const { letra, aire } = letraElegida(lengua.value, ajustes.value.diccionarioLetra);
+    raiz.style.setProperty('--letra-lengua', letra);
+    raiz.style.setProperty('--aire-lectura', String(aire));
+  });
   sombra.appendChild(raiz);
   document.documentElement.appendChild(anfitrion);
   render(<Reproductor />, raiz);

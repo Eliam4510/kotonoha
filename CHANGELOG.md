@@ -2,6 +2,14 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.32.2 · 2026-11-14
+
+La letra, también en los subtítulos.
+
+- **La letra de la lengua, también sobre el video.** La **Letra** de Ajustes (gótica, redondeada, de libro o a mano) solo cambiaba las páginas del diccionario. Ahora es también la de los subtítulos y las fichas sobre el video, y se elige además en el panel **Video y subtítulos**, pestaña **Subtítulos**, junto al tamaño: el panel se aparta y el cambio se ve al momento. La de partida es la gótica: quien no la había cambiado verá los subtítulos en gótica en vez de en la redondeada de antes, y puede volver a ella en ese mismo panel.
+- **Lecturas con aire con cualquier letra.** Cada letra deja a la lectura el aire que le falta, como en el diccionario. Medido sobre el video, del 70 al 250 %: con ninguna toca la lectura la palabra, ni queda más pegada que con la redondeada.
+- **El inglés y el alemán, con su letra sobre el video.** Las capas del video volvían a la letra japonesa, así que los subtítulos en inglés o en alemán salían con las letras latinas de la redondeada japonesa, no con la suya.
+
 ## 0.32.1 · 2026-11-14
 
 La barra de arriba, al alcance, y los cambios de tamaño y de letra, a la vista.
@@ -306,6 +314,14 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.32.2 · 2026-11-14
+
+The typeface, also in subtitles.
+
+- **The language's typeface, also over videos.** The **Typeface** in Settings (sans, rounded, book or handwritten) only changed the dictionary pages. Now it is also used for subtitles and word panels over videos, and it can also be chosen in the **Video and subtitles** panel, **Subtitles** tab, next to the size: the panel steps aside and the change shows at once. The default is sans: if you had not changed it, subtitles will show in sans instead of the rounded typeface used before, and you can go back to it in that same panel.
+- **Readings with room under any typeface.** Each typeface gives readings the room it lacks, as in the dictionary. Measured over the video, from 70 to 250 %: with none of them does the reading touch the word or sit closer than with the rounded one.
+- **English and German with their own typeface over videos.** The video layers went back to the Japanese typeface, so English or German subtitles used the Latin letters of the Japanese rounded typeface, not their own.
 
 ## 0.32.1 · 2026-11-14
 

@@ -187,6 +187,9 @@
 .grupo + .grupo, .grupo + .columnas, .columnas + .grupo { margin-top: 10px; }
 .columnas-arriba { align-items: start; }
 .columnas.separada { margin-top: 12px; }
+/* La letra de la lengua en el panel de subtítulos: cada botón con la palabra de muestra en su letra. */
+.letras-video { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+.letras-video span[lang] { margin-right: 2px; font-size: 15px; font-weight: 700; }
 .panel-ia-error.separada { margin-top: 12px; }
 .nota-grupo.pie { margin-top: 14px; }
 .salida-traductor .esqueleto.larga { width: 92%; }

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.32.1, along with how it has been verified.
+Status of each feature in version 0.32.2, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -20,6 +20,7 @@ Status of each feature in version 0.32.1, along with how it has been verified.
 | The bar appears when the pointer rests at the top, stays while it is near and ignores passing movements | Automated and real session |
 | In a window, it also appears when the pointer rests on the top edge of the video, below the site's header (like YouTube's), and not in the middle of that header, where its search box is | Automated |
 | When changing the size, background or readings with a panel open over the subtitles, the panel steps aside for a moment so the change can be seen; only the row in use stays visible | Automated |
+| The language's typeface (sans, rounded, book or handwritten) is also used for subtitles and word panels over videos: it is chosen in Settings or next to the size, in the subtitles panel, and changes at once; with all of them, readings do not touch the word from 70 to 250 % | Automated |
 | Subtitles that can be dragged anywhere on the video, with magnets and without leaving it | Automated and real session |
 | Line changes without flicker, and slightly smaller text for long paragraphs | Automated and real session |
 | Subtitles stay with the video when the page scrolls, without jitter | Imitation page and real session |

@@ -8,6 +8,7 @@ import type { EntradaBreve } from '../nucleo/explorar';
 import { ConFurigana, NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
+import { letraElegida } from '../ui/letra';
 import { navegar } from './estadoApp';
 
 /** Lo que hace falta para enseñar una palabra en una lista. */
@@ -23,10 +24,8 @@ export const buscarPalabra = (t: string) => navegar(`diccionario?q=${encodeURICo
 
 /** El tamaño y la letra de lo escrito en la lengua en las páginas del diccionario, como variables de CSS. */
 export function estiloDiccionario(ajustes: Ajustes): Record<string, string | number> {
-  const paquete = lengua.value;
-  const elegida = ajustes.diccionarioLetra === 'redondeada' ? undefined : paquete.letras?.[ajustes.diccionarioLetra] ? ajustes.diccionarioLetra : 'gotica';
-  const letra = elegida && paquete.letras?.[elegida];
-  return { '--escala-dic': ajustes.diccionarioTamano / 100, ...(letra ? { '--letra-lengua': letra, '--aire-lectura': paquete.aireLectura?.[elegida] ?? 0 } : {}) };
+  const { letra, aire } = letraElegida(lengua.value, ajustes.diccionarioLetra);
+  return { '--escala-dic': ajustes.diccionarioTamano / 100, '--letra-lengua': letra, '--aire-lectura': aire };
 }
 
 export function TarjetaPalabra({ e, activa, alElegir }: { e: PalabraBreve; activa?: boolean; alElegir?: () => void }) {

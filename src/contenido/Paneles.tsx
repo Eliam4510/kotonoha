@@ -36,6 +36,7 @@ import { cambiarAjuste } from './Reproductor';
 import { LENGUAS, lenguasTraduccion, numero, tm, tr } from '../compartido/i18n';
 import { estudiarLengua, lengua } from '../ui/lengua';
 import { PAQUETES } from '../lenguas';
+import { familiaDe, letrasDe } from '../ui/letra';
 import type { TextosLengua } from '../lenguas/tipos';
 
 /** Anillo de progreso: comprensión del video, avance de una tarea de Claude. */
@@ -98,7 +99,7 @@ function Cabecera({ titulo, icono, detalle, ia }: { titulo: string; icono: Nombr
 
 /** Lo que cambia cómo se ven los subtítulos. */
 const AJUSTES_A_LA_VISTA = new Set<keyof Ajustes>([
-  'escalaObjetivo', 'escalaSecundario', 'ocultarObjetivo', 'ocultarSecundario', 'sombra', 'opacidadSombra', 'subsPosicion',
+  'escalaObjetivo', 'escalaSecundario', 'ocultarObjetivo', 'ocultarSecundario', 'sombra', 'opacidadSombra', 'subsPosicion', 'diccionarioLetra',
   'mostrarEstado', 'furigana', 'glosas', 'colorAcento', 'resaltarFrase', 'particulasConocidas', 'mostrarGramatica', 'formatoLectura',
 ]);
 const ASOMO_MS = 1600;
@@ -450,6 +451,20 @@ function PanelVideo() {
               <Fila etq={tr('Tamaño')}><Paso etiqueta={tr('tamaño de secundarios')} valor={a.escalaSecundario} paso={10} min={40} max={250} unidad="%" alCambiar={(v) => cambiarAjuste({ escalaSecundario: v })} /></Fila>
             </div>
           </div>
+          {/* La letra de la lengua: la misma de las páginas del diccionario, que se elige también en Ajustes. */}
+          {letrasDe(lengua.value).length > 1 && (
+            <div class="grupo">
+              <Fila etq={tr('Letra')}>
+                <div class="segmentado letras-video" role="radiogroup" aria-label={tr('Letra')}>
+                  {letrasDe(lengua.value).map((l) => (
+                    <button key={l.id} role="radio" aria-checked={a.diccionarioLetra === l.id} class={a.diccionarioLetra === l.id ? 'activo' : ''} onClick={() => cambiarAjuste({ diccionarioLetra: l.id })}>
+                      <span lang={lengua.value.id} style={{ fontFamily: familiaDe(lengua.value, l.id) }}>{lengua.value.ejemplos.palabra}</span> {tr(l.nombre)}
+                    </button>
+                  ))}
+                </div>
+              </Fila>
+            </div>
+          )}
           <TituloGrupo>{tr('Posición')}</TituloGrupo>
           <div class="grupo">
             <Fila etq={tr('Dónde van los subtítulos')} ayuda={tr('Arrástralos sobre el video para moverlos')}>

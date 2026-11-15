@@ -565,6 +565,31 @@ if (quiere('asomar')) {
   await p.waitForTimeout(400);
   comprobar(!(await estado()).asomando, 'Y al salir de la fila, enseguida');
   comprobar((await leerAjustes()).escalaObjetivo === 100, 'El tamaño queda como estaba');
+
+  // La letra, en el mismo panel: la de la lengua, la misma de las páginas del diccionario.
+  const letraSubs = () => enOverlay((r) => getComputedStyle(r.querySelector('.linea-sub.objetivo')).fontFamily);
+  const deLibro = await enOverlay((r) => {
+    const f = [...r.querySelectorAll('.panel-flotante .fila')].find((x) => x.querySelector('.etq')?.textContent === 'Letra');
+    const b = f && [...f.querySelectorAll('button')].find((x) => x.textContent.includes('De libro'));
+    if (!b) return null;
+    const c = b.getBoundingClientRect();
+    const g = f.querySelector('.segmentado').getBoundingClientRect();
+    const fr = f.getBoundingClientRect();
+    return { x: c.left + c.width / 2, y: c.top + c.height / 2, opciones: f.querySelectorAll('button').length, cabe: g.left >= fr.left - 0.5 && g.right <= fr.right + 0.5 };
+  });
+  comprobar(deLibro?.opciones === 4 && deLibro.cabe, 'El panel de subtítulos tiene la letra, con sus cuatro opciones a la vista', JSON.stringify(deLibro));
+  await p.mouse.click(deLibro.x, deLibro.y);
+  await p.waitForTimeout(320);
+  const conLibro = await estado();
+  comprobar(conLibro.asomando && conLibro.fila === 'Letra', 'Al cambiar la letra, el panel se aparta y deja esa fila', JSON.stringify(conLibro));
+  comprobar(/Mincho/.test(await letraSubs()), 'Y los subtítulos ya van en esa letra', (await letraSubs()).slice(0, 40));
+  comprobar((await leerAjustes()).diccionarioLetra === 'libro', 'Es la misma de las páginas del diccionario');
+  await sw.evaluate(async () => {
+    const d = await chrome.storage.local.get('ajustes');
+    await chrome.storage.local.set({ ajustes: { ...d.ajustes, diccionarioLetra: 'gotica' } });
+  });
+  await p.waitForTimeout(400);
+  comprobar(/BIZ UDPGothic/.test(await letraSubs()), 'Cambiada desde Ajustes, también al momento', (await letraSubs()).slice(0, 40));
   await p.keyboard.press('Escape');
   await p.waitForTimeout(300);
   await p.mouse.move(800, 5);

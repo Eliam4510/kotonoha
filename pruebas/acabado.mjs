@@ -233,6 +233,55 @@ if (quiere('subtitulos')) {
   await v.waitForTimeout(600);
   await medirMezclas('estrecha');
   await v.setViewportSize({ width: ANCHO, height: ALTO });
+  innerAlto = ALTO;
+
+  // Cada letra de la lengua, también sobre el video: la elegida en Ajustes o en el panel. La lectura no toca la palabra
+  // (medido en la tinta, con el fondo opaco: a través del semitransparente, el cielo del video contaba como tinta), no
+  // queda más pegada que con la redondeada de siempre y el bloque sigue con aire hasta el borde. Lo que se ve entre las
+  // dos depende de la forma de cada letra: con 青, que sube hasta arriba de su cuadro, ya eran unos 2 px, y en la de
+  // libro, 1 px menos. Por eso se admite 1 px de diferencia: la falta de aire de una letra entera sería bastante más.
+  const FAMILIAS = { redondeada: /Kotonoha JP/, gotica: /BIZ UDPGothic/, libro: /Mincho/, escuela: /Kyokasho/ };
+  const unDecimal = (x) => Math.round(x * 10) / 10;
+  /** Lo más pegada que queda una lectura con la redondeada, en cada tamaño y línea: las demás letras se comparan con ella. */
+  const conRedondeada = new Map();
+  for (const letra of Object.keys(FAMILIAS)) {
+    for (const escala of [70, 100, 200, 250]) {
+      await fijar({ ...BASE, diccionarioLetra: letra, escalaObjetivo: escala, escalaSecundario: Math.min(escala, 150), opacidadSombra: 1 });
+      await v.waitForTimeout(500);
+      const problemas = [];
+      for (const [t, linea] of [[10, 'corta'], [44, 'larga']]) {
+        await segundo(t);
+        await esperar('.linea-sub.objetivo .pal rt', 8000);
+        await v.waitForTimeout(300);
+        const familia = await v.evaluate(() => getComputedStyle(document.querySelector('kotonoha-overlay').shadowRoot.querySelector('.linea-sub.objetivo')).fontFamily);
+        if (!FAMILIAS[letra].test(familia)) problemas.push(`${linea}: con la letra ${familia.slice(0, 30)}`);
+        const rubies = v.locator('.linea-sub.objetivo .pal ruby:not(.glosada)');
+        let minimo = Infinity;
+        for (let i = 0; i < Math.min(3, await rubies.count()); i++) {
+          const tinta = await tintaDeLectura(v, rubies.nth(i), '.subs-bloque');
+          if (!tinta) problemas.push(`${linea}: sin lectura que medir`);
+          else minimo = Math.min(minimo, tinta.aire);
+        }
+        const clave = `${escala}|${linea}`;
+        if (minimo < 1) problemas.push(`${linea}: la lectura toca la palabra`);
+        if (letra === 'redondeada') conRedondeada.set(clave, minimo);
+        else if (minimo < (conRedondeada.get(clave) ?? 0) - 1) problemas.push(`${linea}: ${unDecimal(minimo)} px entre la lectura y la palabra, menos que con la redondeada (${unDecimal(conRedondeada.get(clave))})`);
+        const m = await medir();
+        if (!m) {
+          problemas.push(`${linea}: sin bloque`);
+          continue;
+        }
+        const minimoArriba = (m.letra || 25) * 0.3;
+        const arriba = m.arribaLectura ?? m.arriba;
+        if (arriba < minimoArriba) problemas.push(`${linea}: ${arriba} px arriba (mínimo ${unDecimal(minimoArriba)})`);
+        if (m.abajo < 12) problemas.push(`${linea}: ${m.abajo} px abajo`);
+        if (m.lados < 18) problemas.push(`${linea}: ${m.lados} px a los lados`);
+        if (m.pisadas) problemas.push(`${linea}: ${m.pisadas} lecturas o glosas pisan otro texto`);
+        if (!m.dentro || m.alto > innerAlto * 0.72) problemas.push(`${linea}: el bloque mide ${m.alto} px de alto${m.dentro ? '' : ' y se sale de la ventana'}`);
+      }
+      comprobar(!problemas.length, `Subtítulos con la letra «${letra}» al ${escala} %: la lectura no toca la palabra${letra === 'redondeada' ? '' : ' ni queda más pegada que con la redondeada'}, y hay aire hasta el borde`, problemas.join('; '));
+    }
+  }
   await v.close();
   s.close();
   await fijar(BASE);

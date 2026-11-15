@@ -110,6 +110,10 @@
   font-synthesis: none;
 }
 
+/* Una raíz dentro de otra (las capas sobre el video, el reproductor de la app) se queda con la letra de la lengua de la
+   de fuera: la elegida (ui/letra.ts) o la de cada lengua. Sin esto volvía a la japonesa redondeada, también en inglés. */
+.kk-raiz .kk-raiz { --letra-lengua: inherit; }
+
 .kk-raiz[data-tema='claro'] {
   color-scheme: light;
 

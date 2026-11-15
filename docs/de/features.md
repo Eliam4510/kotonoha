@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.32.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.32.2 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -20,6 +20,7 @@ Stand jeder Funktion in Version 0.32.1 und die Art ihrer Überprüfung.
 | Die Leiste erscheint, wenn die Maus oben verweilt, bleibt, solange sie in der Nähe ist, und reagiert nicht auf bloßes Vorbeifahren | Automatisch und echte Sitzung |
 | In einem Fenster erscheint sie auch, wenn die Maus am oberen Rand des Videos verweilt, unter der Kopfzeile der Seite (wie der von YouTube), aber nicht mitten in dieser Kopfzeile, wo ihr Suchfeld ist | Automatisch |
 | Wer Größe, Hintergrund oder Lesungen ändert, während ein Bereich über den Untertiteln offen ist, sieht die Änderung sofort: Der Bereich tritt kurz zur Seite, nur die benutzte Zeile bleibt sichtbar | Automatisch |
+| Die Schrift der Sprache (Grotesk, abgerundet, Buchschrift oder Handschrift) gilt auch für die Untertitel und die Wortfenster über dem Video: Sie wird in den Einstellungen oder neben der Größe im Untertitelbereich gewählt und ändert sich sofort; bei allen berührt die Lesung das Wort von 70 bis 250 % nicht | Automatisch |
 | Untertitel, die sich an jede Stelle des Videos ziehen lassen, mit Magneten und ohne es zu verlassen | Automatisch und echte Sitzung |
 | Zeilenwechsel ohne Flackern und etwas kleinere Schrift bei langen Absätzen | Automatisch und echte Sitzung |
 | Die Untertitel folgen dem Video beim Scrollen der Seite, ohne zu zittern | Nachgebildete Seite und echte Sitzung |
