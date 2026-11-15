@@ -116,11 +116,14 @@ const lenguaActual = async () => (await leerAjustes()).idiomaObjetivo;
 // ---------- Elegir la lengua ----------
 
 console.log('\n== Elegir la lengua ==');
-// Si una ejecución anterior se quedó a medias, se vuelve al punto de partida: el inglés sin palabras conocidas ni ajustes
-// propios (su lector encendido haría fallar lo que sigue), y el japonés con los de siempre.
+// Si una ejecución anterior se quedó a medias, se vuelve al punto de partida: el inglés sin palabras conocidas, sin
+// tarjetas de go (con una vieja, Q parecería crear la suya aunque no lo hiciera) ni ajustes propios (su lector encendido
+// haría fallar lo que sigue), y el japonés con los de siempre y sin 猫, que la copia antigua tiene que añadir.
 await motor('fijarLengua', 'en');
 await motor('cambiarPalabras', ['go', 'wait'].map((x) => ({ clave: `${x}|${x}`, lema: x, lectura: x, estado: 'desconocida' })));
+for (const t of await motor('memoriaPendientes', 500)) if (t.borrador.palabra === 'go') await motor('memoriaEliminar', t.id);
 await motor('fijarLengua', 'ja');
+await motor('cambiarPalabras', [{ clave: '猫|ねこ', lema: '猫', lectura: 'ねこ', estado: 'desconocida' }]);
 await sw.evaluate(async () => {
   const a = (await chrome.storage.local.get('ajustes')).ajustes ?? {};
   await chrome.storage.local.set({ ajustes: { ...a, idiomaObjetivo: 'ja', porLengua: {}, nivel: 'JLPT N3', formatoLectura: 'hiragana', furigana: 'todas', lectorFurigana: 'desconocidas', lectorActivo: true, colorAcento: 'siempre', ankiMazo: 'Kotonoha' } });
