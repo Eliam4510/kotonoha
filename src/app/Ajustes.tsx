@@ -3,7 +3,7 @@
 import type { InfoAyudante, MotorVozLocal } from '../compartido/api';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { AJUSTES_INICIALES, type Ajustes, type AjustesVozLocal, type AjustesVozNeuronal, CLAVE_API, type Esfuerzo, guardarAjustes, type LetraDiccionario, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, TAMANO_DICCIONARIO, type TareaIA, type Tema } from '../compartido/ajustes';
+import { AJUSTES_INICIALES, type Ajustes, type AjustesVozLocal, type AjustesVozNeuronal, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, TAMANO_DICCIONARIO, type TareaIA, type Tema } from '../compartido/ajustes';
 import { borrarArchivosSueltos, borrarModeloGuardado, borrarModeloMoras, bytesModeloMoras, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
@@ -29,6 +29,7 @@ import { decirConNavegador, vocesDeLaLengua } from '../ui/vozNavegador';
 import { useEsperar } from '../ui/preparacion';
 import { ConFurigana } from '../ui/Ficha';
 import { estiloDiccionario } from './TarjetaPalabra';
+import { familiaDe, letrasDe } from '../ui/letra';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -912,20 +913,14 @@ function SeccionDiccionarios({ a, cambiar }: PropsSeccion) {
   );
 }
 
-const LETRAS_DICCIONARIO: { id: LetraDiccionario; nombre: string }[] = [
-  { id: 'gotica', nombre: tm('Gótica') },
-  { id: 'redondeada', nombre: tm('Redondeada') },
-  { id: 'libro', nombre: tm('De libro') },
-  { id: 'escuela', nombre: tm('A mano') },
-];
-
-/** Cómo se ve la página del diccionario: su ancho, el tamaño de las palabras y su letra, con una muestra de cada una. */
+/**
+ * Cómo se ve la página del diccionario: su ancho, el tamaño de las palabras y su letra, con una muestra de cada una. La
+ * letra también es la de los subtítulos y las fichas sobre el video (ui/letra.ts).
+ */
 function PaginaDelDiccionario({ a, cambiar }: PropsSeccion) {
   const paquete = lengua.value;
-  const letras = paquete.letras;
   const { minimo, maximo, paso } = TAMANO_DICCIONARIO;
-  const opciones = LETRAS_DICCIONARIO.filter((l) => l.id === 'redondeada' || (letras && (l.id !== 'escuela' || letras.escuela)));
-  const letraDe = (id: LetraDiccionario) => (id === 'redondeada' ? paquete.letra : letras?.[id] ?? paquete.letra);
+  const opciones = letrasDe(paquete);
   return (
     <div class="ap-grupo">
       <Opcion titulo={tr('Ancho')} ayuda={tr('A todo el ancho, la lista de resultados, la palabra y sus relacionadas van en columnas. Centrada, todo va en una sola.')}>
@@ -942,11 +937,11 @@ function PaginaDelDiccionario({ a, cambiar }: PropsSeccion) {
         </div>
       </Opcion>
       {opciones.length > 1 && (
-        <Opcion titulo={tr('Letra')} ayuda={tr('La gótica se lee mejor en los caracteres complicados. La de escribir a mano enseña los trazos como se escriben.')}>
+        <Opcion titulo={tr('Letra')} ayuda={<>{tr('La gótica se lee mejor en los caracteres complicados. La de escribir a mano enseña los trazos como se escriben.')} {tr('También es la de los subtítulos y las fichas sobre el video.')}</>}>
           <div class="segmentado ap-letras" role="radiogroup" aria-label={tr('Letra')}>
             {opciones.map((l) => (
               <button key={l.id} role="radio" aria-checked={a.diccionarioLetra === l.id} class={a.diccionarioLetra === l.id ? 'activo' : ''} onClick={() => cambiar({ diccionarioLetra: l.id })}>
-                <span lang={paquete.id} style={{ fontFamily: letraDe(l.id) }}>{paquete.ejemplos.palabra}</span> {tr(l.nombre)}
+                <span lang={paquete.id} style={{ fontFamily: familiaDe(paquete, l.id) }}>{paquete.ejemplos.palabra}</span> {tr(l.nombre)}
               </button>
             ))}
           </div>

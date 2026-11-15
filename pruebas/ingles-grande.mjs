@@ -84,6 +84,8 @@ comprobar(resultado.entradas.length > 0, 'Y consulta', `${Date.now() - t} ms`);
 for (let i = 0; i < 120 && !(await motor('estado')).terminosCargados; i++) await dormir(500);
 await app.locator('#diccionarios').scrollIntoViewIfNeeded().catch(() => {});
 const boton = app.locator('button[aria-label="Eliminar Inglés–inglés"]');
+// La lista de diccionarios llega del motor: recién abierto Ajustes, puede no estar pintada todavía.
+await boton.waitFor({ state: 'attached', timeout: 20000 }).catch(() => {});
 comprobar((await boton.count()) === 1, 'Ajustes lo ofrece para quitarlo');
 t = Date.now();
 await boton.click();

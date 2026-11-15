@@ -13,6 +13,7 @@ import { extraerAudioParaWhisper, extraerPistaAudio, extraerSubtitulos, type Inf
 import { Mensaje } from './Piezas';
 import { tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
+import { letraElegida } from '../ui/letra';
 
 const RE_VIDEO = /\.(mp4|webm|mkv|mov|m4v|ogv)$/i;
 const RE_SUB = /\.(srt|vtt|ass|ssa|ttml|dfxp|xml)$/i;
@@ -193,9 +194,12 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
 
   const hayVideo = actual >= 0;
 
+  // Los subtítulos y las fichas, con la letra elegida para la lengua, como sobre el video en cualquier sitio.
+  const { letra, aire } = letraElegida(lengua.value, a.diccionarioLetra);
   return (
     <div
       class={`ap-local ${hayVideo ? 'con-video' : ''}`}
+      style={{ '--letra-lengua': letra, '--aire-lectura': aire }}
       onDragOver={(e) => { e.preventDefault(); fijarArrastrando(true); }}
       onDragLeave={(e) => { if (e.currentTarget === e.target) fijarArrastrando(false); }}
       onDrop={(e) => {

@@ -164,7 +164,8 @@ export const JAPONES: PaqueteLengua = {
     escuela: "'UD Digi Kyokasho NK-R', 'UD Digi Kyokasho NK', 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho N', 'HGKyokashotai', 'BIZ UDPMincho Medium', 'Yu Mincho', serif",
   },
   // Medido con la tinta: con la redondeada y la de escuela quedan unos 0,15 em entre la lectura y el kanji; con la
-  // gótica, casi nada, y con la de libro, la mitad.
+  // gótica, casi nada, y con la de libro, la mitad. En los subtítulos grandes, con la de libro, 青 queda 1 px más pegado
+  // que con la redondeada: es su trazo de arriba, que sube más. Más aire no lo arregla y separa de más todas las demás.
   aireLectura: { gotica: 0.1, libro: 0.06 },
   principiante: { valor: 'principiante absoluto', nombre: tm('Empiezo desde cero'), ayuda: tm('Aún no leo kana'), lectura: 'todas' },
   // Vocabulario que suele asociarse a cada nivel del JLPT. Son cifras orientativas, no oficiales.

@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.32.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.32.2, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -20,6 +20,7 @@ Estado de cada función en la versión 0.32.1, con la forma en que se ha verific
 | La barra aparece al detener el ratón arriba, se queda mientras siga cerca y no se despierta al pasar de largo | Automática y sesión real |
 | En una ventana, también aparece al detener el ratón en el borde de arriba del video, bajo la cabecera del sitio (como la de YouTube), y no en medio de esa cabecera, donde está su buscador | Automática |
 | Al cambiar el tamaño, el fondo o las lecturas con un panel abierto encima de los subtítulos, el panel se aparta un momento y deja ver el cambio; solo queda a la vista la fila que se está usando | Automática |
+| La letra de la lengua (gótica, redondeada, de libro o a mano) es también la de los subtítulos y las fichas sobre el video: se elige en Ajustes o junto al tamaño, en el panel de subtítulos, y cambia al momento; con todas, la lectura no toca la palabra del 70 al 250 % | Automática |
 | Subtítulos que se arrastran a cualquier punto del video, con imanes y sin salirse de él | Automática y sesión real |
 | Cambio de línea sin parpadeos, y letra algo menor en los párrafos largos | Automática y sesión real |
 | Los subtítulos acompañan al video al desplazar la página, sin temblar | Página imitada y sesión real |

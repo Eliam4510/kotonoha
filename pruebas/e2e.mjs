@@ -453,9 +453,12 @@ async function youtubeReproduce() {
   for (let i = 0; i < 30 && !error && !tamanos.length; i++) await p.waitForTimeout(500);
   await p.close();
   const vacios = tamanos.length > 0 && tamanos.every((t) => t === 0);
+  // Sin ninguna respuesta en esa espera tampoco se puede probar: al seguir, los subtítulos llegaban vacíos igual.
+  const sinRespuesta = !tamanos.length;
   if (error) console.log('\n== YouTube real ==\nSe omite: el reproductor rechaza este navegador automatizado.');
   else if (vacios) console.log('\n== YouTube real ==\nSe omite: YouTube responde vacío a los subtítulos en un navegador automatizado.');
-  return !error && !vacios;
+  else if (sinRespuesta) console.log('\n== YouTube real ==\nSe omite: YouTube no ha respondido a los subtítulos a tiempo en un navegador automatizado.');
+  return !error && !vacios && !sinRespuesta;
 }
 
 if (quiere('youtube') && (await youtubeReproduce())) {
