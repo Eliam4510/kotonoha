@@ -28,6 +28,10 @@
 .vs-reservada { background: var(--superficie-2); box-shadow: none; }
 .vs-lienzo.invertido .vs-pagina { background: #111; }
 .vs-lienzo.invertido .vs-pagina img { filter: invert(1) hue-rotate(180deg); }
+/* La nitidez (VisorPaginas, FiltroNitidez): el filtro SVG sobre cada página, también con los colores invertidos. */
+.vs-filtros { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+.vs-lienzo.con-nitidez .vs-pagina img { filter: url(#vs-nitidez); }
+.vs-lienzo.con-nitidez.invertido .vs-pagina img { filter: url(#vs-nitidez) invert(1) hue-rotate(180deg); }
 
 .vs-cargando { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(127, 127, 127, 0.12) 50%, transparent 70%) var(--superficie-2); background-size: 200% 100%; animation: vs-brillo 1.4s linear infinite; }
 @keyframes vs-brillo { from { background-position: 100% 0; } to { background-position: -100% 0; } }

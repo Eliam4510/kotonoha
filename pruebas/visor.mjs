@@ -241,6 +241,36 @@ await v.keyboard.press('ArrowRight');
 await v.waitForTimeout(600);
 comprobar((await indicador(v)) === '2', 'Y se pasa de página', await indicador(v));
 await v.screenshot({ path: join(CAPTURAS, 'pdf.png') });
+
+// La nitidez, para un escaneo con poca resolución: un filtro sobre cada página, que se guarda con el libro.
+const filtro = () =>
+  v.evaluate(() => {
+    const img = document.querySelector('.vs-pagina img');
+    const f = document.querySelector('#vs-nitidez');
+    const mezcla = f?.querySelector('feComposite');
+    return { clase: document.querySelector('.vs-lienzo')?.classList.contains('con-nitidez'), css: img ? getComputedStyle(img).filter : '', k2: mezcla?.getAttribute('k2'), k3: mezcla?.getAttribute('k3'), fondo: !!f?.querySelector('feComponentTransfer'), radio: Number(f?.querySelector('feGaussianBlur')?.getAttribute('stdDeviation')) };
+  });
+comprobar(!(await filtro()).clase, 'Sin nitidez, la página se ve tal cual');
+await v.locator('button[aria-label^="Nitidez"]').click();
+await v.waitForTimeout(300);
+let f = await filtro();
+comprobar(f.clase && f.css.includes('#vs-nitidez') && f.k2 === '2.2' && f.k3 === '-1.2' && f.radio >= 0.6 && f.radio <= 2.5, 'La nitidez enfoca cada página con su filtro, en el nivel medio', JSON.stringify(f));
+await v.locator('.vs-modos button', { hasText: 'Fuerte' }).click();
+await v.locator('.vs-modos button', { hasText: 'Fondo blanco' }).click();
+await v.waitForTimeout(300);
+f = await filtro();
+comprobar(f.k2 === '3' && f.k3 === '-2' && f.fondo, 'Con más fuerza y, si se pide, el papel blanco y el texto negro', JSON.stringify(f));
+await v.locator('button[aria-label="Invertir colores"]').click();
+await v.waitForTimeout(300);
+f = await filtro();
+comprobar(f.css.includes('#vs-nitidez') && f.css.includes('invert(1)'), 'Y junto con los colores invertidos', f.css);
+await v.locator('button[aria-label="Invertir colores"]').click();
+await v.waitForTimeout(900);
+await v.close();
+v = await abrir('apuntes');
+f = await filtro();
+comprobar(f.clase && f.k2 === '3' && f.fondo, 'Al volver a abrirlo, el libro la recuerda', JSON.stringify(f));
+await v.locator('button[aria-label^="Nitidez"]').click();
 await v.waitForTimeout(900);
 await v.close();
 await app.reload();

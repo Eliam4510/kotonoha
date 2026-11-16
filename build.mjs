@@ -53,7 +53,8 @@ const opcionesWhisper = {
   // El OCR del visor también va aparte: carga sus modelos solo si se pide el texto de un libro.
   // Y las voces neuronales del inglés y del alemán, que solo se cargan si se activan, y narabas, el modelo de fonemas que
   // comprueba las moras en la práctica del acento.
-  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts', ocr: 'src/visor/ocrTrabajador.ts', voz: 'src/motor/vozTrabajador.ts', narabas: 'src/motor/narabasTrabajador.ts' },
+  // Y pdf-lib, que solo hace falta al exportar un PDF con su texto: así la ventana no la carga cada vez que se abre.
+  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts', ocr: 'src/visor/ocrTrabajador.ts', voz: 'src/motor/vozTrabajador.ts', narabas: 'src/motor/narabasTrabajador.ts', pdfTexto: 'src/nucleo/pdfActualizar.ts' },
   format: 'esm',
   sourcemap: false,
   minify: true,

@@ -36,6 +36,8 @@ export const CATALOGO = {
   primera: 'caret-line-left',
   ultima: 'caret-line-right',
   invertir: 'circle-half',
+  // La nitidez de las páginas escaneadas: el diafragma de una cámara, lo que enfoca.
+  nitidez: 'aperture',
   sentido: 'arrows-left-right',
   'texto-vertical': 'text-columns',
   video: 'monitor-play',

@@ -2,6 +2,14 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.33.0 · 2026-11-15
+
+El texto del OCR, en un PDF para cualquier lector, y los escaneos, más nítidos.
+
+- **Exportar un PDF con texto.** Desde el menú de cada libro de páginas, o con el botón del visor, **Exportar PDF con texto…** crea un PDF con las mismas páginas y, encima, el texto leído con el OCR, invisible y en su sitio: en cualquier lector de PDF se puede buscar, seleccionar y copiar. Un PDF recibe el texto al final del archivo: sus páginas y sus imágenes quedan idénticas, byte a byte, y solo crece lo que ocupa el texto (seis páginas de un escaneo, unos 19 KB). Un CBZ o un EPUB de imágenes se convierte en un PDF nuevo, con cada JPEG tal cual. Va lo editado a mano; el texto vertical de un manga, en vertical, y cada globo, donde está; también en las páginas giradas. Si el libro no está leído entero, se puede leer desde el mismo diálogo o exportar con lo leído. Un tomo de manga de 224 páginas sale en unos 3 segundos.
+- **Nitidez para los escaneos con poca resolución.** El botón **Nitidez** del visor enfoca las páginas al verlas, en tres niveles, y **Fondo blanco** deja el papel blanco y el texto negro. Se nota sobre todo al acercar, cada libro lo recuerda y vale también con los colores invertidos. Solo cambia cómo se ven: ni el archivo ni lo que lee el OCR.
+- **Una limitación.** Para añadir el texto a un PDF hay que leerlo entero: mientras se exporta, pide unas dos veces lo que pesa en memoria (un libro de 556 MB, algo más de 1 GB, durante segundo y medio). Un PDF protegido con contraseña no se puede exportar.
+
 ## 0.32.2 · 2026-11-14
 
 La letra, también en los subtítulos.
@@ -314,6 +322,14 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.33.0 · 2026-11-15
+
+The OCR text in a PDF for any reader, and sharper scans.
+
+- **Export a PDF with text.** From the menu of each page book, or with the viewer's button, **Export PDF with text…** creates a PDF with the same pages and, on top, the text read with OCR, invisible and in place: any PDF reader can search, select and copy it. A PDF gets the text at the end of the file: its pages and images stay identical, byte for byte, and it only grows by the size of the text (six pages of a scan, about 19 KB). A CBZ or an image EPUB becomes a new PDF, with each JPEG as it was. Hand edits are included; a manga's vertical text stays vertical and each bubble where it is; rotated pages too. If the book has not been read in full, it can be read from the same dialog, or exported with what has been read. A 224-page manga volume comes out in about 3 seconds.
+- **Sharpness for low-resolution scans.** The viewer's **Sharpness** button sharpens pages as you read, at three levels, and **White background** makes the paper white and the text black. It shows most when zoomed in, each book remembers it, and it also works with inverted colors. It only changes how pages look: neither the file nor what OCR reads.
+- **A limitation.** Adding the text to a PDF requires reading it whole: while exporting, it needs about twice its size in memory (a 556 MB book, a little over 1 GB, for a second and a half). A password-protected PDF cannot be exported.
 
 ## 0.32.2 · 2026-11-14
 

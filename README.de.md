@@ -86,7 +86,7 @@ Die **Bibliothek** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, D
 
 <img src="docs/img/ocr.de.png" alt="Eingescannte Seite eines Buchs über organische Chemie, mit erkanntem Text und dem Zeilenfenster zum Wort 結合" width="100%">
 
-Seiten, die Bilder sind, wie Manga, eingescannte Bücher und viele PDFs, werden mit Texterkennung (OCR) auf dem eigenen Rechner und der Grafikkarte gelesen. Es gibt einen Modus für gedruckte Bücher und einen für Manga, der vertikale Sprechblasen liest, ohne Furigana mit dem Text zu verwechseln. Ein Tippen auf ein Wort der Seite öffnet seine Zeile mit Furigana und sein Wortfenster. Jede Seite wird nur einmal gelesen und gespeichert.
+Seiten, die Bilder sind, wie Manga, eingescannte Bücher und viele PDFs, werden mit Texterkennung (OCR) auf dem eigenen Rechner und der Grafikkarte gelesen. Es gibt einen Modus für gedruckte Bücher und einen für Manga, der vertikale Sprechblasen liest, ohne Furigana mit dem Text zu verwechseln. Ein Tippen auf ein Wort der Seite öffnet seine Zeile mit Furigana und sein Wortfenster. Jede Seite wird nur einmal gelesen und gespeichert. Mit **PDF mit Text exportieren** wird das Buch zu einem PDF mit diesem Text unsichtbar darüber, durchsuchbar und kopierbar in jedem PDF-Reader; für Scans mit geringer Auflösung hat der Viewer **Schärfe**.
 
 <img src="docs/img/manga.de.png" alt="Eine Seite von 【推しの子】, im Manga-Modus gelesen, mit der Sprechblase im Fenster und dem Wort 愛" width="100%">
 

@@ -191,7 +191,7 @@ function Pantalla({ v, a }: { v: Vista; a: Ajustes }) {
       {ruta === 'inicio' && <Inicio ajustes={a} />}
       {ruta === 'diccionario' && <Diccionario ajustes={a} consulta={params.get('q') ?? ''} categoria={params.get('cat') ?? undefined} />}
       {ruta === 'lector' && <Cuaderno ajustes={a} inicial={params.get('t') ?? ''} editar={params.get('editar') === '1'} />}
-      {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
+      {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} exportar={params.get('exportar') ?? undefined} />}
       {ruta === 'vocabulario' && <Vocabulario ajustes={a} libro={params.get('libro') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
       {ruta === 'reproductor' && <ReproductorLocal a={a} />}
       {ruta === 'memoria' && <Memoria />}
