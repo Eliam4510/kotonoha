@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.33.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.34.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -92,6 +92,7 @@ Stand jeder Funktion in Version 0.33.1 und die Art ihrer Überprüfung.
 | Vollständige Kopie in einem Ordner: Bücher, OCR-Text und Diktate, ohne API-Schlüssel | Automatisch, hin und zurück |
 | Korrektur des Ergebnisses mit Claude | Simulator |
 | Liedtext auf die Zeiten der Transkription gelegt: der Text aus dem Liedtext, die Zeiten von Whisper | Simulator, mit echtem Whisper, und echte Sitzung mit einem Lied |
+| Beim Anlegen eines Liedtexts landen Verse, die Whisper nicht gehört hat, nicht in einer instrumentalen Passage: YAMNet hört beim Transkribieren des ganzen Lieds, wo gesungen wird. Gemessen mit 21 japanischen Liedern aus offiziellen Kanälen und ihren synchronisierten Texten: Von 164 nicht gehörten Versen liegen 21 mehr als eine Sekunde näher an ihrer Stelle und 3 weiter weg | Gemessen mit echten Liedern und dem echten Code; YAMNet in Kotonoha |
 | Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder, je nach Video gewählt | Automatisch, mit den drei echten Modellen auf der GPU, und echte Sitzung auf YouTube |
 | Liste der gespeicherten Modelle mit dem Platzbedarf jedes Modells und Löschen pro Modell. Das Laden von der Festplatte wird nicht mehr als Download angezeigt | Automatisch und mit echtem Whisper |
 

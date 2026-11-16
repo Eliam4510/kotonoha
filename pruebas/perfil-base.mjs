@@ -22,7 +22,7 @@ if (existsSync(origen) && !existsSync(destino)) cpSync(origen, destino, { recurs
 const c = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 let sw = c.serviceWorkers()[0];
 if (!sw) sw = await c.waitForEvent('serviceworker');

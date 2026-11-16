@@ -28,7 +28,7 @@ const sondaDwm = (s) =>
     });
   });
 
-const n = await chromium.launch({ channel: process.env.KK_CANAL ?? 'msedge', headless: true, args: ['--enable-unsafe-webgpu', '--enable-gpu', '--ignore-gpu-blocklist'] });
+const n = await chromium.launch({ channel: process.env.KK_CANAL ?? 'msedge', headless: true, args: ['--mute-audio', '--enable-unsafe-webgpu', '--enable-gpu', '--ignore-gpu-blocklist'] });
 const p = await n.newPage();
 await p.goto('https://example.com/').catch(() => {});
 

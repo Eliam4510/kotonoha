@@ -66,7 +66,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   viewport: { width: 1600, height: 900 },
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, '--autoplay-policy=no-user-gesture-required'],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, '--autoplay-policy=no-user-gesture-required'],
 });
 const bytesVideo = readFileSync(VIDEO);
 await contexto.route('https://media.test/**', (r) => {

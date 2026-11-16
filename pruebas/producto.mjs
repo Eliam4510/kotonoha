@@ -28,7 +28,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   viewport: { width: 1280, height: 900 },
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 let consultas = 0;
 await contexto.route(API, (r) => {

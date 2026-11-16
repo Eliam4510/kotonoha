@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.33.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.34.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -92,6 +92,7 @@ Estado de cada función en la versión 0.33.1, con la forma en que se ha verific
 | Copia completa en una carpeta: libros, texto del OCR y dictados, sin claves de API | Automática, de ida y vuelta |
 | Corrección del resultado con Claude | Simulador |
 | Letra de una canción colocada sobre los tiempos de la transcripción: el texto sale de la letra y los tiempos, de Whisper | Simulador, con Whisper real, y sesión real con una canción |
+| Al colocar una letra, los versos que Whisper no oyó no caen en un pasaje instrumental: YAMNet oye dónde se canta al transcribir la canción entera. Medido con 21 canciones japonesas de canales oficiales y su letra sincronizada: de 164 versos sin oír, 21 quedan más de un segundo más cerca de su sitio y 3 más lejos | Medida con canciones reales y el código real; YAMNet dentro de Kotonoha |
 | Haas-ja para la voz hablada en japonés, Parakeet para la del inglés y Whisper Turbo para las canciones, elegidos según el video | Automática, con los tres modelos reales en la GPU, y sesión real en YouTube |
 | Lista de modelos guardados, con lo que ocupa cada uno y borrado por modelo. Leerlos del disco ya no se anuncia como una descarga | Automática, y con Whisper real |
 

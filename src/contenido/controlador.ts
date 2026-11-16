@@ -6,7 +6,7 @@ import type { LineaAnalizada, PalabraToken, PistaInfo } from '../compartido/tipo
 import { desconocidas } from '../nucleo/frases';
 import { decidirSalto, duracionPausaDinamica, type LineaModo, MotorModos } from '../nucleo/modos';
 import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, sincroniaDesdePuntos } from '../nucleo/sincronia';
-import { aplicarAjuste, type EntradaAjuste, versosDeLetra } from '../nucleo/letra';
+import { aplicarAjuste, type CantoPorTramos, type EntradaAjuste, ID_LETRA, versosDeLetra, vozDeCanto } from '../nucleo/letra';
 import { analizarSubtitulos, aSrt, esSoloAcotacion, type Linea, siguienteLinea } from '../nucleo/subtitulos';
 import { fusionarLineas } from '../nucleo/transcripcion';
 import { guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
@@ -496,6 +496,8 @@ function elegirPista(lista: PistaInfo[], idioma: string): PistaInfo | undefined 
 }
 
 const importadas = new Map<string, Linea[]>();
+/** Dónde se canta en cada canción transcrita con Whisper, por video: para colocar su letra. */
+const cantos = new Map<string, CantoPorTramos>();
 
 // Tiempos originales de cada pista. Lo que se muestra es esto con la sincronización aplicada.
 let baseObjetivo: LineaAnalizada[] = [];
@@ -797,6 +799,7 @@ export async function cargarVideoActual() {
   if (info.idVideo) {
     const generadas = await motor.subtitulosGenerados(info.idVideo, ajustes.value.idiomaObjetivo).catch(() => []);
     for (const g of generadas) {
+      if (g.canto) cantos.set(info.idVideo, g.canto);
       // Si esta región ya trae esa pista, lo recordado de otra no aporta nada.
       if (g.origen === 'recordada' && lista.some((p) => p.idioma.split('-')[0] === g.idioma.split('-')[0] && !p.automatica)) continue;
       const id = g.origen === 'letra' ? `letra:${g.idioma}` : `generada:${g.idioma}`;
@@ -1166,7 +1169,8 @@ async function guardarGenerada() {
   const video = infoVideo.value?.idVideo;
   const origen = pistas.value.find((p) => p.id === idObjetivo.value)?.origen;
   const estudio = ajustes.value.idiomaObjetivo;
-  if (video) await motor.guardarSubtitulosGenerados(video, estudio, crudas(baseObjetivo), origen, estudio).catch(() => {});
+  const canto = origen === 'whisper' && video ? cantos.get(video) : undefined;
+  if (video) await motor.guardarSubtitulosGenerados(video, estudio, crudas(baseObjetivo), origen, estudio, canto).catch(() => {});
 }
 
 /** Corrección en tiempo real: un lote pequeño con todo lo transcrito hasta ahora como contexto. */
@@ -1323,7 +1327,10 @@ export async function iniciarWhisper(enVivo = false) {
   }
   let vistos = 0;
   const metodo = conAyudante ? 'transcribirDescarga' : audio ? 'transcribirArchivo' : 'transcribirEnVivo';
-  const f = flujoMotor(metodo, conAyudante ? [urlDelVideo(), desdeMs, modelo] : audio ? [audio.url, audio.pcmCrudo, desdeMs, modelo] : [modelo], (acumulado) => {
+  // En una canción, además, dónde se canta: para colocar luego su letra sin poner versos en un pasaje instrumental.
+  const conCanto = esCancion();
+  const videoCanto = info?.idVideo;
+  const f = flujoMotor(metodo, conAyudante ? [urlDelVideo(), desdeMs, modelo, conCanto] : audio ? [audio.url, audio.pcmCrudo, desdeMs, modelo, conCanto] : [modelo], (acumulado) => {
     if (!vigente()) return;
     const texto = acumulado.slice(vistos);
     const fin = texto.lastIndexOf('\n');
@@ -1335,6 +1342,11 @@ export async function iniciarWhisper(enVivo = false) {
       if (e.tipo === 'lineas') {
         whisper.value = { ...actual, lineas: actual.lineas + e.lineas.length };
         colaWhisper = colaWhisper.then(() => recibirLineasWhisper(e.lineas, fuente, vigente)).catch(console.error);
+      } else if (e.tipo === 'canto') {
+        if (videoCanto) {
+          cantos.set(videoCanto, { pasoMs: e.pasoMs, puntos: e.puntos });
+          colaWhisper = colaWhisper.then(() => (vigente() ? guardarGenerada() : undefined)).catch(console.error);
+        }
       } else if (e.tipo === 'bajandoAudio') {
         whisper.value = { ...actual, fase: 'bajando', porcentaje: e.porcentaje };
       } else if (e.tipo === 'extrayendoAudio') {
@@ -1438,7 +1450,9 @@ export async function ajustarLetra() {
   try {
     const respuesta = await flujoMotor('ajustarLetra', [lineas, versos, infoVideo.value?.titulo], () => {});
     const ajuste = JSON.parse(respuesta) as EntradaAjuste[];
-    const { lineas: finales, conTiempo, estimadas } = aplicarAjuste(versos, lineas, ajuste);
+    // Si Whisper oyó la canción, también se sabe dónde se canta: los versos que no recogió no caen en un pasaje instrumental.
+    const canto = video ? cantos.get(video) : undefined;
+    const { lineas: finales, conTiempo, estimadas } = aplicarAjuste(versos, lineas, ajuste, ID_LETRA, canto ? vozDeCanto(canto) : undefined);
     if (!conTiempo) {
       if (sigueAqui()) avisar(tr('Claude no encontró esta letra en lo que se oye. ¿Es la de esta canción?'), 'error', undefined, 8000);
       return;

@@ -60,7 +60,7 @@ const contexto = await chromium.launchPersistentContext(perfil, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   viewport: { width: 1280, height: 900 },
-  args: [`--disable-extensions-except=${copia}`, `--load-extension=${copia}`],
+  args: ['--mute-audio', `--disable-extensions-except=${copia}`, `--load-extension=${copia}`],
   env: { ...process.env, KOTONOHA_URL_VERSIONES: `http://127.0.0.1:${versiones.address().port}`, KOTONOHA_CARPETA_EXTENSION: copia },
 });
 await contexto.route('https://api.github.com/repos/Eliam4510/kotonoha/releases/latest', (r) =>

@@ -53,6 +53,7 @@ async function abrir(voz, ajustes, conPermiso = true) {
     headless: true,
     viewport: { width: 1280, height: 900 },
     args: [
+      '--mute-audio',
       `--disable-extensions-except=${DIST}`,
       `--load-extension=${DIST}`,
       '--enable-unsafe-webgpu',

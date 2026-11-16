@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.33.1, along with how it has been verified.
+Status of each feature in version 0.34.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -92,6 +92,7 @@ Status of each feature in version 0.33.1, along with how it has been verified.
 | Full copy in a folder: books, OCR text and dictations, without API keys | Automated, round trip |
 | Correction of the result with Claude | Simulator |
 | Song lyrics placed on the transcription timing: the text comes from the lyrics and the timing from Whisper | Simulator, with real Whisper, and real session with a song |
+| When placing lyrics, verses Whisper did not hear do not land in an instrumental passage: YAMNet hears where there is singing while the whole song is transcribed. Measured with 21 Japanese songs from official channels and their synced lyrics: of 164 unheard verses, 21 end up more than a second closer to their place and 3 farther | Measured with real songs and the real code; YAMNet inside Kotonoha |
 | Haas-ja for Japanese speech, Parakeet for English speech and Whisper Turbo for songs, chosen according to the video | Automated, with the three real models on the GPU, and a real session on YouTube |
 | Saved models list, with the space each one takes and per-model deletion. Loading from disk is no longer announced as a download | Automated, and with real Whisper |
 

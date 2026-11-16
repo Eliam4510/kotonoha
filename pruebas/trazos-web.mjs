@@ -31,7 +31,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   headless: true,
   viewport: { width: 1280, height: 800 },
   permissions: ['clipboard-read', 'clipboard-write'],
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 await contexto.route('https://paginas.test/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: PAGINA }));
 const sw = await recargarExtension(contexto);

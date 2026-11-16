@@ -2,6 +2,14 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.34.0 · 2026-11-16
+
+La letra de una canción, sin versos en los pasajes instrumentales.
+
+- **Dónde se canta.** Al transcribir una canción entera con Whisper, con el ayudante o desde un archivo, Kotonoha oye además dónde se canta, con YAMNet. Al colocar la letra, un verso que Whisper no recogió ya no cae en un pasaje instrumental: si justo antes del verso siguiente solo suena música, va antes de ella, donde se canta. Medido antes de integrarlo, con 21 canciones japonesas de canales oficiales y la letra sincronizada de cada una: de 164 versos que Whisper no oyó, 21 quedan más de un segundo más cerca de su sitio y 3 más lejos, y los que caen a más de 5 s pasan de 32 a 28, ya con YAMNet dentro de Kotonoha.
+- **Un modelo de 16 MB.** YAMNet, de Google, se descarga la primera vez que hace falta, de la versión 0.34.0 de Kotonoha; se comprueba con su SHA-256 y queda en **Ajustes, Transcripción de voz, Modelos guardados**, donde se puede borrar. Corre en el procesador para no quitarle la tarjeta gráfica a Whisper.
+- **Una limitación.** En la transcripción en tiempo real, sin el ayudante, todavía no se oye dónde se canta: ahí la letra se coloca como antes.
+
 ## 0.33.1 · 2026-11-16
 
 Los subtítulos de Netflix, a su hora tras los anuncios.
@@ -330,6 +338,14 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.34.0 · 2026-11-16
+
+Song lyrics without verses in instrumental passages.
+
+- **Where there is singing.** When a whole song is transcribed with Whisper, with the helper or from a file, Kotonoha also hears where there is singing, with YAMNet. When placing the lyrics, a verse Whisper did not pick up no longer lands in an instrumental passage: if only music plays right before the next verse, it goes before it, where there is singing. Measured before integrating it, with 21 Japanese songs from official channels and each one’s synced lyrics: of 164 verses Whisper did not hear, 21 end up more than a second closer to their place and 3 farther, and those more than 5 s off go from 32 to 28, with YAMNet already running inside Kotonoha.
+- **A 16 MB model.** YAMNet, by Google, is downloaded the first time it is needed, from Kotonoha’s 0.34.0 release; it is checked with its SHA-256 and kept in **Settings, Speech transcription, Saved models**, where it can be deleted. It runs on the processor so it does not take the graphics card from Whisper.
+- **A limitation.** Real-time transcription, without the helper, does not hear where there is singing yet: there the lyrics are placed as before.
 
 ## 0.33.1 · 2026-11-16
 
