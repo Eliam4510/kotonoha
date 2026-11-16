@@ -86,7 +86,7 @@ The **Library** is a complete viewer, like a PDF reader: zoom, two-page spreads,
 
 <img src="docs/img/ocr.en.png" alt="Scanned page from an organic chemistry book, with its recognised text and the line panel showing the word 結合" width="100%">
 
-Pages that are images, such as manga, scanned books and many PDFs, are read with on-device text recognition (OCR) on the graphics card. There is a mode for printed books and another for manga, which reads vertical speech bubbles without mistaking furigana for text. Tapping a word on the page opens its line with furigana and its word panel. Each page is read only once and saved.
+Pages that are images, such as manga, scanned books and many PDFs, are read with on-device text recognition (OCR) on the graphics card. There is a mode for printed books and another for manga, which reads vertical speech bubbles without mistaking furigana for text. Tapping a word on the page opens its line with furigana and its word panel. Each page is read only once and saved. And **Export PDF with text** turns the book into a PDF with that text on top, invisible, to search and copy it in any PDF reader; for low-resolution scans, the viewer has **Sharpness**.
 
 <img src="docs/img/manga.en.png" alt="A page of 【推しの子】 read in Manga mode, with the speech bubble open in the panel and the word 愛" width="100%">
 

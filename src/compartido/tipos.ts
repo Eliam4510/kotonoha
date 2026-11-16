@@ -430,6 +430,12 @@ export interface PeticionRevisionOcr {
 }
 
 /** Un libro que se lee en el visor: un EPUB de imágenes o de texto, un CBZ o un PDF. */
+export interface Nitidez {
+  activa: boolean;
+  nivel: 1 | 2 | 3;
+  limpiar: boolean;
+}
+
 export interface DocumentoBiblioteca {
   formato: 'epub' | 'cbz' | 'pdf';
   /** Un EPUB de texto, como una novela: se pinta con su propio formato, por capítulos, y no por páginas. */
@@ -454,6 +460,11 @@ export interface DocumentoBiblioteca {
   zoom?: 'ancho' | 'pagina' | number;
   /** En un libro de páginas, si se lee como texto, en párrafos, en lugar de ver la imagen de cada página. */
   vistaTexto?: boolean;
+  /**
+   * Para un escaneo con poca resolución: si se enfocan las páginas al verlas, cuánto (1 a 3) y si se deja el papel blanco y
+   * el texto negro. Solo cambia cómo se ven: ni el archivo ni lo que lee el OCR.
+   */
+  nitidez?: Nitidez;
   /**
    * Si se lee el texto de las páginas con el OCR, y con qué modelos: los de libro impreso o los de manga. En un PDF con su
    * propio texto, textoPdf false hace que el OCR lea también esas páginas (la capa de un OCR antiguo); sin él, se usa el

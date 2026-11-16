@@ -40,6 +40,51 @@ function deWebp(b: Uint8Array, d: DataView): Tamano | null {
   return null;
 }
 
+/** Lo que hace falta saber de un JPEG para meterlo tal cual en un PDF, sin volver a comprimirlo. */
+export interface CabeceraJpeg extends Tamano {
+  /** 1 en gris, 3 en color y 4 en CMYK. */
+  componentes: number;
+  bits: number;
+  /** Si lo guardó Adobe: entonces su CMYK va invertido. */
+  adobe: boolean;
+  /** Los puntos por pulgada que dice el archivo, si los dice. */
+  ppp?: number;
+  /** Si va por el método base o el progresivo, los que entiende cualquier lector de PDF. */
+  comun: boolean;
+}
+
+/** La cabecera de un JPEG, o null si no lo es o está cortada. */
+export function cabeceraJpeg(b: Uint8Array): CabeceraJpeg | null {
+  if (b.length < 4 || b[0] !== 0xff || b[1] !== 0xd8) return null;
+  const d = new DataView(b.buffer, b.byteOffset, b.byteLength);
+  let p = 2;
+  let adobe = false;
+  let ppp: number | undefined;
+  while (p + 9 < b.length) {
+    if (b[p] !== 0xff) return null;
+    const marca = b[p + 1];
+    if (marca === 0xff) {
+      p++;
+      continue;
+    }
+    const largo = d.getUint16(p + 2);
+    const firma = (n: number) => String.fromCharCode(...b.subarray(p + 4, p + 4 + n));
+    // APP0 de JFIF: unidades 1 son puntos por pulgada y 2 por centímetro.
+    if (marca === 0xe0 && firma(5) === 'JFIF\0' && p + 13 < b.length) {
+      const unidades = b[p + 11];
+      const x = d.getUint16(p + 12);
+      if (unidades === 1) ppp = x;
+      else if (unidades === 2) ppp = x * 2.54;
+    }
+    if (marca === 0xee && firma(5) === 'Adobe') adobe = true;
+    if (marca >= 0xc0 && marca <= 0xcf && marca !== 0xc4 && marca !== 0xc8 && marca !== 0xcc) {
+      return { bits: b[p + 4], alto: d.getUint16(p + 5), ancho: d.getUint16(p + 7), componentes: b[p + 9], adobe, ppp, comun: (marca === 0xc0 || marca === 0xc1 || marca === 0xc2) && b[p + 4] === 8 };
+    }
+    p += 2 + largo;
+  }
+  return null;
+}
+
 /** El tamaño de una imagen JPEG, PNG, GIF o WebP por su cabecera; null si no se reconoce. */
 export function tamanoDeImagen(b: Uint8Array): Tamano | null {
   const d = new DataView(b.buffer, b.byteOffset, b.byteLength);

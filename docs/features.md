@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.32.2, along with how it has been verified.
+Status of each feature in version 0.33.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -152,6 +152,8 @@ Status of each feature in version 0.32.2, along with how it has been verified.
 | PDF text: in a PDF with another OCR program's text layer, choose between that text and Kotonoha's OCR, remembered for each book | Automated, and with a real scan |
 | OCR reads ahead: the next pages (eight in a manga, four in a book) before you reach them, and drops the ones you skip | Automated |
 | Process: read a whole book with OCR from its card, with progress, pause and "Text ready" at the end | Automated, and with a real volume |
+| Export PDF with text: a PDF with the same pages and the OCR text invisible on top, in place, to search, select and copy in any reader; a PDF gets the text at the end of the file without touching its pages, and a CBZ or an image EPUB becomes a new PDF with each JPEG as it was. Vertical text and rotated pages too, with hand edits | Automated, and with a real manga volume and a real scan |
+| Sharpness for low-resolution scans: three sharpening levels and “White background”, saved with each book, also with inverted colors | Automated, and with a real 127 ppi scan |
 | Vocabulary of a book or a collection: its words counted, most frequent first, with reading, gloss, JLPT level and its best sentences from the book with their page; how much you understand and how many words are missing for 90, 95 and 98 %; change the status of one or all the selected ones; cards in bulk in Memory or Anki with the sentence from the book, without Claude; order by count, by appearance or by how common they are; proper names apart; the book's grammar; in a collection, each volume with what new words it brings; read what is missing with OCR from the same screen | Automated, with a text, a text EPUB, a PDF, a CBZ with OCR-read pages and a collection; measured with a whole novel (about 135,000 words in about four seconds) and with a real manga volume |
 | Japanese glosses chosen by word class: なる as 成る, もの and こと as nouns, and ある, くる or いう with the entry the dictionary stores with kanji; among words read the same way, the most used one | Automated (unit tests), and measured against 0.31.0 with 1,900 words from a novel: 110 gain their gloss, none loses it and the 6 that change do so for the better |
 | Dictionaries from the latest yomidevs release that arrive empty: the most recent earlier release that has them in full is downloaded instead | Automated (unit tests), and with the real broken releases of 12 and 14 November 2026 |

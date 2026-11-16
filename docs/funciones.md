@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.32.2, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.33.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -152,6 +152,8 @@ Estado de cada función en la versión 0.32.2, con la forma en que se ha verific
 | Texto del PDF: en un PDF con la capa de texto de otro programa de OCR, elegir entre ese texto y el OCR de Kotonoha, y que cada libro lo recuerde | Automática, y con un escaneo real |
 | El OCR lee por delante: las páginas siguientes (ocho en un manga, cuatro en un libro) antes de llegar, y deja de lado las que se saltan | Automática |
 | Procesar: leer con el OCR un libro entero desde su tarjeta, con el avance, pausa y «Texto listo» al acabar | Automática, y con un tomo real |
+| Exportar PDF con texto: un PDF con las mismas páginas y el texto del OCR invisible encima, en su sitio, para buscar, seleccionar y copiar en cualquier lector; un PDF recibe el texto al final del archivo, sin tocar sus páginas, y un CBZ o un EPUB de imágenes se convierte en un PDF nuevo con cada JPEG tal cual. También el texto vertical y las páginas giradas, con lo editado a mano | Automática, y con un tomo de manga y un escaneo reales |
+| Nitidez para los escaneos con poca resolución: tres niveles de enfoque y «Fondo blanco», guardados con cada libro, también con los colores invertidos | Automática, y con un escaneo real a 127 ppi |
 | Vocabulario de un libro o de una colección: sus palabras contadas, las que más salen primero, con lectura, glosa, nivel del JLPT y sus mejores frases del libro con la página; cuánto se entiende y cuántas palabras faltan para el 90, el 95 y el 98 %; cambiar el estado de una o de todas las elegidas; tarjetas de golpe en Memoria o en Anki con la frase del libro, sin Claude; orden por veces, por aparición o por lo comunes que son; nombres propios aparte; la gramática del libro; en una colección, cada tomo con lo que trae de nuevo; leer con el OCR lo que falta desde la misma pantalla | Automática, con un texto, un EPUB de texto, un PDF, un CBZ con lo leído por el OCR y una colección; medido con una novela entera (unas 135 000 palabras en unos cuatro segundos) y con un tomo de manga real |
 | Glosas en japonés elegidas por la clase de palabra: なる como 成る, もの y こと como sustantivos, y ある, くる o いう con la entrada que el diccionario guarda con kanji; entre las que se leen igual, la más usada | Automática (pruebas unitarias), y medida contra la 0.31.0 con 1 900 palabras de una novela: 110 ganan su glosa, ninguna la pierde y las 6 que cambian lo hacen a mejor |
 | Diccionarios de la última versión de yomidevs que llegan vacíos: se baja la versión anterior más reciente que los trae enteros | Automática (pruebas unitarias), y con las versiones rotas reales del 12 y el 14 de noviembre de 2026 |

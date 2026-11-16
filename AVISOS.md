@@ -31,8 +31,9 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) con [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | Fonemas de las voces neuronales, copiado al compilar con solo los diccionarios del inglés y del alemán | MIT y GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | Codificación MP3 | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Planificación del repaso | MIT |
-| [fflate](https://github.com/101arrowz/fflate) | Lectura de archivos ZIP | MIT |
+| [fflate](https://github.com/101arrowz/fflate) | Lectura de archivos ZIP y compresión de los PDF exportados | MIT |
 | [pdf.js](https://github.com/mozilla/pdf.js), `pdfjs-dist` | Lectura de PDF en el visor, con los decodificadores JBIG2 de PDFium (BSD-3-Clause), OpenJPEG (BSD-2-Clause) y qcms (MIT) | Apache-2.0 |
+| [pdf-lib](https://github.com/Hopding/pdf-lib), con [pako](https://github.com/nodeca/pako) | Estructura de un PDF al exportarlo con el texto del OCR | MIT |
 | [wink-nlp](https://github.com/winkjs/wink-nlp) | Análisis morfológico del inglés | MIT |
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | Modelo de inglés para wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Iconos | MIT |
@@ -105,8 +106,9 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) with [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | Phonemes for the neural voices, copied at build time with only the English and German dictionaries | MIT and GPL-3.0-or-later |
 | [lamejs](https://github.com/gideonstele/lamejs), `@breezystack/lamejs` | MP3 encoding | LGPL-3.0 |
 | [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) | Review scheduling | MIT |
-| [fflate](https://github.com/101arrowz/fflate) | Reading ZIP files | MIT |
+| [fflate](https://github.com/101arrowz/fflate) | Reading ZIP files and compressing exported PDFs | MIT |
 | [pdf.js](https://github.com/mozilla/pdf.js), `pdfjs-dist` | Reading PDFs in the viewer, with the JBIG2 decoder from PDFium (BSD-3-Clause), OpenJPEG (BSD-2-Clause) and qcms (MIT) | Apache-2.0 |
+| [pdf-lib](https://github.com/Hopding/pdf-lib), with [pako](https://github.com/nodeca/pako) | A PDF's structure when exporting it with the OCR text | MIT |
 | [wink-nlp](https://github.com/winkjs/wink-nlp) | Morphological analysis of English | MIT |
 | [wink-eng-lite-web-model](https://github.com/winkjs/wink-eng-lite-web-model) | English model for wink-nlp | MIT |
 | [Phosphor Icons](https://phosphoricons.com) | Icons | MIT |

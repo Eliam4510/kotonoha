@@ -28,6 +28,7 @@ import { type ArchivoImportado, archivosElegidos, archivosSoltados, cbzDe, taman
 import { TextoInteractivo } from './Lectura';
 import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { descargaOcr, pausar, procesar, procesos } from './procesos';
+import { exportarPdf, guardarEnDescargas, mensajeDeError, type PdfExportado, sePuedeExportar } from './exportarPdf';
 
 /** El idioma de un título: el que se estudia si está escrito en él. */
 export const langDe = (titulo: string) => (lengua.value.escritura.tieneTexto(titulo) ? lengua.value.id : undefined);
@@ -224,7 +225,7 @@ function fajaDe(e: ElementoBiblioteca, a: Avance): string {
   return a.empezado ? tr('Pág. {0} de {1}', a.actual, a.total) : a.total === 1 ? tr('Lectura breve') : tr('{0} páginas', a.total);
 }
 
-function Libro({ e, colecciones, alAbrir, alEliminar, alCambiar, alMover }: { e: ElementoBiblioteca; colecciones: ColeccionBiblioteca[]; alAbrir: () => void; alEliminar: () => void; alCambiar: () => void; alMover: () => void }) {
+function Libro({ e, colecciones, alAbrir, alEliminar, alCambiar, alMover, alExportar }: { e: ElementoBiblioteca; colecciones: ColeccionBiblioteca[]; alAbrir: () => void; alEliminar: () => void; alCambiar: () => void; alMover: () => void; alExportar: () => void }) {
   const a = avance(e);
   const titulo = langDe(e.titulo);
   const claude = e.origen === 'historia';
@@ -241,7 +242,7 @@ function Libro({ e, colecciones, alAbrir, alEliminar, alCambiar, alMover }: { e:
           </span>
         </button>
         <button class="btn-icono chico relleno ap-libro-quitar" aria-label={tr('Eliminar {0}', e.titulo)} data-tip={tr('Eliminar')} onClick={alEliminar}><Icono n="basura" t={14} /></button>
-        <MenuLibro e={e} colecciones={colecciones} alCambiar={alCambiar} alMover={alMover} />
+        <MenuLibro e={e} colecciones={colecciones} alCambiar={alCambiar} alMover={alMover} alExportar={alExportar} />
       </div>
       <h3 title={e.titulo} lang={titulo}>{e.titulo}</h3>
       {a.terminado ? (
@@ -258,8 +259,8 @@ function Libro({ e, colecciones, alAbrir, alEliminar, alCambiar, alMover }: { e:
   );
 }
 
-/** Lo que se puede hacer con un libro: llevarlo a una colección, cambiarle la portada y marcarlo como terminado. */
-function MenuLibro({ e, colecciones, alCambiar, alMover }: { e: ElementoBiblioteca; colecciones: ColeccionBiblioteca[]; alCambiar: () => void; alMover: () => void }) {
+/** Lo que se puede hacer con un libro: llevarlo a una colección, cambiarle la portada, exportarlo con su texto y marcarlo como terminado. */
+function MenuLibro({ e, colecciones, alCambiar, alMover, alExportar }: { e: ElementoBiblioteca; colecciones: ColeccionBiblioteca[]; alCambiar: () => void; alMover: () => void; alExportar: () => void }) {
   const [abierto, fijarAbierto] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
   const imagen = useRef<HTMLInputElement>(null);
@@ -304,6 +305,11 @@ function MenuLibro({ e, colecciones, alCambiar, alMover }: { e: ElementoBibliote
           {e.documento && (
             <button role="menuitem" onClick={() => imagen.current?.click()}>
               <Icono n="imagen" t={15} /> {tr('Cambiar la portada…')}
+            </button>
+          )}
+          {sePuedeExportar(e) && (
+            <button role="menuitem" onClick={() => { fijarAbierto(false); alExportar(); }}>
+              <Icono n="exportar" t={15} /> {tr('Exportar PDF con texto…')}
             </button>
           )}
           {terminado ? (
@@ -432,7 +438,8 @@ type Dialogo =
   | { tipo: 'mover'; libro: ElementoBiblioteca }
   | { tipo: 'anadir'; coleccion: ColeccionBiblioteca }
   | { tipo: 'portada'; coleccion: ColeccionBiblioteca }
-  | { tipo: 'eliminar'; libro: ElementoBiblioteca };
+  | { tipo: 'eliminar'; libro: ElementoBiblioteca }
+  | { tipo: 'exportar'; libro: ElementoBiblioteca };
 
 function Modal({ titulo, alCerrar, children }: { titulo: string; alCerrar: () => void; children: ComponentChildren }) {
   // Antes de pintar: un diálogo que ya se ve tiene que atender a Escape desde el primer momento.
@@ -449,6 +456,87 @@ function Modal({ titulo, alCerrar, children }: { titulo: string; alCerrar: () =>
         {children}
       </div>
     </div>
+  );
+}
+
+type Exportacion = { fase: 'inicio' } | { fase: 'haciendo'; hechas: number; total: number } | ({ fase: 'listo' } & PdfExportado) | { fase: 'error'; mensaje: string };
+
+/**
+ * Exportar un libro de páginas como PDF con el texto del OCR. Si no está leído entero, se puede leer desde aquí (lo mismo
+ * que «Procesar» en su tarjeta) o exportar ya con lo leído.
+ */
+function DialogoExportar({ libro, alCerrar }: { libro: ElementoBiblioteca; alCerrar: () => void }) {
+  const [e, fijarE] = useState(libro);
+  const [estado, fijarEstado] = useState<Exportacion>({ fase: 'inicio' });
+  const cancelar = useRef<AbortController | null>(null);
+  useEffect(() => () => cancelar.current?.abort(), []);
+  const d = e.documento!;
+  const proceso = procesos.value[e.id];
+  const leyendo = proceso?.estado === 'procesando' || proceso?.estado === 'en-cola';
+  const leido = estaProcesado(d);
+  const haciendo = estado.fase === 'haciendo';
+  // Al terminar de leer, el libro ya dice que está leído: se vuelve a pedir.
+  const releer = () => motor.bibliotecaObtener(e.id).then((x) => x && fijarE(x)).catch(() => {});
+  const exportar = async () => {
+    const control = new AbortController();
+    cancelar.current = control;
+    fijarEstado({ fase: 'haciendo', hechas: 0, total: d.paginas });
+    try {
+      const r = await exportarPdf(e, (hechas, total) => fijarEstado({ fase: 'haciendo', hechas, total }), control.signal);
+      // Cancelado mientras se escribía el final del archivo, ya sin páginas por delante: no se descarga.
+      if (control.signal.aborted) return;
+      guardarEnDescargas(r.blob, r.nombre);
+      fijarEstado({ fase: 'listo', ...r });
+    } catch (x) {
+      if (!control.signal.aborted) fijarEstado({ fase: 'error', mensaje: mensajeDeError(x) });
+    } finally {
+      cancelar.current = null;
+    }
+  };
+  const cerrar = () => {
+    cancelar.current?.abort();
+    alCerrar();
+  };
+  return (
+    <Modal titulo={tr('Exportar PDF con texto')} alCerrar={cerrar}>
+      <p class="ap-dialogo-libro" lang={langDe(e.titulo)}>{e.titulo}</p>
+      <p class="ayuda">{tr('Un PDF con las mismas páginas y, encima de cada una, el texto leído con el OCR, invisible: se puede buscar, seleccionar y copiar en cualquier lector de PDF.')}</p>
+      {d.formato === 'pdf' && <p class="ayuda">{tr('Las páginas no cambian: el texto se añade al final del archivo. Las que ya traían su propio texto se quedan como estaban.')}</p>}
+      {leyendo ? (
+        <div class="ap-exportar-leyendo" role="status">
+          <span class="ayuda num">{proceso.total ? tr('Leyendo con el OCR: {0} de {1} páginas.', numero(proceso.hechas), numero(proceso.total)) : tr('Leyendo con el OCR…')}</span>
+          <div class="barra-progreso"><div style={{ width: `${proceso.total ? (100 * proceso.hechas) / proceso.total : 0}%` }} /></div>
+          <button class="btn chico" onClick={() => pausar(e.id)}><Icono n="pausa" t={14} /> {tr('Pausar')}</button>
+        </div>
+      ) : (
+        !leido && estado.fase !== 'listo' && (
+          <Mensaje>
+            {tr('Aún no está leído entero con el OCR: el PDF solo llevará el texto de las páginas ya leídas.')}{' '}
+            <button class="btn chico" disabled={haciendo} onClick={() => procesar(e, () => void releer())}><Icono n="rayo" t={14} /> {tr('Leer el libro entero')}</button>
+          </Mensaje>
+        )
+      )}
+      {estado.fase === 'haciendo' && (
+        <div class="ap-exportar-leyendo" role="status">
+          <span class="ayuda num">{estado.total ? tr('Preparando el PDF: página {0} de {1}', numero(Math.min(estado.hechas + 1, estado.total)), numero(estado.total)) : tr('Leyendo el PDF…')}</span>
+          <div class="barra-progreso"><div style={{ width: `${estado.total ? (100 * estado.hechas) / estado.total : 0}%` }} /></div>
+        </div>
+      )}
+      {estado.fase === 'listo' && (
+        <Mensaje>
+          {tr('Listo: {0}, {1}. Está en las descargas del navegador.', estado.nombre, megas(estado.blob.size))} {tr('Lleva texto en {0} de sus {1} páginas.', numero(estado.conTexto), numero(estado.paginas))}
+        </Mensaje>
+      )}
+      {estado.fase === 'error' && <Mensaje error>{estado.mensaje}</Mensaje>}
+      <div class="ap-dialogo-botones">
+        <button class="btn fantasma" onClick={cerrar}>{estado.fase === 'listo' ? tr('Cerrar') : tr('Cancelar')}</button>
+        {estado.fase !== 'listo' && (
+          <button class="btn primario" disabled={haciendo || leyendo} onClick={exportar}>
+            <Icono n="exportar" t={15} /> {leido ? tr('Exportar') : tr('Exportar con lo leído')}
+          </button>
+        )}
+      </div>
+    </Modal>
   );
 }
 
@@ -669,7 +757,7 @@ const VACIO_DE: Record<Exclude<FiltroEstanteria, 'todo'>, string> = {
   terminados: tm('Aún no has terminado ninguna lectura.'),
 };
 
-export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes: Ajustes; abrir?: string; coleccion?: string }) {
+export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }: { ajustes: Ajustes; abrir?: string; coleccion?: string; exportar?: string }) {
   const [lista, fijarLista] = useState<ElementoBiblioteca[]>([]);
   const [colecciones, fijarColecciones] = useState<ColeccionBiblioteca[]>([]);
   const [cargada, fijarCargada] = useState(false);
@@ -732,6 +820,16 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
     document.addEventListener('visibilitychange', alVolver);
     return () => document.removeEventListener('visibilitychange', alVolver);
   }, []);
+
+  // El visor pide exportar con biblioteca?exportar=ID: se abre el diálogo de ese libro en cuanto está la lista.
+  const exportarPedido = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!exportar || exportarPedido.current === exportar || !cargada) return;
+    const pedido = lista.find((x) => x.id === exportar);
+    if (!pedido || !sePuedeExportar(pedido)) return;
+    exportarPedido.current = exportar;
+    fijarDialogo({ tipo: 'exportar', libro: pedido });
+  }, [exportar, cargada, lista]);
 
   // Los PDF sin portada ni páginas, de antes de sacarlas al importar: de uno en uno, sin estorbar.
   useEffect(() => {
@@ -916,6 +1014,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
       alEliminar={() => fijarDialogo({ tipo: 'eliminar', libro: e })}
       alCambiar={cargar}
       alMover={() => fijarDialogo({ tipo: 'mover', libro: e })}
+      alExportar={() => fijarDialogo({ tipo: 'exportar', libro: e })}
     />
   );
 
@@ -960,6 +1059,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion }: { ajustes
           }}
         />
       )}
+      {dialogo.tipo === 'exportar' && <DialogoExportar libro={dialogo.libro} alCerrar={cerrarDialogo} />}
       {dialogo.tipo === 'eliminar' && (
         <DialogoEliminar
           libro={dialogo.libro}

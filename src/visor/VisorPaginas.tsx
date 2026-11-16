@@ -7,9 +7,9 @@ import { Creador } from '../app/Creador';
 import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
 import { Interruptor } from '../app/Piezas';
 import type { Ajustes } from '../compartido/ajustes';
-import { tr } from '../compartido/i18n';
+import { tm, tr } from '../compartido/i18n';
 import { fondo, motor } from '../compartido/rpc';
-import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca } from '../compartido/tipos';
+import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca, Nitidez } from '../compartido/tipos';
 import { nuevoResaltado, resaltadosDe } from '../nucleo/anotaciones';
 import type { Hallazgo } from '../nucleo/busqueda';
 import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
@@ -56,6 +56,48 @@ interface PropsAnotaciones {
   alAbrirNota?: (id: string | null) => void;
   alGuardarAnotacion?: (a: AnotacionLibro) => void;
   alQuitarAnotacion?: (id: string) => void;
+}
+
+// ---------- Nitidez ----------
+
+const NIVELES_NITIDEZ: [Nitidez['nivel'], string][] = [
+  [1, tm('Suave')],
+  [2, tm('Media')],
+  [3, tm('Fuerte')],
+];
+/** Lo que la máscara de enfoque suma de la diferencia entre la página y su versión desenfocada. */
+const CANTIDAD: Record<Nitidez['nivel'], number> = { 1: 0.6, 2: 1.2, 3: 2 };
+/** El fondo blanco: de este gris para abajo, negro; de este para arriba, blanco. El papel de un escaneo suele ser gris. */
+const NEGRO = 0.18;
+const BLANCO = 0.82;
+
+/**
+ * El filtro de la nitidez, en SVG para que lo pinte la tarjeta gráfica sin rehacer la imagen: una máscara de enfoque (a la
+ * página se le suma su diferencia con una versión desenfocada, que realza los bordes de las letras) y, si se pide, un
+ * estiramiento de niveles que deja el papel blanco y el texto negro. Va sobre la imagen ya escalada a lo que se ve, así
+ * que el radio está en píxeles de pantalla y crece con la escala: lo justo para el borde de una letra.
+ */
+function FiltroNitidez({ n, escala }: { n: Nitidez; escala: number }) {
+  const k = CANTIDAD[n.nivel];
+  // Ampliada, cada borde de letra se reparte en más píxeles de pantalla: el radio crece con la escala a que se ve.
+  const radio = Math.min(2.5, Math.max(0.6, 0.7 * escala));
+  const pendiente = 1 / (BLANCO - NEGRO);
+  const corte = -NEGRO * pendiente;
+  return (
+    <svg class="vs-filtros" aria-hidden="true" width="0" height="0">
+      <filter id="vs-nitidez" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation={radio.toFixed(2)} result="borrosa" />
+        <feComposite in="SourceGraphic" in2="borrosa" operator="arithmetic" k1="0" k2={1 + k} k3={-k} k4="0" result="nitida" />
+        {n.limpiar && (
+          <feComponentTransfer in="nitida">
+            <feFuncR type="linear" slope={pendiente} intercept={corte} />
+            <feFuncG type="linear" slope={pendiente} intercept={corte} />
+            <feFuncB type="linear" slope={pendiente} intercept={corte} />
+          </feComponentTransfer>
+        )}
+      </filter>
+    </svg>
+  );
 }
 
 /**
@@ -195,6 +237,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // La vista de texto: el texto de las páginas en párrafos, con la ayuda de lectura, en lugar de su imagen.
   const [vistaTexto, fijarVistaTexto] = useState(false);
   const [invertir, fijarInvertir] = useState(() => leerPreferencia('visorInvertir', false));
+  const [nitidez, fijarNitidez] = useState<Nitidez>(() => inicial.documento?.nitidez ?? { activa: false, nivel: 2, limpiar: false });
   const { lleno, alternar: pantallaCompleta } = usePantallaCompleta();
   const [hueco, fijarHueco] = useState<Medida>({ ancho: 800, alto: 600 });
   const [escrito, fijarEscrito] = useState<string | null>(null);
@@ -343,12 +386,12 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           pagina,
           abierto: Date.now(),
           ...(terminar ? { terminado: Date.now() } : {}),
-          documento: { paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, vistaTexto, ocr: { activo: ocr, modo: modoOcr, ...(textoPdf ? {} : { textoPdf }) } },
+          documento: { paginas: paginador.total, vista, direccion, portadaSola, ...(anchas ? { anchas } : {}), zoom, vistaTexto, nitidez, ocr: { activo: ocr, modo: modoOcr, ...(textoPdf ? {} : { textoPdf }) } },
         })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(t);
-  }, [doc.id, paginador, pagina, alFinal, vista, direccion, portadaSola, anchas, zoom, vistaTexto, ocr, modoOcr, textoPdf]);
+  }, [doc.id, paginador, pagina, alFinal, vista, direccion, portadaSola, anchas, zoom, vistaTexto, nitidez, ocr, modoOcr, textoPdf]);
 
   // La portada de la estantería, de la página que se está viendo.
   const [portadaHecha, fijarPortadaHecha] = useState(false);
@@ -871,6 +914,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
               />
               <Boton icono="buscar" etiqueta={tr('Buscar en el libro')} activo={panel === 'buscar'} alPulsar={() => fijarPanel(panel === 'buscar' ? null : 'buscar')} />
               <Boton icono="palabras" etiqueta={tr('Vocabulario del libro')} alPulsar={() => fondo.abrirApp(`vocabulario?libro=${encodeURIComponent(doc.id)}`).catch(console.error)} />
+              <Boton icono="exportar" etiqueta={tr('Exportar PDF con texto')} alPulsar={() => fondo.abrirApp(`biblioteca?exportar=${encodeURIComponent(doc.id)}`).catch(console.error)} />
               <Boton icono="miniaturas" etiqueta={tr('Miniaturas')} activo={panel === 'miniaturas'} alPulsar={() => fijarPanel(panel === 'miniaturas' ? null : 'miniaturas')} />
               {paginador.indice.length > 0 && <Boton icono="indice" etiqueta={tr('Índice')} activo={panel === 'indice'} alPulsar={() => fijarPanel(panel === 'indice' ? null : 'indice')} />}
               <Boton
@@ -878,6 +922,24 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                 etiqueta={portadaHecha ? tr('Es la portada en la estantería') : tr('Usar esta página como portada')}
                 alPulsar={() => usarComoPortada().catch(console.error)}
               />
+              {!vistaTexto && (
+                <Boton
+                  icono="nitidez"
+                  etiqueta={tr('Nitidez: enfoca las páginas de un escaneo con poca resolución')}
+                  activo={nitidez.activa}
+                  alPulsar={() => fijarNitidez((x) => ({ ...x, activa: !x.activa }))}
+                />
+              )}
+              {nitidez.activa && !vistaTexto && (
+                <span class="vs-modos" role="group" aria-label={tr('Nitidez')}>
+                  {NIVELES_NITIDEZ.map(([nivel, nombre]) => (
+                    <button key={nivel} class="btn chico fantasma" aria-pressed={nitidez.nivel === nivel} onClick={() => fijarNitidez((x) => ({ ...x, nivel }))}>{tr(nombre)}</button>
+                  ))}
+                  <button class="btn chico fantasma" aria-pressed={nitidez.limpiar} data-tip={tr('El papel más blanco y el texto más negro, para escaneos en blanco y negro')} onClick={() => fijarNitidez((x) => ({ ...x, limpiar: !x.limpiar }))}>
+                    {tr('Fondo blanco')}
+                  </button>
+                </span>
+              )}
               <Boton
                 icono="invertir"
                 etiqueta={tr('Invertir colores')}
@@ -946,9 +1008,10 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             alCerrar={() => fijarPanel(null)}
           />
         )}
+        {nitidez.activa && !vistaTexto && <FiltroNitidez n={nitidez} escala={escala} />}
         <main
           ref={lienzo}
-          class={`vs-lienzo ${invertir && !vistaTexto ? 'invertido' : ''} ${colocando ? 'colocando' : ''} ${vistaTexto ? 'vs-lienzo-texto' : ''}`}
+          class={`vs-lienzo ${invertir && !vistaTexto ? 'invertido' : ''} ${nitidez.activa && !vistaTexto ? 'con-nitidez' : ''} ${colocando ? 'colocando' : ''} ${vistaTexto ? 'vs-lienzo-texto' : ''}`}
           data-vista={vista}
           onClick={pulsarLienzo}
           onPointerDown={tocar}
