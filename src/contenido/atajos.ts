@@ -17,6 +17,7 @@ import {
   lineaAnteriorOSiguiente,
   reproducir,
   saltar,
+  sincronizarConSitio,
 } from './controlador';
 import {
   ajustes,
@@ -25,6 +26,7 @@ import {
   comoActivarCaptura,
   consulta,
   indiceVisual,
+  infoVideo,
   lineasObjetivo,
   panel,
   pausado,
@@ -215,6 +217,11 @@ export function instalarAtajos(): void {
             return hecho();
           case 'g':
             generarSecundarios();
+            return hecho();
+          case 's':
+            // Solo en Netflix: en los demás sitios el reloj del video ya es el del episodio, y la tecla sigue su camino.
+            if (infoVideo.value?.sitio !== 'netflix') return;
+            void sincronizarConSitio();
             return hecho();
           case 'i':
             ajustarDesfase('secundaria', -100);

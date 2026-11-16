@@ -21,6 +21,11 @@ export interface Adaptador {
   imagenOficial?(): string | null;
   /** Reduce el reproductor para dejar sitio al navegador de subtítulos. 0 lo restaura. */
   prepararPanel?(ancho: number): void;
+  /**
+   * El momento del <video> y el del episodio según el reproductor del sitio, en ms y tomados a la vez, para un sitio
+   * cuyo reproductor lleva su propia cuenta (Netflix); null si ahora no se pueden comparar.
+   */
+  tiempos?(): { video: number; jugador: number } | null;
 }
 
 export const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));

@@ -8,6 +8,7 @@ import { borradorVacio, enviarAlCreador } from '../ui/borrador';
 import { actualizarCaptura, empezarGrabacionLinea, pausar, reproducir, saltar, terminarGrabacionLinea } from './controlador';
 import { ajustes, avisar, comoActivarCaptura, infoVideo, lineasObjetivo, lineasSecundarias, quitarAviso } from './estado';
 import type { Control } from './puente';
+import { momentoDelVideo } from './relojSitio';
 import { hayVozSintetica } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
 
@@ -145,7 +146,7 @@ async function capturarImagen(v: HTMLVideoElement, ocultarOverlay: (v: boolean) 
 async function esperarSalto(v: HTMLVideoElement, ms: number) {
   const limite = Date.now() + 4000;
   while (Date.now() < limite) {
-    if (Math.abs(v.currentTime * 1000 - ms) < 500 && !v.seeking && v.readyState >= 3) return;
+    if (Math.abs(momentoDelVideo(v) - ms) < 500 && !v.seeking && v.readyState >= 3) return;
     await dormir(40);
   }
 }
@@ -174,7 +175,7 @@ async function grabarLinea(l: LineaAnalizada, ocultarOverlay: (v: boolean) => vo
   const inicio = Math.max(0, l.inicio - a.rellenoInicioMs);
   const fin = l.fin + a.rellenoFinMs;
   const estabaPausado = v.paused;
-  const posicion = v.currentTime * 1000;
+  const posicion = momentoDelVideo(v);
   let audio: MedioTarjeta | null = null;
   let imagen: MedioTarjeta | null = null;
 
@@ -195,15 +196,15 @@ async function grabarLinea(l: LineaAnalizada, ocultarOverlay: (v: boolean) => vo
       // Por el reloj del video y no por el de la pared: un arranque lento o una pausa de carga no recortan la frase.
       const mitad = (inicio + fin) / 2;
       const limite = Date.now() + (fin - inicio) * 3 + 5000;
-      while (v.currentTime * 1000 < fin && !v.ended && Date.now() < limite) {
-        if (conImagen && !capturando && v.currentTime * 1000 >= mitad) capturando = capturarImagen(v, ocultarOverlay);
+      while (momentoDelVideo(v) < fin && !v.ended && Date.now() < limite) {
+        if (conImagen && !capturando && momentoDelVideo(v) >= mitad) capturando = capturarImagen(v, ocultarOverlay);
         await dormir(20);
       }
     }
     const clip = await motor.terminarClip();
     // En texto, para poder leerlo también al copiar la consola.
     const resumen = !clip ? 'nada' : 'mudo' in clip ? 'mudo' : tr('{0} s, pico {1}', clip.segundos.toFixed(2), clip.pico.toFixed(3));
-    console.info(`Kotonoha: grabación ${JSON.stringify({ arranco, clip: resumen, videoMudo: v.muted, volumen: v.volume, desde: inicio, hasta: fin, llego: Math.round(v.currentTime * 1000) })}`);
+    console.info(`Kotonoha: grabación ${JSON.stringify({ arranco, clip: resumen, videoMudo: v.muted, volumen: v.volume, desde: inicio, hasta: fin, llego: Math.round(momentoDelVideo(v)) })}`);
     if (!arranco) {
       avisar(tr('El video no arrancó para grabar la frase: la tarjeta va sin audio.'), 'error', undefined, 7000);
     } else if (clip && 'mudo' in clip) {

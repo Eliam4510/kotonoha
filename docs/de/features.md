@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.33.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.33.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -74,6 +74,7 @@ Stand jeder Funktion in Version 0.33.0 und die Art ihrer Überprüfung.
 | Export als SRT, mit angewendeter Synchronisierung | Nachgebildete Seite |
 | Gemerkte japanische Spuren über Netflix-Regionen hinweg | Nachgebildete Seite. Mit echten Sitzungen ist noch zu bestätigen, dass die Titelkennung übereinstimmt |
 | Synchronisierung über Versatz oder mit einer oder zwei Markierungen | Automatisch |
+| Netflix-Uhr: Nach Werbung, wenn die nächste Folge von selbst startet, oder nach einem Sprung folgen die Untertitel dem Zeitpunkt der Folge, den der Netflix-Player angibt, ohne die Seite neu zu laden; zieht seine Uhr die Werbung nicht ab, wird um die Zeit angepasst, die das Video währenddessen lief. **Erneut synchronisieren** und `Alt+Shift+S` | Automatisch, mit einem simulierten Netflix |
 
 ## Transkription
 

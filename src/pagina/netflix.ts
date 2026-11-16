@@ -4,7 +4,7 @@
 // estado, buscando objetos por su forma (type === 'timedtext' con urls), sin depender de nombres
 // minificados. Si una pista aún no tiene URL se activa un momento para que Netflix la pida.
 
-import { type Adaptador, esperar, normalizarIdioma, sondear } from './adaptador';
+import { type Adaptador, esperar, normalizarIdioma, sondear, videoPrincipal } from './adaptador';
 import { pistasDetectadas } from './generico';
 import type { PistaInfo } from '../compartido/tipos';
 
@@ -37,6 +37,8 @@ interface JugadorNetflix {
   getTimedTextTrack?(): PistaNetflix;
   setTimedTextTrack?(p: PistaNetflix): Promise<void> | void;
   seek?(ms: number): void;
+  /** El momento del episodio, en ms: el que enseña la barra de Netflix y el que usa seek. */
+  getCurrentTime?(): number;
   play?(): void;
   pause?(): void;
   getMovieId?(): number;
@@ -212,6 +214,14 @@ export const adaptadorNetflix: Adaptador = {
   // Netflix no admite cambiar video.currentTime: hay que pasar por su reproductor.
   saltar(ms) {
     jugador()?.seek?.(Math.max(0, Math.round(ms)));
+  },
+  // Tras un anuncio, al pasar solo al siguiente episodio o tras algunos saltos, video.currentTime ya no es el momento del
+  // episodio, y su reproductor sí lo sabe. Los dos se leen en el mismo instante, con el video en marcha.
+  tiempos() {
+    const v = videoPrincipal();
+    if (!v || v.paused || v.seeking || v.readyState < 3) return null;
+    const t = jugador()?.getCurrentTime?.();
+    return typeof t === 'number' && Number.isFinite(t) ? { video: v.currentTime * 1000, jugador: t } : null;
   },
   reproducir() {
     jugador()?.play?.();

@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.33.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.33.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -74,6 +74,7 @@ Estado de cada función en la versión 0.33.0, con la forma en que se ha verific
 | Exportación a SRT, con la sincronía aplicada | Página imitada |
 | Pistas de japonés recordadas entre regiones de Netflix | Página imitada. Falta confirmar con sesiones reales que el identificador del título coincide |
 | Sincronización por desfase o con una o dos marcas | Automática |
+| Reloj de Netflix: tras un anuncio del medio, al pasar solo al siguiente episodio o tras un salto, los subtítulos siguen el momento del episodio que da el reproductor de Netflix, sin recargar la página; si su reloj no descuenta el anuncio, se ajusta por lo que corrió el video durante él. **Volver a sincronizar** y `Alt+Shift+S` | Automática, con un Netflix simulado |
 
 ## Transcripción
 

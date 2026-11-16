@@ -125,6 +125,8 @@ Los subtítulos en japonés de un título de Netflix se guardan al verlos, junto
 
 La pestaña **Sincronizar** ajusta el desfase de cada pista. También se puede pulsar **Esta línea suena ahora** en el navegador: con una marca se corrige el desfase, y con dos, también la velocidad. El desfase se ajusta con `Alt+I` y `Alt+O`.
 
+**Netflix y sus anuncios.** Tras un anuncio del medio, al pasar solo al siguiente episodio o tras un salto, el reloj del video de Netflix puede irse del episodio, y los subtítulos saldrían adelantados o atrasados. Kotonoha compara el reloj del video con el del reproductor de Netflix mientras se ve el video y lleva los subtítulos por el de Netflix, sin recargar la página; al ajustarlos, avisa con «Subtítulos sincronizados con Netflix». Si tras un anuncio el reloj de Netflix no lo descuenta, se ajusta por lo que corrió el video mientras duraba. En la pestaña **Sincronizar**, **Reloj de Netflix** dice cómo van los dos, y **Volver a sincronizar** (o `Alt+Shift+S`) mide de nuevo. Este ajuste no se guarda: el desfase de cada pista sigue aparte.
+
 ## Transcripción con Whisper
 
 Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta en la tarjeta gráfica mediante WebGPU, y el audio no sale del equipo. La primera vez descarga el modelo, que queda guardado en el navegador. En Netflix no se ofrece, porque sus títulos casi siempre traen subtítulos.
@@ -388,6 +390,7 @@ La referencia completa está en el panel de atajos, sobre el video. Se pueden ca
 | | `G` | Navegador de subtítulos |
 | | `C` | Copiar el subtítulo |
 | | `Alt+Shift+G` | Generar secundarios |
+| | `Alt+Shift+S` | Volver a sincronizar con Netflix |
 | Aplicación | `Alt+Shift+K` | Abrir la ventana de Kotonoha |
 
 ## Problemas frecuentes

@@ -53,7 +53,8 @@ import {
   letraPegada,
 } from './estado';
 import type { Control } from './puente';
-import { tm, tr } from '../compartido/i18n';
+import { acaboAnuncio, anotarSinAnuncio, desfaseDeSaltos, empezoAnuncio, iniciarRelojSitio, medirDeNuevo, momentoDelVideo, reiniciarReloj, sincronizarAhora } from './relojSitio';
+import { numero, tm, tr } from '../compartido/i18n';
 import { relojInmersion } from '../compartido/relojInmersion';
 import { lengua } from '../ui/lengua';
 
@@ -85,6 +86,29 @@ export const grabandoLinea = () => grabacionEnCurso !== null;
 
 export function iniciarControlador(c: Control) {
   control = c;
+  // En Netflix, los subtítulos van por el momento del episodio que da su reproductor (ver relojSitio.ts).
+  const tiempos = c.tiempos;
+  if (tiempos) {
+    iniciarRelojSitio({
+      tomar: () => tiempos(),
+      medible: () => {
+        const v = control.video();
+        return infoVideo.value?.sitio === 'netflix' && !anuncio.value && !!v && !v.paused && !v.seeking;
+      },
+      alCambiar: (ms) => {
+        alCambiarReloj();
+        if (ms) avisar(tr('Subtítulos sincronizados con Netflix ({0} s).', segundosReloj(ms)), 'exito', undefined, 3500);
+      },
+    });
+    // Durante un anuncio del medio el reloj del video sigue corriendo: al acabar se mide enseguida, y se sabe cuánto corrió.
+    let enAnuncio = false;
+    effect(() => {
+      const a = anuncio.value;
+      if (a && !enAnuncio) empezoAnuncio();
+      if (enAnuncio && !a) acaboAnuncio(control.video());
+      enAnuncio = a;
+    });
+  }
   effect(() => {
     const lineas = lineasObjetivo.value;
     const clases = clasesLineas.value;
@@ -210,6 +234,33 @@ function enlazarVideo(v: HTMLVideoElement) {
     lineaPreparada.value = -1;
     tipoPausa.value = null;
   });
+  // Tras un salto o al volver a reproducir, el reloj de Netflix puede haber cambiado: se mide enseguida.
+  v.addEventListener('seeked', () => medirDeNuevo());
+  v.addEventListener('playing', () => medirDeNuevo());
+}
+
+const segundosReloj = (ms: number) => numero(Math.abs(ms) / 1000, { maximumFractionDigits: 1 });
+
+/**
+ * El reloj cambió: la línea en pantalla pasa enseguida a la del momento nuevo, sin esperar al siguiente tick, y lo que
+ * el motor de modos llevaba contado iba por el de antes.
+ */
+function alCambiarReloj() {
+  const v = control.video();
+  if (v) tiempoMs.value = Math.round(momentoDelVideo(v));
+  lineaPreparada.value = -1;
+  motorModos.reiniciar();
+}
+
+/** «Volver a sincronizar», con el botón del panel o con Alt+Shift+S: se mide de nuevo y se dice cómo quedó. */
+export async function sincronizarConSitio() {
+  const r = await sincronizarAhora(() => control.video()?.paused ?? true);
+  if (r.tipo === 'en-pausa') avisar(tr('Se medirá en cuanto siga el video.'), undefined, undefined, 3000);
+  else if (r.tipo === 'sin-reloj') avisar(tr('Netflix no dio su posición: los subtítulos siguen el reloj del video. Puedes moverlos a mano en Sincronizar.'), 'error', undefined, 7000);
+  else {
+    if (r.cambio) alCambiarReloj();
+    avisar(r.correccionMs ? tr('Subtítulos sincronizados con Netflix ({0} s).', segundosReloj(r.correccionMs)) : tr('Ya iban a la par con Netflix.'), 'exito', undefined, 3500);
+  }
 }
 
 function alPausar() {
@@ -305,7 +356,7 @@ export function reproducir() {
 
 export function saltar(ms: number) {
   lineaPreparada.value = -1;
-  return control.saltar(Math.max(0, ms));
+  return control.saltar(Math.max(0, ms - desfaseDeSaltos()));
 }
 
 /**
@@ -337,9 +388,10 @@ function tick() {
   const v = control.video();
   if (!v) return;
   enlazarVideo(v);
-  const ms = v.currentTime * 1000;
+  const ms = momentoDelVideo(v);
   tiempoMs.value = Math.round(ms);
   pausado.value = v.paused;
+  if (!anuncio.value) anotarSinAnuncio(v);
   vigilarRevision();
   if (v.paused || anuncio.value || grabacionEnCurso) return;
 
@@ -702,6 +754,9 @@ export async function seleccionarSecundaria(id: string | null) {
 
 const reanalizar = () => refrescarAnalisis();
 
+/** El episodio para el que se midió el reloj de Netflix. */
+let videoDelReloj: string | null | undefined;
+
 export async function cargarVideoActual() {
   // Lo que siguiera llegando de una transcripción en marcha sería del video o de la lengua de antes.
   if (cortarWhisper()) avisar(tr('La transcripción se detuvo al cambiar de video o de idioma. Lo ya transcrito queda guardado.'), undefined, undefined, 8000);
@@ -713,6 +768,11 @@ export async function cargarVideoActual() {
   flujoAnalisis?.cancelar();
   const info = await control.info();
   infoVideo.value = { sitio: info.sitio, idVideo: info.idVideo, titulo: info.titulo, categoria: info.categoria };
+  // Otro episodio: la corrección del reloj del anterior no vale para este. Cambiar de lengua no lo toca.
+  if (info.idVideo !== videoDelReloj) {
+    videoDelReloj = info.idVideo;
+    reiniciarReloj();
+  }
   pistas.value = [];
   baseObjetivo = [];
   baseSecundaria = [];
@@ -776,14 +836,17 @@ export const nombreIdioma = (c: string) =>
   ({ ja: tr('Japonés'), es: tr('Español'), en: tr('Inglés'), ko: tr('Coreano'), zh: tr('Chino'), pt: tr('Portugués'), fr: tr('Francés'), de: tr('Alemán') } as Record<string, string>)[c.split('-')[0]] ?? c;
 
 export function vigilarAnuncios() {
+  let vuelta = 0;
   setInterval(async () => {
+    // En Netflix, cuatro veces por segundo: lo que corre el video durante un anuncio se mide de borde a borde.
+    if (vuelta++ % 4 && infoVideo.value?.sitio !== 'netflix') return;
     try {
       const i = await control.info();
       anuncio.value = i.anuncio;
     } catch {
       // El adaptador aún no está listo.
     }
-  }, 1000);
+  }, 250);
 }
 
 /** Pista importada por el usuario: queda guardada para este título, y deja de perderse al recargar. */
@@ -1087,7 +1150,7 @@ function enviarMarcaVideo() {
   return () => {
     const v = control.video();
     if (!v) return;
-    const ms = v.currentTime * 1000;
+    const ms = momentoDelVideo(v);
     const ahora = performance.now();
     const esperado = previo + (ahora - instante) * v.playbackRate;
     const salto = previo >= 0 && !v.paused && Math.abs(ms - esperado) > 1500;

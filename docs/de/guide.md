@@ -125,6 +125,8 @@ Die japanischen Untertitel eines Netflix-Titels werden beim Ansehen zusammen mit
 
 Der Tab **Synchronisieren** passt den Versatz jeder Spur an. Alternativ lässt sich im Navigator **Synchronisieren: Diese Zeile ist gerade zu hören** wählen: Eine Markierung korrigiert den Versatz, zwei auch die Geschwindigkeit. Der Versatz lässt sich mit `Alt+I` und `Alt+O` ändern.
 
+**Netflix und seine Werbung.** Nach einer Werbeunterbrechung, wenn die nächste Folge von selbst startet, oder nach einem Sprung kann die Uhr des Netflix-Videos von der Folge abweichen, und die Untertitel kämen zu früh oder zu spät. Kotonoha vergleicht beim Schauen die Uhr des Videos mit der des Netflix-Players und richtet die Untertitel nach der Uhr von Netflix, ohne die Seite neu zu laden; beim Anpassen meldet es „Untertitel mit Netflix synchronisiert“. Zieht die Uhr von Netflix eine Werbung nicht ab, wird um die Zeit angepasst, die das Video währenddessen lief. Im Tab **Synchronisieren** zeigt **Netflix-Uhr**, wie beide zueinander stehen, und **Erneut synchronisieren** (oder `Alt+Shift+S`) misst neu. Diese Anpassung wird nicht gespeichert: Der Versatz jeder Spur bleibt davon getrennt.
+
 ## Transkription mit Whisper
 
 Whisper erzeugt japanische Untertitel, wenn ein Video keine mitbringt. Es läuft über WebGPU auf der Grafikkarte, und das Audio verlässt den Computer nicht. Beim ersten Mal wird das Modell heruntergeladen und im Browser gespeichert. Bei Netflix wird es nicht angeboten, da dessen Titel fast immer Untertitel haben.
@@ -388,6 +390,7 @@ Die vollständige Übersicht steht im Kürzelbereich über dem Video. Die Kürze
 | | `G` | Untertitel-Navigator |
 | | `C` | Untertitel kopieren |
 | | `Alt+Shift+G` | Zweituntertitel erstellen |
+| | `Alt+Shift+S` | Erneut mit Netflix synchronisieren |
 | Anwendung | `Alt+Shift+K` | Kotonoha-Fenster öffnen |
 
 ## Häufige Probleme

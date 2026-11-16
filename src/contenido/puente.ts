@@ -25,6 +25,8 @@ export interface Control {
   imagenOficial(): Promise<string | null>;
   prepararPanel(ancho: number): Promise<void>;
   video(): HTMLVideoElement | null;
+  /** El momento del <video> y el del reproductor del sitio, tomados a la vez (ver relojSitio.ts). */
+  tiempos?(): Promise<{ video: number; jugador: number } | null>;
 }
 
 let contador = 0;
@@ -95,4 +97,5 @@ export const controlSitio: Control = {
   imagenOficial: () => orden('imagenOficial'),
   prepararPanel: (a) => orden('prepararPanel', [a]),
   video: videoPrincipal,
+  tiempos: () => orden('tiempos', [], 2000),
 };
