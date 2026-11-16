@@ -30,7 +30,9 @@ import {
   reiniciarSincronia,
   seleccionarObjetivo,
   seleccionarSecundaria,
+  sincronizarConSitio,
 } from './controlador';
+import { estadoReloj } from './relojSitio';
 import { ajustandoLetra, ajustes, analisisEnCurso, anclas, letraPegada, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
 import { cambiarAjuste } from './Reproductor';
 import { LENGUAS, lenguasTraduccion, numero, tm, tr } from '../compartido/i18n';
@@ -343,6 +345,41 @@ function ControlPista({ titulo, icono, valor, idioma, alElegir, destino, puedeEx
   );
 }
 
+/**
+ * El reloj de Netflix: tras un anuncio, al pasar solo al siguiente episodio o tras un salto, el del video se va, y los
+ * subtítulos siguen al de Netflix (ver relojSitio.ts). Aquí se ve cómo va, y se puede volver a medir a mano.
+ */
+function RelojNetflix() {
+  const e = estadoReloj.value;
+  const midiendo = useSignal(false);
+  const s = numero(Math.abs(e.correccionMs) / 1000, { maximumFractionDigits: 1 });
+  const [titulo, detalle] = !e.medido
+    ? [tr('Sin comparar aún'), tr('Se compara con el video en marcha.')]
+    : e.porAnuncios
+      ? [tr('Ajustado por los anuncios'), tr('El video corrió {0} s durante los anuncios y el reloj de Netflix no los descuenta: los subtítulos van por el episodio.', s)]
+      : e.correccionMs === 0
+        ? [tr('A la par'), tr('El video y Netflix marcan el mismo momento.')]
+        : [tr('Ajustado'), e.correccionMs < 0 ? tr('El video va {0} s por delante de Netflix: los subtítulos siguen a Netflix.', s) : tr('El video va {0} s por detrás de Netflix: los subtítulos siguen a Netflix.', s)];
+  return (
+    <>
+      <TituloGrupo>{tr('Reloj de Netflix')}</TituloGrupo>
+      <div class="grupo reloj-netflix">
+        <Fila etq={titulo} ayuda={detalle} teclas={[tm('Alt'), '+', tm('Shift'), '+', 'S']}>
+          <button class="btn chico" disabled={midiendo.value} onClick={async () => {
+            midiendo.value = true;
+            try {
+              await sincronizarConSitio();
+            } finally {
+              midiendo.value = false;
+            }
+          }}><Icono n="recargar" t={15} /> {midiendo.value ? tr('Midiendo…') : tr('Volver a sincronizar')}</button>
+        </Fila>
+        <p class="nota-grupo">{tr('Tras un anuncio, al pasar solo al siguiente episodio o tras un salto, el reloj del video puede irse del de Netflix. Kotonoha los compara mientras ves el video y lleva los subtítulos por el de Netflix, sin recargar la página.')}</p>
+      </div>
+    </>
+  );
+}
+
 function ControlSincronia({ titulo, pista, disponible }: { titulo: string; pista: 'objetivo' | 'secundaria'; disponible: boolean }) {
   const s = sincronias.value[pista];
   const segundos = s.desfaseMs / 1000;
@@ -486,6 +523,7 @@ function PanelVideo() {
       {p === 'sincronia' && (
         <>
           <p class="panel-intro">{tr('¿Los subtítulos no coinciden con lo que se dice? Muévelos a mano, o márcalos escuchando para una sincronía exacta.')}</p>
+          {infoVideo.value?.sitio === 'netflix' && <RelojNetflix />}
           <div class="columnas">
             <ControlSincronia titulo={tr(lengua.value.textos.nombre)} pista="objetivo" disponible={lineasObjetivo.value.length > 0} />
             <ControlSincronia titulo={tr('Secundarios')} pista="secundaria" disponible={lineasSecundarias.value.length > 0} />
@@ -627,6 +665,7 @@ const atajosDe = (textos: TextosLengua): { titulo: string; filas: [string, strin
         [tm('Mostrar u ocultar secundarios'), [tm('Shift'), '+', '↑']],
         [textos.desfase, [tm('Alt'), '+', 'I', '/', 'O']],
         [tm('Desfase de secundarios'), [tm('Alt'), '+', tm('Shift'), '+', 'I', '/', 'O']],
+        [tm('Volver a sincronizar con Netflix'), [tm('Alt'), '+', tm('Shift'), '+', 'S']],
         [tm('Generar secundarios'), [tm('Alt'), '+', tm('Shift'), '+', 'G']],
         [tm('Navegador de subtítulos'), ['G']],
         [tm('Copiar el subtítulo'), ['C']],

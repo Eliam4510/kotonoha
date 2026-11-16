@@ -57,6 +57,7 @@ if (!window.__kotonohaPagina) {
     ocultarNativos: (v: boolean) => ocultarNativos(v),
     imagenOficial: () => adaptador.imagenOficial?.() ?? null,
     prepararPanel: (ancho: number) => adaptador.prepararPanel?.(ancho),
+    tiempos: () => adaptador.tiempos?.() ?? null,
   };
 
   window.addEventListener('message', (e) => {

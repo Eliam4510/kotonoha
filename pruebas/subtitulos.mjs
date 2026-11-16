@@ -44,7 +44,10 @@ function paginaNetflix() {
     ? [{ trackId: 't-ja', displayName: '日本語', bcp47: 'ja' }, { trackId: 't-en', displayName: 'English', bcp47: 'en' }]
     : [{ trackId: 't-es', displayName: 'Español (Latinoamérica)', bcp47: 'es-419' }];
   const v = document.getElementById('v');
-  const jugador = { getTimedTextTrackList: () => pistas, getTimedTextTrack: () => pistas[0], setTimedTextTrack: async () => {}, seek: (ms) => { v.currentTime = ms / 1000; }, play: () => v.play(), pause: () => v.pause(), getMovieId: () => 1 };
+  // Como el de Netflix, su reproductor cuenta el momento del episodio, y window.__adelanto hace que el video vaya por
+  // delante, como tras un anuncio: seek y getCurrentTime van por el episodio. Con window.__sinReloj no da su momento.
+  const adelanto = () => window.__adelanto ?? 0;
+  const jugador = { getTimedTextTrackList: () => pistas, getTimedTextTrack: () => pistas[0], setTimedTextTrack: async () => {}, seek: (ms) => { v.currentTime = (ms + adelanto()) / 1000; }, getCurrentTime: () => (window.__sinReloj ? undefined : v.currentTime * 1000 - adelanto()), play: () => v.play(), pause: () => v.pause(), getMovieId: () => 1 };
   window.netflix = { appContext: { state: { playerApp: {
     getAPI: () => ({ videoPlayer: { getAllPlayerSessionIds: () => ['watch1'], getVideoPlayerBySessionId: () => jugador }, getVideoMetadataByVideoId: () => ({ getCurrentVideo: () => ({ getTitle: () => 'Película de prueba' }) }) }),
     getState: () => ({ videoPlayer: { cadmiumPlayerRepository: { playersById: { watch1: { datos: pistas.map((p) => ({ type: 'timedtext', trackId: p.trackId, urls: [{ url: 'https://subs.test/' + p.trackId + '.vtt' }] })) } } } } }),
@@ -326,6 +329,135 @@ if (quiere('netflix')) {
     comprobar(false, 'No hay SRT que importar');
   }
   await i.close();
+}
+
+// ---------- Netflix: el reloj del video se va del de Netflix ----------
+
+if (quiere('reloj')) {
+  console.log('\n== Netflix: el reloj del video se va del de Netflix ==');
+  const p = abrir(await contexto.newPage(), 'netflix-reloj');
+  await p.goto('https://www.netflix.com/watch/81234567?r=jp');
+  comprobar(!!(await hasta(p, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000)), 'Carga los subtítulos de Netflix');
+  const video = (f, arg) => p.evaluate(f, arg);
+  const textoAvisos = () => enOverlay(p, (r) => [...r.querySelectorAll('.aviso-texto')].map((a) => a.textContent).join(' | '));
+  const avisoCon = (texto, ms = 8000) => hasta(p, (r, t) => [...r.querySelectorAll('.aviso-texto')].some((a) => a.textContent.includes(t)), texto, ms);
+
+  // Sin desfase, nada cambia: los subtítulos van por el video y no sale ningún aviso.
+  await video(() => { const v = document.querySelector('#v'); v.currentTime = 11; return v.play(); });
+  await p.waitForTimeout(2500);
+  comprobar((await textoLinea(p, 'objetivo')).includes('自分'), 'Sin desfase, la línea es la del video', await textoLinea(p, 'objetivo'));
+  comprobar(!(await textoAvisos()).includes('Netflix'), 'Sin desfase no avisa de nada', await textoAvisos());
+
+  // Como tras un anuncio de 5 s: el video va 5 s por delante del episodio, y la línea de ahora es la anterior.
+  await video(() => { window.__adelanto = 5000; const v = document.querySelector('#v'); v.pause(); v.currentTime = 11; return v.play(); });
+  const corregido = await avisoCon('sincronizados con Netflix');
+  comprobar(!!corregido, 'Se corrige solo y lo dice', await textoAvisos());
+  await video(() => document.querySelector('#v').pause());
+  await p.waitForTimeout(150);
+  const t = await video(() => document.querySelector('#v').currentTime);
+  comprobar((await textoLinea(p, 'objetivo')).includes('授業'), 'La línea es la del momento del episodio, no la del video', `video ${t.toFixed(1)} s: ${await textoLinea(p, 'objetivo')}`);
+
+  await abrirPanel(p, 'Ajustes de video');
+  await pulsar(p, 'Sincronizar', '.panel-flotante');
+  await p.waitForTimeout(200);
+  const panelReloj = await enOverlay(p, (r) => r.querySelector('.reloj-netflix')?.textContent ?? '');
+  comprobar(/Ajustado/.test(panelReloj) && /5\s*s por delante/.test(panelReloj), 'El panel dice cuánto se corrige', panelReloj);
+  comprobar(/Volver a sincronizar/.test(panelReloj), 'Y ofrece volver a sincronizar');
+  await p.screenshot({ path: join(CAPTURAS, 'netflix-reloj.png') });
+  await p.keyboard.press('Escape');
+
+  // Un salto desde Kotonoha va al momento del episodio: la cuarta línea empieza a los 16 s del episodio.
+  await enOverlay(p, (r) => r.querySelectorAll('.nav-linea')[3]?.click());
+  await p.waitForTimeout(600);
+  const tras = await video(() => document.querySelector('#v').currentTime);
+  comprobar(Math.abs(tras - 21) < 0.3 && (await textoLinea(p, 'objetivo')).includes('赤い星'), 'Saltar a una línea lleva a su momento del episodio', `video ${tras.toFixed(2)} s: ${await textoLinea(p, 'objetivo')}`);
+
+  // A mano: con el video en pausa, la medida queda para cuando siga.
+  await p.waitForTimeout(3600);
+  await video(() => { window.__adelanto = 0; });
+  await p.keyboard.press('Alt+Shift+S');
+  comprobar(!!(await avisoCon('en cuanto siga el video', 3000)), 'Alt+Shift+S en pausa: se medirá al seguir', await textoAvisos());
+  await video(() => { const v = document.querySelector('#v'); v.currentTime = 11; return v.play(); });
+  await p.waitForTimeout(2200);
+  comprobar((await textoLinea(p, 'objetivo')).includes('自分'), 'Al volver a ir a la par, se quita la corrección', await textoLinea(p, 'objetivo'));
+  await p.waitForTimeout(3600);
+  await p.keyboard.press('Alt+Shift+S');
+  comprobar(!!(await avisoCon('Ya iban a la par')), 'Alt+Shift+S con todo bien: lo dice', await textoAvisos());
+
+  // Si Netflix no da su momento, todo sigue por el video, y se dice.
+  await p.waitForTimeout(3600);
+  await video(() => { window.__sinReloj = true; window.__adelanto = 5000; const v = document.querySelector('#v'); v.currentTime = 31; return v.play(); });
+  await p.waitForTimeout(500);
+  await p.keyboard.press('Alt+Shift+S');
+  comprobar(!!(await avisoCon('no dio su posición', 7000)), 'Sin el momento de Netflix, avisa de que sigue por el video', await textoAvisos());
+  await video(() => { const v = document.querySelector('#v'); v.pause(); v.currentTime = 23; });
+  await p.waitForTimeout(400);
+  const lineas = await lineasNavegador(p);
+  const ahora = await textoLinea(p, 'objetivo');
+  comprobar(!!ahora && (lineas[4] ?? '').startsWith(ahora), 'Y los subtítulos van por el video', ahora);
+  await p.close();
+
+  // Un anuncio del medio de 5 s, en el mismo <video>: mientras dura, el video corre y el episodio no. Con descuenta, el
+  // reloj de Netflix lo descuenta (como se espera de él); sin, cuenta como el video y hay que medir el anuncio.
+  async function anuncioDelMedio(nombre, descuenta) {
+    const q = abrir(await contexto.newPage(), nombre);
+    await q.goto('https://www.netflix.com/watch/81234567?r=jp');
+    await hasta(q, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000);
+    await q.evaluate(() => { const v = document.querySelector('#v'); v.currentTime = 6; return v.play(); });
+    await q.waitForFunction(() => document.querySelector('#v').currentTime >= 7);
+    const desde = await q.evaluate(() => {
+      const d = document.createElement('div');
+      d.className = 'watch-video--modular-ads-container';
+      document.body.append(d);
+      return document.querySelector('#v').currentTime;
+    });
+    await q.waitForFunction(() => document.querySelector('#v').currentTime >= 12);
+    await q.evaluate(({ desde, descuenta }) => {
+      document.querySelector('.watch-video--modular-ads-container').remove();
+      if (descuenta) window.__adelanto = Math.round((document.querySelector('#v').currentTime - desde) * 1000);
+    }, { desde, descuenta });
+    const dicho = await hasta(q, (r) => [...r.querySelectorAll('.aviso-texto')].find((a) => a.textContent.includes('sincronizados con Netflix'))?.textContent, undefined, 8000);
+    await q.evaluate(() => document.querySelector('#v').pause());
+    await q.waitForTimeout(150);
+    const t = await q.evaluate(() => document.querySelector('#v').currentTime);
+    const linea = await textoLinea(q, 'objetivo');
+    return { q, dicho, t, linea };
+  }
+
+  console.log('\n== Netflix: un anuncio del medio que su reloj descuenta ==');
+  {
+    const { q, dicho, t, linea } = await anuncioDelMedio('netflix-anuncio', true);
+    comprobar(/\(5 s\)/.test(dicho ?? ''), 'Al acabar el anuncio se sincroniza con el reloj de Netflix, al milisegundo', dicho);
+    comprobar(linea.includes('授業'), 'La línea es la del episodio, no la del video', `video ${t.toFixed(1)} s: ${linea}`);
+    await abrirPanel(q, 'Ajustes de video');
+    await pulsar(q, 'Sincronizar', '.panel-flotante');
+    await q.waitForTimeout(200);
+    const panel = await enOverlay(q, (r) => r.querySelector('.reloj-netflix')?.textContent ?? '');
+    comprobar(/^Ajustado(?! por)/.test(panel), 'Manda el reloj de Netflix, no la medida del anuncio', panel.slice(0, 90));
+    await q.close();
+  }
+
+  console.log('\n== Netflix: un anuncio del medio que su reloj no descuenta ==');
+  {
+    const { q, dicho, t, linea } = await anuncioDelMedio('netflix-anuncio-sin-reloj', false);
+    const s = Number(/\(([\d,.]+) s\)/.exec(dicho ?? '')?.[1]?.replace(',', '.'));
+    comprobar(Math.abs(s - 5) <= 0.5, 'Se corrige por lo que corrió el video durante el anuncio', dicho);
+    comprobar(linea.includes('授業'), 'La línea es la del episodio, no la del video', `video ${t.toFixed(1)} s: ${linea}`);
+    await abrirPanel(q, 'Ajustes de video');
+    await pulsar(q, 'Sincronizar', '.panel-flotante');
+    await q.waitForTimeout(200);
+    const panel = await enOverlay(q, (r) => r.querySelector('.reloj-netflix')?.textContent ?? '');
+    comprobar(/Ajustado por los anuncios/.test(panel), 'El panel dice que es por los anuncios', panel.slice(0, 120));
+    await q.screenshot({ path: join(CAPTURAS, 'netflix-anuncio.png') });
+    await q.keyboard.press('Escape');
+    // Un salto desde Kotonoha se traduce al reloj del video, que es el que usa este seek: la cuarta línea, a los 16 s.
+    await enOverlay(q, (r) => r.querySelectorAll('.nav-linea')[3]?.click());
+    await q.waitForTimeout(600);
+    const tras = await q.evaluate(() => document.querySelector('#v').currentTime);
+    const despues = await textoLinea(q, 'objetivo');
+    comprobar(despues.includes('赤い星') && Math.abs(tras - (16 + s)) < 0.6, 'Saltar a una línea lleva a su momento del episodio', `video ${tras.toFixed(2)} s: ${despues}`);
+    await q.close();
+  }
 }
 
 // ---------- YouTube con subtítulos automáticos ----------

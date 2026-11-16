@@ -125,6 +125,8 @@ Japanese subtitles from a Netflix title are saved when watched, along with its i
 
 The **Sync** tab adjusts the offset of each track. **Sync: this line is playing now** in the navigator also works: one mark corrects the offset, and two also correct the speed. The offset is adjusted with `Alt+I` and `Alt+O`.
 
+**Netflix and its ads.** After a mid-roll ad, when the next episode starts on its own or after a jump, the clock of Netflix's video can drift away from the episode, and subtitles would show early or late. Kotonoha compares the video's clock with the Netflix player's while you watch and keeps subtitles on Netflix's clock, without reloading the page; when it adjusts them, it says “Subtitles synced with Netflix”. If after an ad Netflix's clock does not leave it out, the adjustment is how long the video ran during the ad. In the **Sync** tab, **Netflix clock** shows how both line up, and **Sync again** (or `Alt+Shift+S`) measures again. This adjustment is not saved: each track's offset stays separate.
+
 ## Whisper transcription
 
 Whisper generates Japanese subtitles when a video has none. It runs on the graphics card through WebGPU, and the audio never leaves the computer. The first run downloads the model, which stays in the browser. It is not offered on Netflix, since its titles almost always have subtitles.
@@ -388,6 +390,7 @@ The full reference is in the shortcuts panel, on top of the video. They can be c
 | | `G` | Subtitle navigator |
 | | `C` | Copy the subtitle |
 | | `Alt+Shift+G` | Generate secondary subtitles |
+| | `Alt+Shift+S` | Sync with Netflix again |
 | Application | `Alt+Shift+K` | Open the Kotonoha window |
 
 ## Troubleshooting

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.33.0, along with how it has been verified.
+Status of each feature in version 0.33.1, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -74,6 +74,7 @@ Status of each feature in version 0.33.0, along with how it has been verified.
 | Exporting to SRT, with synchronization applied | Imitation page |
 | Japanese tracks remembered across Netflix regions | Imitation page. Real sessions must still confirm that the title identifier matches |
 | Synchronization by offset or with one or two marks | Automated |
+| Netflix clock: after a mid-roll ad, when the next episode starts on its own or after a jump, subtitles follow the episode time given by the Netflix player, without reloading the page; if its clock does not leave the ad out, the adjustment is how long the video ran during it. **Sync again** and `Alt+Shift+S` | Automated, with a simulated Netflix |
 
 ## Transcription
 

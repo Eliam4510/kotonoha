@@ -125,6 +125,8 @@
 
 **同步**标签页用于调整每条字幕轨的偏移。也可以在导航中使用**同步：此行正在播放**：一个标记校正偏移，两个标记还会校正速度。偏移可用 `Alt+I` 和 `Alt+O` 调整。
 
+**Netflix 和广告。** 插播广告之后、自动播放下一集时或跳转之后，Netflix 视频的时钟可能会偏离剧集，字幕就会提前或延后。Kotonoha 会在你观看时比较视频的时钟和 Netflix 播放器的时钟，让字幕按 Netflix 的时钟显示，无需重新加载页面；调整时会提示“字幕已与 Netflix 同步”。如果广告之后 Netflix 的时钟没有扣除广告，就按广告期间视频走过的时间调整。在**同步**标签页中，**Netflix 时钟**会显示两者的情况，**重新同步**（或 `Alt+Shift+S`）会重新测量。这项调整不会保存，与每条字幕轨的偏移分开。
+
 ## 用 Whisper 转录
 
 视频没有字幕时，Whisper 可以生成日语字幕。它通过 WebGPU 在显卡上运行，音频不会离开电脑。首次使用时会下载模型并保存在浏览器中。Netflix 上不提供此功能，因为其作品几乎都有字幕。
@@ -388,6 +390,7 @@ powershell -ExecutionPolicy Bypass -File instalar.ps1 -Extension EXTENSION_ID
 | | `G` | 字幕导航 |
 | | `C` | 复制字幕 |
 | | `Alt+Shift+G` | 生成第二字幕 |
+| | `Alt+Shift+S` | 重新与 Netflix 同步 |
 | 应用 | `Alt+Shift+K` | 打开 Kotonoha 窗口 |
 
 ## 常见问题

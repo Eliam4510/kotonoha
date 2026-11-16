@@ -2,6 +2,14 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.33.1 · 2026-11-16
+
+Los subtítulos de Netflix, a su hora tras los anuncios.
+
+- **El reloj de Netflix.** Durante un anuncio del medio, el reloj del video de Netflix sigue corriendo mientras el episodio está parado, y al volver los subtítulos salían adelantados tantos segundos como había durado el anuncio, hasta recargar la página. Lo mismo podía pasar al empezar solo el siguiente episodio o tras un salto. Ahora Kotonoha compara el reloj del video con el del reproductor de Netflix mientras se ve, también en cuanto acaba un anuncio, y lleva los subtítulos por el de Netflix; al ajustarlos, avisa con «Subtítulos sincronizados con Netflix». Si el reloj de Netflix no descontara un anuncio, se ajusta por lo que corrió el video mientras duraba. Los saltos desde Kotonoha y el audio de las tarjetas van también al momento del episodio.
+- **Volver a sincronizar.** En **Video y subtítulos**, pestaña **Sincronizar**, **Reloj de Netflix** dice cómo van los dos relojes, y **Volver a sincronizar** (o `Alt+Shift+S`) mide de nuevo en un segundo. Este ajuste no se guarda: el desfase de cada pista, el que se pone a mano, sigue aparte.
+- **Una limitación.** Está probado con un Netflix simulado, con y sin anuncios, y no con anuncios reales de Netflix. Si tras un anuncio los subtítulos siguieran adelantados, **Reloj de Netflix** dice qué vio Kotonoha.
+
 ## 0.33.0 · 2026-11-15
 
 El texto del OCR, en un PDF para cualquier lector, y los escaneos, más nítidos.
@@ -322,6 +330,14 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.33.1 · 2026-11-16
+
+Netflix subtitles on time after ads.
+
+- **Netflix's clock.** During a mid-roll ad, the clock of Netflix's video keeps running while the episode is paused, so when the episode came back subtitles showed early by as long as the ad had lasted, until the page was reloaded. The same could happen when the next episode started on its own or after a jump. Kotonoha now compares the video's clock with the Netflix player's while you watch, also as soon as an ad ends, and keeps subtitles on Netflix's clock; when it adjusts them, it says “Subtitles synced with Netflix”. If Netflix's clock did not leave an ad out, the adjustment is how long the video ran during the ad. Jumps from Kotonoha and the audio of cards also go to the right moment of the episode.
+- **Sync again.** In **Video and subtitles**, **Sync** tab, **Netflix clock** shows how both clocks line up, and **Sync again** (or `Alt+Shift+S`) measures again in a second. This adjustment is not saved: each track's offset, the one set by hand, stays separate.
+- **A limitation.** It is tested with a simulated Netflix, with and without ads, and not with real Netflix ads. If subtitles still showed early after an ad, **Netflix clock** says what Kotonoha saw.
 
 ## 0.33.0 · 2026-11-15
 
