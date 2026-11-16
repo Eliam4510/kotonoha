@@ -70,6 +70,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   args: [
+    '--mute-audio',
     `--disable-extensions-except=${DIST}`,
     `--load-extension=${DIST}`,
     '--use-fake-ui-for-media-stream',

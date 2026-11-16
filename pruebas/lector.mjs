@@ -66,7 +66,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   viewport: { width: 1280, height: 800 },
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 
 // Una página que sigue cambiando mientras carga, como casi todas: su imagen tarda y el texto va llegando.

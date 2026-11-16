@@ -170,6 +170,7 @@ Whisper gets the timing right, but in a song it misses many words. If someone ha
 - If the lyrics are pasted before or during transcription, they are aligned automatically at the end, and nothing is spent correcting or reviewing what Whisper heard. If the video already has a track, it can also serve as the timing reference, with **Align the lyrics to this timing**.
 - A chorus written only once is placed wherever it sounds. What is not sung, such as section marks, rōmaji or translations, is ignored.
 - A verse Whisper did not pick up gets an estimated time, and the final notice says how many there are. In that case, **Sync: this line is playing now**, in the navigator, fine-tunes the timing.
+- When a whole song is transcribed, with the helper or from a file, Kotonoha also hears where there is singing, with YAMNet, and does not put those verses in an instrumental passage: if only music plays right before the next verse, they go before it. YAMNet takes 16 MB: it is downloaded the first time and kept in **Saved models**, in **Settings, Speech transcription**. It is not used in real-time transcription.
 - The result is one more track, "Japanese (lyrics)", saved for that video. The original transcription stays available. Each song takes a single request to Claude, and repeating the alignment with the same lyrics costs nothing.
 - On an online video without the local helper, Whisper has to hear the whole song: when the video ends, transcription stops by itself and the lyrics are aligned.
 

@@ -48,7 +48,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   headless: true,
   viewport: { width: 1705, height: 1264 },
   deviceScaleFactor: 1.5,
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, '--autoplay-policy=no-user-gesture-required', '--disable-gpu-compositing', '--disable-gpu-rasterization', '--disable-accelerated-video-decode', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, '--autoplay-policy=no-user-gesture-required', '--disable-gpu-compositing', '--disable-gpu-rasterization', '--disable-accelerated-video-decode', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 const bytesVideo = readFileSync(VIDEO);
 await contexto.route('https://media.test/**', (r) => {

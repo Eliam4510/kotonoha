@@ -118,3 +118,28 @@ export async function bytesModeloMoras(): Promise<number> {
 export async function borrarModeloMoras(): Promise<void> {
   await caches.delete(MODELO_MORAS.cache);
 }
+
+// ---------- El modelo que oye dónde se canta ----------
+
+/**
+ * YAMNet, el clasificador de sonidos de Google (Apache-2.0), para no poner versos de una letra en un pasaje
+ * instrumental. Es la conversión directa a ONNX de audiomagic/yamnet-onnx (Hugging Face, commit f25b741), sin tocar
+ * sus pesos. Va en la versión 0.34.0 de Kotonoha para no depender de un repositorio ajeno, y se comprueba con su SHA-256.
+ */
+export const MODELO_CANTO = {
+  url: 'https://github.com/Eliam4510/kotonoha/releases/download/v0.34.0/yamnet.onnx',
+  sha256: 'd3835ffbbd4a1bb3e777f0ca217b5007907f5171dd5d17c4236b95b2af8f908e',
+  bytes: 16093355,
+  cache: 'kotonoha-modelo-canto',
+};
+
+/** Lo que ocupa guardado: 0 si no está. Sin abrir la caché si no existe, que la crearía vacía. */
+export async function bytesModeloCanto(): Promise<number> {
+  if (!(await caches.has(MODELO_CANTO.cache))) return 0;
+  const r = await (await caches.open(MODELO_CANTO.cache)).match(MODELO_CANTO.url);
+  return r ? Number(r.headers.get('content-length') ?? 0) || MODELO_CANTO.bytes : 0;
+}
+
+export async function borrarModeloCanto(): Promise<void> {
+  await caches.delete(MODELO_CANTO.cache);
+}

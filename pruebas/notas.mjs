@@ -56,7 +56,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   viewport: { width: 1400, height: 900 },
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 const sw = await recargarExtension(contexto);
 const id = new URL(sw.url()).host;

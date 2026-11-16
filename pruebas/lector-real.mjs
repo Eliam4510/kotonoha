@@ -82,7 +82,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   headless: true,
   viewport: { width: 1366, height: 860 },
   locale: INGLES ? 'en-US' : 'ja-JP',
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 const sw = await recargarExtension(contexto);
 const fijar = (c) => sw.evaluate(async (c) => {

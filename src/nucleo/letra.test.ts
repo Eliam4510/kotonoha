@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aplicarAjuste, ID_LETRA, mensajeAjuste, versosDeLetra } from './letra';
+import { aplicarAjuste, ID_LETRA, mensajeAjuste, versosDeLetra, vozDeCanto } from './letra';
 import type { Linea } from './subtitulos';
 
 // Versos inventados para estas pruebas.
@@ -212,5 +212,52 @@ describe('aplicarAjuste', () => {
       expect(l.fin).toBeGreaterThan(l.inicio);
       if (i) expect(l.inicio).toBeGreaterThanOrEqual(r.lineas[i - 1].fin);
     }
+  });
+});
+
+describe('dónde se canta', () => {
+  // Tramos de 2 s con la puntuación de «canto»: por encima de 0,02 hay voz.
+  const canto = (puntos: number[]) => vozDeCanto({ pasoMs: 2000, puntos });
+
+  it('los tramos con voz, con los huecos de un solo tramo rellenos y los más largos respetados', () => {
+    const v = canto([0, 0.05, 0.01, 0.06, 0, 0, 0.03]);
+    expect(v.tramos(0, 14000)).toEqual([[2000, 8000], [12000, 14000]]);
+    expect(v.tramos(5000, 13000)).toEqual([[5000, 8000], [12000, 13000]]);
+    expect(v.duracion).toBe(14000);
+  });
+
+  it('un verso rápido que no se oyó no cae en el pasaje instrumental que le sigue', () => {
+    // Se canta hasta los 8 s, de 8 a 20 s solo hay música, y el siguiente verso se oyó a los 20 s.
+    const lineas = [lin(1, 0, 3000), lin(2, 20000, 23000)];
+    const ajuste = [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }, { v: 2, de: 1, a: 1 }];
+    const versos = ['a', 'x'.repeat(20), 'b'];
+    const voz = canto([0.1, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0.1]);
+    // Sin la voz, pegado al siguiente: en plena música.
+    expect(tiempos(aplicarAjuste(versos, lineas, ajuste).lineas)[1]).toEqual([14000, 20000]);
+    // Con ella, donde se canta, antes del pasaje.
+    expect(tiempos(aplicarAjuste(versos, lineas, ajuste, ID_LETRA, voz).lineas)[1]).toEqual([3000, 8000]);
+  });
+
+  it('si justo antes del siguiente se canta, queda igual que sin la voz', () => {
+    const lineas = [lin(1, 0, 3000), lin(2, 20000, 23000)];
+    const ajuste = [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }, { v: 2, de: 1, a: 1 }];
+    const versos = ['a', 'x'.repeat(20), 'b'];
+    const voz = canto(new Array(12).fill(0.1));
+    expect(aplicarAjuste(versos, lineas, ajuste, ID_LETRA, voz).lineas).toEqual(aplicarAjuste(versos, lineas, ajuste).lineas);
+  });
+
+  it('con casi nada de voz en el hueco, se coloca como siempre', () => {
+    const lineas = [lin(1, 0, 3000), lin(2, 20000, 23000)];
+    const ajuste = [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }, { v: 2, de: 1, a: 1 }];
+    const versos = ['a', 'x'.repeat(20), 'b'];
+    const voz = canto([0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.1]);
+    expect(aplicarAjuste(versos, lineas, ajuste, ID_LETRA, voz).lineas).toEqual(aplicarAjuste(versos, lineas, ajuste).lineas);
+  });
+
+  it('el último verso sin oír, tras el anterior pero donde vuelve a cantarse', () => {
+    // El anterior acaba a los 4 s; de 4 a 8 s, música; desde los 8 s se canta otra vez.
+    const voz = canto([0.1, 0.1, 0, 0, 0.1, 0.1, 0.1, 0.1]);
+    const r = aplicarAjuste(['a', 'abcdefghij'], [lin(1, 0, 4000)], [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }], ID_LETRA, voz);
+    expect(tiempos(r.lineas)[1]).toEqual([8000, 11000]);
   });
 });

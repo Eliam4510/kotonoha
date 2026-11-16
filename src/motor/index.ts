@@ -708,10 +708,10 @@ const api: ApiMotor = {
     await fondo.difundir({ tipo: 'gramatica' });
     return d.ajustes ?? null;
   },
-  async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen, estudio) {
+  async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen, estudio, canto) {
     // La letra no sustituye a la transcripción de la que salieron sus tiempos: con otra letra se volverá a necesitar.
     const clave = origen === 'letra' ? `${idVideo}|${idioma}|letra` : `${idVideo}|${idioma}`;
-    await baseDeEstudio(estudio).generados.put({ clave, idVideo, idioma, lineas, origen, creado: Date.now() });
+    await baseDeEstudio(estudio).generados.put({ clave, idVideo, idioma, lineas, origen, ...(canto ? { canto } : {}), creado: Date.now() });
   },
   correccionesPista: (clave, estudio) => baseDeEstudio(estudio).correcciones.get(clave),
   async guardarCorreccionesPista(clave, cambios, completa, estudio) {
@@ -786,14 +786,15 @@ atenderFlujos({
   // Whisper emite cada evento como una línea de JSON.
   // El modelo lo elige quien pide transcribir, que sabe si el video es una canción. Sin él, el de los ajustes, como voz.
   transcribirEnVivo: async (emitir, senal, modelo?: ModeloWhisper) => String(await whisper.transcribirEnVivo(modelo ?? (await modeloPorOmision()), (e) => emitir(`${JSON.stringify(e)}\n`), senal)),
-  transcribirDescarga: async (emitir, senal, url: string, desdeMs?: number, modelo?: ModeloWhisper) => {
+  // Con `conCanto` (una canción), además se oye dónde se canta, para colocar luego su letra.
+  transcribirDescarga: async (emitir, senal, url: string, desdeMs?: number, modelo?: ModeloWhisper, conCanto?: boolean) => {
     const intensidad = async () => (await aj()).whisperIntensidad;
-    return String(await whisper.transcribirDescarga(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, desdeMs));
+    return String(await whisper.transcribirDescarga(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, desdeMs, conCanto));
   },
-  transcribirArchivo: async (emitir, senal, url: string, pcmCrudo?: boolean, desdeMs?: number, modelo?: ModeloWhisper) => {
+  transcribirArchivo: async (emitir, senal, url: string, pcmCrudo?: boolean, desdeMs?: number, modelo?: ModeloWhisper, conCanto?: boolean) => {
     // La intensidad se vuelve a leer en cada trozo: se puede cambiar mientras transcribe.
     const intensidad = async () => (await aj()).whisperIntensidad;
-    return String(await whisper.transcribirArchivo(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, pcmCrudo, desdeMs));
+    return String(await whisper.transcribirArchivo(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, pcmCrudo, desdeMs, conCanto));
   },
   // La práctica del acento: los tokens de la grabación, cada uno con el instante en que empieza, en JSON.
   transcribirPractica: async (emitir, senal, url: string) => JSON.stringify(await whisper.tokensDeGrabacion(url, (e) => emitir(`${JSON.stringify(e)}\n`), senal)),

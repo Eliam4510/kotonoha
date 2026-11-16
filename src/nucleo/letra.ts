@@ -139,7 +139,11 @@ const duracionEstimada = (texto: string) => Math.min(ESTIMADA_MAXIMA_MS, Math.ma
  * pegan al verso siguiente, que es adonde llevan; si no hay siguiente, al anterior. Si no caben, toman lo que les sobra a sus
  * vecinos: el reconocedor suele alargar una línea sobre lo que no entendió, y ahí es donde suenan. Devuelve dónde acaban.
  */
-function colocarEstimadas(textos: string[], salida: Linea[], siguiente: number | null, holguraSiguiente: number, idDe: (k: number) => number): number {
+function colocarEstimadas(textos: string[], salida: Linea[], siguiente: number | null, holguraSiguiente: number, idDe: (k: number) => number, voz?: Voz): number {
+  if (voz) {
+    const puesto = colocarDondeSeCanta(textos, salida, siguiente, idDe, voz);
+    if (puesto !== null) return puesto;
+  }
   const previa = salida[salida.length - 1];
   const finPrevia = previa?.fin ?? 0;
   const total = textos.reduce((s, t) => s + duracionEstimada(t), 0);
@@ -180,8 +184,106 @@ function bloqueDesde(entradas: Pendiente[], i: number): { versos: Pendiente[]; h
   return { versos, hasta };
 }
 
-/** Construye las líneas finales: el texto, de la letra; los tiempos, de la transcripción. */
-export function aplicarAjuste(versos: string[], lineas: Linea[], ajuste: EntradaAjuste[], idInicial = ID_LETRA): ResultadoAjuste {
+// ---------- Dónde se canta ----------
+
+/** La puntuación de «canto» de YAMNet en cada tramo de `pasoMs`, desde el principio del audio. */
+export interface CantoPorTramos {
+  pasoMs: number;
+  puntos: number[];
+}
+
+/**
+ * Por debajo de esto un tramo no lleva voz. En J-pop real el canto puntúa muy bajo, casi nunca por encima de 0,1:
+ * medido con 21 canciones y la letra sincronizada de cada una, separa lo cantado de lo instrumental con un AUC de 0,9.
+ */
+const UMBRAL_CANTO = 0.02;
+
+/** Los tramos donde se canta, para colocar los versos que la transcripción no recogió. */
+export interface Voz {
+  /** Los tramos con voz entre dos momentos, en ms, en orden y sin solaparse. */
+  tramos(desde: number, hasta: number): [number, number][];
+  /** Lo que dura el audio, en ms. */
+  duracion: number;
+}
+
+/** Un hueco sin voz de un solo tramo se rellena: casi nunca es un pasaje instrumental, sino voz que YAMNet no vio. */
+export function vozDeCanto(c: CantoPorTramos): Voz {
+  const tramos: [number, number][] = [];
+  c.puntos.forEach((x, w) => {
+    if (x < UMBRAL_CANTO) return;
+    const a = w * c.pasoMs;
+    const ultimo = tramos[tramos.length - 1];
+    if (ultimo && a - ultimo[1] <= c.pasoMs) ultimo[1] = a + c.pasoMs;
+    else tramos.push([a, a + c.pasoMs]);
+  });
+  return {
+    duracion: c.puntos.length * c.pasoMs,
+    tramos: (desde, hasta) => tramos.map(([a, b]): [number, number] => [Math.max(a, desde), Math.min(b, hasta)]).filter(([a, b]) => b - a >= 200),
+  };
+}
+
+/** Coloca los versos en el tiempo con voz elegido, en orden y según lo que hay que cantar en cada uno. */
+function enTramos(textos: string[], salida: Linea[], tramos: [number, number][], idDe: (k: number) => number): number {
+  const conVoz = tramos.reduce((s, [a, b]) => s + (b - a), 0);
+  const enReal = (x: number, alFinal: boolean) => {
+    let resto = x;
+    for (const [a, b] of tramos) {
+      if (alFinal ? resto <= b - a : resto < b - a) return a + resto;
+      resto -= b - a;
+    }
+    return tramos[tramos.length - 1][1];
+  };
+  const total = textos.reduce((s, t) => s + peso(t), 0);
+  let cursor = 0;
+  let fin = tramos[0][0];
+  for (const t of textos) {
+    const largo = (conVoz * peso(t)) / total;
+    fin = enReal(cursor + largo, true);
+    salida.push({ id: idDe(salida.length), inicio: enReal(cursor, false), fin, texto: t });
+    cursor += largo;
+  }
+  return fin;
+}
+
+/**
+ * Como siempre, pegados al verso siguiente, pero contando solo el tiempo con voz: si justo antes del siguiente hay un
+ * pasaje instrumental, van antes de él. Al final de la canción, detrás del anterior, también solo donde hay voz. Si el
+ * hueco no da para cantarlos o casi no tiene voz, null: se colocan como siempre, que toma tiempo de los vecinos.
+ * Medido con 164 versos que Whisper no oyó en 17 canciones: mejora 22 en más de un segundo y empeora 3.
+ */
+function colocarDondeSeCanta(textos: string[], salida: Linea[], siguiente: number | null, idDe: (k: number) => number, voz: Voz): number | null {
+  const desde = salida[salida.length - 1]?.fin ?? 0;
+  const hasta = siguiente ?? voz.duracion;
+  const necesario = textos.reduce((s, t) => s + duracionEstimada(t), 0);
+  if (hasta - desde < necesario) return null;
+  const tramos = voz.tramos(desde, hasta);
+  const conVoz = tramos.reduce((s, [a, b]) => s + (b - a), 0);
+  if (conVoz < necesario * 0.5) return null;
+  let falta = Math.min(necesario, conVoz);
+  const elegidos: [number, number][] = [];
+  if (siguiente !== null) {
+    for (let i = tramos.length - 1; i >= 0 && falta > 0; i--) {
+      const [a, b] = tramos[i];
+      const toma = Math.min(falta, b - a);
+      elegidos.unshift([b - toma, b]);
+      falta -= toma;
+    }
+  } else {
+    for (const [a, b] of tramos) {
+      if (falta <= 0) break;
+      const toma = Math.min(falta, b - a);
+      elegidos.push([a, a + toma]);
+      falta -= toma;
+    }
+  }
+  return enTramos(textos, salida, elegidos, idDe);
+}
+
+/**
+ * Construye las líneas finales: el texto, de la letra; los tiempos, de la transcripción. Con `voz`, los versos que la
+ * transcripción no recogió no caen en un pasaje instrumental.
+ */
+export function aplicarAjuste(versos: string[], lineas: Linea[], ajuste: EntradaAjuste[], idInicial = ID_LETRA, voz?: Voz): ResultadoAjuste {
   const entradas = depurar(versos, lineas, ajuste);
   const salida: Linea[] = [];
   const idDe = (k: number) => idInicial + k;
@@ -200,7 +302,7 @@ export function aplicarAjuste(versos: string[], lineas: Linea[], ajuste: Entrada
         siguiente = lineas[entradas[i].de].inicio;
         holgura = Math.max(0, lineas[hasta].fin - siguiente - versos.reduce((s, e) => s + duracionEstimada(e.texto), 0));
       }
-      noAntesDe = colocarEstimadas(sinTiempo, salida, siguiente, holgura, idDe);
+      noAntesDe = colocarEstimadas(sinTiempo, salida, siguiente, holgura, idDe, voz);
       estimadas += sinTiempo.length;
       continue;
     }

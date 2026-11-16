@@ -37,6 +37,7 @@ async function abrir(wav, ajustesIniciales) {
     headless: true,
     viewport: { width: 1360, height: 900 },
     args: [
+      '--mute-audio',
       `--disable-extensions-except=${DIST}`,
       `--load-extension=${DIST}`,
       '--enable-unsafe-webgpu',

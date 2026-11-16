@@ -31,7 +31,9 @@ import {
   type TrozoAudio,
   ventanasDeHueco,
 } from '../nucleo/transcripcion';
+import type { CantoPorTramos } from '../nucleo/letra';
 import { abrirDescarga } from './ayudante';
+import { AcumuladorCanto } from './canto';
 import { escucharPcm } from './grabacion';
 import { lengua, motorLengua } from './lengua';
 
@@ -45,7 +47,9 @@ export type EventoWhisper =
   | { tipo: 'recuperando'; segundos: number }
   | { tipo: 'pausado'; pausado: boolean }
   | { tipo: 'retraso'; segundos: number }
-  | { tipo: 'lineas'; lineas: Linea[] };
+  | { tipo: 'lineas'; lineas: Linea[] }
+  /** Dónde se canta, por tramos: solo en una canción, al terminar de transcribirla entera. */
+  | ({ tipo: 'canto' } & CantoPorTramos);
 
 type Emitir = (e: EventoWhisper) => void;
 
@@ -466,12 +470,13 @@ export async function transcribirArchivo(
   emitir: Emitir,
   senal: AbortSignal,
   pcmCrudo = false,
-  desdeMs = 0
+  desdeMs = 0,
+  conCanto = false
 ): Promise<number> {
   emitir({ tipo: 'preparando' });
   const audio = await abrirAudio(url, pcmCrudo);
   if (!audio) throw new Error(tr('El navegador no puede leer el audio de este archivo. Reprodúcelo y usa la transcripción en tiempo real.'));
-  return transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs);
+  return transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs, conCanto);
 }
 
 /** El ayudante local baja el audio del video: se transcribe entero, sin esperar a reproducirlo. */
@@ -481,7 +486,8 @@ export async function transcribirDescarga(
   intensidad: () => Promise<IntensidadWhisper>,
   emitir: Emitir,
   senal: AbortSignal,
-  desdeMs = 0
+  desdeMs = 0,
+  conCanto = false
 ): Promise<number> {
   emitir({ tipo: 'bajandoAudio', porcentaje: 0 });
   const audio = await abrirDescarga(
@@ -491,19 +497,24 @@ export async function transcribirDescarga(
     (porcentaje) => emitir({ tipo: 'extrayendoAudio', porcentaje })
   );
   try {
-    return await transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs);
+    return await transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs, conCanto);
   } finally {
     audio.cerrar();
   }
 }
 
+/**
+ * Con `conCanto` (una canción), YAMNet oye los mismos bloques que Whisper y al final se emite dónde se canta. Solo si se
+ * transcribe entera desde el principio: lo de una transcripción reanudada no cubriría toda la canción.
+ */
 async function transcribirMuestras(
   audio: FuenteMuestras,
   idModelo: ModeloWhisper,
   intensidad: () => Promise<IntensidadWhisper>,
   emitir: Emitir,
   senal: AbortSignal,
-  desdeMs: number
+  desdeMs: number,
+  conCanto = false
 ): Promise<number> {
   pedidoDetener = false;
   fallosGpu = 0;
@@ -513,6 +524,7 @@ async function transcribirMuestras(
   emitir({ tipo: 'procesando', porcentaje: Math.round((inicioMuestra / Math.max(audio.muestras, 1)) * 100), dispositivo });
 
   const acumulador = new AcumuladorAudio();
+  const canto = conCanto && inicioMuestra === 0 ? new AcumuladorCanto() : null;
   const relojInicio = performance.now();
   let total = 0;
 
@@ -539,6 +551,7 @@ async function transcribirMuestras(
       // El acumulador corta por los silencios: se le va dando audio a medida que lo necesita.
       while (acumulador.muestras < 30 * FRECUENCIA && p < audio.muestras) {
         const parte = await audio.leer(p, bloque);
+        canto?.agregar(parte, p);
         acumulador.agregar(parte, (p / FRECUENCIA) * 1000);
         p += parte.length;
       }
@@ -546,6 +559,8 @@ async function transcribirMuestras(
     }
     const final = senal.aborted ? null : acumulador.extraer(true);
     if (final) await procesar(final, audio.muestras);
+    const puntos = canto && !senal.aborted ? await canto.terminar(audio.muestras) : null;
+    if (puntos) emitir({ tipo: 'canto', ...puntos });
     if (!senal.aborted) emitir({ tipo: 'procesando', porcentaje: 100, restanteS: 0 });
   } finally {
     pausadoPorUsuario = false;

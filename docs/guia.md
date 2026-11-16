@@ -170,6 +170,7 @@ Whisper acierta los tiempos, pero en una canción falla muchas palabras. Si algu
 - Si la letra se pega antes de transcribir o durante la transcripción, se ajusta sola al terminar, y no se gasta en corregir ni en revisar lo que Whisper oyó. Si el video ya tiene una pista, también sirve como referencia de tiempos, con **Ajustar la letra a estos tiempos**.
 - Un estribillo escrito una sola vez se coloca en cada sitio donde suene. Lo que no se canta, como marcas de sección, rōmaji o traducciones, se ignora.
 - Un verso que Whisper no recogió recibe un tiempo estimado, y el aviso final dice cuántos hay. En ese caso, **Esta línea suena ahora**, en el navegador, permite afinar la sincronía.
+- Al transcribir una canción entera, con el ayudante o desde un archivo, Kotonoha oye además dónde se canta, con YAMNet, y no pone esos versos en un pasaje instrumental: si justo antes del verso siguiente solo suena música, van antes de ella. YAMNet pesa 16 MB: se descarga la primera vez y queda en **Modelos guardados**, en **Ajustes, Transcripción de voz**. En la transcripción en tiempo real no se usa.
 - El resultado es una pista más, «Japonés (letra)», guardada para ese video. La transcripción original sigue disponible. Se hace una sola petición a Claude por canción, y repetir el ajuste con la misma letra no vuelve a gastar.
 - En un video de internet sin el ayudante local, Whisper tiene que oír la canción entera: al terminar el video, la transcripción se detiene sola y la letra se ajusta.
 

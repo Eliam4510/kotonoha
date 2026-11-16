@@ -93,7 +93,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: false,
   viewport: { width: 1280, height: 720 },
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, `--allowlisted-extension-id=${ID_EXTENSION}`, '--autoplay-policy=no-user-gesture-required'],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, `--allowlisted-extension-id=${ID_EXTENSION}`, '--autoplay-policy=no-user-gesture-required'],
 });
 await contexto.route('https://media.test/**', (r) => {
   const nombre = new URL(r.request().url()).pathname.slice(1);

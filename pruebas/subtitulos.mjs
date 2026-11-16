@@ -93,7 +93,7 @@ const contexto = await chromium.launchPersistentContext(PERFIL, {
   headless: true,
   viewport: { width: 1280, height: 720 },
   acceptDownloads: true,
-  args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
 });
 
 const CORS = { 'access-control-allow-origin': '*' };
