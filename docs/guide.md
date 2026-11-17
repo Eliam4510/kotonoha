@@ -174,6 +174,8 @@ Whisper gets the timing right, but in a song it misses many words. If someone ha
 - The result is one more track, "Japanese (lyrics)", saved for that video. The original transcription stays available. Each song takes a single request to Claude, and repeating the alignment with the same lyrics costs nothing.
 - On an online video without the local helper, Whisper has to hear the whole song: when the video ends, transcription stops by itself and the lyrics are aligned.
 
+How it works inside, with diagrams: [Song lyrics](architecture.md#song-lyrics), in the architecture.
+
 ### Local helper
 
 An extension cannot download the audio of a video by itself. The helper is a small local program written in PowerShell, which comes with Windows: neither Python nor FFmpeg needs to be installed. It downloads the audio with [yt-dlp](https://github.com/yt-dlp/yt-dlp) and also updates the extension (see **New versions**, under [Data and backups](#data-and-backups)). It is downloaded from the latest version's page, as `kotonoha-X.Y.Z-ayudante.zip`, unzipped into any folder, and started by double-clicking `Instalar.cmd`. The installer:

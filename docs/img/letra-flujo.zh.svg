@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:lang="zh" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo desc">
+<title id="titulo">歌词如何放到歌曲上</title>
+<desc id="desc">歌曲音频交给 Whisper Turbo，由它听出唱了什么、何时唱；同时交给 YAMNet，由它标出哪里有歌声。Claude 把粘贴的歌词中的每一句与 Whisper 的行配对。letra.ts 综合歌词、配对结果、Whisper 的时间和 YAMNet 的歌声，生成歌词字幕轨，并进行分析和翻译。</desc>
+<style>
+text { font-family: 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
+.fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
+.t { font-size: 14px; font-weight: 600; }
+.s, .e { font-size: 12px; }
+.e { fill: #59636e; }
+g rect { stroke-width: 1; }
+.gris rect { fill: #f1efe8; stroke: #5f5e5a; } .gris .t { fill: #444441; } .gris .s { fill: #5f5e5a; }
+.verde rect { fill: #e1f5ee; stroke: #0f6e56; } .verde .t { fill: #085041; } .verde .s { fill: #0f6e56; }
+.coral rect { fill: #faece7; stroke: #993c1d; } .coral .t { fill: #712b13; } .coral .s { fill: #993c1d; }
+.morado rect { fill: #eeedfe; stroke: #534ab7; } .morado .s { fill: #3c3489; }
+.rojo rect { fill: #fcebeb; stroke: #a32d2d; } .rojo .s { fill: #791f1f; }
+.flecha { fill: none; stroke: #59636e; stroke-width: 1.5; }
+.punta { fill: none; stroke: #59636e; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.guia { stroke: #8c959f; stroke-width: 1; stroke-dasharray: 4 4; }
+.eje { stroke: #8c959f; stroke-width: 1; }
+.canto { fill: #7f77dd; }
+.sin-canto { fill: none; stroke: #888780; stroke-dasharray: 3 3; }
+@media (prefers-color-scheme: dark) {
+  .fondo { fill: #0d1117; stroke: #30363d; }
+  .e { fill: #9198a1; }
+  .gris rect { fill: #444441; stroke: #b4b2a9; } .gris .t { fill: #f1efe8; } .gris .s { fill: #d3d1c7; }
+  .verde rect { fill: #085041; stroke: #5dcaa5; } .verde .t { fill: #e1f5ee; } .verde .s { fill: #9fe1cb; }
+  .coral rect { fill: #712b13; stroke: #f0997b; } .coral .t { fill: #faece7; } .coral .s { fill: #f5c4b3; }
+  .morado rect { fill: #3c3489; stroke: #afa9ec; } .morado .s { fill: #eeedfe; }
+  .rojo rect { fill: #791f1f; stroke: #f09595; } .rojo .s { fill: #fcebeb; }
+  .flecha, .punta { stroke: #9198a1; }
+  .guia, .eje { stroke: #6e7681; }
+  .sin-canto { stroke: #9198a1; }
+}
+</style>
+<defs><marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="punta" d="M2 1L8 5L2 9"/></marker></defs>
+<rect class="fondo" x="0.5" y="0.5" width="679" height="599" rx="12"/>
+<g class="gris" data-caja="">
+<rect x="50" y="40" width="180" height="56" rx="8"/>
+<text class="t" x="140" y="59" text-anchor="middle" dominant-baseline="central">粘贴的歌词</text>
+<text class="s" x="140" y="79" text-anchor="middle" dominant-baseline="central">只有句子，没有时间</text>
+</g>
+<g class="gris" data-caja="">
+<rect x="340" y="40" width="200" height="56" rx="8"/>
+<text class="t" x="440" y="59" text-anchor="middle" dominant-baseline="central">歌曲音频</text>
+<text class="s" x="440" y="79" text-anchor="middle" dominant-baseline="central">完整音频，16 kHz</text>
+</g>
+<path class="flecha" d="M440 96 V122 H340 V148" marker-end="url(#punta)"/>
+<path class="flecha" d="M440 96 V122 H540 V148" marker-end="url(#punta)"/>
+<path class="flecha" d="M180 96 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M290 206 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M100 96 V398 H218" marker-end="url(#punta)"/>
+<path class="flecha" d="M270 316 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M400 206 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M540 206 V398 H462" marker-end="url(#punta)"/>
+<path class="flecha" d="M340 426 V478" marker-end="url(#punta)"/>
+<g class="verde" data-caja="">
+<rect x="250" y="150" width="180" height="56" rx="8"/>
+<text class="t" x="340" y="169" text-anchor="middle" dominant-baseline="central">Whisper Turbo</text>
+<text class="s" x="340" y="189" text-anchor="middle" dominant-baseline="central">听到什么、何时听到</text>
+</g>
+<g class="verde" data-caja="">
+<rect x="450" y="150" width="180" height="56" rx="8"/>
+<text class="t" x="540" y="169" text-anchor="middle" dominant-baseline="central">YAMNet</text>
+<text class="s" x="540" y="189" text-anchor="middle" dominant-baseline="central">哪里有歌声</text>
+</g>
+<g class="coral" data-caja="">
+<rect x="130" y="260" width="200" height="56" rx="8"/>
+<text class="t" x="230" y="279" text-anchor="middle" dominant-baseline="central">Claude 配对</text>
+<text class="s" x="230" y="299" text-anchor="middle" dominant-baseline="central">每句对应哪些行</text>
+</g>
+<g class="verde" data-caja="">
+<rect x="220" y="370" width="240" height="56" rx="8"/>
+<text class="t" x="340" y="389" text-anchor="middle" dominant-baseline="central">letra.ts 计算时间</text>
+<text class="s" x="340" y="409" text-anchor="middle" dominant-baseline="central">固定规则，不用 AI</text>
+</g>
+<g class="gris" data-caja="">
+<rect x="240" y="480" width="200" height="56" rx="8"/>
+<text class="t" x="340" y="499" text-anchor="middle" dominant-baseline="central">歌词字幕轨</text>
+<text class="s" x="340" y="519" text-anchor="middle" dominant-baseline="central">分析并翻译</text>
+</g>
+<g data-leyenda=""><g class="verde"><rect x="217" y="560" width="12" height="12" rx="3"/></g><text class="e" x="237" y="566" dominant-baseline="central">在浏览器中</text></g>
+<g data-leyenda=""><g class="coral"><rect x="337" y="560" width="12" height="12" rx="3"/></g><text class="e" x="357" y="566" dominant-baseline="central">Claude，通过 API</text></g>
+</svg>
