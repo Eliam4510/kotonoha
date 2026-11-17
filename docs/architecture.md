@@ -121,7 +121,43 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 | GPU loss | Waits 20 s, reloads the model and continues in gentle mode. On a second failure it stops, with the transcribed text saved |
 | Resuming | A new transcription of the same file continues where it left off |
 
-**Song lyrics.** `src/nucleo/letra.ts` places pasted lyrics on the timing of a track. Claude is asked, through a JSON schema, for a list of entries `{verse, first line, last line}` in the order the song is sung. Neither the words nor the timing come from it: the text is that of the lyrics and the timing that of the transcription, so it cannot alter either. The answer does not reproduce the lyrics, and it is small. Entries out of order lose their timing without affecting the rest (longest increasing subsequence), verses with no timing are estimated from their length, and verses that share a line split its duration.
+## Song lyrics
+
+Pasted lyrics are placed on the audio by dividing the work, and each piece decides only what it does well: Whisper hears when each line sounds, YAMNet where there is singing, Claude which verse belongs to each line, and `src/nucleo/letra.ts` computes the timing.
+
+<p align="center"><img src="img/letra-flujo.en.svg" width="100%" alt="The path of the lyrics: the song's audio goes to Whisper Turbo and to YAMNet; Claude matches the pasted lyrics to what Whisper heard; letra.ts brings it all together, computes the timing and produces the lyrics track"></p>
+
+**Song or speech.** A video is treated as a song if it has lyrics waiting to be placed, if YouTube classifies it as music or if the title says so: MV, lyric video, official audio, karaoke and the like. It is then transcribed with Whisper Turbo, which hears singing over music better than the speech models.
+
+**What Whisper hears.** Three things are added to what the previous section describes. Each chunk gets a little silence in front, because Whisper misses what sounds right at the start. A long line that, without its repetitions, shrinks below 40 % of its length is a loop and is discarded. And what a second pass recovers goes through a stricter filter: the short phrases typical over music and texts with fewer than 4 distinct characters are rejected as well, and if nothing passes, the stretch is taken as music. While lyrics are pending, the transcription is not corrected with Claude, because the text shown will be that of the lyrics.
+
+**Where there is singing.** YAMNet, Google's sound classifier trained on AudioSet (521 classes), hears the same 60 s blocks as Whisper, in its own worker and on the CPU, so as not to compete for the GPU. For each 2 s segment, the score of the "Singing" class is kept. The threshold is 0.02, because the score is very low even during singing, and a single segment without singing between two with it counts as singing: it is almost never an instrumental passage. The score only exists when the song is transcribed whole from the start, with the helper or from a file; real-time transcription does not use it.
+
+**The matching.** Claude receives the lyrics and the transcription as two numbered lists, the second with its timing, which helps it see the instrumental passages. For each verse it returns `{v, de, a}`: the first and the last line of the transcription the verse sounds over. With -1, the verse is sung, but the transcription does not pick it up; with -2, it is not sung, like a section mark, a title or a credit. The prompt asks it to:
+
+- compare by sound, not by spelling: in Japanese, 会いたい, 逢いたい and あいたい are the same; in English, "night" and "knight", and in German, "Meer" and "mehr";
+- keep the order: `de` never goes back;
+- match a line that resembles nothing by its position, since it is usually a misheard verse;
+- repeat a chorus as many times as it is sung, and count choruses in parentheses as sung;
+- ignore rōmaji and translations;
+- return an empty list if the lyrics are not from that song.
+
+The answer is small, follows a JSON schema and is cached: aligning the same lyrics over the same transcription is not paid for twice.
+
+**The timing.** `aplicarAjuste` uses no AI: the same input always gives the same result.
+
+1. The text comes from the lyrics, and the timing from the transcription. What Whisper misheard never reaches the screen.
+2. Of Claude's entries, the longest non-decreasing subsequence is kept. An entry out of order loses its timing, but not its verse, and does not affect the rest: if each entry were compared only with the previous one, a single jump forward would invalidate all the following ones.
+3. A verse Claude leaves out is still sung, so it goes in without timing, after where the previous one sounds.
+4. Verses that share a line of the transcription split its duration according to what has to be sung in each, without counting spaces.
+5. A verse without timing lasts 300 ms per character, between 1.5 and 8 s, and is placed right before the next verse with timing, which is where it leads. With YAMNet's score, only time with singing counts: if there is an instrumental passage right before the next verse, the verse goes before it. If the gap is too short to sing it, or has almost no singing, it is placed as without YAMNet, with the time its neighbors have to spare.
+6. No line lasts less than 700 ms or stays on screen when the next one starts.
+
+<p align="center"><img src="img/letra-voz.en.svg" width="100%" alt="A verse Whisper did not hear, before and now: before, it landed in the instrumental passage, attached to the next verse; now only time with singing counts, and it lands where it is sung"></p>
+
+Measured with Japanese songs from official channels and their synced lyrics, YAMNet separates singing from instrumental passages with an AUC of 0.9. Of 164 verses Whisper did not hear, with YAMNet inside Kotonoha 21 end up more than a second closer to their place and 3 further away, and those more than 5 s off go from 32 to 28. The large errors left come from long passages Whisper does not hear: YAMNet knows there is singing there, but not which verse.
+
+The result is a separate track, analyzed and translated like any other. The final notice says how many verses have an estimated time, and **Sync: this line is playing now**, in the navigator, fine-tunes the sync; with two marks it also corrects the speed.
 
 ## Technical decisions
 
@@ -134,6 +170,7 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 | Dictionaries | Yomitan format: JMdict in Spanish and English, Kanjium accent, JPDB frequency | An open format, which also allows importing others from a file |
 | AI | Official `@anthropic-ai/sdk` from the engine | The key never reaches scripts running in pages |
 | Transcription | Whisper large-v3-turbo with Transformers.js and WebGPU, with a 16-bit encoder and a quantized decoder | The most accurate of those compared, with nothing to install |
+| Singing detection | Google's YAMNet in ONNX, with ONNX Runtime on the CPU | With real songs it separates singing from instrumental passages with an AUC of 0.9. It takes 16 MB, and on the CPU it leaves the GPU to Whisper |
 | Audio from online videos | yt-dlp in a local PowerShell program, over Native Messaging, and FFmpeg if installed | The only way to process it without waiting for playback. It downloads to a temporary file instead of streaming, so it is read at the GPU's pace and nothing stalls |
 | Local files | ffmpeg.wasm | Embedded subtitles and MKV audio tracks, without external programs |
 | Flashcards | AnkiConnect and a built-in FSRS review | Integration with Anki, or review inside the application |

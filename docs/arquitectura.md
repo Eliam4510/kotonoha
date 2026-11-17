@@ -121,7 +121,43 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 | Pérdida de la GPU | Espera 20 s, recarga el modelo y sigue en modo Suave. Al segundo fallo se detiene, con lo transcrito guardado |
 | Reanudación | Una nueva transcripción del mismo archivo continúa por donde quedó |
 
-**Letras de canciones.** `src/nucleo/letra.ts` coloca una letra pegada sobre los tiempos de una pista. A Claude se le pide, con un esquema JSON, una lista de entradas `{verso, línea inicial, línea final}` en el orden en que suena la canción. Ni las palabras ni los tiempos salen de él: el texto es el de la letra y los tiempos son los de la transcripción, de modo que no puede alterar ninguna de las dos cosas. La respuesta, además, no reproduce la letra y ocupa poco. Las entradas fuera de orden pierden su tiempo sin afectar a las demás (subsecuencia creciente más larga), los versos sin tiempo se estiman según su longitud, y los que comparten una línea se reparten su duración.
+## Letras de canciones
+
+Una letra pegada se coloca sobre el audio repartiendo el trabajo, y cada pieza decide solo lo que sabe hacer: Whisper oye cuándo suena cada línea, YAMNet dónde se canta, Claude qué verso corresponde a cada línea y `src/nucleo/letra.ts` calcula los tiempos.
+
+<p align="center"><img src="img/letra-flujo.svg" width="100%" alt="Recorrido de una letra: el audio de la canción va a Whisper Turbo y a YAMNet; Claude empareja la letra pegada con lo que oyó Whisper; letra.ts lo reúne todo, calcula los tiempos y genera la pista de la letra"></p>
+
+**Canción o voz hablada.** Un video se trata como canción si tiene una letra pendiente de colocar, si YouTube lo clasifica como música o si el título lo indica: MV, lyric video, official audio, karaoke y similares. En ese caso se transcribe con Whisper Turbo, que oye el canto sobre la música mejor que los modelos de voz hablada.
+
+**Lo que oye Whisper.** A lo descrito en la sección anterior se suman tres cosas. Cada trozo lleva un poco de silencio delante, porque Whisper pierde lo que suena justo al empezar. Una línea larga que, sin sus repeticiones, se queda en menos del 40 % de su longitud es un bucle y se descarta. Y lo recuperado en una segunda pasada pasa un filtro más estricto: tampoco se aceptan las frases cortas típicas sobre música ni los textos con menos de 4 caracteres distintos, y si nada lo pasa, el tramo se da por música. Mientras hay una letra pendiente, la transcripción no se corrige con Claude, porque el texto que se mostrará es el de la letra.
+
+**Dónde se canta.** YAMNet, el clasificador de sonidos de Google entrenado con AudioSet (521 clases), oye los mismos bloques de 60 s que Whisper, en su propio trabajador y en el procesador, para no competir por la GPU. De cada tramo de 2 s se guarda la puntuación de la clase «Singing» (canto). El umbral es 0,02, porque la puntuación es muy baja incluso cuando se canta, y un único tramo sin voz entre dos con voz cuenta como voz: casi nunca es un pasaje instrumental. La puntuación solo existe cuando la canción se transcribe entera desde el principio, con el ayudante o desde un archivo; la transcripción en tiempo real no la usa.
+
+**El emparejamiento.** Claude recibe la letra y la transcripción como dos listas numeradas, la segunda con sus tiempos, que le ayudan a ver los pasajes instrumentales. Por cada verso devuelve `{v, de, a}`: la primera y la última línea de la transcripción sobre las que suena. Con -1, el verso se canta, pero la transcripción no lo recoge; con -2, no se canta, como una marca de sección, un título o un crédito. El prompt pide:
+
+- comparar por sonido y no por escritura: en japonés, 会いたい, 逢いたい y あいたい son lo mismo; en inglés, «night» y «knight», y en alemán, «Meer» y «mehr»;
+- respetar el orden: `de` nunca retrocede;
+- emparejar por su posición una línea que no se parece a nada, porque suele ser un verso mal oído;
+- repetir un estribillo tantas veces como suena, y contar como cantados los coros entre paréntesis;
+- ignorar el rōmaji y las traducciones;
+- devolver una lista vacía si la letra no es de esa canción.
+
+La respuesta ocupa poco, sigue un esquema JSON y queda en caché: ajustar la misma letra sobre la misma transcripción no se paga dos veces.
+
+**Los tiempos.** `aplicarAjuste` no usa IA: la misma entrada da siempre el mismo resultado.
+
+1. El texto sale de la letra, y los tiempos, de la transcripción. Lo que Whisper oyó mal no llega a la pantalla.
+2. De las entradas de Claude se conserva la subsecuencia no decreciente más larga. Una entrada fuera de orden pierde su tiempo, pero no su verso, y no afecta a las demás: si cada entrada se comparara solo con la anterior, un único salto hacia delante invalidaría todas las siguientes.
+3. Un verso que Claude omite se sigue cantando, así que entra sin tiempo, detrás de donde suena el anterior.
+4. Los versos que comparten una línea de la transcripción se reparten su duración según lo que hay que cantar en cada uno, sin contar los espacios.
+5. Un verso sin tiempo dura 300 ms por carácter, entre 1,5 y 8 s, y se coloca justo antes del siguiente verso con tiempo, que es adonde lleva. Con la puntuación de YAMNet solo cuenta el tiempo con voz: si justo antes del verso siguiente hay un pasaje instrumental, el verso va antes de él. Si el hueco no da para cantarlo, o casi no tiene voz, se coloca como sin YAMNet, con el tiempo que les sobra a sus vecinos.
+6. Ninguna línea dura menos de 700 ms ni sigue en pantalla cuando empieza la siguiente.
+
+<p align="center"><img src="img/letra-voz.svg" width="100%" alt="Un verso que Whisper no oyó, antes y ahora: antes caía en el pasaje instrumental, pegado al verso siguiente; ahora solo cuenta el tiempo con voz, y cae donde se canta"></p>
+
+Medido con canciones japonesas de canales oficiales y su letra sincronizada, YAMNet separa lo cantado de lo instrumental con un AUC de 0,9. De 164 versos que Whisper no oyó, con YAMNet dentro de Kotonoha 21 quedan más de un segundo más cerca de su sitio y 3 más lejos, y los que quedan a más de 5 s pasan de 32 a 28. Los errores grandes que quedan vienen de pasajes largos que Whisper no oye: YAMNet sabe que ahí se canta, pero no qué verso.
+
+El resultado es una pista aparte, que se analiza y se traduce como cualquier otra. El aviso final indica cuántos versos llevan un tiempo estimado, y **Sincronizar: esta línea suena ahora**, en el navegador, afina la sincronía; con dos marcas corrige también la velocidad.
 
 ## Decisiones técnicas
 
@@ -134,6 +170,7 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 | Diccionarios | Formato Yomitan: JMdict en español e inglés, acento de Kanjium, frecuencia de JPDB | Formato abierto, que también permite importar otros desde archivo |
 | IA | SDK oficial `@anthropic-ai/sdk` desde el motor | La clave nunca llega a los scripts que corren en páginas |
 | Transcripción | Whisper large-v3-turbo con Transformers.js y WebGPU, con el codificador en 16 bits y el decodificador cuantizado | El más preciso de los comparados, y sin instalar nada |
+| Detección del canto | YAMNet de Google, en ONNX, con ONNX Runtime en el procesador | Con canciones reales separa lo cantado de lo instrumental con un AUC de 0,9. Pesa 16 MB y, en el procesador, deja la GPU a Whisper |
 | Audio de videos de internet | yt-dlp en un programa local en PowerShell, por Native Messaging, y FFmpeg si está instalado | Es la única forma de procesarlo sin esperar a reproducirlo. Baja a un archivo temporal en lugar de transmitir, de modo que se lee al ritmo de la GPU y nada se atasca |
 | Archivos propios | ffmpeg.wasm | Subtítulos incrustados y pistas de audio de MKV, sin programas externos |
 | Tarjetas | AnkiConnect y un repaso interno con FSRS | Integración con Anki, o repaso dentro de la aplicación |

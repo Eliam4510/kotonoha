@@ -174,6 +174,8 @@ Whisper trifft die Zeiten, verfehlt in einem Lied aber viele Wörter. Wenn jeman
 - Das Ergebnis ist eine weitere Spur, „Japanisch (Liedtext)“, die für dieses Video gespeichert wird. Die ursprüngliche Transkription bleibt verfügbar. Pro Lied fällt eine einzige Anfrage an Claude an, und ein erneuter Abgleich mit demselben Text kostet nichts.
 - Bei einem Internetvideo ohne lokalen Helfer muss Whisper das ganze Lied hören: Wenn das Video endet, stoppt die Transkription von selbst, und der Text wird abgeglichen.
 
+Wie es intern funktioniert, mit Diagrammen: [Liedtexte](architecture.md#liedtexte) in der Architektur.
+
 ### Lokaler Helfer
 
 Eine Erweiterung kann das Audio eines Videos nicht selbst herunterladen. Der Helfer ist ein kleines lokales Programm in PowerShell, das mit Windows mitkommt: Weder Python noch FFmpeg müssen installiert werden. Er lädt das Audio mit [yt-dlp](https://github.com/yt-dlp/yt-dlp) herunter und aktualisiert außerdem die Erweiterung (siehe **Neue Versionen** unter [Daten und Sicherung](#daten-und-sicherung)). Er wird von der Seite der neuesten Version heruntergeladen, als `kotonoha-X.Y.Z-ayudante.zip`, in einen beliebigen Ordner entpackt und mit einem Doppelklick auf `Instalar.cmd` eingerichtet. Das Installationsprogramm:

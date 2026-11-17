@@ -121,7 +121,43 @@ Pausenloses Arbeiten hält die GPU stundenlang bei 100 %, was den Desktop ausbre
 | Verlust der GPU | Wartet 20 s, lädt das Modell neu und arbeitet im Modus Sanft weiter. Beim zweiten Ausfall hält es an, das Transkribierte bleibt gespeichert |
 | Fortsetzung | Eine neue Transkription derselben Datei setzt dort fort, wo sie aufgehört hat |
 
-**Liedtexte.** `src/nucleo/letra.ts` legt einen eingefügten Liedtext auf die Zeiten einer Spur. Claude wird über ein JSON-Schema um eine Liste von Einträgen `{Vers, erste Zeile, letzte Zeile}` in der Reihenfolge des Gesangs gebeten. Weder die Wörter noch die Zeiten stammen von ihm: Der Text ist der des Liedes, die Zeiten sind die der Transkription, sodass es beides nicht verändern kann. Die Antwort gibt den Liedtext nicht wieder und ist klein. Einträge außerhalb der Reihenfolge verlieren ihre Zeit, ohne die übrigen zu beeinflussen (längste aufsteigende Teilfolge), Verse ohne Zeit werden nach ihrer Länge geschätzt, und Verse, die sich eine Zeile teilen, teilen sich deren Dauer.
+## Liedtexte
+
+Ein eingefügter Liedtext wird durch Arbeitsteilung auf das Audio gelegt, und jedes Teil entscheidet nur, was es gut kann: Whisper hört, wann jede Zeile erklingt, YAMNet, wo gesungen wird, Claude, welcher Vers zu welcher Zeile gehört, und `src/nucleo/letra.ts` berechnet die Zeiten.
+
+<p align="center"><img src="../img/letra-flujo.de.svg" width="100%" alt="Der Weg des Liedtexts: Das Audio des Liedes geht an Whisper Turbo und an YAMNet; Claude ordnet den eingefügten Text dem zu, was Whisper gehört hat; letra.ts führt alles zusammen, berechnet die Zeiten und erzeugt die Liedtext-Spur"></p>
+
+**Lied oder gesprochene Sprache.** Ein Video gilt als Lied, wenn ein Liedtext auf seine Platzierung wartet, wenn YouTube es als Musik einstuft oder wenn der Titel es sagt: MV, lyric video, official audio, karaoke und Ähnliches. Dann wird es mit Whisper Turbo transkribiert, das Gesang über Musik besser hört als die Sprachmodelle.
+
+**Was Whisper hört.** Zu dem im vorigen Abschnitt Beschriebenen kommen drei Dinge hinzu. Jedes Stück erhält vorn etwas Stille, weil Whisper verliert, was direkt am Anfang erklingt. Eine lange Zeile, die ohne ihre Wiederholungen unter 40 % ihrer Länge fällt, ist eine Schleife und wird verworfen. Und was ein zweiter Durchgang zurückgewinnt, durchläuft einen strengeren Filter: Auch die typischen kurzen Sätze über Musik und Texte mit weniger als 4 verschiedenen Zeichen werden abgelehnt, und besteht nichts, gilt der Abschnitt als Musik. Solange ein Liedtext aussteht, wird die Transkription nicht mit Claude korrigiert, denn angezeigt wird der Text des Liedes.
+
+**Wo gesungen wird.** YAMNet, der mit AudioSet (521 Klassen) trainierte Geräuschklassifikator von Google, hört dieselben 60-s-Blöcke wie Whisper, in einem eigenen Worker und auf dem Prozessor, um nicht um die GPU zu konkurrieren. Für jeden 2-s-Abschnitt wird der Wert der Klasse „Singing“ (Gesang) gespeichert. Die Schwelle liegt bei 0,02, weil der Wert selbst beim Singen sehr niedrig ist, und ein einzelner Abschnitt ohne Gesang zwischen zwei mit Gesang zählt als Gesang: Er ist fast nie eine Instrumentalpassage. Die Werte gibt es nur, wenn das Lied von Anfang an vollständig transkribiert wird, mit dem Helfer oder aus einer Datei; die Transkription in Echtzeit verwendet sie nicht.
+
+**Die Zuordnung.** Claude erhält den Liedtext und die Transkription als zwei nummerierte Listen, die zweite mit ihren Zeiten, die ihm helfen, die Instrumentalpassagen zu erkennen. Für jeden Vers gibt es `{v, de, a}` zurück: die erste und die letzte Zeile der Transkription, über denen der Vers erklingt. Mit -1 wird der Vers gesungen, aber die Transkription erfasst ihn nicht; mit -2 wird er nicht gesungen, etwa eine Abschnittsmarke, ein Titel oder eine Angabe der Mitwirkenden. Der Prompt verlangt:
+
+- nach Klang statt nach Schreibweise zu vergleichen: Im Japanischen sind 会いたい, 逢いたい und あいたい dasselbe, im Englischen „night“ und „knight“, im Deutschen „Meer“ und „mehr“;
+- die Reihenfolge einzuhalten: `de` geht nie zurück;
+- eine Zeile, die nichts ähnelt, nach ihrer Position zuzuordnen, weil sie meist ein falsch gehörter Vers ist;
+- einen Refrain so oft zu wiederholen, wie er erklingt, und Chöre in Klammern als gesungen zu zählen;
+- Rōmaji und Übersetzungen zu ignorieren;
+- eine leere Liste zurückzugeben, wenn der Text nicht zu diesem Lied gehört.
+
+Die Antwort ist klein, folgt einem JSON-Schema und wird zwischengespeichert: Denselben Text erneut auf dieselbe Transkription abzugleichen, kostet nicht zweimal.
+
+**Die Zeiten.** `aplicarAjuste` verwendet keine KI: Dieselbe Eingabe ergibt immer dasselbe Ergebnis.
+
+1. Der Text stammt aus dem Liedtext, die Zeiten aus der Transkription. Was Whisper falsch gehört hat, erreicht nie den Bildschirm.
+2. Von Claudes Einträgen bleibt die längste nicht fallende Teilfolge erhalten. Ein Eintrag außerhalb der Reihenfolge verliert seine Zeit, aber nicht seinen Vers, und beeinflusst die übrigen nicht: Würde jeder Eintrag nur mit dem vorigen verglichen, machte ein einziger Sprung nach vorn alle folgenden ungültig.
+3. Ein Vers, den Claude auslässt, wird trotzdem gesungen; er kommt daher ohne Zeit hinzu, hinter die Stelle, an der der vorige erklingt.
+4. Verse, die sich eine Zeile der Transkription teilen, teilen sich deren Dauer nach dem, was in jedem zu singen ist, ohne Leerzeichen.
+5. Ein Vers ohne Zeit dauert 300 ms pro Zeichen, zwischen 1,5 und 8 s, und wird direkt vor den nächsten Vers mit Zeit gesetzt, zu dem er hinführt. Mit den Werten von YAMNet zählt nur die Zeit mit Gesang: Liegt direkt vor dem nächsten Vers eine Instrumentalpassage, kommt der Vers vor sie. Reicht die Lücke nicht zum Singen oder enthält sie kaum Gesang, wird er wie ohne YAMNet platziert, mit der Zeit, die seine Nachbarn übrig haben.
+6. Keine Zeile dauert weniger als 700 ms oder bleibt auf dem Bildschirm, wenn die nächste beginnt.
+
+<p align="center"><img src="../img/letra-voz.de.svg" width="100%" alt="Ein Vers, den Whisper nicht gehört hat, vorher und jetzt: Vorher landete er, an den nächsten Vers angehängt, in der Instrumentalpassage; jetzt zählt nur die Zeit mit Gesang, und er landet dort, wo er gesungen wird"></p>
+
+Gemessen mit japanischen Liedern offizieller Kanäle und ihrem synchronisierten Text trennt YAMNet Gesang von Instrumentalpassagen mit einer AUC von 0,9. Von 164 Versen, die Whisper nicht gehört hat, liegen mit YAMNet in Kotonoha 21 mehr als eine Sekunde näher an ihrer Stelle und 3 weiter entfernt, und die mehr als 5 s danebenliegenden gehen von 32 auf 28 zurück. Die verbleibenden großen Fehler stammen aus langen Passagen, die Whisper nicht hört: YAMNet weiß, dass dort gesungen wird, aber nicht, welcher Vers.
+
+Das Ergebnis ist eine eigene Spur, die wie jede andere analysiert und übersetzt wird. Der abschließende Hinweis nennt, wie viele Verse eine geschätzte Zeit haben, und **Synchronisieren: Diese Zeile ist gerade zu hören** im Navigator stimmt die Synchronisierung fein ab; mit zwei Markierungen korrigiert es auch die Geschwindigkeit.
 
 ## Technische Entscheidungen
 
@@ -134,6 +170,7 @@ Pausenloses Arbeiten hält die GPU stundenlang bei 100 %, was den Desktop ausbre
 | Wörterbücher | Yomitan-Format: JMdict auf Spanisch und Englisch, Akzent von Kanjium, Häufigkeit von JPDB | Offenes Format, das auch den Import anderer aus einer Datei erlaubt |
 | KI | Offizielles SDK `@anthropic-ai/sdk` aus der Engine | Der Schlüssel erreicht nie die Skripte, die auf Seiten laufen |
 | Transkription | Whisper large-v3-turbo mit Transformers.js und WebGPU, Encoder in 16 Bit und quantisierter Decoder | Das genaueste der verglichenen, und nichts zu installieren |
+| Gesangserkennung | YAMNet von Google in ONNX, mit ONNX Runtime auf dem Prozessor | Trennt bei echten Liedern Gesang von Instrumentalpassagen mit einer AUC von 0,9. Belegt 16 MB und lässt auf dem Prozessor die GPU für Whisper frei |
 | Audio von Internetvideos | yt-dlp in einem lokalen PowerShell-Programm, über Native Messaging, und FFmpeg, falls installiert | Die einzige Möglichkeit, es zu verarbeiten, ohne auf die Wiedergabe zu warten. Es lädt in eine temporäre Datei statt zu streamen, sodass im Tempo der GPU gelesen wird und nichts staut |
 | Eigene Dateien | ffmpeg.wasm | Eingebettete Untertitel und Audiospuren von MKV, ohne externe Programme |
 | Karten | AnkiConnect und eine interne Wiederholung mit FSRS | Anbindung an Anki oder Wiederholung in der Anwendung |

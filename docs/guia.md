@@ -174,6 +174,8 @@ Whisper acierta los tiempos, pero en una canción falla muchas palabras. Si algu
 - El resultado es una pista más, «Japonés (letra)», guardada para ese video. La transcripción original sigue disponible. Se hace una sola petición a Claude por canción, y repetir el ajuste con la misma letra no vuelve a gastar.
 - En un video de internet sin el ayudante local, Whisper tiene que oír la canción entera: al terminar el video, la transcripción se detiene sola y la letra se ajusta.
 
+Cómo funciona por dentro, con diagramas: [Letras de canciones](arquitectura.md#letras-de-canciones), en la arquitectura.
+
 ### Ayudante local
 
 Una extensión no puede descargar por sí sola el audio de un video. El ayudante es un pequeño programa local escrito en PowerShell, que viene con Windows: no hace falta instalar Python ni FFmpeg. Baja el audio con [yt-dlp](https://github.com/yt-dlp/yt-dlp) y, además, actualiza la extensión (ver **Versiones nuevas**, en [Datos y copia de seguridad](#datos-y-copia-de-seguridad)). Se descarga de la página de la última versión, en `kotonoha-X.Y.Z-ayudante.zip`, se descomprime en cualquier carpeta y se hace doble clic en `Instalar.cmd`. El instalador:
