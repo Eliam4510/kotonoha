@@ -23,6 +23,7 @@ import { auditar, quitarMarcas, resumen, tintaDeLectura } from './auditoria.mjs'
 import { servidor } from './capturas/overlay.mjs';
 import { confirmarBorrado, recargarExtension } from './extension.mjs';
 import { iniciarMock } from './mock-claude.mjs';
+import { estadoOrden, orden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -846,8 +847,7 @@ if (quiere('transiciones')) {
     v.on('pageerror', (e) => errores.push(e.message));
     await v.waitForSelector('.vs-pagina img', { timeout: 60000 });
     await v.locator('.vs-barra [aria-label="Primera página"]').first().click();
-    const una = v.locator('.vs-barra [aria-label="Una página"]').first();
-    if ((await una.getAttribute('aria-pressed')) !== 'true') await una.click();
+    if (!(await estadoOrden(v, 'vista-una')).marcada) await orden(v, 'vista-una');
     await v.waitForTimeout(1500);
     const barra = await v.locator('.vs-barra').boundingBox();
     const hoja = await v.locator('.vs-pagina').first().boundingBox();

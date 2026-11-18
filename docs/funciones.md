@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.35.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.36.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -165,6 +165,9 @@ Estado de cada función en la versión 0.35.0, con la forma en que se ha verific
 | Vista de texto: la página como texto, en párrafos y con los títulos aparte, con la ayuda de lectura del Cuaderno (furigana, comprensión, lectura en voz alta, fichas y tarjetas); cada libro la recuerda | Automática, y los párrafos con 16 páginas reales |
 | Revisar con Claude el texto de una página, con su imagen: solo los cambios que no coinciden, letra a letra, para elegir cuáles aplicar, guardados como líneas editadas | Simulador |
 | Tocar una palabra de la página abre su frase entera, aunque ocupe varios renglones, en una ventana flotante como la de los subtítulos, con furigana, sus palabras, su ficha y la creación de tarjetas; dos toques, la frase, y tres, el párrafo. Un imán lleva un toque entre dos renglones al más cercano | Automática, con un PDF hecho por el navegador, en horizontal y en vertical |
+| Menús con nombre en una sola fila (Libro, Ver, Ir, Texto, Ayudas, Anotar y Ayuda), con la tecla de cada orden y también con el teclado; Buscar una acción (Ctrl+K), que encuentra cualquier orden o lleva a una página por su número, y Atajos de teclado («?») | Automática: pruebas unitarias del registro de órdenes (teclas sin repetir, menús y paleta) y de extremo a extremo |
+| Herramientas del visor: Seleccionar, Mano (arrastrar mueve la página), Resaltador (lo arrastrado queda resaltado, sin abrir la ventana) y Añadir una nota, y un menú con el clic derecho en la página | Automática |
+| Paneles a la izquierda que se ensanchan y recuerdan su ancho; barra de estado con la página, el capítulo, lo que va del libro y de dónde sale el texto; volver tras un salto (Alt+←); modo lectura; «Aa» con las ayudas de lectura, que valen en todo Kotonoha, y lo que vale solo para el libro; un libro abierto no abre otra pestaña | Automática |
 | La ventana no tapa lo que queda por leer: va al margen de la página si cabe, y si no, sobre lo ya leído (encima del renglón, o a la derecha de la columna en vertical); se mueve, se agranda y se fija a un lado como panel, que se ensancha y recuerda su ancho | Automática (pruebas unitarias de la colocación) |
 | Seleccionar arrastrando, letra a letra y entre renglones, con Traducir, Explicar, Desglosar, Escuchar, Resaltar, Nota y Copiar; Ctrl+C copia lo abierto | Automática |
 | Pasar de página con flechas a la vista a los lados, el teclado o deslizando: tocar la página solo cierra lo abierto, y fallar por poco al tocar una palabra ya no pasa de página | Automática |

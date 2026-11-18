@@ -160,6 +160,7 @@ export function VisorTexto({ doc, archivo, ajustes: a }: { doc: ElementoBibliote
     <>
       <header class="vs-barra">
         <Cabeza titulo={doc.titulo} />
+        <span class="vs-barra-hueco" />
         {libro && (
           <>
             <div class="vs-grupo" role="group" aria-label={tr('Capítulos')}>

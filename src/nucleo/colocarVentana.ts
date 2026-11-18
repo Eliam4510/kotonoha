@@ -47,6 +47,11 @@ export function colocarVentana(o: { ancla: Rect; hoja: Rect | null; zona: Rect; 
   const altoDisponible = Math.max(ALTO_MINIMO, zona.height - 2 * MARGEN);
   /** Arriba a la altura pedida, sin que la ventana se salga por abajo. */
   const arribaEn = (y: number) => Math.max(zona.top + MARGEN, Math.min(y, abajoZona - MARGEN - Math.min(alto, altoDisponible)));
+  /**
+   * Lo que puede crecer desde arriba sin pasar del borde de abajo de la zona: con una ficha larga, la ventana crece más que
+   * el alto supuesto y tapaba la barra de estado.
+   */
+  const hastaAbajo = (top: number) => Math.max(ALTO_MINIMO, abajoZona - MARGEN - top);
   const dentroX = (x: number) => Math.max(zona.left + MARGEN, Math.min(x, derechaZona - MARGEN - ancho));
 
   // Al margen, la ventana se estrecha lo que haga falta para caber, hasta un mínimo: no tapar nada vale más que el ancho.
@@ -59,11 +64,12 @@ export function colocarVentana(o: { ancla: Rect; hoja: Rect | null; zona: Rect; 
       // entera: que no salte de un margen al otro por unos píxeles.
       const derecha = libreDerecha >= ancho || (libreDerecha >= minimo && libreIzquierda < ancho);
       const cabe = Math.min(ancho, derecha ? libreDerecha : libreIzquierda);
+      const top = arribaEn(ancla.top - 8);
       return {
         left: derecha ? hoja.left + hoja.width + SEPARACION : hoja.left - SEPARACION - cabe,
         ancho: cabe,
-        top: arribaEn(ancla.top - 8),
-        maxAlto: altoDisponible,
+        top,
+        maxAlto: hastaAbajo(top),
         lado: derecha ? 'margen-derecho' : 'margen-izquierdo',
       };
     }
@@ -78,11 +84,12 @@ export function colocarVentana(o: { ancla: Rect; hoja: Rect | null; zona: Rect; 
     const libre = derecha ? libreDerecha : libreIzquierda;
     const cabe = libre >= minimo ? Math.min(ancho, libre) : ancho;
     const dentro = (x: number) => Math.max(zona.left + MARGEN, Math.min(x, derechaZona - MARGEN - cabe));
+    const top = arribaEn(ancla.top);
     return {
       left: dentro(derecha ? ancla.left + ancla.width + SEPARACION : ancla.left - SEPARACION - cabe),
       ancho: cabe,
-      top: arribaEn(ancla.top),
-      maxAlto: altoDisponible,
+      top,
+      maxAlto: hastaAbajo(top),
       lado: derecha ? 'derecha' : 'izquierda',
     };
   }

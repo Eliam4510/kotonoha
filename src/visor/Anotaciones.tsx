@@ -119,7 +119,7 @@ export function NotasDePagina({ anotaciones, abierta, alAbrir, alGuardar, alQuit
 }
 
 /** El panel con todo lo anotado en el libro, por páginas. */
-export function PanelNotas({ titulo, anotaciones, actual, alIr, alGuardar, alQuitar }: { titulo: string; anotaciones: AnotacionLibro[]; actual: number[]; alIr: (pagina: number) => void; alGuardar: (a: AnotacionLibro) => void; alQuitar: (id: string) => void }) {
+export function PanelNotas({ titulo, anotaciones, actual, alIr, alGuardar, alQuitar, alCerrar }: { titulo: string; anotaciones: AnotacionLibro[]; actual: number[]; alIr: (pagina: number) => void; alGuardar: (a: AnotacionLibro) => void; alQuitar: (id: string) => void; alCerrar?: () => void }) {
   const [editando, fijarEditando] = useState<string | null>(null);
   const [copiadas, fijarCopiadas] = useState(false);
   const grupos = porPagina(anotaciones);
@@ -137,6 +137,11 @@ export function PanelNotas({ titulo, anotaciones, actual, alIr, alGuardar, alQui
         {anotaciones.length > 0 && (
           <button class="btn chico fantasma" data-tip={tr('Copia todas las notas como texto, para pegarlas en otra parte')} onClick={() => copiar().catch(console.error)}>
             <Icono n={copiadas ? 'ok' : 'copiar'} t={13} /> {copiadas ? tr('Copiadas') : tr('Copiar')}
+          </button>
+        )}
+        {alCerrar && (
+          <button class="btn-icono chico vs-cerrar" aria-label={tr('Cerrar')} onClick={alCerrar}>
+            <Icono n="cerrar" t={15} />
           </button>
         )}
       </div>

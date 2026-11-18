@@ -5,9 +5,8 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Creador } from '../app/Creador';
 import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
-import { Interruptor } from '../app/Piezas';
-import type { Ajustes } from '../compartido/ajustes';
-import { tm, tr } from '../compartido/i18n';
+import { type Ajustes, guardarAjustes } from '../compartido/ajustes';
+import { tr } from '../compartido/i18n';
 import { fondo, motor } from '../compartido/rpc';
 import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca, Nitidez } from '../compartido/tipos';
 import { resaltadoDeTramo, resaltadosEn } from '../nucleo/anotaciones';
@@ -20,22 +19,24 @@ import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
 import { cambiosValidos } from '../nucleo/revision';
 import { cajasDe, contextoDe, fraseEn, leerPagina, type PaginaLeida, parrafoEn, type Posicion, posicionEn, seleccionEn, type TramoPagina, tramoEntre, type Unidad } from '../nucleo/seleccion';
-import { Icono } from '../ui/iconos';
+import { Icono, type NombreIcono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
-import { NotasDePagina, PanelNotas, Resaltados } from './Anotaciones';
+import { letrasDe } from '../ui/letra';
+import { COLORES, NotasDePagina, PanelNotas, Resaltados, resaltarEn } from './Anotaciones';
+import { type Comando, entradasDe, type IdMenu, mostrarAtajo, ordenDeTecla, teclaDe } from './comandos';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
 import { imagenParaClaude } from './imagenClaude';
+import { Atajos, BarraMenus, ListaMenu, MenuFlotante, Paleta, useClicFuera } from './Menus';
 import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
+import { type AccionesVisor, type EstadoVisor, type Herramienta, ordenesDelVisor, type PanelVisor, type Vista, type Zoom } from './ordenesVisor';
 import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
 import { PanelBuscar } from './PanelBuscar';
 import { PanelRevision, type PropuestaLinea } from './PanelRevision';
 import { paginadorDePdf } from './pdf';
+import { PanelAa } from './Preferencias';
 import { leerTextoLibro, type TextoDePagina } from './textoLibro';
 import { type TipoUnidad, type UnidadAbierta, Ventana } from './Ventana';
 import { VistaTexto } from './VistaTexto';
-
-type Vista = 'una' | 'doble' | 'continua';
-type Zoom = 'ancho' | 'pagina' | number;
 
 /** El tamaño que se supone a una página que aún no se ha leído: el de un tomo de manga. */
 const PAGINA_SUPUESTA: Medida = { ancho: 844, alto: 1200 };
@@ -64,13 +65,15 @@ interface PropsAnotaciones {
   alQuitarAnotacion?: (id: string) => void;
 }
 
+/** El ancho de los paneles de la izquierda (miniaturas, índice, notas, buscar): se ensanchan arrastrando su borde. */
+const ANCHO_PANEL = { inicial: 280, minimo: 200, maximo: 560 };
+/** Los tamaños que ofrece el zoom de la barra, además de ajustar a la página o al ancho. */
+const TAMANOS_ZOOM = [50, 75, 100, 125, 150, 200, 300];
+/** Cuántas páginas de antes de un salto recuerda «Atrás». */
+const SALTOS = 50;
+
 // ---------- Nitidez ----------
 
-const NIVELES_NITIDEZ: [Nitidez['nivel'], string][] = [
-  [1, tm('Suave')],
-  [2, tm('Media')],
-  [3, tm('Fuerte')],
-];
 /** Lo que la máscara de enfoque suma de la diferencia entre la página y su versión desenfocada. */
 const CANTIDAD: Record<Nitidez['nivel'], number> = { 1: 0.6, 2: 1.2, 3: 2 };
 /** El fondo blanco: de este gris para abajo, negro; de este para arriba, blanco. El papel de un escaneo suele ser gris. */
@@ -111,12 +114,14 @@ function FiltroNitidez({ n, escala }: { n: Nitidez; escala: number }) {
  * van sus líneas: zonas que se pueden tocar, con el texto para los lectores de pantalla, y la palabra elegida marcada.
  * Lo anotado va en dos capas: los resaltados debajo de las líneas y las notas encima.
  */
-function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, unidad, seleccion, marcas, hallado, alTocar, alSeleccionar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
+function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramienta = 'seleccionar', unidad, seleccion, marcas, hallado, alTocar, alSeleccionar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
   paginador: Paginador;
   n: number;
   escala: number;
   alCargar?: () => void;
   lineas?: LineaTexto[];
+  /** Con la mano, arrastrar mueve la página (lo hace el lienzo) en lugar de seleccionar; tocar sigue abriendo la frase. */
+  herramienta?: Herramienta;
   /** Si se sabe dónde va cada letra de la línea: entonces se toca y se selecciona letra a letra. En un globo de manga, no. */
   porPalabra?: boolean;
   /** Lo abierto en la ventana, lo que se está seleccionando y la palabra elegida, si son de esta página. */
@@ -175,7 +180,7 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, unidad, se
   };
   const mover = (e: PointerEvent) => {
     const g = gesto.current;
-    if (!g || g.id !== e.pointerId || !g.desde || !g.raton || !porPalabra || !lineas) return;
+    if (!g || g.id !== e.pointerId || !g.desde || !g.raton || !porPalabra || !lineas || herramienta === 'mano') return;
     if (!g.arrastrando) {
       if (Math.hypot(e.clientX - g.x, e.clientY - g.y) < 5) return;
       g.arrastrando = true;
@@ -194,8 +199,8 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, unidad, se
       atendido.current = true;
       return;
     }
-    // Deslizar el dedo pasa de página: eso no es un toque.
-    if (!g.desde || Math.hypot(e.clientX - g.x, e.clientY - g.y) > 10) return;
+    // Deslizar el dedo pasa de página, y con la mano se arrastra la página: eso no es un toque.
+    if (!g.desde || Math.hypot(e.clientX - g.x, e.clientY - g.y) > (herramienta === 'mano' ? 4 : 10)) return;
     // Los toques seguidos en el mismo sitio cuentan como el doble y el triple clic.
     const ahora = performance.now();
     const previo = toques.current;
@@ -301,7 +306,21 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // Las páginas apaisadas, que en doble página van solas: null mientras no se sepan.
   const [anchas, fijarAnchas] = useState<number[] | null>(null);
   const [zoom, fijarZoom] = useState<Zoom>('pagina');
-  const [panel, fijarPanel] = useState<'miniaturas' | 'indice' | 'notas' | 'buscar' | 'revision' | null>(null);
+  const [panel, fijarPanel] = useState<PanelVisor | null>(null);
+  const [anchoPanel, fijarAnchoPanel] = useState(() => leerPreferencia('visorPanelAncho', ANCHO_PANEL.inicial));
+  // Los menús de la barra, el contextual, el del zoom, «Aa», la paleta y los atajos: solo uno a la vez.
+  const [menu, fijarMenu] = useState<{ menu: IdMenu; teclado: boolean } | null>(null);
+  const [contextual, fijarContextual] = useState<{ x: number; y: number; pagina: number | null; punto: { x: number; y: number } | null } | null>(null);
+  const [desplegable, fijarDesplegable] = useState<'zoom' | 'aa' | null>(null);
+  const [dialogo, fijarDialogo] = useState<'paleta' | 'atajos' | null>(null);
+  // Lo que hace el ratón en la página, y el color con que resalta el resaltador: el último elegido.
+  const [herramienta, fijarHerramienta] = useState<Herramienta>('seleccionar');
+  const [colorResaltador, fijarColorResaltador] = useState<ColorAnotacion>(() => leerPreferencia('visorColorResaltador', 'amarillo'));
+  // El modo lectura: solo la página. La barra se asoma al llevar el ratón arriba.
+  const [lectura, fijarLectura] = useState(false);
+  const [asomada, fijarAsomada] = useState(false);
+  // Las páginas de antes de cada salto (índice, miniaturas, notas, lo encontrado, ir a una página): «Atrás» vuelve.
+  const [saltos, fijarSaltos] = useState<number[]>([]);
   // La vista de texto: el texto de las páginas en párrafos, con la ayuda de lectura, en lugar de su imagen.
   const [vistaTexto, fijarVistaTexto] = useState(false);
   const [invertir, fijarInvertir] = useState(() => leerPreferencia('visorInvertir', false));
@@ -327,9 +346,10 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const [seleccion, fijarSeleccion] = useState<{ pagina: number; cajas: Caja[] } | null>(null);
   const [marcaPalabra, fijarMarcaPalabra] = useState<Caja[] | null>(null);
   const [fijada, fijarFijada] = useState(() => leerPreferencia('visorVentanaFijada', false));
-  // Lo anotado en el libro: marcadores, resaltados y notas. Al añadir una nota, el siguiente toque en una página la pone ahí.
+  // Lo anotado en el libro: marcadores, resaltados y notas. Con la herramienta de nota, el siguiente toque en una página
+  // la pone ahí.
   const [anotaciones, fijarAnotaciones] = useState<AnotacionLibro[]>([]);
-  const [colocando, fijarColocando] = useState(false);
+  const colocando = herramienta === 'nota';
   const [notaAbierta, fijarNotaAbierta] = useState<string | null>(null);
   // Buscar en el libro: lo que se busca, el texto de todo el libro según se prepara y lo encontrado que se está viendo.
   const [consulta, fijarConsulta] = useState('');
@@ -429,12 +449,21 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // contar desde la anterior, no desde lo último pintado.
   const ahora = useRef(0);
   ahora.current = pagina;
-  const irA = (n: number) => {
+  /** Lleva a una página. Si es un salto (no la de al lado), «Atrás» recuerda de dónde se vino. */
+  const irA = (n: number, salto = false) => {
     if (!total) return;
     const m = Math.max(0, Math.min(total - 1, n));
+    const desde = ahora.current;
+    if (salto && m !== desde) fijarSaltos((s) => (s[s.length - 1] === desde ? s : [...s.slice(1 - SALTOS), desde]));
     ahora.current = m;
     desdeDesplazamiento.current = false;
     fijarPagina(m);
+  };
+  const atras = () => {
+    const ultimo = saltos[saltos.length - 1];
+    if (ultimo === undefined) return;
+    fijarSaltos(saltos.slice(0, -1));
+    irA(ultimo);
   };
   const pliegoAhora = () => pliegoDe(lista, ahora.current);
   const siguiente = () => (vista === 'continua' ? irA(ahora.current + 1) : irA(lista[Math.min(pliegoAhora() + 1, lista.length - 1)]?.[0] ?? ahora.current));
@@ -488,59 +517,6 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     if (!paginador || vista === 'continua') return;
     for (const n of lista[actual + 1] ?? []) (paginador.imagenParaVer?.(n) ?? paginador.imagen(n)).catch(() => {});
   }, [pagina, vista, paginador, lista]);
-
-  useEffect(() => {
-    const tecla = (e: KeyboardEvent) => {
-      if (!paginador) return;
-      if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'f' || e.key === 'F')) {
-        // Como en un lector de PDF: buscar en el libro, que el buscador del navegador no ve el texto de las páginas.
-        e.preventDefault();
-        if (panel === 'buscar') document.querySelector<HTMLInputElement>('.vs-panel-buscar input')?.select();
-        else fijarPanel('buscar');
-        return;
-      }
-      if ((e.target as HTMLElement | null)?.closest?.('input, textarea, select')) return;
-      if (e.ctrlKey || e.metaKey) {
-        // Copiar lo abierto en la ventana, si no hay otra cosa seleccionada.
-        if ((e.key === 'c' || e.key === 'C') && unidad && window.getSelection()?.isCollapsed !== false) {
-          navigator.clipboard.writeText(unidad.texto).catch(console.error);
-          e.preventDefault();
-          return;
-        }
-        // Como en un lector de PDF: el zoom del libro, no el de la pestaña.
-        if (e.key === '+' || e.key === '=') zoomPaso(true);
-        else if (e.key === '-') zoomPaso(false);
-        else if (e.key === '0') fijarZoom('pagina');
-        else return;
-        e.preventDefault();
-        return;
-      }
-      if (e.altKey) return;
-      if (e.key === 'Escape' && colocando) {
-        fijarColocando(false);
-        e.preventDefault();
-        return;
-      }
-      if (e.key === 'Escape' && (unidad || seleccion)) {
-        cerrarVentana();
-        e.preventDefault();
-        return;
-      }
-      // En la vista de texto se pasa de página igual en todas las vistas: el texto no se desplaza de página en página.
-      const continua = vista === 'continua' && !vistaTexto;
-      if (e.key === 'ArrowLeft' && !continua) haciaIzquierda();
-      else if (e.key === 'ArrowRight' && !continua) haciaDerecha();
-      else if (e.key === 'PageDown' || (e.key === ' ' && !continua && !e.shiftKey)) siguiente();
-      else if (e.key === 'PageUp' || (e.key === ' ' && !continua && e.shiftKey)) anterior();
-      else if (e.key === 'Home') irA(0);
-      else if (e.key === 'End') irA(total - 1);
-      else if (e.key === 'f' || e.key === 'F') pantallaCompleta();
-      else return;
-      e.preventDefault();
-    };
-    window.addEventListener('keydown', tecla);
-    return () => window.removeEventListener('keydown', tecla);
-  });
 
   // En el desplazamiento continuo, la página actual es la que ocupa la parte de arriba de la vista.
   const [cerca, fijarCerca] = useState<[number, number]>([0, 4]);
@@ -710,6 +686,12 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       fijarSeleccion(null);
       return;
     }
+    // Con el resaltador, lo arrastrado queda resaltado sin abrir la ventana: para marcar mucho seguido.
+    if (herramienta === 'resaltador') {
+      fijarSeleccion(null);
+      resaltarTramo(n, t.lineas, u.tramo, u.texto, true, 'fondo', colorResaltador);
+      return;
+    }
     abrir(n, 'seleccion', u, p);
   };
   const cerrarVentana = () => {
@@ -768,6 +750,18 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     alGuardarAnotacion: guardarAnotacion,
     alQuitarAnotacion: quitarAnotacion,
   });
+  /** Resalta o subraya un tramo de una página. Lo mismo resaltado otra vez cambia de color o de estilo, sin amontonarse. */
+  const resaltarTramo = (n: number, lineasPagina: LineaTexto[], tramo: TramoPagina, texto: string, porLetra: boolean, estilo: 'fondo' | 'subrayado', color: ColorAnotacion) => {
+    const a = resaltadoDeTramo({ libro: doc.id, pagina: n, lineas: lineasPagina, tramo, texto, porLetra, estilo, color });
+    const igual = anotaciones.find((x) => x.tipo === 'resaltado' && x.pagina === a.pagina && x.texto === a.texto && mismasCajas(x.cajas, a.cajas));
+    const guardado = igual ? { ...igual, estilo, color } : a;
+    guardarAnotacion(guardado);
+    return guardado;
+  };
+  const elegirColor = (c: ColorAnotacion) => {
+    guardarPreferencia('visorColorResaltador', c);
+    fijarColorResaltador(c);
+  };
   /** Resalta o subraya lo abierto en la ventana, aunque ocupe varios renglones, o solo un trozo de su texto. */
   const resaltar = (estilo: 'fondo' | 'subrayado', color: ColorAnotacion, trozo: { inicio: number; fin: number } | null): AnotacionLibro | null => {
     if (!unidad || !lineasAbiertas) return null;
@@ -775,33 +769,38 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     const desde = sitios[0];
     const ultimo = sitios[sitios.length - 1];
     if (!desde || !ultimo) return null;
-    const a = resaltadoDeTramo({
-      libro: doc.id,
-      pagina: unidad.pagina,
-      lineas: lineasAbiertas,
-      tramo: trozo ? tramoEntre(lineasAbiertas, desde, ultimo) : unidad.tramo,
-      texto: trozo ? unidad.texto.slice(trozo.inicio, trozo.fin) : unidad.texto,
-      porLetra: unidad.porLetra,
+    // El color elegido en la ventana es también el del resaltador.
+    if (estilo === 'fondo') elegirColor(color);
+    return resaltarTramo(
+      unidad.pagina,
+      lineasAbiertas,
+      trozo ? tramoEntre(lineasAbiertas, desde, ultimo) : unidad.tramo,
+      trozo ? unidad.texto.slice(trozo.inicio, trozo.fin) : unidad.texto,
+      unidad.porLetra,
       estilo,
-      color,
-    });
-    // Lo mismo resaltado otra vez cambia de color o de estilo: no se amontonan resaltados iguales uno encima de otro.
-    const igual = anotaciones.find((x) => x.tipo === 'resaltado' && x.pagina === a.pagina && x.texto === a.texto && mismasCajas(x.cajas, a.cajas));
-    const guardado = igual ? { ...igual, estilo, color } : a;
-    guardarAnotacion(guardado);
-    return guardado;
+      color
+    );
   };
 
-  /** Con «Añadir una nota», un toque en una página pone ahí la nota y la abre para escribirla. */
-  const ponerNota = (e: MouseEvent) => {
-    const hoja = (e.target as HTMLElement | null)?.closest<HTMLElement>('.vs-pagina');
-    fijarColocando(false);
-    if (!hoja?.dataset.pagina) return;
-    const r = hoja.getBoundingClientRect();
+  /** Pone una nota en un punto de una página (en fracciones de la hoja) y la abre para escribirla. */
+  const ponerNotaEn = (n: number, punto: { x: number; y: number }) => {
     const dentro = (v: number) => Math.min(0.97, Math.max(0, v));
-    const a: AnotacionLibro = { id: crypto.randomUUID(), libro: doc.id, tipo: 'nota', pagina: Number(hoja.dataset.pagina) - 1, punto: { x: dentro((e.clientX - r.left) / r.width), y: dentro((e.clientY - r.top) / r.height) }, creada: Date.now() };
+    const a: AnotacionLibro = { id: crypto.randomUUID(), libro: doc.id, tipo: 'nota', pagina: n, punto: { x: dentro(punto.x), y: dentro(punto.y) }, creada: Date.now() };
     guardarAnotacion(a);
     fijarNotaAbierta(a.id);
+  };
+  /** La hoja bajo el puntero y el punto tocado en ella, en fracciones. */
+  const hojaEn = (e: MouseEvent) => {
+    const hoja = (e.target as HTMLElement | null)?.closest<HTMLElement>('.vs-pagina');
+    if (!hoja?.dataset.pagina || hoja.classList.contains('vs-reservada')) return null;
+    const r = hoja.getBoundingClientRect();
+    return { pagina: Number(hoja.dataset.pagina) - 1, punto: { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height } };
+  };
+  /** Con «Añadir una nota», un toque en una página pone ahí la nota; después se vuelve a seleccionar. */
+  const ponerNota = (e: MouseEvent) => {
+    fijarHerramienta('seleccionar');
+    const h = hojaEn(e);
+    if (h) ponerNotaEn(h.pagina, h.punto);
   };
 
   // ---------- Buscar en el libro ----------
@@ -862,7 +861,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     const cajas = h.tramos.map((x) => (porLetra ? cajaDeTramo(t.lineas[x.linea], x.inicio, x.fin) : t.lineas[x.linea].caja));
     if (!ocr && !t.propias) fijarOcr(true);
     fijarHallado({ pagina: h.pagina, cajas });
-    if (!(lista[actual] ?? []).includes(h.pagina) || vista === 'continua') irA(h.pagina);
+    if (!(lista[actual] ?? []).includes(h.pagina) || vista === 'continua') irA(h.pagina, true);
   };
 
   // ---------- Revisar con Claude ----------
@@ -884,6 +883,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   };
 
   const pulsarLienzo = (e: MouseEvent) => {
+    // El clic que termina un arrastre con la mano no es un toque.
+    if (trasArrastre.current) {
+      trasArrastre.current = false;
+      return;
+    }
     if (colocando) {
       ponerNota(e);
       return;
@@ -897,10 +901,48 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     }
   };
 
+  // La mano: arrastrar con el ratón mueve la página, como en un lector de PDF. En una pantalla táctil ya se mueve sola.
+  const trasArrastre = useRef(false);
+  const [arrastrando, fijarArrastrando] = useState(false);
+  const empezarArrastre = (e: PointerEvent) => {
+    const el = lienzo.current;
+    if (herramienta !== 'mano' || e.button !== 0 || e.pointerType === 'touch' || !el) return;
+    if ((e.target as HTMLElement).closest('.vs-nota-pagina, button:not(.vs-linea), a, input, textarea')) return;
+    const inicio = { x: e.clientX, y: e.clientY, izq: el.scrollLeft, arriba: el.scrollTop, movido: false };
+    trasArrastre.current = false;
+    const mover = (ev: PointerEvent) => {
+      if (ev.pointerId !== e.pointerId) return;
+      const dx = ev.clientX - inicio.x;
+      const dy = ev.clientY - inicio.y;
+      if (!inicio.movido && Math.hypot(dx, dy) < 4) return;
+      if (!inicio.movido) {
+        inicio.movido = true;
+        fijarArrastrando(true);
+      }
+      el.scrollLeft = inicio.izq - dx;
+      el.scrollTop = inicio.arriba - dy;
+    };
+    const soltarArrastre = (ev: PointerEvent) => {
+      if (ev.pointerId !== e.pointerId) return;
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', soltarArrastre);
+      window.removeEventListener('pointercancel', soltarArrastre);
+      if (!inicio.movido) return;
+      fijarArrastrando(false);
+      trasArrastre.current = true;
+      // Si el clic no llega (se soltó fuera del lienzo), que no se quede esperando.
+      setTimeout(() => (trasArrastre.current = false), 0);
+    };
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', soltarArrastre);
+    window.addEventListener('pointercancel', soltarArrastre);
+  };
+
   // Deslizar con el dedo, en una pantalla táctil.
   const inicioToque = useRef<{ x: number; y: number } | null>(null);
   const tocar = (e: PointerEvent) => {
     if (e.pointerType !== 'mouse') inicioToque.current = { x: e.clientX, y: e.clientY };
+    empezarArrastre(e);
   };
   const soltar = (e: PointerEvent) => {
     const i = inicioToque.current;
@@ -912,6 +954,309 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
 
   const indicador = vista === 'doble' && (lista[actual]?.length ?? 0) > 1 ? `${lista[actual][0] + 1}–${lista[actual][1] + 1}` : String(pagina + 1);
   const capitulo = paginador ? [...paginador.indice].reverse().find((e) => e.pagina <= pagina) : undefined;
+
+  // ---------- Las órdenes: menús, paleta, atajos y menú contextual (ordenesVisor.ts) ----------
+  const abrirPanel = (p: PanelVisor) => fijarPanel((x) => (x === p ? null : p));
+  const abrirBuscar = () => {
+    if (panel === 'buscar') document.querySelector<HTMLInputElement>('.vs-panel-buscar input')?.select();
+    else fijarPanel('buscar');
+  };
+  const alternarOcr = () => {
+    fijarErrorOcr('');
+    cerrarSiCambia(textoPdf);
+    fijarOcr(!ocr);
+  };
+  const alternarVistaTexto = () => {
+    // Para leer como texto hace falta el texto: si la página no lo trae, lo lee el OCR.
+    if (!vistaTexto && !ocr) {
+      fijarErrorOcr('');
+      fijarOcr(true);
+    }
+    cerrarVentana();
+    fijarHerramienta('seleccionar');
+    fijarVistaTexto(!vistaTexto);
+  };
+  const revisar = () => {
+    fijarRevisadas((r) => [...conTexto.filter((n) => !r.includes(n)), ...r]);
+    fijarPanel('revision');
+  };
+  /** El texto de unas páginas, por párrafos, como se ve en la ventana: los renglones de un párrafo, unidos. */
+  const textoParaCopiar = (paginas: number[]) =>
+    paginas
+      .map((n) => leidaDe(n)?.corrido.texto.trim() ?? '')
+      .filter(Boolean)
+      .join('\n\n');
+  const copiar = (texto: string) => {
+    if (texto) navigator.clipboard.writeText(texto).catch(console.error);
+  };
+  const irAPagina = () => {
+    const campo = document.querySelector<HTMLInputElement>('.vs-barra .vs-numero');
+    if (campo && !lectura) {
+      campo.focus();
+      campo.select();
+    } else fijarDialogo('paleta');
+  };
+  const herramientaA = (h: Herramienta) => {
+    if (h !== 'seleccionar') fijarSeleccion(null);
+    fijarHerramienta(h);
+  };
+  const estado: EstadoVisor = {
+    vista,
+    rtl,
+    portadaSola,
+    zoom,
+    vistaTexto,
+    invertir,
+    nitidez,
+    lleno,
+    lectura,
+    ocr,
+    modoOcr,
+    textoPdf,
+    hayTextoPropio,
+    conTexto: conTexto.length > 0,
+    hayIndice: (paginador?.indice.length ?? 0) > 0,
+    panel,
+    marcada: !!marcador,
+    herramienta,
+    atras: saltos.length ? saltos[saltos.length - 1] : null,
+    fijada,
+    furigana: a.furigana,
+    mostrarEstado: a.mostrarEstado,
+    colorAcento: a.colorAcento,
+    letra: a.diccionarioLetra,
+    lengua: { lectura: tr(lengua.value.textos.lectura), acento: !!lengua.value.acento, comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
+  };
+  const acciones: AccionesVisor = {
+    biblioteca: () => fondo.abrirApp('biblioteca').catch(console.error),
+    vocabulario: () => fondo.abrirApp(`vocabulario?libro=${encodeURIComponent(doc.id)}`).catch(console.error),
+    exportar: () => fondo.abrirApp(`biblioteca?exportar=${encodeURIComponent(doc.id)}`).catch(console.error),
+    portada: () => usarComoPortada().catch(console.error),
+    vista: fijarVista,
+    portadaSola: () => fijarPortadaSola((x) => !x),
+    sentido: (r) => fijarDireccion(r ? 'rtl' : 'ltr'),
+    zoom: (z) => (z === 'mas' ? zoomPaso(true) : z === 'menos' ? zoomPaso(false) : fijarZoom(z)),
+    nitidez: (n) => fijarNitidez((x) => ({ ...x, ...n })),
+    invertir: () => {
+      guardarPreferencia('visorInvertir', !invertir);
+      fijarInvertir(!invertir);
+    },
+    vistaTexto: alternarVistaTexto,
+    lectura: () => {
+      fijarMenu(null);
+      fijarDesplegable(null);
+      // Con el foco en la barra, la barra no se escondería: se queda asomada mientras lo tiene.
+      if (!lectura && document.activeElement?.closest('.vs-barra')) (document.activeElement as HTMLElement).blur();
+      fijarAsomada(false);
+      fijarLectura(!lectura);
+    },
+    pantallaCompleta,
+    ir: (d) => (d === 'primera' ? irA(0, true) : d === 'ultima' ? irA(total - 1, true) : d === 'anterior' ? anterior() : siguiente()),
+    irAPagina,
+    atras,
+    panel: abrirPanel,
+    ocr: alternarOcr,
+    modoOcr: fijarModoOcr,
+    textoPdf: () => {
+      // Cambia de dónde sale el texto de las páginas que traen el suyo: lo abierto en una de ellas se cierra.
+      fijarUnidad((x) => (x && !propias.get(x.pagina) ? x : null));
+      fijarTextoPdf(!textoPdf);
+    },
+    revisar,
+    copiarPagina: () => copiar(textoParaCopiar(aLaVista)),
+    ajuste: (c) => {
+      guardarAjustes(c).catch(console.error);
+    },
+    fijar: () => fijarVentana(!fijada),
+    marcador: alternarMarcador,
+    herramienta: herramientaA,
+    atajos: () => fijarDialogo('atajos'),
+    paleta: () => fijarDialogo('paleta'),
+  };
+  const ordenes = ordenesDelVisor(estado, acciones);
+  const orden = (id: string) => ordenes.find((o) => o.id === id);
+
+  // Las teclas: las de pasar de página, aquí; las demás, las del registro de órdenes, como dicen los menús. El oyente es
+  // uno solo y llama siempre a la versión de este pintado: si se pusiera de nuevo en cada efecto, una tecla pulsada justo
+  // al cerrarse la paleta llegaría al de antes, que aún la cree abierta.
+  const alTeclear = useRef<(e: KeyboardEvent) => void>(() => {});
+  {
+    const tecla = (e: KeyboardEvent) => {
+      if (!paginador || e.isComposing) return;
+      const t = teclaDe(e);
+      // La paleta y buscar valen también escribiendo en un campo.
+      if (t === 'Ctrl+K') {
+        e.preventDefault();
+        fijarMenu(null);
+        fijarDesplegable(null);
+        fijarContextual(null);
+        fijarDialogo((d) => (d === 'paleta' ? null : 'paleta'));
+        return;
+      }
+      if (dialogo) return;
+      if (t === 'Ctrl+F') {
+        // Como en un lector de PDF: buscar en el libro, que el buscador del navegador no ve el texto de las páginas.
+        e.preventDefault();
+        fijarMenu(null);
+        abrirBuscar();
+        return;
+      }
+      const destino = e.target as HTMLElement | null;
+      if (destino?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      // Un menú abierto, o la barra de menús con el foco, atienden sus propias teclas.
+      if (menu || contextual || destino?.closest?.('[role="menu"], [role="menubar"]')) return;
+      if (e.key === 'F10' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        // Como en el escritorio: F10 lleva a la barra de menús.
+        e.preventDefault();
+        if (lectura) fijarAsomada(true);
+        document.querySelector<HTMLElement>('.vs-menus [data-menu]')?.focus();
+        return;
+      }
+      if (t === 'Ctrl+C') {
+        // Copiar lo abierto en la ventana, si no hay otra cosa seleccionada.
+        if (!unidad || window.getSelection()?.isCollapsed === false) return;
+        navigator.clipboard.writeText(unidad.texto).catch(console.error);
+        e.preventDefault();
+        return;
+      }
+      if (e.key === 'Escape') {
+        if (desplegable) fijarDesplegable(null);
+        else if (unidad || seleccion) cerrarVentana();
+        else if (herramienta === 'nota') fijarHerramienta('seleccionar');
+        else if (lectura) fijarLectura(false);
+        else return;
+        e.preventDefault();
+        return;
+      }
+      if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        // En la vista de texto se pasa de página igual en todas las vistas: el texto no se desplaza de página en página.
+        const continua = vista === 'continua' && !vistaTexto;
+        let hecho = true;
+        if (e.key === 'ArrowLeft' && !continua) haciaIzquierda();
+        else if (e.key === 'ArrowRight' && !continua) haciaDerecha();
+        else if (e.key === 'PageDown' || (e.key === ' ' && !continua && !e.shiftKey)) siguiente();
+        else if (e.key === 'PageUp' || (e.key === ' ' && !continua && e.shiftKey)) anterior();
+        else if (e.key === 'Home') irA(0, true);
+        else if (e.key === 'End') irA(total - 1, true);
+        else hecho = false;
+        if (hecho) {
+          e.preventDefault();
+          return;
+        }
+      }
+      const o = ordenDeTecla(ordenes, t);
+      if (!o) return;
+      e.preventDefault();
+      o.ejecutar();
+    };
+    alTeclear.current = tecla;
+  }
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => alTeclear.current(e);
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  }, []);
+
+  // En el modo lectura, la barra se asoma al llevar el ratón arriba y se va al bajar, salvo con un menú abierto. La franja
+  // es ancha: una de pocos píxeles no se acierta.
+  useEffect(() => {
+    if (!lectura) {
+      fijarAsomada(false);
+      return;
+    }
+    const mover = (e: MouseEvent) => {
+      const barra = document.querySelector('.vs-barra');
+      const alto = barra?.getBoundingClientRect().height ?? 48;
+      if (e.clientY <= 32) fijarAsomada(true);
+      else if (e.clientY > alto + 56 && !menu && !desplegable && !barra?.contains(document.activeElement)) fijarAsomada(false);
+    };
+    window.addEventListener('mousemove', mover);
+    return () => window.removeEventListener('mousemove', mover);
+  }, [lectura, menu, desplegable]);
+
+  // El menú de un clic derecho en la página: lo de la ventana abierta, una nota justo ahí, el texto de esa página, las
+  // herramientas y la portada.
+  const abrirContextual = (e: MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.vs-nota-pagina, .vs-flecha')) return;
+    e.preventDefault();
+    fijarMenu(null);
+    fijarDesplegable(null);
+    const h = hojaEn(e);
+    fijarContextual({ x: e.clientX, y: e.clientY, pagina: h?.pagina ?? null, punto: h?.punto ?? null });
+  };
+  const ordenesContexto = (): Comando[] => {
+    if (!contextual) return [];
+    const l: Comando[] = [];
+    const de = (id: string, grupo: string) => {
+      const o = orden(id);
+      if (o) l.push({ ...o, grupo });
+    };
+    if (unidad) {
+      const abierta = unidad;
+      l.push(
+        { id: 'ctx-copiar', etiqueta: tr('Copiar'), menu: 'ver', grupo: 'unidad', icono: 'copiar', atajo: 'Ctrl+C', atajoAparte: true, ejecutar: () => copiar(abierta.texto) },
+        {
+          id: 'ctx-buscar',
+          etiqueta: tr('Buscar en el libro'),
+          menu: 'ver',
+          grupo: 'unidad',
+          icono: 'buscar',
+          ejecutar: () => {
+            fijarConsulta(abierta.texto);
+            fijarPanel('buscar');
+          },
+        }
+      );
+    }
+    const { pagina: n, punto } = contextual;
+    if (n !== null && punto) l.push({ id: 'ctx-nota', etiqueta: tr('Añadir una nota aquí'), menu: 'ver', grupo: 'anotar', icono: 'nota-lapiz', ejecutar: () => ponerNotaEn(n, punto) });
+    de('marcador', 'anotar');
+    if (n !== null && textoDe(n)?.lineas.length) l.push({ id: 'ctx-copiar-pagina', etiqueta: tr('Copiar el texto de la página'), menu: 'ver', grupo: 'pagina', icono: 'copiar', ejecutar: () => copiar(textoParaCopiar([n])) });
+    for (const id of ['seleccionar', 'mano', 'resaltador']) de(id, 'herramienta');
+    de('portada', 'libro');
+    return l;
+  };
+
+  // El zoom de la barra: ajustar a la página o al ancho, y unos tamaños.
+  const grupoZoom = useRef<HTMLDivElement>(null);
+  const botonAa = useRef<HTMLButtonElement>(null);
+  useClicFuera(desplegable === 'zoom', () => [grupoZoom.current], () => fijarDesplegable(null));
+  const ordenesZoom: Comando[] = [
+    ...ordenes.filter((o) => o.id === 'zoom-pagina' || o.id === 'zoom-ancho'),
+    ...TAMANOS_ZOOM.map((t): Comando => ({ id: `zoom-${t}`, etiqueta: `${t} %`, menu: 'ver', grupo: 'tamano', tipo: 'opcion', marcada: zoom === t, ejecutar: () => fijarZoom(t) })),
+  ];
+
+  /** Ensancha el panel de la izquierda arrastrando su borde, o con las flechas si tiene el foco. */
+  const ensanchar = (e: PointerEvent) => {
+    e.preventDefault();
+    const borde = e.currentTarget as HTMLElement;
+    const x0 = e.clientX;
+    const w0 = anchoPanel;
+    let w = w0;
+    borde.setPointerCapture(e.pointerId);
+    const mover = (ev: PointerEvent) => {
+      w = Math.round(Math.min(ANCHO_PANEL.maximo, Math.max(ANCHO_PANEL.minimo, w0 + ev.clientX - x0)));
+      fijarAnchoPanel(w);
+    };
+    const soltarBorde = () => {
+      borde.removeEventListener('pointermove', mover);
+      borde.removeEventListener('pointerup', soltarBorde);
+      borde.removeEventListener('pointercancel', soltarBorde);
+      guardarPreferencia('visorPanelAncho', w);
+    };
+    borde.addEventListener('pointermove', mover);
+    borde.addEventListener('pointerup', soltarBorde);
+    borde.addEventListener('pointercancel', soltarBorde);
+  };
+  const ensancharConTeclas = (e: KeyboardEvent) => {
+    const paso = e.key === 'ArrowRight' ? 24 : e.key === 'ArrowLeft' ? -24 : 0;
+    if (!paso) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const w = Math.min(ANCHO_PANEL.maximo, Math.max(ANCHO_PANEL.minimo, anchoPanel + paso));
+    fijarAnchoPanel(w);
+    guardarPreferencia('visorPanelAncho', w);
+  };
 
   const contenido = () => {
     if (error) return <AvisoError mensaje={error} />;
@@ -941,7 +1286,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             const e = escalaDe([medida(n)], hueco, zoom);
             const t = medida(n);
             return n >= cerca[0] && n <= cerca[1] ? (
-              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
+              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} herramienta={herramienta} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
             ) : (
               <div key={n} class="vs-pagina vs-reservada" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * e)}px`, height: `${Math.round(t.alto * e)}px` }} />
             );
@@ -951,21 +1296,55 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     return (
       <div class={`vs-pliego ${rtl ? 'rtl' : ''}`}>
         {(lista[actualVisible] ?? []).map((n) => (
-          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
+          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} herramienta={herramienta} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
         ))}
       </div>
     );
   };
 
+  const botonCarril = (icono: NombreIcono, etiqueta: string, activo: boolean, alPulsar: () => void, atajo?: string) => (
+    <button type="button" class={`vs-carril-boton ${activo ? 'activo' : ''}`} aria-label={etiqueta} aria-pressed={activo} data-tip={atajo ? `${etiqueta} · ${atajo}` : etiqueta} data-tip-lado="der" onClick={alPulsar}>
+      <Icono n={icono} t={19} />
+    </button>
+  );
+  const tituloPanel = (icono: NombreIcono, nombre: string) => (
+    <div class="vs-panel-titulo">
+      <Icono n={icono} t={16} />
+      <b>{nombre}</b>
+      <button class="btn-icono chico vs-cerrar" aria-label={tr('Cerrar')} onClick={() => fijarPanel(null)}>
+        <Icono n="cerrar" t={15} />
+      </button>
+    </div>
+  );
+
+  // La barra de abajo: dónde se está, cuánto va leído, de dónde sale el texto y qué hace el OCR.
+  const ultimaVista = Math.max(...(lista[actual] ?? [pagina]));
+  const avance = total ? Math.round((100 * (ultimaVista + 1)) / total) : 0;
+  const textoActual = paginador ? textoDe(pagina) : undefined;
+  const nombreModo = modoOcr === 'manga' ? (lengua.value.escritura.globos === 'lector' ? tr('Cómic') : tr('Manga')) : tr('Libro');
+  const desdeDeslizador = useRef<number | null>(null);
+
   return (
-    <>
-      <header class="vs-barra">
+    <div class={`vs-marco ${lectura ? 'modo-lectura' : ''}`}>
+      <header class={`vs-barra ${asomada ? 'asomada' : ''}`}>
         <Cabeza titulo={doc.titulo} />
         {paginador && (
           <>
+            <BarraMenus
+              ordenes={ordenes}
+              abierto={menu}
+              alAbrir={(m) => {
+                if (m) {
+                  fijarDesplegable(null);
+                  fijarContextual(null);
+                }
+                fijarMenu(m);
+              }}
+            />
+            <span class="vs-barra-hueco" />
             <div class="vs-grupo" role="group" aria-label={tr('Páginas')}>
               {/* Los iconos apuntan a donde va la hoja en la pantalla; lo que cambia con el sentido es a qué página lleva. */}
-              <Boton icono="primera" etiqueta={rtl ? tr('Última página') : tr('Primera página')} alPulsar={() => (rtl ? irA(total - 1) : irA(0))} />
+              <Boton icono="primera" clase="vs-extremo" etiqueta={rtl ? tr('Última página') : tr('Primera página')} alPulsar={() => (rtl ? irA(total - 1, true) : irA(0, true))} />
               <Boton icono="anterior" etiqueta={rtl ? tr('Página siguiente') : tr('Página anterior')} alPulsar={haciaIzquierda} />
               <span class="vs-pagina-actual">
                 <input
@@ -979,7 +1358,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       const n = parseInt(escrito ?? '', 10);
-                      if (n > 0) irA(n - 1);
+                      if (n > 0) irA(n - 1, true);
                       fijarEscrito(null);
                       e.currentTarget.blur();
                     } else if (e.key === 'Escape') {
@@ -991,222 +1370,183 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                 <span class="num">/ {total}</span>
               </span>
               <Boton icono="siguiente" etiqueta={rtl ? tr('Página anterior') : tr('Página siguiente')} alPulsar={haciaDerecha} />
-              <Boton icono="ultima" etiqueta={rtl ? tr('Primera página') : tr('Última página')} alPulsar={() => (rtl ? irA(0) : irA(total - 1))} />
+              <Boton icono="ultima" clase="vs-extremo" etiqueta={rtl ? tr('Primera página') : tr('Última página')} alPulsar={() => (rtl ? irA(0, true) : irA(total - 1, true))} />
             </div>
             {!vistaTexto && (
-              <div class="vs-grupo" role="group" aria-label={tr('Zoom')}>
+              <div ref={grupoZoom} class="vs-grupo vs-grupo-zoom" role="group" aria-label={tr('Zoom')}>
                 <Boton icono="alejar" etiqueta={tr('Alejar')} alPulsar={() => zoomPaso(false)} />
-                <button class="btn chico fantasma vs-zoom num" data-tip={tr('Página completa')} onClick={() => fijarZoom('pagina')}>{porcentaje} %</button>
+                <button type="button" class={`btn chico fantasma vs-zoom num ${desplegable === 'zoom' ? 'abierto' : ''}`} aria-haspopup="menu" aria-expanded={desplegable === 'zoom'} onClick={() => fijarDesplegable(desplegable === 'zoom' ? null : 'zoom')}>
+                  {porcentaje} %<Icono n="abajo" t={11} />
+                </button>
                 <Boton icono="acercar" etiqueta={tr('Acercar')} alPulsar={() => zoomPaso(true)} />
-                <Boton icono="ajustar-ancho" etiqueta={tr('Ajustar al ancho')} activo={zoom === 'ancho'} alPulsar={() => fijarZoom('ancho')} />
-                <Boton icono="ajustar-pagina" etiqueta={tr('Página completa')} activo={zoom === 'pagina'} alPulsar={() => fijarZoom('pagina')} />
+                {desplegable === 'zoom' && (
+                  <ListaMenu
+                    entradas={entradasDe(ordenesZoom, 'ver')}
+                    etiqueta={tr('Zoom')}
+                    clase="vs-menu-zoom"
+                    alCerrar={(devolver) => {
+                      fijarDesplegable(null);
+                      if (devolver) grupoZoom.current?.querySelector<HTMLElement>('.vs-zoom')?.focus();
+                    }}
+                  />
+                )}
               </div>
             )}
-            <div class="vs-grupo" role="group" aria-label={tr('Vista')}>
-              <Boton icono="una-pagina" etiqueta={tr('Una página')} activo={vista === 'una'} alPulsar={() => fijarVista('una')} />
-              <Boton icono="doble-pagina" etiqueta={tr('Doble página')} activo={vista === 'doble'} alPulsar={() => fijarVista('doble')} />
-              <Boton icono="continua" etiqueta={tr('Desplazamiento continuo')} activo={vista === 'continua'} alPulsar={() => fijarVista('continua')} />
-            </div>
-            <div class="vs-grupo" role="group" aria-label={tr('Texto de la página')}>
-              <Boton
-                icono="texto"
-                etiqueta={tr('Leer el texto de las páginas')}
-                activo={ocr}
-                alPulsar={() => {
-                  fijarErrorOcr('');
-                  cerrarSiCambia(textoPdf);
-                  fijarOcr(!ocr);
-                }}
-              />
-              {ocr && (
-                <span class="vs-modos">
-                  {hayTextoPropio && (
-                    <button
-                      class="btn chico fantasma"
-                      aria-pressed={textoPdf}
-                      data-tip={tr('El texto que trae el PDF; apagado, Kotonoha lee todas las páginas')}
-                      onClick={() => {
-                        // Cambia de dónde sale el texto de las páginas que traen el suyo: lo abierto en una de ellas se cierra.
-                        fijarUnidad((x) => (x && !propias.get(x.pagina) ? x : null));
-                        fijarTextoPdf(!textoPdf);
-                      }}
-                    >
-                      {tr('Texto del PDF')}
-                    </button>
-                  )}
-                  <button class="btn chico fantasma" aria-pressed={modoOcr === 'libro'} data-tip={tr('Para libros impresos')} onClick={() => fijarModoOcr('libro')}>{tr('Libro')}</button>
-                  {lengua.value.escritura.globos === 'lector' ? (
-                    <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para cómics: lee los globos de izquierda a derecha')} onClick={() => fijarModoOcr('manga')}>{tr('Cómic')}</button>
-                  ) : (
-                    <button class="btn chico fantasma" aria-pressed={modoOcr === 'manga'} data-tip={tr('Para manga: globos y texto vertical')} onClick={() => fijarModoOcr('manga')}>{tr('Manga')}</button>
-                  )}
-                </span>
-              )}
-              <Boton
-                icono="lector"
-                etiqueta={vistaTexto ? tr('Ver las páginas') : tr('Ver como texto')}
-                activo={vistaTexto}
-                alPulsar={() => {
-                  // Para leer como texto hace falta el texto: si la página no lo trae, lo lee el OCR.
-                  if (!vistaTexto && !ocr) {
-                    fijarErrorOcr('');
-                    fijarOcr(true);
-                  }
-                  cerrarVentana();
-                  fijarColocando(false);
-                  fijarVistaTexto(!vistaTexto);
-                }}
-              />
-              <Boton
-                icono="ia"
-                etiqueta={conTexto.length ? tr('Revisar el texto con Claude') : tr('Revisar el texto con Claude: la página aún no tiene texto')}
-                activo={panel === 'revision'}
-                deshabilitado={!conTexto.length}
-                alPulsar={() => {
-                  fijarRevisadas((r) => [...conTexto.filter((n) => !r.includes(n)), ...r]);
-                  fijarPanel('revision');
-                }}
-              />
-            </div>
-            <div class="vs-grupo" role="group" aria-label={tr('Anotaciones')}>
-              <Boton icono="marcador" etiqueta={marcador ? tr('Quitar el marcador de esta página') : tr('Marcar esta página')} activo={!!marcador} alPulsar={alternarMarcador} />
-              {!vistaTexto && <Boton icono="nota-lapiz" etiqueta={colocando ? tr('Toca la página donde va la nota') : tr('Añadir una nota')} activo={colocando} alPulsar={() => fijarColocando(!colocando)} />}
-              <Boton icono="nota" etiqueta={tr('Notas y marcadores')} activo={panel === 'notas'} alPulsar={() => fijarPanel(panel === 'notas' ? null : 'notas')} />
-            </div>
             <div class="vs-grupo">
-              <Boton
-                icono="sentido"
-                etiqueta={rtl ? tr('Se lee de derecha a izquierda') : tr('Se lee de izquierda a derecha')}
-                activo={rtl}
-                alPulsar={() => fijarDireccion(rtl ? 'ltr' : 'rtl')}
-              />
-              <Boton icono="buscar" etiqueta={tr('Buscar en el libro')} activo={panel === 'buscar'} alPulsar={() => fijarPanel(panel === 'buscar' ? null : 'buscar')} />
-              <Boton icono="palabras" etiqueta={tr('Vocabulario del libro')} alPulsar={() => fondo.abrirApp(`vocabulario?libro=${encodeURIComponent(doc.id)}`).catch(console.error)} />
-              <Boton icono="exportar" etiqueta={tr('Exportar PDF con texto')} alPulsar={() => fondo.abrirApp(`biblioteca?exportar=${encodeURIComponent(doc.id)}`).catch(console.error)} />
-              <Boton icono="miniaturas" etiqueta={tr('Miniaturas')} activo={panel === 'miniaturas'} alPulsar={() => fijarPanel(panel === 'miniaturas' ? null : 'miniaturas')} />
-              {paginador.indice.length > 0 && <Boton icono="indice" etiqueta={tr('Índice')} activo={panel === 'indice'} alPulsar={() => fijarPanel(panel === 'indice' ? null : 'indice')} />}
-              <Boton
-                icono={portadaHecha ? 'ok' : 'imagen'}
-                etiqueta={portadaHecha ? tr('Es la portada en la estantería') : tr('Usar esta página como portada')}
-                alPulsar={() => usarComoPortada().catch(console.error)}
-              />
-              {!vistaTexto && (
-                <Boton
-                  icono="nitidez"
-                  etiqueta={tr('Nitidez: enfoca las páginas de un escaneo con poca resolución')}
-                  activo={nitidez.activa}
-                  alPulsar={() => fijarNitidez((x) => ({ ...x, activa: !x.activa }))}
-                />
-              )}
-              {nitidez.activa && !vistaTexto && (
-                <span class="vs-modos" role="group" aria-label={tr('Nitidez')}>
-                  {NIVELES_NITIDEZ.map(([nivel, nombre]) => (
-                    <button key={nivel} class="btn chico fantasma" aria-pressed={nitidez.nivel === nivel} onClick={() => fijarNitidez((x) => ({ ...x, nivel }))}>{tr(nombre)}</button>
-                  ))}
-                  <button class="btn chico fantasma" aria-pressed={nitidez.limpiar} data-tip={tr('El papel más blanco y el texto más negro, para escaneos en blanco y negro')} onClick={() => fijarNitidez((x) => ({ ...x, limpiar: !x.limpiar }))}>
-                    {tr('Fondo blanco')}
-                  </button>
-                </span>
-              )}
-              <Boton
-                icono="invertir"
-                etiqueta={tr('Invertir colores')}
-                activo={invertir}
-                alPulsar={() => {
-                  guardarPreferencia('visorInvertir', !invertir);
-                  fijarInvertir(!invertir);
-                }}
-              />
-              <Boton icono={lleno ? 'salir-pantalla' : 'pantalla-completa'} etiqueta={lleno ? tr('Salir de la pantalla completa') : tr('Pantalla completa')} alPulsar={pantallaCompleta} />
+              <Boton icono="marcador" etiqueta={marcador ? tr('Quitar el marcador de esta página') : tr('Marcar esta página')} activo={!!marcador} alPulsar={alternarMarcador} />
+              <span class="vs-aa-ancla">
+                <button
+                  ref={botonAa}
+                  type="button"
+                  class={`btn chico fantasma vs-aa ${desplegable === 'aa' ? 'abierto' : ''}`}
+                  aria-haspopup="dialog"
+                  aria-expanded={desplegable === 'aa'}
+                  aria-label={tr('Ayudas de lectura')}
+                  data-tip={tr('Ayudas de lectura')}
+                  onClick={() => fijarDesplegable(desplegable === 'aa' ? null : 'aa')}
+                >
+                  Aa
+                </button>
+                {desplegable === 'aa' && <PanelAa e={estado} h={acciones} ancla={() => botonAa.current} alCerrar={() => fijarDesplegable(null)} />}
+              </span>
             </div>
           </>
         )}
       </header>
 
       <div class="vs-cuerpo">
-        {paginador && panel === 'miniaturas' && (
-          <aside class="vs-panel" aria-label={tr('Miniaturas')}>
-            <div class="vs-miniaturas">
-              {Array.from({ length: total }, (_, n) => (
-                <Miniatura key={n} paginador={paginador} n={n} actual={(lista[actual] ?? [pagina]).includes(n)} marcada={anotaciones.some((a) => a.tipo === 'marcador' && a.pagina === n)} alElegir={() => irA(n)} />
-              ))}
+        {paginador && (
+          <nav class="vs-carril" aria-label={tr('Paneles y herramientas')}>
+            <div class="vs-carril-grupo" role="group" aria-label={tr('Navegar')}>
+              {botonCarril('miniaturas', tr('Miniaturas'), panel === 'miniaturas', () => abrirPanel('miniaturas'))}
+              {paginador.indice.length > 0 && botonCarril('indice', tr('Índice'), panel === 'indice', () => abrirPanel('indice'))}
+              {botonCarril('nota', tr('Notas y marcadores'), panel === 'notas', () => abrirPanel('notas'))}
+              {botonCarril('buscar', tr('Buscar en el libro'), panel === 'buscar', () => abrirPanel('buscar'), 'Ctrl+F')}
             </div>
-          </aside>
+            {!vistaTexto && (
+              <div class="vs-carril-grupo" role="group" aria-label={tr('Herramientas')}>
+                {botonCarril('cursor-texto', tr('Seleccionar'), herramienta === 'seleccionar', () => herramientaA('seleccionar'), 'V')}
+                {botonCarril('mano', tr('Mano'), herramienta === 'mano', () => herramientaA(herramienta === 'mano' ? 'seleccionar' : 'mano'), 'H')}
+                {botonCarril('resaltar', tr('Resaltador'), herramienta === 'resaltador', () => herramientaA(herramienta === 'resaltador' ? 'seleccionar' : 'resaltador'), 'R')}
+                {herramienta === 'resaltador' && (
+                  <div class="vs-carril-colores" role="radiogroup" aria-label={tr('Color del resaltador')}>
+                    {COLORES.map((c) => (
+                      <button key={c} type="button" role="radio" aria-checked={colorResaltador === c} class={`vs-color ${c}`} aria-label={resaltarEn(c)} onClick={() => elegirColor(c)} />
+                    ))}
+                  </div>
+                )}
+                {botonCarril('nota-lapiz', tr('Añadir una nota'), herramienta === 'nota', () => herramientaA(herramienta === 'nota' ? 'seleccionar' : 'nota'), 'N')}
+              </div>
+            )}
+          </nav>
         )}
-        {paginador && panel === 'indice' && (
-          <aside class="vs-panel" aria-label={tr('Índice')}>
-            <ol class="vs-indice">
-              {paginador.indice.map((e, i) => (
-                <li key={i}>
-                  <button class={e === capitulo ? 'actual' : ''} aria-current={e === capitulo ? 'true' : undefined} onClick={() => irA(e.pagina)}>
-                    <span>{e.titulo}</span>
-                    <span class="num">{e.pagina + 1}</span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </aside>
+        {paginador && panel && panel !== 'revision' && (
+          <div class="vs-lateral" style={{ width: `${anchoPanel}px` }}>
+            {panel === 'miniaturas' && (
+              <aside class="vs-panel vs-panel-miniaturas" aria-label={tr('Miniaturas')}>
+                {tituloPanel('miniaturas', tr('Miniaturas'))}
+                <div class="vs-miniaturas">
+                  {Array.from({ length: total }, (_, n) => (
+                    <Miniatura key={n} paginador={paginador} n={n} actual={(lista[actual] ?? [pagina]).includes(n)} marcada={anotaciones.some((x) => x.tipo === 'marcador' && x.pagina === n)} alElegir={() => irA(n, true)} />
+                  ))}
+                </div>
+              </aside>
+            )}
+            {panel === 'indice' && (
+              <aside class="vs-panel vs-panel-indice" aria-label={tr('Índice')}>
+                {tituloPanel('indice', tr('Índice'))}
+                <ol class="vs-indice">
+                  {paginador.indice.map((e, i) => (
+                    <li key={i}>
+                      <button class={e === capitulo ? 'actual' : ''} aria-current={e === capitulo ? 'true' : undefined} onClick={() => irA(e.pagina, true)}>
+                        <span>{e.titulo}</span>
+                        <span class="num">{e.pagina + 1}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </aside>
+            )}
+            {panel === 'notas' && (
+              <PanelNotas titulo={doc.titulo} anotaciones={anotaciones} actual={lista[actual] ?? [pagina]} alIr={(n) => irA(n, true)} alGuardar={guardarAnotacion} alQuitar={quitarAnotacion} alCerrar={() => fijarPanel(null)} />
+            )}
+            {panel === 'buscar' && (
+              <PanelBuscar
+                paginas={buscable}
+                total={total}
+                hechas={corpus?.hechas ?? 0}
+                consulta={consulta}
+                alCambiarConsulta={fijarConsulta}
+                sinEspacios={!lengua.value.escritura.palabrasSeparadas}
+                ocrActivo={ocr}
+                alElegir={elegirHallazgo}
+                alCerrar={() => fijarPanel(null)}
+              />
+            )}
+            <div class="vs-lateral-borde" role="separator" aria-orientation="vertical" aria-label={tr('Ancho del panel')} tabIndex={0} onPointerDown={ensanchar} onKeyDown={ensancharConTeclas} />
+          </div>
         )}
-        {paginador && panel === 'notas' && (
-          <PanelNotas titulo={doc.titulo} anotaciones={anotaciones} actual={lista[actual] ?? [pagina]} alIr={irA} alGuardar={guardarAnotacion} alQuitar={quitarAnotacion} />
-        )}
-        {paginador && panel === 'buscar' && (
-          <PanelBuscar
-            paginas={buscable}
-            total={total}
-            hechas={corpus?.hechas ?? 0}
-            consulta={consulta}
-            alCambiarConsulta={fijarConsulta}
-            sinEspacios={!lengua.value.escritura.palabrasSeparadas}
-            ocrActivo={ocr}
-            alElegir={elegirHallazgo}
-            alCerrar={() => fijarPanel(null)}
-          />
-        )}
+        {nitidez.activa && !vistaTexto && <FiltroNitidez n={nitidez} escala={escala} />}
+        <div class="vs-zona">
+          <main
+            ref={lienzo}
+            class={`vs-lienzo ${invertir && !vistaTexto ? 'invertido' : ''} ${nitidez.activa && !vistaTexto ? 'con-nitidez' : ''} ${colocando ? 'colocando' : ''} ${herramienta === 'mano' ? 'mano' : ''} ${arrastrando ? 'arrastrando' : ''} ${vistaTexto ? 'vs-lienzo-texto' : ''}`}
+            data-vista={vista}
+            data-herramienta={herramienta}
+            onClick={pulsarLienzo}
+            onPointerDown={tocar}
+            onPointerUp={soltar}
+            onContextMenu={vistaTexto ? undefined : abrirContextual}
+            onWheel={(e) => {
+              if (!e.ctrlKey) return;
+              e.preventDefault();
+              zoomPaso(e.deltaY < 0);
+            }}
+          >
+            {/* Si la página pedida tarda, una barra fina lo dice mientras se ve la de antes. */}
+            {paginador && !vistaTexto && enPantalla !== pagina && <div class="vs-progreso" role="progressbar" aria-label={tr('Cargando…')} />}
+            {contenido()}
+          </main>
+          {colocando && (
+            <div class="vs-aviso-herramienta" role="status">
+              <Icono n="nota-lapiz" t={14} /> {tr('Toca la página donde va la nota')}
+            </div>
+          )}
+          {portadaHecha && (
+            <div class="vs-aviso-herramienta vs-aviso-hecho" role="status">
+              <Icono n="ok" t={14} /> {tr('Es la portada en la estantería')}
+            </div>
+          )}
+          {lectura && (
+            <div class="vs-aviso-herramienta vs-aviso-lectura" role="status">
+              {tr('Modo lectura: M o Esc para salir')}
+            </div>
+          )}
+          {/* Las flechas para pasar de página, a la vista y siempre en el mismo sitio. */}
+          {paginador && !vistaTexto && vista !== 'continua' && total > 1 && (
+            <>
+              <button class="vs-flecha izquierda" aria-label={rtl ? tr('Página siguiente') : tr('Página anterior')} data-tip={rtl ? tr('Página siguiente') : tr('Página anterior')} onClick={haciaIzquierda}>
+                <Icono n="izquierda" t={18} />
+              </button>
+              <button class="vs-flecha derecha" aria-label={rtl ? tr('Página anterior') : tr('Página siguiente')} data-tip={rtl ? tr('Página anterior') : tr('Página siguiente')} onClick={haciaDerecha}>
+                <Icono n="derecha" t={18} />
+              </button>
+            </>
+          )}
+        </div>
         {paginador && panel === 'revision' && (
           <PanelRevision
             paginas={revisadas}
             revisar={revisarPagina}
             alAplicar={aplicarRevision}
             alVerLinea={(n, indice) => {
-              if (!aLaVista.includes(n)) irA(n);
+              if (!aLaVista.includes(n)) irA(n, true);
               if (vistaTexto) fijarVistaTexto(false);
               tocarTexto(n, { linea: indice, letra: 0 }, 2);
             }}
             alCerrar={() => fijarPanel(null)}
           />
         )}
-        {nitidez.activa && !vistaTexto && <FiltroNitidez n={nitidez} escala={escala} />}
-        <div class="vs-zona">
-        <main
-          ref={lienzo}
-          class={`vs-lienzo ${invertir && !vistaTexto ? 'invertido' : ''} ${nitidez.activa && !vistaTexto ? 'con-nitidez' : ''} ${colocando ? 'colocando' : ''} ${vistaTexto ? 'vs-lienzo-texto' : ''}`}
-          data-vista={vista}
-          onClick={pulsarLienzo}
-          onPointerDown={tocar}
-          onPointerUp={soltar}
-          onWheel={(e) => {
-            if (!e.ctrlKey) return;
-            e.preventDefault();
-            zoomPaso(e.deltaY < 0);
-          }}
-        >
-          {/* Si la página pedida tarda, una barra fina lo dice mientras se ve la de antes. */}
-          {paginador && !vistaTexto && enPantalla !== pagina && <div class="vs-progreso" role="progressbar" aria-label={tr('Cargando…')} />}
-          {contenido()}
-        </main>
-        {/* Las flechas para pasar de página, a la vista y siempre en el mismo sitio. */}
-        {paginador && !vistaTexto && vista !== 'continua' && total > 1 && (
-          <>
-            <button class="vs-flecha izquierda" aria-label={rtl ? tr('Página siguiente') : tr('Página anterior')} data-tip={rtl ? tr('Página siguiente') : tr('Página anterior')} onClick={haciaIzquierda}>
-              <Icono n="izquierda" t={18} />
-            </button>
-            <button class="vs-flecha derecha" aria-label={rtl ? tr('Página anterior') : tr('Página siguiente')} data-tip={rtl ? tr('Página anterior') : tr('Página siguiente')} onClick={haciaDerecha}>
-              <Icono n="derecha" t={18} />
-            </button>
-          </>
-        )}
-        </div>
         {!vistaTexto && unidad && lineasAbiertas && (
           <Ventana
             unidad={unidad}
@@ -1238,10 +1578,55 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
         <Creador ajustes={a} />
       </div>
 
-      {paginador && total > 1 && (
+      {paginador && (
         <footer class="vs-pie">
-          <input type="range" min={1} max={total} step={1} value={pagina + 1} dir={rtl ? 'rtl' : 'ltr'} aria-label={tr('Página')} onInput={(e) => irA(Number(e.currentTarget.value) - 1)} />
-          {capitulo && <span class="vs-capitulo" title={capitulo.titulo}>{capitulo.titulo}</span>}
+          {saltos.length > 0 && (
+            <button type="button" class="btn chico fantasma vs-atras" data-tip={mostrarAtajo('Alt+ArrowLeft')} data-tip-lado="arriba" onClick={atras}>
+              <Icono n="volver" t={14} /> {tr('Volver a la página {0}', saltos[saltos.length - 1] + 1)}
+            </button>
+          )}
+          <span class="vs-donde num">{tr('Página {0} de {1}', indicador, total)}</span>
+          {capitulo && (
+            <span class="vs-capitulo" title={capitulo.titulo}>
+              {capitulo.titulo}
+            </span>
+          )}
+          {total > 1 ? (
+            <input
+              type="range"
+              min={1}
+              max={total}
+              step={1}
+              value={pagina + 1}
+              dir={rtl ? 'rtl' : 'ltr'}
+              aria-label={tr('Página')}
+              onPointerDown={() => (desdeDeslizador.current = ahora.current)}
+              onInput={(e) => irA(Number(e.currentTarget.value) - 1)}
+              onChange={() => {
+                // Arrastrar el deslizador es un salto: «Atrás» vuelve a donde se estaba antes de tomarlo.
+                const desde = desdeDeslizador.current;
+                desdeDeslizador.current = null;
+                if (desde !== null && desde !== ahora.current) fijarSaltos((s) => [...s.slice(1 - SALTOS), desde]);
+              }}
+            />
+          ) : (
+            <span class="vs-pie-hueco" />
+          )}
+          <span class="vs-avance num" data-tip={tr('Lo que va del libro')} data-tip-lado="arriba">
+            {avance} %
+          </span>
+          {textoActual ? (
+            <span class="vs-origen" data-tip={textoActual.propias ? tr('El texto de esta página es el que trae el PDF') : tr('El texto de esta página lo leyó Kotonoha con el OCR')} data-tip-lado="arriba">
+              {textoActual.propias ? tr('Texto del PDF') : `OCR · ${nombreModo}`}
+            </span>
+          ) : (
+            !ocr &&
+            !vistaTexto && (
+              <button type="button" class="btn chico fantasma vs-origen vs-origen-leer" onClick={alternarOcr}>
+                <Icono n="texto" t={13} /> {tr('Leer el texto de las páginas')}
+              </button>
+            )
+          )}
           {ocr && (descarga || leyendoVista || errorOcr) && (
             <span class={`vs-estado ${errorOcr ? 'error' : ''}`} role="status">
               {errorOcr
@@ -1251,14 +1636,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                   : tr('Leyendo el texto de la página…')}
             </span>
           )}
-          {vista === 'doble' && (
-            <label class="vs-portada">
-              <span>{tr('Portada sola')}</span>
-              <Interruptor etiqueta={tr('Portada sola')} on={portadaSola} alCambiar={fijarPortadaSola} />
-            </label>
-          )}
         </footer>
       )}
-    </>
+      {dialogo === 'paleta' && <Paleta ordenes={ordenes} total={total} alIrA={(n) => irA(n, true)} alCerrar={() => fijarDialogo(null)} />}
+      {dialogo === 'atajos' && <Atajos ordenes={ordenes} rtl={rtl} alCerrar={() => fijarDialogo(null)} />}
+      {contextual && <MenuFlotante x={contextual.x} y={contextual.y} ordenes={ordenesContexto()} etiqueta={tr('Menú de la página')} alCerrar={() => fijarContextual(null)} />}
+    </div>
   );
 }

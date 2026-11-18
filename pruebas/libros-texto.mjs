@@ -10,6 +10,7 @@ import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
+import { estadoOrden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -151,7 +152,7 @@ console.log('  líneas:', JSON.stringify(lineas));
 comprobar(!!lineas, 'Sin pedir el OCR, las líneas del PDF ya se pueden tocar');
 comprobar(!!lineas?.includes('今日は図書館で本を読みます。') && !!lineas?.includes('天気がいいので公園を散歩しました。'), 'Con el texto del archivo, renglón a renglón');
 comprobar(!!lineas?.includes('縦書きの文章を電車で読みます。'), 'También la columna vertical, entera');
-comprobar(await v.evaluate(() => document.querySelector('[aria-label="Leer el texto de las páginas"]')?.getAttribute('aria-pressed') === 'false'), 'Y sin encender el OCR ni descargar nada');
+comprobar(!(await estadoOrden(v, 'ocr')).marcada, 'Y sin encender el OCR ni descargar nada');
 
 /** Toca la letra n de una línea, como se haría con el ratón. */
 const tocarLetra = async (texto, n) => {
