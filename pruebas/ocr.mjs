@@ -229,14 +229,15 @@ if (libro.lineas) {
   const e = error(libro.lineas.join(''), LINEAS_LIBRO.join(''));
   comprobar(e < 0.08, 'Con menos de un 8 % de error por carácter', `${(e * 100).toFixed(1)} %`);
   await v.locator('.vs-linea').nth(1).click();
-  const panel = await v.waitForSelector('.vs-panel-linea .pal', { timeout: 15000 }).then(() => true).catch(() => false);
-  comprobar(panel, 'Tocar un renglón abre su texto con las palabras para consultar');
-  await v.locator('.vs-panel-linea .pal').first().click();
-  const ficha = await v.waitForSelector('.vs-panel-linea .vs-ficha .ficha', { timeout: 15000 }).then(() => true).catch(() => false);
+  const panel = await v.waitForSelector('.vs-ventana .pal', { timeout: 15000 }).then(() => true).catch(() => false);
+  comprobar(panel, 'Tocar un renglón abre su frase con las palabras para consultar');
+  await v.locator('.vs-ventana-texto .pal').first().click();
+  const ficha = await v.waitForSelector('.vs-ventana .vs-ficha .ficha', { timeout: 15000 }).then(() => true).catch(() => false);
   comprobar(ficha, 'Y una palabra abre su ficha');
   await v.screenshot({ path: join(CAPTURAS, 'libro.png') });
   // Editar: la línea se cambia a mano, y se ve así en la página.
-  await v.click('.vs-panel-linea button:has-text("Editar")');
+  await v.click('.vs-ventana [aria-label="Más"]');
+  await v.click('.vs-acciones-mas button:has-text("Editar la línea")');
   await v.fill('.vs-editar-campo', EDITADA);
   await v.click('.vs-editar-botones button:has-text("Guardar")');
   const editada = await v
@@ -244,9 +245,12 @@ if (libro.lineas) {
     .then(() => true)
     .catch(() => false);
   comprobar(editada, 'Editar cambia el texto de la línea en la página');
-  comprobar(!!(await v.$('.vs-linea-acciones button:has-text("Restaurar")')), 'Y la línea editada se puede restaurar');
+  // Al guardar, lo abierto se vuelve a leer con el texto nuevo.
+  await v.waitForSelector('.vs-ventana-texto .pal', { timeout: 15000 }).catch(() => {});
+  if (!(await v.$('.vs-acciones-mas'))) await v.click('.vs-ventana [aria-label="Más"]');
+  comprobar(!!(await v.$('.vs-acciones-mas button:has-text("Restaurar")')), 'Y la línea editada se puede restaurar');
   await v.screenshot({ path: join(CAPTURAS, 'libro-editado.png') });
-  await v.click('.vs-panel-linea [aria-label="Cerrar"]');
+  await v.click('.vs-ventana [aria-label="Cerrar"]');
 }
 await v.waitForTimeout(900);
 await v.close();
@@ -257,7 +261,9 @@ const deNuevo = await lineasDe(v, 20000);
 comprobar((deNuevo.lineas?.length ?? 0) > 0 && Date.now() - t1 < 3000, 'Al volver a abrirlo, el texto sale de lo ya leído, enseguida', `${Date.now() - t1} ms`);
 comprobar((deNuevo.lineas ?? []).includes(EDITADA), 'Y con lo editado', JSON.stringify(deNuevo.lineas));
 await v.locator('.vs-linea').nth(1).click();
-await v.click('.vs-linea-acciones button:has-text("Restaurar")');
+await v.waitForSelector('.vs-ventana-texto .pal', { timeout: 15000 }).catch(() => {});
+await v.click('.vs-ventana [aria-label="Más"]');
+await v.click('.vs-acciones-mas button:has-text("Restaurar")');
 const restaurada = await v
   .waitForFunction((t) => [...document.querySelectorAll('.vs-linea')].map((b) => b.getAttribute('aria-label')).join('').includes(t), LINEAS_LIBRO[1].slice(0, 4), { timeout: 5000 })
   .then(() => true)

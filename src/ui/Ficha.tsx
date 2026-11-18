@@ -272,7 +272,7 @@ export function ConEnfasis({ texto }: { texto: string }) {
   );
 }
 
-function Desglose({ texto }: { texto: string }) {
+export function Desglose({ texto }: { texto: string }) {
   const trozos = useMemo(() => {
     return texto
       .split(/^##\s*/m)
@@ -612,6 +612,11 @@ export interface PropsFicha {
   vista?: 'pagina';
   /** Se llama con la entrada del diccionario cuando llega: la página del diccionario la usa a su lado. */
   alCargar?: (r: ResultadoBusqueda) => void;
+  /**
+   * La frase ya se traduce y se desglosa fuera de la ficha, en la ventana que la contiene (la del visor): esas dos
+   * pestañas no se repiten.
+   */
+  fraseFuera?: boolean;
 }
 
 interface SentidoVisible {
@@ -777,7 +782,8 @@ export function Ficha(p: PropsFicha) {
   const [r, fijarR] = useState<ResultadoBusqueda | null>(null);
   const [extras, fijarExtras] = useState<ResultadoBusqueda[]>([]);
   const pestanaGuardada = p.pestanaInicial ?? p.ajustes.diccionarioPestana;
-  const pestanaDeInicio = pestanaGuardada === 'ninguna' ? null : pestanaGuardada;
+  const deFrase = (id: PestanaDiccionario | 'ninguna') => !!p.fraseFuera && (id === 'desglose' || id === 'traduccion');
+  const pestanaDeInicio = pestanaGuardada === 'ninguna' || deFrase(pestanaGuardada) ? null : pestanaGuardada;
   const [pestana, fijarPestana] = useState<PestanaDiccionario | null>(pestanaDeInicio);
   // De qué palabra es el resultado de `r`. Mientras llega el de la nueva, la ficha aún enseña la anterior.
   const [buscada, fijarBuscada] = useState('');
@@ -1134,7 +1140,7 @@ export function Ficha(p: PropsFicha) {
     ),
   };
 
-  const iaDock = PESTANAS.filter((x) => x.ia);
+  const iaDock = PESTANAS.filter((x) => x.ia && !deFrase(x.id));
   const otrasDock = PESTANAS.filter((x) => !x.ia && (x.id !== 'trazos' || lengua.value.trazos) && (x.id !== 'suena' || lengua.value.comoSuena));
   const botonPestana = (x: (typeof PESTANAS)[number]) => (
     <button

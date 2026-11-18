@@ -275,21 +275,27 @@ comprobar((await v.textContent('.vs-revision-acciones button'))?.includes('Aplic
 await v.click('.vs-revision-acciones button');
 await v.waitForSelector('.vs-revision-hecha', { timeout: 5000 }).catch(() => {});
 comprobar((await v.textContent('.vs-revision-hecha'))?.includes('1 línea cambiada.'), 'Y se aplica solo el elegido');
-// Tras aplicar, la lista ya no está: se abre la línea desde la página.
+// Tras aplicar, la lista ya no está: se abre la frase desde la página, en la ventana flotante.
 await v.locator('.vs-linea').nth(1).click();
-await v.waitForSelector('.vs-panel-linea', { timeout: 5000 });
-await esperar(v, () => document.querySelector('.vs-linea-texto .pal'), null, 15000);
-comprobar((await sinFurigana(v, '.vs-linea-texto')) === '熱や光はエネルギーの一つである。', 'La línea queda con el texto revisado', await sinFurigana(v, '.vs-linea-texto'));
+await v.waitForSelector('.vs-ventana', { timeout: 5000 });
+await esperar(v, () => document.querySelector('.vs-ventana-texto .pal'), null, 15000);
+comprobar((await sinFurigana(v, '.vs-ventana-texto')) === '熱や光はエネルギーの一つである。', 'La línea queda con el texto revisado', await sinFurigana(v, '.vs-ventana-texto'));
 await v.screenshot({ path: join(CAPTURAS, '4-revisada.png') });
-comprobar((await v.textContent('.vs-linea-acciones .ayuda').catch(() => '')) === 'Revisado con Claude', 'Y dice que la revisó Claude');
+await v.click('.vs-ventana [aria-label="Más"]');
+comprobar((await v.textContent('.vs-acciones-mas .ayuda').catch(() => '')) === 'Revisado con Claude', 'Y dice que la revisó Claude');
+await v.keyboard.press('Escape');
 await v.locator('.vs-linea').nth(2).click();
-await esperar(v, () => document.querySelector('.vs-linea-texto .pal'), null, 15000);
-comprobar((await sinFurigana(v, '.vs-linea-texto')) === '水にとけたイ才ンは電気を通す。', 'La que no se eligió sigue como estaba');
+await esperar(v, () => document.querySelector('.vs-ventana-texto .pal'), null, 15000);
+comprobar((await sinFurigana(v, '.vs-ventana-texto')) === '水にとけたイ才ンは電気を通す。', 'La que no se eligió sigue como estaba');
+await v.keyboard.press('Escape');
 await v.locator('.vs-linea').nth(1).click();
-await v.click('.vs-linea-acciones button:has-text("Restaurar")');
-await esperar(v, () => !document.querySelector('.vs-linea-acciones .ayuda'), null, 5000);
-await esperar(v, () => document.querySelector('.vs-linea-texto .pal'), null, 15000);
-comprobar((await sinFurigana(v, '.vs-linea-texto')) === '熱や光は工ネルギーの一つである。', '«Restaurar» la devuelve a como estaba');
+await esperar(v, () => document.querySelector('.vs-ventana-texto .pal'), null, 15000);
+await v.click('.vs-ventana [aria-label="Más"]');
+await v.click('.vs-acciones-mas button:has-text("Restaurar")');
+await esperar(v, () => !document.querySelector('.vs-acciones-mas .ayuda'), null, 5000);
+await esperar(v, () => document.querySelector('.vs-ventana-texto .pal'), null, 15000);
+comprobar((await sinFurigana(v, '.vs-ventana-texto')) === '熱や光は工ネルギーの一つである。', '«Restaurar» la devuelve a como estaba');
+await v.keyboard.press('Escape');
 
 // Con el mismo texto, la misma revisión: se lee de lo guardado y no se paga otra vez.
 await v.click('.vs-panel-revision [aria-label="Cerrar"]');

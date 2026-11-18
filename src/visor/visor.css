@@ -55,14 +55,27 @@
 .vs-indice button.actual { background: var(--hoja-suave); color: var(--hoja-tinta); font-weight: 700; }
 .vs-indice .num { color: var(--texto-3); }
 
-/* El texto leído por el OCR: cada línea es una zona que se puede tocar, invisible hasta pasar por encima. */
+/* El texto de la página (VisorPaginas, Pagina): la capa entera recibe los toques, y un imán lleva cada uno a la letra
+   más cercana; las líneas son botones para el teclado y los lectores de pantalla. */
 .vs-texto { position: absolute; inset: 0; }
 .vs-linea { position: absolute; padding: 0; border: none; border-radius: 3px; background: transparent; cursor: pointer; }
-.vs-linea:hover { background: rgba(110, 180, 60, 0.14); box-shadow: 0 0 0 1.5px var(--hoja); }
-.vs-linea.elegida { background: rgba(110, 180, 60, 0.2); box-shadow: 0 0 0 2px var(--hoja); }
+.vs-texto.por-letra .vs-linea { cursor: text; }
+.vs-linea:hover { background: rgba(110, 180, 60, 0.08); }
 .vs-linea:focus-visible { outline: 2px solid var(--hoja); outline-offset: 1px; }
-/* La palabra elegida en el panel, marcada en la página. */
-.vs-marca { position: absolute; pointer-events: none; border-radius: 3px; background: rgba(110, 180, 60, 0.3); box-shadow: 0 0 0 2px var(--hoja); }
+/* Lo abierto en la ventana, suave; lo que se está seleccionando, como una selección; la palabra elegida, en verde. */
+.vs-unidad, .vs-seleccion, .vs-marca { position: absolute; pointer-events: none; border-radius: 2px; }
+.vs-unidad { background: rgba(110, 180, 60, 0.14); mix-blend-mode: multiply; }
+.vs-seleccion { background: rgba(56, 132, 255, 0.3); mix-blend-mode: multiply; }
+.vs-lienzo.invertido .vs-unidad, .vs-lienzo.invertido .vs-seleccion { mix-blend-mode: normal; }
+.vs-marca { border-radius: 3px; background: rgba(110, 180, 60, 0.3); box-shadow: 0 0 0 2px var(--hoja); }
+
+/* Las flechas para pasar de página, a los lados del lienzo: a la vista, discretas hasta pasar por encima. */
+.vs-zona { position: relative; flex: 1; min-width: 0; display: flex; }
+.vs-flecha { position: absolute; top: 50%; z-index: 4; display: flex; align-items: center; justify-content: center; width: 38px; height: 68px; padding: 0; border: 1px solid var(--borde); border-radius: var(--r-3); background: color-mix(in srgb, var(--superficie) 82%, transparent); color: var(--texto-2); cursor: pointer; opacity: 0.5; transform: translateY(-50%); transition: opacity 0.15s, background 0.15s; }
+.vs-flecha:hover, .vs-flecha:focus-visible { opacity: 1; background: var(--superficie); color: var(--texto); }
+.vs-flecha.izquierda { left: 10px; }
+/* A la derecha, sin tapar la barra de desplazamiento del lienzo. */
+.vs-flecha.derecha { right: 22px; }
 
 /* Un EPUB de texto: el capítulo va en un marco que ocupa todo el lienzo; el zoom agranda el marco entero. */
 .vs-lienzo-libro { position: relative; padding: 0; overflow: hidden; display: block; }
@@ -72,15 +85,38 @@
 .vs-modos { display: flex; gap: 2px; margin-inline-start: 4px; }
 .vs-modos .btn[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja); }
 
-/* El panel de la línea, a la derecha: su texto con furigana y, debajo, la ficha de la palabra. */
-.vs-panel-linea { width: 380px; display: flex; flex-direction: column; gap: 12px; border-inline-end: none; border-inline-start: 1px solid var(--borde); }
-.vs-panel-cab { display: flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--texto-3); }
-.vs-panel-cab .vs-cerrar { margin-inline-start: auto; }
-.vs-linea-texto { margin: 0; font-family: var(--letra-lengua); font-size: 22px; font-weight: 500; line-height: 2.2; }
+/* ---------- La ventana de lo que se toca (Ventana.tsx) ----------
+   Flota junto al texto, como la ficha de los subtítulos; fijada, es un panel a la derecha que se ensancha. */
+.vs-ventana { display: flex; flex-direction: column; min-height: 0; background: var(--superficie); color: var(--texto); }
+.vs-ventana.flotante { position: fixed; z-index: 30; min-height: 140px; border-radius: var(--r-4); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-3); overflow: hidden; animation: vs-ventana-entra 0.16s var(--resorte); }
+@keyframes vs-ventana-entra { from { opacity: 0; transform: translateY(4px) scale(0.985); } }
+@media (prefers-reduced-motion: reduce) { .vs-ventana.flotante { animation: none; } }
+.vs-ventana.fijada { position: relative; flex: none; padding: 0; border-inline-end: none; border-inline-start: 1px solid var(--borde); overflow: hidden; }
+.vs-ventana-borde { position: absolute; inset-block: 0; inset-inline-start: -3px; z-index: 2; width: 7px; cursor: col-resize; touch-action: none; }
+.vs-ventana-borde:hover { background: var(--hoja-suave); }
+.vs-ventana-cab { flex: none; display: flex; align-items: center; gap: 2px; padding: 6px 8px 6px 14px; border-bottom: 1px solid var(--borde); color: var(--texto-3); cursor: grab; user-select: none; touch-action: none; }
+.vs-ventana.fijada .vs-ventana-cab { cursor: default; }
+.vs-ventana-que { flex: 1; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.vs-ventana-cuerpo { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 14px 14px; }
+.vs-ventana-texto { margin: 0; font-family: var(--letra-lengua); font-size: 20px; font-weight: 500; line-height: 2.2; }
+/* Una palabra larga se parte entre sus trozos con lectura: ya no salta entera de renglón y deja un hueco. */
+.vs-ventana-texto .pal-partible { cursor: pointer; }
+.vs-ventana-texto .pal.trozo { margin: 0; padding-inline: 0; border-radius: 0; }
+.vs-ventana-texto .pal.trozo:first-child { padding-inline-start: 0.05em; border-start-start-radius: 0.2em; border-end-start-radius: 0.2em; }
+.vs-ventana-texto .pal.trozo:last-child { padding-inline-end: 0.05em; border-start-end-radius: 0.2em; border-end-end-radius: 0.2em; }
+.vs-ventana-texto .pal.trozo::before { left: 0; right: 0; }
+.vs-ventana-texto .pal.trozo:first-child::before { left: 0.1em; }
+.vs-ventana-texto .pal.trozo:last-child::before { right: 0.1em; }
+.vs-ventana-texto .pal-partible:hover .pal { background: var(--pal-hover, var(--superficie-3)); }
+.vs-ventana-asa { position: absolute; right: 0; bottom: 0; z-index: 3; width: 18px; height: 18px; cursor: nwse-resize; touch-action: none; opacity: 0; transition: opacity 0.15s; }
+.vs-ventana-asa::before { content: ''; position: absolute; right: 5px; bottom: 5px; width: 9px; height: 9px; border: 2px solid var(--superficie-4); border-width: 0 2px 2px 0; border-bottom-right-radius: 8px; }
+.vs-ventana.flotante:hover .vs-ventana-asa { opacity: 1; }
+.vs-acciones { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; margin: -4px 0 0 -6px; }
+.vs-acciones .ayuda { margin: 0 4px; font-size: 12px; }
+.vs-accion.activo { background: var(--hoja-suave); color: var(--hoja); }
+.vs-acciones-mas { margin-top: -10px; }
 .vs-ficha { min-height: 0; }
 .vs-pista { margin: 0; }
-.vs-linea-acciones { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; margin: -6px 0 0 -8px; }
-.vs-linea-acciones .ayuda { margin: 0; }
 .vs-editar { display: flex; flex-direction: column; gap: 8px; }
 .vs-editar-campo { width: 100%; resize: vertical; font-family: var(--letra-lengua); font-size: 20px; line-height: 1.6; }
 .vs-editar-botones { display: flex; justify-content: flex-end; gap: 6px; }

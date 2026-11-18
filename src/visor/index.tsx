@@ -16,6 +16,7 @@ import base from '../ui/estilos';
 import { cargarFuentes } from '../ui/fuentes';
 import { useRelojLectura } from '../ui/relojLectura';
 import { aplicarLengua, lengua } from '../ui/lengua';
+import { letraElegida } from '../ui/letra';
 import { variablesPaleta } from '../ui/paletas';
 import { useTema } from '../ui/tema';
 import { Abriendo, AvisoError, Cabeza } from './comun';
@@ -69,8 +70,11 @@ function Visor({ id }: { id: string }) {
     };
   }, [id]);
 
+  // La letra elegida para la lengua, como en los subtítulos y el diccionario: el visor usaba siempre la redondeada, que se
+  // lee peor en los kanji complejos.
+  const letra = letraElegida(lengua.value, a.diccionarioLetra);
   return (
-    <div class="kk-raiz vs" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': lengua.value.letra }}>
+    <div class="kk-raiz vs" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': letra.letra, '--aire-lectura': letra.aire }}>
       <style>{base + overlay + appCss + visorCss}</style>
       {abierto ? (
         abierto.doc.documento?.texto ? (

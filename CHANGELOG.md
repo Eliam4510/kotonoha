@@ -2,6 +2,18 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.35.0 · 2026-11-17
+
+El lector, sin tropiezos: una ventana flotante junto al texto.
+
+- **Tocar una palabra abre su frase.** En el visor, tocar una palabra abre su frase entera, aunque ocupe varios renglones, en una ventana flotante como la de los subtítulos, con furigana, sus palabras y la ficha de la palabra. Dos toques seguidos abren la frase; tres, el párrafo. Si el toque cae entre dos renglones, un imán lo lleva al más cercano. Claude recibe la frase entera, no medio renglón, y la gramática se busca en ella.
+- **La ventana no tapa lo que queda por leer.** Va al margen de la página si cabe, a la altura de lo elegido; si no, sobre lo ya leído: encima del renglón, o a la derecha de la columna en texto vertical. Se mueve, se agranda, y **Fijar a un lado** la convierte en un panel que se ensancha y recuerda su ancho.
+- **Seleccionar en la página.** Arrastrando se selecciona de una letra a otra, también entre renglones, y la ventana ofrece **Traducir**, **Explicar** (qué significa ese trozo dentro de su frase), **Desglosar**, **Escuchar**, **Resaltar**, **Nota** y **Copiar**; en **Más**, **Buscar en el libro** y **Editar la línea**. Ctrl+C copia lo abierto y Esc lo cierra.
+- **Pasar de página, solo cuando se quiere.** Antes, un toque fuera de las líneas en los lados de la página pasaba de página, y fallar por poco al tocar una palabra se la llevaba. Ahora un toque fuera del texto solo cierra lo abierto, y se pasa de página con las flechas que se ven a los lados, el teclado o deslizando.
+- **Resaltados de varios renglones.** Resaltar o subrayar una frase o lo seleccionado lo marca en todos sus renglones; lo mismo resaltado otra vez cambia de color en vez de duplicarse, y **Nota** comenta el resaltado que ya hay.
+- **Más arreglos.** Las palabras largas se parten entre sus trozos con lectura en vez de saltar enteras de renglón; el visor usa la letra elegida en Ajustes, no siempre la redondeada; la ventana se cierra al cambiar de página, y con una palabra elegida funcionan sus teclas, de la 1 a la 4.
+- **Una limitación.** En un globo de manga no se sabe dónde va cada letra: se abre el globo entero, la palabra se elige en la ventana, y dentro de él no se selecciona arrastrando.
+
 ## 0.34.0 · 2026-11-16
 
 La letra de una canción, sin versos en los pasajes instrumentales.
@@ -338,6 +350,18 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.35.0 · 2026-11-17
+
+The reader, without stumbling: a floating window next to the text.
+
+- **Tapping a word opens its sentence.** In the viewer, tapping a word opens its whole sentence, even across several lines, in a floating window like the one for subtitles, with furigana, its words and the word's panel. Two taps in a row open the sentence; three, the paragraph. If a tap lands between two lines, a magnet takes it to the nearest one. Claude receives the whole sentence, not half a line, and grammar is looked for in it.
+- **The window does not cover what is left to read.** It goes in the page margin if it fits, level with what was picked; otherwise over text already read: above the line, or to the right of the column in vertical text. It can be moved and enlarged, and **Pin to the side** turns it into a panel that widens and remembers its width.
+- **Selecting on the page.** Dragging selects from one character to another, across lines too, and the window offers **Translate**, **Explain** (what that piece means within its sentence), **Break down**, **Listen**, **Highlight**, **Note** and **Copy**; under **More**, **Search the book** and **Edit the line**. Ctrl+C copies what is open and Esc closes it.
+- **Turning pages only when you mean to.** Before, a tap outside the lines at the sides of the page turned the page, and narrowly missing a word took you away from it. Now a tap outside the text only closes what is open, and pages are turned with the arrows at the sides, the keyboard or a swipe.
+- **Highlights across lines.** Highlighting or underlining a sentence or a selection marks every line of it; highlighting the same text again changes its colour instead of duplicating it, and **Note** comments on the existing highlight.
+- **More fixes.** Long words break between their parts with readings instead of jumping whole to the next line; the viewer uses the typeface chosen in Settings, not always the rounded one; the window closes when the page changes, and with a word picked its keys, 1 to 4, work.
+- **A limitation.** In a manga bubble the position of each character is not known: the whole bubble opens, the word is picked in the window, and inside it you cannot select by dragging.
 
 ## 0.34.0 · 2026-11-16
 

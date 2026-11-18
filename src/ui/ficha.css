@@ -94,20 +94,26 @@ button.chip-gram:active { transform: scale(0.96); }
 
 /* ---------- Ficha de palabra ---------- */
 .ficha { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; container-type: inline-size; }
-/* En espacios estrechos, como un panel lateral, todo se aprieta sin romperse. */
+/* En espacios estrechos, como un panel lateral, todo se aprieta sin romperse. Las reglas llevan delante .ficha: las de
+   cada pieza van más abajo en este archivo, y con la misma especificidad ganarían ellas, como pasaba antes. */
 @container (max-width: 450px) {
-  .estado { gap: 4px; padding: 0 5px; font-size: 11.5px; }
-  .pestana { font-size: 10px; }
-  .ficha-pie .tecla { display: none; }
-  .etiqueta-frec { padding: 0 8px; margin-right: 0; }
-  .ficha-palabra { font-size: 30px; }
+  .ficha .estado { gap: 4px; padding: 0 5px; font-size: 11.5px; }
+  .ficha .pestana { font-size: 10px; }
+  .ficha .ficha-pie .tecla { display: none; }
+  .ficha .etiqueta-frec { padding: 0 8px; margin-right: 0; }
+  .ficha .ficha-palabra { font-size: 30px; }
 }
-/* Más estrecho todavía, como el panel de una línea en el visor: en español los cuatro estados no cabían y el último se
-   salía sobre el botón de al lado. Sin el punto, que en el activo ya dice su fondo de color. */
-@container (max-width: 390px) {
-  .estados { grid-template-columns: repeat(4, minmax(0, auto)); gap: 1px; }
-  .estado { gap: 0; min-width: 0; padding: 0 4px; font-size: 10.5px; overflow: hidden; }
-  .estado > i { display: none; }
+/* Más estrecho todavía, como la ventana del visor: en español los cuatro estados no caben hasta unos 440 píxeles, y el
+   último se salía sobre el botón de al lado. Sin el punto, que en el activo ya dice su fondo de color. */
+@container (max-width: 440px) {
+  .ficha .estados { grid-template-columns: repeat(4, minmax(0, auto)); gap: 1px; }
+  .ficha .estado { gap: 0; min-width: 0; padding: 0 4px; font-size: 10.5px; overflow: hidden; }
+  .ficha .estado > i { display: none; }
+}
+/* Y por debajo de unos 345, como la ventana del visor estrechada para caber al margen de la página, ni así caben en una
+   fila: van en dos, de dos en dos, en vez de cortarse («esconocid»). */
+@container (max-width: 345px) {
+  .ficha .estados { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: var(--r-3); }
 }
 
 .ficha-cab { flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 4px 18px; }
