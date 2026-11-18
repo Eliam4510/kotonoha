@@ -40,6 +40,11 @@ export const CATALOGO = {
   nitidez: 'aperture',
   sentido: 'arrows-left-right',
   'texto-vertical': 'text-columns',
+  // Las herramientas del visor y el modo lectura.
+  'cursor-texto': 'cursor-text',
+  mano: 'hand',
+  volver: 'arrow-u-up-left',
+  'modo-lectura': 'eyeglasses',
   video: 'monitor-play',
   pelicula: 'film-strip',
   claqueta: 'film-slate',

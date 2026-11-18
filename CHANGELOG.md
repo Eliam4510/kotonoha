@@ -2,6 +2,18 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.36.0 · 2026-11-17
+
+Todo en su sitio: el visor, con menús, herramientas y atajos, como un lector de PDF.
+
+- **Menús con nombre.** Las órdenes del visor, que antes eran una fila de iconos, van en los menús **Libro**, **Ver**, **Ir**, **Texto**, **Ayudas**, **Anotar** y **Ayuda**, en una sola fila con las páginas, el zoom, el marcador y «Aa». Cada orden dice su tecla; hay submenús para el sentido de lectura, la nitidez, la lectura sobre las palabras y la letra, y todo se maneja también con el teclado: F10, las flechas, Intro y Esc.
+- **Buscar una acción.** Ctrl+K abre una paleta que encuentra cualquier orden escribiendo lo que hace, o lleva a una página escribiendo su número. «?» enseña todos los atajos.
+- **Herramientas.** En el carril de la izquierda: **Seleccionar** (V); **Mano** (H), que mueve la página al arrastrar; **Resaltador** (R), que resalta lo que se arrastra sin abrir la ventana, en el color elegido, y **Añadir una nota** (N). Un clic derecho en la página abre su menú, con **Añadir una nota aquí** y **Copiar el texto de la página**.
+- **Paneles y barra de estado.** El carril abre las miniaturas, el índice, las notas y la búsqueda, que se ensanchan arrastrando su borde y recuerdan su ancho. Abajo se ve la página, el capítulo, cuánto va del libro y de dónde sale el texto; si la página no tiene texto, desde ahí mismo se lee con el OCR. Tras un salto desde el índice, las miniaturas, una nota, lo encontrado o un número de página, la barra de estado ofrece volver a la página de antes, también con Alt+←.
+- **Modo lectura y «Aa».** **Modo lectura** (M) deja solo la página; la barra se asoma al llevar el ratón arriba. «Aa» reúne las ayudas de lectura, que valen en todo Kotonoha, y lo que vale solo para el libro abierto: el sentido, la vista y la nitidez.
+- **Un libro, una pestaña.** Abrir desde la Biblioteca un libro que ya está abierto lleva a su pestaña, en vez de abrir otra que guardaría un sitio de lectura distinto.
+- **Más arreglos.** Con una ficha larga, la ventana flotante ya no baja hasta tapar la barra de abajo: crece hasta el borde de la página y por dentro se desplaza.
+
 ## 0.35.0 · 2026-11-17
 
 El lector, sin tropiezos: una ventana flotante junto al texto.
@@ -350,6 +362,18 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.36.0 · 2026-11-17
+
+Everything in its place: the viewer, with menus, tools and shortcuts, like a PDF reader.
+
+- **Named menus.** The viewer's commands, which used to be a row of icons, now sit in the **Book**, **View**, **Go**, **Text**, **Reading aids**, **Annotate** and **Help** menus, in a single row with the pages, the zoom, the bookmark and “Aa”. Each command shows its key; there are submenus for the reading direction, sharpness, the reading over words and the typeface, and everything also works with the keyboard: F10, the arrow keys, Enter and Esc.
+- **Find an action.** Ctrl+K opens a palette that finds any command by typing what it does, or goes to a page by typing its number. “?” shows every shortcut.
+- **Tools.** On the rail on the left: **Select** (V); **Hand** (H), which moves the page when dragging; **Highlighter** (R), which highlights what is dragged over without opening the window, in the chosen colour; and **Add a note** (N). A right click on the page opens its menu, with **Add a note here** and **Copy the page text**.
+- **Panels and status bar.** The rail opens the thumbnails, the contents, the notes and search, which widen by dragging their edge and remember their width. At the bottom you see the page, the chapter, how far into the book you are and where the text comes from; if the page has no text, it can be read with OCR from right there. After a jump from the contents, the thumbnails, a note, a search result or a page number, the status bar offers to go back to the page before, also with Alt+←.
+- **Reading mode and “Aa”.** **Reading mode** (M) leaves just the page; the bar appears when the mouse goes to the top. “Aa” gathers the reading aids, which apply across Kotonoha, and what applies only to the open book: direction, view and sharpness.
+- **One book, one tab.** Opening from the Library a book that is already open takes you to its tab, instead of opening another one that would save a different reading position.
+- **More fixes.** With a long word panel, the floating window no longer grows down over the bar at the bottom: it grows to the edge of the page area and scrolls inside.
 
 ## 0.35.0 · 2026-11-17
 

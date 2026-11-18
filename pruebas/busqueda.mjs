@@ -8,6 +8,7 @@ import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
 import { iniciarMock } from './mock-claude.mjs';
+import { estadoOrden, orden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -115,7 +116,7 @@ const abrir = async () => {
   await app.locator('button.ap-tapa[aria-label="Leer quimica"]').click();
   const v = await nueva;
   vigilar(v);
-  await v.waitForSelector('.vs-barra [aria-label="Buscar en el libro"]', { timeout: 20000 });
+  await v.waitForSelector('.vs-carril [aria-label="Buscar en el libro"]', { timeout: 20000 });
   return v;
 };
 const contar = (v, selector) => v.evaluate((s) => document.querySelectorAll(s).length, selector);
@@ -196,7 +197,7 @@ comprobar((await contar(v, '.vs-panel-buscar')) === 0 && (await contar(v, '.vs-h
 
 console.log('\n== Vista de texto ==');
 await irA(v, 1);
-await v.click('[aria-label="Ver como texto"]');
+await orden(v, 'vista-texto');
 await v.waitForSelector('.vs-vista-texto .ap-papel .pal', { timeout: 20000 }).catch(() => {});
 comprobar((await contar(v, '.vs-pagina img')) === 0, 'La imagen de la página deja paso a su texto');
 comprobar((await sinFurigana(v, '.vs-vista-texto .ap-papel h3')) === '第一章化学の基礎', 'El título, aparte', await sinFurigana(v, '.vs-vista-texto .ap-papel h3'));
@@ -212,7 +213,7 @@ comprobar(limpio(parrafos[0] ?? '') === T.slice(0, 48) && limpio(parrafos[1] ?? 
 comprobar((await contar(v, '.vs-vista-texto .ap-comprension')) === 1, 'Con la comprensión del texto');
 comprobar((await v.locator('.vs-vista-texto .ap-dock button', { hasText: 'Leer en voz alta' }).count()) === 1, 'Y la lectura en voz alta');
 comprobar((await v.textContent('.vs-vista-texto .ap-lectura-titulo')) === 'Página 1', 'Dice de qué página es el texto');
-comprobar((await contar(v, '[aria-label="Ajustar al ancho"]')) === 0 && (await contar(v, '[aria-label="Añadir una nota"]')) === 0, 'Sin el zoom ni las notas, que son de la imagen');
+comprobar((await contar(v, '[aria-label="Acercar"]')) === 0 && (await contar(v, '[aria-label="Añadir una nota"]')) === 0 && !(await estadoOrden(v, 'zoom-ancho')).existe && (await estadoOrden(v, 'nota')).deshabilitada, 'Sin el zoom ni las notas, que son de la imagen');
 await v.locator('.vs-vista-texto .ap-papel .pal').nth(1).click();
 await v.waitForSelector('.vs-vista-texto .ap-lectura-ficha', { timeout: 8000 }).catch(() => {});
 comprobar((await contar(v, '.vs-vista-texto .ap-lectura-ficha')) === 1, 'Tocar una palabra abre su ficha');
@@ -240,7 +241,7 @@ await v.close();
 v = await abrir();
 await v.waitForSelector('.vs-vista-texto', { timeout: 10000 }).catch(() => {});
 comprobar((await contar(v, '.vs-vista-texto')) === 1, 'Al volver a abrir el libro, sigue en la vista de texto');
-await v.click('[aria-label="Ver las páginas"]');
+await orden(v, 'vista-texto');
 await v.waitForSelector('.vs-pagina img', { timeout: 10000 }).catch(() => {});
 comprobar((await contar(v, '.vs-pagina img')) >= 1 && (await contar(v, '.vs-vista-texto')) === 0, 'Y «Ver las páginas» vuelve a la imagen');
 
@@ -249,8 +250,7 @@ comprobar((await contar(v, '.vs-pagina img')) >= 1 && (await contar(v, '.vs-vist
 console.log('\n== Revisar con Claude ==');
 await irA(v, 2);
 await v.waitForSelector('.vs-linea', { timeout: 10000 });
-const revisar = '[aria-label="Revisar el texto con Claude"]';
-await v.click(revisar);
+await orden(v, 'revisar');
 await v.waitForSelector('.vs-revision-error', { timeout: 10000 }).catch(() => {});
 comprobar((await v.textContent('.vs-revision-error p').catch(() => ''))?.includes('Falta la clave de la API de Claude'), 'Sin clave, la revisión dice qué falta');
 await sw.evaluate(async (url) => {
@@ -300,7 +300,7 @@ await v.keyboard.press('Escape');
 // Con el mismo texto, la misma revisión: se lee de lo guardado y no se paga otra vez.
 await v.click('.vs-panel-revision [aria-label="Cerrar"]');
 const pedidas = mock.peticiones.length;
-await v.click(revisar);
+await orden(v, 'revisar');
 await v.waitForSelector('.vs-propuesta', { timeout: 10000 }).catch(() => {});
 comprobar((await contar(v, '.vs-propuesta')) === 2 && mock.peticiones.length === pedidas, 'Revisar otra vez la misma página no vuelve a pedirla', `${mock.peticiones.length - pedidas} peticiones`);
 await v.close();

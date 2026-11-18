@@ -9,6 +9,7 @@ import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
 import { confirmarBorrado, recargarExtension } from './extension.mjs';
+import { estadoOrden, orden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -150,14 +151,14 @@ comprobar((await indicador(v)) === '4–5', 'Dos flechas seguidas a la izquierda
 await v.keyboard.press('ArrowRight');
 await v.waitForTimeout(500);
 comprobar((await indicador(v)) === '2–3', 'La derecha vuelve atrás', await indicador(v));
-const orden = await v.evaluate(() => {
+const ordenHojas = await v.evaluate(() => {
   const x = (n) => document.querySelector(`.vs-pagina[data-pagina="${n}"]`)?.getBoundingClientRect().left ?? 0;
   return x(2) > x(3);
 });
-comprobar(orden, 'La página 2 va a la derecha de la 3, como en un tomo japonés');
+comprobar(ordenHojas, 'La página 2 va a la derecha de la 3, como en un tomo japonés');
 await v.screenshot({ path: join(CAPTURAS, 'manga-doble.png') });
 
-await v.click('[aria-label="Una página"]');
+await orden(v, 'vista-una');
 await v.keyboard.press('End');
 await v.waitForTimeout(300);
 comprobar((await indicador(v)) === '5', 'Fin lleva a la última página', await indicador(v));
@@ -174,7 +175,7 @@ await v.click('[aria-label="Acercar"]');
 await v.waitForTimeout(300);
 const zoomDespues = await v.evaluate(() => document.querySelector('.vs-zoom')?.textContent);
 comprobar(parseInt(zoomDespues ?? '0') > parseInt(zoomAntes ?? '0'), 'Acercar sube el zoom', `${zoomAntes} → ${zoomDespues}`);
-await v.click('[aria-label="Ajustar al ancho"]');
+await orden(v, 'zoom-ancho');
 await v.waitForTimeout(300);
 const ancho = await v.evaluate(() => {
   const l = document.querySelector('.vs-lienzo');
@@ -183,7 +184,7 @@ const ancho = await v.evaluate(() => {
 });
 comprobar(ancho < 3, 'Ajustar al ancho llena el ancho', String(ancho));
 
-await v.click('[aria-label="Desplazamiento continuo"]');
+await orden(v, 'vista-continua');
 await v.waitForTimeout(500);
 comprobar((await v.evaluate(() => document.querySelectorAll('.vs-pagina').length)) === 5, 'En continuo están todas las páginas');
 await v.evaluate(() => document.querySelector('.vs-lienzo').scrollTo(0, 1e6));
@@ -193,7 +194,7 @@ comprobar((await indicador(v)) === '5', 'Al bajar, la página actual sigue al de
 await v.click('[aria-label="Índice"]');
 const entradas = await v.evaluate(() => [...document.querySelectorAll('.vs-indice button')].map((b) => b.textContent));
 comprobar(entradas.length === 2 && entradas[1].startsWith('第一話'), 'El índice del libro, con sus páginas', JSON.stringify(entradas));
-await v.click('[aria-label="Una página"]');
+await orden(v, 'vista-una');
 await v.locator('.vs-indice button').nth(1).click();
 await v.waitForTimeout(300);
 comprobar((await indicador(v)) === '4', 'Una entrada del índice lleva a su página', await indicador(v));
@@ -205,9 +206,10 @@ await v.waitForTimeout(300);
 comprobar((await indicador(v)) === '3', 'Una miniatura lleva a su página', await indicador(v));
 await v.screenshot({ path: join(CAPTURAS, 'manga-miniaturas.png') });
 
-await v.click('[aria-label="Se lee de derecha a izquierda"]');
+comprobar((await estadoOrden(v, 'sentido-rtl')).marcada, 'Un manga se lee de derecha a izquierda');
+await orden(v, 'sentido-ltr');
 await v.waitForTimeout(300);
-comprobar(await v.evaluate(() => !!document.querySelector('[aria-label="Se lee de izquierda a derecha"]')), 'El sentido de lectura se puede cambiar');
+comprobar((await estadoOrden(v, 'sentido-ltr')).marcada, 'El sentido de lectura se puede cambiar');
 await v.keyboard.press('ArrowRight');
 await v.waitForTimeout(300);
 comprobar((await indicador(v)) === '4', 'Y entonces la derecha avanza', await indicador(v));
@@ -251,26 +253,26 @@ const filtro = () =>
     return { clase: document.querySelector('.vs-lienzo')?.classList.contains('con-nitidez'), css: img ? getComputedStyle(img).filter : '', k2: mezcla?.getAttribute('k2'), k3: mezcla?.getAttribute('k3'), fondo: !!f?.querySelector('feComponentTransfer'), radio: Number(f?.querySelector('feGaussianBlur')?.getAttribute('stdDeviation')) };
   });
 comprobar(!(await filtro()).clase, 'Sin nitidez, la página se ve tal cual');
-await v.locator('button[aria-label^="Nitidez"]').click();
+await orden(v, 'nitidez');
 await v.waitForTimeout(300);
 let f = await filtro();
 comprobar(f.clase && f.css.includes('#vs-nitidez') && f.k2 === '2.2' && f.k3 === '-1.2' && f.radio >= 0.6 && f.radio <= 2.5, 'La nitidez enfoca cada página con su filtro, en el nivel medio', JSON.stringify(f));
-await v.locator('.vs-modos button', { hasText: 'Fuerte' }).click();
-await v.locator('.vs-modos button', { hasText: 'Fondo blanco' }).click();
+await orden(v, 'nitidez-3');
+await orden(v, 'fondo-blanco');
 await v.waitForTimeout(300);
 f = await filtro();
 comprobar(f.k2 === '3' && f.k3 === '-2' && f.fondo, 'Con más fuerza y, si se pide, el papel blanco y el texto negro', JSON.stringify(f));
-await v.locator('button[aria-label="Invertir colores"]').click();
+await orden(v, 'invertir');
 await v.waitForTimeout(300);
 f = await filtro();
 comprobar(f.css.includes('#vs-nitidez') && f.css.includes('invert(1)'), 'Y junto con los colores invertidos', f.css);
-await v.locator('button[aria-label="Invertir colores"]').click();
+await orden(v, 'invertir');
 await v.waitForTimeout(900);
 await v.close();
 v = await abrir('apuntes');
 f = await filtro();
 comprobar(f.clase && f.k2 === '3' && f.fondo, 'Al volver a abrirlo, el libro la recuerda', JSON.stringify(f));
-await v.locator('button[aria-label^="Nitidez"]').click();
+await orden(v, 'nitidez');
 await v.waitForTimeout(900);
 await v.close();
 await app.reload();

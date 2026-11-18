@@ -10,6 +10,7 @@ import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
 import { confirmarBorrado, recargarExtension } from './extension.mjs';
+import { esperarOrden, estadoOrden, orden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -215,8 +216,8 @@ console.log('\n== Libro impreso ==');
 let v = await abrir('Libro de prueba');
 const idLibro = libroDe(v);
 comprobar(await v.evaluate(() => !document.querySelector('.vs-linea')), 'Sin pedirlo, no se lee el texto');
-await v.click('[aria-label="Leer el texto de las páginas"]');
-const modo = () => v.evaluate(() => document.querySelector('.vs-modos button[aria-pressed="true"]')?.textContent ?? 'sin modos a la vista');
+await orden(v, 'ocr');
+const modo = async () => ((await estadoOrden(v, 'ocr-libro')).marcada ? 'Libro' : (await estadoOrden(v, 'ocr-manga')).marcada ? 'Manga' : 'sin modo elegido');
 const modoLibro = await modo();
 comprobar(modoLibro === 'Libro', 'Un libro de izquierda a derecha se lee en modo libro', modoLibro === 'Libro' ? '' : modoLibro);
 const t0 = Date.now();
@@ -276,7 +277,7 @@ await v.close();
 
 console.log('\n== Manga ==');
 v = await abrir('Manga de prueba');
-await v.click('[aria-label="Leer el texto de las páginas"]');
+await orden(v, 'ocr');
 const modoManga = await modo();
 comprobar(modoManga === 'Manga', 'Un manga se lee en modo manga', modoManga === 'Manga' ? '' : modoManga);
 const t2 = Date.now();
@@ -307,15 +308,14 @@ const lineasDesde = (pagina, origen, ms) =>
     )
     .then((h) => h.jsonValue())
     .catch(() => null);
-const botonPdf = (pagina) => pagina.locator('.vs-modos button:has-text("Texto del PDF")');
 v = await abrir('capa-vieja');
 const capa = await lineasDesde(v, 'capa', 20000);
 comprobar(!!capa, 'Sin el OCR, el texto que trae el PDF', JSON.stringify(capa));
-await v.click('[aria-label="Leer el texto de las páginas"]');
-await botonPdf(v).waitFor({ timeout: 15000 }).catch(() => {});
-comprobar((await botonPdf(v).getAttribute('aria-pressed').catch(() => null)) === 'true', 'Con el OCR aparece «Texto del PDF», encendido');
+await orden(v, 'ocr');
+const pdf = await esperarOrden(v, 'texto-pdf');
+comprobar(pdf.existe && pdf.marcada && !pdf.deshabilitada, 'Con el OCR aparece «Texto del PDF», encendido', JSON.stringify(pdf));
 comprobar(!!(await lineasDesde(v, 'capa', 5000)), 'Y sigue a la vista el texto del PDF');
-await botonPdf(v).click();
+await orden(v, 'texto-pdf');
 const propio = await lineasDesde(v, 'ocr', 120000);
 const ePdf = propio ? error(propio.join(''), LINEAS_LIBRO.join('')) : 1;
 comprobar(ePdf < 0.08, 'Apagado, Kotonoha lee la imagen con su OCR y no la capa vieja', `${(ePdf * 100).toFixed(1)} %`);
@@ -323,8 +323,8 @@ await v.screenshot({ path: join(CAPTURAS, 'pdf-ocr-propio.png') });
 await v.waitForTimeout(900);
 await v.close();
 v = await abrir('capa-vieja');
-await botonPdf(v).waitFor({ timeout: 15000 }).catch(() => {});
-const recordado = await botonPdf(v).getAttribute('aria-pressed').catch(() => null);
+const pdfRecordado = await esperarOrden(v, 'texto-pdf');
+const recordado = pdfRecordado.existe ? String(pdfRecordado.marcada) : null;
 const otraVez = await lineasDesde(v, 'ocr', 20000);
 comprobar(recordado === 'false' && !!otraVez, 'Al volver a abrirlo, se acuerda de leerlo con el OCR', `${recordado}`);
 await v.close();
@@ -335,7 +335,7 @@ console.log('\n== PDF escaneado: el OCR lee la imagen escaneada, no la página p
 v = await abrir('escaneo-con-margen');
 const avisos = [];
 v.on('console', (m) => avisos.push(m.text()));
-await v.click('[aria-label="Leer el texto de las páginas"]');
+await orden(v, 'ocr');
 const escaneado = await lineasDe(v, 120000);
 const eEscaneo = escaneado.lineas ? error(escaneado.lineas.join(''), LINEAS_LIBRO.join('')) : 1;
 comprobar(eEscaneo < 0.08, 'Lee el texto del escaneo', `${(eEscaneo * 100).toFixed(1)} %`);
@@ -363,7 +363,7 @@ await v.close();
 
 console.log('\n== Las páginas siguientes se leen antes de llegar ==');
 v = await abrir('Manga largo');
-await v.click('[aria-label="Leer el texto de las páginas"]');
+await orden(v, 'ocr');
 const idManga = libroDe(v);
 const primeraPagina = await lineasDe(v, 120000);
 comprobar(!primeraPagina.fallo, 'Lee la página a la vista', primeraPagina.fallo ?? '');

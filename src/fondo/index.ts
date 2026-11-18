@@ -157,6 +157,15 @@ async function abrirLectorWeb(junto = false): Promise<void> {
 /** El visor de la Biblioteca, en una pestaña normal: para leer a pantalla completa o en vista dividida. */
 async function abrirVisor(id: string): Promise<void> {
   const url = chrome.runtime.getURL(`visor.html#${encodeURIComponent(id)}`);
+  // Un libro, una pestaña: si ya está abierto, se va a su pestaña en lugar de abrir otra con otro sitio de lectura, que
+  // al cerrarse dejaría guardado el suyo en lugar del último.
+  const abiertas = await chrome.tabs.query({}).catch(() => [] as chrome.tabs.Tab[]);
+  const ya = abiertas.find((t) => (t.url || t.pendingUrl) === url);
+  if (ya?.id !== undefined) {
+    await chrome.tabs.update(ya.id, { active: true });
+    await chrome.windows.update(ya.windowId, { focused: true }).catch(() => {});
+    return;
+  }
   const ventana = await chrome.windows.getLastFocused({ windowTypes: ['normal'] }).catch(() => null);
   if (!ventana?.id) {
     await chrome.windows.create({ url, type: 'normal' });

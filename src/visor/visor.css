@@ -1,15 +1,22 @@
 /* El visor de la Biblioteca: barra arriba, lienzo con las páginas, panel lateral opcional y barra de páginas abajo. */
-.vs { display: flex; flex-direction: column; height: 100vh; background: var(--fondo); color: var(--texto); font-family: var(--letra, inherit); }
+.vs { position: relative; display: flex; flex-direction: column; height: 100vh; background: var(--fondo); color: var(--texto); font-family: var(--letra, inherit); }
+/* El visor de páginas va en un marco que no cuenta para la maqueta: solo lleva la clase del modo lectura. */
+.vs-marco { display: contents; }
 
-.vs-barra { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 8px 14px; background: var(--superficie); border-bottom: 1px solid var(--borde); position: relative; z-index: 2; }
+/* Una sola fila: la vuelta a la Biblioteca y el título, los menús, y a la derecha las páginas, el zoom, el marcador y
+   «Aa». Por encima de la ventana flotante, para que los menús no queden debajo de ella. */
+.vs-barra { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 6px 10px; background: var(--superficie); border-bottom: 1px solid var(--borde); position: relative; z-index: 35; }
 .vs-grupo { display: flex; align-items: center; gap: 2px; }
-.vs-cabeza { gap: 8px; min-width: 0; flex: 1 1 220px; }
+.vs-cabeza { gap: 8px; min-width: 0; flex: 0 1 auto; max-width: 22vw; }
+.vs-barra-hueco { flex: 1 1 0; min-width: 0; }
 .vs-titulo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 /* Como los botones activos del resto de la app: --hoja-tinta es para texto sobre el verde lima y en el tema oscuro no se ve. */
 .vs .btn-icono[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja); --ico-opacidad: 0.4; }
 .vs-pagina-actual { display: flex; align-items: center; gap: 6px; margin: 0 4px; font-size: 13px; color: var(--texto-2); }
-.vs-numero { width: 5.2em; padding: 3px 6px; text-align: center; font-size: 13px; }
-.vs-zoom { min-width: 4.6em; justify-content: center; font-size: 13px; }
+.vs-numero { width: 5.2em; height: 30px; padding: 3px 6px; text-align: center; font-size: 13px; }
+.vs-zoom { min-width: 5.2em; justify-content: center; gap: 4px; font-size: 13px; }
+.vs-zoom .ico { opacity: 0.55; }
+.vs-zoom.abierto, .vs-aa.abierto { background: var(--superficie-3); color: var(--texto); }
 
 .vs-cuerpo { flex: 1; min-height: 0; display: flex; }
 .vs-panel { flex: none; width: 216px; overflow-y: auto; padding: 12px 10px; background: var(--superficie); border-inline-end: 1px solid var(--borde); }
@@ -41,7 +48,7 @@
 .vs-aviso { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 46ch; padding: 24px; text-align: center; color: var(--texto-2); }
 .vs-aviso b { color: var(--texto); font-size: 17px; }
 
-.vs-miniaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 8px; }
+.vs-miniaturas { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px 8px; }
 .vs-miniatura { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px; border: none; border-radius: var(--r-2); background: none; color: var(--texto-3); font-size: 11.5px; cursor: pointer; }
 .vs-miniatura:hover { background: var(--superficie-2); }
 .vs-miniatura-hoja { display: block; width: 100%; background: var(--superficie-2); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); overflow: hidden; }
@@ -276,6 +283,9 @@
 .vs-capitulo { max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vs-portada { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 
+@media (max-width: 1340px) {
+  .vs-barra .vs-extremo { display: none; }
+}
 @media (max-width: 720px) {
   .vs-barra { gap: 4px 10px; padding: 6px 8px; }
   .vs-panel { width: 150px; }
@@ -288,3 +298,116 @@
 @keyframes vs-progreso { from { transform: translateX(-100%); } to { transform: translateX(320%); } }
 @keyframes vs-progreso-entra { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .vs-progreso::before { animation-duration: 2.4s; } }
+
+/* ---------- Los menús de la barra (Menus.tsx) ----------
+   Como los de un programa de escritorio: nombres en la barra, órdenes con su tecla a la derecha, casillas y opciones con
+   su marca, y submenús de un nivel a un lado. */
+.vs-menus { display: flex; align-items: center; gap: 1px; }
+.vs-menus-uno { position: relative; }
+.vs-menus-nombre { height: 30px; padding: 0 8px; border: none; border-radius: var(--r-2); background: none; color: var(--texto-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.vs-menus-nombre:hover, .vs-menus-nombre.abierto { background: var(--superficie-3); color: var(--texto); }
+.vs-menus-nombre:focus-visible { outline: 2px solid var(--hoja); outline-offset: -2px; }
+.vs-menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 40; display: flex; flex-direction: column; width: max-content; min-width: 250px; max-width: 380px; padding: 5px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-3); outline: none; animation: vs-menu-entra 0.12s ease-out; }
+@keyframes vs-menu-entra { from { opacity: 0; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .vs-menu { animation: none; } }
+.vs-menu-orden { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 5px 10px 5px 8px; border: none; border-radius: var(--r-2); background: none; color: var(--texto); font: inherit; font-size: 13.5px; text-align: start; cursor: pointer; }
+.vs-menu-orden:hover, .vs-menu-orden:focus, .vs-menu-con-sub.abierto { background: var(--superficie-3); outline: none; }
+.vs-menu-orden[aria-disabled='true'] { color: var(--texto-3); cursor: default; }
+.vs-menu-orden[aria-disabled='true']:hover { background: none; }
+.vs-menu-marca { flex: none; width: 18px; display: flex; align-items: center; justify-content: center; color: var(--texto-3); }
+.vs-menu-orden[aria-checked='true'] .vs-menu-marca { color: var(--hoja); }
+.vs-menu-punto { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.vs-menu-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.vs-menu-con-sub .vs-menu-texto { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 14px; }
+.vs-menu-con-sub .vs-menu-etiqueta { white-space: nowrap; }
+.vs-menu-valor { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vs-tecla-flecha { vertical-align: -1px; }
+.vs-menu-porque, .vs-menu-valor { font-size: 11.5px; line-height: 1.35; color: var(--texto-3); }
+.vs-menu-con-sub > .ico { flex: none; color: var(--texto-3); }
+.vs-menu-atajo { flex: none; margin-inline-start: 14px; padding: 0; border: none; background: none; font: inherit; font-size: 11.5px; color: var(--texto-3); }
+.vs-menu-raya { height: 1px; margin: 5px 8px; background: var(--borde); }
+.vs-menu-grupo-sub { position: relative; }
+.vs-submenu { top: -5px; left: calc(100% + 4px); min-width: 200px; }
+.vs-submenu.izquierda { left: auto; right: calc(100% + 4px); }
+.vs-grupo-zoom { position: relative; }
+.vs-menu-zoom { left: 50%; min-width: 210px; transform: translateX(-50%); animation: none; }
+/* El menú de un clic derecho en la página: junto al puntero, sobre todo lo demás. */
+.vs-contextual { position: fixed; z-index: 50; }
+.vs-contextual > .vs-menu { position: static; }
+
+/* ---------- «Aa»: las ayudas de lectura y cómo se ve este libro (Preferencias.tsx) ---------- */
+.vs-aa-ancla { position: relative; display: flex; }
+.vs-aa { min-width: 36px; padding: 0 9px; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+.vs-aa-panel { position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; display: flex; flex-direction: column; gap: 12px; width: 380px; max-width: calc(100vw - 24px); padding: 14px 16px; border-radius: var(--r-4); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-3); animation: vs-menu-entra 0.12s ease-out; }
+.vs-aa-panel section { display: flex; flex-direction: column; gap: 2px; }
+.vs-aa-panel section + section { padding-top: 12px; border-top: 1px solid var(--borde); }
+.vs-aa-panel h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 6px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-3); }
+.vs-aa-panel h3 small { font-size: 11.5px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.vs-aa-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; font-size: 13px; }
+.vs-aa-nombre { color: var(--texto-2); font-weight: 600; }
+.vs-aa-opciones { flex-wrap: wrap; justify-content: flex-end; }
+.vs-aa-opciones button { padding: 4px 10px; font-size: 12.5px; }
+.vs-aa-nitidez { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+
+/* ---------- El carril de la izquierda: los paneles para moverse por el libro y las herramientas ---------- */
+.vs-carril { position: relative; z-index: 3; flex: none; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 46px; padding: 8px 0; background: var(--superficie); border-inline-end: 1px solid var(--borde); }
+.vs-carril-grupo { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.vs-carril-grupo + .vs-carril-grupo { padding-top: 10px; border-top: 1px solid var(--borde); }
+.vs-carril-boton { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: none; border-radius: var(--r-2); background: none; color: var(--texto-2); cursor: pointer; transition: background 0.12s, color 0.12s; }
+.vs-carril-boton:hover { background: var(--superficie-3); color: var(--texto); }
+.vs-carril-boton.activo { background: var(--hoja-suave); color: var(--hoja); --ico-opacidad: 0.4; }
+.vs-carril-boton:focus-visible { outline: 2px solid var(--hoja); outline-offset: 1px; }
+.vs-carril-colores { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 4px 0 6px; }
+.vs-carril-colores .vs-color { width: 18px; height: 18px; }
+.vs-carril-colores .vs-color[aria-checked='true'] { box-shadow: 0 0 0 2px var(--superficie), 0 0 0 4px rgb(var(--c)); }
+
+/* Los paneles de la izquierda se ensanchan arrastrando su borde; el ancho se recuerda. */
+.vs-lateral { position: relative; flex: none; display: flex; min-width: 0; max-width: 45vw; background: var(--superficie); border-inline-end: 1px solid var(--borde); }
+.vs-lateral > .vs-panel { flex: 1; width: auto; min-width: 0; border-inline-end: none; }
+.vs-lateral-borde { position: absolute; inset-block: 0; inset-inline-end: -4px; z-index: 2; width: 8px; cursor: col-resize; touch-action: none; }
+.vs-lateral-borde:hover, .vs-lateral-borde:focus-visible { background: var(--hoja-suave); outline: none; }
+.vs-panel-miniaturas, .vs-panel-indice { display: flex; flex-direction: column; gap: 10px; }
+
+/* Las herramientas, en el lienzo: la mano agarra la página; el resaltador marca lo arrastrado en amarillo. */
+.vs-lienzo.mano, .vs-lienzo.mano .vs-linea, .vs-lienzo.mano .vs-texto.por-letra .vs-linea { cursor: grab; }
+.vs-lienzo.mano.arrastrando, .vs-lienzo.mano.arrastrando * { cursor: grabbing !important; user-select: none; }
+.vs-lienzo[data-herramienta='resaltador'] .vs-seleccion { background: rgba(255, 196, 0, 0.4); }
+.vs-aviso-herramienta { position: absolute; top: 12px; left: 50%; z-index: 6; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 120px); padding: 6px 14px; border-radius: var(--r-pill); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-2); color: var(--texto-2); font-size: 13px; white-space: nowrap; transform: translateX(-50%); pointer-events: none; }
+.vs-aviso-hecho .ico { color: var(--hoja); }
+.vs-aviso-lectura { animation: vs-aviso-fuera 0.4s 2.6s forwards; }
+@keyframes vs-aviso-fuera { to { opacity: 0; visibility: hidden; } }
+
+/* ---------- El modo lectura: solo la página. La barra se asoma por arriba, sobre la página, sin moverla. ---------- */
+.vs-marco.modo-lectura .vs-carril, .vs-marco.modo-lectura .vs-lateral, .vs-marco.modo-lectura .vs-pie { display: none; }
+.vs-marco.modo-lectura .vs-barra { position: absolute; top: 0; left: 0; right: 0; box-shadow: var(--sombra-3); transform: translateY(-100%); transition: transform 0.18s ease; }
+.vs-marco.modo-lectura .vs-barra.asomada, .vs-marco.modo-lectura .vs-barra:focus-within { transform: none; }
+@media (prefers-reduced-motion: reduce) { .vs-marco.modo-lectura .vs-barra { transition: none; } }
+
+/* ---------- La barra de estado ---------- */
+.vs-donde { flex: none; font-weight: 700; color: var(--texto); white-space: nowrap; }
+.vs-pie-hueco { flex: 1; }
+.vs-avance, .vs-origen { flex: none; white-space: nowrap; color: var(--texto-3); }
+.vs-origen-leer { color: var(--texto-2); }
+.vs-atras { flex: none; margin-inline-start: -8px; }
+
+/* ---------- La paleta de acciones (Ctrl+K) y los atajos («?») ---------- */
+.vs-velo { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-start; justify-content: center; padding: 11vh 16px 16px; background: rgba(0, 0, 0, 0.28); }
+.vs-dialogo { display: flex; flex-direction: column; width: min(640px, 100%); max-height: 72vh; border-radius: var(--r-4); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-3); overflow: hidden; animation: vs-ventana-entra 0.16s var(--resorte); }
+@media (prefers-reduced-motion: reduce) { .vs-dialogo { animation: none; } }
+.vs-paleta-campo { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--borde); color: var(--texto-3); }
+.vs-paleta-campo input, .vs-paleta-campo input:focus, .vs-paleta-campo input:hover { flex: 1; min-width: 0; padding: 6px 0; border: none; background: none; box-shadow: none; font-size: 16px; outline: none; }
+.vs-paleta-lista { margin: 0; padding: 6px; list-style: none; overflow-y: auto; }
+.vs-paleta-orden { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: var(--r-2); font-size: 13.5px; cursor: pointer; }
+.vs-paleta-orden.elegida { background: var(--superficie-3); }
+.vs-paleta-orden[aria-disabled='true'] { color: var(--texto-3); cursor: default; }
+.vs-paleta-donde { overflow: hidden; font-size: 11.5px; color: var(--texto-3); text-overflow: ellipsis; white-space: nowrap; }
+.vs-paleta-nada { padding: 16px; text-align: center; }
+.vs-atajos { width: min(860px, 100%); max-height: 80vh; padding: 14px 18px 6px; }
+.vs-atajos-columnas { overflow-y: auto; padding-top: 10px; columns: 2 300px; column-gap: 32px; }
+.vs-atajos-columnas section { margin-bottom: 14px; break-inside: avoid; }
+.vs-atajos-columnas h3 { margin: 0 0 6px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-3); }
+.vs-atajos-columnas dl { margin: 0; }
+.vs-atajo { display: flex; align-items: baseline; gap: 12px; padding: 4px 0; font-size: 13px; }
+.vs-atajo dt { flex: none; display: flex; flex-wrap: wrap; gap: 4px; min-width: 128px; }
+.vs-atajo dd { margin: 0; color: var(--texto-2); line-height: 1.45; }
+.vs-atajo kbd { display: inline-block; padding: 1px 7px; border-radius: 5px; background: var(--superficie-2); box-shadow: inset 0 -1px 0 var(--borde-2), inset 0 0 0 1px var(--borde); font-family: inherit; font-size: 12px; font-weight: 700; color: var(--texto); }

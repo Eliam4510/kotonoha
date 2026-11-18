@@ -19,6 +19,7 @@ import { chromium } from 'playwright';
 import sharp from 'sharp';
 import { confirmarBorrado, recargarExtension } from '../extension.mjs';
 import { iniciarMock } from '../mock-claude.mjs';
+import { estadoOrden, orden } from '../ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..', '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -364,9 +365,8 @@ async function libroDeTexto(b, datos, id) {
 async function paginaConOcr(b, datos, id) {
   const v = await abrir(b, datos.pagina.titulo);
   await v.waitForSelector('.vs-pagina img', { timeout: 20000 });
-  const t = tabla(id);
-  const leer = t['Leer el texto de las páginas'] ?? 'Leer el texto de las páginas';
-  if ((await v.getAttribute(`[aria-label="${leer}"]`, 'aria-pressed')) !== 'true') await v.click(`[aria-label="${leer}"]`);
+  // El OCR se enciende por la paleta (pruebas/ordenes.mjs), con el nombre de la orden, que no cambia con el idioma.
+  if (!(await estadoOrden(v, 'ocr')).marcada) await orden(v, 'ocr');
   await v.waitForFunction(() => document.querySelectorAll('.vs-linea').length >= 3, null, { timeout: 400000 });
   const caja = await v.evaluate((palabra) => {
     // La palabra en un renglón del texto, no en el título: el más largo de los que la tienen.
@@ -398,15 +398,14 @@ async function paginaReal(b, etiqueta, real, id) {
   await ir.press('Enter');
   const hoja = `.vs-pagina[data-pagina="${real.pagina}"]`;
   await v.waitForSelector(`${hoja} img`, { timeout: 60000 });
-  const pulsar = async (etiquetaBoton) => {
-    const x = v.locator(`.vs-barra [aria-label="${tr(etiquetaBoton)}"]`).first();
-    if ((await x.getAttribute('aria-pressed')) !== 'true') await x.click();
+  // Las órdenes del visor van por la paleta (pruebas/ordenes.mjs): sus nombres no cambian con el idioma.
+  const pulsar = async (id) => {
+    if (!(await estadoOrden(v, id)).marcada) await orden(v, id);
   };
-  await pulsar('Una página');
-  await pulsar(real.modo === 'libro' ? 'Ajustar al ancho' : 'Página completa');
-  await pulsar('Leer el texto de las páginas');
-  const modo = v.locator('.vs-modos button', { hasText: tr(real.modo === 'libro' ? 'Libro' : 'Manga') }).first();
-  if ((await modo.getAttribute('aria-pressed')) !== 'true') await modo.click();
+  await pulsar('vista-una');
+  await pulsar(real.modo === 'libro' ? 'zoom-ancho' : 'zoom-pagina');
+  await pulsar('ocr');
+  await pulsar(real.modo === 'libro' ? 'ocr-libro' : 'ocr-manga');
   // La primera vez se descargan los modelos del modo: puede tardar.
   await v.waitForFunction((s) => document.querySelectorAll(s).length >= 3, `${hoja} .vs-linea`, { timeout: 900000 });
   await v.waitForTimeout(1000);

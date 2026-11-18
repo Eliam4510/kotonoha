@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.35.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.36.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -165,6 +165,9 @@ Stand jeder Funktion in Version 0.35.0 und die Art ihrer Überprüfung.
 | Textansicht: die Seite als Text, in Absätzen und mit abgesetzten Überschriften, mit der Lesehilfe des Notizbuchs (Furigana, Verständnis, Vorlesen, Wortfenster und Karten); jedes Buch merkt sie sich | Automatisch, und die Absätze mit 16 echten Seiten |
 | Den Text einer Seite mit Claude prüfen, anhand ihres Bildes: nur die Änderungen, die nicht übereinstimmen, Buchstabe für Buchstabe, zur Auswahl, gespeichert als bearbeitete Zeilen | Simulator |
 | Ein Tippen auf ein Wort der Seite öffnet seinen ganzen Satz, auch über mehrere Zeilen, in einem schwebenden Fenster wie bei den Untertiteln, mit Furigana, seinen Wörtern, dem Wortfenster und der Kartenerstellung; zwei Tipper den Satz, drei den Absatz. Ein Magnet führt ein Tippen zwischen zwei Zeilen zur nächsten | Automatisch, mit einem vom Browser erzeugten PDF, waagerecht und senkrecht |
+| Benannte Menüs in einer einzigen Zeile (Buch, Ansicht, Gehe zu, Text, Lesehilfen, Anmerken und Hilfe), mit der Taste jedes Befehls und auch per Tastatur bedienbar; Aktion suchen (Strg+K), das jeden Befehl findet oder über die Seitenzahl zu einer Seite führt, und Tastenkürzel („?“) | Automatisch: Unit-Tests der Befehlsliste (keine doppelten Tasten, Menüs und Palette) und End-to-End |
+| Werkzeuge des Betrachters: Auswählen, Hand (Ziehen verschiebt die Seite), Textmarker (das Überzogene wird hervorgehoben, ohne das Fenster zu öffnen) und Notiz hinzufügen, dazu ein Rechtsklickmenü auf der Seite | Automatisch |
+| Bereiche links, die sich verbreitern und ihre Breite merken; eine Statusleiste mit Seite, Kapitel, Fortschritt im Buch und Herkunft des Texts; Zurück nach einem Sprung (Alt+←); Lesemodus; „Aa“ mit den Lesehilfen, die in ganz Kotonoha gelten, und dem, was nur für das Buch gilt; ein geöffnetes Buch öffnet keinen weiteren Tab | Automatisch |
 | Das Fenster verdeckt nicht, was noch zu lesen ist: Es steht am Seitenrand, wenn es Platz hat, sonst über bereits Gelesenem (über der Zeile oder rechts der Spalte bei senkrechtem Text); es lässt sich verschieben, vergrößern und als Fenster am Rand anheften, das sich verbreitern lässt und seine Breite behält | Automatisch (Unit-Tests der Platzierung) |
 | Durch Ziehen auswählen, Zeichen für Zeichen und über Zeilen hinweg, mit Übersetzen, Erklären, Aufschlüsseln, Anhören, Hervorheben, Notiz und Kopieren; Strg+C kopiert das Geöffnete | Automatisch |
 | Umblättern mit sichtbaren Pfeilen an den Seiten, der Tastatur oder durch Wischen: Ein Tippen auf die Seite schließt nur das Geöffnete, und ein knapp verfehltes Wort blättert nicht mehr um | Automatisch |

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.35.0, along with how it has been verified.
+Status of each feature in version 0.36.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -165,6 +165,9 @@ Status of each feature in version 0.35.0, along with how it has been verified.
 | Text view: the page as text, in paragraphs with headings set apart, with the Notebook's reading help (furigana, comprehension, read aloud, word panel and cards); each book remembers it | Automated, and the paragraphs with 16 real pages |
 | Review a page's text with Claude, using its image: only the changes that do not match, letter by letter, to choose which to apply, stored as edited lines | Simulator |
 | Tapping a word on the page opens its whole sentence, even across several lines, in a floating window like the one for subtitles, with furigana, its words, their word panel and card creation; two taps, the sentence, and three, the paragraph. A magnet takes a tap between two lines to the nearest one | Automated, with a PDF made by the browser, horizontal and vertical |
+| Named menus in a single row (Book, View, Go, Text, Reading aids, Annotate and Help), with each command's key and also usable with the keyboard; Find an action (Ctrl+K), which finds any command or goes to a page by its number, and Keyboard shortcuts (“?”) | Automated: unit tests of the command registry (no repeated keys, menus and palette) and end to end |
+| Viewer tools: Select, Hand (dragging moves the page), Highlighter (what is dragged over is highlighted without opening the window) and Add a note, and a right-click menu on the page | Automated |
+| Panels on the left that widen and remember their width; a status bar with the page, the chapter, how far into the book and where the text comes from; going back after a jump (Alt+←); reading mode; “Aa” with the reading aids, which apply across Kotonoha, and what applies only to the book; a book that is already open does not open another tab | Automated |
 | The window does not cover what is left to read: it goes in the page margin if it fits, otherwise over text already read (above the line, or to the right of the column in vertical text); it can be moved, enlarged and pinned to the side as a panel that widens and remembers its width | Automated (unit tests of the placement) |
 | Selecting by dragging, character by character and across lines, with Translate, Explain, Break down, Listen, Highlight, Note and Copy; Ctrl+C copies what is open | Automated |
 | Turning pages with visible arrows at the sides, the keyboard or a swipe: tapping the page only closes what is open, and narrowly missing a word no longer turns the page | Automated |

@@ -6,9 +6,9 @@ import { tr } from '../compartido/i18n';
 import { fondo } from '../compartido/rpc';
 import { Icono, type NombreIcono } from '../ui/iconos';
 
-export function Boton({ icono, etiqueta, activo, alPulsar, deshabilitado }: { icono: NombreIcono; etiqueta: string; activo?: boolean; alPulsar: () => void; deshabilitado?: boolean }) {
+export function Boton({ icono, etiqueta, activo, alPulsar, deshabilitado, clase = '' }: { icono: NombreIcono; etiqueta: string; activo?: boolean; alPulsar: () => void; deshabilitado?: boolean; clase?: string }) {
   return (
-    <button class="btn-icono chico" aria-label={etiqueta} data-tip={etiqueta} aria-pressed={activo === undefined ? undefined : activo} disabled={deshabilitado} onClick={alPulsar}>
+    <button class={`btn-icono chico ${clase}`} aria-label={etiqueta} data-tip={etiqueta} aria-pressed={activo === undefined ? undefined : activo} disabled={deshabilitado} onClick={alPulsar}>
       <Icono n={icono} t={17} />
     </button>
   );

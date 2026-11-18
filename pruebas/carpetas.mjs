@@ -10,6 +10,7 @@ import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
+import { estadoOrden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -164,18 +165,18 @@ await v.screenshot({ path: join(CAPTURAS, 'doble-apaisada.png') });
 await v.keyboard.press('ArrowLeft');
 await v.waitForTimeout(500);
 comprobar((await indicador(v)) === '4–5', 'Y las demás siguen de dos en dos', await indicador(v));
-const orden = await v.evaluate(() => {
+const ordenHojas = await v.evaluate(() => {
   const x = (n) => document.querySelector(`.vs-pagina[data-pagina="${n}"]`)?.getBoundingClientRect().left ?? 0;
   return x(4) > x(5);
 });
-comprobar(orden, 'De derecha a izquierda, como un tomo japonés');
+comprobar(ordenHojas, 'De derecha a izquierda, como un tomo japonés');
 await v.waitForTimeout(900);
 await v.close();
 
 console.log('\n== El tomo con ficha ==');
 v = await abrir('Tomo con ficha');
 comprobar((await v.evaluate(() => document.querySelector('.vs-lienzo')?.dataset.vista)) === 'una', 'Se lee de una en una y de izquierda a derecha, como dice su ComicInfo');
-comprobar(!!(await v.$('[aria-label="Se lee de izquierda a derecha"]')), 'Con el sentido de su ficha');
+comprobar((await estadoOrden(v, 'sentido-ltr')).marcada, 'Con el sentido de su ficha');
 await v.close();
 
 if (errores.length) console.log('\nErrores en la página:', [...new Set(errores)].slice(0, 6));

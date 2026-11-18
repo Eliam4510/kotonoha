@@ -15,6 +15,9 @@ describe('dónde va la ventana de lo que se toca', () => {
     // Más abajo, sube lo justo para no salirse por abajo.
     const abajo = colocarVentana({ ...base, hoja, ancla: { left: 560, top: 700, width: 300, height: 30 }, vertical: false });
     expect(abajo.top).toBe(860 - 12 - 520);
+    // Y aunque su ficha sea larga, no crece por debajo de la zona: debajo está la barra de estado.
+    expect((abajo.top ?? 0) + abajo.maxAlto).toBe(860 - 12);
+    expect(c.top! + c.maxAlto).toBe(860 - 12);
   });
 
   it('si al margen falta un poco, se estrecha para caber, hasta un mínimo', () => {

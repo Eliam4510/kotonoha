@@ -11,6 +11,7 @@ import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
+import { orden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -269,7 +270,7 @@ console.log('\n== Desde el visor ==');
 const visor = await contexto.newPage();
 visor.on('pageerror', (e) => errores.push(e.message));
 await visor.goto(`chrome-extension://${id}/visor.html#${encodeURIComponent(pdf.id)}`);
-await visor.locator('button[aria-label="Vocabulario del libro"]').click({ timeout: 20000 });
+await orden(visor, 'vocabulario');
 const pedida = await esperar(() => sw.evaluate(async () => (await chrome.tabs.query({})).map((t) => t.pendingUrl || t.url).find((u) => u?.includes('#/vocabulario?libro=')) ?? null));
 comprobar(!!pedida?.includes(encodeURIComponent(pdf.id)), 'El visor abre el vocabulario de su libro', pedida ?? '');
 await visor.close();
