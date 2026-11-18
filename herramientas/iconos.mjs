@@ -43,6 +43,8 @@ export const CATALOGO = {
   // Las herramientas del visor y el modo lectura.
   'cursor-texto': 'cursor-text',
   mano: 'hand',
+  // Leer una zona: un rectángulo de puntos que se dibuja sobre la página.
+  area: 'selection-plus',
   volver: 'arrow-u-up-left',
   'modo-lectura': 'eyeglasses',
   video: 'monitor-play',

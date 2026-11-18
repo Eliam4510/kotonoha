@@ -12,7 +12,7 @@ export type Vista = 'una' | 'doble' | 'continua';
 export type Zoom = 'ancho' | 'pagina' | number;
 export type PanelVisor = 'miniaturas' | 'indice' | 'notas' | 'buscar' | 'revision' | 'consultadas';
 /** Lo que hace el ratón en la página: seleccionar texto, mover la página, resaltar arrastrando o poner una nota. */
-export type Herramienta = 'seleccionar' | 'mano' | 'resaltador' | 'nota';
+export type Herramienta = 'seleccionar' | 'mano' | 'area' | 'resaltador' | 'nota';
 /** La tecla que, con el ratón sobre una palabra, abre su ficha sin hacer clic; o ninguna. */
 export type TeclaFicha = 'Shift' | 'Control' | 'Alt' | 'ninguna';
 /** Lo que se pinta sobre la página, para todos los libros. */
@@ -24,7 +24,28 @@ export interface AjustePagina {
   tecla?: TeclaFicha;
 }
 
-export interface EstadoVisor {
+/** Lo que cambia con la lengua: cómo se llama la lectura, si va sobre la página, si hay acento, si son cómics y sus letras. */
+export interface LenguaVisor {
+  lectura: string;
+  lecturaEnPagina: boolean;
+  acento: boolean;
+  comic: boolean;
+  letras: { id: LetraDiccionario; nombre: string }[];
+}
+
+/** Las ayudas de lectura de Kotonoha entero (lectura sobre las palabras, colores, letra): igual en los dos visores. */
+export interface AyudasLectura {
+  furigana: ModoLectura;
+  mostrarEstado: boolean;
+  colorAcento: ModoColor;
+  letra: LetraDiccionario;
+  lengua: LenguaVisor;
+}
+
+/** Un cambio en las ayudas de lectura, que se guarda en los ajustes. */
+export type AjusteLectura = { furigana?: ModoLectura; mostrarEstado?: boolean; colorAcento?: ModoColor; diccionarioLetra?: LetraDiccionario };
+
+export interface EstadoVisor extends AyudasLectura {
   vista: Vista;
   rtl: boolean;
   portadaSola: boolean;
@@ -49,10 +70,6 @@ export interface EstadoVisor {
   /** La página a la que vuelve «Atrás», si se ha saltado de una a otra. */
   atras: number | null;
   fijada: boolean;
-  furigana: ModoLectura;
-  mostrarEstado: boolean;
-  colorAcento: ModoColor;
-  letra: LetraDiccionario;
   /** La página aumentada: si se pinta, con qué furigana y con o sin gramática. */
   aumento: boolean;
   furiganaPagina: ModoLectura;
@@ -62,8 +79,6 @@ export interface EstadoVisor {
   teclaFicha: TeclaFicha;
   /** Si se está leyendo en voz alta. */
   voz: boolean;
-  /** Lo que cambia con la lengua: cómo se llama la lectura, si hay acento, si son cómics y las letras que tiene. */
-  lengua: { lectura: string; lecturaEnPagina: boolean; acento: boolean; comic: boolean; letras: { id: LetraDiccionario; nombre: string }[] };
 }
 
 export interface AccionesVisor {
@@ -89,7 +104,7 @@ export interface AccionesVisor {
   textoPdf(): void;
   revisar(): void;
   copiarPagina(): void;
-  ajuste(c: { furigana?: ModoLectura; mostrarEstado?: boolean; colorAcento?: ModoColor; diccionarioLetra?: LetraDiccionario }): void;
+  ajuste(c: AjusteLectura): void;
   fijar(): void;
   marcador(): void;
   herramienta(h: Herramienta): void;
@@ -245,6 +260,21 @@ export function ordenesDelVisor(e: EstadoVisor, h: AccionesVisor): Comando[] {
   );
   if (e.hayTextoPropio)
     o.push({ id: 'texto-pdf', etiqueta: tr('Texto del PDF'), menu: 'texto', grupo: 'origen', tipo: 'casilla', marcada: e.textoPdf, deshabilitada: !e.ocr, ayuda: sinOcr ?? tr('El texto que trae el PDF; apagado, Kotonoha lee todas las páginas'), palabras: 'OCR', ejecutar: h.textoPdf });
+  // Leer una zona es una herramienta, como las de Ver y Anotar: con el texto, porque lo que hace es leerlo.
+  o.push({
+    id: 'area',
+    etiqueta: tr('Leer una zona'),
+    menu: 'texto',
+    grupo: 'herramienta',
+    icono: 'area',
+    tipo: 'opcion',
+    marcada: e.herramienta === 'area',
+    atajo: 'O',
+    deshabilitada: e.vistaTexto,
+    ayuda: sinImagen ?? tr('Dibuja un rectángulo y el OCR lee lo que hay dentro, como un diagrama o un cartel'),
+    palabras: 'OCR',
+    ejecutar: () => h.herramienta('area'),
+  });
   const sinTexto = e.conTexto ? undefined : tr('La página aún no tiene texto');
   o.push(
     { id: 'buscar', etiqueta: tr('Buscar en el libro'), menu: 'texto', grupo: 'usar', icono: 'buscar', tipo: 'casilla', marcada: e.panel === 'buscar', atajo: 'Ctrl+F', atajoAparte: true, ejecutar: () => h.panel('buscar') },
@@ -266,65 +296,10 @@ export function ordenesDelVisor(e: EstadoVisor, h: AccionesVisor): Comando[] {
   );
 
   // ---------- Ayudas de lectura: valen en todo Kotonoha, no solo en este libro ----------
-  const lectura = e.lengua.lectura;
-  o.push(
-    ...([
-      ['todas', tr('Todas las palabras')],
-      ['desconocidas', tr('Desconocidas')],
-      ['alPasar', tr('Al pasar el ratón')],
-      ['ninguna', tr('Ninguna')],
-    ] as const).map(([valor, nombre]): Comando => ({
-      id: `furigana-${valor}`,
-      etiqueta: nombre,
-      menu: 'ayudas',
-      grupo: 'palabras',
-      submenu: lectura,
-      tipo: 'opcion',
-      marcada: e.furigana === valor,
-      palabras: lectura,
-      ejecutar: () => h.ajuste({ furigana: valor }),
-    })),
-    { id: 'estado', etiqueta: tr('Estado de aprendizaje'), menu: 'ayudas', grupo: 'palabras', tipo: 'casilla', marcada: e.mostrarEstado, ayuda: tr('El color de cada palabra según la conozcas, la estés aprendiendo o sea nueva'), ejecutar: () => h.ajuste({ mostrarEstado: !e.mostrarEstado }) }
-  );
-  if (e.lengua.acento) {
-    const acento = tr('Color de acento');
-    o.push(
-      ...([
-        ['siempre', tr('Siempre')],
-        ['alPasar', tr('Al pasar el ratón')],
-        ['ninguno', tr('Ninguno')],
-      ] as const).map(([valor, nombre]): Comando => ({
-        id: `acento-${valor}`,
-        etiqueta: nombre,
-        menu: 'ayudas',
-        grupo: 'palabras',
-        submenu: acento,
-        tipo: 'opcion',
-        marcada: e.colorAcento === valor,
-        palabras: acento,
-        ejecutar: () => h.ajuste({ colorAcento: valor }),
-      }))
-    );
-  }
-  if (e.lengua.letras.length > 1) {
-    const letra = tr('Letra');
-    o.push(
-      ...e.lengua.letras.map((l): Comando => ({
-        id: `letra-${l.id}`,
-        etiqueta: tr(l.nombre),
-        menu: 'ayudas',
-        grupo: 'palabras',
-        submenu: letra,
-        tipo: 'opcion',
-        marcada: e.letra === l.id,
-        palabras: letra,
-        ejecutar: () => h.ajuste({ diccionarioLetra: l.id }),
-      }))
-    );
-  }
+  o.push(...ordenesAyudasLectura(e, h.ajuste));
   // Sobre la página: valen para todos los libros, y el subrayado sigue al «Estado de aprendizaje».
   const sinAumento = e.aumento ? undefined : tr('Primero, las ayudas sobre la página');
-  const furiganaPagina = tr('{0} sobre la página', lectura);
+  const furiganaPagina = tr('{0} sobre la página', e.lengua.lectura);
   o.push(
     {
       id: 'aumento',
@@ -398,9 +373,79 @@ export function ordenesDelVisor(e: EstadoVisor, h: AccionesVisor): Comando[] {
   );
 
   // ---------- Ayuda ----------
-  o.push(
-    { id: 'atajos', etiqueta: tr('Atajos de teclado'), menu: 'ayuda', grupo: 'ayuda', icono: 'teclado', atajo: '?', ejecutar: h.atajos },
-    { id: 'paleta', etiqueta: tr('Buscar una acción'), menu: 'ayuda', grupo: 'ayuda', icono: 'comando', atajo: 'Ctrl+K', atajoAparte: true, ejecutar: h.paleta }
-  );
+  o.push(...ordenesAyuda(h));
   return o;
+}
+
+/**
+ * Las ayudas de lectura del menú Ayudas: la lectura sobre las palabras, el estado de aprendizaje, el color del acento y la
+ * letra. Son de Kotonoha entero (valen igual en los subtítulos y el Cuaderno) y las dos clases de visor las ofrecen igual.
+ */
+export function ordenesAyudasLectura(e: AyudasLectura, ajuste: (c: AjusteLectura) => void): Comando[] {
+  const o: Comando[] = [];
+  const lectura = e.lengua.lectura;
+  o.push(
+    ...([
+      ['todas', tr('Todas las palabras')],
+      ['desconocidas', tr('Desconocidas')],
+      ['alPasar', tr('Al pasar el ratón')],
+      ['ninguna', tr('Ninguna')],
+    ] as const).map(([valor, nombre]): Comando => ({
+      id: `furigana-${valor}`,
+      etiqueta: nombre,
+      menu: 'ayudas',
+      grupo: 'palabras',
+      submenu: lectura,
+      tipo: 'opcion',
+      marcada: e.furigana === valor,
+      palabras: lectura,
+      ejecutar: () => ajuste({ furigana: valor }),
+    })),
+    { id: 'estado', etiqueta: tr('Estado de aprendizaje'), menu: 'ayudas', grupo: 'palabras', tipo: 'casilla', marcada: e.mostrarEstado, ayuda: tr('El color de cada palabra según la conozcas, la estés aprendiendo o sea nueva'), ejecutar: () => ajuste({ mostrarEstado: !e.mostrarEstado }) }
+  );
+  if (e.lengua.acento) {
+    const acento = tr('Color de acento');
+    o.push(
+      ...([
+        ['siempre', tr('Siempre')],
+        ['alPasar', tr('Al pasar el ratón')],
+        ['ninguno', tr('Ninguno')],
+      ] as const).map(([valor, nombre]): Comando => ({
+        id: `acento-${valor}`,
+        etiqueta: nombre,
+        menu: 'ayudas',
+        grupo: 'palabras',
+        submenu: acento,
+        tipo: 'opcion',
+        marcada: e.colorAcento === valor,
+        palabras: acento,
+        ejecutar: () => ajuste({ colorAcento: valor }),
+      }))
+    );
+  }
+  if (e.lengua.letras.length > 1) {
+    const letra = tr('Letra');
+    o.push(
+      ...e.lengua.letras.map((l): Comando => ({
+        id: `letra-${l.id}`,
+        etiqueta: tr(l.nombre),
+        menu: 'ayudas',
+        grupo: 'palabras',
+        submenu: letra,
+        tipo: 'opcion',
+        marcada: e.letra === l.id,
+        palabras: letra,
+        ejecutar: () => ajuste({ diccionarioLetra: l.id }),
+      }))
+    );
+  }
+  return o;
+}
+
+/** El menú Ayuda: los atajos de teclado y la paleta. */
+export function ordenesAyuda(h: { atajos(): void; paleta(): void }): Comando[] {
+  return [
+    { id: 'atajos', etiqueta: tr('Atajos de teclado'), menu: 'ayuda', grupo: 'ayuda', icono: 'teclado', atajo: '?', ejecutar: h.atajos },
+    { id: 'paleta', etiqueta: tr('Buscar una acción'), menu: 'ayuda', grupo: 'ayuda', icono: 'comando', atajo: 'Ctrl+K', atajoAparte: true, ejecutar: h.paleta },
+  ];
 }

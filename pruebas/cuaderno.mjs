@@ -197,15 +197,20 @@ await dormir(1200);
 const despues = await p.evaluate(async (id) => (await new Promise((ok) => chrome.runtime.sendMessage({ canal: 'motor', metodo: 'bibliotecaObtener', args: [id] }, (r) => ok(r?.valor))))?.texto, libro?.id);
 comprobar(despues?.includes('夜は早く寝ます。'), 'Lo escrito después se guarda también en la biblioteca');
 
-// Una nota nueva no pierde la anterior; desde la biblioteca se vuelve a editar.
+// Una nota nueva no pierde la anterior; desde la biblioteca se vuelve a editar. El texto se lee en el visor, como los
+// libros, y desde allí pasa al Cuaderno, que se abre en la pestaña de la app.
 await p.getByRole('button', { name: 'Nota nueva' }).click();
 await dormir(500);
-await p.goto(`chrome-extension://${id}/app.html#/biblioteca?abrir=${libro?.id}`);
-await p.waitForTimeout(2000);
-const editarEn = p.getByRole('button', { name: 'Editar en el Cuaderno' });
-comprobar(await editarEn.isVisible(), 'El texto de la biblioteca se puede editar en el Cuaderno');
+const visor = await contexto.newPage();
+visor.on('pageerror', (e) => errores.push(e.message));
+await visor.goto(`chrome-extension://${id}/visor.html#${libro?.id}`);
+const editarEn = visor.getByRole('button', { name: 'Editar en el Cuaderno' });
+await editarEn.waitFor({ timeout: 10000 }).catch(() => {});
+comprobar(await editarEn.isVisible(), 'El texto de la biblioteca, abierto en el visor, se puede editar en el Cuaderno');
 await editarEn.click();
+await p.waitForURL(/lector/, { timeout: 10000 }).catch(() => {});
 await p.locator('.cu-editor').waitFor({ timeout: 5000 }).catch(() => {});
+await visor.close();
 await dormir(600);
 comprobar((await p.locator('.cu-editor h1').innerText().catch(() => '')) === '今日の予定' && (await p.locator('.cu-estado', { hasText: 'En la biblioteca' }).isVisible()), 'Se abre para editar, enlazado a su nota');
 await p.screenshot({ path: join(CAPTURAS, '4-desde-biblioteca.png') });

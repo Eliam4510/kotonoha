@@ -17,10 +17,11 @@ import { cajaDeTramo, type LineaTexto, leerConOcr, textoDePagina } from '../nucl
 import { aplicarEdiciones, type EdicionLinea, type LineaEditada } from '../nucleo/ediciones';
 import { edicionesDe, guardarEdicion, lecturaMinima, quitarEdicion } from '../compartido/paginasOcr';
 import type { Direccion } from '../nucleo/libro';
-import type { Caja } from '../nucleo/ocr';
+import type { Caja, LineaOcr } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
 import { cambiosValidos } from '../nucleo/revision';
 import { cajasDe, contextoDe, envolvente, fraseEn, leerPagina, type PaginaLeida, parrafoEn, type Posicion, posicionEn, seleccionEn, type TramoPagina, tramoEntre, type Unidad } from '../nucleo/seleccion';
+import { comoGlobo, conZonas, lineasDeZona, type ZonaLeida } from '../nucleo/zonas';
 import { motorDe } from '../lenguas/motor';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
@@ -34,7 +35,7 @@ import { imagenParaClaude } from './imagenClaude';
 import { Atajos, BarraMenus, ListaMenu, MenuFlotante, Paleta, useClicFuera } from './Menus';
 import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
 import { type AccionesVisor, type AjustePagina, type EstadoVisor, type Herramienta, ordenesDelVisor, type PanelVisor, type TeclaFicha, type Vista, type Zoom } from './ordenesVisor';
-import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
+import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip, zonaParaOcr } from './paginador';
 import { PanelBuscar } from './PanelBuscar';
 import { PanelRevision, type PropuestaLinea } from './PanelRevision';
 import { paginadorDePdf } from './pdf';
@@ -120,7 +121,7 @@ function FiltroNitidez({ n, escala }: { n: Nitidez; escala: number }) {
  * van sus líneas: zonas que se pueden tocar, con el texto para los lectores de pantalla, y la palabra elegida marcada.
  * Lo anotado va en dos capas: los resaltados debajo de las líneas y las notas encima.
  */
-function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramienta = 'seleccionar', unidad, seleccion, marcas, hallado, alTocar, alSeleccionar, alPasar, capas, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
+function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramienta = 'seleccionar', unidad, seleccion, marcas, hallado, alTocar, alSeleccionar, alPasar, capas, alArea, zonaLeyendo, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
   paginador: Paginador;
   n: number;
   escala: number;
@@ -144,6 +145,10 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
   alPasar?: (pos: Posicion | null, e: MouseEvent | null) => void;
   /** Lo que se pinta encima de la página (la página aumentada), con el tamaño de la página en la pantalla. */
   capas?: (ancho: number, alto: number) => preact.ComponentChildren;
+  /** Con la herramienta Área, la zona dibujada, en fracciones de la página, para leerla con el OCR. */
+  alArea?: (caja: Caja) => void;
+  /** La zona de esta página que se está leyendo: se ve mientras tanto. */
+  zonaLeyendo?: Caja;
 } & PropsAnotaciones) {
   // La página que ya está lista se monta con su imagen: sin un fotograma vacío antes.
   const [imagen, fijarImagen] = useState<PaginaImagen | null>(() => paginador.imagenYa?.(n) ?? null);
@@ -225,6 +230,45 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
     alTocar?.(g.desde, veces);
   };
 
+  // Área: arrastrando se dibuja un rectángulo, y al soltar se lee lo que tiene dentro. La capa va encima de todo lo de la
+  // página, y lo que pasa en ella es suyo: ni se pasa de página deslizando ni se abre la frase de debajo.
+  const area = useRef<HTMLDivElement>(null);
+  const trazo = useRef<{ id: number; x: number; y: number } | null>(null);
+  const [dibujo, fijarDibujo] = useState<Caja | null>(null);
+  const enFraccion = (e: PointerEvent) => {
+    const r = area.current?.getBoundingClientRect();
+    if (!r?.width || !r.height) return null;
+    return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) };
+  };
+  const rectangulo = (a: { x: number; y: number }, b: { x: number; y: number }): Caja => ({ x0: Math.min(a.x, b.x), y0: Math.min(a.y, b.y), x1: Math.max(a.x, b.x), y1: Math.max(a.y, b.y) });
+  const empezarZona = (e: PointerEvent) => {
+    const p = e.button === 0 ? enFraccion(e) : null;
+    if (!p) return;
+    e.preventDefault();
+    e.stopPropagation();
+    trazo.current = { id: e.pointerId, ...p };
+    area.current?.setPointerCapture(e.pointerId);
+    fijarDibujo(rectangulo(p, p));
+  };
+  const moverZona = (e: PointerEvent) => {
+    const t = trazo.current;
+    const p = t?.id === e.pointerId ? enFraccion(e) : null;
+    if (t && p) fijarDibujo(rectangulo(t, p));
+  };
+  const soltarZona = (e: PointerEvent) => {
+    const t = trazo.current;
+    if (t?.id !== e.pointerId) return;
+    trazo.current = null;
+    e.stopPropagation();
+    fijarDibujo(null);
+    const p = enFraccion(e);
+    const r = area.current?.getBoundingClientRect();
+    if (!t || !p || !r) return;
+    const c = rectangulo(t, p);
+    // Un toque o una raya no son una zona: la herramienta sigue esperando un rectángulo.
+    if ((c.x1 - c.x0) * r.width >= 8 && (c.y1 - c.y0) * r.height >= 8) alArea?.(c);
+  };
+
   return (
     <div class="vs-pagina" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * escala)}px`, height: `${Math.round(t.alto * escala)}px` }}>
       {imagen ? <img src={imagen.url} alt={tr('Página {0}', n + 1)} draggable={false} decoding="sync" /> : fallo ? <span class="vs-fallo">{fallo}</span> : <span class="vs-cargando" />}
@@ -274,6 +318,23 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
       )}
       {imagen && anotaciones && anotaciones.length > 0 && (
         <NotasDePagina anotaciones={anotaciones} abierta={notaAbierta ?? null} alAbrir={(id) => alAbrirNota?.(id)} alGuardar={(a) => alGuardarAnotacion?.(a)} alQuitar={(id) => alQuitarAnotacion?.(id)} />
+      )}
+      {imagen && zonaLeyendo && <span class="vs-area-marco leyendo" style={porciento(zonaLeyendo)} aria-hidden="true" />}
+      {imagen && herramienta === 'area' && (
+        <div
+          ref={area}
+          class="vs-area"
+          onPointerDown={empezarZona}
+          onPointerMove={moverZona}
+          onPointerUp={soltarZona}
+          onPointerCancel={() => {
+            trazo.current = null;
+            fijarDibujo(null);
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {dibujo && <span class="vs-area-marco" style={porciento(dibujo)} />}
+        </div>
       )}
     </div>
   );
@@ -601,11 +662,15 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const cerrarSiCambia = (usaPdf: boolean) => fijarUnidad((x) => (x && usaPdf && propias.get(x.pagina) ? x : null));
   useEffect(() => {
     fijarLineas(new Map());
+    // Lo leído en una zona va como en su modo (en un manga, un globo): con otro modo, se vuelve a pedir.
+    fijarZonas(new Map());
     cerrarSiCambia(textoPdf);
   }, [modoOcr]);
+  /** El lector del OCR: uno por libro abierto, para las páginas y para las zonas de Área. */
+  const lectorOcr = () => (lector.current ??= new LectorOcr((d) => fijarDescarga(d.cargado >= d.total ? null : d)));
   useEffect(() => {
     if (!ocr || !paginador) return;
-    const l = (lector.current ??= new LectorOcr((d) => fijarDescarga(d.cargado >= d.total ? null : d)));
+    const l = lectorOcr();
     // Lo que se ha dejado atrás antes de su turno ya no se lee: primero va lo que se ve, y luego lo que viene, por orden.
     l.soloEstas(doc.id, modoOcr, porLeer);
     let vivo = true;
@@ -622,11 +687,28 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     };
   }, [ocr, modoOcr, paginador, doc.id, porLeer.join(',')]);
 
-  /** Las líneas de una página: las del propio PDF si las trae y se usan; si no, las del OCR, si está activo. Con lo editado encima. */
-  // Lo editado sobre una página se aplica una vez por cambio: la página aumentada reconoce sus líneas por su identidad.
+  // Lo leído con Área («Leer una zona», más abajo), por página: entra en el texto de su página mientras el libro está
+  // abierto, sin guardarse.
+  const [zonas, fijarZonas] = useState<Map<number, ZonaLeida[]>>(() => new Map());
+  const conSusZonas = useRef(new Map<number, { base: LineaTexto[] | undefined; zonas: ZonaLeida[]; t: { lineas: LineaTexto[]; propias: boolean } }>());
+  /**
+   * Las líneas de una página: las del propio PDF si las trae y se usan; si no, las del OCR, si está activo. Con lo leído
+   * en sus zonas y lo editado encima.
+   */
+  // Cada paso se hace una vez por cambio: la página aumentada reconoce las líneas de una página por su identidad.
   const editadas = useRef(new Map<number, { base: LineaTexto[]; ediciones: EdicionLinea[]; lineas: LineaEditada[] }>());
   const textoDe = (n: number): { lineas: LineaEditada[]; propias: boolean } | undefined => {
-    const t = textoDePagina(propias.get(n), lineas.get(n), { ocrActivo: ocr, textoPdf });
+    const leido = textoDePagina(propias.get(n), lineas.get(n), { ocrActivo: ocr, textoPdf });
+    let t: { lineas: LineaTexto[]; propias: boolean } | undefined = leido;
+    const z = zonas.get(n);
+    if (z?.length) {
+      const hecho = conSusZonas.current.get(n);
+      if (hecho && hecho.base === leido?.lineas && hecho.zonas === z) t = hecho.t;
+      else {
+        t = { lineas: conZonas(leido?.lineas ?? [], z), propias: !!leido?.propias };
+        conSusZonas.current.set(n, { base: leido?.lineas, zonas: z, t });
+      }
+    }
     const suyas = t ? ediciones.filter((e) => e.pagina === n) : [];
     if (!t || !suyas.length) return t;
     const c = editadas.current.get(n);
@@ -748,6 +830,59 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     reabrir.current = null;
     tocarTexto(r.pagina, r.pos, r.veces);
   }, [ediciones]);
+  // ---------- Área: leer con el OCR una zona de la página (nucleo/zonas.ts) ----------
+  // Para lo que la lectura de la página no ve (un diagrama, un cartel de un manga) o para leer algo suelto sin leer el
+  // libro: se dibuja un rectángulo y se lee solo eso, aunque el OCR del libro esté apagado. Lo leído se abre en la ventana.
+  const [leyendoZona, fijarLeyendoZona] = useState<{ pagina: number; caja: Caja } | null>(null);
+  const [zonaVacia, fijarZonaVacia] = useState(false);
+  const abrirZona = useRef<{ pagina: number; lineas: LineaOcr[] } | null>(null);
+  const leerZona = async (n: number, caja: Caja) => {
+    if (!paginador || leyendoZona) return;
+    // Es de un solo uso: después se vuelve a seleccionar, que es lo que se hace con lo leído.
+    fijarHerramienta('seleccionar');
+    cerrarVentana();
+    fijarErrorOcr('');
+    fijarZonaVacia(false);
+    fijarLeyendoZona({ pagina: n, caja });
+    // En un manga cada globo es una línea: lo leído en la zona, también.
+    const globos = !textoDe(n)?.propias && modoOcr === 'manga';
+    try {
+      const imagen = await zonaParaOcr(paginador, n, caja);
+      const leidas = imagen ? await lectorOcr().leerZona(globos ? modoOcr : 'libro', async () => imagen) : [];
+      const suyas = globos ? [comoGlobo(leidas)].filter((l): l is LineaOcr => !!l) : leidas.filter((l) => l.texto.trim());
+      if (!suyas.length) {
+        fijarZonaVacia(true);
+        setTimeout(() => fijarZonaVacia(false), 2500);
+        return;
+      }
+      abrirZona.current = { pagina: n, lineas: suyas };
+      fijarZonas((m) => new Map(m).set(n, [...(m.get(n) ?? []), { caja, lineas: suyas }]));
+    } catch (e) {
+      if (!esCancelada(e)) fijarErrorOcr(e instanceof Error ? e.message : String(e));
+    } finally {
+      fijarLeyendoZona(null);
+    }
+  };
+  // Cuando lo leído ya es texto de la página, se abre: como lo seleccionado o, en un manga, como un globo.
+  useEffect(() => {
+    const z = abrirZona.current;
+    if (!z) return;
+    abrirZona.current = null;
+    const t = textoDe(z.pagina);
+    const p = leidaDe(z.pagina);
+    const suyas = t ? lineasDeZona(t.lineas, z.lineas) : [];
+    if (!t || !p || !suyas.length) return;
+    const desde = suyas[0];
+    const hasta = suyas[suyas.length - 1];
+    if (!porLetraEn(z.pagina)) {
+      const u = parrafoEn(p, { linea: desde, letra: 0 });
+      if (u) abrir(z.pagina, 'globo', u, p);
+      return;
+    }
+    const u = seleccionEn(p, { desde: { linea: desde, letra: 0 }, hasta: { linea: hasta, letra: t.lineas[hasta].texto.length } });
+    if (u.texto.trim()) abrir(z.pagina, 'seleccion', u, p);
+  }, [zonas]);
+
   // ---------- La página aumentada (nucleo/aumento.ts, Aumento.tsx) ----------
   // Lo que se pinta sobre la página vale para todos los libros, y se recuerda en este equipo.
   const [aumento, fijarAumento] = useState(() => leerPreferencia('visorAumento', true));
@@ -955,6 +1090,9 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       capas: (ancho: number, alto: number) => capasDe(n, ancho, alto),
     };
   };
+
+  /** Área en una página: lo dibujado se lee, y la zona que se está leyendo se ve. Sin texto en la página, también. */
+  const propsZona = (n: number) => ({ alArea: (caja: Caja) => leerZona(n, caja), zonaLeyendo: leyendoZona?.pagina === n ? leyendoZona.caja : undefined });
 
   // ---------- Lo anotado ----------
   // Se cambia a la vista al momento y se guarda detrás, en la base de la lengua, con los libros.
@@ -1361,7 +1499,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       if (e.key === 'Escape') {
         if (desplegable) fijarDesplegable(null);
         else if (unidad || seleccion) cerrarVentana();
-        else if (herramienta === 'nota') fijarHerramienta('seleccionar');
+        else if (herramienta === 'nota' || herramienta === 'area') fijarHerramienta('seleccionar');
         else if (vozAlta.voz) vozAlta.parar();
         else if (lectura) fijarLectura(false);
         else return;
@@ -1452,7 +1590,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     if (n !== null && punto) l.push({ id: 'ctx-nota', etiqueta: tr('Añadir una nota aquí'), menu: 'ver', grupo: 'anotar', icono: 'nota-lapiz', ejecutar: () => ponerNotaEn(n, punto) });
     de('marcador', 'anotar');
     if (n !== null && textoDe(n)?.lineas.length) l.push({ id: 'ctx-copiar-pagina', etiqueta: tr('Copiar el texto de la página'), menu: 'ver', grupo: 'pagina', icono: 'copiar', ejecutar: () => copiar(textoParaCopiar([n])) });
-    for (const id of ['seleccionar', 'mano', 'resaltador']) de(id, 'herramienta');
+    for (const id of ['seleccionar', 'mano', 'area', 'resaltador']) de(id, 'herramienta');
     de('portada', 'libro');
     return l;
   };
@@ -1526,7 +1664,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             const e = escalaDe([medida(n)], hueco, zoom);
             const t = medida(n);
             return n >= cerca[0] && n <= cerca[1] ? (
-              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} herramienta={herramienta} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
+              <Pagina key={n} paginador={paginador} n={n} escala={e} alCargar={() => refrescar((x) => x + 1)} herramienta={herramienta} hallado={halladoEn(n)} {...propsTexto(n)} {...propsZona(n)} {...propsAnotaciones(n)} />
             ) : (
               <div key={n} class="vs-pagina vs-reservada" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * e)}px`, height: `${Math.round(t.alto * e)}px` }} />
             );
@@ -1536,7 +1674,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     return (
       <div class={`vs-pliego ${rtl ? 'rtl' : ''}`}>
         {(lista[actualVisible] ?? []).map((n) => (
-          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} herramienta={herramienta} hallado={halladoEn(n)} {...propsTexto(n)} {...propsAnotaciones(n)} />
+          <Pagina key={n} paginador={paginador} n={n} escala={escala} alCargar={() => refrescar((x) => x + 1)} herramienta={herramienta} hallado={halladoEn(n)} {...propsTexto(n)} {...propsZona(n)} {...propsAnotaciones(n)} />
         ))}
       </div>
     );
@@ -1667,6 +1805,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
               <div class="vs-carril-grupo" role="group" aria-label={tr('Herramientas')}>
                 {botonCarril('cursor-texto', tr('Seleccionar'), herramienta === 'seleccionar', () => herramientaA('seleccionar'), 'V')}
                 {botonCarril('mano', tr('Mano'), herramienta === 'mano', () => herramientaA(herramienta === 'mano' ? 'seleccionar' : 'mano'), 'H')}
+                {botonCarril('area', tr('Leer una zona'), herramienta === 'area', () => herramientaA(herramienta === 'area' ? 'seleccionar' : 'area'), 'O')}
                 {botonCarril('resaltar', tr('Resaltador'), herramienta === 'resaltador', () => herramientaA(herramienta === 'resaltador' ? 'seleccionar' : 'resaltador'), 'R')}
                 {herramienta === 'resaltador' && (
                   <div class="vs-carril-colores" role="radiogroup" aria-label={tr('Color del resaltador')}>
@@ -1750,6 +1889,16 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           {colocando && (
             <div class="vs-aviso-herramienta" role="status">
               <Icono n="nota-lapiz" t={14} /> {tr('Toca la página donde va la nota')}
+            </div>
+          )}
+          {herramienta === 'area' && (
+            <div class="vs-aviso-herramienta" role="status">
+              <Icono n="area" t={14} /> {tr('Dibuja un rectángulo sobre lo que quieras leer')}
+            </div>
+          )}
+          {zonaVacia && (
+            <div class="vs-aviso-herramienta vs-aviso-zona" role="status">
+              {tr('No hay texto en esa zona')}
             </div>
           )}
           {portadaHecha && (
@@ -1901,13 +2050,15 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
               </button>
             )
           )}
-          {ocr && (descarga || leyendoVista || errorOcr) && (
+          {((ocr && (descarga || leyendoVista || errorOcr)) || leyendoZona) && (
             <span class={`vs-estado ${errorOcr ? 'error' : ''}`} role="status">
               {errorOcr
                 ? errorOcr
                 : descarga
                   ? tr('Descargando el reconocimiento de texto: {0} %', Math.round((100 * descarga.cargado) / Math.max(1, descarga.total)))
-                  : tr('Leyendo el texto de la página…')}
+                  : leyendoZona
+                    ? tr('Leyendo la zona…')
+                    : tr('Leyendo el texto de la página…')}
             </span>
           )}
         </footer>

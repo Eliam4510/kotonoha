@@ -712,6 +712,8 @@ function activarSeguimiento() {
   document.addEventListener('keydown', (e) => {
     const c = consultaWeb.value;
     if (e.key === 'Escape') {
+      // Lo cerrado con Esc ya está atendido: en el visor de un EPUB de texto, la misma tecla no sale además del modo lectura.
+      if (c || panelAbierto.value) e.preventDefault();
       if (c) cerrarConsulta();
       if (panelAbierto.value) panelAbierto.value = false;
       return;

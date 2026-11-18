@@ -1,7 +1,8 @@
 // Prueba el reconocimiento de texto del visor con páginas hechas aquí: una de libro, con tres líneas horizontales; otra de
 // manga, con un globo de texto vertical; un PDF escaneado con la capa de texto de otro OCR, para «Texto del PDF»; y otro
-// con márgenes, para ver que el OCR lee la imagen escaneada tal cual y pone las líneas en su sitio. Usa la GPU y descarga
-// los modelos la primera vez (unos 200 MB).
+// con márgenes, para ver que el OCR lee la imagen escaneada tal cual y pone las líneas en su sitio. También «Leer una
+// zona» (Área), en el libro y en el manga, con el OCR del libro apagado. Usa la GPU y descarga los modelos la primera vez
+// (unos 200 MB).
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/ocr.mjs
 
 import { mkdirSync, rmSync } from 'node:fs';
@@ -275,6 +276,62 @@ comprobar(restaurada, 'Restaurar vuelve al texto leído');
 await v.waitForTimeout(500);
 await v.close();
 
+// ---------- Leer una zona ----------
+
+console.log('\n== Leer una zona ==');
+/** Dibuja con el ratón un rectángulo sobre la página, en fracciones de la página. */
+const dibujarZona = async (pg, [x0, y0, x1, y1]) => {
+  const r = await pg.locator('.vs-pagina').first().boundingBox();
+  await pg.mouse.move(r.x + x0 * r.width, r.y + y0 * r.height);
+  await pg.mouse.down();
+  await pg.mouse.move(r.x + x1 * r.width, r.y + y1 * r.height, { steps: 6 });
+  await pg.mouse.up();
+};
+const botonArea = (pg) => pg.locator('.vs-carril-boton[aria-label="Leer una zona"]');
+/** Apaga el OCR del libro, si está encendido, y espera a que la página se quede sin texto. */
+const sinOcr = async (pg) => {
+  if ((await estadoOrden(pg, 'ocr')).marcada) await orden(pg, 'ocr');
+  await pg.waitForFunction(() => !document.querySelector('.vs-texto'), null, { timeout: 5000 }).catch(() => {});
+};
+const lineasEnPagina = (pg) => pg.evaluate(() => [...document.querySelectorAll('.vs-linea')].map((b) => ({ texto: b.getAttribute('aria-label') ?? '', cortes: b.hasAttribute('data-cortes') })));
+v = await abrir('Libro de prueba');
+await sinOcr(v);
+comprobar((await lineasEnPagina(v)).length === 0, 'Con el OCR del libro apagado, la página no tiene texto');
+await v.keyboard.press('o');
+comprobar((await botonArea(v).getAttribute('aria-pressed')) === 'true', 'La tecla O elige «Leer una zona»');
+// El segundo renglón: de 360 a 420 píxeles de los 1600 de alto, y de 120 a 960 de los 1200 de ancho.
+const t5 = Date.now();
+await dibujarZona(v, [0.06, 0.215, 0.86, 0.275]);
+const ventanaZona = await v
+  .waitForSelector('.vs-ventana .pal', { timeout: 120000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(ventanaZona, 'Al soltar el rectángulo, lo leído se abre en la ventana', `${Date.now() - t5} ms`);
+const enLaZona = await lineasEnPagina(v);
+console.log('  leído en la zona:', JSON.stringify(enLaZona.map((l) => l.texto)));
+comprobar(enLaZona.length === 1, 'Solo entra en la página el renglón de la zona', String(enLaZona.length));
+const eZona = error(enLaZona.map((l) => l.texto).join(''), LINEAS_LIBRO[1]);
+comprobar(eZona < 0.1, 'Y se lee bien', `${(eZona * 100).toFixed(1)} %`);
+comprobar(enLaZona.length > 0 && enLaZona.every((l) => l.cortes), 'Sabiendo dónde va cada letra');
+comprobar((await botonArea(v).getAttribute('aria-pressed')) === 'false', 'Después, la herramienta vuelve a ser Seleccionar');
+await v.screenshot({ path: join(CAPTURAS, 'zona.png') });
+await v.click('.vs-ventana [aria-label="Cerrar"]');
+// Una zona en blanco lo dice, y la página sigue como estaba.
+await botonArea(v).click();
+await dibujarZona(v, [0.1, 0.8, 0.6, 0.95]);
+const vacia = await v
+  .waitForSelector('.vs-aviso-zona', { timeout: 60000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(vacia, 'Una zona sin texto avisa de que no lo hay');
+comprobar((await lineasEnPagina(v)).length === 1, 'Y el texto de la página no cambia');
+await v.waitForTimeout(500);
+await v.close();
+v = await abrir('Libro de prueba');
+await v.waitForTimeout(1500);
+comprobar((await lineasEnPagina(v)).length === 0, 'Lo leído en una zona no se guarda: al volver a abrir el libro ya no está');
+await v.close();
+
 // ---------- Manga ----------
 
 console.log('\n== Manga ==');
@@ -292,6 +349,31 @@ if (manga.lineas) {
   comprobar(e < 0.15, 'El globo entero, con sus dos columnas en orden', `${(e * 100).toFixed(1)} %`);
   await v.screenshot({ path: join(CAPTURAS, 'manga.png') });
 }
+await v.close();
+// Una zona sobre el globo, con el OCR apagado: lo leído es un globo, con sus columnas en orden.
+v = await abrir('Manga de prueba');
+await sinOcr(v);
+await v.keyboard.press('o');
+await dibujarZona(v, [0.38, 0.2, 0.64, 0.68]);
+const globoZona = await v
+  .waitForSelector('.vs-ventana .pal', { timeout: 60000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(globoZona, 'En un manga, una zona sobre un globo se abre en la ventana');
+const enElGlobo = await lineasEnPagina(v);
+console.log('  leído en la zona:', JSON.stringify(enElGlobo.map((l) => l.texto)));
+const eGlobo = enElGlobo.length === 1 ? error(enElGlobo[0].texto, COLUMNAS.join('')) : 1;
+comprobar(eGlobo < 0.15, 'Como un solo globo, con sus dos columnas en orden', enElGlobo.length === 1 ? `${(eGlobo * 100).toFixed(1)} %` : `${enElGlobo.length} líneas`);
+await v.screenshot({ path: join(CAPTURAS, 'manga-zona.png') });
+await v.click('.vs-ventana [aria-label="Cerrar"]');
+// En la trama gris de fuera del globo no hay nada que leer: manga-ocr también «lee» algo ahí, pero sin seguridad.
+await botonArea(v).click();
+await dibujarZona(v, [0.04, 0.03, 0.3, 0.14]);
+const tramaVacia = await v
+  .waitForSelector('.vs-aviso-zona', { timeout: 60000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(tramaVacia, 'Una zona de la trama, sin texto, avisa de que no lo hay', JSON.stringify((await lineasEnPagina(v)).map((l) => l.texto)));
 await v.close();
 
 // ---------- PDF con la capa de otro OCR ----------

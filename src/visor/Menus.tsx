@@ -283,7 +283,22 @@ function Dialogo({ etiqueta, clase, alCerrar, children }: { etiqueta: string; cl
  * La paleta de acciones: se escribe lo que se quiere hacer y se encuentra la orden, esté en el menú que esté. Un número
  * lleva a esa página. Las flechas eligen e Intro ejecuta.
  */
-export function Paleta({ ordenes, total, alIrA, alCerrar }: { ordenes: Comando[]; total: number; alIrA: (n: number) => void; alCerrar: () => void }) {
+export function Paleta({
+  ordenes,
+  total,
+  alIrA,
+  alCerrar,
+  etiquetaIr = (n) => tr('Ir a la página {0}', n),
+  pista = tr('Busca una acción o escribe un número de página'),
+}: {
+  ordenes: Comando[];
+  total: number;
+  alIrA: (n: number) => void;
+  alCerrar: () => void;
+  /** Cómo se dice ir al número escrito: a una página o, en un libro de texto, a un capítulo. */
+  etiquetaIr?: (n: number) => string;
+  pista?: string;
+}) {
   const [consulta, fijarConsulta] = useState('');
   const [elegida, fijarElegida] = useState(0);
   const campo = useRef<HTMLInputElement>(null);
@@ -292,7 +307,7 @@ export function Paleta({ ordenes, total, alIrA, alCerrar }: { ordenes: Comando[]
   const nombreMenu = (m: IdMenu) => tr(MENUS.find((x) => x.id === m)?.nombre ?? m);
   const numero = /^\s*\d+\s*$/.test(consulta) ? parseInt(consulta, 10) : NaN;
   const irA: Comando | null =
-    numero >= 1 && numero <= total ? { id: 'ir-a', etiqueta: tr('Ir a la página {0}', numero), menu: 'ir', grupo: 'ir', icono: 'siguiente', ejecutar: () => alIrA(numero - 1) } : null;
+    numero >= 1 && numero <= total ? { id: 'ir-a', etiqueta: etiquetaIr(numero), menu: 'ir', grupo: 'ir', icono: 'siguiente', ejecutar: () => alIrA(numero - 1) } : null;
   const halladas = useMemo(() => [...(irA ? [irA] : []), ...buscarOrdenes(ordenes, consulta, nombreMenu)], [ordenes, consulta]);
   useEffect(() => fijarElegida(0), [consulta]);
   useEffect(() => {
@@ -314,7 +329,7 @@ export function Paleta({ ordenes, total, alIrA, alCerrar }: { ordenes: Comando[]
           aria-expanded="true"
           aria-controls="vs-paleta-lista"
           aria-activedescendant={halladas[elegida] ? `vs-paleta-${halladas[elegida].id}` : undefined}
-          placeholder={tr('Busca una acción o escribe un número de página')}
+          placeholder={pista}
           value={consulta}
           onInput={(e) => fijarConsulta(e.currentTarget.value)}
           onKeyDown={(e) => {
@@ -360,11 +375,11 @@ export function Paleta({ ordenes, total, alIrA, alCerrar }: { ordenes: Comando[]
   );
 }
 
-/** Los atajos de teclado: los del registro, por menús, y los que atiende el visor por su cuenta. */
-export function Atajos({ ordenes, rtl, alCerrar }: { ordenes: Comando[]; rtl: boolean; alCerrar: () => void }) {
+/** Los atajos de teclado: los del registro, por menús, y los que atiende el visor por su cuenta (`fijos`, si no son los de las páginas). */
+export function Atajos({ ordenes, rtl, fijos: propios, alCerrar }: { ordenes: Comando[]; rtl: boolean; fijos?: [string[], string][]; alCerrar: () => void }) {
   const cerrar = useRef<HTMLButtonElement>(null);
   useLayoutEffect(() => cerrar.current?.focus(), []);
-  const fijos: [string[], string][] = [
+  const fijos: [string[], string][] = propios ?? [
     [rtl ? ['←'] : ['→'], tr('Página siguiente')],
     [rtl ? ['→'] : ['←'], tr('Página anterior')],
     [[tr('Re Pág y Av Pág'), tr('Espacio')], tr('Pasar de página')],

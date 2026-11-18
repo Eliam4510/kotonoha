@@ -1,16 +1,18 @@
 // El desplegable «Aa» de la barra del visor: las ayudas de lectura y cómo se ve el libro, a la mano y diciendo a qué
 // alcanzan. Las ayudas (lectura sobre las palabras, colores, letra) son de Kotonoha entero: valen igual en los subtítulos
-// y el Cuaderno. El sentido, la vista y la nitidez son de este libro: cada libro recuerda los suyos.
+// y el Cuaderno. El sentido, la vista y la nitidez son de este libro: cada libro recuerda los suyos. El desplegable y las
+// ayudas de lectura los usa también el visor de un EPUB de texto.
 
+import type { ComponentChildren } from 'preact';
 import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 import { Interruptor } from '../app/Piezas';
 import { tr } from '../compartido/i18n';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { MODOS_LECTURA } from '../ui/palabras';
 import { useClicFuera } from './Menus';
-import type { AccionesVisor, EstadoVisor, Vista } from './ordenesVisor';
+import type { AccionesVisor, AjusteLectura, AyudasLectura, EstadoVisor, Vista } from './ordenesVisor';
 
-function Fila({ nombre, children }: { nombre: string; children: preact.ComponentChildren }) {
+export function Fila({ nombre, children }: { nombre: string; children: preact.ComponentChildren }) {
   return (
     <div class="vs-aa-fila">
       <span class="vs-aa-nombre">{nombre}</span>
@@ -19,7 +21,7 @@ function Fila({ nombre, children }: { nombre: string; children: preact.Component
   );
 }
 
-function Segmentado<T extends string | number>({ etiqueta, valor, opciones, alCambiar }: { etiqueta: string; valor: T; opciones: { v: T; texto?: string; icono?: NombreIcono; nombre?: string }[]; alCambiar: (v: T) => void }) {
+export function Segmentado<T extends string | number>({ etiqueta, valor, opciones, alCambiar }: { etiqueta: string; valor: T; opciones: { v: T; texto?: string; icono?: NombreIcono; nombre?: string }[]; alCambiar: (v: T) => void }) {
   return (
     <div class="segmentado vs-aa-opciones" role="radiogroup" aria-label={etiqueta}>
       {opciones.map((o) => (
@@ -31,7 +33,8 @@ function Segmentado<T extends string | number>({ etiqueta, valor, opciones, alCa
   );
 }
 
-export function PanelAa({ e, h, alCerrar, ancla }: { e: EstadoVisor; h: AccionesVisor; alCerrar: () => void; ancla: () => Element | null }) {
+/** El desplegable de «Aa», bajo su botón (`ancla`): lo cierran Esc y un clic fuera, y al abrirse lleva el foco dentro. */
+export function DesplegableAa({ alCerrar, ancla, children }: { alCerrar: () => void; ancla: () => Element | null; children: ComponentChildren }) {
   const ref = useRef<HTMLDivElement>(null);
   useClicFuera(true, () => [ref.current, ancla()], alCerrar);
   useLayoutEffect(() => ref.current?.querySelector<HTMLElement>('button')?.focus({ preventScroll: true }), []);
@@ -46,43 +49,58 @@ export function PanelAa({ e, h, alCerrar, ancla }: { e: EstadoVisor; h: Acciones
     window.addEventListener('keydown', tecla, true);
     return () => window.removeEventListener('keydown', tecla, true);
   }, []);
+  return (
+    <div ref={ref} class="vs-aa-panel" role="dialog" aria-label={tr('Ayudas de lectura')}>
+      {children}
+    </div>
+  );
+}
+
+/** Las ayudas de lectura de Kotonoha entero: la lectura sobre las palabras, el estado, el color del acento y la letra. */
+export function SeccionAyudas({ e, ajuste }: { e: AyudasLectura; ajuste: (c: AjusteLectura) => void }) {
+  return (
+    <section>
+      <h3>
+        {tr('Ayudas de lectura')} <small>{tr('En todo Kotonoha')}</small>
+      </h3>
+      <Fila nombre={e.lengua.lectura}>
+        <Segmentado etiqueta={e.lengua.lectura} valor={e.furigana} opciones={MODOS_LECTURA.map(([v, n]) => ({ v, texto: tr(n) }))} alCambiar={(v) => ajuste({ furigana: v })} />
+      </Fila>
+      <Fila nombre={tr('Estado de aprendizaje')}>
+        <Interruptor etiqueta={tr('Estado de aprendizaje')} on={e.mostrarEstado} alCambiar={(v) => ajuste({ mostrarEstado: v })} />
+      </Fila>
+      {e.lengua.acento && (
+        <Fila nombre={tr('Color de acento')}>
+          <Segmentado
+            etiqueta={tr('Color de acento')}
+            valor={e.colorAcento}
+            opciones={[
+              { v: 'siempre', texto: tr('Siempre') },
+              { v: 'alPasar', texto: tr('Al pasar') },
+              { v: 'ninguno', texto: tr('Nada') },
+            ]}
+            alCambiar={(v) => ajuste({ colorAcento: v })}
+          />
+        </Fila>
+      )}
+      {e.lengua.letras.length > 1 && (
+        <Fila nombre={tr('Letra')}>
+          <Segmentado etiqueta={tr('Letra')} valor={e.letra} opciones={e.lengua.letras.map((l) => ({ v: l.id, texto: tr(l.nombre) }))} alCambiar={(v) => ajuste({ diccionarioLetra: v })} />
+        </Fila>
+      )}
+    </section>
+  );
+}
+
+export function PanelAa({ e, h, alCerrar, ancla }: { e: EstadoVisor; h: AccionesVisor; alCerrar: () => void; ancla: () => Element | null }) {
   const vistas: { v: Vista; icono: NombreIcono; nombre: string }[] = [
     { v: 'una', icono: 'una-pagina', nombre: tr('Una página') },
     { v: 'doble', icono: 'doble-pagina', nombre: tr('Doble página') },
     { v: 'continua', icono: 'continua', nombre: tr('Desplazamiento continuo') },
   ];
   return (
-    <div ref={ref} class="vs-aa-panel" role="dialog" aria-label={tr('Ayudas de lectura')}>
-      <section>
-        <h3>
-          {tr('Ayudas de lectura')} <small>{tr('En todo Kotonoha')}</small>
-        </h3>
-        <Fila nombre={e.lengua.lectura}>
-          <Segmentado etiqueta={e.lengua.lectura} valor={e.furigana} opciones={MODOS_LECTURA.map(([v, n]) => ({ v, texto: tr(n) }))} alCambiar={(v) => h.ajuste({ furigana: v })} />
-        </Fila>
-        <Fila nombre={tr('Estado de aprendizaje')}>
-          <Interruptor etiqueta={tr('Estado de aprendizaje')} on={e.mostrarEstado} alCambiar={(v) => h.ajuste({ mostrarEstado: v })} />
-        </Fila>
-        {e.lengua.acento && (
-          <Fila nombre={tr('Color de acento')}>
-            <Segmentado
-              etiqueta={tr('Color de acento')}
-              valor={e.colorAcento}
-              opciones={[
-                { v: 'siempre', texto: tr('Siempre') },
-                { v: 'alPasar', texto: tr('Al pasar') },
-                { v: 'ninguno', texto: tr('Nada') },
-              ]}
-              alCambiar={(v) => h.ajuste({ colorAcento: v })}
-            />
-          </Fila>
-        )}
-        {e.lengua.letras.length > 1 && (
-          <Fila nombre={tr('Letra')}>
-            <Segmentado etiqueta={tr('Letra')} valor={e.letra} opciones={e.lengua.letras.map((l) => ({ v: l.id, texto: tr(l.nombre) }))} alCambiar={(v) => h.ajuste({ diccionarioLetra: v })} />
-          </Fila>
-        )}
-      </section>
+    <DesplegableAa alCerrar={alCerrar} ancla={ancla}>
+      <SeccionAyudas e={e} ajuste={h.ajuste} />
       <section>
         <h3>
           {tr('Sobre la página')} <small>{tr('En todos los libros')}</small>
@@ -157,6 +175,6 @@ export function PanelAa({ e, h, alCerrar, ancla }: { e: EstadoVisor; h: Acciones
           </Fila>
         )}
       </section>
-    </div>
+    </DesplegableAa>
   );
 }

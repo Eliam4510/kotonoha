@@ -393,9 +393,11 @@ if (quiere('detalles')) {
   // Las frases que se añaden para mirar el cambio de palabra: se borran al acabar.
   const FUENTE_CAMBIO = 'Video de prueba del acabado (cambio de palabra)';
   await p.setViewportSize({ width: ANCHO, height: ALTO });
+  // Un texto de la Biblioteca se lee en el visor, como los libros: su dirección entera.
+  const visorDe = (libro) => `chrome-extension://${id}/visor.html#${libro}`;
   const ir = async (ruta, esperar, tiempo = 900) => {
     await p.goto('about:blank');
-    await p.goto(app(ruta));
+    await p.goto(ruta.startsWith('chrome-extension:') ? ruta : app(ruta));
     if (esperar) await p.locator(esperar).first().waitFor({ timeout: 60000 }).catch(() => {});
     await p.waitForTimeout(tiempo);
   };
@@ -526,7 +528,7 @@ if (quiere('detalles')) {
     const alPrincipio = [];
     for (const ancho of [820, 1100, ANCHO]) {
       await p.setViewportSize({ width: ancho, height: 1000 });
-      await ir('biblioteca?abrir=acabado-leer', '.ap-papel .pal', 1500);
+      await ir(visorDe('acabado-leer'), '.ap-papel .pal', 1500);
       const malos = await p.evaluate(() => {
         const papel = document.querySelector('.ap-papel');
         const r = document.createRange();
@@ -549,10 +551,10 @@ if (quiere('detalles')) {
     }
     comprobar(!alPrincipio.length, 'Leyendo, ningún punto, coma ni comilla de cierre empieza un renglón, a ningún ancho', alPrincipio.join('; '));
 
-    // En la Biblioteca y en el Cuaderno, que pone su propia altura a la ficha.
+    // En un texto de la Biblioteca, que se lee en el visor, y en el Cuaderno, que pone su propia altura a la ficha.
     await p.setViewportSize({ width: 820, height: 1000 });
     const tapadas = [];
-    for (const [sitio, ruta, n] of [['Biblioteca', 'biblioteca?abrir=acabado-leer', 5], ['Biblioteca', null, 48], ['Cuaderno', `lector?t=${encodeURIComponent(LARGO)}`, 5], ['Cuaderno', null, 48]]) {
+    for (const [sitio, ruta, n] of [['Biblioteca', visorDe('acabado-leer'), 5], ['Biblioteca', null, 48], ['Cuaderno', `lector?t=${encodeURIComponent(LARGO)}`, 5], ['Cuaderno', null, 48]]) {
       if (ruta) await ir(ruta, '.ap-papel .pal', 1500);
       const palabra = p.locator('.ap-papel .pal').nth(n);
       await palabra.scrollIntoViewIfNeeded();
@@ -563,10 +565,12 @@ if (quiere('detalles')) {
         const ficha = document.querySelector('.ap-lectura-ficha').getBoundingClientRect();
         const elegida = document.querySelector('.ap-elegida')?.getBoundingClientRect();
         const papel = document.querySelector('.ap-papel').getBoundingClientRect();
+        // Abajo de lo que se lee: en el visor, encima de su barra de estado.
+        const fondo = document.querySelector('.vs-lienzo')?.getBoundingClientRect().bottom ?? innerHeight;
         return {
           aLaVista: !!elegida && elegida.top >= 0 && elegida.bottom <= ficha.top && elegida.bottom <= innerHeight,
           // A lo ancho del texto, pegada abajo y sin pasar de algo más de media ventana.
-          debajo: ficha.left <= papel.left + 2 && ficha.right >= papel.right - 2 && ficha.bottom >= innerHeight - 2 && ficha.height <= innerHeight * 0.6,
+          debajo: ficha.left <= papel.left + 2 && ficha.right >= papel.right - 2 && ficha.bottom >= fondo - 2 && ficha.height <= innerHeight * 0.6,
           ficha: [Math.round(ficha.left), Math.round(ficha.top), Math.round(ficha.right), Math.round(ficha.bottom)],
           elegida: elegida ? [Math.round(elegida.top), Math.round(elegida.bottom)] : null,
         };

@@ -44,7 +44,8 @@ export type ModoOcr = 'libro' | 'manga';
 /** Lo que de verdad lee el trabajador: el modo Manga de una lengua con espacios es el de los cómics. */
 export type ModoLectura = ModoOcr | 'comic';
 
-export type PedidoOcr = { tipo: 'leer'; id: number; modo: ModoLectura; imagen: ImageBitmap } | { tipo: 'liberar' };
+/** `zona`: la imagen es una zona suelta de una página (la herramienta Área), no la página entera. */
+export type PedidoOcr = { tipo: 'leer'; id: number; modo: ModoLectura; imagen: ImageBitmap; zona?: boolean } | { tipo: 'liberar' };
 
 export type RespuestaOcr =
   | { tipo: 'descarga'; archivo: string; cargado: number; total: number }
@@ -298,11 +299,14 @@ async function leerCajas(m: ModelosLibro, imagen: ImageBitmap, cajas: { caja: Ca
   return textos;
 }
 
-async function leerLibro(imagen: ImageBitmap): Promise<LineaOcr[]> {
+async function leerLibro(imagen: ImageBitmap, zona = false): Promise<LineaOcr[]> {
   const m = await cargarLibro();
   fase('modelos');
   const { width: w, height: h } = imagen;
-  const cajas = (await cajasDeLineas(m, imagen, { x0: 0, y0: 0, x1: w, y1: h })).map((caja) => ({ caja, vertical: esVertical(caja) }));
+  // Una página entera se lee a 1920 píxeles de lado, la escala con la que se ajustó el detector. Una zona suelta es mucho
+  // menos que una página: a esa escala sus letras se agrandarían de más. Se amplía al doble, como un globo de un cómic.
+  const limite = zona ? Math.min(1920, Math.max(320, 2 * Math.max(w, h))) : undefined;
+  const cajas = (await cajasDeLineas(m, imagen, { x0: 0, y0: 0, x1: w, y1: h }, limite)).map((caja) => ({ caja, vertical: esVertical(caja) }));
   fase('deteccion');
   const leidas = await leerCajas(m, imagen, cajas);
   const lineas: LineaOcr[] = [];
@@ -312,6 +316,23 @@ async function leerLibro(imagen: ImageBitmap): Promise<LineaOcr[]> {
   });
   fase('lectura');
   return ordenarLineas(quitarFurigana(lineas));
+}
+
+/**
+ * Una zona suelta de un manga (la herramienta Área), leída con manga-ocr como un globo: lo que se dibuja alrededor de un
+ * globo o de un cartel es lo que el detector de globos recortaría. El reconocedor de libros, en cambio, se come las kana
+ * pequeñas de las columnas de un manga. Como lo suelto de una página, lo que se lee con poca seguridad no vale: en una
+ * zona en blanco manga-ocr también «lee» algo.
+ */
+async function leerZonaManga(imagen: ImageBitmap): Promise<LineaOcr[]> {
+  // Para el detector de globos, 2 es el texto suelto, fuera de un globo (BloqueManga, en nucleo/ocr.ts).
+  const TEXTO_SUELTO = 2;
+  const m = await cargarManga();
+  fase('modelos');
+  const caja = { x0: 0, y0: 0, x1: imagen.width, y1: imagen.height };
+  const [{ texto, confianza }] = await leerGlobos(m, imagen, [caja]);
+  fase('lectura');
+  return texto && !esRuidoManga(texto, TEXTO_SUELTO, confianza) ? [{ caja: { x0: 0, y0: 0, x1: 1, y1: 1 }, texto, vertical: esVertical(caja) }] : [];
 }
 
 /** Los bloques de texto de una página de manga o de cómic, con el detector de globos. */
@@ -501,7 +522,15 @@ self.onmessage = async (e: MessageEvent<PedidoOcr>) => {
   fases = {};
   desde = inicio;
   try {
-    const lineas = p.modo === 'manga' ? await leerManga(p.imagen) : p.modo === 'comic' ? await leerComic(p.imagen) : await leerLibro(p.imagen);
+    const lineas = p.zona
+      ? p.modo === 'manga'
+        ? await leerZonaManga(p.imagen)
+        : await leerLibro(p.imagen, true)
+      : p.modo === 'manga'
+        ? await leerManga(p.imagen)
+        : p.modo === 'comic'
+          ? await leerComic(p.imagen)
+          : await leerLibro(p.imagen);
     avisar({ tipo: 'lineas', id: p.id, lineas, ms: Math.round(performance.now() - inicio), dispositivo: (await hayGpu()) ? 'webgpu' : 'wasm', fases });
   } catch (err) {
     avisar({ tipo: 'error', id: p.id, mensaje: err instanceof Error ? err.message : String(err) });

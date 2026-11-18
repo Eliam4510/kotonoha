@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.37.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.38.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -171,6 +171,9 @@ Estado de cada función en la versión 0.37.0, con la forma en que se ha verific
 | La página aumentada: subrayado por estado, furigana (todas, desconocidas, al pasar o ninguna) y gramática sobre la página, sin tapar el furigana impreso; con el texto de un PDF y con el OCR de libros, que ahora sabe dónde va cada letra por los pasos del reconocedor | Automática: pruebas unitarias del sitio de cada palabra y su lectura, de los cortes del CTC y del furigana impreso; de extremo a extremo con un PDF con ruby |
 | La traducción de la frase abierta como un subtítulo bajo ella, leída de lo guardado sin gastar; la ficha al pasar el ratón con Mayús, Ctrl o Alt; cuánto se entiende de lo que se ve | Automática, con un Claude falso |
 | Leer en voz alta siguiendo la frase, de página en página; Consultadas: las palabras elegidas en un libro, a tarjetas de golpe con su frase, su furigana, sus definiciones y un recorte de la página | Automática |
+| Leer una zona (O): un rectángulo dibujado sobre la página se lee con el OCR, aunque el del libro esté apagado; lo leído entra en el texto de la página, en su sitio, y se abre en la ventana; en un manga, como un globo leído con manga-ocr. No se guarda | Automática: pruebas unitarias del recorte y de cómo entra lo leído en la página; de extremo a extremo en un libro y en un manga, también con una zona sin texto |
+| Los EPUB de texto, con lo del visor de páginas: los menús, Buscar una acción (Ctrl+K, también con el foco en el libro), los atajos, «Aa», el índice a la izquierda, Atrás (Alt+←), la barra de estado y el modo lectura | Automática |
+| Los textos de la Biblioteca (lo pegado, los relatos, los artículos) se leen en el visor, en una pestaña propia, con sus menús, «Aa», sus páginas y Editar en el Cuaderno | Automática |
 | La ventana no tapa lo que queda por leer: va al margen de la página si cabe, y si no, sobre lo ya leído (encima del renglón, o a la derecha de la columna en vertical); se mueve, se agranda y se fija a un lado como panel, que se ensancha y recuerda su ancho | Automática (pruebas unitarias de la colocación) |
 | Seleccionar arrastrando, letra a letra y entre renglones, con Traducir, Explicar, Desglosar, Escuchar, Resaltar, Nota y Copiar; Ctrl+C copia lo abierto | Automática |
 | Pasar de página con flechas a la vista a los lados, el teclado o deslizando: tocar la página solo cierra lo abierto, y fallar por poco al tocar una palabra ya no pasa de página | Automática |
