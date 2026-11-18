@@ -5,6 +5,7 @@ import type { AnotacionLibro, ColorAnotacion } from '../compartido/tipos';
 import { cajaDeTramo, type LineaTexto } from './capaTexto';
 import { solape } from './ediciones';
 import type { Caja } from './ocr';
+import { cajasDe, type TramoPagina } from './seleccion';
 
 /** Lo mínimo que tiene que solaparse la línea de un resaltado con una línea para ser suyo. */
 const SOLAPE_MINIMO = 0.5;
@@ -41,6 +42,48 @@ export function nuevoResaltado(o: {
     creada: Date.now(),
   };
 }
+
+/**
+ * Un resaltado (o subrayado) de lo que se tocó o seleccionó en una página, aunque ocupe varios renglones: una caja por
+ * renglón. Su línea es la del primero, la que lo identifica.
+ */
+export function resaltadoDeTramo(o: {
+  libro: string;
+  pagina: number;
+  lineas: LineaTexto[];
+  tramo: TramoPagina;
+  texto: string;
+  porLetra: boolean;
+  estilo: 'fondo' | 'subrayado';
+  color: ColorAnotacion;
+}): AnotacionLibro {
+  const primera = o.lineas[o.tramo.desde.linea];
+  return {
+    id: crypto.randomUUID(),
+    libro: o.libro,
+    tipo: 'resaltado',
+    pagina: o.pagina,
+    cajas: cajasDe(o.lineas, o.tramo, o.porLetra),
+    linea: primera.caja,
+    texto: o.texto,
+    estilo: o.estilo,
+    vertical: primera.vertical,
+    color: o.color,
+    creada: Date.now(),
+  };
+}
+
+/** Lo que tiene `a` dentro de `b`, de 0 a 1. */
+function dentro(a: Caja, b: Caja): number {
+  const ix = Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0));
+  const iy = Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+  const area = (a.x1 - a.x0) * (a.y1 - a.y0);
+  return area > 0 ? (ix * iy) / area : 0;
+}
+
+/** Los resaltados de una página que caen sobre unas cajas: los de la frase o lo seleccionado que se está viendo. */
+export const resaltadosEn = (anotaciones: AnotacionLibro[], pagina: number, cajas: Caja[]) =>
+  anotaciones.filter((a) => a.tipo === 'resaltado' && a.pagina === pagina && (a.cajas ?? []).some((c) => cajas.some((u) => dentro(c, u) >= SOLAPE_MINIMO)));
 
 /** Los resaltados de una página que son de esta línea: los que se hicieron sobre la línea que ocupa ese sitio. */
 export const resaltadosDe = (anotaciones: AnotacionLibro[], pagina: number, linea: Caja) =>

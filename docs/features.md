@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.34.0, along with how it has been verified.
+Status of each feature in version 0.35.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -160,11 +160,14 @@ Status of each feature in version 0.34.0, along with how it has been verified.
 | Japanese glosses chosen by word class: なる as 成る, もの and こと as nouns, and ある, くる or いう with the entry the dictionary stores with kanji; among words read the same way, the most used one | Automated (unit tests), and measured against 0.31.0 with 1,900 words from a novel: 110 gain their gloss, none loses it and the 6 that change do so for the better |
 | Dictionaries from the latest yomidevs release that arrive empty: the most recent earlier release that has them in full is downloaded instead | Automated (unit tests), and with the real broken releases of 12 and 14 November 2026 |
 | Edit a line's text by hand, stored apart from what was read and with Restore | Automated |
-| Notes and bookmarks, as in a PDF reader: bookmark pages, highlight in four colours or underline a line, a word or a stretch, with a comment, and sticky notes on the page; in the "Notes and bookmarks" panel, everything by page, to go to, edit, remove or copy as text | Automated |
+| Notes and bookmarks, as in a PDF reader: bookmark pages, highlight in four colours or underline a sentence, a selection even across several lines, or a word, with a comment, and sticky notes on the page; in the "Notes and bookmarks" panel, everything by page, to go to, edit, remove or copy as text | Automated |
 | Search the book: in the PDF text and the OCR text, with edits, ignoring character width and the difference between hiragana and katakana, also a word split across two lines; results by page and marked on the page | Automated |
 | Text view: the page as text, in paragraphs with headings set apart, with the Notebook's reading help (furigana, comprehension, read aloud, word panel and cards); each book remembers it | Automated, and the paragraphs with 16 real pages |
 | Review a page's text with Claude, using its image: only the changes that do not match, letter by letter, to choose which to apply, stored as edited lines | Simulator |
-| Tapping a line on the page opens its text with furigana and words to look up, with their word panel and card creation | Automated |
+| Tapping a word on the page opens its whole sentence, even across several lines, in a floating window like the one for subtitles, with furigana, its words, their word panel and card creation; two taps, the sentence, and three, the paragraph. A magnet takes a tap between two lines to the nearest one | Automated, with a PDF made by the browser, horizontal and vertical |
+| The window does not cover what is left to read: it goes in the page margin if it fits, otherwise over text already read (above the line, or to the right of the column in vertical text); it can be moved, enlarged and pinned to the side as a panel that widens and remembers its width | Automated (unit tests of the placement) |
+| Selecting by dragging, character by character and across lines, with Translate, Explain, Break down, Listen, Highlight, Note and Copy; Ctrl+C copies what is open | Automated |
+| Turning pages with visible arrows at the sides, the keyboard or a swipe: tapping the page only closes what is open, and narrowly missing a word no longer turns the page | Automated |
 | Each page is read only once and saved; its text also reaches screen readers | Automated |
 | Text EPUBs in the viewer, in their own format: chapters, CSS, ruby, illustrations and vertical writing, with the page reader on top, with colours, furigana and word panels | Automated, with a vertical EPUB with ruby, CSS and an illustration |
 | Nothing an EPUB contains runs or loads anything from outside: no scripts, frames, forms or on* attributes | Automated, with an EPUB full of traps |
@@ -290,7 +293,7 @@ Status of each feature in version 0.34.0, along with how it has been verified.
 | Platforms | Desktop Chrome and Edge. The local helper is prepared for Windows |
 | Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card carries the episode's official image, if the site offers one |
 | Audio with DRM | A protected site may withhold its sound from capture. After two silent sentences in a row in a video, the line is no longer replayed to record it |
-| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the single-file backup, but they are in the full copy. A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word. |
+| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the single-file backup, but they are in the full copy. A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word: the word is picked in the window, and inside a bubble you cannot select by dragging. |
 | Synchronization | No server: moving between computers is done with the full copy |
 | Background music | Whisper can miss quiet conversation under loud music |
 | Song lyrics | Timing is per Whisper line, not per word. With very loud music Whisper may hear little, and then more verses get an estimated time |

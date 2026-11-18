@@ -379,7 +379,7 @@ async function paginaConOcr(b, datos, id) {
   }, datos.palabraPagina);
   if (!caja) throw new Error(`El OCR no leyó «${datos.palabraPagina}»: ${await v.evaluate(() => [...document.querySelectorAll('.vs-linea')].map((x) => x.getAttribute('aria-label')).join(' | '))}`);
   await v.mouse.click(caja.x, caja.y);
-  await v.waitForSelector('.vs-panel-linea .vs-ficha .ficha', { timeout: 20000 });
+  await v.waitForSelector('.vs-ventana .vs-ficha .ficha', { timeout: 20000 });
   await v.mouse.move(640, 790);
   await v.waitForTimeout(1500);
   await guardar(v, 'ocr', id);
@@ -425,19 +425,20 @@ async function paginaReal(b, etiqueta, real, id) {
   );
   if (!caja) throw new Error(`El OCR no leyó «${real.palabra}»: ${await v.evaluate((s) => [...document.querySelectorAll(s)].map((x) => x.getAttribute('aria-label')).join(' | '), `${hoja} .vs-linea`)}`);
   await v.mouse.click(caja.x, caja.y);
-  await v.waitForSelector('.vs-panel-linea .pal', { timeout: 20000 });
+  await v.waitForSelector('.vs-ventana-texto .pal', { timeout: 20000 });
   if (real.modo === 'manga') {
-    // Un globo se abre entero: la palabra se elige en el panel, sin su furigana.
+    // Un globo se abre entero: la palabra se elige en la ventana, sin su furigana. Una palabra larga va partida en trozos.
     await v.waitForTimeout(500);
-    const indice = await v.evaluate((palabra) => [...document.querySelectorAll('.vs-panel-linea .pal')].findIndex((p) => {
+    const PALABRAS = '.vs-ventana-texto .pal:not(.trozo), .vs-ventana-texto .pal-partible';
+    const indice = await v.evaluate(({ s, palabra }) => [...document.querySelectorAll(s)].findIndex((p) => {
       const copia = p.cloneNode(true);
       copia.querySelectorAll('rt, rp').forEach((r) => r.remove());
       return copia.textContent.trim() === palabra;
-    }), real.palabra);
+    }), { s: PALABRAS, palabra: real.palabra });
     if (indice < 0) throw new Error(`En el globo no está la palabra «${real.palabra}»`);
-    await v.locator('.vs-panel-linea .pal').nth(indice).click();
+    await v.locator(PALABRAS).nth(indice).click();
   }
-  await v.waitForSelector('.vs-panel-linea .vs-ficha .ficha', { timeout: 20000 });
+  await v.waitForSelector('.vs-ventana .vs-ficha .ficha', { timeout: 20000 });
   await v.mouse.move(640, 790);
   await v.waitForTimeout(2000);
   await guardar(v, real.base, id);

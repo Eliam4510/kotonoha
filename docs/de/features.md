@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.34.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.35.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -160,11 +160,14 @@ Stand jeder Funktion in Version 0.34.0 und die Art ihrer Überprüfung.
 | Japanische Glossen nach Wortart gewählt: なる als 成る, もの und こと als Substantive, und ある, くる oder いう mit dem Eintrag, den das Wörterbuch mit Kanji führt; unter gleich gelesenen Wörtern das meistgebrauchte | Automatisch (Unit-Tests), und gegen 0.31.0 mit 1.900 Wörtern eines Romans gemessen: 110 bekommen eine Glosse, keines verliert sie, und die 6, die sich ändern, werden besser |
 | Wörterbücher aus der neuesten yomidevs-Version, die leer ankommen: Stattdessen wird die jüngste frühere Version geladen, die sie vollständig enthält | Automatisch (Unit-Tests), und mit den echten defekten Versionen vom 12. und 14. November 2026 |
 | Den Text einer Zeile von Hand bearbeiten, getrennt vom Gelesenen gespeichert und mit „Wiederherstellen“ | Automatisch |
-| Notizen und Lesezeichen wie in einem PDF-Reader: Seiten markieren, eine Zeile, ein Wort oder einen Abschnitt in vier Farben hervorheben oder unterstreichen, mit Kommentar, und Notizen auf der Seite; im Fenster „Notizen und Lesezeichen“ alles nach Seiten, zum Hinspringen, Bearbeiten, Entfernen oder Kopieren als Text | Automatisch |
+| Notizen und Lesezeichen wie in einem PDF-Reader: Seiten markieren, einen Satz, eine Auswahl auch über mehrere Zeilen oder ein Wort in vier Farben hervorheben oder unterstreichen, mit Kommentar, und Notizen auf der Seite; im Fenster „Notizen und Lesezeichen“ alles nach Seiten, zum Hinspringen, Bearbeiten, Entfernen oder Kopieren als Text | Automatisch |
 | Im Buch suchen: im PDF-Text und im Text der Texterkennung, mit Bearbeitungen, ohne Unterschied bei Zeichenbreite sowie zwischen Hiragana und Katakana, auch ein über zwei Zeilen geteiltes Wort; Ergebnisse nach Seiten und auf der Seite markiert | Automatisch |
 | Textansicht: die Seite als Text, in Absätzen und mit abgesetzten Überschriften, mit der Lesehilfe des Notizbuchs (Furigana, Verständnis, Vorlesen, Wortfenster und Karten); jedes Buch merkt sie sich | Automatisch, und die Absätze mit 16 echten Seiten |
 | Den Text einer Seite mit Claude prüfen, anhand ihres Bildes: nur die Änderungen, die nicht übereinstimmen, Buchstabe für Buchstabe, zur Auswahl, gespeichert als bearbeitete Zeilen | Simulator |
-| Ein Tippen auf eine Zeile der Seite öffnet ihren Text mit Furigana und nachschlagbaren Wörtern, samt Wortfenster und Kartenerstellung | Automatisch |
+| Ein Tippen auf ein Wort der Seite öffnet seinen ganzen Satz, auch über mehrere Zeilen, in einem schwebenden Fenster wie bei den Untertiteln, mit Furigana, seinen Wörtern, dem Wortfenster und der Kartenerstellung; zwei Tipper den Satz, drei den Absatz. Ein Magnet führt ein Tippen zwischen zwei Zeilen zur nächsten | Automatisch, mit einem vom Browser erzeugten PDF, waagerecht und senkrecht |
+| Das Fenster verdeckt nicht, was noch zu lesen ist: Es steht am Seitenrand, wenn es Platz hat, sonst über bereits Gelesenem (über der Zeile oder rechts der Spalte bei senkrechtem Text); es lässt sich verschieben, vergrößern und als Fenster am Rand anheften, das sich verbreitern lässt und seine Breite behält | Automatisch (Unit-Tests der Platzierung) |
+| Durch Ziehen auswählen, Zeichen für Zeichen und über Zeilen hinweg, mit Übersetzen, Erklären, Aufschlüsseln, Anhören, Hervorheben, Notiz und Kopieren; Strg+C kopiert das Geöffnete | Automatisch |
+| Umblättern mit sichtbaren Pfeilen an den Seiten, der Tastatur oder durch Wischen: Ein Tippen auf die Seite schließt nur das Geöffnete, und ein knapp verfehltes Wort blättert nicht mehr um | Automatisch |
 | Jede Seite wird nur einmal gelesen und gespeichert; ihr Text erreicht auch Bildschirmleser | Automatisch |
 | Text-EPUBs im Betrachter in ihrem eigenen Format: Kapitel, CSS, Ruby, Illustrationen und vertikale Schrift, mit dem Seiten-Reader darüber, mit Farben, Furigana und Wortfenstern | Automatisch, mit einem vertikalen EPUB mit Ruby, CSS und Illustration |
 | Was ein EPUB enthält, wird nicht ausgeführt und lädt nichts von außen: keine Skripte, Frames, Formulare oder on*-Attribute | Automatisch, mit einem EPUB voller Fallen |
@@ -290,7 +293,7 @@ Stand jeder Funktion in Version 0.34.0 und die Art ihrer Überprüfung.
 | Plattformen | Chrome und Edge auf dem Desktop. Der lokale Helfer ist für Windows vorbereitet |
 | Bild mit DRM | Bei Netflix und anderen geschützten Websites liefert der Browser das Einzelbild schwarz. Die Karte erhält das offizielle Bild der Folge, falls die Website eines anbietet |
 | Audio mit DRM | Eine geschützte Website kann ihren Ton der Aufnahme vorenthalten. Nach zwei stummen Sätzen in Folge in einem Video wird die Zeile nicht mehr zur Aufnahme erneut abgespielt |
-| Betrachter | Die Texterkennung kann ähnliche Zeichen verwechseln (エ und 工, ー und 一), gelegentlich eines auslassen und die Indizes von Formeln verlieren; das Originalbild bleibt immer sichtbar. Der Modus Buch ist mit horizontalem Text gemessen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung in einer Datei, wohl aber der vollständigen Kopie. Ein Text-EPUB wird kapitelweise mit Scrollen gelesen, nicht seitenweise; im Modus Manga wird die ganze Sprechblase angetippt, nicht jedes Wort. |
+| Betrachter | Die Texterkennung kann ähnliche Zeichen verwechseln (エ und 工, ー und 一), gelegentlich eines auslassen und die Indizes von Formeln verlieren; das Originalbild bleibt immer sichtbar. Der Modus Buch ist mit horizontalem Text gemessen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung in einer Datei, wohl aber der vollständigen Kopie. Ein Text-EPUB wird kapitelweise mit Scrollen gelesen, nicht seitenweise; im Modus Manga wird die ganze Sprechblase angetippt, nicht jedes Wort: Das Wort wählt man im Fenster, und in einer Sprechblase lässt sich nicht durch Ziehen auswählen. |
 | Synchronisierung | Ohne Server: Die Übertragung zwischen Computern erfolgt über die vollständige Kopie |
 | Hintergrundmusik | Whisper kann leise Gespräche unter lauter Musik verlieren |
 | Liedtexte | Die Zeiten gelten je Whisper-Zeile, nicht je Wort. Bei sehr lauter Musik hört Whisper womöglich wenig, und dann erhalten mehr Verse eine geschätzte Zeit |

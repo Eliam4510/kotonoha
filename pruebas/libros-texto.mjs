@@ -160,11 +160,12 @@ const tocarLetra = async (texto, n) => {
   const t = (n + 0.5) / [...texto].length;
   await v.mouse.click(vertical ? caja.x + caja.width / 2 : caja.x + caja.width * t, vertical ? caja.y + caja.height * t : caja.y + caja.height / 2);
 };
-/** La palabra elegida en el panel, sin su furigana. */
+/** La palabra elegida en la ventana flotante, sin su furigana; entera aunque vaya partida en trozos. */
 const elegida = (esperada) =>
   esperar(() =>
     v.evaluate((e) => {
-      const el = document.querySelector('.vs-panel-linea .pal.ap-elegida');
+      const trozo = document.querySelector('.vs-ventana-texto .ap-elegida');
+      const el = trozo?.closest('.pal-partible') ?? trozo;
       if (!el) return null;
       const copia = el.cloneNode(true);
       for (const rt of copia.querySelectorAll('rt')) rt.remove();
@@ -172,8 +173,8 @@ const elegida = (esperada) =>
     }, esperada)
   );
 await tocarLetra('今日は図書館で本を読みます。', 4);
-comprobar((await elegida('図書館')) === '図書館', 'Tocar una palabra en la página la elige en el panel', await elegida());
-comprobar(!!(await esperar(() => v.evaluate(() => !!document.querySelector('.vs-panel-linea .vs-ficha .ficha')))), 'Con su ficha abierta');
+comprobar((await elegida('図書館')) === '図書館', 'Tocar una palabra en la página la elige en la ventana flotante', await elegida());
+comprobar(!!(await esperar(() => v.evaluate(() => !!document.querySelector('.vs-ventana .vs-ficha .ficha')))), 'Con su ficha abierta');
 const marca = await v.evaluate(() => {
   const m = document.querySelector('.vs-marca')?.getBoundingClientRect();
   const l = document.querySelector('.vs-linea[aria-label="今日は図書館で本を読みます。"]')?.getBoundingClientRect();

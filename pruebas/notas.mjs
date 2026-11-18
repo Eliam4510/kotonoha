@@ -1,5 +1,5 @@
 // Prueba lo que se anota en el visor con un PDF hecho aquí mismo, que trae su texto (así no hace falta el OCR): marcar una
-// página, resaltar una línea y comentarla, subrayar una palabra, poner una nota sobre la página, el panel «Notas» (ir,
+// página, resaltar una frase y comentarla, subrayar una palabra, poner una nota sobre la página, el panel «Notas» (ir,
 // editar, quitar, copiar), que todo siga ahí al volver a abrir el libro y que se vaya con él al eliminarlo.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/notas.mjs
 
@@ -106,14 +106,15 @@ await v.click('[aria-label="Marcar esta página"]');
 comprobar((await contar(v, '.vs-pagina .vs-cinta')) === 1, 'La página lleva su cinta');
 comprobar((await v.getAttribute('[aria-label="Quitar el marcador de esta página"]', 'aria-pressed')) === 'true', 'Y el botón queda encendido, para quitarlo');
 
-// ---------- Resaltar una línea y comentarla ----------
+// ---------- Resaltar una frase y comentarla ----------
 
 console.log('\n== Resaltar ==');
 await v.locator('.vs-linea').first().click();
-await v.waitForSelector('.vs-panel-linea .vs-resaltar');
-await v.waitForSelector('.vs-linea-texto .pal.ap-elegida', { timeout: 15000 }).catch(() => {});
-// Tocar la página elige la palabra tocada, pero lo que se resalta sigue siendo la línea.
-comprobar((await v.textContent('.vs-resaltar-objetivo .activo').catch(() => '')) === 'La línea', 'Al tocar la línea, lo que se resalta es la línea entera');
+await v.waitForSelector('.vs-ventana');
+await v.waitForSelector('.vs-ventana-texto .ap-elegida', { timeout: 15000 }).catch(() => {});
+await v.click('.vs-ventana .vs-accion:has-text("Resaltar")');
+// Tocar la página elige la palabra tocada, pero lo que se resalta es su frase entera: aquí, el renglón del título.
+comprobar((await v.textContent('.vs-resaltar-objetivo .activo').catch(() => '')) === 'Frase', 'Al tocar una palabra, lo que se resalta es su frase entera');
 await v.click('[aria-label="Resaltar en amarillo"]');
 comprobar((await contar(v, '.vs-resaltado.fondo.amarillo')) === 1, 'La línea queda resaltada en amarillo sobre la página');
 const linea = await v.evaluate(() => {
@@ -130,11 +131,13 @@ comprobar((await v.textContent('.vs-resaltado-comentario')) === 'Definición de 
 // ---------- Subrayar una palabra ----------
 
 console.log('\n== Subrayar una palabra ==');
-await v.locator('.vs-panel-linea [aria-label="Línea siguiente"]').click();
-await v.waitForSelector('.vs-linea-texto .pal', { timeout: 15000 });
-const palabra = v.locator('.vs-linea-texto .pal').nth(1);
+await v.keyboard.press('Escape');
+await v.locator('.vs-linea').nth(1).click();
+await v.waitForSelector('.vs-ventana-texto .pal', { timeout: 15000 });
+const palabra = v.locator('.vs-ventana-texto .pal').nth(1);
 const texto = (await palabra.textContent())?.trim();
 await palabra.click();
+await v.click('.vs-ventana .vs-accion:has-text("Resaltar")');
 const solo = v.locator('.vs-resaltar-objetivo button').nth(1);
 const que = await solo.textContent();
 comprobar(!!texto && que === `Solo «${texto}»`, 'Con una palabra elegida, se puede resaltar solo esa', que);
@@ -146,8 +149,8 @@ const tramo = await v.evaluate(() => {
   return s && l ? { s: s.width, l: l.width } : null;
 });
 comprobar(!!tramo && tramo.s > 5 && tramo.s < tramo.l * 0.6, 'Subrayada solo la palabra, no la línea', JSON.stringify(tramo));
-await v.screenshot({ path: join(CAPTURAS, 'panel-linea.png') });
-await v.click('.vs-panel-linea [aria-label="Cerrar"]');
+await v.screenshot({ path: join(CAPTURAS, 'ventana.png') });
+await v.click('.vs-ventana [aria-label="Cerrar"]');
 await v.screenshot({ path: join(CAPTURAS, 'resaltados.png') });
 
 // ---------- Una nota sobre la página ----------

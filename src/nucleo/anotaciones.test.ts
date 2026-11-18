@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AnotacionLibro } from '../compartido/tipos';
-import { notasComoTexto, nuevoResaltado, ordenadas, porPagina, resaltadosDe } from './anotaciones';
+import { notasComoTexto, nuevoResaltado, ordenadas, porPagina, resaltadoDeTramo, resaltadosDe, resaltadosEn } from './anotaciones';
 import type { LineaTexto } from './capaTexto';
 
 /** Un renglón de diez letras repartidas por igual entre x = 0,1 y x = 0,6. */
@@ -71,5 +71,27 @@ describe('las notas como texto', () => {
       { pagina: (n) => `Página ${n}`, marcador: 'Marcador', nota: 'Nota' }
     );
     expect(texto).toBe('# Mi libro\n\n## Página 1\n\n- Nota: Empieza aquí\n\n## Página 5\n\n- Marcador\n> 水に溶ける\n\nRepasar\n');
+  });
+});
+
+describe('un resaltado de lo seleccionado en varios renglones', () => {
+  const segundo: LineaTexto = { caja: { x0: 0.1, y0: 0.27, x1: 0.6, y1: 0.32 }, texto: 'klmnopqrst', vertical: false };
+  const lineas = [renglon, segundo];
+  const tramo = { desde: { linea: 0, letra: 7 }, hasta: { linea: 1, letra: 3 } };
+
+  it('lleva una caja por renglón, el texto seleccionado y la línea del primero', () => {
+    const a = resaltadoDeTramo({ ...base, lineas, tramo, texto: 'hijklm', porLetra: true });
+    expect(a.cajas).toHaveLength(2);
+    expect(a.cajas?.[0].x0).toBeCloseTo(0.45);
+    expect(a.cajas?.[1].x1).toBeCloseTo(0.25);
+    expect(a.linea).toEqual(renglon.caja);
+    expect(a.texto).toBe('hijklm');
+  });
+
+  it('se encuentra desde cualquiera de sus renglones, y no desde otro sitio de la página', () => {
+    const a = resaltadoDeTramo({ ...base, lineas, tramo, texto: 'hijklm', porLetra: true });
+    expect(resaltadosEn([a], 3, [segundo.caja])).toEqual([a]);
+    expect(resaltadosEn([a], 3, [{ x0: 0.1, y0: 0.5, x1: 0.6, y1: 0.55 }])).toEqual([]);
+    expect(resaltadosEn([a], 4, [segundo.caja])).toEqual([]);
   });
 });

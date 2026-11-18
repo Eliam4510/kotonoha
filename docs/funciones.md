@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.34.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.35.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -160,11 +160,14 @@ Estado de cada función en la versión 0.34.0, con la forma en que se ha verific
 | Glosas en japonés elegidas por la clase de palabra: なる como 成る, もの y こと como sustantivos, y ある, くる o いう con la entrada que el diccionario guarda con kanji; entre las que se leen igual, la más usada | Automática (pruebas unitarias), y medida contra la 0.31.0 con 1 900 palabras de una novela: 110 ganan su glosa, ninguna la pierde y las 6 que cambian lo hacen a mejor |
 | Diccionarios de la última versión de yomidevs que llegan vacíos: se baja la versión anterior más reciente que los trae enteros | Automática (pruebas unitarias), y con las versiones rotas reales del 12 y el 14 de noviembre de 2026 |
 | Editar el texto de una línea a mano, guardado aparte de lo leído y con «Restaurar» | Automática |
-| Notas y marcadores, como en un lector de PDF: marcar páginas, resaltar en cuatro colores o subrayar una línea, una palabra o un tramo, con un comentario, y notas sueltas sobre la página; en el panel «Notas y marcadores», todo por páginas, para ir, editar, quitar o copiar como texto | Automática |
+| Notas y marcadores, como en un lector de PDF: marcar páginas, resaltar en cuatro colores o subrayar una frase, lo seleccionado aunque ocupe varios renglones o una palabra, con un comentario, y notas sueltas sobre la página; en el panel «Notas y marcadores», todo por páginas, para ir, editar, quitar o copiar como texto | Automática |
 | Buscar en el libro: en el texto del PDF y en el del OCR, con lo editado, sin distinguir anchos ni hiragana y katakana, también una palabra partida entre dos renglones; resultados por páginas y marcados en la página | Automática |
 | Vista de texto: la página como texto, en párrafos y con los títulos aparte, con la ayuda de lectura del Cuaderno (furigana, comprensión, lectura en voz alta, fichas y tarjetas); cada libro la recuerda | Automática, y los párrafos con 16 páginas reales |
 | Revisar con Claude el texto de una página, con su imagen: solo los cambios que no coinciden, letra a letra, para elegir cuáles aplicar, guardados como líneas editadas | Simulador |
-| Tocar una línea de la página abre su texto con furigana y palabras para consultar, con su ficha y la creación de tarjetas | Automática |
+| Tocar una palabra de la página abre su frase entera, aunque ocupe varios renglones, en una ventana flotante como la de los subtítulos, con furigana, sus palabras, su ficha y la creación de tarjetas; dos toques, la frase, y tres, el párrafo. Un imán lleva un toque entre dos renglones al más cercano | Automática, con un PDF hecho por el navegador, en horizontal y en vertical |
+| La ventana no tapa lo que queda por leer: va al margen de la página si cabe, y si no, sobre lo ya leído (encima del renglón, o a la derecha de la columna en vertical); se mueve, se agranda y se fija a un lado como panel, que se ensancha y recuerda su ancho | Automática (pruebas unitarias de la colocación) |
+| Seleccionar arrastrando, letra a letra y entre renglones, con Traducir, Explicar, Desglosar, Escuchar, Resaltar, Nota y Copiar; Ctrl+C copia lo abierto | Automática |
+| Pasar de página con flechas a la vista a los lados, el teclado o deslizando: tocar la página solo cierra lo abierto, y fallar por poco al tocar una palabra ya no pasa de página | Automática |
 | Cada página se lee una sola vez y se guarda; su texto también llega a los lectores de pantalla | Automática |
 | EPUB de texto en el visor, con su propio formato: capítulos, CSS, ruby, ilustraciones y escritura vertical, y el lector de páginas encima, con colores, furigana y fichas | Automática, con un EPUB vertical con ruby, CSS e ilustración |
 | Lo que trae un EPUB no se ejecuta ni carga nada de fuera: ni scripts, ni marcos, ni formularios, ni atributos on* | Automática, con un EPUB con trampas |
@@ -290,7 +293,7 @@ Estado de cada función en la versión 0.34.0, con la forma en que se ha verific
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
-| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad de un solo archivo, sino en la copia completa. Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra. |
+| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad de un solo archivo, sino en la copia completa. Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra: la palabra se elige en la ventana, y dentro de un globo no se selecciona arrastrando. |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia completa |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
 | Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |

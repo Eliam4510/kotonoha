@@ -10,15 +10,17 @@ import type { Ajustes } from '../compartido/ajustes';
 import { tm, tr } from '../compartido/i18n';
 import { fondo, motor } from '../compartido/rpc';
 import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca, Nitidez } from '../compartido/tipos';
-import { nuevoResaltado, resaltadosDe } from '../nucleo/anotaciones';
+import { resaltadoDeTramo, resaltadosEn } from '../nucleo/anotaciones';
 import type { Hallazgo } from '../nucleo/busqueda';
-import { cajaDeTramo, caracterEn, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
+import { cajaDeTramo, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
 import { aplicarEdiciones, type EdicionLinea, type LineaEditada } from '../nucleo/ediciones';
 import { edicionesDe, guardarEdicion, lecturaMinima, quitarEdicion } from '../compartido/paginasOcr';
 import type { Direccion } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
 import { cambiosValidos } from '../nucleo/revision';
+import { cajasDe, contextoDe, fraseEn, leerPagina, type PaginaLeida, parrafoEn, type Posicion, posicionEn, seleccionEn, type TramoPagina, tramoEntre, type Unidad } from '../nucleo/seleccion';
+import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { NotasDePagina, PanelNotas, Resaltados } from './Anotaciones';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
@@ -26,10 +28,10 @@ import { imagenParaClaude } from './imagenClaude';
 import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
 import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
 import { PanelBuscar } from './PanelBuscar';
-import { PanelLinea } from './PanelLinea';
 import { PanelRevision, type PropuestaLinea } from './PanelRevision';
 import { paginadorDePdf } from './pdf';
 import { leerTextoLibro, type TextoDePagina } from './textoLibro';
+import { type TipoUnidad, type UnidadAbierta, Ventana } from './Ventana';
 import { VistaTexto } from './VistaTexto';
 
 type Vista = 'una' | 'doble' | 'continua';
@@ -46,6 +48,10 @@ const ALREDEDOR = 2;
  * bastante más, así que ocho bastan para no esperar nunca al pasar de página; un libro se lee más despacio.
  */
 const ADELANTE: Record<ModoOcr, number> = { manga: 8, libro: 4 };
+
+/** Si dos listas de cajas son las mismas, salvo redondeos. */
+const mismasCajas = (a: Caja[] = [], b: Caja[] = []) =>
+  a.length === b.length && a.every((c, i) => Math.abs(c.x0 - b[i].x0) + Math.abs(c.y0 - b[i].y0) + Math.abs(c.x1 - b[i].x1) + Math.abs(c.y1 - b[i].y1) < 1e-4);
 
 const porciento = (c: Caja) => ({ left: `${c.x0 * 100}%`, top: `${c.y0 * 100}%`, width: `${(c.x1 - c.x0) * 100}%`, height: `${(c.y1 - c.y0) * 100}%` });
 
@@ -105,19 +111,24 @@ function FiltroNitidez({ n, escala }: { n: Nitidez; escala: number }) {
  * van sus líneas: zonas que se pueden tocar, con el texto para los lectores de pantalla, y la palabra elegida marcada.
  * Lo anotado va en dos capas: los resaltados debajo de las líneas y las notas encima.
  */
-function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, marca, hallado, alTocar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
+function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, unidad, seleccion, marcas, hallado, alTocar, alSeleccionar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
   paginador: Paginador;
   n: number;
   escala: number;
   alCargar?: () => void;
   lineas?: LineaTexto[];
-  /** Si se sabe dónde va cada letra de la línea: entonces tocar una palabra la elige. En un globo de manga, no. */
+  /** Si se sabe dónde va cada letra de la línea: entonces se toca y se selecciona letra a letra. En un globo de manga, no. */
   porPalabra?: boolean;
-  elegida?: number;
-  marca?: Caja;
+  /** Lo abierto en la ventana, lo que se está seleccionando y la palabra elegida, si son de esta página. */
+  unidad?: Caja[];
+  seleccion?: Caja[];
+  marcas?: Caja[];
   /** Lo encontrado al buscar en el libro, si está en esta página: se marca y se lleva a la vista. */
   hallado?: Caja[];
-  alTocar?: (indice: number, caracter?: number) => void;
+  /** Un toque cerca del texto, con cuántos van seguidos: uno, la palabra; dos, la frase; tres, el párrafo. */
+  alTocar?: (pos: Posicion, veces: number) => void;
+  /** Lo seleccionado arrastrando, mientras se arrastra y al soltar. */
+  alSeleccionar?: (tramo: TramoPagina, terminada: boolean) => void;
 } & PropsAnotaciones) {
   // La página que ya está lista se monta con su imagen: sin un fotograma vacío antes.
   const [imagen, fijarImagen] = useState<PaginaImagen | null>(() => paginador.imagenYa?.(n) ?? null);
@@ -142,29 +153,94 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, elegida, m
     };
   }, [paginador, n]);
   const t = imagen ?? paginador.tamano(n) ?? PAGINA_SUPUESTA;
+
+  // Tocar y seleccionar. Un imán perdona los huecos entre renglones (nucleo/seleccion.ts); lejos del texto, el toque no
+  // es para él y sigue hasta el lienzo, que cierra lo abierto. Nunca pasa de página: para eso están las flechas.
+  const capa = useRef<HTMLDivElement>(null);
+  const gesto = useRef<{ x: number; y: number; desde: Posicion | null; arrastrando: boolean; id: number; raton: boolean } | null>(null);
+  const toques = useRef({ t: 0, x: 0, y: 0, veces: 0 });
+  const atendido = useRef(false);
+  const enPunto = (e: PointerEvent, siempre = false) => {
+    const r = capa.current?.getBoundingClientRect();
+    if (!r?.width || !lineas) return null;
+    return posicionEn(lineas, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, { proporcion: t.alto / t.ancho, siempre });
+  };
+  const bajar = (e: PointerEvent) => {
+    atendido.current = false;
+    if (e.button !== 0 || !lineas?.length) return;
+    const desde = enPunto(e);
+    gesto.current = { x: e.clientX, y: e.clientY, desde, arrastrando: false, id: e.pointerId, raton: e.pointerType === 'mouse' };
+    // Con el ratón, sin el foco del botón de la línea ni la selección del navegador.
+    if (desde && e.pointerType === 'mouse') e.preventDefault();
+  };
+  const mover = (e: PointerEvent) => {
+    const g = gesto.current;
+    if (!g || g.id !== e.pointerId || !g.desde || !g.raton || !porPalabra || !lineas) return;
+    if (!g.arrastrando) {
+      if (Math.hypot(e.clientX - g.x, e.clientY - g.y) < 5) return;
+      g.arrastrando = true;
+      capa.current?.setPointerCapture(e.pointerId);
+    }
+    const hasta = enPunto(e, true);
+    if (hasta) alSeleccionar?.(tramoEntre(lineas, g.desde, hasta), false);
+  };
+  const subir = (e: PointerEvent) => {
+    const g = gesto.current;
+    gesto.current = null;
+    if (!g || g.id !== e.pointerId || !lineas) return;
+    if (g.arrastrando && g.desde) {
+      const hasta = enPunto(e, true);
+      if (hasta) alSeleccionar?.(tramoEntre(lineas, g.desde, hasta), true);
+      atendido.current = true;
+      return;
+    }
+    // Deslizar el dedo pasa de página: eso no es un toque.
+    if (!g.desde || Math.hypot(e.clientX - g.x, e.clientY - g.y) > 10) return;
+    // Los toques seguidos en el mismo sitio cuentan como el doble y el triple clic.
+    const ahora = performance.now();
+    const previo = toques.current;
+    const seguido = ahora - previo.t < 450 && Math.hypot(e.clientX - previo.x, e.clientY - previo.y) < 8;
+    const veces = seguido ? Math.min(3, previo.veces + 1) : 1;
+    toques.current = { t: ahora, x: e.clientX, y: e.clientY, veces };
+    atendido.current = true;
+    alTocar?.(g.desde, veces);
+  };
+
   return (
     <div class="vs-pagina" data-pagina={n + 1} style={{ width: `${Math.round(t.ancho * escala)}px`, height: `${Math.round(t.alto * escala)}px` }}>
       {imagen ? <img src={imagen.url} alt={tr('Página {0}', n + 1)} draggable={false} decoding="sync" /> : fallo ? <span class="vs-fallo">{fallo}</span> : <span class="vs-cargando" />}
       {imagen && anotaciones && anotaciones.length > 0 && <Resaltados anotaciones={anotaciones} />}
       {imagen && lineas && (
-        <div class="vs-texto">
+        <div
+          ref={capa}
+          class={`vs-texto ${porPalabra ? 'por-letra' : ''}`}
+          onPointerDown={bajar}
+          onPointerMove={mover}
+          onPointerUp={subir}
+          onPointerCancel={() => (gesto.current = null)}
+          onClick={(e) => {
+            // Lo tocado ya se atendió al soltar: que no llegue al lienzo, que lo tomaría por un toque fuera del texto.
+            if (atendido.current) e.stopPropagation();
+            atendido.current = false;
+          }}
+        >
           {lineas.map((l, i) => (
             <button
               key={i}
-              class={`vs-linea ${elegida === i ? 'elegida' : ''}`}
+              class="vs-linea"
               style={porciento(l.caja)}
               aria-label={l.texto}
               onClick={(e) => {
+                // Con el teclado se abre la frase con que empieza la línea; el ratón y el dedo van por la capa.
+                if (e.detail !== 0) return;
                 e.stopPropagation();
-                // Con el ratón o el dedo se sabe dónde se tocó; con el teclado, se abre la línea entera.
-                let caracter: number | undefined;
-                const capa = e.currentTarget.parentElement?.getBoundingClientRect();
-                if (porPalabra && e.detail > 0 && capa?.width) caracter = caracterEn(l, (e.clientX - capa.left) / capa.width, (e.clientY - capa.top) / capa.height);
-                alTocar?.(i, caracter);
+                alTocar?.({ linea: i, letra: 0 }, 2);
               }}
             />
           ))}
-          {marca && <span class="vs-marca" style={porciento(marca)} />}
+          {unidad?.map((c, i) => <span key={`u${i}`} class="vs-unidad" style={porciento(c)} />)}
+          {seleccion?.map((c, i) => <span key={`s${i}`} class="vs-seleccion" style={porciento(c)} />)}
+          {marcas?.map((c, i) => <span key={`m${i}`} class="vs-marca" style={porciento(c)} />)}
         </div>
       )}
       {imagen && hallado && hallado.length > 0 && (
@@ -214,14 +290,6 @@ function Miniatura({ paginador, n, actual, marcada, alElegir }: { paginador: Pag
   );
 }
 
-/** La palabra elegida en el panel de una línea, para marcarla en la página. */
-interface Marca {
-  pagina: number;
-  indice: number;
-  inicio: number;
-  fin: number;
-}
-
 export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: ElementoBiblioteca; archivo: File; ajustes: Ajustes }) {
   const [doc, fijarDoc] = useState(inicial);
   const [paginador, fijarPaginador] = useState<Paginador | null>(null);
@@ -254,8 +322,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const [ediciones, fijarEdiciones] = useState<EdicionLinea[]>([]);
   const [descarga, fijarDescarga] = useState<Descarga | null>(null);
   const [errorOcr, fijarErrorOcr] = useState('');
-  const [abierta, fijarAbierta] = useState<{ pagina: number; indice: number; caracter?: number } | null>(null);
-  const [marca, fijarMarca] = useState<Marca | null>(null);
+  // Lo abierto en la ventana flotante, lo que se está seleccionando y la palabra elegida en la ventana, marcada en la página.
+  const [unidad, fijarUnidad] = useState<UnidadAbierta | null>(null);
+  const [seleccion, fijarSeleccion] = useState<{ pagina: number; cajas: Caja[] } | null>(null);
+  const [marcaPalabra, fijarMarcaPalabra] = useState<Caja[] | null>(null);
+  const [fijada, fijarFijada] = useState(() => leerPreferencia('visorVentanaFijada', false));
   // Lo anotado en el libro: marcadores, resaltados y notas. Al añadir una nota, el siguiente toque en una página la pone ahí.
   const [anotaciones, fijarAnotaciones] = useState<AnotacionLibro[]>([]);
   const [colocando, fijarColocando] = useState(false);
@@ -430,6 +501,12 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       }
       if ((e.target as HTMLElement | null)?.closest?.('input, textarea, select')) return;
       if (e.ctrlKey || e.metaKey) {
+        // Copiar lo abierto en la ventana, si no hay otra cosa seleccionada.
+        if ((e.key === 'c' || e.key === 'C') && unidad && window.getSelection()?.isCollapsed !== false) {
+          navigator.clipboard.writeText(unidad.texto).catch(console.error);
+          e.preventDefault();
+          return;
+        }
         // Como en un lector de PDF: el zoom del libro, no el de la pestaña.
         if (e.key === '+' || e.key === '=') zoomPaso(true);
         else if (e.key === '-') zoomPaso(false);
@@ -441,6 +518,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       if (e.altKey) return;
       if (e.key === 'Escape' && colocando) {
         fijarColocando(false);
+        e.preventDefault();
+        return;
+      }
+      if (e.key === 'Escape' && (unidad || seleccion)) {
+        cerrarVentana();
         e.preventDefault();
         return;
       }
@@ -522,8 +604,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const leyendoVista = aLaVista.some((n) => porLeer.includes(n));
   // Si alguna página del PDF trae su propio texto: entonces se puede elegir entre ese texto y el OCR.
   const hayTextoPropio = [...propias.values()].some((l) => !!l?.length);
-  // Al cambiar de dónde sale el texto, la línea abierta solo sigue si es del texto del PDF y ese texto se sigue usando.
-  const cerrarSiCambia = (usaPdf: boolean) => fijarAbierta((x) => (x && usaPdf && propias.get(x.pagina) ? x : null));
+  // Al cambiar de dónde sale el texto, lo abierto solo sigue si es del texto del PDF y ese texto se sigue usando.
+  const cerrarSiCambia = (usaPdf: boolean) => fijarUnidad((x) => (x && usaPdf && propias.get(x.pagina) ? x : null));
   useEffect(() => {
     fijarLineas(new Map());
     cerrarSiCambia(textoPdf);
@@ -576,26 +658,95 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     await quitarEdicion(clave);
     fijarEdiciones((l) => l.filter((e) => e.clave !== clave));
   };
-  const lineasAbiertas = abierta ? textoDe(abierta.pagina)?.lineas : undefined;
-  const moverLinea = (paso: number) => {
-    if (!abierta || !lineasAbiertas) return;
-    fijarAbierta({ pagina: abierta.pagina, indice: Math.max(0, Math.min(lineasAbiertas.length - 1, abierta.indice + paso)) });
+  // ---------- Lo que se toca: la ventana flotante ----------
+  const lineasAbiertas = unidad ? textoDe(unidad.pagina)?.lineas : undefined;
+  /** Si el texto de una página se toca letra a letra; en un manga leído con el OCR, globo a globo. */
+  const porLetraEn = (n: number) => !!textoDe(n)?.propias || modoOcr === 'libro';
+  const leidaDe = (n: number): PaginaLeida | null => {
+    const t = textoDe(n);
+    return t ? leerPagina(t.lineas, { globos: !t.propias && modoOcr === 'manga', marca: lengua.value.escritura.marcaDeLista }) : null;
   };
+  const abrir = (n: number, tipo: TipoUnidad, u: Unidad, p: PaginaLeida, tocada?: Posicion) => {
+    const porLetra = porLetraEn(n);
+    fijarSeleccion(null);
+    fijarMarcaPalabra(null);
+    fijarUnidad({
+      clave: Date.now(),
+      pagina: n,
+      tipo,
+      texto: u.texto,
+      sitios: u.sitios,
+      tramo: u.tramo,
+      tocada,
+      contexto: contextoDe(p, u, lengua.value.escritura.frase),
+      cajas: cajasDe(p.lineas, u.tramo, porLetra),
+      porLetra,
+      vertical: !!p.lineas[u.tramo.desde.linea]?.vertical,
+    });
+  };
+  /** Un toque en el texto: la palabra, dentro de su frase; dos seguidos, la frase; tres, el párrafo. En un manga, el globo. */
+  const tocarTexto = (n: number, pos: Posicion, veces: number) => {
+    const p = leidaDe(n);
+    if (!p) return;
+    if (!porLetraEn(n)) {
+      const u = parrafoEn(p, pos);
+      if (u) abrir(n, 'globo', u, p);
+      return;
+    }
+    const u = veces >= 3 ? parrafoEn(p, pos) : (fraseEn(p, pos, lengua.value.escritura.frase) ?? parrafoEn(p, pos));
+    if (u) abrir(n, veces >= 3 ? 'parrafo' : veces === 2 ? 'frase' : 'palabra', u, p, veces === 1 ? pos : undefined);
+  };
+  /** Lo seleccionado arrastrando: se marca mientras se arrastra y se abre al soltar. */
+  const seleccionar = (n: number, tramo: TramoPagina, terminada: boolean) => {
+    const t = textoDe(n);
+    if (!t) return;
+    if (!terminada) {
+      fijarSeleccion({ pagina: n, cajas: cajasDe(t.lineas, tramo, true) });
+      return;
+    }
+    const p = leidaDe(n);
+    const u = p ? seleccionEn(p, tramo) : null;
+    if (!p || !u?.texto.trim()) {
+      fijarSeleccion(null);
+      return;
+    }
+    abrir(n, 'seleccion', u, p);
+  };
+  const cerrarVentana = () => {
+    fijarUnidad(null);
+    fijarSeleccion(null);
+    fijarMarcaPalabra(null);
+  };
+  const fijarVentana = (f: boolean) => {
+    guardarPreferencia('visorVentanaFijada', f);
+    fijarFijada(f);
+  };
+  // Si lo abierto deja de verse (otra página), la ventana flotante se cierra: lo que señalaba ya no está. Fijada, sigue.
+  useEffect(() => {
+    fijarSeleccion((s) => (s && aLaVista.includes(s.pagina) ? s : null));
+    if (!fijada && unidad && !aLaVista.includes(unidad.pagina)) cerrarVentana();
+  }, [aLaVista.join(',')]);
+  // Al editar una línea cambia su texto: lo abierto se vuelve a leer desde donde empezaba.
+  const reabrir = useRef<{ pagina: number; pos: Posicion; veces: number } | null>(null);
+  useEffect(() => {
+    const r = reabrir.current;
+    if (!r) return;
+    reabrir.current = null;
+    tocarTexto(r.pagina, r.pos, r.veces);
+  }, [ediciones]);
   const propsTexto = (n: number) => {
     const t = textoDe(n);
     if (!t) return {};
-    const m = marca && marca.pagina === n ? t.lineas[marca.indice] : undefined;
     return {
       lineas: t.lineas,
       porPalabra: t.propias || modoOcr === 'libro',
-      elegida: abierta?.pagina === n ? abierta.indice : undefined,
-      marca: m && marca ? cajaDeTramo(m, marca.inicio, marca.fin) : undefined,
-      alTocar: (i: number, caracter?: number) => fijarAbierta({ pagina: n, indice: i, caracter }),
+      unidad: unidad?.pagina === n ? unidad.cajas : undefined,
+      seleccion: seleccion?.pagina === n ? seleccion.cajas : undefined,
+      marcas: unidad?.pagina === n && marcaPalabra ? marcaPalabra : undefined,
+      alTocar: (pos: Posicion, veces: number) => tocarTexto(n, pos, veces),
+      alSeleccionar: (tramo: TramoPagina, terminada: boolean) => seleccionar(n, tramo, terminada),
     };
   };
-  useEffect(() => {
-    if (!abierta) fijarMarca(null);
-  }, [abierta]);
 
   // ---------- Lo anotado ----------
   // Se cambia a la vista al momento y se guarda detrás, en la base de la lengua, con los libros.
@@ -617,12 +768,28 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     alGuardarAnotacion: guardarAnotacion,
     alQuitarAnotacion: quitarAnotacion,
   });
-  /** Resalta o subraya un tramo de la línea abierta, o la línea entera. */
-  const resaltar = (estilo: 'fondo' | 'subrayado', color: ColorAnotacion, tramo: { inicio: number; fin: number } | null) => {
-    if (!abierta || !lineasAbiertas) return;
-    const linea = lineasAbiertas[abierta.indice];
-    const porLetra = !!textoDe(abierta.pagina)?.propias || modoOcr === 'libro';
-    guardarAnotacion(nuevoResaltado({ libro: doc.id, pagina: abierta.pagina, linea, tramo, porLetra, estilo, color }));
+  /** Resalta o subraya lo abierto en la ventana, aunque ocupe varios renglones, o solo un trozo de su texto. */
+  const resaltar = (estilo: 'fondo' | 'subrayado', color: ColorAnotacion, trozo: { inicio: number; fin: number } | null): AnotacionLibro | null => {
+    if (!unidad || !lineasAbiertas) return null;
+    const sitios = trozo ? unidad.sitios.slice(trozo.inicio, trozo.fin) : unidad.sitios;
+    const desde = sitios[0];
+    const ultimo = sitios[sitios.length - 1];
+    if (!desde || !ultimo) return null;
+    const a = resaltadoDeTramo({
+      libro: doc.id,
+      pagina: unidad.pagina,
+      lineas: lineasAbiertas,
+      tramo: trozo ? tramoEntre(lineasAbiertas, desde, ultimo) : unidad.tramo,
+      texto: trozo ? unidad.texto.slice(trozo.inicio, trozo.fin) : unidad.texto,
+      porLetra: unidad.porLetra,
+      estilo,
+      color,
+    });
+    // Lo mismo resaltado otra vez cambia de color o de estilo: no se amontonan resaltados iguales uno encima de otro.
+    const igual = anotaciones.find((x) => x.tipo === 'resaltado' && x.pagina === a.pagina && x.texto === a.texto && mismasCajas(x.cajas, a.cajas));
+    const guardado = igual ? { ...igual, estilo, color } : a;
+    guardarAnotacion(guardado);
+    return guardado;
   };
 
   /** Con «Añadir una nota», un toque en una página pone ahí la nota y la abre para escribirla. */
@@ -721,12 +888,13 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       ponerNota(e);
       return;
     }
-    // En la vista de texto, un toque es para el texto: consultar una palabra, no pasar de página.
-    if (vista === 'continua' || vistaTexto || !lienzo.current) return;
-    const r = lienzo.current.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width;
-    if (x < 0.3) haciaIzquierda();
-    else if (x > 0.7) haciaDerecha();
+    // Un toque fuera del texto cierra lo abierto y nada más: pasar de página es cosa de las flechas, del teclado y de
+    // deslizar. Antes los lados del lienzo pasaban de página, y fallar por poco al tocar una palabra se la llevaba.
+    fijarSeleccion(null);
+    if (!fijada) {
+      fijarUnidad(null);
+      fijarMarcaPalabra(null);
+    }
   };
 
   // Deslizar con el dedo, en una pantalla táctil.
@@ -858,8 +1026,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                       aria-pressed={textoPdf}
                       data-tip={tr('El texto que trae el PDF; apagado, Kotonoha lee todas las páginas')}
                       onClick={() => {
-                        // Cambia de dónde sale el texto de las páginas que traen el suyo: la línea abierta en una de ellas se cierra.
-                        fijarAbierta((x) => (x && !propias.get(x.pagina) ? x : null));
+                        // Cambia de dónde sale el texto de las páginas que traen el suyo: lo abierto en una de ellas se cierra.
+                        fijarUnidad((x) => (x && !propias.get(x.pagina) ? x : null));
                         fijarTextoPdf(!textoPdf);
                       }}
                     >
@@ -884,7 +1052,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
                     fijarErrorOcr('');
                     fijarOcr(true);
                   }
-                  fijarAbierta(null);
+                  cerrarVentana();
                   fijarColocando(false);
                   fijarVistaTexto(!vistaTexto);
                 }}
@@ -1003,12 +1171,13 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             alVerLinea={(n, indice) => {
               if (!aLaVista.includes(n)) irA(n);
               if (vistaTexto) fijarVistaTexto(false);
-              fijarAbierta({ pagina: n, indice });
+              tocarTexto(n, { linea: indice, letra: 0 }, 2);
             }}
             alCerrar={() => fijarPanel(null)}
           />
         )}
         {nitidez.activa && !vistaTexto && <FiltroNitidez n={nitidez} escala={escala} />}
+        <div class="vs-zona">
         <main
           ref={lienzo}
           class={`vs-lienzo ${invertir && !vistaTexto ? 'invertido' : ''} ${nitidez.activa && !vistaTexto ? 'con-nitidez' : ''} ${colocando ? 'colocando' : ''} ${vistaTexto ? 'vs-lienzo-texto' : ''}`}
@@ -1026,22 +1195,44 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           {paginador && !vistaTexto && enPantalla !== pagina && <div class="vs-progreso" role="progressbar" aria-label={tr('Cargando…')} />}
           {contenido()}
         </main>
-        {!vistaTexto && abierta && lineasAbiertas?.[abierta.indice] && (
-          <PanelLinea
+        {/* Las flechas para pasar de página, a la vista y siempre en el mismo sitio. */}
+        {paginador && !vistaTexto && vista !== 'continua' && total > 1 && (
+          <>
+            <button class="vs-flecha izquierda" aria-label={rtl ? tr('Página siguiente') : tr('Página anterior')} data-tip={rtl ? tr('Página siguiente') : tr('Página anterior')} onClick={haciaIzquierda}>
+              <Icono n="izquierda" t={18} />
+            </button>
+            <button class="vs-flecha derecha" aria-label={rtl ? tr('Página anterior') : tr('Página siguiente')} data-tip={rtl ? tr('Página anterior') : tr('Página siguiente')} onClick={haciaDerecha}>
+              <Icono n="derecha" t={18} />
+            </button>
+          </>
+        )}
+        </div>
+        {!vistaTexto && unidad && lineasAbiertas && (
+          <Ventana
+            unidad={unidad}
             lineas={lineasAbiertas}
-            indice={abierta.indice}
-            caracter={abierta.caracter}
             ajustes={a}
             titulo={doc.titulo}
-            alMover={moverLinea}
-            alCerrar={() => fijarAbierta(null)}
-            alMarcar={(t) => fijarMarca(t ? { pagina: abierta.pagina, indice: abierta.indice, ...t } : null)}
-            alEditar={(texto) => editar(abierta.pagina, lineasAbiertas[abierta.indice], texto)}
-            alRestaurar={() => restaurar(lineasAbiertas[abierta.indice])}
-            resaltados={resaltadosDe(anotaciones, abierta.pagina, lineasAbiertas[abierta.indice].caja)}
+            fijada={fijada}
+            alFijar={fijarVentana}
+            alCerrar={cerrarVentana}
+            alMarcar={fijarMarcaPalabra}
+            resaltados={resaltadosEn(anotaciones, unidad.pagina, unidad.cajas)}
             alResaltar={resaltar}
             alGuardarAnotacion={guardarAnotacion}
             alQuitarAnotacion={quitarAnotacion}
+            alEditar={async (i, texto) => {
+              reabrir.current = { pagina: unidad.pagina, pos: { linea: i, letra: 0 }, veces: unidad.tipo === 'parrafo' ? 3 : 2 };
+              await editar(unidad.pagina, lineasAbiertas[i], texto);
+            }}
+            alRestaurar={async (i) => {
+              reabrir.current = { pagina: unidad.pagina, pos: { linea: i, letra: 0 }, veces: unidad.tipo === 'parrafo' ? 3 : 2 };
+              await restaurar(lineasAbiertas[i]);
+            }}
+            alBuscar={(texto) => {
+              fijarConsulta(texto);
+              fijarPanel('buscar');
+            }}
           />
         )}
         <Creador ajustes={a} />
