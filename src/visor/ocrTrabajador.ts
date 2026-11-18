@@ -22,7 +22,8 @@ import {
   bloquesDeDetector,
   type Caja,
   cajasDeMapa,
-  decodificarCtc,
+  cortesDeCentros,
+  decodificarCtcConPasos,
   esRuidoComic,
   esRuidoManga,
   esVertical,
@@ -261,10 +262,12 @@ async function cajasDeLineas(m: ModelosLibro, imagen: ImageBitmap, region: Caja,
 
 /**
  * Lee cada línea a 48 píxeles de alto, de la imagen original; las de ancho parecido se leen de una vez, rellenas hasta el
- * mismo ancho. Devuelve el texto de cada caja, en su orden.
+ * mismo ancho. Devuelve el texto de cada caja, en su orden, y dónde va cada letra, en píxeles de la imagen a lo largo de la
+ * línea: el paso del CTC en que sale cada letra cae a la altura de la letra en el recorte, y el recorte es la caja estirada
+ * (en una columna, girada: el principio de la columna queda a la izquierda).
  */
-async function leerCajas(m: ModelosLibro, imagen: ImageBitmap, cajas: { caja: Caja; vertical: boolean }[]): Promise<string[]> {
-  const textos = cajas.map(() => '');
+async function leerCajas(m: ModelosLibro, imagen: ImageBitmap, cajas: { caja: Caja; vertical: boolean }[]): Promise<{ texto: string; cortes?: number[] }[]> {
+  const textos: { texto: string; cortes?: number[] }[] = cajas.map(() => ({ texto: '' }));
   const grupos = new Map<number, { i: number; caja: Caja; vertical: boolean; ancho: number }[]>();
   cajas.forEach(({ caja, vertical }, i) => {
     const proporcion = vertical ? (caja.y1 - caja.y0) / (caja.x1 - caja.x0) : (caja.x1 - caja.x0) / (caja.y1 - caja.y0);
@@ -285,7 +288,12 @@ async function leerCajas(m: ModelosLibro, imagen: ImageBitmap, cajas: { caja: Ca
     const probs = salida[m.lector.outputNames[0]];
     const [, T, C] = probs.dims as number[];
     const datos = probs.data as Float32Array;
-    grupo.forEach((g, i) => (textos[g.i] = decodificarCtc(datos.subarray(i * T * C, (i + 1) * T * C), T, C, m.diccionario)));
+    grupo.forEach((g, i) => {
+      const { texto, centros } = decodificarCtcConPasos(datos.subarray(i * T * C, (i + 1) * T * C), T, C, m.diccionario);
+      const [desde, hasta] = g.vertical ? [g.caja.y0, g.caja.y1] : [g.caja.x0, g.caja.x1];
+      // Un paso del CTC cubre tramo / T píxeles del lote; lo que pasa del ancho de la línea es relleno.
+      textos[g.i] = { texto, cortes: cortesDeCentros(centros, (paso) => (paso * tramo) / T / g.ancho, desde, hasta) };
+    });
   }
   return textos;
 }
@@ -296,10 +304,11 @@ async function leerLibro(imagen: ImageBitmap): Promise<LineaOcr[]> {
   const { width: w, height: h } = imagen;
   const cajas = (await cajasDeLineas(m, imagen, { x0: 0, y0: 0, x1: w, y1: h })).map((caja) => ({ caja, vertical: esVertical(caja) }));
   fase('deteccion');
-  const textos = await leerCajas(m, imagen, cajas);
+  const leidas = await leerCajas(m, imagen, cajas);
   const lineas: LineaOcr[] = [];
   cajas.forEach((c, i) => {
-    if (textos[i]) lineas.push({ caja: fraccion(c.caja, w, h), texto: textos[i], vertical: c.vertical });
+    const { texto, cortes } = leidas[i];
+    if (texto) lineas.push({ caja: fraccion(c.caja, w, h), texto, vertical: c.vertical, ...(cortes ? { cortes: cortes.map((v) => v / (c.vertical ? h : w)) } : {}) });
   });
   fase('lectura');
   return ordenarLineas(quitarFurigana(lineas));
@@ -365,7 +374,7 @@ async function leerComic(imagen: ImageBitmap): Promise<LineaOcr[]> {
   const salida: LineaOcr[] = [];
   let k = 0;
   bloques.forEach((b, i) => {
-    const renglones = porBloque[i].map((caja) => ({ caja: fraccion(caja, w, h), texto: textos[k++], vertical: false }));
+    const renglones = porBloque[i].map((caja) => ({ caja: fraccion(caja, w, h), texto: textos[k++].texto, vertical: false }));
     // Un globo no tiene columnas: sus renglones van de arriba abajo, aunque unos sean mucho más cortos que otros.
     const texto = unirRenglones(porRenglones(renglones.filter((r) => r.texto), false).map((r) => r.texto));
     if (texto && !esRuidoComic(texto)) salida.push({ caja: fraccion(b, w, h), texto, vertical: false });

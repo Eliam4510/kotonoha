@@ -229,6 +229,8 @@ if (libro.lineas) {
   comprobar(libro.lineas.length === 3, 'Una zona por renglón', String(libro.lineas.length));
   const e = error(libro.lineas.join(''), LINEAS_LIBRO.join(''));
   comprobar(e < 0.08, 'Con menos de un 8 % de error por carácter', `${(e * 100).toFixed(1)} %`);
+  const conCortes = await v.evaluate(() => document.querySelectorAll('.vs-linea[data-cortes]').length);
+  comprobar(conCortes === libro.lineas.length, 'Cada renglón leído sabe dónde va cada letra, por los pasos del reconocedor', `${conCortes} de ${libro.lineas.length}`);
   await v.locator('.vs-linea').nth(1).click();
   const panel = await v.waitForSelector('.vs-ventana .pal', { timeout: 15000 }).then(() => true).catch(() => false);
   comprobar(panel, 'Tocar un renglón abre su frase con las palabras para consultar');

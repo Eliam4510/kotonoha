@@ -5,11 +5,13 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Creador } from '../app/Creador';
 import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
-import { type Ajustes, guardarAjustes } from '../compartido/ajustes';
+import { Anillo } from '../app/Piezas';
+import { type Ajustes, guardarAjustes, type ModoLectura } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
-import { fondo, motor } from '../compartido/rpc';
-import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca, Nitidez } from '../compartido/tipos';
+import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
+import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca, Nitidez, PalabraToken } from '../compartido/tipos';
 import { resaltadoDeTramo, resaltadosEn } from '../nucleo/anotaciones';
+import { comprensionDe, type FraseEnPagina, frasesEnPagina, type GramaticaEnPagina, gramaticaEnPagina, palabraEn, type PalabraEnPagina, palabrasEnPagina } from '../nucleo/aumento';
 import type { Hallazgo } from '../nucleo/busqueda';
 import { cajaDeTramo, type LineaTexto, leerConOcr, textoDePagina } from '../nucleo/capaTexto';
 import { aplicarEdiciones, type EdicionLinea, type LineaEditada } from '../nucleo/ediciones';
@@ -18,17 +20,20 @@ import type { Direccion } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
 import { cambiosValidos } from '../nucleo/revision';
-import { cajasDe, contextoDe, fraseEn, leerPagina, type PaginaLeida, parrafoEn, type Posicion, posicionEn, seleccionEn, type TramoPagina, tramoEntre, type Unidad } from '../nucleo/seleccion';
+import { cajasDe, contextoDe, envolvente, fraseEn, leerPagina, type PaginaLeida, parrafoEn, type Posicion, posicionEn, seleccionEn, type TramoPagina, tramoEntre, type Unidad } from '../nucleo/seleccion';
+import { motorDe } from '../lenguas/motor';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { letrasDe } from '../ui/letra';
 import { COLORES, NotasDePagina, PanelNotas, Resaltados, resaltarEn } from './Anotaciones';
+import { CapaAumento, FraseLeida, SubtituloFrase } from './Aumento';
 import { type Comando, entradasDe, type IdMenu, mostrarAtajo, ordenDeTecla, teclaDe } from './comandos';
 import { Abriendo, AvisoError, Boton, Cabeza, usePantallaCompleta } from './comun';
+import { apuntarConsultada, type Consultada, leerConsultadas, PanelConsultadas } from './Consultadas';
 import { imagenParaClaude } from './imagenClaude';
 import { Atajos, BarraMenus, ListaMenu, MenuFlotante, Paleta, useClicFuera } from './Menus';
 import { type Descarga, esCancelada, LectorOcr, type ModoOcr } from './ocr';
-import { type AccionesVisor, type EstadoVisor, type Herramienta, ordenesDelVisor, type PanelVisor, type Vista, type Zoom } from './ordenesVisor';
+import { type AccionesVisor, type AjustePagina, type EstadoVisor, type Herramienta, ordenesDelVisor, type PanelVisor, type TeclaFicha, type Vista, type Zoom } from './ordenesVisor';
 import { imagenParaOcr, miniaturaDe, type PaginaImagen, type Paginador, paginadorDeZip } from './paginador';
 import { PanelBuscar } from './PanelBuscar';
 import { PanelRevision, type PropuestaLinea } from './PanelRevision';
@@ -37,6 +42,7 @@ import { PanelAa } from './Preferencias';
 import { leerTextoLibro, type TextoDePagina } from './textoLibro';
 import { type TipoUnidad, type UnidadAbierta, Ventana } from './Ventana';
 import { VistaTexto } from './VistaTexto';
+import { useVozAlta } from './vozAlta';
 
 /** El tamaño que se supone a una página que aún no se ha leído: el de un tomo de manga. */
 const PAGINA_SUPUESTA: Medida = { ancho: 844, alto: 1200 };
@@ -114,7 +120,7 @@ function FiltroNitidez({ n, escala }: { n: Nitidez; escala: number }) {
  * van sus líneas: zonas que se pueden tocar, con el texto para los lectores de pantalla, y la palabra elegida marcada.
  * Lo anotado va en dos capas: los resaltados debajo de las líneas y las notas encima.
  */
-function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramienta = 'seleccionar', unidad, seleccion, marcas, hallado, alTocar, alSeleccionar, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
+function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramienta = 'seleccionar', unidad, seleccion, marcas, hallado, alTocar, alSeleccionar, alPasar, capas, anotaciones, notaAbierta, alAbrirNota, alGuardarAnotacion, alQuitarAnotacion }: {
   paginador: Paginador;
   n: number;
   escala: number;
@@ -134,6 +140,10 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
   alTocar?: (pos: Posicion, veces: number) => void;
   /** Lo seleccionado arrastrando, mientras se arrastra y al soltar. */
   alSeleccionar?: (tramo: TramoPagina, terminada: boolean) => void;
+  /** El ratón pasa por el texto, sin pulsar: la letra que tiene debajo (o nada al salir), con las teclas pulsadas. */
+  alPasar?: (pos: Posicion | null, e: MouseEvent | null) => void;
+  /** Lo que se pinta encima de la página (la página aumentada), con el tamaño de la página en la pantalla. */
+  capas?: (ancho: number, alto: number) => preact.ComponentChildren;
 } & PropsAnotaciones) {
   // La página que ya está lista se monta con su imagen: sin un fotograma vacío antes.
   const [imagen, fijarImagen] = useState<PaginaImagen | null>(() => paginador.imagenYa?.(n) ?? null);
@@ -180,7 +190,11 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
   };
   const mover = (e: PointerEvent) => {
     const g = gesto.current;
-    if (!g || g.id !== e.pointerId || !g.desde || !g.raton || !porPalabra || !lineas || herramienta === 'mano') return;
+    if (!g) {
+      if (e.pointerType === 'mouse') alPasar?.(enPunto(e), e);
+      return;
+    }
+    if (g.id !== e.pointerId || !g.desde || !g.raton || !porPalabra || !lineas || herramienta === 'mano') return;
     if (!g.arrastrando) {
       if (Math.hypot(e.clientX - g.x, e.clientY - g.y) < 5) return;
       g.arrastrando = true;
@@ -223,6 +237,7 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
           onPointerMove={mover}
           onPointerUp={subir}
           onPointerCancel={() => (gesto.current = null)}
+          onPointerLeave={() => alPasar?.(null, null)}
           onClick={(e) => {
             // Lo tocado ya se atendió al soltar: que no llegue al lienzo, que lo tomaría por un toque fuera del texto.
             if (atendido.current) e.stopPropagation();
@@ -235,6 +250,7 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
               class="vs-linea"
               style={porciento(l.caja)}
               aria-label={l.texto}
+              data-cortes={l.cortes ? '' : undefined}
               onClick={(e) => {
                 // Con el teclado se abre la frase con que empieza la línea; el ratón y el dedo van por la capa.
                 if (e.detail !== 0) return;
@@ -248,6 +264,7 @@ function Pagina({ paginador, n, escala, alCargar, lineas, porPalabra, herramient
           {marcas?.map((c, i) => <span key={`m${i}`} class="vs-marca" style={porciento(c)} />)}
         </div>
       )}
+      {imagen && capas?.(Math.round(t.ancho * escala), Math.round(t.alto * escala))}
       {imagen && hallado && hallado.length > 0 && (
         <div class="vs-hallados" aria-hidden="true">
           {hallado.map((c, i) => (
@@ -606,10 +623,17 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   }, [ocr, modoOcr, paginador, doc.id, porLeer.join(',')]);
 
   /** Las líneas de una página: las del propio PDF si las trae y se usan; si no, las del OCR, si está activo. Con lo editado encima. */
+  // Lo editado sobre una página se aplica una vez por cambio: la página aumentada reconoce sus líneas por su identidad.
+  const editadas = useRef(new Map<number, { base: LineaTexto[]; ediciones: EdicionLinea[]; lineas: LineaEditada[] }>());
   const textoDe = (n: number): { lineas: LineaEditada[]; propias: boolean } | undefined => {
     const t = textoDePagina(propias.get(n), lineas.get(n), { ocrActivo: ocr, textoPdf });
     const suyas = t ? ediciones.filter((e) => e.pagina === n) : [];
-    return t && suyas.length ? { ...t, lineas: aplicarEdiciones(t.lineas, suyas) } : t;
+    if (!t || !suyas.length) return t;
+    const c = editadas.current.get(n);
+    if (c && c.base === t.lineas && c.ediciones === ediciones) return { ...t, lineas: c.lineas };
+    const l = aplicarEdiciones(t.lineas, suyas);
+    editadas.current.set(n, { base: t.lineas, ediciones, lineas: l });
+    return { ...t, lineas: l };
   };
   /** Guarda el texto editado de una línea; si vuelve a ser el leído, la edición sobra y se quita. */
   const editar = async (pagina: number, linea: LineaEditada, texto: string, origen?: 'claude') => {
@@ -638,9 +662,17 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const lineasAbiertas = unidad ? textoDe(unidad.pagina)?.lineas : undefined;
   /** Si el texto de una página se toca letra a letra; en un manga leído con el OCR, globo a globo. */
   const porLetraEn = (n: number) => !!textoDe(n)?.propias || modoOcr === 'libro';
+  // El texto seguido de cada página, también una vez por cambio de sus líneas.
+  const leidas = useRef(new Map<number, { lineas: LineaEditada[]; globos: boolean; p: PaginaLeida }>());
   const leidaDe = (n: number): PaginaLeida | null => {
     const t = textoDe(n);
-    return t ? leerPagina(t.lineas, { globos: !t.propias && modoOcr === 'manga', marca: lengua.value.escritura.marcaDeLista }) : null;
+    if (!t) return null;
+    const globos = !t.propias && modoOcr === 'manga';
+    const c = leidas.current.get(n);
+    if (c && c.lineas === t.lineas && c.globos === globos) return c.p;
+    const p = leerPagina(t.lineas, { globos, marca: lengua.value.escritura.marcaDeLista });
+    leidas.current.set(n, { lineas: t.lineas, globos, p });
+    return p;
   };
   const abrir = (n: number, tipo: TipoUnidad, u: Unidad, p: PaginaLeida, tocada?: Posicion) => {
     const porLetra = porLetraEn(n);
@@ -716,6 +748,198 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     reabrir.current = null;
     tocarTexto(r.pagina, r.pos, r.veces);
   }, [ediciones]);
+  // ---------- La página aumentada (nucleo/aumento.ts, Aumento.tsx) ----------
+  // Lo que se pinta sobre la página vale para todos los libros, y se recuerda en este equipo.
+  const [aumento, fijarAumento] = useState(() => leerPreferencia('visorAumento', true));
+  const [furiganaPagina, fijarFuriganaPagina] = useState<ModoLectura>(() => leerPreferencia('visorFurigana', 'desconocidas'));
+  const [gramaticaPagina, fijarGramaticaPagina] = useState(() => leerPreferencia('visorGramatica', false));
+  const [traduccionBajo, fijarTraduccionBajo] = useState(() => leerPreferencia('visorTraduccionBajo', true));
+  const [teclaFicha, fijarTeclaFicha] = useState<TeclaFicha>(() => leerPreferencia('visorTeclaFicha', 'Shift'));
+  const ajustarPagina = (c: AjustePagina) => {
+    if (c.aumento !== undefined) {
+      guardarPreferencia('visorAumento', c.aumento);
+      fijarAumento(c.aumento);
+    }
+    if (c.furigana !== undefined) {
+      guardarPreferencia('visorFurigana', c.furigana);
+      fijarFuriganaPagina(c.furigana);
+    }
+    if (c.gramatica !== undefined) {
+      guardarPreferencia('visorGramatica', c.gramatica);
+      fijarGramaticaPagina(c.gramatica);
+    }
+    if (c.traduccion !== undefined) {
+      guardarPreferencia('visorTraduccionBajo', c.traduccion);
+      fijarTraduccionBajo(c.traduccion);
+    }
+    if (c.tecla !== undefined) {
+      guardarPreferencia('visorTeclaFicha', c.tecla);
+      fijarTeclaFicha(c.tecla);
+    }
+  };
+  // Lo analizado de cada página a la vista, con su texto. Al cambiar el estado de una palabra, otra vuelta: los colores y
+  // el furigana de «las nuevas» siguen a lo que se sabe.
+  const [analisis, fijarAnalisis] = useState<Map<number, { texto: string; tokens: PalabraToken[]; vuelta: number }>>(() => new Map());
+  const [vuelta, fijarVuelta] = useState(0);
+  useEffect(
+    () =>
+      alRecibirEvento((e) => {
+        if (e.tipo === 'palabras' || e.tipo === 'palabrasRecargar') fijarVuelta((v) => v + 1);
+      }),
+    []
+  );
+  const porAnalizar = vistaTexto
+    ? []
+    : aLaVista.filter((n) => {
+        const pl = leidaDe(n);
+        const x = analisis.get(n);
+        return !!pl?.corrido.texto.trim() && (x?.texto !== pl.corrido.texto || x.vuelta !== vuelta);
+      });
+  useEffect(() => {
+    if (!porAnalizar.length) return;
+    let vivo = true;
+    for (const n of porAnalizar) {
+      const pl = leidaDe(n);
+      if (!pl) continue;
+      const texto = pl.corrido.texto;
+      const v = vuelta;
+      motor
+        .analizarTexto(texto)
+        .then((r) => {
+          if (!vivo) return;
+          // Solo lo de cerca: un libro entero analizado ocuparía memoria sin servir de nada.
+          fijarAnalisis((m) => new Map([...m].filter(([k]) => Math.abs(k - n) <= 6)).set(n, { texto, tokens: r.flat(), vuelta: v }));
+        })
+        .catch(console.error);
+    }
+    return () => {
+      vivo = false;
+    };
+  }, [porAnalizar.join(','), vuelta]);
+  /** Lo analizado de una página, si está al día con su texto. */
+  const tokensDe = (n: number): PalabraToken[] | null => {
+    const pl = leidaDe(n);
+    const x = analisis.get(n);
+    return pl && x && x.texto === pl.corrido.texto ? x.tokens : null;
+  };
+  const aumentos = useRef(new Map<number, { tokens: PalabraToken[]; p: PaginaLeida; gram: boolean; palabras: PalabraEnPagina[]; gramatica: GramaticaEnPagina[] }>());
+  /** Las palabras de una página en su sitio, con su gramática. Sin la posición de cada letra (un globo), nada. */
+  const aumentoDe = (n: number) => {
+    const pl = leidaDe(n);
+    const tokens = tokensDe(n);
+    if (!pl || !tokens || !porLetraEn(n)) return null;
+    const c = aumentos.current.get(n);
+    if (c && c.tokens === tokens && c.p === pl && c.gram === gramaticaPagina) return c;
+    const nuevo = {
+      tokens,
+      p: pl,
+      gram: gramaticaPagina,
+      palabras: palabrasEnPagina(pl, tokens),
+      gramatica: gramaticaPagina ? gramaticaEnPagina(pl, frasesEnPagina(pl, lengua.value.escritura.frase), (f) => motorDe(lengua.value.id).detectarGramatica(f)) : [],
+    };
+    aumentos.current.set(n, nuevo);
+    return nuevo;
+  };
+  // Cuánto se entiende de lo que se ve.
+  const comprension = comprensionDe(aLaVista.flatMap((n) => tokensDe(n) ?? []));
+
+  // El ratón por el texto: la palabra de debajo lleva su furigana «al pasar», y con la tecla elegida se abre su ficha sin
+  // hacer clic. También al pulsar la tecla con el ratón ya encima.
+  const [encima, fijarEncima] = useState<{ n: number; k: number } | null>(null);
+  const ultimoPaso = useRef<{ n: number; pos: Posicion } | null>(null);
+  const porTecla = useRef('');
+  const conTecla = (e: { shiftKey: boolean; ctrlKey: boolean; altKey: boolean; metaKey: boolean } | null) =>
+    !!e && (teclaFicha === 'Shift' ? e.shiftKey : teclaFicha === 'Control' ? e.ctrlKey || e.metaKey : teclaFicha === 'Alt' ? e.altKey : false);
+  const pasarPor = (n: number, pos: Posicion | null, tecla: boolean) => {
+    ultimoPaso.current = pos ? { n, pos } : null;
+    const aum = pos ? aumentoDe(n) : null;
+    const k = aum && pos ? palabraEn(aum.p, aum.palabras, pos) : -1;
+    if (aumento && furiganaPagina === 'alPasar' && (k >= 0 ? `${n}:${k}` : '') !== (encima ? `${encima.n}:${encima.k}` : '')) fijarEncima(k >= 0 ? { n, k } : null);
+    if (!tecla || !pos || (herramienta !== 'seleccionar' && herramienta !== 'mano')) {
+      if (!tecla) porTecla.current = '';
+      return;
+    }
+    // La palabra que hay debajo; en un globo de manga, el globo.
+    const cual = k >= 0 ? `${n}:${k}` : !porLetraEn(n) ? `${n}:l${pos.linea}` : '';
+    if (!cual || cual === porTecla.current) return;
+    porTecla.current = cual;
+    tocarTexto(n, pos, 1);
+  };
+
+  // La traducción de la frase abierta, como un subtítulo: lo pedido vale para esa frase.
+  const [pedida, fijarPedida] = useState({ clave: 0, n: 0 });
+  const pedirTraduccion = () => {
+    const u = unidad;
+    if (u) fijarPedida((x) => ({ clave: u.clave, n: x.clave === u.clave ? x.n + 1 : 1 }));
+  };
+
+  // Las palabras consultadas en el libro (Consultadas.tsx).
+  const [consultadas, fijarConsultadas] = useState<Consultada[]>(() => leerConsultadas(inicial.id));
+  const consultar = (w: { clave: string; lema: string; lectura: string; superficie: string; frase: string }) => {
+    const u = unidad;
+    if (u) fijarConsultadas(apuntarConsultada(doc.id, { ...w, pagina: u.pagina, caja: envolvente(u.cajas) }));
+  };
+
+  // Leer en voz alta, siguiendo la frase (vozAlta.ts).
+  const frasesDe = (n: number): FraseEnPagina[] => {
+    const pl = leidaDe(n);
+    return pl ? frasesEnPagina(pl, lengua.value.escritura.frase, porLetraEn(n)) : [];
+  };
+  const vozAlta = useVozAlta({ frasesDe, total, irA: (n) => irA(n), ajustes: a });
+  const leerEnVozAlta = () => {
+    if (vozAlta.voz) {
+      vozAlta.parar();
+      return;
+    }
+    // Desde lo abierto, si está a la vista; si no, desde el principio de la página.
+    const desde = unidad && aLaVista.includes(unidad.pagina) ? unidad.pagina : (aLaVista[0] ?? pagina);
+    let i = 0;
+    const pl = leidaDe(desde);
+    if (unidad && unidad.pagina === desde && pl) {
+      const k = pl.inicios[unidad.tramo.desde.linea] + unidad.tramo.desde.letra;
+      const j = frasesDe(desde).findIndex((f) => k >= f.inicio && k < f.fin);
+      if (j >= 0) i = j;
+    }
+    cerrarVentana();
+    vozAlta.empezar(desde, i);
+  };
+  const fraseSonando = vozAlta.voz ? frasesDe(vozAlta.voz.pagina)[vozAlta.voz.frase] : undefined;
+  // La frase que suena, a la vista.
+  useEffect(() => {
+    if (fraseSonando) document.querySelector('.vs-leyendo')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [vozAlta.voz?.pagina, vozAlta.voz?.frase]);
+
+  /** Lo que se pinta sobre una página: lo aumentado, la frase que suena y el subtítulo de la frase abierta. */
+  const capasDe = (n: number, ancho: number, alto: number) => {
+    const aum = aumento ? aumentoDe(n) : null;
+    return (
+      <>
+        {aum && (
+          <CapaAumento
+            palabras={aum.palabras}
+            tokens={aum.tokens}
+            a={{ furigana: lengua.value.lectura.distingue ? furiganaPagina : 'ninguna', estado: a.mostrarEstado, gramatica: gramaticaPagina }}
+            ancho={ancho}
+            alto={alto}
+            encima={encima?.n === n ? encima.k : -1}
+            gramatica={aum.gramatica}
+          />
+        )}
+        {fraseSonando && vozAlta.voz?.pagina === n && <FraseLeida cajas={fraseSonando.cajas} />}
+        {traduccionBajo && unidad?.pagina === n && (
+          <SubtituloFrase
+            key={unidad.clave}
+            cajas={unidad.cajas}
+            contexto={{ frase: unidad.texto, antes: unidad.contexto.antes, despues: unidad.contexto.despues, titulo: doc.titulo }}
+            pedida={pedida.clave === unidad.clave ? pedida.n : 0}
+            alPedir={pedirTraduccion}
+            alto={alto}
+          />
+        )}
+      </>
+    );
+  };
+
   const propsTexto = (n: number) => {
     const t = textoDe(n);
     if (!t) return {};
@@ -727,6 +951,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
       marcas: unidad?.pagina === n && marcaPalabra ? marcaPalabra : undefined,
       alTocar: (pos: Posicion, veces: number) => tocarTexto(n, pos, veces),
       alSeleccionar: (tramo: TramoPagina, terminada: boolean) => seleccionar(n, tramo, terminada),
+      alPasar: (pos: Posicion | null, e: MouseEvent | null) => pasarPor(n, pos, conTecla(e)),
+      capas: (ancho: number, alto: number) => capasDe(n, ancho, alto),
     };
   };
 
@@ -1025,7 +1251,13 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     mostrarEstado: a.mostrarEstado,
     colorAcento: a.colorAcento,
     letra: a.diccionarioLetra,
-    lengua: { lectura: tr(lengua.value.textos.lectura), acento: !!lengua.value.acento, comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
+    aumento,
+    furiganaPagina,
+    gramaticaPagina,
+    traduccionBajo,
+    teclaFicha,
+    voz: !!vozAlta.voz,
+    lengua: { lectura: tr(lengua.value.textos.lectura), lecturaEnPagina: lengua.value.lectura.distingue, acento: !!lengua.value.acento, comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
   };
   const acciones: AccionesVisor = {
     biblioteca: () => fondo.abrirApp('biblioteca').catch(console.error),
@@ -1072,6 +1304,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     herramienta: herramientaA,
     atajos: () => fijarDialogo('atajos'),
     paleta: () => fijarDialogo('paleta'),
+    pagina: ajustarPagina,
+    vozAlta: leerEnVozAlta,
   };
   const ordenes = ordenesDelVisor(estado, acciones);
   const orden = (id: string) => ordenes.find((o) => o.id === id);
@@ -1083,6 +1317,11 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   {
     const tecla = (e: KeyboardEvent) => {
       if (!paginador || e.isComposing) return;
+      // La tecla de la ficha con el ratón ya sobre una palabra: la abre sin moverlo.
+      if (teclaFicha !== 'ninguna' && e.key === teclaFicha && !e.repeat && ultimoPaso.current && !dialogo && !menu && !contextual) {
+        const u = ultimoPaso.current;
+        pasarPor(u.n, u.pos, true);
+      }
       const t = teclaDe(e);
       // La paleta y buscar valen también escribiendo en un campo.
       if (t === 'Ctrl+K') {
@@ -1123,6 +1362,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
         if (desplegable) fijarDesplegable(null);
         else if (unidad || seleccion) cerrarVentana();
         else if (herramienta === 'nota') fijarHerramienta('seleccionar');
+        else if (vozAlta.voz) vozAlta.parar();
         else if (lectura) fijarLectura(false);
         else return;
         e.preventDefault();
@@ -1440,7 +1680,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             )}
           </nav>
         )}
-        {paginador && panel && panel !== 'revision' && (
+        {paginador && panel && panel !== 'revision' && panel !== 'consultadas' && (
           <div class="vs-lateral" style={{ width: `${anchoPanel}px` }}>
             {panel === 'miniaturas' && (
               <aside class="vs-panel vs-panel-miniaturas" aria-label={tr('Miniaturas')}>
@@ -1517,6 +1757,24 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
               <Icono n="ok" t={14} /> {tr('Es la portada en la estantería')}
             </div>
           )}
+          {vozAlta.voz && (
+            <div class="vs-voz" role="group" aria-label={tr('Leer en voz alta')}>
+              <Icono n="altavoz" t={15} />
+              <span class="num">{tr('Frase {0} de {1}', vozAlta.voz.frase + 1, vozAlta.voz.total)}</span>
+              {vozAlta.voz.pausada ? (
+                <button type="button" class="btn-icono chico" aria-label={tr('Seguir')} data-tip={tr('Seguir')} onClick={vozAlta.seguir}>
+                  <Icono n="reproducir" t={15} />
+                </button>
+              ) : (
+                <button type="button" class="btn-icono chico" aria-label={tr('Pausa')} data-tip={tr('Pausa')} onClick={vozAlta.pausar}>
+                  <Icono n="pausa" t={15} />
+                </button>
+              )}
+              <button type="button" class="btn-icono chico" aria-label={tr('Parar')} data-tip={tr('Parar')} onClick={vozAlta.parar}>
+                <Icono n="detener" t={15} />
+              </button>
+            </div>
+          )}
           {lectura && (
             <div class="vs-aviso-herramienta vs-aviso-lectura" role="status">
               {tr('Modo lectura: M o Esc para salir')}
@@ -1534,6 +1792,9 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
             </>
           )}
         </div>
+        {paginador && panel === 'consultadas' && (
+          <PanelConsultadas libro={doc.id} titulo={doc.titulo} paginador={paginador} ajustes={a} lista={consultadas} alCambiar={fijarConsultadas} alIr={(n) => irA(n, true)} alCerrar={() => fijarPanel(null)} />
+        )}
         {paginador && panel === 'revision' && (
           <PanelRevision
             paginas={revisadas}
@@ -1573,6 +1834,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
               fijarConsulta(texto);
               fijarPanel('buscar');
             }}
+            alTraducir={pedirTraduccion}
+            alConsultar={consultar}
           />
         )}
         <Creador ajustes={a} />
@@ -1615,6 +1878,17 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           <span class="vs-avance num" data-tip={tr('Lo que va del libro')} data-tip-lado="arriba">
             {avance} %
           </span>
+          {comprension.total > 0 && (
+            <span class="vs-comprension" data-tip={tr('{0} palabras a la vista; {1} nuevas', comprension.total, comprension.nuevas)} data-tip-lado="arriba">
+              <Anillo valor={comprension.porcentaje} t={18} grosor={2.5} />
+              <b class="num">{comprension.porcentaje} %</b> {tr('de comprensión')}
+            </span>
+          )}
+          {consultadas.length > 0 && (
+            <button type="button" class="btn chico fantasma vs-consultadas-boton" aria-pressed={panel === 'consultadas'} onClick={() => abrirPanel('consultadas')}>
+              <Icono n="tarjetas" t={13} /> {tr('Consultadas')} <span class="vs-cuenta num">{consultadas.length}</span>
+            </button>
+          )}
           {textoActual ? (
             <span class="vs-origen" data-tip={textoActual.propias ? tr('El texto de esta página es el que trae el PDF') : tr('El texto de esta página lo leyó Kotonoha con el OCR')} data-tip-lado="arriba">
               {textoActual.propias ? tr('Texto del PDF') : `OCR · ${nombreModo}`}

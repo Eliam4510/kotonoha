@@ -4,7 +4,9 @@ import {
   bloquesDeDetector,
   type Caja,
   cajasDeMapa,
+  cortesDeCentros,
   decodificarCtc,
+  decodificarCtcConPasos,
   esRuidoComic,
   esRuidoManga,
   esVertical,
@@ -70,6 +72,37 @@ describe('la salida CTC', () => {
     const probs = pasos.flatMap((k) => [0, 1, 2, 3].map((c) => (c === k ? 1 : 0)));
     expect(decodificarCtc(probs, pasos.length, 4, dic)).toBe('aab b');
   });
+
+  it('y dice en qué paso cae cada letra: la mitad de los pasos en que gana', () => {
+    const dic = ['a', 'b'];
+    // «a» en los pasos 0 y 1, blanco, «a» en el 3, «b» en el 4, espacio en el 5 y «b» en el 6 y el 7.
+    const pasos = [1, 1, 0, 1, 2, 3, 2, 2];
+    const probs = pasos.flatMap((k) => [0, 1, 2, 3].map((c) => (c === k ? 1 : 0)));
+    const r = decodificarCtcConPasos(probs, pasos.length, 4, dic);
+    expect(r.texto).toBe('aab b');
+    expect(r.centros).toEqual([1, 3.5, 4.5, 5.5, 7]);
+  });
+
+  it('sin los espacios de los extremos, que tampoco van en el texto', () => {
+    const pasos = [3, 1, 0, 3];
+    const probs = pasos.flatMap((k) => [0, 1, 2, 3].map((c) => (c === k ? 1 : 0)));
+    expect(decodificarCtcConPasos(probs, pasos.length, 4, ['a', 'b'])).toEqual({ texto: 'a', centros: [1.5] });
+  });
+});
+
+describe('dónde va cada letra de una línea leída', () => {
+  it('cada letra llega a medio camino de la siguiente, y las de los extremos medio ancho hacia fuera', () => {
+    // Cuatro letras con el centro en los pasos 2, 6, 10 y 14 de 16, sobre una línea de 100 a 260 píxeles.
+    const c = cortesDeCentros([2, 6, 10, 14], (p) => p / 16, 100, 260);
+    expect(c).toEqual([100, 140, 180, 220, 260]);
+  });
+
+  it('el relleno del lote no cuenta, y nunca se sale de la caja', () => {
+    // La línea ocupa la mitad del lote: el paso 8 de 16 ya es el final.
+    expect(cortesDeCentros([1, 3, 5, 7], (p) => (p * 32) / 16 / 16, 0, 80)).toEqual([0, 20, 40, 60, 80]);
+    expect(cortesDeCentros([0.2, 15.9], (p) => p / 16, 0, 160)).toEqual([0, 80.5, 160]);
+    expect(cortesDeCentros([], (p) => p, 0, 1)).toBeUndefined();
+  });
 });
 
 describe('el furigana impreso', () => {
@@ -95,6 +128,20 @@ describe('el furigana impreso', () => {
     ];
     // «すいどう» no tiene una línea más gruesa justo debajo; «すいどうかん» tiene el grosor de una línea normal.
     expect(quitarFurigana(lineas).map((l) => l.texto)).toEqual(['去年の地震から十年が経ち、町の図書館で', '写真の展示が始まった。', 'すいどう', 'すいどうかん']);
+  });
+
+  it('apunta en la línea qué letras llevaban ese furigana encima', () => {
+    // 母親 y 節水, en las letras 0-1 y 3-4 de una línea de 11 letras de 40 píxeles cada una.
+    const base = linea('母親は節水をしている。', 100, 100, 540, 140);
+    const lineas = [base, linea('ははおや', 100, 84, 180, 98), linea('せっすい', 220, 84, 300, 98)];
+    const [r] = quitarFurigana(lineas);
+    expect(r.texto).toBe('母親は節水をしている。');
+    expect(r.rubi).toEqual([
+      [0, 2],
+      [3, 5],
+    ]);
+    // Sin furigana encima, la línea queda tal cual.
+    expect(quitarFurigana([linea('別の列', 0, 0, 100, 30)])[0].rubi).toBeUndefined();
   });
 
   it('en vertical, el furigana va a la derecha de la columna', () => {

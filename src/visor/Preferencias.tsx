@@ -85,6 +85,42 @@ export function PanelAa({ e, h, alCerrar, ancla }: { e: EstadoVisor; h: Acciones
       </section>
       <section>
         <h3>
+          {tr('Sobre la página')} <small>{tr('En todos los libros')}</small>
+        </h3>
+        <Fila nombre={tr('Ayudas sobre la página')}>
+          <Interruptor etiqueta={tr('Ayudas sobre la página')} on={e.aumento} alCambiar={(v) => h.pagina({ aumento: v })} />
+        </Fila>
+        {e.aumento && (
+          <>
+            {e.lengua.lecturaEnPagina && (
+              <Fila nombre={e.lengua.lectura}>
+                <Segmentado etiqueta={tr('{0} sobre la página', e.lengua.lectura)} valor={e.furiganaPagina} opciones={MODOS_LECTURA.map(([v, n]) => ({ v, texto: tr(n) }))} alCambiar={(v) => h.pagina({ furigana: v })} />
+              </Fila>
+            )}
+            <Fila nombre={tr('Gramática')}>
+              <Interruptor etiqueta={tr('Gramática sobre la página')} on={e.gramaticaPagina} alCambiar={(v) => h.pagina({ gramatica: v })} />
+            </Fila>
+          </>
+        )}
+        <Fila nombre={tr('Traducción bajo la frase')}>
+          <Interruptor etiqueta={tr('Traducción bajo la frase')} on={e.traduccionBajo} alCambiar={(v) => h.pagina({ traduccion: v })} />
+        </Fila>
+        <Fila nombre={tr('Ficha al pasar el ratón')}>
+          <Segmentado
+            etiqueta={tr('Ficha al pasar el ratón')}
+            valor={e.teclaFicha}
+            opciones={[
+              { v: 'Shift', texto: tr('Mayús') },
+              { v: 'Control', texto: 'Ctrl' },
+              { v: 'Alt', texto: 'Alt' },
+              { v: 'ninguna', texto: tr('Nunca') },
+            ]}
+            alCambiar={(v) => h.pagina({ tecla: v })}
+          />
+        </Fila>
+      </section>
+      <section>
+        <h3>
           {tr('Este libro')} <small>{tr('Solo en este libro')}</small>
         </h3>
         <Fila nombre={tr('Sentido de lectura')}>

@@ -14,6 +14,13 @@ export interface LineaOcr {
   caja: Caja;
   texto: string;
   vertical: boolean;
+  /**
+   * Dónde empieza cada unidad del texto a lo largo de la línea, en fracciones de la página, y al final dónde acaba la
+   * última: la x en un renglón y la y en una columna. El texto de un PDF las trae; el OCR las saca de los pasos del CTC.
+   */
+  cortes?: number[];
+  /** Los tramos del texto, de una letra a otra, que llevan furigana impreso encima (o al lado, en vertical). */
+  rubi?: [number, number][];
 }
 
 const ancho = (c: Caja) => c.x1 - c.x0;
@@ -104,10 +111,17 @@ export function cajasDeMapa(mapa: ArrayLike<number>, W: number, H: number, wOrig
   return cajas;
 }
 
-/** La salida CTC del reconocedor de PP-OCR: el índice 0 es el blanco, y el último, el espacio. */
-export function decodificarCtc(probs: ArrayLike<number>, T: number, C: number, diccionario: string[]): string {
+/**
+ * La salida CTC del reconocedor de PP-OCR, con dónde cae cada letra: el índice 0 es el blanco, y el último, el espacio.
+ * Una letra ocupa los pasos seguidos en que gana su clase; su centro es la mitad de ese tramo, en pasos (de 0 a T). Cada
+ * unidad del texto lleva su centro, también las dos de una letra fuera del plano básico.
+ */
+export function decodificarCtcConPasos(probs: ArrayLike<number>, T: number, C: number, diccionario: string[]): { texto: string; centros: number[] } {
   let anterior = -1;
   let texto = '';
+  const centros: number[] = [];
+  let desde = 0;
+  let unidades = 0;
   for (let t = 0; t < T; t++) {
     let mejor = 0;
     let pm = -Infinity;
@@ -118,10 +132,58 @@ export function decodificarCtc(probs: ArrayLike<number>, T: number, C: number, d
         mejor = k;
       }
     }
-    if (mejor !== anterior && mejor !== 0) texto += mejor === C - 1 ? ' ' : (diccionario[mejor - 1] ?? '');
+    if (mejor !== anterior && mejor !== 0) {
+      const letra = mejor === C - 1 ? ' ' : (diccionario[mejor - 1] ?? '');
+      texto += letra;
+      desde = t;
+      unidades = letra.length;
+      for (let u = 0; u < unidades; u++) centros.push(t + 0.5);
+    } else if (mejor === anterior && mejor !== 0 && unidades) {
+      // La misma letra sigue: su centro pasa a la mitad de todos sus pasos.
+      for (let u = 1; u <= unidades; u++) centros[centros.length - u] = (desde + t + 1) / 2;
+    }
+    if (mejor !== anterior) unidades = mejor === 0 ? 0 : unidades;
     anterior = mejor;
   }
-  return texto.trim();
+  // Como el texto, sin los espacios de los extremos.
+  const inicio = texto.length - texto.trimStart().length;
+  const fin = texto.trimEnd().length;
+  return { texto: texto.slice(inicio, fin), centros: centros.slice(inicio, fin) };
+}
+
+/** La salida CTC del reconocedor de PP-OCR: el índice 0 es el blanco, y el último, el espacio. */
+export function decodificarCtc(probs: ArrayLike<number>, T: number, C: number, diccionario: string[]): string {
+  return decodificarCtcConPasos(probs, T, C, diccionario).texto;
+}
+
+/**
+ * Los cortes de una línea leída: dónde empieza cada letra a lo largo de la línea, de `desde` a `hasta`, y al final dónde
+ * acaba la última. `aFraccion` lleva un centro, en pasos del CTC, a su sitio en la línea, de 0 a 1. Cada letra llega hasta
+ * la mitad del camino a la siguiente; la primera y la última, medio ancho de letra hacia fuera, sin salirse de la caja.
+ */
+export function cortesDeCentros(centros: number[], aFraccion: (paso: number) => number, desde: number, hasta: number): number[] | undefined {
+  const n = centros.length;
+  if (!n) return undefined;
+  const pos = centros.map((c) => desde + Math.min(1, Math.max(0, aFraccion(c))) * (hasta - desde));
+  for (let i = 1; i < n; i++) if (pos[i] < pos[i - 1]) pos[i] = pos[i - 1];
+  const pasos = pos.slice(1).map((p, i) => p - pos[i]).filter((d) => d > 0).sort((a, b) => a - b);
+  const medio = pasos.length ? pasos[pasos.length >> 1] / 2 : (hasta - desde) / 2;
+  const cortes = [Math.max(desde, pos[0] - medio)];
+  for (let i = 1; i < n; i++) cortes.push((pos[i - 1] + pos[i]) / 2);
+  cortes.push(Math.min(hasta, pos[n - 1] + medio));
+  return cortes;
+}
+
+/** La letra de una línea que hay en una posición a lo largo de ella, con sus cortes o repartiendo la caja por igual. */
+function letraEnPosicion(l: LineaOcr, v: number): number {
+  const n = l.texto.length;
+  if (l.cortes?.length === n + 1) {
+    let k = 0;
+    while (k + 1 < n && l.cortes[k + 1] <= v) k++;
+    return k;
+  }
+  const [a, b] = l.vertical ? [l.caja.y0, l.caja.y1] : [l.caja.x0, l.caja.x1];
+  return Math.max(0, Math.min(n - 1, Math.floor(((v - a) / Math.max(1e-9, b - a)) * n)));
 }
 
 /** Una caja mucho más alta que ancha es una columna de texto vertical. */
@@ -137,10 +199,12 @@ const SOLO_KANA = /^[\p{scx=Hiragana}\p{scx=Katakana}\s]+$/u;
  * mitad de las líneas son furigana y la mediana es la suya. Kotonoha pone su propio furigana, y leído como texto
  * mezclaría las lecturas con la frase.
  */
-export function quitarFurigana(lineas: LineaOcr[]): LineaOcr[] {
-  return lineas.filter((l) => {
+export function quitarFurigana<T extends LineaOcr>(lineas: T[]): T[] {
+  // Lo que tapaba cada furigana quitado queda apuntado en su línea: el visor no le pondrá otro encima.
+  const rubis = new Map<T, [number, number][]>();
+  const quedan = lineas.filter((l) => {
     if (!SOLO_KANA.test(l.texto)) return true;
-    return !lineas.some((o) => {
+    const base = lineas.find((o) => {
       if (o === l) return false;
       const v = o.vertical;
       const grueso = (c: Caja) => (v ? ancho(c) : alto(c));
@@ -152,7 +216,34 @@ export function quitarFurigana(lineas: LineaOcr[]): LineaOcr[] {
       const hueco = v ? Math.max(o.caja.x0 - l.caja.x1, l.caja.x0 - o.caja.x1) : Math.max(o.caja.y0 - l.caja.y1, l.caja.y0 - o.caja.y1);
       return hueco < 0.5 * grueso(o.caja);
     });
+    if (!base) return true;
+    const v = base.vertical;
+    const a = v ? Math.max(base.caja.y0, l.caja.y0) : Math.max(base.caja.x0, l.caja.x0);
+    const b = v ? Math.min(base.caja.y1, l.caja.y1) : Math.min(base.caja.x1, l.caja.x1);
+    // La letra donde empieza y la última que tapa, por su centro: el furigana de 母親 no llega a la は de después.
+    const letras: number[] = [];
+    for (let k = letraEnPosicion(base, a); k <= letraEnPosicion(base, b); k++) letras.push(k);
+    const tapadas = letras.filter((k) => {
+      const centro = posicionDeLetra(base, k + 0.5);
+      return centro >= a && centro <= b;
+    });
+    if (tapadas.length) rubis.set(base, [...(rubis.get(base) ?? []), [tapadas[0], tapadas[tapadas.length - 1] + 1]]);
+    return false;
   });
+  return quedan.map((l) => (rubis.has(l) ? { ...l, rubi: rubis.get(l)!.sort((x, y) => x[0] - y[0]) } : l));
+}
+
+/** Dónde cae una posición del texto (una letra y una fracción de ella) a lo largo de la línea. */
+function posicionDeLetra(l: LineaOcr, i: number): number {
+  const n = l.texto.length;
+  const k = Math.floor(i);
+  if (l.cortes?.length === n + 1) {
+    const a = l.cortes[Math.max(0, Math.min(n, k))];
+    const b = l.cortes[Math.max(0, Math.min(n, k + 1))];
+    return a + (b - a) * (i - k);
+  }
+  const [a, b] = l.vertical ? [l.caja.y0, l.caja.y1] : [l.caja.x0, l.caja.x1];
+  return a + ((b - a) * i) / Math.max(1, n);
 }
 
 /**

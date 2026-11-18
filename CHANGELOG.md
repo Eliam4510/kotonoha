@@ -2,6 +2,19 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.37.0 · 2026-11-17
+
+La página aumentada: lo de los subtítulos, sobre la página del libro.
+
+- **Furigana y estado sobre la página.** Con **Ayudas sobre la página** (A), cada palabra nueva o en aprendizaje lleva su subrayado de color y su lectura encima de los kanji, como en los subtítulos; con **Gramática sobre la página**, una línea de puntos bajo cada punto de gramática. La lectura se elige aparte: todas las palabras, las desconocidas (de partida), al pasar el ratón o ninguna. Donde el libro trae su furigana impreso no se pone otro, y al marcar una palabra como conocida su lectura desaparece.
+- **El OCR sabe dónde va cada letra.** El reconocedor de libros ya decía en qué paso de su lectura salía cada letra; ahora se guarda, y tocar una palabra o poner su furigana es exacto también en un escaneo. Las páginas leídas antes reparten las letras a lo ancho del renglón, como hasta ahora.
+- **La traducción, como un subtítulo.** Con **Traducción bajo la frase**, la traducción de la frase abierta sale debajo de ella. La que ya se pidió alguna vez se lee de lo guardado, sin gastar; si no la hay, **Traducir** la pide ahí mismo.
+- **La ficha al pasar el ratón.** Con Mayús pulsada (o Ctrl o Alt, en **Ficha al pasar el ratón**), pasar el ratón por una palabra la abre sin hacer clic.
+- **Cuánto se entiende.** La barra de estado dice qué parte de las palabras de lo que se ve ya se conoce.
+- **Leer en voz alta siguiendo la frase.** **Leer en voz alta** (L) lee las frases una a una, marca en la página la que suena y sigue en la página siguiente, con pausa y Esc para parar.
+- **Consultadas, a tarjetas.** Las palabras que se eligen en la ventana quedan apuntadas en **Consultadas**; de ahí se crean sus tarjetas de una vez, con la frase y la palabra en negrita, el furigana, las definiciones y un recorte de la página como imagen. Sin Claude.
+- **Una limitación.** En los globos de manga no se sabe dónde va cada letra: ahí lo aumentado sigue en la ventana.
+
 ## 0.36.0 · 2026-11-17
 
 Todo en su sitio: el visor, con menús, herramientas y atajos, como un lector de PDF.
@@ -362,6 +375,19 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.37.0 · 2026-11-17
+
+The augmented page: what subtitles show, on the book's page.
+
+- **Furigana and status on the page.** With **Aids on the page** (A), each new or learning word gets its coloured underline and its reading over the kanji, as in subtitles; with **Grammar on the page**, a dotted line under each grammar point. The reading is chosen separately: all words, unknown ones (the default), on hover or none. Where the book has printed furigana none is added, and when a word is marked as known its reading disappears.
+- **OCR knows where each letter goes.** The book recognizer already said at which step of its reading each letter came out; now that is kept, so tapping a word or placing its furigana is exact on a scan too. Pages read before spread the letters along the line, as until now.
+- **The translation, like a subtitle.** With **Translation under the sentence**, the translation of the open sentence appears under it. One requested before is read from what was saved, at no cost; otherwise **Translate** requests it right there.
+- **The word panel on hover.** With Shift held (or Ctrl or Alt, in **Word panel on hover**), moving the mouse over a word opens it without clicking.
+- **How much you understand.** The status bar shows what share of the words in view you already know.
+- **Read aloud following the sentence.** **Read aloud** (L) reads the sentences one by one, marks on the page the one being read and goes on to the next page, with pause and Esc to stop.
+- **Looked up, into cards.** Words chosen in the window are noted in **Looked up**; from there their cards are created at once, with the sentence and the word in bold, furigana, definitions and a crop of the page as the image. Without Claude.
+- **A limitation.** In manga bubbles the position of each letter is not known: there, the aids stay in the window.
 
 ## 0.36.0 · 2026-11-17
 

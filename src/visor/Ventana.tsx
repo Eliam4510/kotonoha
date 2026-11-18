@@ -91,6 +91,10 @@ interface PropsVentana {
   alEditar?: (linea: number, texto: string) => Promise<void>;
   alRestaurar?: (linea: number) => Promise<void>;
   alBuscar?: (texto: string) => void;
+  /** Se pidió la traducción: el visor la pone también como un subtítulo bajo la frase. */
+  alTraducir?: () => void;
+  /** Una palabra elegida en la ventana: el visor la apunta entre las consultadas del libro. */
+  alConsultar?: (w: { clave: string; lema: string; lectura: string; superficie: string; frase: string }) => void;
 }
 
 /** Un botón de la fila de acciones: icono y nombre, que se ven siempre. */
@@ -146,6 +150,10 @@ export function Ventana(p: PropsVentana) {
   useEffect(() => () => p.alMarcar(null), []);
 
   const palabra = elegida !== null ? tokens[elegida] : null;
+  // Lo consultado queda apuntado en el libro, para pasarlo a tarjetas al terminar de leer.
+  useEffect(() => {
+    if (palabra?.esPalabra) p.alConsultar?.({ clave: palabra.clave, lema: palabra.lema, lectura: palabra.lecturaLema, superficie: palabra.superficie, frase: unidad.contexto.frase });
+  }, [palabra?.clave, unidad.clave]);
 
   // Con una palabra elegida, sus teclas, como en el lector de páginas web: 1 desconocida, 2 rastrear, 3 conocida, 4 ignorada.
   useEffect(() => {
@@ -434,7 +442,15 @@ export function Ventana(p: PropsVentana) {
 
       {borrador === null && (
         <div class="vs-acciones" role="toolbar" aria-label={tr('Qué hacer con esto')}>
-          <Accion icono="traducir" nombre={tr('Traducir')} activa={accion === 'traducir'} alPulsar={() => alternar('traducir')} />
+          <Accion
+            icono="traducir"
+            nombre={tr('Traducir')}
+            activa={accion === 'traducir'}
+            alPulsar={() => {
+              if (accion !== 'traducir') p.alTraducir?.();
+              alternar('traducir');
+            }}
+          />
           {esTrozo && <Accion icono="ia" nombre={tr('Explicar')} ayuda={tr('Qué significa aquí, dentro de su frase')} activa={accion === 'explicar'} alPulsar={() => alternar('explicar')} />}
           <Accion icono="frases" nombre={tr('Desglosar')} ayuda={tr('La frase por partes, con su gramática')} activa={accion === 'desglosar'} alPulsar={() => alternar('desglosar')} />
           <Accion icono="altavoz" nombre={tr('Escuchar')} alPulsar={() => void escuchar()} />

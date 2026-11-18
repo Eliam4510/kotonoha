@@ -10,9 +10,19 @@ import type { ModoOcr } from './ocr';
 
 export type Vista = 'una' | 'doble' | 'continua';
 export type Zoom = 'ancho' | 'pagina' | number;
-export type PanelVisor = 'miniaturas' | 'indice' | 'notas' | 'buscar' | 'revision';
+export type PanelVisor = 'miniaturas' | 'indice' | 'notas' | 'buscar' | 'revision' | 'consultadas';
 /** Lo que hace el ratón en la página: seleccionar texto, mover la página, resaltar arrastrando o poner una nota. */
 export type Herramienta = 'seleccionar' | 'mano' | 'resaltador' | 'nota';
+/** La tecla que, con el ratón sobre una palabra, abre su ficha sin hacer clic; o ninguna. */
+export type TeclaFicha = 'Shift' | 'Control' | 'Alt' | 'ninguna';
+/** Lo que se pinta sobre la página, para todos los libros. */
+export interface AjustePagina {
+  aumento?: boolean;
+  furigana?: ModoLectura;
+  gramatica?: boolean;
+  traduccion?: boolean;
+  tecla?: TeclaFicha;
+}
 
 export interface EstadoVisor {
   vista: Vista;
@@ -43,8 +53,17 @@ export interface EstadoVisor {
   mostrarEstado: boolean;
   colorAcento: ModoColor;
   letra: LetraDiccionario;
+  /** La página aumentada: si se pinta, con qué furigana y con o sin gramática. */
+  aumento: boolean;
+  furiganaPagina: ModoLectura;
+  gramaticaPagina: boolean;
+  /** La traducción de la frase abierta, como un subtítulo bajo ella. */
+  traduccionBajo: boolean;
+  teclaFicha: TeclaFicha;
+  /** Si se está leyendo en voz alta. */
+  voz: boolean;
   /** Lo que cambia con la lengua: cómo se llama la lectura, si hay acento, si son cómics y las letras que tiene. */
-  lengua: { lectura: string; acento: boolean; comic: boolean; letras: { id: LetraDiccionario; nombre: string }[] };
+  lengua: { lectura: string; lecturaEnPagina: boolean; acento: boolean; comic: boolean; letras: { id: LetraDiccionario; nombre: string }[] };
 }
 
 export interface AccionesVisor {
@@ -76,6 +95,8 @@ export interface AccionesVisor {
   herramienta(h: Herramienta): void;
   atajos(): void;
   paleta(): void;
+  pagina(c: AjustePagina): void;
+  vozAlta(): void;
 }
 
 export function ordenesDelVisor(e: EstadoVisor, h: AccionesVisor): Comando[] {
@@ -228,7 +249,20 @@ export function ordenesDelVisor(e: EstadoVisor, h: AccionesVisor): Comando[] {
   o.push(
     { id: 'buscar', etiqueta: tr('Buscar en el libro'), menu: 'texto', grupo: 'usar', icono: 'buscar', tipo: 'casilla', marcada: e.panel === 'buscar', atajo: 'Ctrl+F', atajoAparte: true, ejecutar: () => h.panel('buscar') },
     { id: 'copiar-pagina', etiqueta: tr('Copiar el texto de la página'), menu: 'texto', grupo: 'usar', icono: 'copiar', deshabilitada: !e.conTexto, ayuda: sinTexto, ejecutar: h.copiarPagina },
-    { id: 'revisar', etiqueta: tr('Revisar el texto con Claude'), menu: 'texto', grupo: 'usar', icono: 'ia', deshabilitada: !e.conTexto, ayuda: sinTexto ?? tr('Claude compara el texto leído con la imagen de la página y propone qué editar'), ejecutar: h.revisar }
+    { id: 'revisar', etiqueta: tr('Revisar el texto con Claude'), menu: 'texto', grupo: 'usar', icono: 'ia', deshabilitada: !e.conTexto, ayuda: sinTexto ?? tr('Claude compara el texto leído con la imagen de la página y propone qué editar'), ejecutar: h.revisar },
+    {
+      id: 'voz-alta',
+      etiqueta: tr('Leer en voz alta'),
+      menu: 'texto',
+      grupo: 'voz',
+      icono: 'altavoz',
+      tipo: 'casilla',
+      marcada: e.voz,
+      atajo: 'L',
+      deshabilitada: !e.conTexto && !e.voz,
+      ayuda: sinTexto ?? tr('Lee las frases una a una, marca en la página la que suena y sigue en la página siguiente'),
+      ejecutar: h.vozAlta,
+    }
   );
 
   // ---------- Ayudas de lectura: valen en todo Kotonoha, no solo en este libro ----------
@@ -288,14 +322,79 @@ export function ordenesDelVisor(e: EstadoVisor, h: AccionesVisor): Comando[] {
       }))
     );
   }
-  o.push({ id: 'fijar', etiqueta: tr('Fijar a un lado'), menu: 'ayudas', grupo: 'ventana', icono: 'fijar', tipo: 'casilla', marcada: e.fijada, ayuda: tr('La ventana de lo que se toca, como un panel a la derecha en lugar de flotar junto al texto'), ejecutar: h.fijar });
+  // Sobre la página: valen para todos los libros, y el subrayado sigue al «Estado de aprendizaje».
+  const sinAumento = e.aumento ? undefined : tr('Primero, las ayudas sobre la página');
+  const furiganaPagina = tr('{0} sobre la página', lectura);
+  o.push(
+    {
+      id: 'aumento',
+      etiqueta: tr('Ayudas sobre la página'),
+      menu: 'ayudas',
+      grupo: 'pagina',
+      tipo: 'casilla',
+      marcada: e.aumento,
+      atajo: 'A',
+      ayuda: tr('El subrayado por estado, la lectura y la gramática, pintados sobre la página'),
+      ejecutar: () => h.pagina({ aumento: !e.aumento }),
+    },
+    ...(e.lengua.lecturaEnPagina ? ([
+      ['todas', tr('Todas las palabras')],
+      ['desconocidas', tr('Desconocidas')],
+      ['alPasar', tr('Al pasar el ratón')],
+      ['ninguna', tr('Ninguna')],
+    ] as const) : []).map(([valor, nombre]): Comando => ({
+      id: `pfurigana-${valor}`,
+      etiqueta: nombre,
+      menu: 'ayudas',
+      grupo: 'pagina',
+      submenu: furiganaPagina,
+      tipo: 'opcion',
+      marcada: e.furiganaPagina === valor,
+      deshabilitada: !e.aumento,
+      ayuda: sinAumento,
+      palabras: furiganaPagina,
+      ejecutar: () => h.pagina({ furigana: valor }),
+    })),
+    { id: 'gramatica-pagina', etiqueta: tr('Gramática sobre la página'), menu: 'ayudas', grupo: 'pagina', tipo: 'casilla', marcada: e.gramaticaPagina, deshabilitada: !e.aumento, ayuda: sinAumento ?? tr('Una línea de puntos bajo cada punto de gramática que se reconoce'), ejecutar: () => h.pagina({ gramatica: !e.gramaticaPagina }) },
+    {
+      id: 'traduccion-bajo',
+      etiqueta: tr('Traducción bajo la frase'),
+      menu: 'ayudas',
+      grupo: 'pagina',
+      tipo: 'casilla',
+      marcada: e.traduccionBajo,
+      ayuda: tr('La traducción de la frase abierta, como un subtítulo debajo de ella; la ya hecha se ve sin gastar'),
+      ejecutar: () => h.pagina({ traduccion: !e.traduccionBajo }),
+    }
+  );
+  const ficha = tr('Ficha al pasar el ratón');
+  o.push(
+    ...([
+      ['Shift', tr('Con Mayús')],
+      ['Control', tr('Con Ctrl')],
+      ['Alt', tr('Con Alt')],
+      ['ninguna', tr('Nunca')],
+    ] as const).map(([valor, nombre]): Comando => ({
+      id: `tecla-${valor}`,
+      etiqueta: nombre,
+      menu: 'ayudas',
+      grupo: 'ventana',
+      submenu: ficha,
+      tipo: 'opcion',
+      marcada: e.teclaFicha === valor,
+      palabras: ficha,
+      ejecutar: () => h.pagina({ tecla: valor }),
+    })),
+    { id: 'fijar', etiqueta: tr('Fijar a un lado'), menu: 'ayudas', grupo: 'ventana', icono: 'fijar', tipo: 'casilla', marcada: e.fijada, ayuda: tr('La ventana de lo que se toca, como un panel a la derecha en lugar de flotar junto al texto'), ejecutar: h.fijar }
+  );
 
   // ---------- Anotar ----------
   o.push(
     { id: 'marcador', etiqueta: tr('Marcar esta página'), menu: 'anotar', grupo: 'pagina', icono: 'marcador', tipo: 'casilla', marcada: e.marcada, atajo: 'B', ejecutar: h.marcador },
     { id: 'resaltador', etiqueta: tr('Resaltador'), menu: 'anotar', grupo: 'herramienta', icono: 'resaltar', tipo: 'opcion', marcada: e.herramienta === 'resaltador', atajo: 'R', deshabilitada: e.vistaTexto, ayuda: sinImagen ?? tr('Lo que se arrastra queda resaltado, sin abrir la ventana'), ejecutar: () => h.herramienta('resaltador') },
     { id: 'nota', etiqueta: tr('Añadir una nota'), menu: 'anotar', grupo: 'herramienta', icono: 'nota-lapiz', tipo: 'opcion', marcada: e.herramienta === 'nota', atajo: 'N', deshabilitada: e.vistaTexto, ayuda: sinImagen ?? tr('Toca la página donde va la nota'), ejecutar: () => h.herramienta('nota') },
-    { id: 'notas', etiqueta: tr('Notas y marcadores'), menu: 'anotar', grupo: 'panel', icono: 'nota', tipo: 'casilla', marcada: e.panel === 'notas', ejecutar: () => h.panel('notas') }
+    { id: 'notas', etiqueta: tr('Notas y marcadores'), menu: 'anotar', grupo: 'panel', icono: 'nota', tipo: 'casilla', marcada: e.panel === 'notas', ejecutar: () => h.panel('notas') },
+    { id: 'consultadas', etiqueta: tr('Consultadas'), menu: 'anotar', grupo: 'panel', icono: 'tarjetas', tipo: 'casilla', marcada: e.panel === 'consultadas', ayuda: tr('Las palabras consultadas en este libro, para pasarlas a tarjetas con su frase y un recorte de la página'), ejecutar: () => h.panel('consultadas') }
   );
 
   // ---------- Ayuda ----------
