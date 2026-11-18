@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.36.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.37.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -168,6 +168,9 @@ Estado de cada función en la versión 0.36.0, con la forma en que se ha verific
 | Menús con nombre en una sola fila (Libro, Ver, Ir, Texto, Ayudas, Anotar y Ayuda), con la tecla de cada orden y también con el teclado; Buscar una acción (Ctrl+K), que encuentra cualquier orden o lleva a una página por su número, y Atajos de teclado («?») | Automática: pruebas unitarias del registro de órdenes (teclas sin repetir, menús y paleta) y de extremo a extremo |
 | Herramientas del visor: Seleccionar, Mano (arrastrar mueve la página), Resaltador (lo arrastrado queda resaltado, sin abrir la ventana) y Añadir una nota, y un menú con el clic derecho en la página | Automática |
 | Paneles a la izquierda que se ensanchan y recuerdan su ancho; barra de estado con la página, el capítulo, lo que va del libro y de dónde sale el texto; volver tras un salto (Alt+←); modo lectura; «Aa» con las ayudas de lectura, que valen en todo Kotonoha, y lo que vale solo para el libro; un libro abierto no abre otra pestaña | Automática |
+| La página aumentada: subrayado por estado, furigana (todas, desconocidas, al pasar o ninguna) y gramática sobre la página, sin tapar el furigana impreso; con el texto de un PDF y con el OCR de libros, que ahora sabe dónde va cada letra por los pasos del reconocedor | Automática: pruebas unitarias del sitio de cada palabra y su lectura, de los cortes del CTC y del furigana impreso; de extremo a extremo con un PDF con ruby |
+| La traducción de la frase abierta como un subtítulo bajo ella, leída de lo guardado sin gastar; la ficha al pasar el ratón con Mayús, Ctrl o Alt; cuánto se entiende de lo que se ve | Automática, con un Claude falso |
+| Leer en voz alta siguiendo la frase, de página en página; Consultadas: las palabras elegidas en un libro, a tarjetas de golpe con su frase, su furigana, sus definiciones y un recorte de la página | Automática |
 | La ventana no tapa lo que queda por leer: va al margen de la página si cabe, y si no, sobre lo ya leído (encima del renglón, o a la derecha de la columna en vertical); se mueve, se agranda y se fija a un lado como panel, que se ensancha y recuerda su ancho | Automática (pruebas unitarias de la colocación) |
 | Seleccionar arrastrando, letra a letra y entre renglones, con Traducir, Explicar, Desglosar, Escuchar, Resaltar, Nota y Copiar; Ctrl+C copia lo abierto | Automática |
 | Pasar de página con flechas a la vista a los lados, el teclado o deslizando: tocar la página solo cierra lo abierto, y fallar por poco al tocar una palabra ya no pasa de página | Automática |
@@ -296,7 +299,7 @@ Estado de cada función en la versión 0.36.0, con la forma en que se ha verific
 | Plataformas | Chrome y Edge de escritorio. El ayudante local está preparado para Windows |
 | Imagen con DRM | En Netflix y otros sitios protegidos, el navegador entrega el fotograma en negro. La tarjeta lleva la imagen oficial del episodio, si el sitio la ofrece |
 | Audio con DRM | Un sitio protegido puede no entregar su sonido a la captura. Tras dos frases mudas seguidas en un video, la línea ya no se vuelve a reproducir para grabarla |
-| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad de un solo archivo, sino en la copia completa. Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra: la palabra se elige en la ventana, y dentro de un globo no se selecciona arrastrando. |
+| Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad de un solo archivo, sino en la copia completa. Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra: la palabra se elige en la ventana, y dentro de un globo no se selecciona arrastrando. Las ayudas sobre la página no van en los globos de manga, donde no se sabe dónde va cada letra, y las páginas leídas con el OCR antes de la 0.37.0 reparten sus letras a lo ancho del renglón. |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia completa |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
 | Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |

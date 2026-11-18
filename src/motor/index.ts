@@ -556,6 +556,9 @@ const api: ApiMotor = {
   async glosaBreve(l, f) {
     return ia.glosaBreve(await aj(), l, f);
   },
+  async traduccionGuardada(frase) {
+    return ia.traduccionGuardada(await aj(), frase);
+  },
   async sentidoGuardado(c, definiciones) {
     return ia.sentidoGuardado(await aj(), c, definiciones);
   },

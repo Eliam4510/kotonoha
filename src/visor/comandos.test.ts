@@ -33,8 +33,15 @@ const ESTADO: EstadoVisor = {
   mostrarEstado: true,
   colorAcento: 'siempre',
   letra: 'gotica',
+  aumento: true,
+  furiganaPagina: 'desconocidas',
+  gramaticaPagina: false,
+  traduccionBajo: true,
+  teclaFicha: 'Shift',
+  voz: false,
   lengua: {
     lectura: 'Furigana',
+    lecturaEnPagina: true,
     acento: true,
     comic: false,
     letras: [
@@ -160,6 +167,12 @@ describe('las órdenes del visor', () => {
     const l = ordenesDelVisor({ ...ESTADO, lengua: { ...ESTADO.lengua, acento: false, letras: [ESTADO.lengua.letras[0]] } }, acciones());
     expect(l.some((c) => c.id.startsWith('acento-') || c.id.startsWith('letra-'))).toBe(false);
   });
+  it('sin una lectura que sea parte de la palabra (la pronunciación del inglés), no se ofrece sobre la página', () => {
+    const l = ordenesDelVisor({ ...ESTADO, lengua: { ...ESTADO.lengua, lecturaEnPagina: false } }, acciones());
+    expect(l.some((c) => c.id.startsWith('pfurigana-'))).toBe(false);
+    expect(l.some((c) => c.id === 'aumento')).toBe(true);
+  });
+
   it('las teclas ejecutan lo suyo, salvo las que atiende otra parte del visor', () => {
     const hechas: string[] = [];
     const l = ordenesDelVisor(ESTADO, acciones(hechas));

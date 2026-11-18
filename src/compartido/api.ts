@@ -252,6 +252,8 @@ export interface ApiMotor {
   sentidoEnContexto(c: ContextoIA, definiciones: string[], recargar?: boolean): Promise<SentidoEnContexto>;
   /** Lo ya preguntado sobre esta palabra en esta frase, sin gastar nada. */
   sentidoGuardado(c: ContextoIA, definiciones: string[]): Promise<SentidoEnContexto | null>;
+  /** La traducción ya guardada de una frase, sin pedírsela a Claude. */
+  traduccionGuardada(frase: string): Promise<string | null>;
   /** Lo gastado en Claude desde un instante, petición a petición. */
   consumo(desde: number): Promise<FilaConsumo[]>;
   revisarLectura(c: ContextoIA, texto: string): Promise<{ lectura: string; lema: string; lectura_lema: string; motivo: string }>;

@@ -249,11 +249,16 @@ export const enMarco = (c: Caja, marco: Caja): Caja => {
 
 const enUnidad = (v: number) => Math.min(1, Math.max(0, v));
 
-/** Las líneas leídas en una imagen, con sus cajas pasadas a la página. Lo que quedara fuera de la página se quita. */
+/**
+ * Las líneas leídas en una imagen, con sus cajas pasadas a la página, y dónde va cada letra también: los cortes van a lo
+ * largo de la línea, en x en un renglón y en y en una columna. Lo que quedara fuera de la página se quita.
+ */
 export function lineasEnMarco(lineas: LineaOcr[], marco: Caja): LineaOcr[] {
   return lineas.flatMap((l) => {
     const c = enMarco(l.caja, marco);
     const caja = { x0: enUnidad(c.x0), y0: enUnidad(c.y0), x1: enUnidad(c.x1), y1: enUnidad(c.y1) };
-    return caja.x1 > caja.x0 && caja.y1 > caja.y0 ? [{ ...l, caja }] : [];
+    if (!(caja.x1 > caja.x0 && caja.y1 > caja.y0)) return [];
+    const [a, b] = l.vertical ? [marco.y0, marco.y1] : [marco.x0, marco.x1];
+    return [{ ...l, caja, ...(l.cortes ? { cortes: l.cortes.map((v) => enUnidad(a + v * (b - a))) } : {}) }];
   });
 }

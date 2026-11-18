@@ -343,9 +343,9 @@
 .vs-aa-panel section + section { padding-top: 12px; border-top: 1px solid var(--borde); }
 .vs-aa-panel h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 6px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-3); }
 .vs-aa-panel h3 small { font-size: 11.5px; font-weight: 600; letter-spacing: 0; text-transform: none; }
-.vs-aa-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; font-size: 13px; }
+.vs-aa-fila { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; min-height: 38px; font-size: 13px; }
 .vs-aa-nombre { color: var(--texto-2); font-weight: 600; }
-.vs-aa-opciones { flex-wrap: wrap; justify-content: flex-end; }
+.vs-aa-opciones { flex-wrap: nowrap; justify-content: flex-end; margin-inline-start: auto; }
 .vs-aa-opciones button { padding: 4px 10px; font-size: 12.5px; }
 .vs-aa-nitidez { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
 
@@ -411,3 +411,61 @@
 .vs-atajo dt { flex: none; display: flex; flex-wrap: wrap; gap: 4px; min-width: 128px; }
 .vs-atajo dd { margin: 0; color: var(--texto-2); line-height: 1.45; }
 .vs-atajo kbd { display: inline-block; padding: 1px 7px; border-radius: 5px; background: var(--superficie-2); box-shadow: inset 0 -1px 0 var(--borde-2), inset 0 0 0 1px var(--borde); font-family: inherit; font-size: 12px; font-weight: 700; color: var(--texto); }
+
+/* ---------- La página aumentada (Aumento.tsx) ----------
+   Sobre el papel de la página, que es blanco aunque la interfaz sea oscura: colores fijos que se ven sobre blanco. Con los
+   colores invertidos, la página es oscura y el furigana va claro. No recibe toques: el texto sigue debajo. */
+.vs-pagina { --sub-desconocida: #F06A35; --sub-aprendiendo: #E0A800; --sub-rastreada: #9C7CFF; --sub-gramatica: #1C7ED6; }
+.vs-aumento { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.vs-sub { position: absolute; border-radius: 1px; --c: var(--sub-desconocida); box-shadow: inset 0 -2.5px 0 var(--c); }
+.vs-sub.est-aprendiendo { --c: var(--sub-aprendiendo); }
+.vs-sub.rastreada { --c: var(--sub-rastreada); }
+/* En vertical, el furigana va a la derecha de la columna; el subrayado, a la izquierda. */
+.vs-sub.v { box-shadow: inset 2.5px 0 0 var(--c); }
+.vs-rubi { position: absolute; display: flex; align-items: flex-end; justify-content: center; overflow: visible; white-space: nowrap; color: #262626; font-family: var(--letra-lengua); font-weight: 600; line-height: 1; letter-spacing: -0.02em; text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff; }
+.vs-rubi.v { align-items: center; writing-mode: vertical-rl; }
+.vs-lienzo.invertido .vs-rubi { color: #f2f2f2; text-shadow: 0 0 2px #000, 0 0 2px #000, 0 0 3px #000; }
+.vs-gram { position: absolute; border-bottom: 2px dotted var(--sub-gramatica); transform: translateY(4px); }
+.vs-gram.v { border-bottom: none; border-left: 2px dotted var(--sub-gramatica); transform: translateX(-4px); }
+/* La frase que suena al leer en voz alta. */
+.vs-leyendo { position: absolute; border-radius: 3px; background: rgba(255, 196, 0, 0.3); box-shadow: 0 0 0 2px rgba(240, 160, 0, 0.55); mix-blend-mode: multiply; scroll-margin: 90px; }
+.vs-lienzo.invertido .vs-leyendo { background: rgba(255, 196, 0, 0.2); mix-blend-mode: normal; }
+
+/* La traducción de la frase abierta, como un subtítulo bajo ella. */
+.vs-subtitulo { position: absolute; z-index: 4; display: flex; justify-content: center; padding: 6px 14px; border-radius: 8px; background: rgba(20, 20, 20, 0.86); color: #fff; font-family: var(--letra, inherit); font-weight: 500; line-height: 1.45; text-align: center; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.28); pointer-events: auto; animation: vs-menu-entra 0.14s ease-out; }
+.vs-subtitulo.nada { padding: 0; background: none; box-shadow: none; }
+.vs-subtitulo-pedir { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border: none; border-radius: var(--r-pill); background: rgba(20, 20, 20, 0.78); color: #fff; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.vs-subtitulo-pedir:hover { background: rgba(20, 20, 20, 0.92); }
+.vs-subtitulo-error { color: #FFD8A8; font-size: 0.85em; }
+
+/* Leer en voz alta: los mandos, sobre la página. */
+.vs-voz { position: absolute; left: 50%; bottom: 14px; z-index: 6; display: flex; align-items: center; gap: 4px; padding: 4px 6px 4px 12px; border-radius: var(--r-pill); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-2); color: var(--texto-2); font-size: 13px; transform: translateX(-50%); }
+.vs-voz > .ico { color: var(--hoja); }
+.vs-voz > span { margin: 0 6px 0 4px; white-space: nowrap; }
+
+/* La barra de estado: cuánto se entiende y lo consultado. */
+.vs-comprension { flex: none; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--texto-3); }
+.vs-comprension b { color: var(--texto-2); }
+.vs-consultadas-boton { flex: none; gap: 6px; }
+/* Los botones de la barra de estado no la ensanchan: si cambiara su alto, cambiaría el de la página. */
+.vs-pie .btn.chico { height: 24px; padding: 0 8px; }
+.vs-consultadas-boton[aria-pressed='true'] { background: var(--hoja-suave); color: var(--hoja); }
+
+/* ---------- Consultadas (Consultadas.tsx) ---------- */
+.vs-panel-consultadas { width: 340px; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-inline-start: 1px solid var(--borde); border-inline-end: none; }
+.vs-panel-consultadas > .ayuda { margin: 0; font-size: 12.5px; line-height: 1.55; }
+.vs-cuenta { padding: 0 8px; border-radius: var(--r-pill); background: var(--superficie-3); font-size: 11.5px; font-weight: 700; color: var(--texto-2); }
+.vs-consultadas-acciones { display: flex; justify-content: space-between; gap: 6px; }
+.vs-consultadas-aviso { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--texto-2); }
+.vs-consultadas-aviso.error { color: var(--error); }
+.vs-consultadas { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.vs-consultada { display: flex; align-items: flex-start; gap: 8px; padding: 6px 4px; border-radius: var(--r-2); }
+.vs-consultada:hover { background: var(--superficie-2); }
+.vs-consultada.hecha { opacity: 0.66; }
+.vs-consultada-elegir input { margin-top: 6px; accent-color: var(--hoja); }
+.vs-consultada-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vs-consultada-palabra { display: flex; align-items: baseline; gap: 6px; font-family: var(--letra-lengua); font-size: 16px; font-weight: 600; }
+.vs-consultada-palabra small { font-size: 12px; font-weight: 500; color: var(--texto-3); }
+.vs-consultada-ok { align-self: center; color: var(--hoja); }
+.vs-consultada-frase { display: -webkit-box; overflow: hidden; color: var(--texto-2); font-family: var(--letra-lengua); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.vs-consultada-botones { display: flex; align-items: center; gap: 2px; }

@@ -150,6 +150,15 @@ describe('las líneas leídas en el escaneo', () => {
     expect(cortada.caja.x1).toBe(1);
     expect(fuera).toEqual([]);
   });
+
+  it('con dónde va cada letra: los cortes pasan a la página como la caja', () => {
+    const marco = { x0: -0.1, y0: 0.2, x1: 1.1, y1: 0.7 };
+    const [renglon] = lineasEnMarco([{ caja: { x0: 0.5, y0: 0.2, x1: 0.6, y1: 0.3 }, texto: 'あい', vertical: false, cortes: [0.5, 0.55, 0.6] }], marco);
+    expect(renglon.cortes?.map((v) => +v.toFixed(4))).toEqual([0.5, 0.56, 0.62]);
+    // En una columna, los cortes van en y.
+    const [columna] = lineasEnMarco([{ caja: { x0: 0.5, y0: 0.2, x1: 0.55, y1: 0.4 }, texto: 'あい', vertical: true, cortes: [0.2, 0.3, 0.4] }], marco);
+    expect(columna.cortes?.map((v) => +v.toFixed(4))).toEqual([0.3, 0.35, 0.4]);
+  });
 });
 
 // Un PDF hecho a mano como los de un escáner: la imagen, con un margen y un recorte alrededor, y el texto invisible de

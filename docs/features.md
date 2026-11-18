@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.36.0, along with how it has been verified.
+Status of each feature in version 0.37.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -168,6 +168,9 @@ Status of each feature in version 0.36.0, along with how it has been verified.
 | Named menus in a single row (Book, View, Go, Text, Reading aids, Annotate and Help), with each command's key and also usable with the keyboard; Find an action (Ctrl+K), which finds any command or goes to a page by its number, and Keyboard shortcuts (“?”) | Automated: unit tests of the command registry (no repeated keys, menus and palette) and end to end |
 | Viewer tools: Select, Hand (dragging moves the page), Highlighter (what is dragged over is highlighted without opening the window) and Add a note, and a right-click menu on the page | Automated |
 | Panels on the left that widen and remember their width; a status bar with the page, the chapter, how far into the book and where the text comes from; going back after a jump (Alt+←); reading mode; “Aa” with the reading aids, which apply across Kotonoha, and what applies only to the book; a book that is already open does not open another tab | Automated |
+| The augmented page: underline by status, furigana (all, unknown, on hover or none) and grammar on the page, without covering printed furigana; with a PDF's own text and with book OCR, which now knows where each letter goes from the recognizer's steps | Automated: unit tests of each word's place and its reading, of the CTC cuts and of printed furigana; end to end with a PDF with ruby |
+| The translation of the open sentence as a subtitle under it, read from what was saved at no cost; the word panel on hover with Shift, Ctrl or Alt; how much of what is in view you understand | Automated, with a fake Claude |
+| Read aloud following the sentence, page after page; Looked up: the words picked in a book, turned into cards at once with their sentence, furigana, definitions and a crop of the page | Automated |
 | The window does not cover what is left to read: it goes in the page margin if it fits, otherwise over text already read (above the line, or to the right of the column in vertical text); it can be moved, enlarged and pinned to the side as a panel that widens and remembers its width | Automated (unit tests of the placement) |
 | Selecting by dragging, character by character and across lines, with Translate, Explain, Break down, Listen, Highlight, Note and Copy; Ctrl+C copies what is open | Automated |
 | Turning pages with visible arrows at the sides, the keyboard or a swipe: tapping the page only closes what is open, and narrowly missing a word no longer turns the page | Automated |
@@ -296,7 +299,7 @@ Status of each feature in version 0.36.0, along with how it has been verified.
 | Platforms | Desktop Chrome and Edge. The local helper is prepared for Windows |
 | Images with DRM | On Netflix and other protected sites, the browser delivers the frame in black. The card carries the episode's official image, if the site offers one |
 | Audio with DRM | A protected site may withhold its sound from capture. After two silent sentences in a row in a video, the line is no longer replayed to record it |
-| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the single-file backup, but they are in the full copy. A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word: the word is picked in the window, and inside a bubble you cannot select by dragging. |
+| Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the single-file backup, but they are in the full copy. A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word: the word is picked in the window, and inside a bubble you cannot select by dragging. The aids on the page do not apply to manga bubbles, where the position of each letter is not known, and pages read by OCR before 0.37.0 spread their letters along the line. |
 | Synchronization | No server: moving between computers is done with the full copy |
 | Background music | Whisper can miss quiet conversation under loud music |
 | Song lyrics | Timing is per Whisper line, not per word. With very loud music Whisper may hear little, and then more verses get an estimated time |

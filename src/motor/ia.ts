@@ -370,6 +370,15 @@ export async function sentidoGuardado(a: Ajustes, c: ContextoIA, definiciones: s
   return texto ? (JSON.parse(texto) as SentidoEnContexto) : null;
 }
 
+/**
+ * La traducción que Claude ya hizo de una frase, si está guardada: la misma clave que el flujo «traducir», que solo
+ * depende de la frase. No gasta nada; el visor la pone como un subtítulo bajo la frase.
+ */
+export async function traduccionGuardada(a: Ajustes, frase: string): Promise<string | null> {
+  const c: ContextoIA = { frase };
+  return leerCache(await claveDeCache(preparar(a, 'traducir', c, { idioma: a.idiomaTraduccion }), identidad(a, 'traducir', { frase }, a.idiomaTraduccion)));
+}
+
 export async function generarFrase(a: Ajustes, lema: string): Promise<string> {
   return (await conCache(preparar(a, 'generar', { lema }), false)).trim();
 }
