@@ -10,22 +10,19 @@ import { numero, tm, tr } from '../compartido/i18n';
 import { flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { CambioBiblioteca, ColeccionBiblioteca, ElementoBiblioteca, TipoColeccion } from '../compartido/tipos';
 import { librosDeImagenes } from '../nucleo/carpetas';
-import { type Avance, avanceDe, coleccionesDeImportados, deTomos, enCurso, type FiltroEstanteria, filtrar, type Importado, librosDe, paginasDeTexto, resumenDe, TAM_PAGINA_TEXTO } from '../nucleo/estanteria';
+import { type Avance, avanceDe, coleccionesDeImportados, deTomos, enCurso, type FiltroEstanteria, filtrar, type Importado, librosDe, resumenDe, TAM_PAGINA_TEXTO } from '../nucleo/estanteria';
 import { estructuraDeHtml, estructuraDeNodo, type NodoHtml } from '../nucleo/estructura';
 import { IMAGEN, leerEpubDeTexto, leerLibro } from '../nucleo/libro';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
 import { fuenteDeArchivo, LIMITE_ZIP, leerEntrada } from '../nucleo/zip';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
-import { useRelojLectura } from '../ui/relojLectura';
 import { useEsperar } from '../ui/preparacion';
-import { abrirEnCuaderno } from './Cuaderno';
 import { datosDeZip, miniaturaDe } from '../visor/paginador';
 import { datosDePdf } from '../visor/pdf';
 import { estaProcesado } from '../visor/procesador';
 import { guardarPreferencia, leerPreferencia, navegar } from './estadoApp';
 import { type ArchivoImportado, archivosElegidos, archivosSoltados, cbzDe, tamanoDe } from './importacion';
-import { TextoInteractivo } from './Lectura';
 import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { descargaOcr, pausar, procesar, procesos } from './procesos';
 import { exportarPdf, guardarEnDescargas, mensajeDeError, type PdfExportado, sePuedeExportar } from './exportarPdf';
@@ -761,9 +758,6 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
   const [lista, fijarLista] = useState<ElementoBiblioteca[]>([]);
   const [colecciones, fijarColecciones] = useState<ColeccionBiblioteca[]>([]);
   const [cargada, fijarCargada] = useState(false);
-  const [abierto, fijarAbierto] = useState<ElementoBiblioteca | null>(null);
-  const [pagina, fijarPagina] = useState(0);
-  useRelojLectura(abierto ? abierto.id : null, abierto?.titulo ?? '', ajustes.idiomaObjetivo);
   const [tema, fijarTema] = useState('');
   const [relato, fijarRelato] = useState('');
   const [generando, fijarGenerando] = useState(false);
@@ -797,15 +791,10 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
     guardarPreferencia('filtroEstanteria', f);
   };
 
+  // Todo se lee en el visor, en su propia pestaña, con sus menús y sus ayudas: los libros y también los textos. Él guarda
+  // por dónde se va, y al volver aquí la estantería lo dice.
   const abrirLibro = (e: ElementoBiblioteca) => {
-    // Un libro de páginas se lee en el visor, en su propia pestaña; él guarda por dónde se va.
-    if (e.documento) {
-      fondo.abrirVisor(e.id).catch((x) => fijarError(x instanceof Error ? x.message : String(x)));
-      return;
-    }
-    fijarPagina(e.pagina ?? 0);
-    fijarAbierto(e);
-    motor.bibliotecaCambiar(e.id, { abierto: Date.now() }).catch(console.error);
+    fondo.abrirVisor(e.id).catch((x) => fijarError(x instanceof Error ? x.message : String(x)));
   };
 
   useEffect(() => {
@@ -843,15 +832,6 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
       );
     }
   }, [lista]);
-
-  // En un texto, ver la última página lo deja terminado.
-  const pags = abierto ? paginasDeTexto(abierto.texto) : [];
-  useEffect(() => {
-    if (!abierto || abierto.terminado || pagina < pags.length - 1) return;
-    const terminado = Date.now();
-    fijarAbierto({ ...abierto, terminado });
-    motor.bibliotecaCambiar(abierto.id, { terminado }).catch(console.error);
-  }, [abierto?.id, pagina]);
 
   // Una colección que no está en lo cargado puede ser nueva: se mira otra vez, y si de verdad ya no existe (se quitó en
   // otra pestaña), se vuelve a la estantería.
@@ -967,43 +947,6 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
       fijarGenerando(false);
     }
   };
-
-  if (abierto) {
-    const irA = (n: number) => {
-      fijarPagina(n);
-      motor.bibliotecaCambiar(abierto.id, { pagina: n, abierto: Date.now() }).catch(console.error);
-      document.querySelector('.ap-principal')?.scrollTo(0, 0);
-    };
-    return (
-      <div class="ap-lienzo ancho">
-        <TextoInteractivo
-          key={pagina}
-          texto={pags[pagina]}
-          ajustes={ajustes}
-          titulo={abierto.titulo}
-          inicioBarra={
-            <>
-              <button class="btn chico fantasma" onClick={() => { fijarAbierto(null); cargar(); }}><Icono n="flecha-izq" t={15} /> {tr('Biblioteca')}</button>
-              <b class="ap-lectura-titulo" lang={lengua.value.id}>{abierto.titulo}</b>
-              <button class="btn chico fantasma" onClick={() => void abrirEnCuaderno(abierto)}><Icono n="lapiz" t={14} /> {tr('Editar en el Cuaderno')}</button>
-            </>
-          }
-          pie={
-            pags.length > 1 ? (
-              <nav class="ap-paginacion" aria-label={tr('Páginas')}>
-                <button class="btn" disabled={pagina === 0} onClick={() => irA(pagina - 1)}><Icono n="flecha-izq" t={15} /> {tr('Anterior')}</button>
-                <div class="ap-paginacion-centro">
-                  <span class="ayuda num">{tr('Página {0} de {1}', pagina + 1, pags.length)}</span>
-                  <div class="barra-progreso"><div style={{ width: `${((pagina + 1) / pags.length) * 100}%` }} /></div>
-                </div>
-                <button class="btn" disabled={pagina >= pags.length - 1} onClick={() => irA(pagina + 1)}>{tr('Siguiente')} <Icono n="flecha" t={15} /></button>
-              </nav>
-            ) : undefined
-          }
-        />
-      </div>
-    );
-  }
 
   const libro = (e: ElementoBiblioteca) => (
     <Libro

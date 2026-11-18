@@ -38,6 +38,8 @@ interface Tarea {
   orden: number;
   enMarcha: boolean;
   imagen: () => Promise<ImagenOcr>;
+  /** Una zona suelta de una página (la herramienta Área): no se guarda en la base y el detector se ajusta a su tamaño. */
+  zona: boolean;
   ok: (l: LineaOcr[]) => void;
   mal: (e: Error) => void;
   promesa: Promise<LineaOcr[]>;
@@ -108,7 +110,7 @@ export class LectorOcr {
       ok = a;
       mal = b;
     });
-    const tarea: Tarea = { clave, libro, modo, prioridad, orden: this.llegadas++, enMarcha: false, imagen, ok, mal, promesa };
+    const tarea: Tarea = { clave, libro, modo, prioridad, orden: this.llegadas++, enMarcha: false, imagen, zona: false, ok, mal, promesa };
     this.tareas.set(clave, tarea);
     // Lo ya leído sale de la base sin esperar turno.
     baseOcr()
@@ -129,6 +131,28 @@ export class LectorOcr {
           mal(e instanceof Error ? e : new Error(String(e)));
         }
       );
+    return promesa;
+  }
+
+  /**
+   * Lee una zona de una página (la herramienta Área). En un manga en japonés, con manga-ocr, como un globo; si no, con
+   * el detector y el reconocedor de libros, que encuentran sus renglones o columnas y dónde va cada letra. `imagen` da su
+   * recorte y, como marco, dónde está en la página: lo leído sale ya en su sitio, como lo de un escaneo. Pasa delante de
+   * lo que espera, no se guarda y no la cancela el cambio de página: es lo que se acaba de pedir.
+   */
+  leerZona(modoPedido: ModoOcr, imagen: () => Promise<ImagenOcr>): Promise<LineaOcr[]> {
+    let ok!: (l: LineaOcr[]) => void;
+    let mal!: (e: Error) => void;
+    const promesa = new Promise<LineaOcr[]>((a, b) => {
+      ok = a;
+      mal = b;
+    });
+    const orden = this.llegadas++;
+    const modo = modoDeLectura(modoPedido) === 'manga' ? 'manga' : 'libro';
+    const tarea: Tarea = { clave: `zona:${orden}`, libro: '', modo, prioridad: -1, orden, enMarcha: false, imagen, zona: true, ok, mal, promesa };
+    this.tareas.set(tarea.clave, tarea);
+    this.esperando.push(tarea);
+    void this.seguir();
     return promesa;
   }
 
@@ -176,16 +200,16 @@ export class LectorOcr {
         bitmap.close?.();
         throw cancelada();
       }
-      console.debug('Kotonoha OCR: lee', marco ? 'el escaneo' : 'la página', `${bitmap.width}×${bitmap.height}`);
+      console.debug('Kotonoha OCR: lee', t.zona ? 'una zona' : marco ? 'el escaneo' : 'la página', `${bitmap.width}×${bitmap.height}`);
       const id = this.siguienteId++;
       const leidas = await new Promise<LineaOcr[]>((ok, mal) => {
         this.pendientes.set(id, { ok, mal });
-        const pedido: PedidoOcr = { tipo: 'leer', id, modo: t.modo, imagen: bitmap };
+        const pedido: PedidoOcr = { tipo: 'leer', id, modo: t.modo, imagen: bitmap, ...(t.zona ? { zona: true } : {}) };
         this.trabajadorListo().postMessage(pedido, [bitmap]);
       });
-      // Si se leyó solo la imagen escaneada, sus líneas se ponen donde está ella en la página.
+      // Si se leyó solo la imagen escaneada (o una zona), sus líneas se ponen donde está ella en la página.
       const lineas = marco ? lineasEnMarco(leidas, marco) : leidas;
-      await baseOcr().paginas.put({ clave: t.clave, libro: t.libro, lineas, creada: Date.now(), lectura: LECTURA });
+      if (!t.zona) await baseOcr().paginas.put({ clave: t.clave, libro: t.libro, lineas, creada: Date.now(), lectura: LECTURA });
       t.ok(lineas);
     } catch (e) {
       t.mal(e instanceof Error ? e : new Error(String(e)));

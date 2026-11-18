@@ -2,6 +2,22 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.38.0 · 2026-11-17
+
+Un solo visor: los EPUB de texto y los textos de la Biblioteca, con lo mismo que los libros de páginas, y Leer una zona.
+
+- **Leer una zona.** **Leer una zona** (O), en el menú **Texto** o en las herramientas de la izquierda, lee con el OCR solo lo que se rodea con un rectángulo: un diagrama, un cartel en el fondo de un manga o una página que no se ha leído. Funciona con el OCR del libro apagado. Lo leído entra en el texto de la página, en su sitio, y se abre en la ventana como lo seleccionado; no se guarda. En un manga se lee con manga-ocr, como un globo: el reconocedor de libros se comía las kana pequeñas de las columnas.
+- **Los EPUB de texto, como los demás libros.** Tienen la barra de menús (**Libro**, **Ver**, **Ir**, **Ayudas** y **Ayuda**), **Buscar una acción** (Ctrl+K), los **Atajos de teclado** (?), «Aa» con las **Ayudas de lectura**, el **Índice** en la barra de la izquierda, **Atrás** (Alt+←), la barra de estado y el **Modo lectura** (M). Las teclas valen también con el foco dentro del libro, que se las pasa al visor. **Texto vertical** está ahora en el menú **Ver** y en «Aa».
+- **Los textos de la Biblioteca, en el visor.** Lo pegado, los relatos y los artículos se abren en una pestaña propia, como los libros, con sus menús, «Aa», sus páginas y **Editar en el Cuaderno**. Se leen con la misma ayuda de siempre, la de la vista de texto, y la estantería sigue recordando por qué página se va.
+
+## 0.38.0 · 2026-11-17
+
+One viewer: text EPUBs and Library texts, with the same as page books, and Read an area.
+
+- **Read an area.** **Read an area** (O), in the **Text** menu or among the tools on the left, reads with OCR only what you surround with a rectangle: a diagram, a sign in the background of a manga or a page that has not been read. It works with the book’s OCR turned off. What is read goes into the page text, in its place, and opens in the window like a selection; it is not saved. In a manga it is read with manga-ocr, as a bubble: the book recognizer dropped the small kana in manga columns.
+- **Text EPUBs, like the other books.** They have the menu bar (**Book**, **View**, **Go**, **Reading aids** and **Help**), **Find an action** (Ctrl+K), the **Keyboard shortcuts** (?), “Aa” with the **Reading aids**, **Contents** in the bar on the left, **Back** (Alt+←), the status bar and **Reading mode** (M). The keys also work with the focus inside the book, which passes them on to the viewer. **Vertical text** is now in the **View** menu and in “Aa”.
+- **Library texts, in the viewer.** Pasted text, stories and articles open in their own tab, like books, with its menus, “Aa”, their pages and **Edit in the Notebook**. They are read with the usual aid, the one in the text view, and the shelf still remembers which page you are on.
+
 ## 0.37.0 · 2026-11-17
 
 La página aumentada: lo de los subtítulos, sobre la página del libro.

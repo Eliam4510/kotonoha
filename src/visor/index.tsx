@@ -1,6 +1,7 @@
 // El visor de la Biblioteca, en una pestaña propia. Abre el libro de la biblioteca y su archivo guardado y le da
-// paso al visor que le toca: el de páginas, como un lector de PDF, para los EPUB de imágenes, los CBZ y los PDF; o el de
-// texto para un EPUB de texto, que se pinta con su propio formato. Es una página de la extensión: el libro no sale del equipo.
+// paso al visor que le toca: el de páginas, como un lector de PDF, para los EPUB de imágenes, los CBZ y los PDF; el de
+// texto para un EPUB de texto, que se pinta con su propio formato; o el de lectura para un texto de la estantería (pegado,
+// una historia, un artículo), que no tiene archivo. Es una página de la extensión: el libro no sale del equipo.
 
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
@@ -21,6 +22,7 @@ import { variablesPaleta } from '../ui/paletas';
 import { useTema } from '../ui/tema';
 import { Abriendo, AvisoError, Cabeza } from './comun';
 import visorCss from './visor.css';
+import { VisorLectura } from './VisorLectura';
 import { VisorPaginas } from './VisorPaginas';
 import { VisorTexto } from './VisorTexto';
 import { seguirEstadosGramatica } from '../ui/gramatica';
@@ -30,7 +32,8 @@ function Visor({ id }: { id: string }) {
   const [cargados, fijarCargados] = useState(false);
   const tema = useTema(a.tema);
   aplicarLengua(a);
-  const [abierto, fijarAbierto] = useState<{ doc: ElementoBiblioteca; archivo: File } | null>(null);
+  // Un texto de la estantería no tiene archivo: su texto va en la ficha.
+  const [abierto, fijarAbierto] = useState<{ doc: ElementoBiblioteca; archivo: File | null } | null>(null);
   const [error, fijarError] = useState('');
   useRelojLectura(abierto ? abierto.doc.id : null, abierto?.doc.titulo ?? '', a.idiomaObjetivo);
 
@@ -58,9 +61,9 @@ function Visor({ id }: { id: string }) {
     let vivo = true;
     (async () => {
       const e = await motor.bibliotecaObtener(id);
-      if (!e?.documento) throw new Error(tr('Este libro ya no está en la Biblioteca.'));
-      const archivo = await archivoDocumento(id);
-      if (!archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Biblioteca.'));
+      if (!e) throw new Error(tr('Este libro ya no está en la Biblioteca.'));
+      const archivo = e.documento ? await archivoDocumento(id) : null;
+      if (e.documento && !archivo) throw new Error(tr('El archivo de este libro no está en este equipo. Vuelve a importarlo desde la Biblioteca.'));
       if (!vivo) return;
       document.title = tr('{0} · Kotonoha', e.titulo);
       fijarAbierto({ doc: e, archivo });
@@ -77,7 +80,9 @@ function Visor({ id }: { id: string }) {
     <div class="kk-raiz vs" data-tema={tema} lang={bcp47Actual()} style={{ ...variablesPaleta(a.paleta, tema === 'oscuro'), '--letra-lengua': letra.letra, '--aire-lectura': letra.aire }}>
       <style>{base + overlay + appCss + visorCss}</style>
       {abierto ? (
-        abierto.doc.documento?.texto ? (
+        !abierto.doc.documento || !abierto.archivo ? (
+          <VisorLectura doc={abierto.doc} ajustes={a} />
+        ) : abierto.doc.documento.texto ? (
           <VisorTexto doc={abierto.doc} archivo={abierto.archivo} ajustes={a} />
         ) : (
           <VisorPaginas doc={abierto.doc} archivo={abierto.archivo} ajustes={a} />

@@ -141,15 +141,18 @@ describe('las órdenes del visor', () => {
   });
   it('en cada grupo de opciones hay una sola marcada', () => {
     const grupos = new Map<string, Comando[]>();
-    for (const c of lista.filter((c) => c.tipo === 'opcion' && c.menu !== 'ver' && c.menu !== 'anotar')) grupos.set(`${c.menu}/${c.grupo}/${c.submenu}`, [...(grupos.get(`${c.menu}/${c.grupo}/${c.submenu}`) ?? []), c]);
+    for (const c of lista.filter((c) => c.tipo === 'opcion' && c.menu !== 'ver' && c.menu !== 'anotar' && c.grupo !== 'herramienta')) grupos.set(`${c.menu}/${c.grupo}/${c.submenu}`, [...(grupos.get(`${c.menu}/${c.grupo}/${c.submenu}`) ?? []), c]);
     for (const [g, l] of grupos) expect(l.filter((c) => c.marcada).length, g).toBe(1);
-    // Las herramientas van repartidas entre Ver y Anotar, pero también es una sola a la vez.
-    expect(lista.filter((c) => ['seleccionar', 'mano', 'resaltador', 'nota'].includes(c.id) && c.marcada).map((c) => c.id)).toEqual(['seleccionar']);
+    // Las herramientas van repartidas entre Ver, Texto y Anotar, pero también es una sola a la vez.
+    const herramientas = lista.filter((c) => c.grupo === 'herramienta');
+    expect(herramientas.map((c) => c.id).sort()).toEqual(['area', 'mano', 'nota', 'resaltador', 'seleccionar']);
+    expect(herramientas.filter((c) => c.marcada).map((c) => c.id)).toEqual(['seleccionar']);
   });
   it('en la vista de texto no se ofrece lo que es de la imagen', () => {
     const t = ordenesDelVisor({ ...ESTADO, vistaTexto: true }, acciones());
     expect(t.some((c) => ['acercar', 'zoom-ancho', 'nitidez', 'invertir'].includes(c.id))).toBe(false);
     expect(t.find((c) => c.id === 'resaltador')?.deshabilitada).toBe(true);
+    expect(t.find((c) => c.id === 'area')?.deshabilitada).toBe(true);
   });
   it('sin el OCR, sus modos se ven pero no se pueden elegir, y dicen por qué', () => {
     const libro = lista.find((c) => c.id === 'ocr-libro');

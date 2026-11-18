@@ -6,6 +6,7 @@ import type { LineaTexto } from '../nucleo/capaTexto';
 import { type Tamano, tamanoDeImagen, tipoDeImagen } from '../nucleo/imagenes';
 import { type Direccion, type EntradaIndice, leerLibro } from '../nucleo/libro';
 import type { Caja } from '../nucleo/ocr';
+import { recorteDeZona } from '../nucleo/zonas';
 import { fuenteDeArchivo, leerEntrada, leerPrincipio } from '../nucleo/zip';
 
 export interface PaginaImagen extends Tamano {
@@ -53,6 +54,21 @@ export async function imagenParaOcr(p: Paginador, n: number): Promise<ImagenOcr>
     return null;
   });
   return propia ?? { imagen: await (await fetch((await p.imagen(n)).url)).blob() };
+}
+
+/**
+ * Lo que lee el OCR de una zona de la página (la herramienta Área): el recorte de la imagen que se lee de esa página y,
+ * como marco, dónde queda en ella. Null si la zona cae fuera de esa imagen, como en el margen blanco de un escaneo.
+ */
+export async function zonaParaOcr(p: Paginador, n: number, zona: Caja): Promise<ImagenOcr | null> {
+  const { imagen, marco } = await imagenParaOcr(p, n);
+  const fuente = imagen instanceof Blob ? await createImageBitmap(imagen) : imagen;
+  try {
+    const r = recorteDeZona(zona, fuente.width, fuente.height, marco);
+    return r && { imagen: await createImageBitmap(fuente, r.x, r.y, r.ancho, r.alto), marco: r.marco };
+  } finally {
+    fuente.close();
+  }
 }
 
 /** Lo que se lee de cada imagen para saber su tamaño: la cabecera suele caber en mucho menos. */

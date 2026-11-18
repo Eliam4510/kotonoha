@@ -5,10 +5,9 @@
 
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Ajustes } from '../compartido/ajustes';
-import type { ElementoBiblioteca } from '../compartido/tipos';
 import { tr } from '../compartido/i18n';
 import { fondo, motor } from '../compartido/rpc';
-import { alCambiarNotaCuaderno, alCambiarTextoLector, guardarNotaCuaderno, guardarTextoLector, leerNotaCuaderno, leerTextoLector } from '../compartido/textoLector';
+import { alCambiarNotaCuaderno, alCambiarTextoLector, guardarNotaCuaderno, guardarTextoLector, leerNotaCuaderno, leerTextoLector, tituloDeNota } from '../compartido/textoLector';
 import { anadirDictado } from '../nucleo/dictado';
 import { leerEstructura, normalizarTextoPlano, textoConEstructura, textoPlano } from '../nucleo/estructura';
 import { Icono } from '../ui/iconos';
@@ -16,7 +15,6 @@ import { lengua } from '../ui/lengua';
 import { useRelojLectura } from '../ui/relojLectura';
 import { useEsperar } from '../ui/preparacion';
 import { Dictado, limpiarDictadosSiToca } from './Dictado';
-import { navegar } from './estadoApp';
 import { type ApiEditor, EditorCuaderno } from './EditorCuaderno';
 import { TextoInteractivo } from './Lectura';
 import { Mensaje } from './Piezas';
@@ -39,14 +37,6 @@ async function pegadoConEstructura(): Promise<string> {
   return normalizarTextoPlano(await navigator.clipboard.readText());
 }
 
-/** El título de una nota: su primer título, o el principio de su primera línea. */
-export function tituloDeNota(md: string): string {
-  const bloques = leerEstructura(md);
-  const titulo = bloques.find((b) => b.tipo === 'titulo');
-  const texto = titulo?.tipo === 'titulo' ? titulo.linea.texto : textoPlano(bloques).split('\n').find((l) => l.trim()) ?? '';
-  return texto.trim().slice(0, 40);
-}
-
 /** Lo que dice el texto, sin marcas ni espacios: para ver si «Organizar» cambió alguna palabra. */
 const soloTexto = (md: string) => textoPlano(leerEstructura(md)).replace(/\s+/g, '');
 
@@ -63,20 +53,6 @@ function parecido(a: string, b: string): number {
     }
   }
   return a.length + b.length ? (2 * comunes) / (a.length + b.length) : 1;
-}
-
-/**
- * Abre un texto de la biblioteca en el Cuaderno para seguir escribiendo en él. Lo que hubiera en el Cuaderno sin guardar no
- * se pierde: va antes a la biblioteca.
- */
-export async function abrirEnCuaderno(e: ElementoBiblioteca): Promise<void> {
-  const [actual, enlazada] = await Promise.all([leerTextoLector(), leerNotaCuaderno()]);
-  if (actual.trim() && !enlazada && actual.trim() !== e.texto.trim()) {
-    await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo: tituloDeNota(actual) || tr('Sin título'), texto: actual, origen: 'pegado', creado: Date.now() });
-  }
-  await guardarTextoLector(e.texto);
-  await guardarNotaCuaderno(e.id);
-  navegar('lector?editar=1');
 }
 
 export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { ajustes: Ajustes; inicial: string; editar?: boolean; web?: boolean }) {

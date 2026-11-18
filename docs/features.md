@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.37.0, along with how it has been verified.
+Status of each feature in version 0.38.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -171,6 +171,9 @@ Status of each feature in version 0.37.0, along with how it has been verified.
 | The augmented page: underline by status, furigana (all, unknown, on hover or none) and grammar on the page, without covering printed furigana; with a PDF's own text and with book OCR, which now knows where each letter goes from the recognizer's steps | Automated: unit tests of each word's place and its reading, of the CTC cuts and of printed furigana; end to end with a PDF with ruby |
 | The translation of the open sentence as a subtitle under it, read from what was saved at no cost; the word panel on hover with Shift, Ctrl or Alt; how much of what is in view you understand | Automated, with a fake Claude |
 | Read aloud following the sentence, page after page; Looked up: the words picked in a book, turned into cards at once with their sentence, furigana, definitions and a crop of the page | Automated |
+| Read an area (O): a rectangle drawn on the page is read with OCR, even with the book’s OCR off; what is read goes into the page text in its place and opens in the window; in a manga, as a bubble read with manga-ocr. It is not saved | Automated: unit tests of the crop and of how what is read enters the page; end to end on a book and a manga, also with an area without text |
+| Text EPUBs, with what the page viewer has: the menus, Find an action (Ctrl+K, also with the focus in the book), the shortcuts, “Aa”, the contents on the left, Back (Alt+←), the status bar and reading mode | Automated |
+| Library texts (pasted text, stories, articles) are read in the viewer, in their own tab, with its menus, “Aa”, their pages and Edit in the Notebook | Automated |
 | The window does not cover what is left to read: it goes in the page margin if it fits, otherwise over text already read (above the line, or to the right of the column in vertical text); it can be moved, enlarged and pinned to the side as a panel that widens and remembers its width | Automated (unit tests of the placement) |
 | Selecting by dragging, character by character and across lines, with Translate, Explain, Break down, Listen, Highlight, Note and Copy; Ctrl+C copies what is open | Automated |
 | Turning pages with visible arrows at the sides, the keyboard or a swipe: tapping the page only closes what is open, and narrowly missing a word no longer turns the page | Automated |

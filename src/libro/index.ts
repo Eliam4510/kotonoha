@@ -6,6 +6,7 @@ import { leerAjustes } from '../compartido/ajustes';
 import { archivoDocumento } from '../compartido/documentos';
 import { fijarIdioma, tr } from '../compartido/i18n';
 import { iniciarLectorWeb } from '../contenido/lectorWeb';
+import { teclaDe } from '../visor/comandos';
 import { leerEpubDeTexto } from '../nucleo/libro';
 import { fuenteDeArchivo, leerEntrada, leerIndiceZip } from '../nucleo/zip';
 import { prepararCapitulo, type RecursosLibro } from './capitulo';
@@ -178,36 +179,43 @@ function instalarControles() {
     { passive: false }
   );
 
+  // Lo que ya atendió otro (la ficha de una palabra, con 1 a 4 o Esc) no se toca. Pasar de página se hace aquí, y el zoom
+  // también, porque el navegador haría el suyo; lo demás va al visor, que tiene las órdenes de los menús.
   window.addEventListener('keydown', (e) => {
-    if (e.defaultPrevented) return;
+    if (e.defaultPrevented || e.isComposing) return;
     const objetivo = e.composedPath()[0] as HTMLElement | undefined;
     if (objetivo && (objetivo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(objetivo.tagName))) return;
     if (e.ctrlKey || e.metaKey) {
       const paso = e.key === '+' || e.key === '=' ? 1 : e.key === '-' ? -1 : e.key === '0' ? 0 : null;
-      if (paso === null) return;
-      e.preventDefault();
-      enviar({ tipo: 'zoom', paso });
-      return;
+      if (paso !== null) {
+        e.preventDefault();
+        enviar({ tipo: 'zoom', paso });
+        return;
+      }
+    } else if (!e.altKey) {
+      const izquierda = vertical && haciaIzquierda();
+      let paso: 1 | -1 | null = null;
+      if (e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) paso = 1;
+      else if (e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) paso = -1;
+      else if (e.key === 'ArrowLeft') paso = izquierda ? 1 : -1;
+      else if (e.key === 'ArrowRight') paso = izquierda ? -1 : 1;
+      else if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        irAFraccion(e.key === 'Home' ? 0 : 1);
+        return;
+      }
+      if (paso !== null) {
+        e.preventDefault();
+        pasar(paso);
+        return;
+      }
     }
-    if (e.altKey) return;
-    const izquierda = vertical && haciaIzquierda();
-    let paso: 1 | -1 | null = null;
-    if (e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) paso = 1;
-    else if (e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) paso = -1;
-    else if (e.key === 'ArrowLeft') paso = izquierda ? 1 : -1;
-    else if (e.key === 'ArrowRight') paso = izquierda ? -1 : 1;
-    else if (e.key === 'Home' || e.key === 'End') {
-      e.preventDefault();
-      irAFraccion(e.key === 'Home' ? 0 : 1);
-      return;
-    } else if (e.key === 'f' || e.key === 'F') {
-      e.preventDefault();
-      enviar({ tipo: 'pantallaCompleta' });
-      return;
-    }
-    if (paso === null) return;
-    e.preventDefault();
-    pasar(paso);
+    // Al visor: las letras y los signos sueltos, Esc, F10 y lo que va con Ctrl o Alt. Lo que el navegador haría por su
+    // cuenta con esas teclas (buscar en la barra de direcciones, volver atrás en el marco) se le quita aquí mismo.
+    const tecla = teclaDe(e);
+    if (!(e.key.length === 1 || e.key === 'Escape' || e.key === 'F10' || e.ctrlKey || e.metaKey || e.altKey)) return;
+    if (tecla === 'Ctrl+K' || tecla === 'Alt+ArrowLeft' || tecla === 'F10') e.preventDefault();
+    enviar({ tipo: 'tecla', tecla });
   });
 
   // Un enlace a otro capítulo lo abre el visor; uno dentro del capítulo funciona solo.

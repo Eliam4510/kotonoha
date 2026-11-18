@@ -1,7 +1,9 @@
 // Prueba los libros que traen su texto: un PDF japonés hecho aquí mismo por el navegador, con texto horizontal y vertical,
 // y un EPUB de texto vertical con ruby, su CSS, una ilustración y trampas (un script, un atributo on*, un marco y
 // direcciones de fuera). Sin OCR: el texto del PDF se toca palabra a palabra, y el EPUB se pinta con su propio formato y
-// el lector de páginas encima. Comprueba también capítulos, enlaces, índice, zoom, texto horizontal y memoria.
+// el lector de páginas encima. Comprueba también capítulos, enlaces, índice, zoom, texto horizontal y memoria, y que el
+// libro de texto tiene lo del visor de páginas: los menús, la paleta (también desde dentro del capítulo), «Atrás», el
+// modo lectura y «Aa». Y un texto de la Biblioteca (lo pegado), que también se lee en el visor, con lo mismo.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/libros-texto.mjs
 
 import { mkdirSync, rmSync } from 'node:fs';
@@ -10,7 +12,7 @@ import { join, resolve } from 'node:path';
 import { strToU8, zipSync } from 'fflate';
 import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
-import { estadoOrden } from './ordenes.mjs';
+import { estadoOrden, orden } from './ordenes.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -320,15 +322,125 @@ f = await esperar(async () => {
   const x = v.frames().find((y) => y.url().includes('c=0') && !y.isDetached());
   return x && (await x.evaluate(() => document.documentElement.classList.contains('kk-vertical')).catch(() => false)) ? x : null;
 }, 15000);
-await v.click('[aria-label="Texto vertical"]');
+comprobar((await estadoOrden(v, 'texto-vertical')).marcada, 'Un libro vertical se lee en vertical, y el menú Ver lo dice');
+await orden(v, 'texto-vertical');
 f = await esperar(async () => {
   const x = v.frames().find((y) => y.url().includes('h=1') && !y.isDetached());
   return x && (await x.evaluate(() => document.documentElement.classList.contains('kk-horizontal')).catch(() => false)) ? x : null;
 }, 15000);
 comprobar((await f?.evaluate(() => getComputedStyle(document.querySelector('#primero')).writingMode)) === 'horizontal-tb', 'Un libro vertical se puede leer en horizontal');
-comprobar((await v.evaluate(() => document.querySelector('[aria-label="Texto vertical"]')?.getAttribute('aria-pressed'))) === 'false', 'Y el botón lo dice');
+comprobar(!(await estadoOrden(v, 'texto-vertical')).marcada, 'Y el menú lo dice');
 await v.screenshot({ path: join(CAPTURAS, 'epub-horizontal.png') });
 await v.close();
+
+// ---------- Lo mismo que el visor de páginas ----------
+
+console.log('\n== Los menús y las ayudas del visor, en un libro de texto ==');
+v = await abrir('猫の小説');
+f = await libro();
+const menus = await v.evaluate(() => [...document.querySelectorAll('.vs-menus [data-menu]')].map((b) => b.getAttribute('data-menu')));
+comprobar(JSON.stringify(menus) === JSON.stringify(['libro', 'ver', 'ir', 'ayudas', 'ayuda']), 'La barra de menús del visor, con lo que tiene sentido en un libro de texto', JSON.stringify(menus));
+// Las teclas pulsadas dentro del capítulo llegan al visor: Ctrl+K abre la paleta aunque el foco esté en el libro.
+const focoEnLibro = await f.evaluate(() => document.hasFocus());
+await v.keyboard.press('Control+k');
+const paleta = await v
+  .waitForSelector('.vs-paleta [data-orden]', { timeout: 5000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(paleta && focoEnLibro, 'Con el foco en el libro, Ctrl+K abre la paleta', `foco en el libro: ${focoEnLibro}`);
+// Un número en la paleta lleva a ese capítulo, y eso es un salto: «Atrás» vuelve.
+const capituloAntes = await v.evaluate(() => document.querySelector('.vs-numero')?.value);
+const destino = capituloAntes === '1' ? '2' : '1';
+await v.keyboard.type(destino);
+const irA = await v.evaluate(() => document.querySelector('.vs-paleta [data-orden="ir-a"] .vs-menu-etiqueta')?.textContent ?? '');
+comprobar(irA === `Ir al capítulo ${destino}`, 'Un número en la paleta va a ese capítulo', irA);
+await v.keyboard.press('Enter');
+f = await esperar(async () => {
+  const x = v.frames().find((y) => y.url().includes(`c=${Number(destino) - 1}`) && !y.isDetached());
+  return x && (await x.evaluate(() => document.documentElement.classList.contains('kk-vertical') || document.documentElement.classList.contains('kk-horizontal')).catch(() => false)) ? x : null;
+}, 15000);
+comprobar(!!f && (await v.evaluate(() => document.querySelector('.vs-numero')?.value)) === destino, 'Y se abre', await v.evaluate(() => document.querySelector('.vs-numero')?.value));
+const volver = await v.evaluate(() => document.querySelector('.vs-pie .vs-atras')?.textContent?.trim() ?? '');
+comprobar(volver === `Volver al capítulo ${capituloAntes}`, 'La barra de estado ofrece volver', volver);
+// Alt+← dentro del capítulo es «Atrás», no el historial del navegador.
+await esperar(() => f.evaluate(() => document.hasFocus()), 5000);
+await v.keyboard.press('Alt+ArrowLeft');
+f = await esperar(async () => {
+  const x = v.frames().find((y) => y.url().includes(`c=${Number(capituloAntes) - 1}`) && !y.isDetached());
+  return x && (await x.evaluate(() => document.documentElement.classList.contains('kk-vertical') || document.documentElement.classList.contains('kk-horizontal')).catch(() => false)) ? x : null;
+}, 15000);
+comprobar(!!f && (await v.evaluate(() => document.querySelector('.vs-numero')?.value)) === capituloAntes, 'Alt+← vuelve al capítulo de antes', await v.evaluate(() => document.querySelector('.vs-numero')?.value));
+comprobar(v.url().includes('visor.html'), 'Sin salir del visor', v.url());
+// M, pulsada en el libro, es el modo lectura: solo el libro, sin barras.
+await esperar(() => f.evaluate(() => document.hasFocus()), 5000);
+await v.keyboard.press('m');
+const enLectura = await v
+  .waitForFunction(() => !!document.querySelector('.vs-marco.modo-lectura'), null, { timeout: 5000 })
+  .then(() => true)
+  .catch(() => false);
+const sinPie = await v.evaluate(() => getComputedStyle(document.querySelector('.vs-pie')).display === 'none');
+comprobar(enLectura && sinPie, 'M, pulsada en el libro, pasa al modo lectura, sin barras');
+await v.keyboard.press('Escape');
+const fuera = await v
+  .waitForFunction(() => !document.querySelector('.vs-marco.modo-lectura'), null, { timeout: 5000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(fuera, 'Y Esc sale de él');
+// «Aa»: las ayudas de lectura de Kotonoha entero, como en el visor de páginas. En el primer capítulo, que es vertical,
+// también cómo se lee este libro.
+await orden(v, 'primero');
+f = await esperar(async () => {
+  const x = v.frames().find((y) => y.url().includes('c=0') && !y.isDetached());
+  return x && (await x.evaluate(() => document.documentElement.classList.contains('kk-vertical') || document.documentElement.classList.contains('kk-horizontal')).catch(() => false)) ? x : null;
+}, 15000);
+const furiganaAntes = await sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes?.furigana);
+await v.click('.vs-aa');
+await v.waitForSelector('.vs-aa-panel', { timeout: 5000 });
+await v.click('.vs-aa-panel [role="radio"]:has-text("Nada")');
+const furiganaDespues = await esperar(async () => {
+  const x = await sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes?.furigana);
+  return x === 'ninguna' ? x : null;
+}, 5000);
+comprobar(furiganaDespues === 'ninguna', '«Aa» cambia las ayudas de lectura de Kotonoha entero', `${furiganaAntes} → ${furiganaDespues}`);
+comprobar(await v.evaluate(() => [...document.querySelectorAll('.vs-aa-panel h3')].some((h) => h.textContent.includes('Este libro'))), 'Y, en un libro vertical, cómo se lee este');
+await v.screenshot({ path: join(CAPTURAS, 'epub-aa.png') });
+await v.keyboard.press('Escape');
+await sw.evaluate(async (antes) => {
+  const d = await chrome.storage.local.get('ajustes');
+  await chrome.storage.local.set({ ajustes: { ...d.ajustes, furigana: antes } });
+}, furiganaAntes ?? 'todas');
+await v.close();
+
+// ---------- Un texto de la Biblioteca ----------
+
+console.log('\n== Un texto de la Biblioteca, en el visor ==');
+// Más de dos páginas de la estantería (2500 caracteres cada una).
+const PARRAFO_TEXTO = '今日は図書館で本を読みました。天気がいいので、帰りに公園を散歩しました。\n\n';
+const TEXTO_LARGO = PARRAFO_TEXTO.repeat(Math.ceil(6000 / PARRAFO_TEXTO.length));
+const ID_TEXTO = 'texto-en-el-visor';
+const llamar = (metodo, ...args) => app.evaluate(({ metodo, args }) => new Promise((ok) => chrome.runtime.sendMessage({ canal: 'motor', metodo, args }, (r) => ok(r?.valor))), { metodo, args });
+await llamar('bibliotecaGuardar', { id: ID_TEXTO, titulo: '図書館の日', texto: TEXTO_LARGO, origen: 'pegado', creado: Date.now() });
+await app.reload();
+await app.waitForSelector('button.ap-tapa[aria-label*="図書館の日"]', { timeout: 15000 });
+v = await abrir('図書館の日');
+const leido = await v
+  .waitForSelector('.vs-vista-texto .ap-papel .pal', { timeout: 20000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(leido && v.url().includes('visor.html'), 'Un texto de la Biblioteca se abre en el visor, con la ayuda de lectura', v.url());
+const menusTexto = await v.evaluate(() => [...document.querySelectorAll('.vs-menus [data-menu]')].map((b) => b.getAttribute('data-menu')));
+comprobar(JSON.stringify(menusTexto) === JSON.stringify(['libro', 'ver', 'ir', 'ayudas', 'ayuda']), 'Con la barra de menús del visor', JSON.stringify(menusTexto));
+const donde = () => v.evaluate(() => document.querySelector('.vs-pie .vs-donde')?.textContent ?? '');
+comprobar((await donde()) === 'Página 1 de 3', 'Y la barra de estado dice por qué página va', await donde());
+await v.keyboard.press('ArrowRight');
+await esperar(async () => ((await donde()) === 'Página 2 de 3' ? true : null), 5000);
+comprobar((await donde()) === 'Página 2 de 3', 'Las flechas pasan de página', await donde());
+comprobar((await estadoOrden(v, 'cuaderno')).existe, 'Se puede seguir escribiendo en el Cuaderno, desde el menú Libro');
+await v.waitForTimeout(800);
+await v.close();
+const guardada = await llamar('bibliotecaObtener', ID_TEXTO);
+comprobar(guardada?.pagina === 1, 'La estantería recuerda por qué página se iba', String(guardada?.pagina));
+await llamar('bibliotecaEliminar', ID_TEXTO);
 
 comprobar(externas.length === 0, 'Ninguna petición a direcciones de fuera del libro', JSON.stringify(externas.slice(0, 3)));
 if (errores.length) console.log('\nErrores en la página:', [...new Set(errores)].slice(0, 6));

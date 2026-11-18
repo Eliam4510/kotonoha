@@ -86,6 +86,8 @@
 
 /* Un EPUB de texto: el capítulo va en un marco que ocupa todo el lienzo; el zoom agranda el marco entero. */
 .vs-lienzo-libro { position: relative; padding: 0; overflow: hidden; display: block; }
+/* En un libro de texto, el modo lectura no ve el ratón sobre el libro, que es otra página: esta franja lo ve llegar arriba. */
+.vs-asomar { position: absolute; top: 0; left: 0; right: 0; z-index: 5; height: 18px; }
 .vs-lienzo-libro > .vs-aviso { height: 100%; justify-content: center; }
 .vs-libro { position: absolute; left: 0; top: 0; border: 0; background: #fff; transform-origin: 0 0; }
 .vs-lienzo.invertido .vs-libro { filter: invert(1) hue-rotate(180deg); }
@@ -375,6 +377,13 @@
 .vs-aviso-herramienta { position: absolute; top: 12px; left: 50%; z-index: 6; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 120px); padding: 6px 14px; border-radius: var(--r-pill); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-2); color: var(--texto-2); font-size: 13px; white-space: nowrap; transform: translateX(-50%); pointer-events: none; }
 .vs-aviso-hecho .ico { color: var(--hoja); }
 .vs-aviso-lectura { animation: vs-aviso-fuera 0.4s 2.6s forwards; }
+/* Leer una zona: el rectángulo se dibuja en el azul de lo seleccionado y, mientras se lee, late. La capa va sobre todo lo
+   de la página, pero debajo de las flechas. */
+.vs-area { position: absolute; inset: 0; z-index: 3; cursor: crosshair; touch-action: none; }
+.vs-area-marco { position: absolute; z-index: 3; border: 1.5px dashed rgb(56, 132, 255); border-radius: 2px; background: rgba(56, 132, 255, 0.1); pointer-events: none; }
+.vs-area-marco.leyendo { animation: vs-area-late 0.9s ease-in-out infinite alternate; }
+@keyframes vs-area-late { to { background: rgba(56, 132, 255, 0.26); } }
+@media (prefers-reduced-motion: reduce) { .vs-area-marco.leyendo { animation: none; background: rgba(56, 132, 255, 0.2); } }
 @keyframes vs-aviso-fuera { to { opacity: 0; visibility: hidden; } }
 
 /* ---------- El modo lectura: solo la página. La barra se asoma por arriba, sobre la página, sin moverla. ---------- */
