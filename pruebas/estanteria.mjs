@@ -312,6 +312,39 @@ const cuarto = await esperar(app, () => {
 const aviso2 = await app.evaluate(() => document.querySelector('.ap-mensaje:not(.error)')?.textContent ?? '');
 comprobar(!!cuarto && aviso2.includes('Añadido a «Serie de prueba»: 1 tomo.'), 'Una carpeta con un tomo más de la serie lo añade a su colección', aviso2);
 
+// ---------- Una carpeta con libros en sus subcarpetas, a una colección ----------
+
+console.log('\n== Importar una carpeta de revistas en una colección ==');
+// Como unas revistas guardadas por año y mes: dos se llaman igual, y un léame no es un libro.
+rmSync(join(CAPTURAS, 'revistas'), { recursive: true, force: true });
+const REVISTAS = join(CAPTURAS, 'revistas', '数学の雑誌');
+for (const [carpeta, nombre, paginas] of [['2023/04', '本誌.pdf', 2], ['2023/05', '本誌.pdf', 3], ['2024/01', '数学通信 2024年1月号.pdf', 4]]) {
+  mkdirSync(join(REVISTAS, carpeta), { recursive: true });
+  writeFileSync(join(REVISTAS, carpeta, nombre), pdfDePrueba(paginas));
+}
+writeFileSync(join(REVISTAS, 'léame.txt'), 'No es un libro.');
+await boton('Nueva colección').click();
+await app.fill('.ap-dialogo input.campo', 'Matemáticas');
+await app.locator('.ap-dialogo .segmentado button', { hasText: 'Estudio' }).click();
+await enDialogo('Crear').click();
+await app.waitForSelector('.ap-vista-coleccion h1', { timeout: 10000 });
+const avisoActual = () => app.evaluate(() => document.querySelector('.ap-mensaje:not(.error)')?.textContent ?? '');
+/** Elige la carpeta de las revistas con «Importar una carpeta», en la colección, y espera a que acabe. */
+const importarRevistas = async (listo) => {
+  const [selector] = await Promise.all([app.waitForEvent('filechooser'), app.locator('.ap-importar-carpeta').click()]);
+  await selector.setFiles(REVISTAS);
+  return esperar(app, listo, undefined, 60000);
+};
+comprobar(await app.locator('.ap-importar-carpeta').isVisible(), 'La colección tiene «Importar una carpeta»');
+await importarRevistas(() => (!document.querySelector('.ap-importando') && document.querySelectorAll('.ap-vista-coleccion .ap-libro').length >= 3 ? true : null));
+const revistas = await app.evaluate(() => [...document.querySelectorAll('.ap-vista-coleccion .ap-libro h3')].map((h) => h.textContent).sort());
+comprobar(JSON.stringify(revistas) === JSON.stringify(['数学通信 2024年1月号', '本誌 (2023/04)', '本誌 (2023/05)'].sort()), 'Todos los PDF de sus subcarpetas entran en la colección, con títulos que no se repiten y sin el léame', JSON.stringify(revistas));
+await app.screenshot({ path: join(CAPTURAS, 'revistas.png') });
+const otraVez = await importarRevistas(() => (!document.querySelector('.ap-importando') && (document.querySelector('.ap-mensaje:not(.error)')?.textContent ?? '').includes('Ya estaban') ? true : null));
+const tras = await app.evaluate(() => document.querySelectorAll('.ap-vista-coleccion .ap-libro').length);
+comprobar(!!otraVez && tras === 3 && (await avisoActual()).includes('Ya estaban en la Biblioteca: 3.'), 'Importarla otra vez no duplica nada, y lo dice', `${tras} libros; ${await avisoActual()}`);
+await volver();
+
 // ---------- Todo sigue ahí ----------
 
 await app.goto(URL_ESTANTERIA);

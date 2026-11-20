@@ -2,6 +2,22 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.38.1 · 2026-11-19
+
+Importar una carpeta con todo lo que tiene dentro, también desde una colección.
+
+- **Importar una carpeta, en una colección.** Dentro de una colección, **Importar una carpeta** trae todos los libros (PDF, EPUB y CBZ) de una carpeta y de todas sus subcarpetas, como unas revistas guardadas por año y mes, y los deja en esa colección. En la estantería, el botón que decía «Elegir una carpeta de imágenes» se llama ahora **Importar una carpeta**: ya traía también esos libros, y ahora van juntos a una colección con el nombre de la carpeta elegida, aunque cada uno esté en su subcarpeta.
+- **En orden y sin títulos repetidos.** Los libros entran en el orden natural de su ruta (los años y los meses, por orden), con la cuenta de lo que va. Si dos se llaman igual en subcarpetas distintas, su título lleva detrás las subcarpetas: «本誌 (2023/04)».
+- **Sin duplicados.** Importar otra vez la misma carpeta solo trae lo nuevo; lo que ya estaba se queda y, si se importa en una colección, pasa a ella.
+
+## 0.38.1 · 2026-11-19
+
+Import a folder with everything inside it, also from a collection.
+
+- **Import a folder into a collection.** Inside a collection, **Import a folder** brings in all the books (PDF, EPUB and CBZ) in a folder and all its subfolders, such as magazines kept by year and month, and puts them in that collection. On the shelf, the button that said “Choose an image folder” is now called **Import a folder**: it already brought in those books too, and now they go together into a collection named after the chosen folder, even when each one is in its own subfolder.
+- **In order and without repeated titles.** Books come in in the natural order of their paths (years and months in order), with a running count. If two have the same name in different subfolders, their title carries the subfolders after it: “本誌 (2023/04)”.
+- **No duplicates.** Importing the same folder again brings in only what is new; what was there stays and, when importing into a collection, moves into it.
+
 ## 0.38.0 · 2026-11-17
 
 Un solo visor: los EPUB de texto y los textos de la Biblioteca, con lo mismo que los libros de páginas, y Leer una zona.

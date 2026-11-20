@@ -134,6 +134,37 @@ const mismoNombre = (a: string, b: string) => a.trim().normalize('NFKC').toLower
  * llame como ella; si no hay, se crea una, siempre que sean al menos dos (un libro suelto no es una colección). Si todos se
  * leen de derecha a izquierda, la colección es de manga.
  */
+/**
+ * Los libros (PDF, EPUB y CBZ) de una carpeta importada, en el orden natural de su ruta (los años y los meses de unas
+ * revistas, por orden), con el título que lleva cada uno: el nombre de su archivo o, si ese nombre se repite en otras
+ * subcarpetas, el nombre con las subcarpetas en que está, sin la elegida: «本誌 (2023/04)».
+ */
+export function titulosDeDocumentos<T extends { ruta: string }>(archivos: T[]): { archivo: T; titulo: string }[] {
+  const partes = (r: string) => r.split('/');
+  const nombre = (r: string) => (partes(r).at(-1) ?? r).replace(/\.[^.]+$/, '');
+  const veces = new Map<string, number>();
+  for (const a of archivos) veces.set(nombre(a.ruta).normalize('NFC'), (veces.get(nombre(a.ruta).normalize('NFC')) ?? 0) + 1);
+  return [...archivos]
+    .sort((a, b) => porNombre(a.ruta, b.ruta))
+    .map((archivo) => {
+      const n = nombre(archivo.ruta);
+      const subcarpetas = partes(archivo.ruta).slice(1, -1).join('/');
+      return { archivo, titulo: (veces.get(n.normalize('NFC')) ?? 0) > 1 && subcarpetas ? `${n} (${subcarpetas})` : n };
+    });
+}
+
+/**
+ * El libro de la biblioteca que ya es este archivo, si lo hay: el mismo formato y el mismo tamaño y, en un PDF, un título
+ * que empieza por su nombre (el de un EPUB o un CBZ sale de dentro del libro). Así, importar otra vez una carpeta solo
+ * trae lo nuevo.
+ */
+export function yaImportado(lista: ElementoBiblioteca[], nombre: string, tamano: number): ElementoBiblioteca | undefined {
+  const formato = /\.pdf$/i.test(nombre) ? 'pdf' : /\.cbz$/i.test(nombre) ? 'cbz' : /\.epub$/i.test(nombre) ? 'epub' : null;
+  if (!formato) return undefined;
+  const base = nombre.replace(/\.[^.]+$/, '').normalize('NFC');
+  return lista.find((e) => e.documento?.formato === formato && e.documento.tamano === tamano && (formato !== 'pdf' || e.titulo.normalize('NFC').startsWith(base)));
+}
+
 export function coleccionesDeImportados(importados: Importado[], existentes: ColeccionBiblioteca[]): PlanColecciones {
   const grupos = new Map<string, Importado[]>();
   for (const i of importados) {

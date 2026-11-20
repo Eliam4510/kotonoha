@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ColeccionBiblioteca, ElementoBiblioteca } from '../compartido/tipos';
-import { aplicarCambio, avanceDe, coleccionesDeImportados, enCurso, filtrar, librosDe, resumenDe } from './estanteria';
+import { aplicarCambio, avanceDe, coleccionesDeImportados, enCurso, filtrar, librosDe, resumenDe, titulosDeDocumentos, yaImportado } from './estanteria';
 
 let n = 0;
 const libro = (titulo: string, extra: Partial<ElementoBiblioteca> = {}, paginas = 100): ElementoBiblioteca => ({
@@ -108,5 +108,35 @@ describe('un cambio sobre lo guardado', () => {
     expect(aplicarCambio(e, { terminado: undefined }).terminado).toBe(5);
     // Un texto sin documento no gana uno.
     expect(aplicarCambio({ ...e, documento: undefined }, { documento: { portada: 'x' } }).documento).toBeUndefined();
+  });
+});
+
+describe('importar una carpeta con libros en sus subcarpetas', () => {
+  const ruta = (r: string) => ({ ruta: r });
+
+  it('van en el orden natural de su ruta: los años y los meses, por orden', () => {
+    const l = titulosDeDocumentos([ruta('Revistas/2024/1/c.pdf'), ruta('Revistas/2023/10/b.pdf'), ruta('Revistas/2023/9/a.pdf')]);
+    expect(l.map((x) => x.archivo.ruta)).toEqual(['Revistas/2023/9/a.pdf', 'Revistas/2023/10/b.pdf', 'Revistas/2024/1/c.pdf']);
+    expect(l.map((x) => x.titulo)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('un nombre que se repite lleva detrás sus subcarpetas, sin la elegida', () => {
+    const l = titulosDeDocumentos([ruta('数学/2023/04/本誌.pdf'), ruta('数学/2023/05/本誌.pdf'), ruta('数学/2024/01/数学通信 2024年1月号.pdf')]);
+    expect(l.map((x) => x.titulo)).toEqual(['本誌 (2023/04)', '本誌 (2023/05)', '数学通信 2024年1月号']);
+  });
+
+  it('un archivo suelto, fuera de toda carpeta, se queda con su nombre', () => {
+    expect(titulosDeDocumentos([ruta('apuntes.pdf')]).map((x) => x.titulo)).toEqual(['apuntes']);
+  });
+
+  it('lo ya importado se reconoce por su formato, su tamaño y, en un PDF, su nombre', () => {
+    const pdf = (titulo: string, tamano: number) => libro(titulo, { documento: { formato: 'pdf', paginas: 10, direccion: 'ltr', tamano } });
+    const lista = [pdf('本誌 (2023/04)', 500), pdf('数学通信 2024年1月号', 700), libro('Mi serie 1', { documento: { formato: 'cbz', paginas: 10, direccion: 'rtl', tamano: 900 } })];
+    expect(yaImportado(lista, '本誌.pdf', 500)?.titulo).toBe('本誌 (2023/04)');
+    expect(yaImportado(lista, '本誌.pdf', 501)).toBeUndefined();
+    expect(yaImportado(lista, '別の本.pdf', 700)).toBeUndefined();
+    // El título de un CBZ o un EPUB sale de dentro del libro: basta con el formato y el tamaño.
+    expect(yaImportado(lista, 'tomo1.cbz', 900)?.titulo).toBe('Mi serie 1');
+    expect(yaImportado(lista, 'notas.txt', 500)).toBeUndefined();
   });
 });
