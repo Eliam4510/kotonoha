@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.38.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.38.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -174,6 +174,7 @@ Estado de cada función en la versión 0.38.0, con la forma en que se ha verific
 | Leer una zona (O): un rectángulo dibujado sobre la página se lee con el OCR, aunque el del libro esté apagado; lo leído entra en el texto de la página, en su sitio, y se abre en la ventana; en un manga, como un globo leído con manga-ocr. No se guarda | Automática: pruebas unitarias del recorte y de cómo entra lo leído en la página; de extremo a extremo en un libro y en un manga, también con una zona sin texto |
 | Los EPUB de texto, con lo del visor de páginas: los menús, Buscar una acción (Ctrl+K, también con el foco en el libro), los atajos, «Aa», el índice a la izquierda, Atrás (Alt+←), la barra de estado y el modo lectura | Automática |
 | Los textos de la Biblioteca (lo pegado, los relatos, los artículos) se leen en el visor, en una pestaña propia, con sus menús, «Aa», sus páginas y Editar en el Cuaderno | Automática |
+| Importar una carpeta, también desde una colección: todos sus PDF, EPUB y CBZ, en todas sus subcarpetas y en orden, con títulos que no se repiten y sin duplicar lo que ya estaba | Automática |
 | La ventana no tapa lo que queda por leer: va al margen de la página si cabe, y si no, sobre lo ya leído (encima del renglón, o a la derecha de la columna en vertical); se mueve, se agranda y se fija a un lado como panel, que se ensancha y recuerda su ancho | Automática (pruebas unitarias de la colocación) |
 | Seleccionar arrastrando, letra a letra y entre renglones, con Traducir, Explicar, Desglosar, Escuchar, Resaltar, Nota y Copiar; Ctrl+C copia lo abierto | Automática |
 | Pasar de página con flechas a la vista a los lados, el teclado o deslizando: tocar la página solo cierra lo abierto, y fallar por poco al tocar una palabra ya no pasa de página | Automática |

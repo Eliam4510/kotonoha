@@ -10,7 +10,7 @@ import { numero, tm, tr } from '../compartido/i18n';
 import { flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { CambioBiblioteca, ColeccionBiblioteca, ElementoBiblioteca, TipoColeccion } from '../compartido/tipos';
 import { librosDeImagenes } from '../nucleo/carpetas';
-import { type Avance, avanceDe, coleccionesDeImportados, deTomos, enCurso, type FiltroEstanteria, filtrar, type Importado, librosDe, resumenDe, TAM_PAGINA_TEXTO } from '../nucleo/estanteria';
+import { type Avance, avanceDe, coleccionesDeImportados, deTomos, enCurso, type FiltroEstanteria, filtrar, type Importado, librosDe, resumenDe, TAM_PAGINA_TEXTO, titulosDeDocumentos, yaImportado } from '../nucleo/estanteria';
 import { estructuraDeHtml, estructuraDeNodo, type NodoHtml } from '../nucleo/estructura';
 import { IMAGEN, leerEpubDeTexto, leerLibro } from '../nucleo/libro';
 import { analizarSubtitulos } from '../nucleo/subtitulos';
@@ -149,10 +149,11 @@ function TarjetaColeccion({ c, lista }: { c: ColeccionBiblioteca; lista: Element
  * capítulo a capítulo; lo demás, por páginas. De un PDF se saca ya su portada y cuántas páginas tiene. Devuelve null si no
  * es un libro, o si un EPUB de texto no se puede leer así: entonces sigue el camino del texto.
  */
-async function importarDocumento(f: File, coleccion?: string): Promise<ElementoBiblioteca | null> {
+/** Guarda un libro en la biblioteca. `nombre` es su título si no trae otro dentro (un EPUB o un CBZ lo traen). */
+async function importarDocumento(f: File, coleccion?: string, nombre?: string): Promise<ElementoBiblioteca | null> {
   const formato = /\.pdf$/i.test(f.name) ? 'pdf' : /\.cbz$/i.test(f.name) ? 'cbz' : /\.epub$/i.test(f.name) ? 'epub' : null;
   if (!formato) return null;
-  let titulo = f.name.replace(/\.[^.]+$/, '');
+  let titulo = nombre ?? f.name.replace(/\.[^.]+$/, '');
   let paginas = 0;
   let direccion: 'rtl' | 'ltr' = 'ltr';
   let portada: string | undefined;
@@ -858,13 +859,24 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
     const importados: Importado[] = [];
     const anotar = (e: ElementoBiblioteca | null, carpeta?: string) => e && importados.push({ id: e.id, rtl: e.documento?.direccion === 'rtl', ...(carpeta ? { carpeta } : {}) });
     const imagenes = archivos.filter((a) => IMAGEN.test(a.ruta) || /(^|\/)ComicInfo\.xml$/i.test(a.ruta));
-    // De una carpeta solo entran sus libros: un léame o unas notas que vengan con el manga no son lecturas.
-    const resto = archivos.filter((a) => !imagenes.includes(a) && (!a.ruta.includes('/') || /\.(epub|pdf|cbz)$/i.test(a.ruta)));
-    for (const { archivo: f, ruta } of resto) {
-      fijarProgreso(tr('Importando «{0}»…', f.name));
+    // De una carpeta solo entran sus libros, en todas sus subcarpetas: un léame o unas notas que vengan con el manga no son
+    // lecturas. Van en el orden natural de su ruta y sin títulos repetidos (titulosDeDocumentos).
+    const resto = titulosDeDocumentos(archivos.filter((a) => !imagenes.includes(a) && (!a.ruta.includes('/') || /\.(epub|pdf|cbz)$/i.test(a.ruta))));
+    // Importar otra vez una carpeta no duplica lo que ya estaba; si se importa en una colección, lo de antes pasa a ella.
+    const yaEstan = resto.some((d) => d.archivo.ruta.includes('/')) ? await motor.bibliotecaListar() : [];
+    let repetidos = 0;
+    for (const [i, { archivo: { archivo: f, ruta }, titulo }] of resto.entries()) {
+      fijarProgreso(resto.length > 1 ? tr('Importando «{0}» ({1} de {2})…', f.name, i + 1, resto.length) : tr('Importando «{0}»…', f.name));
       try {
-        const doc = await importarDocumento(f, coleccion);
-        if (doc) anotar(doc, ruta.includes('/') ? ruta.slice(0, ruta.lastIndexOf('/')) : undefined);
+        const ya = ruta.includes('/') ? yaImportado(yaEstan, f.name, f.size) : undefined;
+        if (ya) {
+          repetidos++;
+          if (coleccion && ya.coleccion !== coleccion) await motor.bibliotecaCambiar(ya.id, { coleccion });
+          continue;
+        }
+        const doc = await importarDocumento(f, coleccion, titulo);
+        // Los libros de una carpeta van juntos a la colección de la carpeta elegida, aunque cada uno esté en su subcarpeta.
+        if (doc) anotar(doc, ruta.includes('/') ? ruta.slice(0, ruta.indexOf('/')) : undefined);
         else await motor.bibliotecaGuardar({ id: crypto.randomUUID(), titulo: f.name.replace(/\.[^.]+$/, ''), texto: await textoDeArchivo(f), origen: 'archivo', creado: Date.now(), ...(coleccion ? { coleccion } : {}) });
         await cargar();
       } catch (e) {
@@ -884,6 +896,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
       }
     }
     // Lo que venía de una misma carpeta va a su colección: la que se llame como ella o, si son varios, una nueva.
+    const avisos: string[] = [];
     if (!coleccion && importados.length) {
       const existentes = await motor.coleccionesListar();
       const plan = coleccionesDeImportados(importados, existentes);
@@ -899,8 +912,10 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
         const c = existentes.find((x) => x.id === a.coleccion);
         if (c) hecho.push(tr('Añadido a «{0}»: {1}.', c.nombre, cuantos(a.libros.length, c.tipo)));
       }
-      fijarAviso(hecho.join(' '));
+      avisos.push(...hecho);
     }
+    if (repetidos) avisos.push(tr('Ya estaban en la Biblioteca: {0}.', repetidos));
+    if (avisos.length) fijarAviso(avisos.join(' '));
     fijarProgreso('');
     cargar();
   };
@@ -1084,6 +1099,7 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
               {total > 0 && <button class="btn" onClick={() => navegar(`vocabulario?coleccion=${encodeURIComponent(vista.id)}`)}><Icono n="palabras" t={15} /> {tr('Vocabulario')}</button>}
               <button class="btn" onClick={() => fijarDialogo({ tipo: 'anadir', coleccion: vista })}><Icono n="mas" t={15} /> {tr('Añadir libros')}</button>
               <button class="btn fantasma" onClick={() => elegirArchivos(vista.id)}><Icono n="subir" t={15} /> {tr('Importar aquí')}</button>
+              <button class="btn fantasma ap-importar-carpeta" data-tip={tr('Todos los libros de una carpeta, también los de sus subcarpetas, a esta colección')} onClick={() => elegirCarpeta(vista.id)}><Icono n="carpeta" t={15} /> {tr('Importar una carpeta')}</button>
               <button class="btn fantasma" onClick={() => fijarDialogo({ tipo: 'coleccion', coleccion: vista })}><Icono n="lapiz" t={15} /> {tr('Editar')}</button>
               <button class="btn fantasma" onClick={() => fijarDialogo({ tipo: 'portada', coleccion: vista })}><Icono n="imagen" t={15} /> {tr('Portada')}</button>
               <button
@@ -1131,8 +1147,8 @@ export function Biblioteca({ ajustes, abrir, coleccion: idColeccion, exportar }:
             <span class="ayuda">{tr('Arrástralos aquí o haz clic para elegirlos')}</span>
             <span class="ap-formatos">{['EPUB', 'PDF', 'CBZ', 'JPG', 'PNG', 'TXT', 'HTML', 'SRT', 'VTT', 'ASS'].map((f) => <i key={f}>{f}</i>)}</span>
           </button>
-          <button class="btn chico fantasma ap-elegir-carpeta" data-tip={tr('Cada carpeta de imágenes, o cada tomo dentro de ella, entra como un libro')} onClick={() => elegirCarpeta()}>
-            <Icono n="carpeta" t={15} /> {tr('Elegir una carpeta de imágenes')}
+          <button class="btn chico fantasma ap-elegir-carpeta" data-tip={tr('Sus libros (PDF, EPUB y CBZ), también los de las subcarpetas, y cada carpeta de imágenes como un libro')} onClick={() => elegirCarpeta()}>
+            <Icono n="carpeta" t={15} /> {tr('Importar una carpeta')}
           </button>
         </div>
         {selectores}

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.38.0, along with how it has been verified.
+Status of each feature in version 0.38.1, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -174,6 +174,7 @@ Status of each feature in version 0.38.0, along with how it has been verified.
 | Read an area (O): a rectangle drawn on the page is read with OCR, even with the book’s OCR off; what is read goes into the page text in its place and opens in the window; in a manga, as a bubble read with manga-ocr. It is not saved | Automated: unit tests of the crop and of how what is read enters the page; end to end on a book and a manga, also with an area without text |
 | Text EPUBs, with what the page viewer has: the menus, Find an action (Ctrl+K, also with the focus in the book), the shortcuts, “Aa”, the contents on the left, Back (Alt+←), the status bar and reading mode | Automated |
 | Library texts (pasted text, stories, articles) are read in the viewer, in their own tab, with its menus, “Aa”, their pages and Edit in the Notebook | Automated |
+| Import a folder, also from a collection: all its PDF, EPUB and CBZ files, in all its subfolders and in order, with titles that do not repeat and without duplicating what was already there | Automated |
 | The window does not cover what is left to read: it goes in the page margin if it fits, otherwise over text already read (above the line, or to the right of the column in vertical text); it can be moved, enlarged and pinned to the side as a panel that widens and remembers its width | Automated (unit tests of the placement) |
 | Selecting by dragging, character by character and across lines, with Translate, Explain, Break down, Listen, Highlight, Note and Copy; Ctrl+C copies what is open | Automated |
 | Turning pages with visible arrows at the sides, the keyboard or a swipe: tapping the page only closes what is open, and narrowly missing a word no longer turns the page | Automated |

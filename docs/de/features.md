@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.38.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.38.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -174,6 +174,7 @@ Stand jeder Funktion in Version 0.38.0 und die Art ihrer Überprüfung.
 | Einen Bereich lesen (O): Ein auf der Seite gezogenes Rechteck wird mit der Texterkennung gelesen, auch wenn sie für das Buch ausgeschaltet ist; das Gelesene kommt an seiner Stelle in den Text der Seite und öffnet sich im Fenster; in einem Manga als Sprechblase, gelesen mit manga-ocr. Es wird nicht gespeichert | Automatisch: Unit-Tests des Ausschnitts und dessen, wie das Gelesene in die Seite kommt; End-to-End in einem Buch und einem Manga, auch mit einem Bereich ohne Text |
 | Text-EPUBs mit dem, was der Seitenbetrachter hat: die Menüs, Aktion suchen (Strg+K, auch mit dem Fokus im Buch), die Tastenkürzel, „Aa“, das Inhaltsverzeichnis links, Zurück (Alt+←), die Statusleiste und der Lesemodus | Automatisch |
 | Die Texte der Bibliothek (Eingefügtes, Geschichten, Artikel) werden im Betrachter gelesen, in einem eigenen Tab, mit seinen Menüs, „Aa“, ihren Seiten und Im Notizbuch bearbeiten | Automatisch |
+| Ordner importieren, auch aus einer Sammlung: alle PDF-, EPUB- und CBZ-Dateien darin, in allen Unterordnern und der Reihe nach, mit Titeln, die sich nicht wiederholen, und ohne zu verdoppeln, was schon da war | Automatisch |
 | Das Fenster verdeckt nicht, was noch zu lesen ist: Es steht am Seitenrand, wenn es Platz hat, sonst über bereits Gelesenem (über der Zeile oder rechts der Spalte bei senkrechtem Text); es lässt sich verschieben, vergrößern und als Fenster am Rand anheften, das sich verbreitern lässt und seine Breite behält | Automatisch (Unit-Tests der Platzierung) |
 | Durch Ziehen auswählen, Zeichen für Zeichen und über Zeilen hinweg, mit Übersetzen, Erklären, Aufschlüsseln, Anhören, Hervorheben, Notiz und Kopieren; Strg+C kopiert das Geöffnete | Automatisch |
 | Umblättern mit sichtbaren Pfeilen an den Seiten, der Tastatur oder durch Wischen: Ein Tippen auf die Seite schließt nur das Geöffnete, und ein knapp verfehltes Wort blättert nicht mehr um | Automatisch |
