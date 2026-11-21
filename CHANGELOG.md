@@ -2,6 +2,16 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.40.0 · 2026-11-20
+
+Medir en el uso real: lo que tardan la voz y el OCR en este equipo, y un consejo cuando no llegan.
+
+- **Cuando la transcripción no llega.** Al transcribir un video entero (un archivo, o con el ayudante), si lo que se ve alcanza a lo transcrito y la transcripción no da abasto, Kotonoha lo dice, propone Whisper Base y ofrece **Esperar a la transcripción**: pausa el video y lo reanuda solo en cuanto vuelve a ir por delante. En vivo, el aviso de retraso también propone Whisper Base.
+- **La intensidad automática mira el video.** En **Automática**, si lo que se ve está a punto de alcanzar a lo transcrito, la tarjeta gráfica trabaja a toda marcha; si el video da tirones mientras la transcripción va por delante, descansa más, como en **Suave**, y lo dice. **Suave** y **Rápida** no cambian.
+- **El OCR, a la medida del equipo.** El visor mide lo que tarda cada página. En un equipo en el que una página tarda mucho, lee menos por delante, para que la que se pide al pasar de página no espere, y propone una vez **Leer una zona**.
+- **Lo medido, en «Tu equipo».** Lo que tardan de verdad la voz, con cada modelo, y el OCR, en cada modo, se guarda en este equipo y manda sobre la prueba: la tarjeta lo dice con **medido al usarlo**. Ni eso ni la prueba van en la copia completa: en otro equipo no valdrían.
+- **Más detalles.** La gráfica que nombra el panel de la transcripción se ve como en «Tu equipo» («AMD RDNA 4»).
+
 ## 0.39.0 · 2026-11-20
 
 Tu equipo: qué tal irá aquí lo que corre en la tarjeta gráfica, desde la primera vez.
@@ -401,6 +411,16 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.40.0 · 2026-11-20
+
+Measuring in real use: how long voice and OCR take on this computer, and a tip when they cannot keep up.
+
+- **When the transcription cannot keep up.** When transcribing a whole video (a file, or with the helper), if what you are watching catches up with the transcription and the card cannot keep up, Kotonoha says so, suggests Whisper Base and offers **Wait for the transcription**: it pauses the video and resumes it by itself as soon as the transcription is ahead again. Live, the delay notice also suggests Whisper Base.
+- **Automatic intensity watches the video.** On **Automatic**, if what you are watching is about to catch up with the transcription, the graphics card works at full speed; if the video stutters while the transcription is ahead, it rests more, as on **Gentle**, and says so. **Gentle** and **Fast** do not change.
+- **OCR sized to the computer.** The viewer measures how long each page takes. On a computer where a page takes long, it reads fewer pages ahead, so the page you ask for when turning does not wait, and suggests **Read an area** once.
+- **What is measured, in “Your computer”.** How long voice (with each model) and OCR (in each mode) really take is saved on this computer and takes precedence over the test: the card says so with **measured in use**. Neither that nor the test goes into the full backup: on another computer they would not apply.
+- **More details.** The graphics card named in the transcription panel looks as it does in “Your computer” (“AMD RDNA 4”).
 
 ## 0.39.0 · 2026-11-20
 

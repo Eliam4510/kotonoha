@@ -99,6 +99,13 @@ export interface EstadoWhisper {
   cargadoMb?: number;
   totalMb?: number;
   dispositivo?: string;
+  /** El identificador del modelo, para guardar en «Tu equipo» lo que tarda este equipo con él. */
+  idModelo?: string;
+  /** Hasta dónde va lo transcrito, en el tiempo del video: solo al transcribir el audio entero. */
+  frenteMs?: number;
+  /** Cuánto audio lleva y a cuántas veces el tiempo real calcula, sin los descansos. */
+  audioS?: number;
+  velocidad?: number;
 }
 export const whisper = signal<EstadoWhisper | null>(null);
 /** La letra pegada en el panel. Se queda mientras se transcribe: al terminar, se ajusta sola. */

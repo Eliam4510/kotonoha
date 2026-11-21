@@ -335,11 +335,97 @@ export function fusionarLineas<T extends Linea>(base: T[], nuevas: T[]): T[] {
 
 export type IntensidadWhisper = 'auto' | 'suave' | 'rapida';
 
-/** Fracción del tiempo que la GPU trabaja para Whisper. Nunca es 1: el escritorio siempre tiene huecos. */
-export function ocupacionObjetivo(intensidad: IntensidadWhisper, enUso: boolean): number {
+/** Lo que el reproductor cuenta del video mientras se transcribe su audio entero (un archivo, o con el ayudante). */
+export interface RitmoVideo {
+  /** Cuánto va lo transcrito por delante de lo que se ve, en segundos; null si el video no se está viendo. */
+  ventajaS: number | null;
+  /** Si el video ha perdido fotogramas mientras se transcribía. */
+  tirones: boolean;
+}
+
+/** Con menos ventaja, lo que se ve está a punto de alcanzar a lo transcrito: en automático se trabaja a toda marcha. */
+export const VENTAJA_JUSTA_S = 30;
+/** Con más ventaja y el video dando tirones, en automático la gráfica descansa como en «Suave»: lo que se ve tardará en llegar. */
+export const VENTAJA_HOLGADA_S = 60;
+
+/**
+ * Fracción del tiempo que la GPU trabaja para Whisper. Nunca es 1: el escritorio siempre tiene huecos. En automático,
+ * además, mira el video que se está viendo: si lo visto va a alcanzar a lo transcrito, trabaja más; si va sobrado y el
+ * video da tirones, descansa más. «Suave» y «Rápida» son lo que se eligió, y no cambian.
+ */
+export function ocupacionObjetivo(intensidad: IntensidadWhisper, enUso: boolean, ritmo?: RitmoVideo): number {
   if (intensidad === 'suave') return 0.3;
   if (intensidad === 'rapida') return 0.9;
+  if (ritmo && ritmo.ventajaS !== null) {
+    if (ritmo.ventajaS < VENTAJA_JUSTA_S) return 0.9;
+    if (ritmo.tirones && ritmo.ventajaS > VENTAJA_HOLGADA_S) return 0.3;
+  }
   return enUso ? 0.75 : 0.9;
+}
+
+/** La última marca del reproductor: dónde iba el video, si se estaba viendo, a qué velocidad y cuándo se marcó. */
+export interface MarcaVideo {
+  videoMs: number;
+  reproduciendo: boolean;
+  velocidad: number;
+  instante: number;
+}
+
+/** Una marca más vieja ya no dice dónde va el video: el reproductor marca cuatro veces por segundo. */
+const MARCA_VIEJA_MS = 3000;
+
+/** Cuánto va lo transcrito (hasta `frenteMs`) por delante de lo que se ve, en segundos; null si no se está viendo. */
+export function ventajaSobreVideo(frenteMs: number, marca: MarcaVideo, ahora: number): number | null {
+  if (!marca.reproduciendo || ahora - marca.instante > MARCA_VIEJA_MS) return null;
+  return (frenteMs - (marca.videoMs + (ahora - marca.instante) * marca.velocidad)) / 1000;
+}
+
+/** Al empezar aún no hay ritmo: se espera este rato antes de juzgar si la transcripción llega. */
+const ARRANQUE_MS = 20000;
+/** Lo que se ve está a menos de esto de lo transcrito: ya no quedan subtítulos por delante. */
+const MARGEN_ALCANCE_MS = 3000;
+
+/**
+ * Si la transcripción de un audio entero no llega a lo que se ve: lo visto ya la alcanzó y, al ritmo que lleva (lo
+ * transcrito por segundo de reloj, con los descansos), no la va a dejar atrás. Si lo visto la alcanzó porque se saltó
+ * hacia delante, pero la transcripción corre más que el video, sí llegará: no se avisa.
+ */
+export function noLlega(p: { frenteMs: number; vistoMs: number; avanceMs: number; transcurridoMs: number; velocidadVideo: number }): boolean {
+  if (p.transcurridoMs < ARRANQUE_MS || p.frenteMs - p.vistoMs > MARGEN_ALCANCE_MS) return false;
+  return p.avanceMs / p.transcurridoMs < p.velocidadVideo * 1.1;
+}
+
+/** Con esta ventaja, lo que esperaba a la transcripción puede seguir: hay subtítulos para un buen rato. */
+export const VENTAJA_PARA_SEGUIR_S = 45;
+
+/** Lo que el video cuenta de sus fotogramas desde que empezó: los que había que pintar y los que se perdieron. */
+export interface CalidadVideo {
+  totales: number;
+  perdidos: number;
+}
+
+const VENTANA_TIRONES_MS = 10000;
+/** Con menos fotogramas en la ventana (un video en pausa casi todo el rato), no se juzga. */
+const MINIMO_FOTOGRAMAS = 60;
+/** Lo normal es perder alguno suelto; perder más de uno de cada veinte ya se nota. */
+const PROPORCION_TIRONES = 0.05;
+
+/**
+ * Si el video da tirones: los fotogramas perdidos en los últimos diez segundos, frente a los que había que pintar. Se le
+ * da lo que cuenta el reproductor cada poco; si la cuenta vuelve a empezar (otro video), empieza de nuevo.
+ */
+export class MedidorTirones {
+  private muestras: (CalidadVideo & { t: number })[] = [];
+
+  medir(c: CalidadVideo, ahora: number): boolean {
+    const ultima = this.muestras[this.muestras.length - 1];
+    if (ultima && (c.totales < ultima.totales || c.perdidos < ultima.perdidos)) this.muestras = [];
+    this.muestras.push({ ...c, t: ahora });
+    while (this.muestras.length > 2 && ahora - this.muestras[0].t > VENTANA_TIRONES_MS) this.muestras.shift();
+    const totales = c.totales - this.muestras[0].totales;
+    const perdidos = c.perdidos - this.muestras[0].perdidos;
+    return totales >= MINIMO_FOTOGRAMAS && perdidos / totales > PROPORCION_TIRONES;
+  }
 }
 
 const PAUSA_MINIMA_MS = 200;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { estimar, lecturaCorrecta, nivelDe, nombreDeGpu, PIEZAS, type PiezaPesada, pocoEspacio, type PruebaEquipo, REFERENCIA_MUESTRA_MS, type SenalesEquipo } from './equipo';
+import { anotarOcr, estimar, lecturaCorrecta, msPorPagina, MUESTRAS_OCR, nivelDe, nombreDeGpu, ocrLento, paginasPorDelante, PIEZAS, type UsoEquipo, type PiezaPesada, pocoEspacio, type PruebaEquipo, REFERENCIA_MUESTRA_MS, type SenalesEquipo } from './equipo';
 
 const senales = (o: Partial<SenalesEquipo> = {}, gpu: Partial<SenalesEquipo['gpu']> = {}): SenalesEquipo => ({
   webgpu: true,
@@ -64,6 +64,56 @@ describe('lo que tardaría cada pieza', () => {
   it('en el procesador, la voz, el manga y la práctica quedan muy lentos aunque el OCR de libros vaya bien', () => {
     const e = estimar(TODAS, senales(), prueba(REFERENCIA_MUESTRA_MS * 2, { dispositivo: 'wasm' }));
     expect(e.map((x) => x.estado)).toEqual(['muy-lento', 'muy-lento', 'bien', 'muy-lento', 'muy-lento']);
+  });
+});
+
+describe('lo medido al usarlo', () => {
+  const uso: UsoEquipo = {
+    voz: { haas: { velocidad: 30, dispositivo: 'webgpu', fecha: 1 }, turbo: { velocidad: 6, dispositivo: 'webgpu', fecha: 1 } },
+    ocr: { libro: { ms: [900, 1100, 1300], dispositivo: 'webgpu', fecha: 1 } },
+  };
+
+  it('manda sobre la prueba, y se sabe que sale de usarlo', () => {
+    const [voz, letras, libro, manga] = estimar(['voz', 'letras', 'ocr-libro', 'ocr-manga'], senales(), prueba(2800), { uso, modeloVoz: 'haas', modeloLetras: 'turbo' });
+    // 30 minutos a treinta veces el tiempo real, con los descansos del automático: algo más de un minuto.
+    expect(voz).toMatchObject({ estado: 'bien', deUso: true });
+    expect(voz.segundos).toBeCloseTo(1800 / 30 / 0.9);
+    expect(letras.segundos).toBeCloseTo(240 / 6 / 0.9);
+    expect(libro).toMatchObject({ segundos: 1.1, estado: 'bien', deUso: true });
+    // El manga no se ha medido al usarlo: sale de la prueba, diez veces más lenta que la referencia.
+    expect(manga.deUso).toBeUndefined();
+    expect(manga).toMatchObject({ estado: 'lento', medido: true });
+  });
+
+  it('la voz se mide por modelo: lo de Whisper Base no dice nada de Haas-ja', () => {
+    const [voz] = estimar(['voz'], senales(), null, { uso: { voz: { base: { velocidad: 50, dispositivo: 'wasm', fecha: 1 } } }, modeloVoz: 'haas' });
+    expect(voz.deUso).toBeUndefined();
+  });
+
+  it('del OCR hacen falta unas páginas, y valen las últimas, leídas en el mismo sitio', () => {
+    let m = anotarOcr(undefined, 5000, 'webgpu', 1);
+    m = anotarOcr(m, 1000, 'webgpu', 2);
+    expect(msPorPagina(m)).toBeNull();
+    m = anotarOcr(m, 1200, 'webgpu', 3);
+    expect(msPorPagina(m)).toBe(1200);
+    for (let i = 0; i < 30; i++) m = anotarOcr(m, 800, 'webgpu', 4);
+    expect(m.ms).toHaveLength(MUESTRAS_OCR);
+    // Si pasa a leerse con el procesador, lo de la gráfica ya no vale.
+    expect(anotarOcr(m, 9000, 'wasm', 5).ms).toEqual([9000]);
+  });
+
+  it('en un equipo lento, el OCR lee menos páginas por delante', () => {
+    expect(paginasPorDelante(4, null)).toBe(4);
+    expect(paginasPorDelante(4, 1100)).toBe(4);
+    expect(paginasPorDelante(8, 1800)).toBe(8);
+    expect(paginasPorDelante(4, 8000)).toBe(2);
+    expect(paginasPorDelante(8, 30000)).toBe(1);
+  });
+
+  it('propone «Leer una zona» cuando una página tarda', () => {
+    expect(ocrLento('libro', 1100)).toBe(false);
+    expect(ocrLento('libro', 4000)).toBe(true);
+    expect(ocrLento('manga', 3000)).toBe(false);
   });
 });
 

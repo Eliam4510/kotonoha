@@ -8,8 +8,8 @@ import { decidirSalto, duracionPausaDinamica, type LineaModo, MotorModos } from 
 import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, sincroniaDesdePuntos } from '../nucleo/sincronia';
 import { aplicarAjuste, type CantoPorTramos, type EntradaAjuste, ID_LETRA, versosDeLetra, vozDeCanto } from '../nucleo/letra';
 import { analizarSubtitulos, aSrt, esSoloAcotacion, type Linea, siguienteLinea } from '../nucleo/subtitulos';
-import { fusionarLineas } from '../nucleo/transcripcion';
-import { guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
+import { fusionarLineas, MedidorTirones, noLlega, VENTAJA_PARA_SEGUIR_S } from '../nucleo/transcripcion';
+import { anotarUso, guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
 import {
   ajustes,
   analisisEnCurso,
@@ -51,6 +51,8 @@ import {
   whisper,
   ajustandoLetra,
   letraPegada,
+  quitarAviso,
+  type EstadoWhisper,
 } from './estado';
 import type { Control } from './puente';
 import { acaboAnuncio, anotarSinAnuncio, desfaseDeSaltos, empezoAnuncio, iniciarRelojSitio, medirDeNuevo, momentoDelVideo, reiniciarReloj, sincronizarAhora } from './relojSitio';
@@ -1137,6 +1139,7 @@ export function cortarWhisper(): boolean {
   flujoWhisper = null;
   if (intervaloMarcas) clearInterval(intervaloMarcas);
   intervaloMarcas = null;
+  terminarEspera(false);
   sinCorregir = [];
   whisper.value = null;
   return true;
@@ -1146,10 +1149,14 @@ let sinCorregir: Linea[] = [];
 let colaCorreccion: Promise<void> = Promise.resolve();
 const LOTE_CORRECCION = 10;
 
-/** El motor oye el audio pero no sabe en qué punto va el video: se le informa continuamente. */
+/**
+ * El motor oye el audio pero no sabe en qué punto va el video: se le informa continuamente. Al transcribir el audio
+ * entero, con eso sabe cuánto va por delante de lo que se ve; y si el video pierde fotogramas, que da tirones.
+ */
 function enviarMarcaVideo() {
   let previo = -1;
   let instante = 0;
+  const tirones = new MedidorTirones();
   return () => {
     const v = control.video();
     if (!v) return;
@@ -1159,10 +1166,80 @@ function enviarMarcaVideo() {
     const salto = previo >= 0 && !v.paused && Math.abs(ms - esperado) > 1500;
     previo = ms;
     instante = ahora;
-    motor.whisperMarca(ms, !v.paused && !anuncio.value, v.playbackRate, salto).catch(() => {});
-    // Con una letra esperando, al acabar la canción no hay nada más que oír.
-    if (v.ended && hayLetraPendiente() && whisper.value?.fase !== 'terminando') detenerWhisper();
+    const calidad = v.getVideoPlaybackQuality?.();
+    const conTirones = !!calidad && tirones.medir({ totales: calidad.totalVideoFrames, perdidos: calidad.droppedVideoFrames }, ahora);
+    motor.whisperMarca(ms, !v.paused && !anuncio.value, v.playbackRate, salto, conTirones).catch(() => {});
+    vigilarRitmo(v, ms);
+    // En tiempo real, con una letra esperando, al acabar la canción no hay nada más que oír. Con el audio entero no: que el
+    // video acabe no quiere decir que la transcripción haya llegado al final.
+    if (!whisper.value?.desdeArchivo && v.ended && hayLetraPendiente() && whisper.value?.fase !== 'terminando') detenerWhisper();
   };
+}
+
+/**
+ * El ritmo de una transcripción del audio entero: desde dónde y cuándo empezó a avanzar, si ya se avisó de que no llega
+ * y, si se está esperando a que vaya por delante, el aviso que lo dice.
+ */
+let ritmo: { inicio: { t: number; frenteMs: number } | null; avisado: boolean; esperando: number | null } = { inicio: null, avisado: false, esperando: null };
+
+/**
+ * Si lo que se ve alcanza a lo transcrito y, a su ritmo, la transcripción no lo va a dejar atrás, se dice una vez, con la
+ * opción de esperarla. Mientras se espera, el video sigue solo en cuanto haya subtítulos para un buen rato.
+ */
+function vigilarRitmo(v: HTMLVideoElement, vistoMs: number) {
+  const w = whisper.value;
+  if (!w?.desdeArchivo || w.frenteMs === undefined) return;
+  if (ritmo.esperando !== null) {
+    // Si lo pone en marcha quien lo ve, ya no se espera.
+    if (!v.paused) terminarEspera(false);
+    else if ((w.frenteMs - vistoMs) / 1000 > VENTAJA_PARA_SEGUIR_S || (w.porcentaje ?? 0) >= 100) terminarEspera(true);
+    return;
+  }
+  if (ritmo.avisado || !ritmo.inicio || v.paused || v.ended || anuncio.value) return;
+  const datos = { frenteMs: w.frenteMs, vistoMs, avanceMs: w.frenteMs - ritmo.inicio.frenteMs, transcurridoMs: performance.now() - ritmo.inicio.t, velocidadVideo: v.playbackRate };
+  if (!noLlega(datos)) return;
+  ritmo.avisado = true;
+  const aviso = avisar(
+    w.idModelo === 'base'
+      ? tr('La transcripción va más despacio que el video en este equipo.')
+      : tr('La transcripción va más despacio que el video en este equipo. Con Whisper Base, en Ajustes, Transcripción, iría más rápido.'),
+    undefined,
+    {
+      texto: tr('Esperar a la transcripción'),
+      fn: () => {
+        quitarAviso(aviso);
+        esperarTranscripcion();
+      },
+    },
+    15000
+  );
+}
+
+/** Pausa el video hasta que la transcripción vaya por delante: entonces sigue solo. */
+function esperarTranscripcion() {
+  const v = control.video();
+  if (!v || !whisper.value || ritmo.esperando !== null) return;
+  v.pause();
+  ritmo.esperando = avisar(tr('Esperando a la transcripción: el video sigue solo en cuanto vaya por delante.'), undefined, undefined, 0);
+}
+
+function terminarEspera(seguir: boolean) {
+  if (ritmo.esperando === null) return;
+  quitarAviso(ritmo.esperando);
+  ritmo.esperando = null;
+  if (seguir) control.video()?.play().catch(() => {});
+}
+
+/** Con menos audio, lo medido diría más de lo que tarda el modelo en cargarse que de lo que calcula. */
+const MINIMO_AUDIO_MEDIDA_S = 60;
+
+/** Lo que calculó este equipo con ese modelo, para «Tu equipo»: con bastante audio para que valga. */
+function guardarMedidaVoz(w: EstadoWhisper | null) {
+  const id = w?.idModelo;
+  if (!id || !w.velocidad || !w.dispositivo || (w.audioS ?? 0) < MINIMO_AUDIO_MEDIDA_S) return;
+  // El motor de voz da el nombre de la gráfica, para enseñarlo; lo medido dice solo dónde se calculó, como en el OCR.
+  const medida = { velocidad: Math.round(w.velocidad * 100) / 100, dispositivo: w.dispositivo === DISPOSITIVO_SIN_GPU ? 'wasm' : 'webgpu', fecha: Date.now() };
+  anotarUso((u) => ({ ...u, voz: { ...u.voz, [id]: medida } })).catch(console.error);
 }
 
 async function guardarGenerada() {
@@ -1278,7 +1355,7 @@ export async function iniciarWhisper(enVivo = false) {
   const modelo = modeloParaTranscribir(ajustes.value.whisperModelo, ajustes.value.idiomaObjetivo, esCancion());
   const sesion = ++sesionWhisper;
   const vigente = () => sesion === sesionWhisper;
-  whisper.value = { fase: conAyudante ? 'bajando' : desdeArchivo ? 'extrayendo' : 'preparando', lineas: 0, desdeArchivo: !!desdeArchivo || conAyudante, modelo: MODELOS_WHISPER[modelo].nombre };
+  whisper.value = { fase: conAyudante ? 'bajando' : desdeArchivo ? 'extrayendo' : 'preparando', lineas: 0, desdeArchivo: !!desdeArchivo || conAyudante, modelo: MODELOS_WHISPER[modelo].nombre, idModelo: modelo };
   let audio: { url: string; pcmCrudo: boolean } | null = null;
   try {
     audio = desdeArchivo ? await desdeArchivo((porcentaje) => vigente() && (whisper.value = whisper.value && { ...whisper.value, fase: 'extrayendo', porcentaje })) : null;
@@ -1318,13 +1395,16 @@ export async function iniciarWhisper(enVivo = false) {
   let avisoRetraso = false;
   const info = infoVideo.value;
   const fuente = { titulo: info?.titulo, url: location.href, idVideo: info?.idVideo ?? undefined };
-  let marcas: ReturnType<typeof setInterval> | null = null;
-  if (!audio && !conAyudante) {
-    const marcar = enviarMarcaVideo();
-    marcar();
-    marcas = setInterval(marcar, 250);
-    intervaloMarcas = marcas;
-  }
+  // Dónde va el video se marca siempre: en tiempo real, para saber qué se oye; con el audio entero, para que la intensidad
+  // automática no corra más de la cuenta ni se quede atrás, y para avisar si lo que se ve alcanza a lo transcrito.
+  terminarEspera(false);
+  ritmo = { inicio: null, avisado: false, esperando: null };
+  const marcar = enviarMarcaVideo();
+  marcar();
+  const marcas: ReturnType<typeof setInterval> = setInterval(marcar, 250);
+  intervaloMarcas = marcas;
+  /** Lo último que se supo de esta transcripción, para guardar lo medido aunque se corte. */
+  let medidaSesion: EstadoWhisper | null = null;
   let vistos = 0;
   const metodo = conAyudante ? 'transcribirDescarga' : audio ? 'transcribirArchivo' : 'transcribirEnVivo';
   // En una canción, además, dónde se canta: para colocar luego su letra sin poner versos en un pasaje instrumental.
@@ -1359,20 +1439,36 @@ export async function iniciarWhisper(enVivo = false) {
         whisper.value = { ...actual, fase: actual.fase === 'terminando' ? 'terminando' : 'escuchando', dispositivo: e.dispositivo };
       } else if (e.tipo === 'procesando') {
         avisarSiNoHayGpu(actual.dispositivo, e.dispositivo);
+        // Desde aquí se mide el ritmo: lo de antes era cargar el modelo y, con el ayudante, bajar el audio.
+        if (e.frenteMs !== undefined && !ritmo.inicio) ritmo.inicio = { t: performance.now(), frenteMs: e.frenteMs };
         whisper.value = {
           ...actual,
           fase: actual.fase === 'terminando' ? 'terminando' : 'procesando',
           porcentaje: e.porcentaje ?? actual.porcentaje,
           dispositivo: e.dispositivo ?? actual.dispositivo,
           restanteS: e.restanteS ?? actual.restanteS,
+          frenteMs: e.frenteMs ?? actual.frenteMs,
+          audioS: e.audioS ?? actual.audioS,
+          velocidad: e.velocidad ?? actual.velocidad,
         };
+        medidaSesion = whisper.value;
+      } else if (e.tipo === 'tirones') {
+        avisar(tr('El video daba tirones: mientras la transcripción vaya por delante, la tarjeta gráfica descansa más.'), undefined, undefined, 7000);
       } else if (e.tipo === 'pausado') {
         whisper.value = { ...actual, pausado: e.pausado };
       } else if (e.tipo === 'recuperando') {
         whisper.value = { ...actual, fase: 'recuperando' };
         avisar(tr('La tarjeta gráfica se reinició. Espero {0} s y sigo a la mínima intensidad. Lo transcrito está guardado.', e.segundos), 'error', undefined, 10000);
       } else if (e.tipo === 'retraso') {
-        if (!avisoRetraso) avisar(tr('La tarjeta gráfica va justa y la transcripción lleva retraso. Cierra otras aplicaciones exigentes si quieres que se ponga al día.'), undefined, undefined, 8000);
+        if (!avisoRetraso)
+          avisar(
+            actual.idModelo === 'base'
+              ? tr('La tarjeta gráfica va justa y la transcripción lleva retraso. Cierra otras aplicaciones exigentes si quieres que se ponga al día.')
+              : tr('La tarjeta gráfica va justa y la transcripción lleva retraso. Con Whisper Base, en Ajustes, Transcripción, iría más rápido; también ayuda cerrar otras aplicaciones exigentes.'),
+            undefined,
+            undefined,
+            10000
+          );
         avisoRetraso = true;
       } else if (e.tipo === 'preparando') {
         whisper.value = { ...actual, fase: 'preparando' };
@@ -1404,9 +1500,13 @@ export async function iniciarWhisper(enVivo = false) {
     if (conAyudante && whisper.value?.fase === 'bajando') avisar(tr('No se pudo bajar el audio: {0}', mensaje), 'error', { texto: tr('Transcribir al reproducir'), fn: () => iniciarWhisper(true) }, 12000);
     else avisar(tr('No se pudo transcribir: {0}', mensaje), 'error', undefined, 8000);
   } finally {
-    if (marcas) clearInterval(marcas);
+    clearInterval(marcas);
+    // Lo medido vale aunque se cortara: era este equipo calculando.
+    guardarMedidaVoz(medidaSesion);
     // Si se cortó, lo que hay ahora es de otra transcripción, o de ninguna: no se toca.
     if (vigente()) {
+      // Si el video esperaba a la transcripción, ya no queda nada que esperar.
+      terminarEspera(true);
       intervaloMarcas = null;
       flujoWhisper = null;
       whisper.value = null;

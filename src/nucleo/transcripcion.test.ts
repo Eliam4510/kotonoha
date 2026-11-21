@@ -15,11 +15,14 @@ import {
   FRECUENCIA,
   fusionarLineas,
   huecosSinTexto as huecosSinTextoCon,
+  MedidorTirones,
+  noLlega,
   ocupacionObjetivo,
   partirTexto as partirTextoCon,
   pausaTrasTrozo,
   segundosRestantes,
   segmentosALineas as segmentosALineasCon,
+  ventajaSobreVideo,
   ventanasDeHueco,
   videoEn,
   type SegmentoWhisper,
@@ -203,6 +206,66 @@ describe('control de carga', () => {
   it('estima el tiempo restante con el ritmo real', () => {
     expect(segundosRestantes(600, 7200, 120)).toBe(1320);
     expect(segundosRestantes(0, 7200, 0)).toBeNull();
+  });
+
+  it('en automático, si lo visto va a alcanzar a lo transcrito, trabaja a toda marcha', () => {
+    expect(ocupacionObjetivo('auto', true, { ventajaS: 10, tirones: false })).toBe(0.9);
+    expect(ocupacionObjetivo('auto', true, { ventajaS: 10, tirones: true })).toBe(0.9);
+  });
+
+  it('en automático, con ventaja de sobra y el video dando tirones, descansa como en «Suave»', () => {
+    expect(ocupacionObjetivo('auto', true, { ventajaS: 300, tirones: true })).toBe(ocupacionObjetivo('suave', true));
+    // Sin tirones, o sin ventaja de sobra, como siempre.
+    expect(ocupacionObjetivo('auto', true, { ventajaS: 300, tirones: false })).toBe(0.75);
+    expect(ocupacionObjetivo('auto', true, { ventajaS: 45, tirones: true })).toBe(0.75);
+    // Sin ver el video, como siempre.
+    expect(ocupacionObjetivo('auto', false, { ventajaS: null, tirones: true })).toBe(0.9);
+  });
+
+  it('lo elegido a mano no cambia por el video', () => {
+    expect(ocupacionObjetivo('suave', true, { ventajaS: 5, tirones: false })).toBe(0.3);
+    expect(ocupacionObjetivo('rapida', true, { ventajaS: 600, tirones: true })).toBe(0.9);
+  });
+
+  it('la ventaja sobre el video sale de la última marca del reproductor', () => {
+    const marca = { videoMs: 60000, reproduciendo: true, velocidad: 1, instante: 1000 };
+    expect(ventajaSobreVideo(120000, marca, 3000)).toBe(58);
+    expect(ventajaSobreVideo(120000, { ...marca, velocidad: 2 }, 3000)).toBe(56);
+    expect(ventajaSobreVideo(120000, { ...marca, reproduciendo: false }, 3000)).toBeNull();
+    // Una marca vieja ya no dice dónde va el video.
+    expect(ventajaSobreVideo(120000, marca, 10000)).toBeNull();
+  });
+
+  it('los tirones son fotogramas perdidos de sobra en los últimos diez segundos', () => {
+    const m = new MedidorTirones();
+    // A 30 fotogramas por segundo, perdiendo uno de cada cien: va bien.
+    let t = 0;
+    for (; t <= 10000; t += 250) expect(m.medir({ totales: (t / 1000) * 30, perdidos: Math.floor((t / 1000) * 0.3) }, t)).toBe(false);
+    // Empieza a perder uno de cada cinco: en unos segundos ya son tirones.
+    let perdidos = 3;
+    let totales = 300;
+    let visto = false;
+    for (; t <= 20000; t += 250) {
+      totales += 7.5;
+      perdidos += 1.5;
+      visto = m.medir({ totales, perdidos }, t);
+    }
+    expect(visto).toBe(true);
+    // Otro video: la cuenta vuelve a empezar, y con tan pocos fotogramas no se juzga.
+    expect(m.medir({ totales: 10, perdidos: 5 }, t)).toBe(false);
+  });
+
+  it('la transcripción no llega si lo visto la alcanzó y, a su ritmo, no la va a dejar atrás', () => {
+    const base = { frenteMs: 100000, vistoMs: 99000, avanceMs: 80000, transcurridoMs: 100000, velocidadVideo: 1 };
+    expect(noLlega(base)).toBe(true);
+    // Al empezar, aún no se juzga.
+    expect(noLlega({ ...base, transcurridoMs: 10000, avanceMs: 8000 })).toBe(false);
+    // Con subtítulos por delante, nada que avisar.
+    expect(noLlega({ ...base, vistoMs: 60000 })).toBe(false);
+    // Se saltó hacia delante, pero transcribe a veinte veces el video: llegará sola.
+    expect(noLlega({ ...base, avanceMs: 2000000 })).toBe(false);
+    // Viéndolo al doble, lo que basta a 1x no llega.
+    expect(noLlega({ ...base, avanceMs: 150000, velocidadVideo: 2 })).toBe(true);
   });
 });
 

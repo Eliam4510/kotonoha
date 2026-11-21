@@ -55,7 +55,14 @@ const LIBERAR_TRAS_MS = 2 * 60 * 1000;
 export class LectorOcr {
   private trabajador: Worker | null = null;
   private temporizadorLiberar: ReturnType<typeof setTimeout> | null = null;
-  private pendientes = new Map<number, { ok: (l: LineaOcr[]) => void; mal: (e: Error) => void }>();
+  private pendientes = new Map<number, { ok: (l: LineaOcr[]) => void; mal: (e: Error) => void; modo?: ModoLectura; zona?: boolean }>();
+  /** Los modos que ya leyeron algo en este trabajador: la primera lectura de cada uno carga sus modelos. */
+  private modosCargados = new Set<ModoLectura>();
+  /**
+   * Lo que tarda una página aquí, para «Tu equipo» y para leer por delante lo justo. Ni las zonas ni la primera de cada
+   * modo, que carga sus modelos, dicen lo que tarda una página.
+   */
+  alMedir: ((modo: 'libro' | 'manga', ms: number, dispositivo: string) => void) | null = null;
   private siguienteId = 1;
   /** Las páginas pedidas que aún no han terminado, esperen turno o se estén leyendo. */
   private tareas = new Map<string, Tarea>();
@@ -73,6 +80,7 @@ export class LectorOcr {
     this.temporizadorLiberar = null;
     if (this.trabajador) return this.trabajador;
     const t = new Worker(chrome.runtime.getURL('ocr.js'), { type: 'module' });
+    this.modosCargados.clear();
     t.onmessage = (e: MessageEvent<RespuestaOcr>) => {
       const r = e.data;
       if (r.tipo === 'descarga') this.alDescargar(r);
@@ -82,6 +90,11 @@ export class LectorOcr {
         if (r.tipo === 'lineas') {
           console.debug('Kotonoha OCR', r.ms, 'ms', r.dispositivo, JSON.stringify(r.fases));
           this.ultima = { ms: r.ms, dispositivo: r.dispositivo };
+          if (p?.modo) {
+            const primera = !this.modosCargados.has(p.modo);
+            this.modosCargados.add(p.modo);
+            if (!primera && !p.zona && (p.modo === 'libro' || p.modo === 'manga')) this.alMedir?.(p.modo, r.ms, r.dispositivo);
+          }
           p?.ok(r.lineas);
         } else p?.mal(new Error(r.mensaje));
       }
@@ -206,7 +219,7 @@ export class LectorOcr {
       console.debug('Kotonoha OCR: lee', t.zona ? 'una zona' : marco ? 'el escaneo' : 'la página', `${bitmap.width}×${bitmap.height}`);
       const id = this.siguienteId++;
       const leidas = await new Promise<LineaOcr[]>((ok, mal) => {
-        this.pendientes.set(id, { ok, mal });
+        this.pendientes.set(id, { ok, mal, modo: t.modo, zona: t.zona });
         const pedido: PedidoOcr = { tipo: 'leer', id, modo: t.modo, imagen: bitmap, ...(t.zona ? { zona: true } : {}) };
         this.trabajadorListo().postMessage(pedido, [bitmap]);
       });

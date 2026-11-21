@@ -3,6 +3,7 @@
 
 import { env, pipeline } from '@huggingface/transformers';
 import type { ConfigTdt } from '../compartido/ajustes';
+import { nombreDeGpu } from '../nucleo/equipo';
 import { cargarTdt, liberarTdt, transcribirTdt } from './motorTdt';
 
 env.allowLocalModels = false;
@@ -32,7 +33,8 @@ async function elegirDispositivo(): Promise<void> {
   const adaptador = gpu ? await gpu.requestAdapter({ powerPreference: 'high-performance' }).catch(() => null) : null;
   dispositivo = adaptador ? 'webgpu' : 'wasm';
   const i = adaptador?.info;
-  nombreDispositivo = adaptador ? i?.description || [i?.vendor?.toUpperCase(), i?.architecture].filter(Boolean).join(' ') || 'GPU' : 'procesador (sin GPU)';
+  // El mismo nombre que en «Tu equipo»: «AMD RDNA 4» y no «AMD rdna-4».
+  nombreDispositivo = adaptador ? nombreDeGpu({ fabricante: i?.vendor ?? '', arquitectura: i?.architecture ?? '', descripcion: i?.description ?? '' }) || 'GPU' : 'procesador (sin GPU)';
 }
 
 interface DispositivoGpu {

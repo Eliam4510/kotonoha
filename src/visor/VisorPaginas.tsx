@@ -6,8 +6,8 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Creador } from '../app/Creador';
 import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
 import { Anillo } from '../app/Piezas';
-import { type Ajustes, guardarAjustes, type ModoLectura } from '../compartido/ajustes';
-import { tr } from '../compartido/i18n';
+import { type Ajustes, anotarUso, guardarAjustes, type ModoLectura } from '../compartido/ajustes';
+import { numero, tr } from '../compartido/i18n';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca, Nitidez, PalabraToken } from '../compartido/tipos';
 import { resaltadoDeTramo, resaltadosEn } from '../nucleo/anotaciones';
@@ -19,6 +19,7 @@ import { edicionesDe, guardarEdicion, lecturaMinima, quitarEdicion } from '../co
 import type { Direccion } from '../nucleo/libro';
 import type { Caja, LineaOcr } from '../nucleo/ocr';
 import { escalaDe, type Medida, pasoDeZoom, pliegoDe, pliegos } from '../nucleo/paginas';
+import { anotarOcr, type MedidaOcr, msPorPagina, ocrLento, paginasPorDelante } from '../nucleo/equipo';
 import { cambiosValidos } from '../nucleo/revision';
 import { cajasDe, contextoDe, envolvente, fraseEn, leerPagina, type PaginaLeida, parrafoEn, type Posicion, posicionEn, seleccionEn, type TramoPagina, tramoEntre, type Unidad } from '../nucleo/seleccion';
 import { comoGlobo, conZonas, lineasDeZona, type ZonaLeida } from '../nucleo/zonas';
@@ -436,6 +437,45 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   // Las páginas cuyo texto se pidió revisar con Claude mientras está abierto su panel, la última primero.
   const [revisadas, fijarRevisadas] = useState<number[]>([]);
   const lector = useRef<LectorOcr | null>(null);
+  // Lo que tarda una página aquí, por modo: lo medido antes en este equipo y lo de este rato. Con eso se lee por delante
+  // lo justo, se propone «Leer una zona» si va lento y se guarda para «Tu equipo».
+  const usoOcr = useRef<Partial<Record<ModoOcr, MedidaOcr>>>({ ...(a.equipoUso?.ocr ?? {}) });
+  const [msOcr, fijarMsOcr] = useState<Record<ModoOcr, number | null>>(() => ({ libro: msPorPagina(usoOcr.current.libro), manga: msPorPagina(usoOcr.current.manga) }));
+  const porGuardar = useRef<{ modo: ModoOcr; ms: number; dispositivo: string; fecha: number }[]>([]);
+  const temporizadorUso = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Se guarda cada poco y sobre lo último guardado: otro libro abierto también puede estar midiendo.
+  const guardarUsoOcr = () => {
+    temporizadorUso.current = null;
+    const lote = porGuardar.current;
+    porGuardar.current = [];
+    if (!lote.length) return;
+    anotarUso((u) => {
+      const porModo = { ...u.ocr };
+      for (const m of lote) porModo[m.modo] = anotarOcr(porModo[m.modo], m.ms, m.dispositivo, m.fecha);
+      return { ...u, ocr: porModo };
+    }).catch(console.error);
+  };
+  const medirOcr = (modo: ModoOcr, ms: number, dispositivo: string) => {
+    const fecha = Date.now();
+    usoOcr.current = { ...usoOcr.current, [modo]: anotarOcr(usoOcr.current[modo], ms, dispositivo, fecha) };
+    fijarMsOcr((x) => ({ ...x, [modo]: msPorPagina(usoOcr.current[modo]) }));
+    porGuardar.current.push({ modo, ms, dispositivo, fecha });
+    temporizadorUso.current ??= setTimeout(guardarUsoOcr, 5000);
+  };
+  // Lo que quede por guardar, al cerrar el libro.
+  useEffect(
+    () => () => {
+      if (temporizadorUso.current) clearTimeout(temporizadorUso.current);
+      guardarUsoOcr();
+    },
+    []
+  );
+  // Si leer una página va lento aquí, se propone una vez «Leer una zona», que lee solo lo que se rodea.
+  const [consejoOcrVisto, fijarConsejoOcrVisto] = useState(a.avisoOcrLentoVisto);
+  const cerrarConsejoOcr = () => {
+    fijarConsejoOcrVisto(true);
+    guardarAjustes({ avisoOcrLentoVisto: true }).catch(console.error);
+  };
   const lienzo = useRef<HTMLElement>(null);
   /** Si el último cambio de página vino del desplazamiento: entonces no hay que desplazar otra vez. */
   const desdeDesplazamiento = useRef(false);
@@ -627,7 +667,8 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
   const continuaTexto = vista === 'continua' && vistaTexto;
   const aLaVista = continuaTexto ? [pagina] : vista === 'continua' ? Array.from({ length: Math.max(0, cerca[1] - cerca[0] + 1) }, (_, i) => cerca[0] + i) : (lista[actual] ?? []);
   // Las páginas que vienen después, en el orden de lectura: el OCR las lee antes de llegar, para que nunca haya que esperar.
-  const adelante = ADELANTE[modoOcr];
+  // Si en este equipo una página tarda mucho, menos: las que se piden al pasar de página no esperan detrás de ellas.
+  const adelante = paginasPorDelante(ADELANTE[modoOcr], msOcr[modoOcr]);
   const despues = continuaTexto
     ? Array.from({ length: Math.max(0, Math.min(adelante, total - 1 - pagina)) }, (_, i) => pagina + 1 + i)
     : vista === 'continua'
@@ -667,7 +708,13 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     cerrarSiCambia(textoPdf);
   }, [modoOcr]);
   /** El lector del OCR: uno por libro abierto, para las páginas y para las zonas de Área. */
-  const lectorOcr = () => (lector.current ??= new LectorOcr((d) => fijarDescarga(d.cargado >= d.total ? null : d)));
+  const lectorOcr = () => {
+    if (!lector.current) {
+      lector.current = new LectorOcr((d) => fijarDescarga(d.cargado >= d.total ? null : d));
+      lector.current.alMedir = medirOcr;
+    }
+    return lector.current;
+  };
   useEffect(() => {
     if (!ocr || !paginador) return;
     const l = lectorOcr();
@@ -1904,6 +1951,25 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           {portadaHecha && (
             <div class="vs-aviso-herramienta vs-aviso-hecho" role="status">
               <Icono n="ok" t={14} /> {tr('Es la portada en la estantería')}
+            </div>
+          )}
+          {ocr && !consejoOcrVisto && herramienta === 'seleccionar' && !lectura && msOcr[modoOcr] !== null && ocrLento(modoOcr, msOcr[modoOcr]!) && (
+            <div class="vs-aviso-herramienta vs-aviso-ocr" role="status">
+              <Icono n="area" t={14} />
+              <span>{tr('Aquí cada página tarda unos {0} s en leerse. «Leer una zona» (O) lee solo lo que rodees.', numero(Math.round(msOcr[modoOcr]! / 100) / 10))}</span>
+              <button
+                type="button"
+                class="btn chico"
+                onClick={() => {
+                  herramientaA('area');
+                  cerrarConsejoOcr();
+                }}
+              >
+                {tr('Leer una zona')}
+              </button>
+              <button type="button" class="btn-icono chico" aria-label={tr('Cerrar')} onClick={cerrarConsejoOcr}>
+                <Icono n="cerrar" t={13} />
+              </button>
             </div>
           )}
           {vozAlta.voz && (

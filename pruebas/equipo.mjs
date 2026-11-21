@@ -37,7 +37,7 @@ const ajustes = (c) =>
   }, c);
 const leerAjustes = () => sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes ?? {});
 // Como una instalación nueva: la bienvenida sin ver, nada medido y el aviso sin ver.
-await ajustes({ bienvenidaVista: false, avisoEquipoVisto: false, equipoPrueba: null, idiomaInterfaz: 'es', idiomaObjetivo: 'ja', destino: 'memoria', ankiPuerto: 1, whisperModelo: 'auto' });
+await ajustes({ bienvenidaVista: false, avisoEquipoVisto: false, equipoPrueba: null, equipoUso: {}, idiomaInterfaz: 'es', idiomaObjetivo: 'ja', destino: 'memoria', ankiPuerto: 1, whisperModelo: 'auto' });
 const errores = [];
 const app = await contexto.newPage();
 app.on('pageerror', (e) => errores.push(e.message));
@@ -112,6 +112,19 @@ const enAjustes = await app.evaluate(() => {
 comprobar(enAjustes.url.includes('ajustes?seccion=equipo') && enAjustes.arriba && enAjustes.marcada === 'Tu equipo', 'Que lleva a «Tu equipo», en Ajustes, arriba y marcada', JSON.stringify(enAjustes));
 comprobar((await leerAjustes()).avisoEquipoVisto === true, 'Y no vuelve a salir');
 await app.screenshot({ path: join(CAPTURAS, 'ajustes.png') });
+
+// ---------- La copia completa ----------
+
+console.log('\n== La copia no se lleva lo medido ==');
+// Lo medido es de este equipo: en otro, con otra gráfica, no valdría.
+await ajustes({ equipoUso: { ocr: { libro: { ms: [1000, 1100, 1200], dispositivo: 'webgpu', fecha: 1 } } } });
+const copia = await app.evaluate(async () => {
+  const a = (await chrome.storage.local.get('ajustes')).ajustes;
+  const r = await chrome.runtime.sendMessage({ canal: 'motor', metodo: 'exportarDatos', args: [a] });
+  return r?.ok ? Object.keys(JSON.parse(r.valor).ajustes) : null;
+});
+comprobar(!!copia && copia.includes('idiomaObjetivo') && !copia.includes('equipoPrueba') && !copia.includes('equipoUso'), 'La copia completa lleva los ajustes, pero no lo medido en este equipo', copia ? '' : 'sin copia');
+await ajustes({ equipoUso: {} });
 
 // ---------- Un equipo sin gráfica para la web ----------
 

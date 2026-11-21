@@ -141,7 +141,8 @@ const id = new URL(sw.url()).host;
 for (const pg of contexto.pages()) if (pg.url().includes('app.html')) await pg.close();
 await sw.evaluate(async () => {
   const d = await chrome.storage.local.get('ajustes');
-  await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), bienvenidaVista: true, idiomaInterfaz: 'es', idiomaObjetivo: 'ja', destino: 'memoria', ankiPuerto: 1 } });
+  // Sin lo medido en otra pasada: cada una mide lo suyo, y el consejo de «Leer una zona» aún no se ha visto.
+  await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), bienvenidaVista: true, idiomaInterfaz: 'es', idiomaObjetivo: 'ja', destino: 'memoria', ankiPuerto: 1, equipoUso: {}, avisoOcrLentoVisto: false } });
 });
 const errores = [];
 const app = await contexto.newPage();
@@ -463,6 +464,39 @@ await v.keyboard.press('ArrowLeft');
 const t3 = Date.now();
 const siguiente = await lineasDe(v, 20000);
 comprobar((siguiente.lineas?.length ?? 0) > 0 && Date.now() - t3 < 1500, 'Al pasar de página, su texto ya está', `${Date.now() - t3} ms`);
+// Lo que tardó cada página se guarda cada poco, para «Tu equipo» y para leer por delante lo justo.
+await v.waitForTimeout(6000);
+await v.close();
+
+// ---------- Lo medido al leer ----------
+
+console.log('\n== Lo medido al leer, para «Tu equipo» ==');
+const leerAjustes = () => sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes ?? {});
+const medido = (await leerAjustes()).equipoUso?.ocr?.manga;
+console.log('  ', JSON.stringify(medido));
+// La primera página carga los modelos y no dice lo que tarda una página: de nueve, cuentan ocho.
+comprobar(medido?.ms?.length >= 6 && medido.ms.length <= 8 && medido.dispositivo === 'webgpu', 'Se guarda lo que tarda cada página de manga en la gráfica, sin la primera', `${medido?.ms?.length} páginas`);
+// En un equipo en el que cada página tarda nueve segundos, el visor propone una vez «Leer una zona».
+await sw.evaluate(async () => {
+  const d = await chrome.storage.local.get('ajustes');
+  await chrome.storage.local.set({ ajustes: { ...(d.ajustes ?? {}), equipoUso: { ...(d.ajustes?.equipoUso ?? {}), ocr: { ...(d.ajustes?.equipoUso?.ocr ?? {}), libro: { ms: [9000, 9200, 8800], dispositivo: 'webgpu', fecha: Date.now() } } }, avisoOcrLentoVisto: false } });
+});
+v = await abrir('Libro de prueba');
+await orden(v, 'ocr');
+const consejo = await v
+  .waitForSelector('.vs-aviso-ocr', { timeout: 10000 })
+  .then((e) => e.textContent())
+  .catch(() => '');
+comprobar(/unos 9 s/.test(consejo) && /Leer una zona/.test(consejo), 'Si una página tarda, propone «Leer una zona», con lo que tarda aquí', consejo);
+await v.screenshot({ path: join(CAPTURAS, 'consejo-zona.png') });
+await v.locator('.vs-aviso-ocr .btn', { hasText: 'Leer una zona' }).click();
+const conArea = await v
+  .waitForFunction(() => !document.querySelector('.vs-aviso-ocr') && /Dibuja un rectángulo/.test(document.querySelector('.vs-aviso-herramienta')?.textContent ?? ''), null, { timeout: 5000 })
+  .then(() => true)
+  .catch(() => false);
+comprobar(conArea, 'Que pone la herramienta Área y se va');
+await v.waitForTimeout(500);
+comprobar((await leerAjustes()).avisoOcrLentoVisto === true, 'Y no vuelve a salir');
 await v.close();
 
 // ---------- Procesar el libro entero desde la estantería ----------

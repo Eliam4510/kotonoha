@@ -4,7 +4,7 @@
 // primera vez baja su modelo, que luego usa el lector) y mide de verdad. Nada se apaga: solo se recomienda.
 
 import { useEffect, useState } from 'preact/hooks';
-import { type Ajustes, guardarAjustes, MODELOS_WHISPER } from '../compartido/ajustes';
+import { type Ajustes, guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
 import { detectarEquipo } from '../compartido/equipo';
 import { numero, tm, tr } from '../compartido/i18n';
 import { type EstadoPieza, type EstimacionPieza, estimar, lecturaCorrecta, type NivelEquipo, nivelDe, nombreDeGpu, OCR_LIBRO_MB, OCR_MANGA_MB, type PiezaPesada, pocoEspacio, type PruebaEquipo, type SenalesEquipo } from '../nucleo/equipo';
@@ -119,12 +119,21 @@ const PIEZA: Record<PiezaPesada, Pieza> = {
 /** Las piezas que hay en la lengua que se estudia: el manga, con manga-ocr, es del japonés. */
 const piezasDeLengua = (): PiezaPesada[] => ['voz', 'letras', 'ocr-libro', ...(lengua.value.id === 'ja' ? (['ocr-manga'] as const) : []), 'practica'];
 
+/** Los modelos con los que se transcribiría aquí: el de la voz de la lengua, o el elegido, y el de las canciones. */
+const modelosDe = (a: Ajustes) => ({
+  modeloVoz: modeloParaTranscribir(a.whisperModelo, lengua.value.id, false),
+  modeloLetras: modeloParaTranscribir(a.whisperModelo, lengua.value.id, true),
+});
+
 /** Lo que se descarga la primera vez que se usa cada pieza, en MB. */
-function descargaDe(p: PiezaPesada): number {
+function descargaDe(p: PiezaPesada, a: Ajustes): number {
   if (p === 'ocr-libro') return OCR_LIBRO_MB;
   if (p === 'ocr-manga') return OCR_MANGA_MB;
-  if (p === 'letras') return MODELOS_WHISPER.turbo.mb;
-  return lengua.value.id === 'ja' ? MODELOS_WHISPER.haas.mb : MODELOS_WHISPER.parakeet.mb;
+  const { modeloVoz, modeloLetras } = modelosDe(a);
+  if (p === 'letras') return MODELOS_WHISPER[modeloLetras].mb;
+  // La práctica usa siempre el modelo de voz de la lengua, sea cual sea el elegido para los videos.
+  if (p === 'practica') return lengua.value.id === 'ja' ? MODELOS_WHISPER.haas.mb : MODELOS_WHISPER.parakeet.mb;
+  return MODELOS_WHISPER[modeloVoz].mb;
 }
 
 const tamano = (mb: number) => (mb >= 1000 ? tr('{0} GB', numero(Math.round(mb / 100) / 10)) : tr('{0} MB', numero(mb)));
@@ -154,11 +163,12 @@ function TarjetaPieza({ e, a }: { e: EstimacionPieza; a: Ajustes }) {
       <div class="ap-equipo-pieza-texto">
         <b>{tr(p.nombre)}</b>
         <span>
-          {tr(p.que)} {tr('Descarga {0} la primera vez.', tamano(descargaDe(e.pieza)))}
+          {tr(p.que)} {tr('Descarga {0} la primera vez.', tamano(descargaDe(e.pieza, a)))}
         </span>
         {e.segundos !== undefined && (
           <span class="ap-equipo-tiempo">
             {tr(p.unidad)}: {duracion(e.segundos)}
+            {e.deUso && <span class="ap-equipo-uso"> · {tr('medido al usarlo')}</span>}
           </span>
         )}
         {lento && <span class="ap-equipo-consejo">{tr(p.consejo)}</span>}
@@ -200,7 +210,8 @@ export function PanelEquipo({ a }: { a: Ajustes }) {
   if (!senales) return <p class="ayuda" role="status">{tr('Mirando tu equipo…')}</p>;
   const prueba = a.equipoPrueba;
   const nivel = nivelDe(senales, prueba);
-  const piezas = estimar(piezasDeLengua(), senales, prueba);
+  // Lo medido al usar Kotonoha en este equipo manda sobre la prueba: es esa misma pieza haciendo su trabajo.
+  const piezas = estimar(piezasDeLengua(), senales, prueba, { uso: a.equipoUso, ...modelosDe(a) });
   const resultado = !prueba
     ? tr('Lee una página de muestra con el OCR. La primera vez descarga {0}, que luego usa el lector.', tamano(OCR_LIBRO_MB))
     : !prueba.correcto
