@@ -583,8 +583,8 @@ const api: ApiMotor = {
     return ia.revisarPaginaOcr(await aj(), p);
   },
 
-  async whisperMarca(ms, reproduciendo, velocidad, salto) {
-    whisper.marcarVideo(ms, reproduciendo, velocidad, salto);
+  async whisperMarca(ms, reproduciendo, velocidad, salto, tirones) {
+    whisper.marcarVideo(ms, reproduciendo, velocidad, salto, tirones);
   },
   ayudante: () => consultarAyudante(),
   flujosActivos: async () => flujosActivos(),
@@ -689,7 +689,8 @@ const api: ApiMotor = {
       };
     }
     // Las claves de API no van en la copia: un archivo así acaba en cualquier sitio. Se vuelven a escribir al restaurar.
-    const { azureClave: _clave, ...sinClaves } = ajustes;
+    // Lo medido de este equipo tampoco: en otro, con otra gráfica, no valdría.
+    const { azureClave: _clave, equipoPrueba: _prueba, equipoUso: _uso, ...sinClaves } = ajustes;
     return JSON.stringify({ version: 2, ajustes: sinClaves, lenguas, consumo: await baseGeneral.consumo.toArray() });
   },
   async importarDatos(json) {

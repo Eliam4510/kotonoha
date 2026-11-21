@@ -23,12 +23,15 @@ import {
   type Hueco,
   huecosSinTexto,
   type IntensidadWhisper,
+  type MarcaVideo,
   ocupacionObjetivo,
   pausaTrasTrozo,
+  type RitmoVideo,
   type SegmentoWhisper,
   segmentosALineas,
   segundosRestantes,
   type TrozoAudio,
+  ventajaSobreVideo,
   ventanasDeHueco,
 } from '../nucleo/transcripcion';
 import type { CantoPorTramos } from '../nucleo/letra';
@@ -43,7 +46,13 @@ export type EventoWhisper =
   | { tipo: 'bajandoAudio'; porcentaje: number }
   | { tipo: 'extrayendoAudio'; porcentaje: number }
   | { tipo: 'escuchando'; dispositivo: string }
-  | { tipo: 'procesando'; porcentaje?: number; dispositivo?: string; restanteS?: number | null }
+  /**
+   * Al transcribir un audio entero, además: hasta dónde va lo transcrito (`frenteMs`), cuánto audio lleva (`audioS`) y a
+   * cuántas veces el tiempo real calcula, sin contar los descansos (`velocidad`).
+   */
+  | { tipo: 'procesando'; porcentaje?: number; dispositivo?: string; restanteS?: number | null; frenteMs?: number; audioS?: number; velocidad?: number }
+  /** La intensidad automática descansa más porque el video da tirones: una vez por transcripción. */
+  | { tipo: 'tirones' }
   | { tipo: 'recuperando'; segundos: number }
   | { tipo: 'pausado'; pausado: boolean }
   | { tipo: 'retraso'; segundos: number }
@@ -326,11 +335,22 @@ async function usandoElEquipo(): Promise<boolean> {
   return enUsoCache;
 }
 
-/** Descansa en proporción a lo que tardó el trozo. También atiende la pausa pedida por ti. */
-async function descansar(msTrozo: number, intensidad: () => Promise<IntensidadWhisper>, emitir: Emitir, senal: AbortSignal) {
+/** Ya se dijo, en esta transcripción, que descansa más porque el video da tirones. */
+let avisadosTirones = false;
+
+/**
+ * Descansa en proporción a lo que tardó el trozo. También atiende la pausa pedida por ti. Con el ritmo del video que se
+ * está viendo, la intensidad automática se adapta a él.
+ */
+async function descansar(msTrozo: number, intensidad: () => Promise<IntensidadWhisper>, emitir: Emitir, senal: AbortSignal, ritmo?: RitmoVideo) {
   // Tras un fallo de la GPU se sigue en lo más suave, sea cual sea la intensidad elegida.
   const nivel = trasFallo ? 'suave' : await intensidad().catch(() => 'auto' as const);
-  const ocupacion = ocupacionDePrueba ?? ocupacionObjetivo(nivel, await usandoElEquipo());
+  const ocupacion = ocupacionDePrueba ?? ocupacionObjetivo(nivel, await usandoElEquipo(), ritmo);
+  // La primera vez que descansa más por los tirones, se dice: si no, parecería que va más lenta porque sí.
+  if (ocupacionDePrueba === null && !trasFallo && nivel === 'auto' && ritmo?.tirones && ocupacion <= ocupacionObjetivo('suave', true) && !avisadosTirones) {
+    avisadosTirones = true;
+    emitir({ tipo: 'tirones' });
+  }
   await esperaCancelable(pausaTrasTrozo(msTrozo, ocupacion), senal);
   if (pausadoPorUsuario && !senal.aborted) {
     emitir({ tipo: 'pausado', pausado: true });
@@ -341,21 +361,20 @@ async function descansar(msTrozo: number, intensidad: () => Promise<IntensidadWh
 
 // ---------- Tiempo real ----------
 
-interface Marca {
-  videoMs: number;
-  reproduciendo: boolean;
-  velocidad: number;
-  instante: number;
-}
-
-let marca: Marca = { videoMs: 0, reproduciendo: false, velocidad: 1, instante: 0 };
+let marca: MarcaVideo = { videoMs: 0, reproduciendo: false, velocidad: 1, instante: 0 };
 let acumuladorVivo: AcumuladorAudio | null = null;
 let hayCorte = false;
+/** Si el video ha perdido fotogramas durante esta transcripción: se queda hasta la siguiente. */
+let huboTirones = false;
 
-/** El reproductor informa del tiempo del video: la captura solo oye el audio, no sabe dónde va. */
-export function marcarVideo(videoMs: number, reproduciendo: boolean, velocidad: number, salto: boolean) {
+/**
+ * El reproductor informa del tiempo del video: la captura solo oye el audio, no sabe dónde va. Al transcribir un audio
+ * entero, con eso se sabe cuánto va lo transcrito por delante de lo que se ve, y si el video da tirones.
+ */
+export function marcarVideo(videoMs: number, reproduciendo: boolean, velocidad: number, salto: boolean, tirones = false) {
   marca = { videoMs, reproduciendo, velocidad, instante: performance.now() };
   if (salto) hayCorte = true;
+  if (tirones) huboTirones = true;
 }
 
 let pedidoDetener = false;
@@ -373,6 +392,8 @@ export async function transcribirEnVivo(idModelo: ModeloWhisper, emitir: Emitir,
   pedidoDetener = false;
   fallosGpu = 0;
   trasFallo = false;
+  // Un salto marcado mientras se transcribía un archivo no es de este video.
+  hayCorte = false;
   const dispositivo = await cargarModelo(idModelo, emitir);
   if (senal.aborted) return 0;
   emitir({ tipo: 'escuchando', dispositivo });
@@ -395,10 +416,16 @@ export async function transcribirEnVivo(idModelo: ModeloWhisper, emitir: Emitir,
   });
 
   let total = 0;
+  // Lo calculado, para «Tu equipo»: a cuántas veces el tiempo real calcula este equipo con este modelo.
+  let computoMs = 0;
+  let audioHechoMs = 0;
   const enviar = async (t: TrozoAudio | null) => {
     if (!t) return;
-    emitir({ tipo: 'procesando' });
+    emitir({ tipo: 'procesando', ...(computoMs > 0 ? { audioS: Math.round(audioHechoMs / 1000), velocidad: audioHechoMs / computoMs } : {}) });
+    const antes = performance.now();
     const lineas = await procesarTrozo(t, idModelo, emitir, senal);
+    computoMs += performance.now() - antes;
+    audioHechoMs += (t.pcm.length / FRECUENCIA) * 1000;
     if (lineas.length) {
       total += lineas.length;
       emitir({ tipo: 'lineas', lineas });
@@ -519,6 +546,8 @@ async function transcribirMuestras(
   pedidoDetener = false;
   fallosGpu = 0;
   trasFallo = false;
+  huboTirones = false;
+  avisadosTirones = false;
   const dispositivo = await cargarModelo(idModelo, emitir);
   const inicioMuestra = Math.min(audio.muestras, Math.floor((desdeMs / 1000) * FRECUENCIA));
   emitir({ tipo: 'procesando', porcentaje: Math.round((inicioMuestra / Math.max(audio.muestras, 1)) * 100), dispositivo });
@@ -527,6 +556,12 @@ async function transcribirMuestras(
   const canto = conCanto && inicioMuestra === 0 ? new AcumuladorCanto() : null;
   const relojInicio = performance.now();
   let total = 0;
+  // Hasta dónde va lo transcrito, en el tiempo del video, y lo calculado: para saber si llega a lo que se ve y para
+  // «Tu equipo», que guarda a cuántas veces el tiempo real calcula este equipo con cada modelo.
+  let frenteMs = (inicioMuestra / FRECUENCIA) * 1000;
+  let computoMs = 0;
+  let audioHechoMs = 0;
+  const medida = () => ({ frenteMs: Math.round(frenteMs), audioS: Math.round(audioHechoMs / 1000), ...(computoMs > 0 ? { velocidad: audioHechoMs / computoMs } : {}) });
 
   const procesar = async (t: TrozoAudio, posicion: number) => {
     const hechas = posicion - acumulador.muestras - inicioMuestra;
@@ -535,14 +570,19 @@ async function transcribirMuestras(
       tipo: 'procesando',
       porcentaje: Math.round(((posicion - acumulador.muestras) / audio.muestras) * 100),
       restanteS: segundosRestantes(hechas, porHacer, (performance.now() - relojInicio) / 1000),
+      ...medida(),
     });
     const antes = performance.now();
     const lineas = await procesarTrozo(t, idModelo, emitir, senal);
+    const ms = performance.now() - antes;
+    computoMs += ms;
+    audioHechoMs += (t.pcm.length / FRECUENCIA) * 1000;
+    frenteMs = ((posicion - acumulador.muestras) / FRECUENCIA) * 1000;
     if (lineas.length) {
       total += lineas.length;
       emitir({ tipo: 'lineas', lineas });
     }
-    await descansar(performance.now() - antes, intensidad, emitir, senal);
+    await descansar(ms, intensidad, emitir, senal, { ventajaS: ventajaSobreVideo(frenteMs, marca, performance.now()), tirones: huboTirones });
   };
 
   try {
@@ -561,7 +601,7 @@ async function transcribirMuestras(
     if (final) await procesar(final, audio.muestras);
     const puntos = canto && !senal.aborted ? await canto.terminar(audio.muestras) : null;
     if (puntos) emitir({ tipo: 'canto', ...puntos });
-    if (!senal.aborted) emitir({ tipo: 'procesando', porcentaje: 100, restanteS: 0 });
+    if (!senal.aborted) emitir({ tipo: 'procesando', porcentaje: 100, restanteS: 0, ...medida() });
   } finally {
     pausadoPorUsuario = false;
     programarLiberacion();

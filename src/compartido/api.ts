@@ -223,7 +223,8 @@ export interface ApiMotor {
   empezarClip(): Promise<void>;
   /** `mudo` si la grabación no tiene ningún sonido: lo que pasa si se captura otra pestaña o el video está silenciado. */
   terminarClip(): Promise<{ datos: string; tipo: string; segundos: number; pico: number } | { mudo: true } | null>;
-  whisperMarca(ms: number, reproduciendo: boolean, velocidad: number, salto: boolean): Promise<void>;
+  /** Dónde va el video, si se ve, a qué velocidad, si saltó y si pierde fotogramas (`tirones`) mientras se transcribe. */
+  whisperMarca(ms: number, reproduciendo: boolean, velocidad: number, salto: boolean, tirones?: boolean): Promise<void>;
   /** Trabajos largos en marcha: mientras haya alguno, la extensión no se recarga sola. */
   flujosActivos(): Promise<number>;
   /** Null si el ayudante local no está instalado. */

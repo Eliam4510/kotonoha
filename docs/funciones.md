@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.39.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.40.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -176,6 +176,7 @@ Estado de cada función en la versión 0.39.0, con la forma en que se ha verific
 | Los textos de la Biblioteca (lo pegado, los relatos, los artículos) se leen en el visor, en una pestaña propia, con sus menús, «Aa», sus páginas y Editar en el Cuaderno | Automática |
 | Importar una carpeta, también desde una colección: todos sus PDF, EPUB y CBZ, en todas sus subcarpetas y en orden, con títulos que no se repiten y sin duplicar lo que ya estaba | Automática |
 | «Tu equipo», en la bienvenida y en Ajustes: qué tal irán aquí la voz local, las letras de canciones y el OCR, con lo que el navegador dice de la gráfica y una prueba con el OCR de una página de muestra; cada pieza, con su tiempo y un consejo. Nada se apaga | Automática: pruebas unitarias de los niveles y las estimaciones; de extremo a extremo con la gráfica de verdad y sin ella |
+| Medir en el uso real: lo que tardan la voz y el OCR se guarda en «Tu equipo» y manda sobre la prueba; si un video se ve más deprisa de lo que se transcribe, se avisa, y «Esperar a la transcripción» lo pausa hasta que vuelve a ir por delante; en «Automática», la gráfica descansa más si el video da tirones; el OCR lee menos páginas por delante en un equipo lento y propone «Leer una zona» | Automática: pruebas unitarias del ritmo, los tirones y lo medido; de extremo a extremo con una transcripción de verdad más lenta que el video, y con el OCR |
 | La ventana no tapa lo que queda por leer: va al margen de la página si cabe, y si no, sobre lo ya leído (encima del renglón, o a la derecha de la columna en vertical); se mueve, se agranda y se fija a un lado como panel, que se ensancha y recuerda su ancho | Automática (pruebas unitarias de la colocación) |
 | Seleccionar arrastrando, letra a letra y entre renglones, con Traducir, Explicar, Desglosar, Escuchar, Resaltar, Nota y Copiar; Ctrl+C copia lo abierto | Automática |
 | Pasar de página con flechas a la vista a los lados, el teclado o deslizando: tocar la página solo cierra lo abierto, y fallar por poco al tocar una palabra ya no pasa de página | Automática |

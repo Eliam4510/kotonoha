@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.39.0, along with how it has been verified.
+Status of each feature in version 0.40.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -176,6 +176,7 @@ Status of each feature in version 0.39.0, along with how it has been verified.
 | Library texts (pasted text, stories, articles) are read in the viewer, in their own tab, with its menus, “Aa”, their pages and Edit in the Notebook | Automated |
 | Import a folder, also from a collection: all its PDF, EPUB and CBZ files, in all its subfolders and in order, with titles that do not repeat and without duplicating what was already there | Automated |
 | “Your computer”, in the welcome screen and in Settings: how local voice, song lyrics and OCR will run here, from what the browser says about the graphics card and a test that reads a sample page with OCR; each part with its time and a tip. Nothing is turned off | Automated: unit tests of the levels and estimates; end to end with the real graphics card and without one |
+| Measuring in real use: how long voice and OCR take is saved in “Your computer” and takes precedence over the test; if a video is watched faster than it is transcribed, a notice says so, and “Wait for the transcription” pauses it until the transcription is ahead again; on “Automatic”, the graphics card rests more if the video stutters; OCR reads fewer pages ahead on a slow computer and suggests “Read an area” | Automated: unit tests of the pace, stutters and measurements; end to end with a real transcription slower than the video, and with OCR |
 | The window does not cover what is left to read: it goes in the page margin if it fits, otherwise over text already read (above the line, or to the right of the column in vertical text); it can be moved, enlarged and pinned to the side as a panel that widens and remembers its width | Automated (unit tests of the placement) |
 | Selecting by dragging, character by character and across lines, with Translate, Explain, Break down, Listen, Highlight, Note and Copy; Ctrl+C copies what is open | Automated |
 | Turning pages with visible arrows at the sides, the keyboard or a swipe: tapping the page only closes what is open, and narrowly missing a word no longer turns the page | Automated |

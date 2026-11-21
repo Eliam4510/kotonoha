@@ -39,14 +39,39 @@ export interface EstimacionPieza {
   segundos?: number;
   /** Si sale de la prueba; si no, es lo probable para esa clase de equipo. */
   medido: boolean;
+  /** Si sale de lo medido al usar Kotonoha, que vale más que la prueba: es este equipo haciendo eso mismo. */
+  deUso?: boolean;
+}
+
+/**
+ * Lo medido al usar Kotonoha, sin la prueba: la voz, por modelo, al transcribir un archivo o un video con el ayudante, y
+ * el OCR, por modo, al leer páginas en el visor. Se queda en este equipo, como todo lo demás.
+ */
+export interface UsoEquipo {
+  voz?: Partial<Record<string, MedidaVoz>>;
+  ocr?: Partial<Record<'libro' | 'manga', MedidaOcr>>;
+}
+
+export interface MedidaVoz {
+  /** Segundos de audio por segundo de cálculo, sin contar los descansos entre trozos. */
+  velocidad: number;
+  dispositivo: string;
+  fecha: number;
+}
+
+export interface MedidaOcr {
+  /** Lo que tardaron las últimas páginas, en milisegundos: como mucho, `MUESTRAS_OCR`. */
+  ms: number[];
+  dispositivo: string;
+  fecha: number;
 }
 
 /** Lo que tarda cada pieza en el equipo de referencia, en segundos, y hasta dónde va «bien» y hasta dónde «lento». */
-export const PIEZAS: Record<PiezaPesada, { segundos: number; bien: number; lento: number }> = {
+export const PIEZAS: Record<PiezaPesada, { segundos: number; bien: number; lento: number; audioS?: number }> = {
   // 30 minutos de video con Haas-ja o Parakeet. Más de 30 minutos es más lento que el propio video.
-  voz: { segundos: 60, bien: 600, lento: 1800 },
+  voz: { segundos: 60, bien: 600, lento: 1800, audioS: 1800 },
   // Una canción de 4 minutos con Whisper Turbo (5 minutos por cada 30 de audio).
-  letras: { segundos: 40, bien: 120, lento: 480 },
+  letras: { segundos: 40, bien: 120, lento: 480, audioS: 240 },
   // Una página de un libro, con el detector y el reconocedor de libros. Las siguientes se leen por adelantado mientras
   // se lee una, que lleva minutos: hasta 10 segundos casi no se nota.
   'ocr-libro': { segundos: 1, bien: 2.5, lento: 10 },
@@ -101,13 +126,58 @@ const PROBABLE: Record<Exclude<NivelEquipo, 'sin-medir'>, Record<PiezaPesada, Es
   basico: { voz: 'muy-lento', letras: 'muy-lento', 'ocr-libro': 'lento', 'ocr-manga': 'muy-lento', practica: 'lento' },
 };
 
+/** Lo medido al usarlo y los modelos con los que se compara: el de la voz de la lengua y el de las canciones. */
+export interface OpcionesUso {
+  uso?: UsoEquipo | null;
+  modeloVoz?: string;
+  modeloLetras?: string;
+}
+
+/** La parte del tiempo que Whisper trabaja en automático cuando nadie usa el equipo: lo demás son descansos. */
+const OCUPACION_REFERENCIA = 0.9;
+/** Con menos páginas leídas, una sola lenta (la primera de un libro, con todo por cargar) pesaría demasiado. */
+export const MINIMO_PAGINAS = 3;
+export const MUESTRAS_OCR = 20;
+
+export function mediana(xs: number[]): number {
+  if (!xs.length) return 0;
+  const o = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(o.length / 2);
+  return o.length % 2 ? o[m] : (o[m - 1] + o[m]) / 2;
+}
+
+/** Suma una página leída a lo medido. Si cambió dónde se lee, la gráfica o el procesador, lo de antes ya no vale. */
+export function anotarOcr(previa: MedidaOcr | undefined, ms: number, dispositivo: string, fecha: number): MedidaOcr {
+  const antes = previa && previa.dispositivo === dispositivo ? previa.ms : [];
+  return { ms: [...antes, Math.round(ms)].slice(-MUESTRAS_OCR), dispositivo, fecha };
+}
+
+/** Lo que tarda una página aquí, en milisegundos, según lo medido al leer; null si aún no hay bastante. */
+export const msPorPagina = (m: MedidaOcr | undefined): number | null => (m && m.ms.length >= MINIMO_PAGINAS ? mediana(m.ms) : null);
+
+/** Lo que tardaría una pieza según lo medido al usarla, en segundos; undefined si no se ha medido. */
+function segundosDeUso(pieza: PiezaPesada, o: OpcionesUso): number | undefined {
+  if (!o.uso) return;
+  if (pieza === 'voz' || pieza === 'letras') {
+    const m = o.uso.voz?.[(pieza === 'voz' ? o.modeloVoz : o.modeloLetras) ?? ''];
+    return m && m.velocidad > 0 ? (PIEZAS[pieza].audioS ?? 0) / m.velocidad / OCUPACION_REFERENCIA : undefined;
+  }
+  if (pieza === 'ocr-libro' || pieza === 'ocr-manga') {
+    const ms = msPorPagina(o.uso.ocr?.[pieza === 'ocr-libro' ? 'libro' : 'manga']);
+    return ms === null ? undefined : ms / 1000;
+  }
+}
+
 /**
- * Cuánto tardaría cada pieza aquí. Con la prueba, lo del equipo de referencia por lo que aquí tarda el OCR. Los modelos
- * de voz y el de manga pesan mucho más que el del OCR de libros, y en el procesador no van: sin la gráfica, muy lentos.
+ * Cuánto tardaría cada pieza aquí. Lo medido al usarla manda; si no, con la prueba, lo del equipo de referencia por lo
+ * que aquí tarda el OCR. Los modelos de voz y el de manga pesan mucho más que el del OCR de libros, y en el procesador no
+ * van: sin la gráfica, muy lentos.
  */
-export function estimar(piezas: PiezaPesada[], s: SenalesEquipo, prueba?: PruebaEquipo | null): EstimacionPieza[] {
+export function estimar(piezas: PiezaPesada[], s: SenalesEquipo, prueba?: PruebaEquipo | null, o: OpcionesUso = {}): EstimacionPieza[] {
   const nivel = nivelDe(s, prueba);
   return piezas.map((pieza) => {
+    const deUso = segundosDeUso(pieza, o);
+    if (deUso !== undefined) return { pieza, estado: estadoPorTiempo(pieza, deUso), segundos: deUso, medido: true, deUso: true };
     if (prueba?.correcto) {
       if (prueba.dispositivo === 'wasm' && SOLO_CON_GRAFICA.includes(pieza)) return { pieza, estado: 'muy-lento', medido: true };
       const segundos = PIEZAS[pieza].segundos * factorDe(prueba);
@@ -117,6 +187,20 @@ export function estimar(piezas: PiezaPesada[], s: SenalesEquipo, prueba?: Prueba
     return { pieza, estado: nivel === 'sin-medir' ? 'sin-medir' : PROBABLE[nivel][pieza], medido: false };
   });
 }
+
+/**
+ * Cuántas páginas lee el OCR por delante de las que se ven: las de siempre mientras quepan en unos segundos de trabajo.
+ * En un equipo en el que una página tarda mucho, menos: no se tiene la gráfica ocupada con páginas que quizá no se lean,
+ * y la que se pide al pasar de página no espera detrás de ellas.
+ */
+const TRABAJO_POR_DELANTE_MS = 16000;
+export function paginasPorDelante(porOmision: number, msPagina: number | null): number {
+  if (!msPagina) return porOmision;
+  return Math.max(1, Math.min(porOmision, Math.round(TRABAJO_POR_DELANTE_MS / msPagina)));
+}
+
+/** Si leer una página con el OCR va lento aquí: entonces se propone «Leer una zona». */
+export const ocrLento = (modo: 'libro' | 'manga', msPagina: number) => estadoPorTiempo(modo === 'libro' ? 'ocr-libro' : 'ocr-manga', msPagina / 1000) !== 'bien';
 
 /** Si no cabe un modelo de voz (1,3 GB y algo de margen): conviene liberar espacio antes. */
 export const pocoEspacio = (s: SenalesEquipo) => s.libre !== null && s.libre < 2 * 1024 ** 3;

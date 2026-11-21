@@ -376,6 +376,9 @@
 .vs-lienzo[data-herramienta='resaltador'] .vs-seleccion { background: rgba(255, 196, 0, 0.4); }
 .vs-aviso-herramienta { position: absolute; top: 12px; left: 50%; z-index: 6; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 120px); padding: 6px 14px; border-radius: var(--r-pill); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-2); color: var(--texto-2); font-size: 13px; white-space: nowrap; transform: translateX(-50%); pointer-events: none; }
 .vs-aviso-hecho .ico { color: var(--hoja); }
+/* El consejo de «Leer una zona» lleva botones: se puede pulsar y, en una ventana estrecha, parte sus líneas. */
+.vs-aviso-ocr { pointer-events: auto; white-space: normal; border-radius: 16px; padding: 6px 8px 6px 14px; gap: 8px; }
+.vs-aviso-ocr > span { min-width: 0; }
 .vs-aviso-lectura { animation: vs-aviso-fuera 0.4s 2.6s forwards; }
 /* Leer una zona: el rectángulo se dibuja en el azul de lo seleccionado y, mientras se lee, late. La capa va sobre todo lo
    de la página, pero debajo de las flechas. */

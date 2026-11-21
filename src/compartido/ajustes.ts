@@ -1,4 +1,4 @@
-import type { PruebaEquipo } from '../nucleo/equipo';
+import type { PruebaEquipo, UsoEquipo } from '../nucleo/equipo';
 import type { IdPaleta } from '../ui/paletas';
 import { PAQUETE_INICIAL, paqueteDe } from '../lenguas';
 import { lenguaDe, lenguasExplicacion, lenguasTraduccion, type PreferenciaIdioma, resolverIdioma, tm } from './i18n';
@@ -206,6 +206,10 @@ export interface Ajustes {
   bienvenidaVista: boolean;
   /** Lo medido con «Probar mi equipo», en este equipo: el OCR leyendo una página de muestra. */
   equipoPrueba: PruebaEquipo | null;
+  /** Lo medido al usar Kotonoha en este equipo: la voz al transcribir y el OCR al leer páginas. No va en la copia. */
+  equipoUso: UsoEquipo;
+  /** Ya se propuso «Leer una zona» porque el OCR tarda en este equipo: no se repite. */
+  avisoOcrLentoVisto: boolean;
   /** Ya vio «Tu equipo»: en la bienvenida o, quien ya usaba Kotonoha, con el aviso de Inicio. */
   avisoEquipoVisto: boolean;
   /** Cómo se escriben las lecturas: kana, o rōmaji para quien aún no lo lee. */
@@ -409,6 +413,8 @@ export const AJUSTES_INICIALES: Ajustes = {
   limiteGasto: 0,
   bienvenidaVista: false,
   equipoPrueba: null,
+  equipoUso: {},
+  avisoOcrLentoVisto: false,
   avisoEquipoVisto: false,
   formatoLectura: PAQUETE_INICIAL.lectura.formatoInicial,
   paleta: 'predeterminada',
@@ -643,6 +649,12 @@ export async function guardarAjustes(cambios: Partial<Ajustes>): Promise<Ajustes
   const nuevos = { ...actuales, ...cambios };
   await chrome.storage.local.set({ [CLAVE]: nuevos });
   return nuevos;
+}
+
+/** Suma algo a lo medido al usar Kotonoha, sobre lo último guardado: la voz y el OCR se miden desde páginas distintas. */
+export async function anotarUso(fn: (u: UsoEquipo) => UsoEquipo): Promise<void> {
+  const { equipoUso } = await leerAjustes();
+  await guardarAjustes({ equipoUso: fn(equipoUso ?? {}) });
 }
 
 export function alCambiarAjustes(fn: (a: Ajustes) => void): () => void {
