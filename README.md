@@ -189,7 +189,7 @@ El uso normal cuesta céntimos al mes. La clave se guarda solo en el navegador. 
 
 ## Instalación
 
-Requisito: Chrome o Edge 120 o posterior.
+Requisito: Chrome o Edge 120 o posterior. La transcripción, las letras de canciones y el OCR corren en la tarjeta gráfica y van más rápido con una dedicada; sin ella también funcionan, más despacio.
 
 1. Descargar `kotonoha-<versión>-extension.zip` de la [última versión](https://github.com/Eliam4510/kotonoha/releases/latest) y descomprimirlo en un sitio definitivo.
 2. Abrir `chrome://extensions` o `edge://extensions` y activar el **modo de desarrollador**.
@@ -197,7 +197,7 @@ Requisito: Chrome o Edge 120 o posterior.
 
 En Windows también se puede empezar por el ayudante: `kotonoha-<versión>-ayudante.zip` trae `Instalar.cmd`, que con un doble clic instala el ayudante y, si no encuentra Kotonoha, también la extensión, con un identificador fijo. Después solo quedan los pasos 2 y 3.
 
-La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, e instala los diccionarios. Para actualizar, basta con descomprimir la versión nueva encima de la anterior: la extensión se recarga sola. Cuando hay una versión nueva, Kotonoha lo avisa en Inicio y, con el ayudante instalado, **Actualizar ahora** la pone con un clic. La [guía de uso](docs/guia.md) explica cada función, y [CONTRIBUTING.md](CONTRIBUTING.md), cómo compilarla desde el código.
+La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, instala los diccionarios y dice qué tal irá cada cosa en el equipo. Para actualizar, basta con descomprimir la versión nueva encima de la anterior: la extensión se recarga sola. Cuando hay una versión nueva, Kotonoha lo avisa en Inicio y, con el ayudante instalado, **Actualizar ahora** la pone con un clic. La [guía de uso](docs/guia.md) explica cada función, y [CONTRIBUTING.md](CONTRIBUTING.md), cómo compilarla desde el código.
 
 ## Atajos principales
 

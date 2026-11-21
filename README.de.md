@@ -185,7 +185,7 @@ Normale Nutzung kostet wenige Cent im Monat. Der Schlüssel wird nur im Browser 
 
 ## Installation
 
-Voraussetzung: Chrome oder Edge ab Version 120.
+Voraussetzung: Chrome oder Edge ab Version 120. Transkription, Liedtexte und Texterkennung laufen auf der Grafikkarte und sind mit einer dedizierten schneller; ohne sie funktionieren sie auch, nur langsamer.
 
 1. `kotonoha-<version>-extension.zip` aus der [neuesten Version](https://github.com/Eliam4510/kotonoha/releases/latest) herunterladen und an einem dauerhaften Ort entpacken.
 2. `chrome://extensions` oder `edge://extensions` öffnen und den **Entwicklermodus** einschalten.
@@ -193,7 +193,7 @@ Voraussetzung: Chrome oder Edge ab Version 120.
 
 Unter Windows geht es auch mit dem Helfer: `kotonoha-<version>-ayudante.zip` enthält `Instalar.cmd`, das per Doppelklick den Helfer installiert und, wenn es Kotonoha nicht findet, auch die Erweiterung, mit fester Kennung. Danach fehlen nur noch die Schritte 2 und 3.
 
-Beim ersten Start fragt eine Begrüßung nach der eigenen Sprache, der Lernsprache und dem Niveau und installiert die Wörterbücher. Zum Aktualisieren genügt es, die neue Version über die alte zu entpacken: Die Erweiterung lädt sich selbst neu. Gibt es eine neue Version, zeigt Kotonoha das auf der Startseite an, und mit installiertem Helfer spielt **Jetzt aktualisieren** sie mit einem Klick ein. Die [Anleitung](docs/de/guide.md) erklärt jede Funktion, [CONTRIBUTING.md](CONTRIBUTING.md) das Erstellen aus dem Quellcode.
+Beim ersten Start fragt eine Begrüßung nach der eigenen Sprache, der Lernsprache und dem Niveau, installiert die Wörterbücher und zeigt, wie gut jeder Teil auf dem Computer laufen wird. Zum Aktualisieren genügt es, die neue Version über die alte zu entpacken: Die Erweiterung lädt sich selbst neu. Gibt es eine neue Version, zeigt Kotonoha das auf der Startseite an, und mit installiertem Helfer spielt **Jetzt aktualisieren** sie mit einem Klick ein. Die [Anleitung](docs/de/guide.md) erklärt jede Funktion, [CONTRIBUTING.md](CONTRIBUTING.md) das Erstellen aus dem Quellcode.
 
 ## Wichtige Tastenkürzel
 

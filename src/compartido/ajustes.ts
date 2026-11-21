@@ -1,3 +1,4 @@
+import type { PruebaEquipo } from '../nucleo/equipo';
 import type { IdPaleta } from '../ui/paletas';
 import { PAQUETE_INICIAL, paqueteDe } from '../lenguas';
 import { lenguaDe, lenguasExplicacion, lenguasTraduccion, type PreferenciaIdioma, resolverIdioma, tm } from './i18n';
@@ -203,6 +204,10 @@ export interface Ajustes {
   limiteGasto: number;
   /** Ya vio o saltó el asistente de la primera vez. */
   bienvenidaVista: boolean;
+  /** Lo medido con «Probar mi equipo», en este equipo: el OCR leyendo una página de muestra. */
+  equipoPrueba: PruebaEquipo | null;
+  /** Ya vio «Tu equipo»: en la bienvenida o, quien ya usaba Kotonoha, con el aviso de Inicio. */
+  avisoEquipoVisto: boolean;
   /** Cómo se escriben las lecturas: kana, o rōmaji para quien aún no lo lee. */
   formatoLectura: string;
   /** Colores de los estados de una palabra. */
@@ -403,6 +408,8 @@ export const AJUSTES_INICIALES: Ajustes = {
   creditoMensual: 0,
   limiteGasto: 0,
   bienvenidaVista: false,
+  equipoPrueba: null,
+  avisoEquipoVisto: false,
   formatoLectura: PAQUETE_INICIAL.lectura.formatoInicial,
   paleta: 'predeterminada',
   lectorActivo: true,

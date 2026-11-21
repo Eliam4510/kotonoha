@@ -2,6 +2,16 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.39.0 · 2026-11-20
+
+Tu equipo: qué tal irá aquí lo que corre en la tarjeta gráfica, desde la primera vez.
+
+- **Tu equipo.** Un paso nuevo de la bienvenida, tras los diccionarios, y una sección de **Ajustes** dicen qué tal irá en este equipo lo que corre en la tarjeta gráfica y no en la nube: **Subtítulos para videos sin ellos**, **Letras de canciones**, **Texto de libros escaneados**, **Texto de manga** (al estudiar japonés) y **Dictado y práctica de la pronunciación**. Cada tarjeta dice cuánto tardaría (30 minutos de video, una canción de 4 minutos, una página, una frase) y si irá bien, lenta o muy lenta, con un consejo.
+- **Probar mi equipo.** Lee una página de muestra con el OCR y mide cuánto tarda en la gráfica; con eso calcula lo demás. La primera vez descarga 25 MB, el mismo modelo que luego usa el lector. Sin la prueba, se guía por lo que el navegador dice de la gráfica: sin gráfica para la web, el equipo es básico; con una dedicada que el navegador reconoce, potente; si no se sabe, queda sin medir.
+- **Solo recomienda.** Nada se apaga: todo sigue disponible. Si la voz irá lenta, **Usar Whisper Base** cambia el modelo, solo si se pulsa. Lo medido no sale del equipo.
+- **Un aviso, una vez.** Quien ya usaba Kotonoha ve un aviso en **Inicio** una sola vez: **Ver mi equipo** lleva a la sección de **Ajustes**.
+- **Los diccionarios de tu lengua, también al arrancar.** Justo al abrir el navegador, **Ajustes**, la ficha y el **Diccionario** podían recibir los diccionarios del japonés aunque se estudiara otra lengua (al estudiar inglés, ninguno), y no se corregía hasta el siguiente cambio. Ahora el motor fija la lengua antes de contestar.
+
 ## 0.38.1 · 2026-11-19
 
 Importar una carpeta con todo lo que tiene dentro, también desde una colección.
@@ -10,14 +20,6 @@ Importar una carpeta con todo lo que tiene dentro, también desde una colección
 - **En orden y sin títulos repetidos.** Los libros entran en el orden natural de su ruta (los años y los meses, por orden), con la cuenta de lo que va. Si dos se llaman igual en subcarpetas distintas, su título lleva detrás las subcarpetas: «本誌 (2023/04)».
 - **Sin duplicados.** Importar otra vez la misma carpeta solo trae lo nuevo; lo que ya estaba se queda y, si se importa en una colección, pasa a ella.
 
-## 0.38.1 · 2026-11-19
-
-Import a folder with everything inside it, also from a collection.
-
-- **Import a folder into a collection.** Inside a collection, **Import a folder** brings in all the books (PDF, EPUB and CBZ) in a folder and all its subfolders, such as magazines kept by year and month, and puts them in that collection. On the shelf, the button that said “Choose an image folder” is now called **Import a folder**: it already brought in those books too, and now they go together into a collection named after the chosen folder, even when each one is in its own subfolder.
-- **In order and without repeated titles.** Books come in in the natural order of their paths (years and months in order), with a running count. If two have the same name in different subfolders, their title carries the subfolders after it: “本誌 (2023/04)”.
-- **No duplicates.** Importing the same folder again brings in only what is new; what was there stays and, when importing into a collection, moves into it.
-
 ## 0.38.0 · 2026-11-17
 
 Un solo visor: los EPUB de texto y los textos de la Biblioteca, con lo mismo que los libros de páginas, y Leer una zona.
@@ -25,14 +27,6 @@ Un solo visor: los EPUB de texto y los textos de la Biblioteca, con lo mismo que
 - **Leer una zona.** **Leer una zona** (O), en el menú **Texto** o en las herramientas de la izquierda, lee con el OCR solo lo que se rodea con un rectángulo: un diagrama, un cartel en el fondo de un manga o una página que no se ha leído. Funciona con el OCR del libro apagado. Lo leído entra en el texto de la página, en su sitio, y se abre en la ventana como lo seleccionado; no se guarda. En un manga se lee con manga-ocr, como un globo: el reconocedor de libros se comía las kana pequeñas de las columnas.
 - **Los EPUB de texto, como los demás libros.** Tienen la barra de menús (**Libro**, **Ver**, **Ir**, **Ayudas** y **Ayuda**), **Buscar una acción** (Ctrl+K), los **Atajos de teclado** (?), «Aa» con las **Ayudas de lectura**, el **Índice** en la barra de la izquierda, **Atrás** (Alt+←), la barra de estado y el **Modo lectura** (M). Las teclas valen también con el foco dentro del libro, que se las pasa al visor. **Texto vertical** está ahora en el menú **Ver** y en «Aa».
 - **Los textos de la Biblioteca, en el visor.** Lo pegado, los relatos y los artículos se abren en una pestaña propia, como los libros, con sus menús, «Aa», sus páginas y **Editar en el Cuaderno**. Se leen con la misma ayuda de siempre, la de la vista de texto, y la estantería sigue recordando por qué página se va.
-
-## 0.38.0 · 2026-11-17
-
-One viewer: text EPUBs and Library texts, with the same as page books, and Read an area.
-
-- **Read an area.** **Read an area** (O), in the **Text** menu or among the tools on the left, reads with OCR only what you surround with a rectangle: a diagram, a sign in the background of a manga or a page that has not been read. It works with the book’s OCR turned off. What is read goes into the page text, in its place, and opens in the window like a selection; it is not saved. In a manga it is read with manga-ocr, as a bubble: the book recognizer dropped the small kana in manga columns.
-- **Text EPUBs, like the other books.** They have the menu bar (**Book**, **View**, **Go**, **Reading aids** and **Help**), **Find an action** (Ctrl+K), the **Keyboard shortcuts** (?), “Aa” with the **Reading aids**, **Contents** in the bar on the left, **Back** (Alt+←), the status bar and **Reading mode** (M). The keys also work with the focus inside the book, which passes them on to the viewer. **Vertical text** is now in the **View** menu and in “Aa”.
-- **Library texts, in the viewer.** Pasted text, stories and articles open in their own tab, like books, with its menus, “Aa”, their pages and **Edit in the Notebook**. They are read with the usual aid, the one in the text view, and the shelf still remembers which page you are on.
 
 ## 0.37.0 · 2026-11-17
 
@@ -407,6 +401,32 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.39.0 · 2026-11-20
+
+Your computer: how what runs on the graphics card will go here, from the very first time.
+
+- **Your computer.** A new welcome step, after the dictionaries, and a section in **Settings** show how what runs on the graphics card, not in the cloud, will go on this computer: **Subtitles for videos without them**, **Song lyrics**, **Text from scanned books**, **Manga text** (when studying Japanese) and **Dictation and pronunciation practice**. Each card says how long it would take (30 minutes of video, a 4-minute song, a page, a sentence) and whether it will run well, slowly or very slowly, with a tip.
+- **Test my computer.** Reads a sample page with OCR and measures how long it takes on the graphics card; from that it works out the rest. The first time it downloads 25 MB, the same model the reader then uses. Without the test, it goes by what the browser says about the graphics card: with no graphics card for the web, the computer is basic; with a dedicated one the browser recognizes, powerful; when it cannot tell, it stays not measured.
+- **Only recommendations.** Nothing is turned off: everything stays available. If voice will be slow, **Use Whisper Base** switches the model, only when pressed. What is measured never leaves the computer.
+- **A notice, once.** Those who already used Kotonoha see a notice on **Home** only once: **See my computer** leads to the section in **Settings**.
+- **Your language’s dictionaries, also at startup.** Right after opening the browser, **Settings**, the word card and the **Dictionary** could get the Japanese dictionaries even when studying another language (none, when studying English), and it was not corrected until the next change. Now the engine sets the language before answering.
+
+## 0.38.1 · 2026-11-19
+
+Import a folder with everything inside it, also from a collection.
+
+- **Import a folder into a collection.** Inside a collection, **Import a folder** brings in all the books (PDF, EPUB and CBZ) in a folder and all its subfolders, such as magazines kept by year and month, and puts them in that collection. On the shelf, the button that said “Choose an image folder” is now called **Import a folder**: it already brought in those books too, and now they go together into a collection named after the chosen folder, even when each one is in its own subfolder.
+- **In order and without repeated titles.** Books come in in the natural order of their paths (years and months in order), with a running count. If two have the same name in different subfolders, their title carries the subfolders after it: “本誌 (2023/04)”.
+- **No duplicates.** Importing the same folder again brings in only what is new; what was there stays and, when importing into a collection, moves into it.
+
+## 0.38.0 · 2026-11-17
+
+One viewer: text EPUBs and Library texts, with the same as page books, and Read an area.
+
+- **Read an area.** **Read an area** (O), in the **Text** menu or among the tools on the left, reads with OCR only what you surround with a rectangle: a diagram, a sign in the background of a manga or a page that has not been read. It works with the book’s OCR turned off. What is read goes into the page text, in its place, and opens in the window like a selection; it is not saved. In a manga it is read with manga-ocr, as a bubble: the book recognizer dropped the small kana in manga columns.
+- **Text EPUBs, like the other books.** They have the menu bar (**Book**, **View**, **Go**, **Reading aids** and **Help**), **Find an action** (Ctrl+K), the **Keyboard shortcuts** (?), “Aa” with the **Reading aids**, **Contents** in the bar on the left, **Back** (Alt+←), the status bar and **Reading mode** (M). The keys also work with the focus inside the book, which passes them on to the viewer. **Vertical text** is now in the **View** menu and in “Aa”.
+- **Library texts, in the viewer.** Pasted text, stories and articles open in their own tab, like books, with its menus, “Aa”, their pages and **Edit in the Notebook**. They are read with the usual aid, the one in the text view, and the shelf still remembers which page you are on.
 
 ## 0.37.0 · 2026-11-17
 

@@ -62,7 +62,31 @@
 @media (prefers-reduced-motion: reduce) { .ap-lengua-lista { animation: none; } }
 
 /* Una versión nueva en GitHub, arriba de Inicio. */
-.ap-aviso-version { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 14px; padding: 14px 16px; }
+/* «Tu equipo»: el nivel, la prueba y una tarjeta por pieza pesada, con lo que tardaría aquí. */
+.ap-equipo { display: flex; flex-direction: column; gap: 12px; }
+.ap-equipo-cab { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.ap-equipo-nivel { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--r-pill); font-size: 13.5px; font-weight: 800; background: var(--superficie-2); color: var(--texto); }
+.ap-equipo-nivel.potente { background: var(--hoja-suave); color: var(--hoja); }
+.ap-equipo-nivel.medio { background: color-mix(in srgb, var(--aviso) 22%, transparent); }
+.ap-equipo-nivel.basico { background: color-mix(in srgb, var(--error, #d9534f) 16%, transparent); }
+.ap-equipo-datos { font-size: 12.5px; color: var(--texto-3); }
+.ap-equipo-explicacion { margin: 0; font-size: 14px; line-height: 1.5; color: var(--texto-2); }
+.ap-equipo-prueba { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.ap-equipo-prueba .ayuda { flex: 1; min-width: 220px; font-size: 13px; }
+.ap-equipo-piezas { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ap-equipo-pieza { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--r-3); background: var(--superficie-2); }
+.ap-equipo-pieza-icono { display: inline-flex; flex: none; margin-top: 2px; color: var(--texto-2); }
+.ap-equipo-pieza-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 13px; color: var(--texto-2); line-height: 1.45; }
+.ap-equipo-pieza-texto b { font-size: 14px; color: var(--texto); }
+.ap-equipo-tiempo { font-weight: 700; color: var(--texto); }
+.ap-equipo-consejo { color: var(--texto-2); font-style: italic; }
+.ap-equipo-estado { flex: none; padding: 2px 10px; border-radius: var(--r-pill); font-size: 12px; font-weight: 800; white-space: nowrap; background: var(--superficie); color: var(--texto-2); }
+.ap-equipo-estado.bien { color: var(--hoja); background: var(--hoja-suave); }
+.ap-equipo-estado.lento { background: color-mix(in srgb, var(--aviso) 24%, transparent); color: var(--texto); }
+.ap-equipo-estado.muy-lento { background: color-mix(in srgb, var(--error, #d9534f) 18%, transparent); color: var(--texto); }
+.ap-equipo-nota { margin: 0; font-size: 12.5px; }
+/* El aviso de «Tu equipo» se ve como el de la versión, pero con su clase: las pruebas buscan el de la versión por la suya. */
+.ap-aviso-version, .ap-aviso-equipo { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 14px; padding: 14px 16px; }
 .ap-aviso-version-icono { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; border-radius: 50%; color: var(--hoja); background: var(--hoja-suave); }
 .ap-aviso-version-texto { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 2px; }
 .ap-aviso-version-texto b { font-size: 14.5px; font-weight: 800; }

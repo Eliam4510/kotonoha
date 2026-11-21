@@ -22,7 +22,7 @@ Diese Anleitung beschreibt die tägliche Nutzung von Kotonoha. Die Installation 
 
 ## Erste Einrichtung
 
-Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und Niveau fragt und vorschlägt, die Wörterbücher zu installieren, den Claude-Schlüssel hinzuzufügen und festzulegen, wohin die Karten gehen. Sie lässt sich überspringen und unter **Einstellungen, Darstellung** erneut aufrufen. Alles Weitere wird unter **Einstellungen** im Fenster der Erweiterung festgelegt, das sich mit `Alt+Shift+K` öffnet.
+Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und Niveau fragt und vorschlägt, die Wörterbücher zu installieren, zu sehen, wie gut der Computer mitkommt, den Claude-Schlüssel hinzuzufügen und festzulegen, wohin die Karten gehen. Sie lässt sich überspringen und unter **Einstellungen, Darstellung** erneut aufrufen. Alles Weitere wird unter **Einstellungen** im Fenster der Erweiterung festgelegt, das sich mit `Alt+Shift+K` öffnet.
 
 | Schritt | Wo | Wofür |
 |---|---|---|
@@ -34,6 +34,8 @@ Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und
 | Anki | Einstellungen, Karten und Anki | Optional. Erfordert ein geöffnetes Anki mit dem Add-on AnkiConnect |
 
 Die Erweiterung funktioniert ohne Claude-Schlüssel: Untertitel, Wörterbuch, Furigana, Farben, Karten und Whisper benötigen ihn nicht.
+
+**Dein Computer.** Spracherkennung, Liedtexte und Texterkennung laufen auf dem Computer selbst, auf der Grafikkarte, nicht in der Cloud. **Dein Computer** in der Begrüßung und in den **Einstellungen** zeigt, wie gut jedes davon laufen wird: nach dem, was der Browser über die Grafikkarte sagt, und mit **Meinen Computer testen**, indem eine Beispielseite mit der Texterkennung gelesen wird (beim ersten Mal werden 25 MB heruntergeladen, die dann der Betrachter nutzt). Jeder Teil zeigt, wie lange er bräuchte und ob er gut, langsam oder sehr langsam läuft, mit einem Tipp, etwa **Whisper Base verwenden**, um auf einem Computer ohne starke Grafikkarte zu transkribieren. Nichts wird abgeschaltet: Alles bleibt verfügbar, und die Messwerte verlassen den Computer nicht. Wer Kotonoha schon benutzt hat, findet es über einen Hinweis auf **Start**.
 
 **Andere KI-Anbieter.** Unter **Einstellungen, Andere KI-Anbieter** werden OpenRouter, DeepSeek oder OpenAI mit ihrem Schlüssel hinzugefügt, oder LM Studio und Ollama auf dem Rechner selbst, ohne Schlüssel. **Seine Modelle anzeigen** listet auf, was jeder anbietet, und **Verbindung testen** schickt ihm eine minimale Anfrage. Danach kann unter **Modell und Aufwand pro Aufgabe** jede Aufgabe eines ihrer Modelle nutzen. Strukturierte Antworten werden mit ihrem JSON-Schema angefordert und, wenn der Anbieter es nicht unterstützt wie DeepSeek, im JSON-Modus mit dem Schema in den Anweisungen; erlaubt er nicht so viele Antwort-Tokens, werden weniger angefordert. Die Ausgaben werden mit den Kosten erfasst, die der Anbieter meldet (OpenRouter tut das); Modelle auf dem Rechner selbst zählen null. Die Schlüssel werden getrennt gespeichert, wie der von Claude, und erreichen nie die Seiten. Die Anweisungen sind auf Claude abgestimmt: Mit anderen Modellen können die Antworten schlechter ausfallen. Ollama antwortet Erweiterungen nur, wenn es mit `OLLAMA_ORIGINS=chrome-extension://*` gestartet wird.
 
