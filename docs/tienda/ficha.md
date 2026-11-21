@@ -10,7 +10,7 @@
 
 **Resumen** (132 caracteres como máximo):
 
-> Subtítulos interactivos, diccionario, tarjetas y ayuda de lectura para aprender japonés, inglés y alemán con video y texto real.
+> Subtítulos interactivos, diccionario, tarjetas y ayuda de lectura: japonés, inglés, chino y alemán con video y texto real.
 
 **Descripción:**
 
@@ -53,7 +53,7 @@ Privacidad
 
 **Summary** (132 characters at most):
 
-> Interactive subtitles, a dictionary, flashcards and reading help to learn Japanese, English and German from real video and text.
+> Interactive subtitles, a dictionary, flashcards and reading help: Japanese, English, Chinese and German from real video and text.
 
 **Description:**
 

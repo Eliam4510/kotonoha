@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.ko.png" alt="Kotonoha: 대화형 자막, 사전, 카드, Claude 설명으로 일본어, 영어, 독일어를 배웁니다" width="100%">
+  <img src="docs/img/banner.ko.png" alt="Kotonoha: 대화형 자막, 사전, 카드, Claude 설명으로 일본어, 영어, 중국어, 독일어를 배웁니다" width="100%">
 </p>
 
 <h3 align="center">늘 보고 읽는 콘텐츠로 일본어와 영어를 배우세요.</h3>
@@ -43,7 +43,7 @@ Kotonoha(言の葉, '말의 잎')는 Chrome과 Edge용 확장 프로그램으로
   <tr><td><b>보기</b></td><td>YouTube, Netflix, Disney+, Crunchyroll, Prime Video와 내 파일에서 후리가나, 높낮이 악센트, 단어별 학습 상태가 표시되는 자막.</td></tr>
   <tr><td><b>읽기</b></td><td>모든 웹페이지, 복사한 내용, 스캔본과 이미지 폴더를 포함한 EPUB, PDF, 만화.</td></tr>
   <tr><td><b>기억하기</b></td><td>장면의 오디오와 이미지가 담긴 카드를 클릭 한 번으로 Anki나 내장 복습에 보냅니다.</td></tr>
-  <tr><td><b>언어</b></td><td>일본어, 영어, 독일어를 배울 수 있습니다. 인터페이스는 한국어, 영어, 스페인어, 독일어, 중국어, 일본어로 제공됩니다.</td></tr>
+  <tr><td><b>언어</b></td><td>일본어, 영어, 중국어, 독일어를 배울 수 있습니다. 인터페이스는 한국어, 영어, 스페인어, 독일어, 중국어, 일본어로 제공됩니다.</td></tr>
 </table>
 
 ## Kotonoha로 배우는 방법
@@ -160,6 +160,10 @@ flowchart LR
 
 영어에서는 단어 패널이 미국식과 영국식 발음을 IPA로 보여 주고, *picked it up*처럼 떨어져 있는 구동사도 찾아내며, 불규칙형이 어느 단어에서 왔는지 알려 줍니다. 사전은 Wiktionary에서 가져오며 뜻은 한국어로 나옵니다. 코믹스는 말풍선마다 왼쪽에서 오른쪽으로 읽고, 문장은 이 컴퓨터의 신경망 음성으로 들려줍니다. 영어는 Kokoro, 독일어는 Piper입니다. 언어마다 단어, 카드, 설정을 따로 보관하고 클릭 한 번으로 전환합니다.
 
+### 중국어도 배울 수 있습니다
+
+중국어는 띄어쓰기가 없어도 단어가 저절로 나뉘고, 글자마다 위에 병음이 붙습니다. 성조는 사전의 성조이며, 읽기가 여러 개인 글자(长, cháng 또는 zhǎng)는 문장에 맞는 읽기를 고릅니다. 사전은 CC-CEDICT이고, 사용자 언어로 된 Wiktionary의 짧은 번역이 있으면 앞에 둡니다. 한자로도 병음으로도, 성조가 있든 없든 찾을 수 있습니다. 간체자를 배우며, 영상에 번체자 자막만 있으면 간체자로 보여 줍니다. 수준은 HSK 3.0 등급입니다.
+
 ### 그 밖에
 
 - **영어의 실제 발음.** 단어 패널이 이어서 말할 때의 문장을 보여 줍니다: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, 각 변화에 대한 설명과 함께.
@@ -239,7 +243,7 @@ TypeScript, Preact, Dexie, esbuild를 쓰며, 음성과 OCR에는 WebGPU 위의 
 
 코드는 [MIT 라이선스](LICENSE)로 공개합니다. 서드파티 구성 요소, 사용 중 내려받는 데이터, 책임 있는 사용 조건은 [고지](docs/ko/notices.md)에 자세히 있습니다.
 
-- 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)와 KANJIDIC(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io). 영어와 독일어는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org)를 거친 [Wiktionary](https://www.wiktionary.org).
+- 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)와 KANJIDIC(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io). 영어와 독일어는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org)를 거친 [Wiktionary](https://www.wiktionary.org). 중국어는 [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan)을 거친 [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict).
 - 음성: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja, Parakeet과 [Transformers.js](https://github.com/huggingface/transformers.js).
 - 문자 인식: [PP-OCRv5와 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr), [말풍선 검출기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - 획순: Ulrich Apel의 [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0.

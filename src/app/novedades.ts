@@ -5,11 +5,11 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.42.0',
+  version: '0.43.0',
   puntos: [
-    tm('Las voces de AivisSpeech, dentro de Kotonoha: se instalan en Ajustes, Voces, y se oyen sin tener AivisSpeech abierto.'),
-    tm('Un catálogo de AivisHub para elegir más voces, oírlas antes de instalarlas y ver la licencia de cada una.'),
-    tm('Corren en tu gráfica: la primera frase tarda unos segundos, y las siguientes, casi nada.'),
+    tm('Ya se puede estudiar chino, en caracteres simplificados: elígelo en Inicio o en Ajustes, Idioma y nivel.'),
+    tm('El pinyin va sobre cada carácter, con la lectura que toca en la frase, y el diccionario es CC-CEDICT, en el que también se busca por pinyin.'),
+    tm('Las palabras se separan solas aunque el texto no lleve espacios, y los subtítulos en tradicionales se ven en simplificados.'),
   ],
 };
 

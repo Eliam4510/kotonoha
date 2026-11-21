@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 const SRC = join(import.meta.dirname, '..');
 /** Las carpetas de los paquetes de lengua: dentro, cada uno nombra lo suyo y las demás lenguas. */
-const PAQUETES = new Set(['japones', 'ingles', 'aleman']);
+const PAQUETES = new Set(['japones', 'ingles', 'aleman', 'chino']);
 
 function archivos(carpeta: string): string[] {
   return readdirSync(carpeta, { withFileTypes: true }).flatMap((e) => {
@@ -61,7 +61,22 @@ describe('lo japonés está en su paquete', () => {
     expect(encontrados).toEqual([]);
   });
 
-  it('los módulos del japonés solo se importan desde su registro', () => {
-    expect(buscar(/from '[^']*lenguas\/(japones|ingles|aleman)/, {})).toEqual([]);
+  it('los módulos de cada lengua solo se importan desde su registro', () => {
+    expect(buscar(/from '[^']*lenguas\/(japones|ingles|aleman|chino)/, {})).toEqual([]);
+  });
+});
+
+describe('lo chino está en su paquete', () => {
+  it('ninguna frase de la interfaz nombra el chino como lengua de estudio fuera del paquete', () => {
+    const encontrados = buscar(/\bt[rm]\('[^']*(\bchin[oa]\b|pinyin|\bHSK\b|hanzi|mandar[ií]n)/i, {
+      // Los idiomas de la interfaz y la tabla de idiomas de las pistas: los nombran a todos.
+      'compartido/i18n.ts': /tm\('Chino simplificado'\)/,
+      'contenido/controlador.ts': /zh: tr\('Chino'\)/,
+      // Las variantes de un kanji en la página del carácter: su forma en China.
+      'app/PaginaCaracter.tsx': /tr\('Chino (tradicional|simplificado)'\)/,
+      // Lo nuevo de cada versión: un aviso para todos, que cuenta lo que llega, también una lengua nueva.
+      'app/novedades.ts': /tm\('/,
+    });
+    expect(encontrados).toEqual([]);
   });
 });

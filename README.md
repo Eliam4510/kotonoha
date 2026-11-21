@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/img/banner.png" alt="Kotonoha: subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés, inglés y alemán" width="100%">
+  <img src="docs/img/banner.png" alt="Kotonoha: subtítulos interactivos, diccionario, tarjetas y explicaciones con Claude para aprender japonés, inglés, chino y alemán" width="100%">
 </p>
 
-<h3 align="center">Aprende japonés, inglés y alemán con lo que ya ves y lees.</h3>
+<h3 align="center">Aprende japonés, inglés, chino y alemán con lo que ya ves y lees.</h3>
 
 <p align="center">
   Subtítulos interactivos sobre tus videos, una ficha que entiende cada palabra en su frase, libros, PDF y manga con ayuda de lectura, y tarjetas para Anki. Todo en el navegador, gratis y de código abierto.
@@ -47,7 +47,7 @@ Funciona en el propio equipo. El diccionario, el análisis, la transcripción de
   <tr><td><b>Ver</b></td><td>Subtítulos con furigana, acento tonal y el estado de cada palabra en YouTube, Netflix, Disney+, Crunchyroll, Prime Video y archivos propios.</td></tr>
   <tr><td><b>Leer</b></td><td>Cualquier página web, lo que se copia, y libros EPUB, PDF y manga, también escaneados o en carpetas de imágenes.</td></tr>
   <tr><td><b>Recordar</b></td><td>Tarjetas de un clic, con el audio y la imagen de la escena, para Anki o para el repaso integrado.</td></tr>
-  <tr><td><b>Idiomas</b></td><td>Se estudia japonés, inglés o alemán. La interfaz está en español, inglés, alemán, chino, coreano y japonés.</td></tr>
+  <tr><td><b>Idiomas</b></td><td>Se estudia japonés, inglés, chino o alemán. La interfaz está en español, inglés, alemán, chino, coreano y japonés.</td></tr>
 </table>
 
 ## Cómo se aprende con Kotonoha
@@ -164,6 +164,10 @@ Y se practica ahí mismo: se escribe con el ratón, un lápiz o el dedo, calcand
 
 En inglés, la ficha da la pronunciación americana y británica en IPA, encuentra los verbos con partícula aunque vayan separados, como *picked it up*, y dice de qué palabra viene cada forma irregular. En alemán, dice de qué palabra sale cada forma conjugada o declinada, como *ging* de *gehen*, y encuentra los verbos separables aunque la partícula vaya al final. Los diccionarios salen de Wiktionary, en el idioma propio. Los cómics se leen globo a globo, de izquierda a derecha, y las frases suenan con voces neuronales en el propio equipo: Kokoro en inglés y Piper en alemán. Cada idioma guarda sus propias palabras, tarjetas y ajustes, y se cambia de uno a otro con un clic.
 
+### Chino
+
+En chino, las palabras se separan solas aunque el texto no lleve espacios, y el pinyin va sobre cada carácter, con el tono del diccionario y, si un carácter se lee de varias formas (长, cháng o zhǎng), la de la frase. El diccionario es CC-CEDICT, con las traducciones breves de Wiktionary delante cuando están en tu idioma, y se busca en caracteres o en pinyin, con tonos o sin ellos. Se estudian los caracteres simplificados: si un video solo trae subtítulos en tradicionales, se ven en simplificados. Los niveles son los del HSK 3.0.
+
 ### Y además
 
 - **Cómo suena de verdad el inglés.** La ficha enseña la frase como se dice al hablar seguido: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, con lo que pasa en cada caso.
@@ -243,7 +247,7 @@ Las versiones salen con sus pruebas y su documentación en los seis idiomas; las
 
 El código se publica bajo la [licencia MIT](LICENSE). Los componentes de terceros, los datos que se descargan al usarla y las condiciones de uso responsable se detallan en [AVISOS.md](AVISOS.md).
 
-- Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) y KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io); para el inglés y el alemán, [Wiktionary](https://www.wiktionary.org) mediante [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org).
+- Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) y KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io); para el inglés y el alemán, [Wiktionary](https://www.wiktionary.org) mediante [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org); para el chino, [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) mediante [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan).
 - Voz: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja y Parakeet, con [Transformers.js](https://github.com/huggingface/transformers.js).
 - Reconocimiento de texto: [PP-OCRv5 y PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) y un [detector de globos de texto](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0.

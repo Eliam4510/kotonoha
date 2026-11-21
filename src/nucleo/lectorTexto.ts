@@ -72,10 +72,10 @@ export function tramosConLectura(segmentos: SegmentoLectura[]): (TramoTexto & { 
  * Cuánto ha de estrecharse una lectura para no invadir a las vecinas: una lectura larga sobre un solo kanji
  * se comprime, hasta un límite a partir del cual se dejaría de leer bien.
  */
-export function compresionLectura(anchoBase: number, caracteres: number, tamano: number, anchoPorCaracter = 1): number {
+export function compresionLectura(anchoBase: number, caracteres: number, tamano: number, anchoPorCaracter = 1, minima = 0.62): number {
   const ancho = caracteres * tamano * anchoPorCaracter;
   if (ancho <= anchoBase || ancho === 0) return 1;
-  return Math.max(0.62, anchoBase / ancho);
+  return Math.max(minima, anchoBase / ancho);
 }
 
 /**

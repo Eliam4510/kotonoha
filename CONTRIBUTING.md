@@ -33,7 +33,7 @@ Después se carga la carpeta `dist` como extensión descomprimida, en `chrome://
 | Orden | Qué hace |
 |---|---|
 | `npm run dev` | Compila y vigila los cambios en `src/` |
-| `npm test` | Las pruebas unitarias, con Vitest |
+| `npm test` | Las pruebas unitarias, con Vitest. La primera vez, las del acento de las voces y las del chino bajan sus datos, de direcciones fijadas y comprobados por SHA-256 (unos 15 MB), a `node_modules/.cache/kotonoha` |
 | `npm run typecheck` | La comprobación de tipos |
 | `npm run paquete` | Deja en `release/` los ZIP de la extensión y del ayudante, con sus sumas SHA-256 |
 
@@ -74,6 +74,7 @@ Las pruebas con navegador usan una compilación con identificador fijo, que se c
 | `node pruebas/primera-vez.mjs` | La llegada de alguien nuevo, con un perfil nuevo: «¿Por dónde quieres empezar?» y sus cuatro caminos, el texto de ejemplo en el visor (una sola vez en la Biblioteca), «Descubre Kotonoha» con lo de cada lengua, las pistas de la primera vez y «Lo nuevo», que sale una vez a quien ya usaba Kotonoha |
 | `node pruebas/ingles.mjs` | Estudiar inglés de principio a fin: elegir el idioma, instalar los diccionarios, un video, una página, y volver al japonés sin que se mezcle nada |
 | `node pruebas/aleman.mjs` | Estudiar alemán de principio a fin con los diccionarios reales |
+| `node pruebas/chino.mjs` | Estudiar chino de principio a fin con los diccionarios reales (la primera vez baja CC-CEDICT, unos 8 MB, que conserva el perfil `.perfil-chino`): las palabras partidas y su pinyin repartido sobre cada carácter, la glosa en español antes que la inglesa, la búsqueda por pinyin, la pista simplificada antes que la tradicional y una tradicional pasada a simplificados, el lector en una página y la vuelta al japonés |
 | `node pruebas/subtitulos.mjs` | Traducir, corregir, exportar e importar, en páginas que imitan a Netflix y YouTube y con una API de Claude simulada |
 | `node pruebas/experiencia.mjs` | Lo que se percibe sobre el video, fotograma a fotograma: parpadeos, temblores y arrastre, y el registro del gasto |
 | `node pruebas/e2e.mjs` | La extensión de extremo a extremo en Edge. Los sitios de video no sirven subtítulos a un navegador automatizado: si YouTube responde vacío, la prueba omite lo de YouTube real, que se comprueba a mano |
@@ -147,6 +148,7 @@ La documentación nombra los botones y las pantallas tal como aparecen en la int
 | `node pruebas/capturas/dictado.mjs` | La imagen del modo Dictado del README en cada idioma de la interfaz que estudia japonés: la página y el video de `dictado-video.mjs`, con una frase escrita con algún fallo. Mejor un idioma por vez |
 | `node pruebas/capturas/gramatica.mjs <idioma>` | La imagen de la gramática con estados del README en un idioma de la interfaz: el globo de 〜ことができる marcado como «Aprendiendo», con la explicación simulada en ese idioma y la frase traducida debajo |
 | `node herramientas/jlpt.mjs` | Vuelve a generar `publico/datos/jlpt`: el vocabulario y los kanji de las listas de Jonathan Waller (copias del Internet Archive, CC BY) y la gramática de `herramientas/jlpt/gramatica.tsv` |
+| `python herramientas/corpus-pinyin.py src/lenguas/chino/corpus-pinyin.json` | Vuelve a generar la referencia del corpus del chino (cómo parte jieba cada frase y el pinyin de pypinyin), con la que la prueba mide el analizador. Pide jieba 0.42.1 y pypinyin 0.55.0 en un entorno aparte |
 | `node pruebas/capturas.mjs` | El banco de capturas de todas las pantallas, para revisar el diseño |
 | `node pruebas/capturas/demo.mjs` | El GIF de demostración |
 
@@ -203,7 +205,7 @@ Then load the `dist` folder as an unpacked extension in `chrome://extensions` or
 | Command | What it does |
 |---|---|
 | `npm run dev` | Builds and watches `src/` for changes |
-| `npm test` | Unit tests, with Vitest |
+| `npm test` | Unit tests, with Vitest. The first time, the voice accent and Chinese tests download their data, from pinned addresses and checked by SHA-256 (about 15 MB), to `node_modules/.cache/kotonoha` |
 | `npm run typecheck` | Type checking |
 | `npm run paquete` | Writes the extension and helper ZIPs, with SHA-256 sums, to `release/` |
 
@@ -259,7 +261,7 @@ Browser tests use a build with a fixed extension ID, created with `KK_SALIDA=.di
 | `node pruebas/voz-local.mjs [--real]` | The local voice with a simulated engine speaking the VOICEVOX API: Settings finds it and lists its voices, “Try”, read aloud with the dictionary accent applied, the cache, the word panel and falling back to the browser voice with the engine closed. With `--real`, AivisSpeech too if it is open. Uses the base profile |
 | `node pruebas/voz-japonesa.mjs` | The AivisHub voices inside Kotonoha: “Install the voices” (the first time it downloads about 0.9 GB, kept in the `.perfil-voz` profile), reading with まお and with another style, the cache, what “Your computer” measures, the AivisHub catalog with its search and its own-license step, “Saved models” and the Home notice |
 | `node pruebas/proveedores.mjs` | Another AI provider with a simulated server that behaves like DeepSeek (it rejects the JSON schema and high token limits): the Settings card, its models, the connection test, the streamed explanation with the key, the meaning in context in JSON mode and spending with the provider’s cost. Uses the base profile and spends nothing |
-| `node pruebas/ingles.mjs`, `node pruebas/aleman.mjs` | Studying English and German end to end |
+| `node pruebas/ingles.mjs`, `node pruebas/aleman.mjs`, `node pruebas/chino.mjs` | Studying English, German and Chinese end to end |
 | `node pruebas/e2e.mjs` | The extension end to end in Edge. Video sites do not serve subtitles to an automated browser: if YouTube answers with an empty response, the test skips the real YouTube checks, which are verified by hand |
 
 The full list, with the speech and helper tests, is in the Spanish section above.

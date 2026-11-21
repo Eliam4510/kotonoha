@@ -91,8 +91,8 @@ describe.each(PAQUETES.map((p) => [p.id, p] as const))('paquete %s', (id, p) => 
     expect(e.titulo && e.autor).toBeTruthy();
     const parrafos = e.texto.split('\n\n');
     expect(parrafos.length).toBeGreaterThanOrEqual(2);
-    // La fuente, al final y en la propia lengua: Aozora Bunko o Wikisource.
-    expect(parrafos[parrafos.length - 1]).toMatch(/青空文庫|Wikisource/);
+    // La fuente, al final y en la propia lengua: Aozora Bunko o Wikisource (维基文库, en chino).
+    expect(parrafos[parrafos.length - 1]).toMatch(/青空文庫|Wikisource|维基文库/);
     expect(e.texto.length).toBeLessThan(2000);
   });
 

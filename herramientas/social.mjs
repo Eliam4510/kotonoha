@@ -41,7 +41,7 @@ await p.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
   <svg class="fondo" viewBox="0 0 1280 640" preserveAspectRatio="none"><defs><radialGradient id="g"><stop offset="0" stop-color="#FFF3CF" stop-opacity=".5"/><stop offset="1" stop-color="#FFF3CF" stop-opacity="0"/></radialGradient></defs>${estrellas}<circle cx="1120" cy="96" r="150" fill="url(#g)"/><circle cx="1120" cy="96" r="44" fill="#FFF3CF"/>${montana(520, 90, '#46305F', 1.2)}${montana(574, 66, '#2F2449', 3.1)}${montana(618, 44, '#1C1833', 5.3)}</svg>
   <div class="centro">
     <div class="marca">${hoja.replace(/id="kk-/g, 'id="s-').replace(/url\(#kk-/g, 'url(#s-')}<div><h1>Kotonoha</h1><div class="kanji">言の葉</div></div></div>
-    <p class="lema">Learn Japanese, English and German from real video, web pages, books and manga</p>
+    <p class="lema">Learn Japanese, English, Chinese and German from real video, web pages, books and manga</p>
     <div class="linea"><span class="chip"><b>Interactive</b> subtitles</span><span class="chip">Word panel with <b>Claude</b></span><span class="chip">On-device <b>OCR</b></span><span class="chip"><b>Anki</b> cards</span></div>
   </div>
 </body></html>`);

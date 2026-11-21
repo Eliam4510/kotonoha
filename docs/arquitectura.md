@@ -279,7 +279,7 @@ Lo caro es medir y cambiar el DOM. Chromium reconstruye todos los marcadores de 
 
 ## Paquetes de lengua
 
-Todo lo que depende de la lengua que se estudia vive en `src/lenguas/<lengua>`, y el resto del programa solo conoce las interfaces de `src/lenguas/tipos.ts`. Hay dos paquetes: japonés e inglés. Cada paquete tiene dos partes:
+Todo lo que depende de la lengua que se estudia vive en `src/lenguas/<lengua>`, y el resto del programa solo conoce las interfaces de `src/lenguas/tipos.ts`. Hay cuatro paquetes: japonés, inglés, alemán y chino. Cada paquete tiene dos partes:
 
 - **`PaqueteLengua`** es ligero y lo usan todas las pantallas, incluido el content script: cómo se reconoce la lengua en un texto, cómo se escriben sus lecturas, sus niveles, voces y enlaces, y las frases de la interfaz que la nombran.
 - **`MotorLengua`** solo se carga en el motor y en la ventana de la aplicación: el analizador, las reglas de gramática, los prompts, las reglas de transcripción, los diccionarios y el audio.
@@ -297,6 +297,8 @@ El paquete del inglés muestra en qué difieren las lenguas:
 | Acento | Patrón tonal por moras, de Kanjium | Sílaba tónica, deducida de la IPA |
 | Diccionarios | JMdict, Kanjium y JPDB | Wiktionary, con wiktionary-to-yomitan, y FrequencyWords |
 | Lista de términos en memoria | Se espera a tenerla: sin ella, los compuestos saldrían partidos | No se espera: solo sirve para unir palabras con guion |
+
+El chino no separa las palabras con espacios, y ningún analizador que quepa en la extensión las corta bien. Las saca de los diccionarios: al importarlos, el motor guarda las lecturas de cada término (`lecturasDeDiccionario`, en la tabla `lecturas`), todas con la forma de CC-CEDICT (`normalizarLectura`: Wiktionary escribe *nǐ hǎo* y CC-CEDICT *nǐhǎo*), y carga la lista de frecuencia. El analizador elige el corte más probable, como jieba, y la lectura del diccionario; entre varias, la de la frase según pinyin-pro. Las pistas en caracteres tradicionales y lo que transcribe Whisper se pasan a simplificados antes de analizarlos (`normalizarTexto`, con OpenCC), y entre las pistas de un video se prefieren las simplificadas (`pistasPreferidas`). pinyin-pro y las tablas de OpenCC van aparte, en `chino.js`, como wink-nlp en `ingles.js`: solo se cargan al estudiar chino.
 
 Los ajustes que dependen de la lengua se guardan en `porLengua` y se restauran al cambiar de una a otra (`ajustesParaLengua`). El resto del programa sigue leyéndolos en su sitio de siempre.
 

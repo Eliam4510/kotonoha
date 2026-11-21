@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.zh.png" alt="Kotonoha：交互式字幕、词典、卡片和 Claude 讲解，学习日语、英语和德语" width="100%">
+  <img src="docs/img/banner.zh.png" alt="Kotonoha：交互式字幕、词典、卡片和 Claude 讲解，学习日语、英语、中文和德语" width="100%">
 </p>
 
 <h3 align="center">用你每天在看、在读的内容学日语和英语。</h3>
@@ -43,7 +43,7 @@ Kotonoha（言の葉，“言语之叶”）是一款适用于 Chrome 和 Edge �
   <tr><td><b>看</b></td><td>在 YouTube、Netflix、Disney+、Crunchyroll、Prime Video 和本地文件中，字幕带有振假名、音调重音和每个词的学习状态。</td></tr>
   <tr><td><b>读</b></td><td>任意网页、你复制的内容，以及 EPUB、PDF 和漫画书籍，扫描版和图片文件夹也可以。</td></tr>
   <tr><td><b>记</b></td><td>一键生成卡片，附带场景的音频和画面，可送往 Anki 或内置复习。</td></tr>
-  <tr><td><b>语言</b></td><td>可以学习日语、英语或德语。界面提供简体中文、英语、西班牙语、德语、韩语和日语。</td></tr>
+  <tr><td><b>语言</b></td><td>可以学习日语、英语、中文或德语。界面提供简体中文、英语、西班牙语、德语、韩语和日语。</td></tr>
 </table>
 
 ## 用 Kotonoha 学习的方式
@@ -160,6 +160,10 @@ flowchart LR
 
 学习英语时，单词面板会给出美式和英式的 IPA 发音，即使短语动词被拆开（如 *picked it up*）也能找到，并说明每个不规则形式来自哪个词。词典来自 Wiktionary，释义为中文。漫画按对话框从左到右逐个读取，句子由本机的神经网络语音朗读：英语用 Kokoro，德语用 Piper。每种语言分别保存自己的单词、卡片和设置，一键即可切换。
 
+### 也能学中文
+
+学中文时，文本即使没有空格也会自动分词，每个汉字上方标有拼音，采用词典声调；多音字（长：cháng 或 zhǎng）按句中的读音标注。词典是 CC-CEDICT，若有你所用语言的 Wiktionary 简短译文，会排在它前面；用汉字或拼音都能搜索，带不带声调都行。学习的是简体字：如果视频只有繁体字幕，会转成简体显示。等级采用 HSK 3.0。
+
 ### 还有
 
 - **英语的实际发音。** 单词面板会按连贯说话时的样子显示句子：*going to* → *gonna*、*meet you* → *meechu*、*turn off* → *tur‿noff*，并说明每种变化。
@@ -239,7 +243,7 @@ flowchart LR
 
 代码以 [MIT 许可](LICENSE)发布。第三方组件、使用时下载的数据以及负责任使用的条件详见[声明](docs/zh/notices.md)。
 
-- 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) 和 KANJIDIC（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)；英语和德语使用 [Wiktionary](https://www.wiktionary.org)，经 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理。
+- 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) 和 KANJIDIC（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)；英语和德语使用 [Wiktionary](https://www.wiktionary.org)，经 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理；中文使用 [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)，经 [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) 整理。
 - 语音：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja 和 Parakeet，借助 [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 文字识别：[PP-OCRv5 和 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr) 和[对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0。

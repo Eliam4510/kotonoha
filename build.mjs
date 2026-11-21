@@ -26,6 +26,8 @@ const entradas = {
   libro: 'src/libro/index.ts',
   // El analizador del inglés, con su modelo: pesa varios megas y solo se carga si se estudia inglés.
   ingles: 'src/lenguas/ingles/wink.ts',
+  // pinyin-pro y las tablas de OpenCC: solo se cargan si se estudia chino.
+  chino: 'src/lenguas/chino/bibliotecas.ts',
 };
 
 const opciones = {

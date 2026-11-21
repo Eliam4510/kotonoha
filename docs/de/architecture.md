@@ -279,7 +279,7 @@ Teuer sind das Messen und das Ändern des DOM. Chromium baut nach jeder Änderun
 
 ## Sprachpakete
 
-Alles, was von der gelernten Sprache abhängt, liegt in `src/lenguas/<Sprache>`, und der Rest des Programms kennt nur die Schnittstellen in `src/lenguas/tipos.ts`. Es gibt zwei Pakete: Japanisch und Englisch. Jedes Paket besteht aus zwei Teilen:
+Alles, was von der gelernten Sprache abhängt, liegt in `src/lenguas/<Sprache>`, und der Rest des Programms kennt nur die Schnittstellen in `src/lenguas/tipos.ts`. Es gibt vier Pakete: Japanisch, Englisch, Deutsch und Chinesisch. Jedes Paket besteht aus zwei Teilen:
 
 - **`PaqueteLengua`** ist leichtgewichtig und wird von allen Ansichten genutzt, auch vom Content Script: wie die Sprache in einem Text erkannt wird, wie ihre Lesungen geschrieben werden, ihre Stufen, Stimmen und Links sowie die Sätze der Oberfläche, die sie benennen.
 - **`MotorLengua`** wird nur in der Engine und im Anwendungsfenster geladen: Analysator, Grammatikregeln, Prompts, Transkriptionsregeln, Wörterbücher und Audio.
@@ -297,6 +297,8 @@ Das Paket für Englisch zeigt, worin sich die Sprachen unterscheiden:
 | Akzent | Tonmuster nach Moren, von Kanjium | Betonte Silbe, aus der IPA abgeleitet |
 | Wörterbücher | JMdict, Kanjium und JPDB | Wiktionary über wiktionary-to-yomitan und FrequencyWords |
 | Liste der Begriffe im Speicher | Die Analyse wartet darauf: Ohne sie würden Komposita getrennt | Die Analyse wartet nicht: Sie dient nur dazu, Wörter mit Bindestrich zu verbinden |
+
+Chinesisch trennt Wörter nicht durch Leerzeichen, und kein Analysator, der in die Erweiterung passt, zerlegt sie gut. Die Wörter stammen aus den Wörterbüchern: Beim Import speichert die Engine die Lesungen jedes Begriffs (`lecturasDeDiccionario`, in der Tabelle `lecturas`), alle in der Form von CC-CEDICT (`normalizarLectura`: Wiktionary schreibt *nǐ hǎo*, CC-CEDICT *nǐhǎo*), und lädt die Häufigkeitsliste. Der Analysator wählt die wahrscheinlichste Zerlegung, wie jieba, und die Lesung des Wörterbuchs; bei mehreren die des Satzes laut pinyin-pro. Spuren in traditionellen Schriftzeichen und das von Whisper Transkribierte werden vor der Analyse in vereinfachte umgewandelt (`normalizarTexto`, mit OpenCC), und unter den Spuren eines Videos werden die vereinfachten bevorzugt (`pistasPreferidas`). pinyin-pro und die Tabellen von OpenCC liegen getrennt in `chino.js`, wie wink-nlp in `ingles.js`: Sie werden nur geladen, wenn man Chinesisch lernt.
 
 Einstellungen, die von der Sprache abhängen, werden in `porLengua` gespeichert und beim Wechsel wiederhergestellt (`ajustesParaLengua`). Der Rest des Programms liest sie weiterhin an ihrem gewohnten Ort.
 

@@ -3,9 +3,9 @@
 // mientras el motor está abierto y se rehace si cambian la lengua o los diccionarios.
 
 import { buscarPorSignificado as buscarEnIndice, clasesDe, type ConSignificado, type EntradaBreve, indiceDeSignificados, ordenarEntradas, sinonimosDe } from '../nucleo/explorar';
-import { db } from './db';
+import { db, type FilaTermino } from './db';
 import { listaDiccionarios } from './diccionarios';
-import { lengua } from './lengua';
+import { lengua, motorLengua } from './lengua';
 
 /** La etiqueta de JMdict (en el formato de Yomitan) de las palabras de uso común. */
 const COMUN = String.fromCodePoint(0x2b50);
@@ -166,7 +166,9 @@ async function porFrecuencia(xs: EntradaBreve[]): Promise<EntradaBreve[]> {
   if (!dic || xs.length < 2) return xs;
   const filas = await db.frecuencias.bulkGet(xs.map((e) => [dic.id, e.termino, e.lectura]));
   const sinLectura = await db.frecuencias.bulkGet(xs.map((e) => [dic.id, e.termino, '']));
-  const rango = (i: number) => filas[i]?.rango ?? sinLectura[i]?.rango ?? Infinity;
+  // Las listas sencillas (FrequencyWords) guardan la palabra como su lectura: en chino, la de la entrada es el pinyin.
+  const comoLista = await db.frecuencias.bulkGet(xs.map((e) => [dic.id, e.termino, e.termino]));
+  const rango = (i: number) => filas[i]?.rango ?? sinLectura[i]?.rango ?? comoLista[i]?.rango ?? Infinity;
   return xs
     .map((e, i) => ({ e, r: rango(i), i }))
     .sort((a, b) => Number(b.e.comun) - Number(a.e.comun) || a.r - b.r || a.i - b.i)
@@ -196,6 +198,20 @@ export async function categoriaConCaracter(id: string, caracter: string, limite 
 const FILAS_PREFIJO = 4000;
 
 /**
+ * Lo que la lengua escribe de otra forma que no se estudia: en chino, 銀行 junto a 银行, con la misma lectura y la misma
+ * definición. Se queda la forma de la lengua (la simplificada) si también está entre los resultados.
+ */
+function sinFormasRepetidas(filas: FilaTermino[]): FilaTermino[] {
+  const normalizar = motorLengua().normalizarTexto;
+  if (!normalizar) return filas;
+  const presentes = new Set(filas.map((f) => `${f.termino}|${f.lectura}`));
+  return filas.filter((f) => {
+    const propia = normalizar(f.termino);
+    return propia === f.termino || !presentes.has(`${propia}|${f.lectura}`);
+  });
+}
+
+/**
  * La lista de resultados del diccionario: primero las palabras que son justo lo buscado (por su escritura o, si se
  * escribió solo la lectura, por ella: のむ da 飲む y 呑む), y después las que empiezan por ello (日本 da 日本語 y 日本人).
  */
@@ -208,10 +224,25 @@ export async function resultadosDeBusqueda(texto: string, limite = 40): Promise<
   const orden = new Map((await diccionariosDeTerminos()).map((d, i) => [d.id, i]));
   const exactas = new Map<string, EntradaConOrden>();
   const empiezan = new Map<string, EntradaConOrden>();
-  const indice = db.terminos.where(porLectura ? 'lectura' : 'termino');
-  // Donde la lectura no distingue palabras, tampoco las mayúsculas: «haus» encuentra Haus.
-  const filas = await (lectura.distingue ? indice.startsWith(buscado) : indice.startsWithIgnoreCase(buscado)).limit(FILAS_PREFIJO).toArray();
-  const igual = (x: string) => (lectura.distingue ? x === buscado : x.toLocaleLowerCase() === buscado.toLocaleLowerCase());
+  // En chino, sin tonos: «nihao» encuentra nǐhǎo. Si se escribieron los tonos (ni3hao3, nǐhǎo), solo esos.
+  const laxa = porLectura && lectura.paraBuscar ? lectura.paraBuscar(q) : null;
+  const conTonos = laxa !== null && buscado !== laxa;
+  let filas: FilaTermino[];
+  if (laxa !== null) {
+    const conLectura = await db.lecturas.where('busqueda').startsWith(laxa).limit(FILAS_PREFIJO).toArray();
+    const terminos = [...new Set(conLectura.map((f) => f.termino))];
+    filas = terminos.length ? await db.terminos.where('termino').anyOf(terminos).limit(FILAS_PREFIJO).toArray() : [];
+    filas = filas.filter((f) => lectura.paraBuscar!(f.lectura).startsWith(laxa) && (!conTonos || lectura.normalizar(f.lectura).startsWith(buscado)));
+  } else {
+    const indice = db.terminos.where(porLectura ? 'lectura' : 'termino');
+    // Donde la lectura no distingue palabras, tampoco las mayúsculas: «haus» encuentra Haus.
+    filas = await (lectura.distingue ? indice.startsWith(buscado) : indice.startsWithIgnoreCase(buscado)).limit(FILAS_PREFIJO).toArray();
+  }
+  // Lo que pasa a la forma de la lengua (en chino, las tablas de OpenCC) se carga con el analizador.
+  if (motorLengua().normalizarTexto) await motorLengua().analizador.cargar().catch(() => {});
+  filas = sinFormasRepetidas(filas);
+  const igual = (x: string) =>
+    laxa !== null ? (conTonos ? lectura.normalizar(x) === buscado : lectura.paraBuscar!(x) === laxa) : lectura.distingue ? x === buscado : x.toLocaleLowerCase() === buscado.toLocaleLowerCase();
   for (const f of filas) {
     const o = orden.get(f.dic);
     if (o === undefined) continue;

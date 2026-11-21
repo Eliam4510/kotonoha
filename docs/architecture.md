@@ -279,7 +279,7 @@ What costs is measuring and changing the DOM. Chromium rebuilds every highlight 
 
 ## Language packages
 
-Everything that depends on the language being studied lives in `src/lenguas/<language>`, and the rest of the program only knows the interfaces in `src/lenguas/tipos.ts`. There are two packages: Japanese and English. Each package has two parts:
+Everything that depends on the language being studied lives in `src/lenguas/<language>`, and the rest of the program only knows the interfaces in `src/lenguas/tipos.ts`. There are four packages: Japanese, English, German and Chinese. Each package has two parts:
 
 - **`PaqueteLengua`** is lightweight and used by every screen, including the content script: how the language is recognized in a text, how its readings are written, its levels, voices and links, and the interface sentences that name it.
 - **`MotorLengua`** is only loaded in the engine and in the application window: the analyzer, grammar rules, prompts, transcription rules, dictionaries and audio.
@@ -297,6 +297,8 @@ The English package shows where languages differ:
 | Accent | Pitch pattern by mora, from Kanjium | Stressed syllable, worked out from the IPA |
 | Dictionaries | JMdict, Kanjium and JPDB | Wiktionary, through wiktionary-to-yomitan, and FrequencyWords |
 | List of terms in memory | Analysis waits for it: without it, compounds would come out split | Analysis does not wait: it only serves to join hyphenated words |
+
+Chinese does not separate words with spaces, and no analyzer that fits in the extension splits them well. It takes them from the dictionaries: when importing them, the engine stores each term’s readings (`lecturasDeDiccionario`, in the `lecturas` table), all in CC-CEDICT’s form (`normalizarLectura`: Wiktionary writes *nǐ hǎo* and CC-CEDICT *nǐhǎo*), and loads the frequency list. The analyzer picks the most probable split, as jieba does, and the dictionary reading; among several, the sentence’s according to pinyin-pro. Tracks in traditional characters and what Whisper transcribes are turned into simplified characters before analysis (`normalizarTexto`, with OpenCC), and among a video’s tracks the simplified ones are preferred (`pistasPreferidas`). pinyin-pro and the OpenCC tables go separately, in `chino.js`, like wink-nlp in `ingles.js`: they are only loaded when studying Chinese.
 
 Settings that depend on the language are stored in `porLengua` and restored when switching (`ajustesParaLengua`). The rest of the program keeps reading them in their usual place.
 

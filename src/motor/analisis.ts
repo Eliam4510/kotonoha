@@ -28,6 +28,8 @@ let terminos: Set<string> | null = null;
 /** En las lenguas que lo usan, de qué palabras sale cada forma flexionada (ging, de gehen) y cuánto se usa cada una. */
 let formas: Map<string, FormaFlexionada[]> | null = null;
 let rangos: Map<string, number> | null = null;
+/** En las lenguas que lo usan, cómo lee cada término el diccionario: en chino, 长 es cháng o zhǎng. */
+let lecturas: Map<string, string[]> | null = null;
 /** De qué lengua son los términos en memoria. */
 let lenguaTerminos = '';
 /**
@@ -39,6 +41,7 @@ let terminosAnteriores: {
   terminos: Set<string>;
   formas: Map<string, FormaFlexionada[]> | null;
   rangos: Map<string, number> | null;
+  lecturas: Map<string, string[]> | null;
 } | null = null;
 
 /** Lo que el analizador puede preguntar de los diccionarios sin esperar a la base. */
@@ -46,7 +49,19 @@ const consultas: ConsultasAnalisis = {
   formas: (palabra) => formas?.get(palabra),
   // Las listas de frecuencia vienen en minúsculas: Essen cuenta como «essen».
   rango: (termino) => rangos?.get(termino) ?? rangos?.get(termino.toLocaleLowerCase()),
+  lecturas: (termino) => lecturas?.get(termino),
 };
+
+/** Las lecturas de todos los diccionarios, juntas y sin repetir: la misma puede venir en varios. */
+async function leerLecturas(): Promise<Map<string, string[]>> {
+  const salida = new Map<string, string[]>();
+  for (const f of await db.lecturas.toArray()) {
+    const previas = salida.get(f.termino);
+    if (!previas) salida.set(f.termino, f.lecturas);
+    else for (const l of f.lecturas) if (!previas.includes(l)) previas.push(l);
+  }
+  return salida;
+}
 
 /** Las formas de todos los diccionarios, juntas: la misma puede venir en varios. */
 async function leerFormas(): Promise<Map<string, FormaFlexionada[]>> {
@@ -91,15 +106,19 @@ export function recargarTerminos(): Promise<void> {
   const esta = ++ultimaCarga;
   const id = lengua().id;
   const conFormas = !!motorLengua().formasDeDiccionario;
+  const conLecturas = !!motorLengua().lecturasDeDiccionario;
   cargaTerminos = (async () => {
     const claves = (await db.terminos.orderBy('termino').uniqueKeys()) as string[];
     const nuevasFormas = conFormas ? await leerFormas() : null;
-    const nuevosRangos = conFormas ? await leerRangos() : null;
+    const nuevasLecturas = conLecturas ? await leerLecturas() : null;
+    // La frecuencia decide entre dos lemas (alemán) o cómo partir un texto sin espacios (chino).
+    const nuevosRangos = conFormas || conLecturas ? await leerRangos() : null;
     // Una carga larga puede acabar después de cambiar de lengua: lo que traiga ya no sirve.
     if (esta !== ultimaCarga) return;
     terminos = new Set(claves);
     formas = nuevasFormas;
     rangos = nuevosRangos;
+    lecturas = nuevasLecturas;
     lenguaTerminos = id;
     cacheTokens.clear();
     cacheGlosas.clear();
@@ -126,14 +145,15 @@ async function preparar(): Promise<void> {
 export function olvidarLengua() {
   ultimaCarga++;
   const id = lengua().id;
-  const salientes = terminos && lenguaTerminos && lenguaTerminos !== id ? { lengua: lenguaTerminos, terminos, formas, rangos } : null;
+  const salientes = terminos && lenguaTerminos && lenguaTerminos !== id ? { lengua: lenguaTerminos, terminos, formas, rangos, lecturas } : null;
   if (terminosAnteriores?.lengua === id) {
-    ({ terminos, formas, rangos } = terminosAnteriores);
+    ({ terminos, formas, rangos, lecturas } = terminosAnteriores);
     lenguaTerminos = id;
   } else {
     terminos = null;
     formas = null;
     rangos = null;
+    lecturas = null;
     lenguaTerminos = '';
   }
   terminosAnteriores = salientes ?? terminosAnteriores;
@@ -219,7 +239,11 @@ async function datosDe(unicas: ClaveConDatos[], o = { acentos: true, glosas: tru
   const filasFrec = dicFrec
     ? await db.frecuencias.bulkGet(unicas.map(([, v]) => [dicFrec, v.lema, v.lectura] as [string, string, string]))
     : [];
-  const faltanFrec = dicFrec ? unicas.filter((_, i) => !filasFrec[i]).map(([, v]) => [dicFrec, v.lema, ''] as [string, string, string]) : [];
+  // Sin su lectura: las que no la traen, y las listas sencillas, que guardan la palabra como su lectura (FrequencyWords).
+  // En chino la lectura es el pinyin, así que solo así se encuentran.
+  const faltanFrec = dicFrec
+    ? unicas.filter((_, i) => !filasFrec[i]).flatMap(([, v]) => [[dicFrec, v.lema, ''], [dicFrec, v.lema, v.lema]] as [string, string, string][])
+    : [];
   const respaldoFrec = faltanFrec.length ? await db.frecuencias.bulkGet(faltanFrec) : [];
   const frecPorLema = new Map(respaldoFrec.filter(Boolean).map((f) => [f!.termino, f!.rango]));
   // Las listas de frecuencia vienen en minúsculas: un sustantivo alemán, Kind, está como «kind».
@@ -390,6 +414,10 @@ export async function analizarLineas(
   fuente?: { titulo?: string; url?: string; idVideo?: string }
 ): Promise<LineaAnalizada[]> {
   await preparar();
+  // Una pista en otra forma de la lengua (en chino, en tradicionales) se analiza y se ve ya cambiada; también lo que
+  // transcribe Whisper, que pasa por aquí como cualquier pista.
+  const normalizar = motorLengua().normalizarTexto;
+  if (normalizar) lineas = lineas.map((l) => ({ ...l, texto: normalizar(l.texto) }));
   const filas = await db.analisis.bulkGet(lineas.map((l) => claveLinea(l.texto)));
   const tokens = lineas.map((l, i) => {
     const base = tokensDe(l.texto);

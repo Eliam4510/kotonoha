@@ -279,7 +279,7 @@ AivisSpeech の音声は、Style-Bert-VITS2 JP-Extra の ONNX モデル（AIVMX�
 
 ## 言語パッケージ
 
-学習する言語によって変わるものはすべて `src/lenguas/<言語>` にあり、プログラムの他の部分は `src/lenguas/tipos.ts` のインターフェースだけを知っています。パッケージは日本語と英語の 2 つです。各パッケージは二つの部分に分かれます。
+学習する言語によって変わるものはすべて `src/lenguas/<言語>` にあり、プログラムの他の部分は `src/lenguas/tipos.ts` のインターフェースだけを知っています。パッケージは日本語、英語、ドイツ語、中国語の 4 つです。各パッケージは二つの部分に分かれます。
 
 - **`PaqueteLengua`** は軽量で、コンテンツスクリプトを含むすべての画面で使います。文章の中でその言語を見分ける方法、読みの書き方、レベル、音声、リンク、そしてその言語に触れる画面上の文を持ちます。
 - **`MotorLengua`** はエンジンとアプリのウィンドウでのみ読み込みます。解析器、文法の規則、プロンプト、文字起こしの規則、辞書、音声を持ちます。
@@ -297,6 +297,8 @@ AivisSpeech の音声は、Style-Bert-VITS2 JP-Extra の ONNX モデル（AIVMX�
 | アクセント | モーラごとの音調パターン、Kanjium | 強勢のある音節、IPA から導出 |
 | 辞書 | JMdict、Kanjium、JPDB | wiktionary-to-yomitan を通じた Wiktionary と FrequencyWords |
 | メモリ上の語のリスト | 分析はこれを待ちます。なければ複合語が分かれてしまいます | 分析は待ちません。ハイフンでつながる語を結ぶためだけに使います |
+
+中国語は単語をスペースで区切らず、拡張機能に収まる解析器ではうまく区切れません。そこで単語は辞書から得ます。インポート時にエンジンは各語の読みを保存し（`lecturasDeDiccionario`、`lecturas` テーブル）、すべて CC-CEDICT の書き方にそろえ（`normalizarLectura`：Wiktionary は *nǐ hǎo*、CC-CEDICT は *nǐhǎo*）、頻度リストも読み込みます。解析器は jieba のように最も確からしい区切りと辞書の読みを選び、読みが複数あれば pinyin-pro による文中の読みを選びます。繁体字のトラックと Whisper の書き起こしは解析の前に簡体字に変換し（`normalizarTexto`、OpenCC を使用）、動画のトラックでは簡体字を優先します（`pistasPreferidas`）。pinyin-pro と OpenCC の変換表は、wink-nlp の `ingles.js` と同じく別の `chino.js` にあり、中国語を学ぶときだけ読み込みます。
 
 言語によって変わる設定は `porLengua` に保存され、切り替え時に復元されます（`ajustesParaLengua`）。プログラムの他の部分はこれまでどおりの場所から読み取ります。
 

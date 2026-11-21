@@ -70,9 +70,9 @@ comprobar(consultas === 1, 'Al volver a Inicio no pregunta otra vez en el mismo 
 // ---------- Lengua desde Inicio ----------
 
 const selector = p.locator('.ap-lengua-segmentado');
-comprobar((await selector.locator('button').count()) === 3, 'Inicio enseña las tres lenguas');
+comprobar((await selector.locator('button').count()) === 4, 'Inicio enseña las cuatro lenguas');
 comprobar((await selector.locator('[aria-checked="true"]').innerText()).includes('日本語'), 'Con la que se estudia marcada, en su escritura');
-comprobar((await selector.locator('svg.ap-bandera').count()) === 3, 'Cada una con su bandera');
+comprobar((await selector.locator('svg.ap-bandera').count()) === 4, 'Cada una con su bandera');
 await selector.locator('[data-lengua="en"]').click();
 await p.waitForFunction(() => document.querySelector('.ap-lengua-segmentado [aria-checked="true"]')?.textContent?.includes('English'), null, { timeout: 8000 }).catch(() => {});
 comprobar((await ajustes()).idiomaObjetivo === 'en', 'Elegir English pasa a estudiar inglés');
@@ -87,7 +87,7 @@ await p.screenshot({ path: join(CAPTURAS, '2-ingles.png') });
 const menu = p.locator('.ap-lengua-menu');
 comprobar((await menu.locator('.ap-lengua-actual').innerText()).includes('English'), 'La barra lateral dice qué se estudia');
 await menu.locator('.ap-lengua-actual').click();
-comprobar((await menu.locator('[role="menuitemradio"]').count()) === 3, 'Y abre un menú con las tres');
+comprobar((await menu.locator('[role="menuitemradio"]').count()) === 4, 'Y abre un menú con las cuatro');
 // Después de su animación de entrada, que empieza transparente.
 await p.waitForTimeout(300);
 await p.screenshot({ path: join(CAPTURAS, '3-menu.png') });

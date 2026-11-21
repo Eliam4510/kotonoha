@@ -28,6 +28,8 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [narabas](https://github.com/darashi/narabas)，darashi 出品，及其用 ReazonSpeech 语料库训练的[模型](https://github.com/darashi/narabas-models/releases/tag/v0) | 日语音素模型，用于在音调重音练习中检查音拍；使用时从作者的发布下载，与该工具本身的做法相同；Kotonoha 不再分发 | 工具为 MIT；模型发布时未附带自己的许可证 |
 | [AivisHub 语音](https://hub.aivis-project.com)（Style-Bert-VITS2 JP-Extra），ku-nlp 的 BERT [DeBERTa-v2-large-japanese-char-wwm](https://huggingface.co/ku-nlp/deberta-v2-large-japanese-char-wwm)（[tsukumijima 的 ONNX 转换](https://huggingface.co/tsukumijima/deberta-v2-large-japanese-char-wwm-onnx)），以及 [yomi 格式](https://huggingface.co/datasets/hdae/yomi-dict)的词典 [naist-jdic](https://github.com/jpreprocess/naist-jdic) | 日语神经网络语音，在设置的“语音”中安装时下载；Kotonoha 不重新分发 | 每个语音有自己的许可证，安装前会显示（ACML 1.0、ACML-NC 1.0、CC0 或自定义）；BERT 为 CC BY-SA 4.0，词典为 BSD-3-Clause |
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | 为 AivisHub 语音提供读音、重音和重音短语，连同 LICENSE 和 NOTICE 一起并入代码 src/lenguas/japones/voz/yomi | MIT |
+| [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | 按上下文给出汉语拼音：在一个字的几个读音中（长：cháng 或 zhǎng）选出句中的读音 | MIT |
+| [opencc-js](https://github.com/nk2028/opencc-js)，及 [OpenCC](https://github.com/BYVoid/OpenCC) 的转换表（`opencc-data`） | 把繁体字幕轨道和 Whisper 的转写转成简体字；其声明见 `licencias/AVISO-opencc.txt` | 代码 MIT，转换表 Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/ffmpeg` | 读取本地文件 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/core` | FFmpeg 核心，编译时复制 | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) 与 [eSpeak NG](https://github.com/espeak-ng/espeak-ng)，`@diffusionstudio/piper-wasm` | 神经网络语音的音素，编译时复制，只含英语和德语词典 | MIT 和 GPL-3.0-or-later |
@@ -56,9 +58,10 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | 笔顺 | [KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，原始文件由 jsDelivr 提供；它没有的文件由该项目的 GitHub 仓库提供 | CC BY-SA 3.0 |
 | 单词音频 | JapanesePod101 和 [Lingua Libre](https://lingualibre.org) | 以各来源为准 |
 | 图片 | [Openverse](https://openverse.org) | 以每张图片的许可证为准 |
-| 英语和德语词典和发音 | [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 根据 [kaikki.org](https://kaikki.org) 整理，从 Hugging Face 提供 | CC BY-SA 4.0 |
-| 英语和德语频率 | Hermit Dave 的 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)，基于 OpenSubtitles | CC BY-SA 4.0 |
-| 英语和德语单词音频 | Wikimedia Commons 和 [Lingua Libre](https://lingualibre.org) | 各录音的条款 |
+| 英语和德语词典和发音，以及汉语的简短译文 | [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 根据 [kaikki.org](https://kaikki.org) 整理，从 Hugging Face 提供 | CC BY-SA 4.0 |
+| CC-CEDICT | [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)，采用 [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) 的格式，每天在 GitHub 上发布 | CC BY-SA 4.0 |
+| 英语、德语和汉语频率 | Hermit Dave 的 [FrequencyWords](https://github.com/hermitdave/FrequencyWords)，基于 OpenSubtitles | CC BY-SA 4.0 |
+| 英语、德语和汉语单词音频 | Wikimedia Commons 和 [Lingua Libre](https://lingualibre.org) | 各录音的条款 |
 
 ## 外部程序
 

@@ -15,6 +15,7 @@ Diese Anleitung beschreibt die tägliche Nutzung von Kotonoha. Die Installation 
 - [Webseiten, Reader und Bibliothek](#webseiten-reader-und-bibliothek)
 - [Englisch lernen](#englisch-lernen)
 - [Deutsch lernen](#deutsch-lernen)
+- [Chinesisch lernen](#chinesisch-lernen)
 - [Kosten für Claude](#kosten-für-claude)
 - [Daten und Sicherung](#daten-und-sicherung)
 - [Tastenkürzel](#tastenkürzel)
@@ -30,7 +31,7 @@ Beim ersten Mal öffnet sich eine Begrüßung, die nach Sprache, Lernsprache und
 | Claude-API-Schlüssel | Einstellungen, Claude | Erklärungen, Prüfung der Lesungen, Übersetzung und Korrektur. Er wird nur im Browser gespeichert |
 | Andere KI-Anbieter | Einstellungen, Andere KI-Anbieter | OpenRouter, DeepSeek oder OpenAI mit ihrem Schlüssel, oder LM Studio und Ollama auf dem Rechner selbst, für die gewählten Aufgaben. Claude bleibt der Standard |
 | Sprache und Niveau | Einstellungen, Sprache und Niveau | Sprache der Oberfläche und, getrennt davon, die der Erklärungen und Übersetzungen. Das Niveau passt die Erklärungen an und bestimmt, wie viele Furigana anfangs sichtbar sind |
-| Sprache, die du lernst | **Start** und die Seitenleiste, Einstellungen, Sprache und Niveau, das Menü der Erweiterung oder **Videoeinstellungen, Untertitel** direkt im Video | Japanisch, Englisch oder Deutsch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
+| Sprache, die du lernst | **Start** und die Seitenleiste, Einstellungen, Sprache und Niveau, das Menü der Erweiterung oder **Videoeinstellungen, Untertitel** direkt im Video | Japanisch, Englisch, Chinesisch oder Deutsch. Jede behält ihre eigenen Wörter, Wörterbücher, Karten und Einstellungen |
 | Anki | Einstellungen, Karten und Anki | Optional. Erfordert ein geöffnetes Anki mit dem Add-on AnkiConnect |
 
 Die Erweiterung funktioniert ohne Claude-Schlüssel: Untertitel, Wörterbuch, Furigana, Farben, Karten und Whisper benötigen ihn nicht.
@@ -145,7 +146,7 @@ Whisper erzeugt japanische Untertitel, wenn ein Video keine mitbringt. Es läuft
 
 | Modell | Download | Einsatz |
 |---|---|---|
-| Automatisch | | Standard. Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Deutsch und Whisper Turbo für Lieder |
+| Automatisch | | Standard. Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Deutsch und Whisper Turbo für Lieder und für Chinesisch |
 | Haas-ja | 1,3 GB | Nur Japanisch. Am genauesten und schnellsten bei gesprochener Sprache, auch mit Hintergrundmusik, und mit Satzzeichen |
 | Parakeet | 1,3 GB | Englisch und Deutsch. Am genauesten und schnellsten bei gesprochener Sprache, auch mit Hintergrundmusik, mit Satzzeichen und den genauesten Zeiten |
 | Whisper Turbo | 1,5 GB | Am besten für Lieder |
@@ -357,6 +358,23 @@ Es wird wie Englisch gewählt, und alles funktioniert gleich, mit diesen Untersc
 | Comics | Der Modus **Comic**, wie im Englischen, mit ä, ö, ü und ß: 0,4 % Fehler auf Testseiten |
 | Buch-OCR | Liest moderne Schrift gut: 0,03 % Fehler auf Testseiten in vier Schriften. Die Fraktur alter Bücher wird nicht gelesen: Auf einer Seite von 1919 verfehlte sie drei von vier Buchstaben |
 | Stimme der Sätze | **Neuronale Stimme im Browser** liest die Sätze mit Piper, mit der Stimme von Thorsten, auf dem eigenen Rechner und ohne Schlüssel. Beim ersten Mal werden 63 MB heruntergeladen, und ein Satz ist in weniger als einer Sekunde gelesen |
+
+## Chinesisch lernen
+
+Es wird wie Englisch gewählt, und alles funktioniert gleich, mit diesen Unterschieden:
+
+| Element | Auf Chinesisch |
+|---|---|
+| Schrift | Vereinfachte Schriftzeichen. Unter den Spuren eines Videos wird die vereinfachte gewählt; eine in traditionellen Schriftzeichen und das von Whisper Transkribierte werden in vereinfachten angezeigt und analysiert. Webseiten in traditionellen Schriftzeichen werden so gelesen, wie sie sind |
+| Wörterbücher | CC-CEDICT, das offene chinesische Wörterbuch, mit dem Pinyin jedes Wortes und seinen beiden Schriftformen: Es definiert auf Englisch, erscheint täglich und lädt etwa 8 MB herunter. Davor stehen die kurzen Übersetzungen von Wiktionary in der Sprache der Oberfläche, falls es welche gibt, und dazu die Häufigkeitsliste von FrequencyWords, die auch hilft, den Text in Wörter zu zerlegen |
+| Wörter | Chinesisch trennt Wörter nicht durch Leerzeichen: Kotonoha zerlegt den Text mit den Wörterbüchern und der Häufigkeit (我们 / 今天 / 去 / 银行). Ein Name oder ein Wort, das in keinem Wörterbuch steht, bleibt Zeichen für Zeichen, und Claude korrigiert es beim Prüfen der Zeile |
+| Pinyin | Über jedem Zeichen, mit Tonzeichen (yín háng) oder, unter **Einstellungen, Sprache und Niveau**, mit Ziffern (yin2 hang2). Es ist das des Wörterbuchs, mit dem neutralen Ton (意思, yìsi) und ohne den Tonwechsel von 一 und 不, der später eigens gezeigt wird. Hat ein Zeichen mehrere Lesungen (长, cháng oder zhǎng), wird die des Satzes gewählt |
+| Suchen | In Schriftzeichen oder in Pinyin, mit oder ohne Töne: *nihao* und *ni3hao3* finden 你好 |
+| Grammatik | 35 Punkte von HSK 1 bis 5, etwa 了, 把, 被, 是…的 oder 越来越, mit derselben Bestätigung durch Claude |
+| Niveaus | Die des HSK 3.0, 2025 überarbeitet: von HSK 1 (300 Wörter) bis HSK 7–9 |
+| Transkription | Whisper Turbo, auch für gesprochene Sprache. Viele chinesische Videos haben die Untertitel fest im Bild: Dann liefert es den Text |
+| Stimme der Sätze | Die Azure-Stimmen für Hochchinesisch der Volksrepublik oder die des Browsers. Die Stimmen von AivisHub lesen nur Japanisch |
+| Strichfolge | Wird noch nicht angeboten |
 
 ## Kosten für Claude
 

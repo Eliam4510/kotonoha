@@ -38,6 +38,8 @@ export interface ConsultasAnalisis {
   formas?(palabra: string): readonly FormaFlexionada[] | undefined;
   /** El puesto de una palabra en la lista de frecuencia: cuanto menor, más común. */
   rango?(termino: string): number | undefined;
+  /** Cómo se lee un término según los diccionarios: en chino, 长 es cháng o zhǎng. */
+  lecturas?(termino: string): readonly string[] | undefined;
 }
 
 /** Una palabra tal como la entrega el analizador, antes de mirar diccionarios y progreso. */
@@ -145,8 +147,18 @@ export interface LecturaLengua {
   normalizar(lectura: string): string;
   /** Si un texto está escrito solo con lo que se usa para las lecturas, y por tanto se puede buscar por ellas. */
   esSoloLectura(texto: string): boolean;
+  /**
+   * La forma de una lectura con la que se busca, si es más laxa que `normalizar`: en chino, sin tonos, para que «nihao»
+   * encuentre 你好. Sin esto, se busca la lectura tal cual.
+   */
+  paraBuscar?(lectura: string): string;
   /** Ancho de un carácter de la lectura respecto a su tamaño, para saber si cabe. */
   anchoCaracter(formato: string): number;
+  /**
+   * Cuánto se puede estrechar una lectura que no cabe sobre su texto en una página. Sin esto, hasta el 62 %: más estrecho,
+   * el kana deja de leerse bien. El pinyin, de letras latinas sencillas, aguanta más.
+   */
+  compresionMinima?: number;
   /** Si la lectura es la pronunciación guardada, cómo se escribe sobre la palabra. `visible` sabrá leerlo. */
   dePronunciacion?(transcripciones: Transcripcion[]): string;
 }
@@ -407,6 +419,11 @@ export interface PaqueteLengua {
   ajustes: Partial<AjustesLengua>;
   /** Palabras que en un título delatan una canción en esta lengua, además de las de siempre como «MV». */
   tituloDeCancion?: RegExp;
+  /**
+   * Entre las pistas de subtítulos de la lengua, cuáles se prefieren, de más a menos: en chino, las de caracteres
+   * simplificados (zh-Hans, zh-CN) antes que las de tradicionales. Sin esto, cualquiera vale lo mismo.
+   */
+  pistasPreferidas?: string[];
   /** Si las fichas del lector buscan también frases hechas que empiecen en la palabra. */
   frasesEnLector: boolean;
   /** Qué buscar para ilustrar una palabra, si no hace falta preguntárselo a Claude. */
@@ -608,6 +625,28 @@ export interface MotorLengua {
    * un analizador propio. Con ellas se carga también la lista de frecuencia, que decide entre dos lemas posibles.
    */
   formasDeDiccionario?: boolean;
+  /**
+   * Si las lecturas de cada término se guardan para analizar: en chino, la de una palabra es la del diccionario (意思 se
+   * lee yìsi, con el segundo tono neutro), y el analizador elige entre las de un carácter suelto (长, cháng o zhǎng). Con
+   * ellas se carga también la lista de frecuencia, que decide cómo partir un texto sin espacios.
+   */
+  lecturasDeDiccionario?: boolean;
+  /**
+   * Cómo se guarda la lectura de un término al importar un diccionario, si cada uno la escribe a su manera: en chino,
+   * Wiktionary separa las sílabas (nǐ hǎo) y CC-CEDICT no (nǐhǎo). Así casan, y la glosa en el idioma de cada cual se
+   * encuentra por la lectura de la palabra.
+   */
+  normalizarLectura?(lectura: string): string;
+  /**
+   * Cómo se guarda cada definición al importarla, si el diccionario trae algo en una forma que aquí no sirve: en
+   * CC-CEDICT, cada referencia en sus dos escrituras (個｜个) y el clasificador como «CL:».
+   */
+  limpiarGlosa?(glosa: string): string;
+  /**
+   * Lo que se hace con un texto antes de analizarlo, si llega de fuera en otra forma de la lengua: en chino, una pista en
+   * caracteres tradicionales se pasa a simplificados. Sus palabras dan el texto ya cambiado, que es lo que se ve.
+   */
+  normalizarTexto?(texto: string): string;
   /** Cómo se le enseña a Claude una palabra analizada. Sin esto, con su lectura entre paréntesis. */
   describirPalabra?(token: TokenUnido): string;
   /** La parte de una definición que cabe bajo una palabra. Sin esto, hasta el primer punto y coma. */

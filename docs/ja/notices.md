@@ -28,6 +28,8 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | [narabas](https://github.com/darashi/narabas)、darashi 製、ReazonSpeech コーパスで学習した[モデル](https://github.com/darashi/narabas-models/releases/tag/v0) | アクセントの練習でモーラを確認する日本語の音素モデル。ツール自体と同じく、使うときに作者の公開ページからダウンロード。Kotonoha は再配布しない | ツールは MIT。モデルは独自のライセンスなしで公開 |
 | [AivisHub の音声](https://hub.aivis-project.com)（Style-Bert-VITS2 JP-Extra）、ku-nlp の BERT [DeBERTa-v2-large-japanese-char-wwm](https://huggingface.co/ku-nlp/deberta-v2-large-japanese-char-wwm)（[tsukumijima による ONNX 変換](https://huggingface.co/tsukumijima/deberta-v2-large-japanese-char-wwm-onnx)）、[yomi の形式](https://huggingface.co/datasets/hdae/yomi-dict)の辞書 [naist-jdic](https://github.com/jpreprocess/naist-jdic) | 日本語のニューラル音声。設定の「音声」からインストールするときにダウンロードし、Kotonoha は再配布しない | 音声ごとのライセンス（インストール前に表示：ACML 1.0、ACML-NC 1.0、CC0、独自）。BERT は CC BY-SA 4.0、辞書は BSD-3-Clause |
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | AivisHub の音声のための読み、アクセント、アクセント句。src/lenguas/japones/voz/yomi に LICENSE と NOTICE ごと取り込み | MIT |
+| [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | 中国語の文脈に応じたピンイン：一つの漢字の読み（长 の cháng と zhǎng）から、その文での読みを選ぶ | MIT |
+| [opencc-js](https://github.com/nk2028/opencc-js)、[OpenCC](https://github.com/BYVoid/OpenCC) の変換表（`opencc-data`）とともに | 繁体字の字幕トラックと Whisper の書き起こしを簡体字に変換。告知は `licencias/AVISO-opencc.txt` | コードは MIT、変換表は Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/ffmpeg` | 手元のファイルの読み取り | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/core` | FFmpeg のコア、コンパイル時にコピー | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) と [eSpeak NG](https://github.com/espeak-ng/espeak-ng)、`@diffusionstudio/piper-wasm` | ニューラル音声の音素、コンパイル時に英語とドイツ語の辞書だけを入れてコピー | MIT と GPL-3.0-or-later |
@@ -56,9 +58,10 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | 書き順 | [KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、jsDelivr が配信する元のファイル（ない場合はプロジェクトの GitHub リポジトリから取得） | CC BY-SA 3.0 |
 | 単語の音声 | JapanesePod101 と [Lingua Libre](https://lingualibre.org) | 各出所の条件 |
 | 画像 | [Openverse](https://openverse.org) | 各画像のライセンス |
-| 英語とドイツ語の辞書と発音 | [Wiktionary](https://www.wiktionary.org)。[kaikki.org](https://kaikki.org) をもとに [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) が整形し、Hugging Face から配信 | CC BY-SA 4.0 |
-| 英語とドイツ語の頻度 | Hermit Dave の [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、OpenSubtitles に基づく | CC BY-SA 4.0 |
-| 英語とドイツ語の単語の音声 | Wikimedia Commons、[Lingua Libre](https://lingualibre.org) | 各録音の条件 |
+| 英語とドイツ語の辞書と発音、中国語の短い訳語 | [Wiktionary](https://www.wiktionary.org)。[kaikki.org](https://kaikki.org) をもとに [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) が整形し、Hugging Face から配信 | CC BY-SA 4.0 |
+| CC-CEDICT | [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)、[cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) の形式で、GitHub に毎日公開 | CC BY-SA 4.0 |
+| 英語、ドイツ語、中国語の頻度 | Hermit Dave の [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、OpenSubtitles に基づく | CC BY-SA 4.0 |
+| 英語、ドイツ語、中国語の単語の音声 | Wikimedia Commons、[Lingua Libre](https://lingualibre.org) | 各録音の条件 |
 
 ## 外部プログラム
 

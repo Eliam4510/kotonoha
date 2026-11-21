@@ -28,6 +28,8 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [narabas](https://github.com/darashi/narabas), de darashi, con su [modelo](https://github.com/darashi/narabas-models/releases/tag/v0), entrenado con el corpus ReazonSpeech | Modelo de fonemas del japonés para comprobar las moras en la práctica del acento, descargado al usarlo de la publicación de su autor, como hace la propia herramienta; Kotonoha no lo redistribuye | MIT, la herramienta; el modelo se publica sin licencia propia |
 | Las [voces de AivisHub](https://hub.aivis-project.com) (Style-Bert-VITS2 JP-Extra), con el BERT [DeBERTa-v2-large-japanese-char-wwm](https://huggingface.co/ku-nlp/deberta-v2-large-japanese-char-wwm) de ku-nlp, en la [conversión a ONNX de tsukumijima](https://huggingface.co/tsukumijima/deberta-v2-large-japanese-char-wwm-onnx), y el diccionario [naist-jdic](https://github.com/jpreprocess/naist-jdic) en el [formato de yomi](https://huggingface.co/datasets/hdae/yomi-dict) | Voces neuronales del japonés, descargadas al instalarlas desde Ajustes, Voces; Kotonoha no las redistribuye | Cada voz, la suya, que se enseña antes de instalarla (ACML 1.0, ACML-NC 1.0, CC0 o propia); CC BY-SA 4.0 el BERT y BSD-3-Clause el diccionario |
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | La lectura, el acento y las frases acentuales de las voces de AivisHub, incorporado al código en src/lenguas/japones/voz/yomi con su LICENSE y su NOTICE | MIT |
+| [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | El pinyin del chino en contexto: entre las lecturas de un carácter (长, cháng o zhǎng), la de su frase | MIT |
+| [opencc-js](https://github.com/nk2028/opencc-js), con las tablas de [OpenCC](https://github.com/BYVoid/OpenCC) (`opencc-data`) | Pasar a caracteres simplificados las pistas en tradicionales y lo que transcribe Whisper; su aviso está en `licencias/AVISO-opencc.txt` | MIT el código, Apache-2.0 las tablas |
 | [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet), de Google, en la [conversión a ONNX de Audio Magic](https://huggingface.co/audiomagic/yamnet-onnx) (commit f25b741, sin cambiar sus pesos) | Saber dónde se canta al colocar la letra de una canción. Kotonoha publica ese mismo archivo con su versión 0.34.0 y la extensión lo descarga al usarlo; su aviso está en `licencias/AVISO-yamnet.txt` | Apache-2.0; las clases de AudioSet, CC BY 4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lectura de archivos propios | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | Núcleo de FFmpeg, copiado al compilar | GPL-2.0-or-later |
@@ -59,9 +61,10 @@ Ninguno de estos datos forma parte del repositorio. La extensión los descarga b
 | Orden de los trazos | [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, con los archivos originales servidos por jsDelivr o, si no los tiene, por el repositorio del proyecto en GitHub | CC BY-SA 3.0 |
 | Audio de palabras | JapanesePod101 y [Lingua Libre](https://lingualibre.org) | Las de cada fuente |
 | Imágenes | [Openverse](https://openverse.org) | La licencia de cada imagen |
-| Diccionarios y pronunciación del inglés y del alemán | [Wiktionary](https://www.wiktionary.org), preparados por [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) a partir de [kaikki.org](https://kaikki.org), y servidos desde Hugging Face | CC BY-SA 4.0 |
-| Frecuencias del inglés y del alemán | [FrequencyWords](https://github.com/hermitdave/FrequencyWords), de Hermit Dave, a partir de OpenSubtitles | CC BY-SA 4.0 |
-| Audio de palabras en inglés y en alemán | Wikimedia Commons y [Lingua Libre](https://lingualibre.org) | Las de cada grabación |
+| Diccionarios y pronunciación del inglés y del alemán, y traducciones breves del chino | [Wiktionary](https://www.wiktionary.org), preparados por [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) a partir de [kaikki.org](https://kaikki.org), y servidos desde Hugging Face | CC BY-SA 4.0 |
+| CC-CEDICT | [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict), en el formato de [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan), que lo publica cada día en GitHub | CC BY-SA 4.0 |
+| Frecuencias del inglés, del alemán y del chino | [FrequencyWords](https://github.com/hermitdave/FrequencyWords), de Hermit Dave, a partir de OpenSubtitles | CC BY-SA 4.0 |
+| Audio de palabras en inglés, alemán y chino | Wikimedia Commons y [Lingua Libre](https://lingualibre.org) | Las de cada grabación |
 
 ### Programas externos
 
@@ -106,6 +109,8 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [narabas](https://github.com/darashi/narabas), by darashi, with its [model](https://github.com/darashi/narabas-models/releases/tag/v0), trained on the ReazonSpeech corpus | Japanese phoneme model for checking morae in pitch accent practice, downloaded on use from its author’s release, as the tool itself does; Kotonoha does not redistribute it | MIT, the tool; the model is published without a license of its own |
 | [AivisHub voices](https://hub.aivis-project.com) (Style-Bert-VITS2 JP-Extra), with the BERT [DeBERTa-v2-large-japanese-char-wwm](https://huggingface.co/ku-nlp/deberta-v2-large-japanese-char-wwm) by ku-nlp, in the [ONNX conversion by tsukumijima](https://huggingface.co/tsukumijima/deberta-v2-large-japanese-char-wwm-onnx), and the dictionary [naist-jdic](https://github.com/jpreprocess/naist-jdic) in [yomi’s format](https://huggingface.co/datasets/hdae/yomi-dict) | Japanese neural voices, downloaded when installed from Settings, Voices; Kotonoha does not redistribute them | Each voice its own, shown before installing it (ACML 1.0, ACML-NC 1.0, CC0 or its own); CC BY-SA 4.0 for the BERT and BSD-3-Clause for the dictionary |
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | Readings, accent and accent phrases for the AivisHub voices, included in the code in src/lenguas/japones/voz/yomi with its LICENSE and NOTICE | MIT |
+| [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | Chinese pinyin in context: among a character’s readings (长, cháng or zhǎng), the one in its sentence | MIT |
+| [opencc-js](https://github.com/nk2028/opencc-js), with the [OpenCC](https://github.com/BYVoid/OpenCC) tables (`opencc-data`) | Turning traditional-character tracks and what Whisper transcribes into simplified characters; its notice is in `licencias/AVISO-opencc.txt` | MIT the code, Apache-2.0 the tables |
 | [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet), by Google, in [Audio Magic’s ONNX conversion](https://huggingface.co/audiomagic/yamnet-onnx) (commit f25b741, weights unchanged) | Telling where there is singing when placing a song’s lyrics. Kotonoha publishes that same file with its 0.34.0 release and the extension downloads it on use; its notice is in `licencias/AVISO-yamnet.txt` | Apache-2.0; the AudioSet classes, CC BY 4.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Reading local files | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg core, copied at build time | GPL-2.0-or-later |
@@ -137,9 +142,10 @@ None of this data is part of the repository. The extension downloads it on deman
 | Stroke order | [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, with the original files served by jsDelivr or, when it does not have them, by the project's repository on GitHub | CC BY-SA 3.0 |
 | Word audio | JapanesePod101 and [Lingua Libre](https://lingualibre.org) | Those of each source |
 | Images | [Openverse](https://openverse.org) | The license of each image |
-| English and German dictionaries and pronunciation | [Wiktionary](https://www.wiktionary.org), prepared by [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) from [kaikki.org](https://kaikki.org), and served from Hugging Face | CC BY-SA 4.0 |
-| English and German frequencies | [FrequencyWords](https://github.com/hermitdave/FrequencyWords), by Hermit Dave, from OpenSubtitles | CC BY-SA 4.0 |
-| English and German word audio | Wikimedia Commons and [Lingua Libre](https://lingualibre.org) | Those of each recording |
+| English and German dictionaries and pronunciation, and short Chinese translations | [Wiktionary](https://www.wiktionary.org), prepared by [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) from [kaikki.org](https://kaikki.org), and served from Hugging Face | CC BY-SA 4.0 |
+| CC-CEDICT | [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict), in the format of [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan), which publishes it every day on GitHub | CC BY-SA 4.0 |
+| English, German and Chinese frequencies | [FrequencyWords](https://github.com/hermitdave/FrequencyWords), by Hermit Dave, from OpenSubtitles | CC BY-SA 4.0 |
+| English, German and Chinese word audio | Wikimedia Commons and [Lingua Libre](https://lingualibre.org) | Those of each recording |
 
 ### External programs
 

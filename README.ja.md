@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.ja.png" alt="Kotonoha：インタラクティブな字幕、辞書、カード、Claude の解説で英語とドイツ語を学ぶ" width="100%">
+  <img src="docs/img/banner.ja.png" alt="Kotonoha：インタラクティブな字幕、辞書、カード、Claude の解説で英語、中国語、ドイツ語を学ぶ" width="100%">
 </p>
 
 <h3 align="center">いつも見ている動画や記事で、英語を学ぶ。</h3>
@@ -43,7 +43,7 @@ Kotonoha（言の葉）は Chrome と Edge の拡張機能です。YouTube や N
   <tr><td><b>見る</b></td><td>YouTube、Netflix、Disney+、Crunchyroll、Prime Video、手元の動画ファイルで、単語ごとの学習状態がわかる英語字幕。</td></tr>
   <tr><td><b>読む</b></td><td>あらゆるウェブページ、コピーした文章、EPUB や PDF の本、画像フォルダーの漫画。スキャンしたページも読めます。</td></tr>
   <tr><td><b>覚える</b></td><td>場面の音声と画像付きのカードをワンクリックで作成し、Anki または内蔵の復習へ。</td></tr>
-  <tr><td><b>言語</b></td><td>英語とドイツ語を学べます。表示言語は日本語、英語、スペイン語、ドイツ語、中国語、韓国語です。</td></tr>
+  <tr><td><b>言語</b></td><td>英語、中国語、ドイツ語を学べます。表示言語は日本語、英語、スペイン語、ドイツ語、中国語、韓国語です。</td></tr>
 </table>
 
 ## Kotonoha での学び方
@@ -119,6 +119,10 @@ flowchart LR
 <img src="docs/img/ingles-idioma.ja.png" alt="学ぶ言語を選ぶウェルカム画面" width="100%">
 
 なお、日本語を学ぶ人のための機能（ふりがな、ピッチアクセント、漢字の筆順、マンガの文字認識など）もあり、ほかの言語の README で紹介しています。
+
+### 中国語も
+
+中国語は、スペースのない文でも単語に区切られ、各漢字の上にピンインが付きます。声調は辞書のもので、読みが複数ある字（长：cháng と zhǎng）は文に合う読みになります。辞書は CC-CEDICT で、あなたの言語の Wiktionary の短い訳語があれば前に置きます。漢字でもピンインでも、声調の有無を問わず検索できます。学ぶのは簡体字で、繁体字の字幕しかない動画は簡体字で表示します。レベルは HSK 3.0 です。
 
 ### そのほか
 
@@ -201,7 +205,7 @@ TypeScript、Preact、Dexie、esbuild で作られ、音声と OCR には WebGPU
 
 コードは [MIT ライセンス](LICENSE)で公開しています。サードパーティのコンポーネント、利用時にダウンロードするデータ、責任ある利用の条件は[告知](docs/ja/notices.md)に記載しています。
 
-- 辞書：英語とドイツ語は [Wiktionary](https://www.wiktionary.org)（[wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org) による整形）、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、英語の解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。日本語は [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium)、[JPDB](https://jpdb.io)。
+- 辞書：英語とドイツ語は [Wiktionary](https://www.wiktionary.org)（[wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org) による整形）、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、英語の解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。中国語は [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)（[cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) による整形）。日本語は [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium)、[JPDB](https://jpdb.io)。
 - 音声：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja、Parakeet と [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 文字認識：[PP-OCRv5 と PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr)、[吹き出し検出モデル](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - アイコン：[Phosphor](https://phosphoricons.com)。フォント：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic)、[Nunito](https://fonts.google.com/specimen/Nunito)。

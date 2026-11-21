@@ -15,6 +15,7 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 - [Páginas web, lector y biblioteca](#páginas-web-lector-y-biblioteca)
 - [Estudiar inglés](#estudiar-inglés)
 - [Estudiar alemán](#estudiar-alemán)
+- [Estudiar chino](#estudiar-chino)
 - [Gasto en Claude](#gasto-en-claude)
 - [Datos y copia de seguridad](#datos-y-copia-de-seguridad)
 - [Atajos de teclado](#atajos-de-teclado)
@@ -30,7 +31,7 @@ La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere e
 | Clave de la API de Claude | Ajustes, Claude | Explicaciones, revisión de lecturas, traducción y corrección. Se guarda solo en el navegador |
 | Otros proveedores de IA | Ajustes, Otros proveedores de IA | OpenRouter, DeepSeek u OpenAI con su clave, o LM Studio y Ollama en el propio equipo, para las tareas que se elijan. Claude sigue siendo el de siempre |
 | Idioma y nivel | Ajustes, Idioma y nivel | Idioma de la interfaz, y por separado el de las explicaciones y las traducciones. El nivel adapta las explicaciones y decide cuánto furigana se ve al principio |
-| Idioma que estudias | **Inicio** y la barra lateral, Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés, inglés o alemán. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
+| Idioma que estudias | **Inicio** y la barra lateral, Ajustes, Idioma y nivel, el menú de la extensión, o **Ajustes de video, Subtítulos** sobre el propio video | Japonés, inglés, chino o alemán. Cada uno guarda sus palabras, diccionarios, tarjetas y ajustes |
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
 La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
@@ -145,7 +146,7 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 
 | Modelo | Descarga | Uso |
 |---|---|---|
-| Automático | | Por omisión. Haas-ja para la voz en japonés, Parakeet para la voz en inglés y en alemán, y Whisper Turbo para las canciones |
+| Automático | | Por omisión. Haas-ja para la voz en japonés, Parakeet para la voz en inglés y en alemán, y Whisper Turbo para las canciones y para el chino |
 | Haas-ja | 1,3 GB | Solo japonés. El más preciso y rápido con voz hablada, también con música de fondo, y con puntuación |
 | Parakeet | 1,3 GB | Inglés y alemán. El más preciso y rápido con voz hablada, también con música de fondo, con puntuación y los tiempos más exactos |
 | Whisper Turbo | 1,5 GB | El mejor con canciones |
@@ -357,6 +358,23 @@ Se elige como el inglés, y todo funciona igual, con estas diferencias:
 | Cómics | El modo **Cómic**, como en inglés, con ä, ö, ü y ß: un 0,4 % de error en páginas de prueba |
 | OCR de libros | Lee bien la letra moderna: un 0,03 % de error en páginas de prueba con cuatro tipografías. La letra gótica (Fraktur) de los libros antiguos no se lee: en una página de 1919 falló tres de cada cuatro letras |
 | Voz de las frases | **Voz neuronal en el navegador** lee las frases con Piper, con la voz de Thorsten, en el propio equipo y sin clave. La primera vez descarga 63 MB, y lee una frase en menos de un segundo |
+
+## Estudiar chino
+
+Se elige como el inglés, y todo funciona igual, con estas diferencias:
+
+| Elemento | En chino |
+|---|---|
+| Escritura | Caracteres simplificados. Entre las pistas de un video se elige la simplificada; una en tradicionales, y lo que transcribe Whisper, se ven y se analizan en simplificados. Las páginas web en tradicionales se leen como están |
+| Diccionarios | CC-CEDICT, el diccionario abierto del chino, con el pinyin de cada palabra y sus dos escrituras: define en inglés, se publica cada día y descarga unos 8 MB. Delante van las traducciones breves de Wiktionary en el idioma de la interfaz, si las hay, y con ellos la frecuencia de FrequencyWords, que también sirve para partir el texto en palabras |
+| Palabras | El chino no separa las palabras con espacios: Kotonoha las corta con los diccionarios y la frecuencia (我们 / 今天 / 去 / 银行). Un nombre o una palabra que no esté en ningún diccionario queda carácter a carácter, y Claude lo corrige al revisar la línea |
+| Pinyin | Sobre cada carácter, con marcas de tono (yín háng) o, en **Ajustes, Idioma y nivel**, con números (yin2 hang2). Es el del diccionario, con el tono neutro (意思, yìsi) y sin el cambio de tono de 一 y 不, que se enseñará aparte. Si un carácter se lee de varias formas (长, cháng o zhǎng), se elige la de la frase |
+| Buscar | En caracteres o en pinyin, con tonos o sin ellos: *nihao* y *ni3hao3* encuentran 你好 |
+| Gramática | 35 puntos del HSK 1 al 5, como 了, 把, 被, 是…的 o 越来越, con la misma confirmación de Claude |
+| Niveles | Los del HSK 3.0, revisado en 2025: del HSK 1 (300 palabras) al HSK 7–9 |
+| Transcripción | Whisper Turbo, también para la voz. Muchos videos chinos llevan los subtítulos grabados en la imagen: entonces es lo que da el texto |
+| Voz de las frases | Las voces de Azure del chino de China continental, o la del navegador. Las de AivisHub solo leen japonés |
+| Trazos | Todavía no se ofrecen |
 
 ## Gasto en Claude
 

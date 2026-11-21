@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.42.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.43.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -274,6 +274,21 @@ Stand jeder Funktion in Version 0.42.0 und die Art ihrer Überprüfung.
 | Neuronale Stimme im Browser: Piper, mit der Stimme von Thorsten | Automatisch; Whisper Turbo versteht ihre Sätze fehlerfrei |
 | Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
 
+## Chinesisch
+
+| Funktion | Überprüfung |
+|---|---|
+| Chinesische Untertitel, mit jedem Wort analysiert, Pinyin über jedem Zeichen und den zweiten Untertiteln in der Hilfssprache | Nachgebaute Seite |
+| Die vereinfachte Spur vor der traditionellen, und eine traditionelle in vereinfachte Schriftzeichen umgewandelt | Nachgebaute Seite |
+| Wörter mit den Wörterbüchern und der Häufigkeit zerlegt, und das Pinyin des Wörterbuchs; bei mehreren das des Satzes | Gemessen mit 200 Sätzen gegen jieba und pypinyin: 91 % der Trennungen und 96 % der Silben gleich. Der Rest ist fast nur Konvention (der neutrale Ton von CC-CEDICT, der nicht angewandte Tonwechsel) oder ein Fehler der Referenz |
+| CC-CEDICT, kurze Übersetzungen von Wiktionary in der Sprache der Oberfläche und Häufigkeit, mit vereinheitlichten Lesungen | Automatisch, mit echten Daten |
+| Suche nach Pinyin, mit oder ohne Töne | Automatisch, mit echten Daten |
+| Grammatik von HSK 1 bis 5: 35 Regeln, von Claude bestätigt | Automatisch |
+| Seiten-Reader, mit Pinyin über jedem Zeichen | Automatisch |
+| Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
+| Whisper Turbo für Sprache und Lieder | Ausstehend |
+| Azure-Stimmen | Ausstehend |
+
 ## Gestaltungsgrundsätze
 
 | Grundsatz | Umsetzung |
@@ -296,10 +311,11 @@ Stand jeder Funktion in Version 0.42.0 und die Art ihrer Überprüfung.
 |---|---|
 | Sehr große PDFs | Solange es geöffnet ist, reserviert ein PDF so viel Speicher, wie die Datei groß ist (so arbeitet pdf.js): Eine Datei mit 550 MB zeigt im Task-Manager mehr als 1 GB, obwohl nur der gelesene Teil wirklich belegt ist. Beim Schließen wird er freigegeben |
 | Eigennamen im Wortschatz | Nur die, die IPADIC als Namen erkennt, werden abgesondert; Figurennamen, die auch Wörter sind (アイ, ルビー), erscheinen als Wörter und lassen sich als ignoriert markieren. Gezählt wird nur bereits gelesener Text: in einem Bildbuch die mit der Texterkennung gelesenen Seiten |
-| Lernsprache | Japanisch, Englisch und Deutsch. Jede neue Sprache braucht ihr eigenes Paket in `src/lenguas` |
+| Lernsprache | Japanisch, Englisch, Deutsch und Chinesisch. Jede neue Sprache braucht ihr eigenes Paket in `src/lenguas` |
 | Analyse des Englischen | Sie erfolgt mit einem kleinen Modell, das in die Erweiterung passt. In mehrdeutigen Sätzen kann es die Wortart falsch bestimmen und damit auch die Übersetzung unter dem Wort. Das Wortfenster zeigt weiterhin alle Definitionen |
 | Analyse des Deutschen | Sie stammt aus den Formen der Wörterbücher: Ohne Deutsch–Englisch ist jedes Wort seine eigene Form. Zwischen zwei möglichen Wörtern entscheidet die Häufigkeit, ohne auf den Satz zu achten; Claude korrigiert Fehler, wenn es die Zeile prüft |
 | Deutsche Komposita | Ein zusammengesetztes Nomen, das nicht in den Wörterbüchern steht, wird nicht in seine Teile zerlegt |
+| Analyse des Chinesischen | Die Wörter stammen aus den Wörterbüchern und der Häufigkeit, ohne Modell: Ein Name oder ein neues Wort bleibt Zeichen für Zeichen. Das Pinyin trägt den Ton des Wörterbuchs: Der Tonwechsel von 一 und 不 wird noch nicht gezeigt |
 | Englisch-Englisch-Wörterbuch | Es ist groß: etwa 110 MB Download und etwa 220 MB Speicherplatz. Installieren und Entfernen dauern einige Minuten. Es wird nur bei englischer Oberfläche vorgeschlagen |
 | Übersetzungen der Oberfläche | Mit KI-Unterstützung geschrieben, noch ohne Prüfung durch Muttersprachler. Fehler werden in `idiomas/` korrigiert |
 | Seiten-Reader | Wirkt nur im Hauptframe: Text in einem iframe erreicht er nicht. Was eine Seite auf eine Leinwand oder in ein Bild zeichnet, ist kein Text |

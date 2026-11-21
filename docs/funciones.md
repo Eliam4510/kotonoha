@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.42.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.43.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -274,6 +274,21 @@ Estado de cada función en la versión 0.42.0, con la forma en que se ha verific
 | Voz neuronal en el navegador: Piper, con la voz de Thorsten | Automática; Whisper Turbo entiende sus frases sin errores |
 | Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
 
+## Chino
+
+| Función | Verificación |
+|---|---|
+| Subtítulos en chino, con cada palabra analizada, el pinyin sobre cada carácter y los secundarios en el idioma de apoyo | Página imitada |
+| La pista simplificada antes que la tradicional, y una tradicional pasada a caracteres simplificados | Página imitada |
+| Palabras partidas con los diccionarios y la frecuencia, y el pinyin del diccionario; si hay varios, el de la frase | Medida con 200 frases frente a jieba y pypinyin: iguales el 91 % de los cortes y el 96 % de las sílabas. Lo demás es casi todo criterio (el tono neutro de CC-CEDICT, el cambio de tono que no se aplica) o error de la referencia |
+| CC-CEDICT, traducciones breves de Wiktionary en el idioma de la interfaz y frecuencia, con las lecturas de todos igualadas | Automática, con datos reales |
+| Buscar por pinyin, con tonos o sin ellos | Automática, con datos reales |
+| Gramática del HSK 1 al 5: 35 reglas, confirmadas por Claude | Automática |
+| Lector de páginas, con el pinyin sobre cada carácter | Automática |
+| Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
+| Whisper Turbo para la voz y las canciones | Pendiente |
+| Voces de Azure | Pendiente |
+
 ## Criterios de diseño
 
 | Criterio | Aplicación |
@@ -296,10 +311,11 @@ Estado de cada función en la versión 0.42.0, con la forma en que se ha verific
 |---|---|
 | PDF muy grandes | Mientras está abierto, un PDF reserva tanta memoria como pesa el archivo (así trabaja pdf.js): uno de 550 MB aparece con más de 1 GB en el administrador de tareas, aunque solo se use de verdad la parte leída. Al cerrarlo se libera |
 | Nombres propios en el vocabulario | Solo se apartan los que IPADIC reconoce como nombres; los de personajes que también son palabras (アイ, ルビー) salen como palabras y se pueden marcar como ignorados. Solo cuenta el texto ya leído: en un libro de imágenes, las páginas leídas con el OCR |
-| Idioma de estudio | Japonés, inglés y alemán. Cada idioma nuevo necesita su propio paquete, en `src/lenguas` |
+| Idioma de estudio | Japonés, inglés, alemán y chino. Cada idioma nuevo necesita su propio paquete, en `src/lenguas` |
 | Análisis del inglés | Lo hace un modelo pequeño, que cabe en la extensión. En frases ambiguas puede equivocarse de categoría, y con ella de traducción bajo la palabra. La ficha sigue mostrando todas las definiciones |
 | Análisis del alemán | Sale de las formas de los diccionarios: sin el alemán–inglés, cada palabra es su propia forma. Entre dos palabras posibles decide la frecuencia, sin mirar la frase; Claude corrige lo que falle al revisar la línea |
 | Compuestos alemanes | Un sustantivo compuesto que no esté en los diccionarios no se descompone en sus partes |
+| Análisis del chino | Las palabras salen de los diccionarios y la frecuencia, sin un modelo: un nombre o una palabra nueva queda carácter a carácter. El pinyin lleva el tono de diccionario: el cambio de tono de 一 y 不 todavía no se enseña |
 | Diccionario inglés-inglés | Es grande: descarga unos 110 MB y ocupa unos 220 MB. Instalarlo y quitarlo lleva unos minutos. Solo se propone con la interfaz en inglés |
 | Traducciones de la interfaz | Escritas con ayuda de IA, sin revisión nativa todavía. Los errores se corrigen en `idiomas/` |
 | Lector de páginas | Solo actúa en el marco principal: no llega al texto dentro de un iframe. Lo que una página dibuje en un lienzo o en una imagen no es texto |

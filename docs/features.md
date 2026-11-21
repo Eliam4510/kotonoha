@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.42.0, along with how it has been verified.
+Status of each feature in version 0.43.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -274,6 +274,21 @@ Status of each feature in version 0.42.0, along with how it has been verified.
 | Neural voice in the browser: Piper, in Thorsten’s voice | Automated; Whisper Turbo understands its sentences without errors |
 | Word audio from Wikimedia Commons and Lingua Libre | Automated |
 
+## Chinese
+
+| Feature | Verification |
+|---|---|
+| Chinese subtitles, with every word analyzed, pinyin over each character and the secondary ones in the support language | Mock page |
+| The simplified track before the traditional one, and a traditional one turned into simplified characters | Mock page |
+| Words split with the dictionaries and the frequency list, and the dictionary’s pinyin; if there are several, the sentence’s | Measured with 200 sentences against jieba and pypinyin: 91 % of splits and 96 % of syllables the same. The rest is almost all convention (CC-CEDICT’s neutral tone, the tone change that is not applied) or errors in the reference |
+| CC-CEDICT, Wiktionary’s short translations in the interface language and frequency, with all their readings unified | Automatic, with real data |
+| Search by pinyin, with or without tones | Automatic, with real data |
+| Grammar from HSK 1 to 5: 35 rules, confirmed by Claude | Automatic |
+| Page reader, with pinyin over each character | Automatic |
+| Word audio from Wikimedia Commons and Lingua Libre | Automatic |
+| Whisper Turbo for speech and songs | Pending |
+| Azure voices | Pending |
+
 ## Design principles
 
 | Principle | How it applies |
@@ -296,10 +311,11 @@ Status of each feature in version 0.42.0, along with how it has been verified.
 |---|---|
 | Very large PDFs | While open, a PDF reserves as much memory as the file takes up (that is how pdf.js works): a 550 MB file shows more than 1 GB in the task manager, although only the part read is really used. It is released when closed |
 | Proper names in the vocabulary | Only the ones IPADIC recognizes as names are set apart; character names that are also words (アイ, ルビー) appear as words and can be marked as ignored. Only text already read counts: in an image book, the pages read with OCR |
-| Study language | Japanese, English and German. Each new language needs its own package, in `src/lenguas` |
+| Study language | Japanese, English, German and Chinese. Each new language needs its own package, in `src/lenguas` |
 | English analysis | It is done by a small model that fits in the extension. In ambiguous sentences it can pick the wrong category, and with it the wrong translation under the word. The word panel still shows every definition |
 | German analysis | It comes from the dictionaries' forms: without German–English, each word is its own form. Between two possible words, frequency decides, without looking at the sentence; Claude fixes what goes wrong when it reviews the line |
 | German compounds | A compound noun that is not in the dictionaries is not split into its parts |
+| Chinese analysis | Words come from the dictionaries and the frequency list, without a model: a name or a new word stays character by character. Pinyin carries the dictionary tone: the tone change of 一 and 不 is not taught yet |
 | English-English dictionary | It is large: about 110 MB to download and about 220 MB on disk. Installing and removing it takes a few minutes. It is only suggested with the interface in English |
 | Interface translations | Written with AI assistance, with no native review yet. Mistakes are fixed in `idiomas/` |
 | Page reader | Acts only on the main frame: it does not reach text inside an iframe. What a page draws on a canvas or in an image is not text |

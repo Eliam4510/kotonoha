@@ -1,4 +1,4 @@
-// Cambiar de lengua a la vista: en Inicio, un selector con las tres; en la barra lateral, un menú con la actual. Cada
+// Cambiar de lengua a la vista: en Inicio, un selector con todas; en la barra lateral, un menú con la actual. Cada
 // lengua lleva una bandera pequeña para reconocerla de un vistazo y su nombre escrito en ella misma. Las banderas son
 // dibujos: Windows no pinta los emoji de bandera, y en su lugar saldrían dos letras.
 
@@ -12,9 +12,38 @@ import { estudiarLengua } from '../ui/lengua';
 /** El alto de las franjas de la bandera de Estados Unidos: trece en 20 unidades. */
 const FRANJA = 20 / 13;
 
-/** La bandera de una lengua: Japón, Estados Unidos (el inglés de Kotonoha se pronuncia así por omisión) y Alemania. */
+/**
+ * Una estrella de cinco puntas de radio `r` en (x, y), con una punta hacia (haciaX, haciaY); sin ese punto, hacia
+ * arriba. Las de la bandera china, en su rejilla oficial de 30 × 20: la grande, y las cuatro pequeñas mirándola.
+ */
+function estrella(x: number, y: number, r: number, haciaX = x, haciaY = y - 1): string {
+  const inicio = Math.atan2(haciaY - y, haciaX - x);
+  return Array.from({ length: 10 }, (_, k) => {
+    const a = inicio + (k * Math.PI) / 5;
+    const radio = k % 2 ? r * 0.382 : r;
+    return `${(x + radio * Math.cos(a)).toFixed(2)},${(y + radio * Math.sin(a)).toFixed(2)}`;
+  }).join(' ');
+}
+
+/** La bandera de una lengua: Japón, Estados Unidos (el inglés de Kotonoha se pronuncia así por omisión), China y Alemania. */
 export function Bandera({ id, t = 18 }: { id: string; t?: number }) {
   const props = { class: 'ap-bandera', width: t, height: Math.round((t * 2) / 3), viewBox: '0 0 30 20', 'aria-hidden': 'true' as const };
+  if (id === 'zh') {
+    return (
+      <svg {...props}>
+        <rect width="30" height="20" fill="#EE1C25" />
+        <polygon points={estrella(5, 5, 3)} fill="#FFFF00" />
+        {[
+          [10, 2],
+          [12, 4],
+          [12, 7],
+          [10, 9],
+        ].map(([x, y]) => (
+          <polygon key={`${x}-${y}`} points={estrella(x, y, 1, 5, 5)} fill="#FFFF00" />
+        ))}
+      </svg>
+    );
+  }
   if (id === 'ja') {
     return (
       <svg {...props}>

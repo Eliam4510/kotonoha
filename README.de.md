@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.de.png" alt="Kotonoha: interaktive Untertitel, ein Wörterbuch, Karten und Erklärungen von Claude, um Japanisch, Englisch und Deutsch zu lernen" width="100%">
+  <img src="docs/img/banner.de.png" alt="Kotonoha: interaktive Untertitel, ein Wörterbuch, Karten und Erklärungen von Claude, um Japanisch, Englisch, Chinesisch und Deutsch zu lernen" width="100%">
 </p>
 
 <h3 align="center">Japanisch und Englisch lernen mit dem, was man ohnehin schaut und liest.</h3>
@@ -43,7 +43,7 @@ Alles läuft auf dem eigenen Rechner. Wörterbuch, Textanalyse, Transkription un
   <tr><td><b>Schauen</b></td><td>Untertitel mit Furigana, Tonhöhenakzent und dem Stand jedes Wortes auf YouTube, Netflix, Disney+, Crunchyroll, Prime Video und in eigenen Dateien.</td></tr>
   <tr><td><b>Lesen</b></td><td>Jede Webseite, alles Kopierte und Bücher als EPUB, PDF und Manga, auch eingescannte oder als Bilderordner.</td></tr>
   <tr><td><b>Behalten</b></td><td>Karten mit einem Klick, mit Ton und Bild der Szene, für Anki oder die eingebaute Wiederholung.</td></tr>
-  <tr><td><b>Sprachen</b></td><td>Gelernt wird Japanisch, Englisch oder Deutsch. Die Oberfläche gibt es auf Deutsch, Englisch, Spanisch, Chinesisch, Koreanisch und Japanisch.</td></tr>
+  <tr><td><b>Sprachen</b></td><td>Gelernt wird Japanisch, Englisch, Chinesisch oder Deutsch. Die Oberfläche gibt es auf Deutsch, Englisch, Spanisch, Chinesisch, Koreanisch und Japanisch.</td></tr>
 </table>
 
 ## So lernt man mit Kotonoha
@@ -160,6 +160,10 @@ Und geübt wird gleich dort: Man schreibt mit Maus, Stift oder Finger, nachzeich
 
 Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache in IPA, findet Partikelverben auch dann, wenn sie getrennt stehen, wie *picked it up*, und nennt das Wort, von dem jede unregelmäßige Form stammt. Die Wörterbücher stammen aus Wiktionary, auf Deutsch. Comics werden Sprechblase für Sprechblase gelesen, von links nach rechts, und Sätze klingen mit neuronalen Stimmen auf dem eigenen Rechner: Kokoro auf Englisch und Piper auf Deutsch. Jede Sprache behält ihre eigenen Wörter, Karten und Einstellungen, und der Wechsel braucht einen Klick.
 
+### Auch Chinesisch
+
+Auf Chinesisch werden die Wörter von selbst getrennt, auch ohne Leerzeichen im Text, und das Pinyin steht über jedem Zeichen, mit dem Ton des Wörterbuchs und, wenn ein Zeichen mehrere Lesungen hat (长, cháng oder zhǎng), der des Satzes. Das Wörterbuch ist CC-CEDICT, davor die kurzen Übersetzungen von Wiktionary, wenn es sie in deiner Sprache gibt, und gesucht wird in Schriftzeichen oder in Pinyin, mit oder ohne Töne. Gelernt werden vereinfachte Schriftzeichen: Hat ein Video nur Untertitel in traditionellen, erscheinen sie in vereinfachten. Die Niveaus sind die des HSK 3.0.
+
 ### Außerdem
 
 - **Wie Englisch wirklich klingt.** Das Wortfenster zeigt den Satz so, wie er beim zusammenhängenden Sprechen klingt: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, mit Erklärung zu jedem Fall.
@@ -239,7 +243,7 @@ Jede Version erscheint mit ihren Tests und ihrer Dokumentation in sechs Sprachen
 
 Der Code steht unter der [MIT-Lizenz](LICENSE). Komponenten Dritter, die bei der Nutzung heruntergeladenen Daten und die Bedingungen für einen verantwortungsvollen Gebrauch stehen in den [Hinweisen](docs/de/notices.md).
 
-- Wörterbücher: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) und KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) und [JPDB](https://jpdb.io); für Englisch und Deutsch [Wiktionary](https://www.wiktionary.org) über [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) und [kaikki.org](https://kaikki.org).
+- Wörterbücher: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) und KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) und [JPDB](https://jpdb.io); für Englisch und Deutsch [Wiktionary](https://www.wiktionary.org) über [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) und [kaikki.org](https://kaikki.org); für Chinesisch [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) über [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan).
 - Sprache: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja und Parakeet, mit [Transformers.js](https://github.com/huggingface/transformers.js).
 - Texterkennung: [PP-OCRv5 und PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) und ein [Sprechblasen-Detektor](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Strichfolge: [KanjiVG](https://kanjivg.tagaini.net), von Ulrich Apel, CC BY-SA 3.0.

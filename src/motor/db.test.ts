@@ -33,8 +33,8 @@ describe('bases de datos por lengua', () => {
     const base = baseDe('anterior');
     expect(base.name).toBe('kikitori-anterior');
     await base.open();
-    expect(base.verno).toBe(11);
-    expect(base.tables.map((t) => t.name)).toEqual(expect.arrayContaining(['formas', 'colecciones', 'anotaciones', 'inmersion', 'gramatica', 'gramaticaVista', 'caracteres', 'indices']));
+    expect(base.verno).toBe(12);
+    expect(base.tables.map((t) => t.name)).toEqual(expect.arrayContaining(['formas', 'colecciones', 'anotaciones', 'inmersion', 'gramatica', 'gramaticaVista', 'caracteres', 'indices', 'lecturas']));
     expect(await base.palabras.get('猫|')).toMatchObject({ lema: '猫', estado: 'conocida' });
     expect(await base.biblioteca.get('l')).toMatchObject({ titulo: 'Un libro', pagina: 4 });
     // La misma palabra de la versión anterior no aparece repetida ni con otra clave.

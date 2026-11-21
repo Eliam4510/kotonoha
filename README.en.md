@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/banner.en.png" alt="Kotonoha: interactive subtitles, a dictionary, flashcards and explanations from Claude for learning Japanese, English and German" width="100%">
+  <img src="docs/img/banner.en.png" alt="Kotonoha: interactive subtitles, a dictionary, flashcards and explanations from Claude for learning Japanese, English, Chinese and German" width="100%">
 </p>
 
 <h3 align="center">Learn Japanese from what you already watch and read.</h3>
@@ -43,7 +43,7 @@ It runs on your own computer. The dictionary, the text analysis, speech transcri
   <tr><td><b>Watch</b></td><td>Subtitles with furigana, pitch accent and the state of every word on YouTube, Netflix, Disney+, Crunchyroll, Prime Video and your own files.</td></tr>
   <tr><td><b>Read</b></td><td>Any web page, whatever you copy, and EPUB, PDF and manga books, scanned ones and image folders included.</td></tr>
   <tr><td><b>Remember</b></td><td>One-click flashcards with the audio and image of the scene, for Anki or the built-in review.</td></tr>
-  <tr><td><b>Languages</b></td><td>Study Japanese, English or German. The interface is in English, Spanish, German, Chinese, Korean and Japanese.</td></tr>
+  <tr><td><b>Languages</b></td><td>Study Japanese, English, Chinese or German. The interface is in English, Spanish, German, Chinese, Korean and Japanese.</td></tr>
 </table>
 
 ## How you learn with Kotonoha
@@ -158,6 +158,10 @@ And you practice it right there: you write with the mouse, a pen or your finger,
 
 The same tools work for German: the word panel tells you which word each conjugated or declined form comes from, such as *ging* from *gehen* or *Häuser* from *Haus*, finds separable verbs even when the particle sits at the end of the sentence, and gives the pronunciation in IPA. Its dictionaries come from Wiktionary, and German speech is transcribed by Parakeet. Speakers of other languages can study English the same way. Comics are read balloon by balloon, from left to right, and sentences are spoken by neural voices on your own computer: Kokoro in English and Piper in German. Each language keeps its own words, cards and settings, and switching takes one click.
 
+### Chinese too
+
+In Chinese, words are split on their own even though the text has no spaces, and pinyin goes over each character, with the dictionary tone and, when a character has several readings (长, cháng or zhǎng), the one in the sentence. The dictionary is CC-CEDICT, with Wiktionary’s short translations in front when they exist in your language, and you can search in characters or in pinyin, with or without tones. You study simplified characters: if a video only has subtitles in traditional characters, they show in simplified ones. The levels are those of the HSK 3.0.
+
 ### And also
 
 - **How English really sounds.** The word panel shows the sentence as it is said in connected speech: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, with what happens in each case.
@@ -237,7 +241,7 @@ Each release ships with its tests and its documentation in six languages; [What�
 
 The code is released under the [MIT license](LICENSE). Third-party components, the data downloaded during use and the terms of responsible use are detailed in [AVISOS.md](AVISOS.md#english).
 
-- Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) and KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io); for English and German, [Wiktionary](https://www.wiktionary.org) through [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) and [kaikki.org](https://kaikki.org).
+- Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) and KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io); for English and German, [Wiktionary](https://www.wiktionary.org) through [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) and [kaikki.org](https://kaikki.org); for Chinese, [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) through [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan).
 - Speech: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja and Parakeet, with [Transformers.js](https://github.com/huggingface/transformers.js).
 - Text recognition: [PP-OCRv5 and PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) and a [speech bubble detector](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0.

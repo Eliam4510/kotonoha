@@ -921,6 +921,7 @@ export class Pintor {
       if (l.fuera !== fuera) escrituras.push(() => this.marcarFuera(l, fuera));
     };
     const anchoCaracter = lengua.value.lectura.anchoCaracter(this.a.formatoLectura);
+    const minima = lengua.value.lectura.compresionMinima;
     for (const l of lista) {
       const caja = l.rango.getClientRects()[0];
       const e = estiloDe(l.padre);
@@ -938,14 +939,14 @@ export class Pintor {
       const tam = tamanoLectura(e.tam, e.hueco);
       const caracteres = l.texto.length;
       if (e.vertical) {
-        const k = compresionLectura(caja.height, caracteres, tam, anchoCaracter);
+        const k = compresionLectura(caja.height, caracteres, tam, anchoCaracter, minima);
         const x = caja.right - origen.x + 1;
         const y = caja.top - origen.y + caja.height / 2;
         const largo = caracteres * tam * anchoCaracter * k;
         escribir(l, oculta || (conLimite && (x + tam > limiteX || y + largo / 2 > limiteY)), x, y, tam, `translateY(-50%) scaleY(${k})`, e);
         continue;
       }
-      const k = compresionLectura(caja.width, caracteres, tam, anchoCaracter);
+      const k = compresionLectura(caja.width, caracteres, tam, anchoCaracter, minima);
       const ancho = caracteres * tam * anchoCaracter * k;
       // El rectángulo del texto es más alto que la letra: la lectura va justo encima de la letra, no de la caja.
       const arribaLetra = caja.top + Math.max(0, (caja.height - e.tam) / 2);

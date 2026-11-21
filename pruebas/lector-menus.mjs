@@ -308,9 +308,24 @@ console.log('\n== Una sola pestaña por libro ==');
 const pestanas = contexto.pages().length;
 await app.bringToFront();
 await app.locator('button.ap-tapa').first().click();
-await v.waitForTimeout(1500);
-const activa = await sw.evaluate(async () => (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]?.url ?? '');
-comprobar(contexto.pages().length === pestanas && activa.includes('visor.html'), 'Abrir otra vez el libro lleva a su pestaña, sin abrir otra', `${pestanas} → ${contexto.pages().length}`);
+// Lo que el fondo cambia es la pestaña activa de la ventana del libro, la misma de la app: antes del clic era la app.
+// No se mira «la última ventana enfocada»: un Edge con el perfil recién creado abre por su cuenta una ventana con su
+// página de inicio, y sin pantalla todas dicen estar enfocadas (desde la 0.43.0 pasaba casi siempre). Se espera, hasta
+// ocho segundos, porque el fondo no espera a nadie.
+let activa = '';
+for (let i = 0; i < 32 && !activa.includes('visor.html'); i++) {
+  await v.waitForTimeout(250);
+  activa = await sw.evaluate(async () => {
+    const ventanas = await chrome.windows.getAll({ populate: true });
+    const conApp = ventanas.find((w) => (w.tabs ?? []).some((t) => (t.url ?? '').includes('app.html')));
+    return conApp?.tabs?.find((t) => t.active)?.url ?? '';
+  });
+}
+const estadoPestanas = await sw.evaluate(async () => {
+  const ventanas = await chrome.windows.getAll({ populate: true });
+  return ventanas.map((w) => `${w.id}${w.focused ? '*' : ''}[${(w.tabs ?? []).map((t) => `${t.active ? '>' : ''}${(t.url || t.pendingUrl || '').replace(/^chrome-extension:\/\/[^/]+\//, '').slice(0, 30)}`).join(' ')}]`).join(' ');
+});
+comprobar(contexto.pages().length === pestanas && activa.includes('visor.html'), 'Abrir otra vez el libro lleva a su pestaña, sin abrir otra', `${pestanas} → ${contexto.pages().length}; ${estadoPestanas}`);
 await v.reload();
 await v.waitForSelector('.vs-carril');
 await v.click('.vs-carril [aria-label="Miniaturas"]');

@@ -107,7 +107,7 @@ const motor = async (metodo, ...args) => {
 console.log('\n== Elegir la lengua ==');
 const selector = app.locator('select[aria-label="Idioma que estudias"]');
 const opciones = await selector.locator('option').allTextContents();
-comprobar(opciones.join('|') === 'Japonés · 日本語|Inglés · English|Alemán · Deutsch', 'Se puede elegir el alemán', opciones.join(' | '));
+comprobar(opciones.join('|') === 'Japonés · 日本語|Inglés · English|Chino · 中文|Alemán · Deutsch', 'Se puede elegir el alemán', opciones.join(' | '));
 if ((await selector.inputValue()) !== 'de') {
   await selector.selectOption('de');
   await app.waitForTimeout(800);

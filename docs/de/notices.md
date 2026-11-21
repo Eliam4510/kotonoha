@@ -28,6 +28,8 @@ Der Code von Kotonoha wird unter der [MIT-Lizenz](../../LICENSE) veröffentlicht
 | [narabas](https://github.com/darashi/narabas), von darashi, mit seinem [Modell](https://github.com/darashi/narabas-models/releases/tag/v0), trainiert mit dem ReazonSpeech-Korpus | Phonemmodell für Japanisch, das die Moren in der Akzentübung prüft, bei Gebrauch aus der Veröffentlichung seines Autors heruntergeladen, wie es das Werkzeug selbst tut; Kotonoha verbreitet es nicht weiter | MIT, das Werkzeug; das Modell wird ohne eigene Lizenz veröffentlicht |
 | Die [Stimmen von AivisHub](https://hub.aivis-project.com) (Style-Bert-VITS2 JP-Extra), mit dem BERT [DeBERTa-v2-large-japanese-char-wwm](https://huggingface.co/ku-nlp/deberta-v2-large-japanese-char-wwm) von ku-nlp, in der [ONNX-Umwandlung von tsukumijima](https://huggingface.co/tsukumijima/deberta-v2-large-japanese-char-wwm-onnx), und dem Wörterbuch [naist-jdic](https://github.com/jpreprocess/naist-jdic) im [Format von yomi](https://huggingface.co/datasets/hdae/yomi-dict) | Neuronale Stimmen des Japanischen, heruntergeladen beim Installieren unter Einstellungen, Stimmen; Kotonoha verbreitet sie nicht weiter | Jede Stimme ihre eigene, die vor dem Installieren angezeigt wird (ACML 1.0, ACML-NC 1.0, CC0 oder eine eigene); CC BY-SA 4.0 für das BERT und BSD-3-Clause für das Wörterbuch |
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | Lesungen, Akzent und Akzentphrasen für die Stimmen von AivisHub, in den Code übernommen unter src/lenguas/japones/voz/yomi, mit seiner LICENSE und NOTICE | MIT |
+| [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | Pinyin des Chinesischen im Kontext: von den Lesungen eines Zeichens (长, cháng oder zhǎng) die seines Satzes | MIT |
+| [opencc-js](https://github.com/nk2028/opencc-js), mit den Tabellen von [OpenCC](https://github.com/BYVoid/OpenCC) (`opencc-data`) | Wandelt Spuren in traditionellen Schriftzeichen und das von Whisper Transkribierte in vereinfachte Schriftzeichen um; sein Hinweis steht in `licencias/AVISO-opencc.txt` | MIT der Code, Apache-2.0 die Tabellen |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | Lesen eigener Dateien | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg-Kern, beim Kompilieren kopiert | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) mit [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | Phoneme der neuronalen Stimmen, beim Kompilieren nur mit den Wörterbüchern für Englisch und Deutsch kopiert | MIT und GPL-3.0-or-later |
@@ -56,9 +58,10 @@ Keine dieser Daten gehört zum Repository. Die Erweiterung lädt sie bei Bedarf 
 | Strichfolge | [KanjiVG](https://kanjivg.tagaini.net) von Ulrich Apel, mit den Originaldateien über jsDelivr oder, wenn es sie nicht hat, aus dem GitHub-Repository des Projekts | CC BY-SA 3.0 |
 | Audio von Wörtern | JapanesePod101 und [Lingua Libre](https://lingualibre.org) | Die jeder Quelle |
 | Bilder | [Openverse](https://openverse.org) | Die Lizenz jedes Bildes |
-| Wörterbücher und Aussprache des Englischen und Deutschen | [Wiktionary](https://www.wiktionary.org), aufbereitet von [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) aus [kaikki.org](https://kaikki.org) und über Hugging Face bereitgestellt | CC BY-SA 4.0 |
-| Häufigkeiten des Englischen und Deutschen | [FrequencyWords](https://github.com/hermitdave/FrequencyWords) von Hermit Dave, auf Basis von OpenSubtitles | CC BY-SA 4.0 |
-| Wort-Audio auf Englisch und Deutsch | Wikimedia Commons und [Lingua Libre](https://lingualibre.org) | Die der jeweiligen Aufnahme |
+| Wörterbücher und Aussprache des Englischen und Deutschen, und kurze Übersetzungen des Chinesischen | [Wiktionary](https://www.wiktionary.org), aufbereitet von [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) aus [kaikki.org](https://kaikki.org) und über Hugging Face bereitgestellt | CC BY-SA 4.0 |
+| CC-CEDICT | [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict), im Format von [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan), das es täglich auf GitHub veröffentlicht | CC BY-SA 4.0 |
+| Häufigkeiten des Englischen, Deutschen und Chinesischen | [FrequencyWords](https://github.com/hermitdave/FrequencyWords) von Hermit Dave, auf Basis von OpenSubtitles | CC BY-SA 4.0 |
+| Wort-Audio auf Englisch, Deutsch und Chinesisch | Wikimedia Commons und [Lingua Libre](https://lingualibre.org) | Die der jeweiligen Aufnahme |
 
 ## Externe Programme
 

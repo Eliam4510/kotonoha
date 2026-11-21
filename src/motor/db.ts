@@ -29,6 +29,15 @@ export interface FilaForma {
   lemas: FormaFlexionada[];
 }
 
+/** Cómo lee un diccionario un término, en las lenguas que analizan con ello: 长, cháng y zhǎng. */
+export interface FilaLecturas {
+  dic: string;
+  termino: string;
+  lecturas: string[];
+  /** Esas lecturas tal como se buscan, si la lengua las busca de forma más laxa: en chino, sin tonos (chang, zhang). */
+  busqueda?: string[];
+}
+
 export interface FilaFrecuencia {
   dic: string;
   termino: string;
@@ -148,6 +157,7 @@ class BaseKotonoha extends Dexie {
   consumo!: Table<FilaConsumo, number>;
   trazos!: Table<FilaTrazos, string>;
   formas!: Table<FilaForma, [string, string]>;
+  lecturas!: Table<FilaLecturas, [string, string]>;
   colecciones!: Table<ColeccionBiblioteca, string>;
   anotaciones!: Table<AnotacionLibro, string>;
   inmersion!: Table<FilaInmersion, [string, string, string]>;
@@ -188,6 +198,9 @@ class BaseKotonoha extends Dexie {
     // su familia.
     // Y los índices del diccionario ya hechos, para no recorrerlo entero cada vez que arranca el motor.
     this.version(11).stores({ caracteres: 'caracter, fonetico, *piezas', indices: 'clave' });
+    // Las lecturas de cada término (0.43.0), para las lenguas que las necesitan al analizar, como el chino; y por ellas,
+    // sin tonos, se busca en el diccionario: nihao encuentra 你好.
+    this.version(12).stores({ lecturas: '[dic+termino], dic, *busqueda' });
   }
 }
 

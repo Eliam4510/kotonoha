@@ -59,6 +59,7 @@ import { acaboAnuncio, anotarSinAnuncio, desfaseDeSaltos, empezoAnuncio, iniciar
 import { numero, tm, tr } from '../compartido/i18n';
 import { relojInmersion } from '../compartido/relojInmersion';
 import { lengua } from '../ui/lengua';
+import { paqueteDe } from '../lenguas';
 
 let control: Control;
 
@@ -492,7 +493,13 @@ export function alSalirSubtitulo() {
 function elegirPista(lista: PistaInfo[], idioma: string): PistaInfo | undefined {
   const base = idioma.split('-')[0];
   const coincide = (p: PistaInfo) => p.idioma === idioma || p.idioma.split('-')[0] === base;
-  const candidatas = lista.filter(coincide);
+  // Entre las variantes de la lengua, las que prefiere su paquete: en chino, las de caracteres simplificados.
+  const preferidas = (paqueteDe(base).id === base ? paqueteDe(base).pistasPreferidas : undefined)?.map((x) => x.toLowerCase()) ?? [];
+  const puesto = (p: PistaInfo) => {
+    const i = preferidas.indexOf(p.idioma.toLowerCase());
+    return i < 0 ? preferidas.length : i;
+  };
+  const candidatas = lista.filter(coincide).sort((a, b) => puesto(a) - puesto(b));
   // Mejor los subtítulos hechos a mano que los automáticos, y sin CC para no leer acotaciones.
   return candidatas.find((p) => p.origen === 'letra') ?? candidatas.find((p) => p.origen === 'importada') ?? candidatas.find((p) => !p.automatica && !p.cc) ?? candidatas.find((p) => !p.automatica) ?? candidatas[0];
 }

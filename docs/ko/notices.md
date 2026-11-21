@@ -28,6 +28,8 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | [narabas](https://github.com/darashi/narabas), darashi 제작, ReazonSpeech 말뭉치로 학습한 [모델](https://github.com/darashi/narabas-models/releases/tag/v0) 포함 | 고저 악센트 연습에서 모라를 확인하는 일본어 음소 모델. 도구 자체와 마찬가지로 사용할 때 작성자의 배포에서 내려받으며, Kotonoha는 재배포하지 않음 | 도구는 MIT; 모델은 별도 라이선스 없이 공개됨 |
 | [AivisHub 음성](https://hub.aivis-project.com)(Style-Bert-VITS2 JP-Extra), ku-nlp의 BERT [DeBERTa-v2-large-japanese-char-wwm](https://huggingface.co/ku-nlp/deberta-v2-large-japanese-char-wwm)([tsukumijima의 ONNX 변환](https://huggingface.co/tsukumijima/deberta-v2-large-japanese-char-wwm-onnx)), [yomi 형식](https://huggingface.co/datasets/hdae/yomi-dict)의 사전 [naist-jdic](https://github.com/jpreprocess/naist-jdic) | 일본어 신경망 음성. 설정의 ‘음성’에서 설치할 때 내려받으며, Kotonoha는 재배포하지 않음 | 음성마다 고유한 라이선스(설치 전에 표시: ACML 1.0, ACML-NC 1.0, CC0 또는 자체). BERT는 CC BY-SA 4.0, 사전은 BSD-3-Clause |
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | AivisHub 음성을 위한 읽기, 악센트, 악센트 구. src/lenguas/japones/voz/yomi에 LICENSE, NOTICE와 함께 포함 | MIT |
+| [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | 문맥에 맞는 중국어 병음: 한 글자의 여러 읽기(长의 cháng과 zhǎng) 가운데 그 문장의 읽기 | MIT |
+| [opencc-js](https://github.com/nk2028/opencc-js), [OpenCC](https://github.com/BYVoid/OpenCC) 변환표(`opencc-data`) 포함 | 번체자 자막 트랙과 Whisper 받아쓰기를 간체자로 변환. 고지는 `licencias/AVISO-opencc.txt` | 코드는 MIT, 변환표는 Apache-2.0 |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | 내 파일 읽기 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg 코어, 컴파일 시 복사 | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize)와 [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | 신경망 음성의 음소, 컴파일 시 영어와 독일어 사전만 넣어 복사 | MIT와 GPL-3.0-or-later |
@@ -56,9 +58,10 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | 획순 | [KanjiVG](https://kanjivg.tagaini.net), Ulrich Apel, jsDelivr가 제공하는 원본 파일(없는 파일은 프로젝트의 GitHub 저장소에서 제공) | CC BY-SA 3.0 |
 | 단어 오디오 | JapanesePod101과 [Lingua Libre](https://lingualibre.org) | 각 출처의 조건 |
 | 이미지 | [Openverse](https://openverse.org) | 각 이미지의 라이선스 |
-| 영어와 독일어 사전과 발음 | [Wiktionary](https://www.wiktionary.org), [kaikki.org](https://kaikki.org)를 바탕으로 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)이 정리, Hugging Face에서 제공 | CC BY-SA 4.0 |
-| 영어와 독일어 빈도 | Hermit Dave의 [FrequencyWords](https://github.com/hermitdave/FrequencyWords), OpenSubtitles 기반 | CC BY-SA 4.0 |
-| 영어와 독일어 단어 오디오 | Wikimedia Commons, [Lingua Libre](https://lingualibre.org) | 각 녹음의 조건 |
+| 영어와 독일어 사전과 발음, 중국어 짧은 번역 | [Wiktionary](https://www.wiktionary.org), [kaikki.org](https://kaikki.org)를 바탕으로 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)이 정리, Hugging Face에서 제공 | CC BY-SA 4.0 |
+| CC-CEDICT | [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict), [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) 형식으로 GitHub에 매일 공개 | CC BY-SA 4.0 |
+| 영어, 독일어, 중국어 빈도 | Hermit Dave의 [FrequencyWords](https://github.com/hermitdave/FrequencyWords), OpenSubtitles 기반 | CC BY-SA 4.0 |
+| 영어, 독일어, 중국어 단어 오디오 | Wikimedia Commons, [Lingua Libre](https://lingualibre.org) | 각 녹음의 조건 |
 
 ## 외부 프로그램
 

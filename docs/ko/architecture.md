@@ -279,7 +279,7 @@ AivisSpeech 음성은 Style-Bert-VITS2 JP-Extra의 ONNX 모델(AIVMX)과 653 MB�
 
 ## 언어 패키지
 
-학습하는 언어에 따라 달라지는 모든 것은 `src/lenguas/<언어>`에 있으며, 프로그램의 나머지 부분은 `src/lenguas/tipos.ts`의 인터페이스만 압니다. 패키지는 일본어와 영어 두 가지입니다. 각 패키지는 두 부분으로 나뉩니다.
+학습하는 언어에 따라 달라지는 모든 것은 `src/lenguas/<언어>`에 있으며, 프로그램의 나머지 부분은 `src/lenguas/tipos.ts`의 인터페이스만 압니다. 패키지는 일본어, 영어, 독일어, 중국어 네 가지입니다. 각 패키지는 두 부분으로 나뉩니다.
 
 - **`PaqueteLengua`** 는 가벼우며 콘텐츠 스크립트를 포함한 모든 화면에서 사용합니다. 텍스트에서 해당 언어를 알아보는 방법, 읽기 표기, 수준, 음성, 링크, 그리고 인터페이스에서 해당 언어를 가리키는 문장을 담습니다.
 - **`MotorLengua`** 는 엔진과 애플리케이션 창에서만 불러옵니다. 분석기, 문법 규칙, 프롬프트, 전사 규칙, 사전, 오디오를 담습니다.
@@ -297,6 +297,8 @@ AivisSpeech 음성은 Style-Bert-VITS2 JP-Extra의 ONNX 모델(AIVMX)과 653 MB�
 | 악센트 | 모라별 고저 패턴, Kanjium | 강세 음절, IPA에서 도출 |
 | 사전 | JMdict, Kanjium, JPDB | wiktionary-to-yomitan을 통한 Wiktionary, FrequencyWords |
 | 메모리의 용어 목록 | 분석이 기다립니다. 없으면 복합어가 나뉘어 나옵니다 | 분석이 기다리지 않습니다. 하이픈으로 연결된 단어를 잇는 데만 쓰입니다 |
+
+중국어는 단어를 띄어 쓰지 않으며, 확장 프로그램에 들어갈 만한 분석기로는 잘 나눌 수 없습니다. 그래서 단어는 사전에서 얻습니다. 가져올 때 엔진은 각 용어의 읽기를 저장하고(`lecturasDeDiccionario`, `lecturas` 테이블) 모두 CC-CEDICT 표기로 맞추며(`normalizarLectura`: Wiktionary는 *nǐ hǎo*, CC-CEDICT는 *nǐhǎo*), 빈도 목록도 불러옵니다. 분석기는 jieba처럼 가장 그럴듯한 나눔과 사전의 읽기를 고르고, 읽기가 여러 개면 pinyin-pro에 따른 문장 속 읽기를 고릅니다. 번체자 트랙과 Whisper 받아쓰기는 분석 전에 간체자로 바꾸고(`normalizarTexto`, OpenCC 사용), 영상의 트랙 중에서는 간체자를 우선합니다(`pistasPreferidas`). pinyin-pro와 OpenCC 변환표는 wink-nlp의 `ingles.js`처럼 따로 `chino.js`에 있으며, 중국어를 공부할 때만 불러옵니다.
 
 언어에 따라 달라지는 설정은 `porLengua`에 저장되고 언어를 바꿀 때 복원됩니다(`ajustesParaLengua`). 프로그램의 나머지 부분은 평소 위치에서 그대로 읽습니다.
 

@@ -279,7 +279,7 @@ AivisSpeech 的语音是 Style-Bert-VITS2 JP-Extra 的 ONNX 模型（AIVMX），
 
 ## 语言包
 
-所有取决于所学语言的内容都位于 `src/lenguas/<语言>`，程序的其余部分只了解 `src/lenguas/tipos.ts` 中的接口。目前有两个语言包：日语和英语。每个包分为两部分：
+所有取决于所学语言的内容都位于 `src/lenguas/<语言>`，程序的其余部分只了解 `src/lenguas/tipos.ts` 中的接口。目前有四个语言包：日语、英语、德语和中文。每个包分为两部分：
 
 - **`PaqueteLengua`** 很轻量，所有界面都会使用，包括内容脚本：如何在文本中识别该语言、如何书写读音、级别、语音和链接，以及界面中提到该语言的句子。
 - **`MotorLengua`** 只在引擎和应用窗口中加载：分析器、语法规则、提示词、转录规则、词典和音频。
@@ -297,6 +297,8 @@ AivisSpeech 的语音是 Style-Bert-VITS2 JP-Extra 的 ONNX 模型（AIVMX），
 | 重音 | 按音拍的音调模式，来自 Kanjium | 重读音节，由 IPA 推导 |
 | 词典 | JMdict、Kanjium 和 JPDB | 通过 wiktionary-to-yomitan 获取的 Wiktionary，以及 FrequencyWords |
 | 内存中的词条列表 | 分析会等待它：没有它，复合词会被拆开 | 分析不等待：它只用于连接带连字符的词 |
+
+中文的词与词之间不用空格，能放进扩展里的分析器也切分得不好。因此词语取自词典：导入时，引擎保存每个词条的读音（`lecturasDeDiccionario`，即 `lecturas` 表），统一为 CC-CEDICT 的写法（`normalizarLectura`：Wiktionary 写作 *nǐ hǎo*，CC-CEDICT 写作 *nǐhǎo*），并载入词频表。分析器像 jieba 一样选出最可能的切分和词典读音；有多个读音时，按 pinyin-pro 判断的句中读音选择。繁体轨道和 Whisper 的转写在分析前转成简体（`normalizarTexto`，使用 OpenCC），视频的轨道中优先选择简体（`pistasPreferidas`）。pinyin-pro 和 OpenCC 的转换表和 wink-nlp 的 `ingles.js` 一样单独放在 `chino.js` 中，只在学习中文时载入。
 
 取决于语言的设置保存在 `porLengua` 中，切换时恢复（`ajustesParaLengua`）。程序的其余部分仍在原来的位置读取它们。
 

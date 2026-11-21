@@ -8,7 +8,7 @@ import { apiVersiones, descargaUltima, versionBuena } from '../nucleo/versionesG
 import { type CaracterImportado, type FormaImportada, type FrecuenciaImportada, leerBancoCaracteres, leerBancoFormas, leerBancoMeta, leerBancoTerminos, leerKanjium, leerListaFrecuencia } from '../nucleo/yomitan';
 import { db } from './db';
 import { tr } from '../compartido/i18n';
-import { motorLengua } from './lengua';
+import { lengua, motorLengua } from './lengua';
 
 const LOTE = 4000;
 const TANDA_BORRADO = 10000;
@@ -93,6 +93,7 @@ async function borrarFilas(id: string, tipo?: InfoDiccionario['tipo']) {
   if (tipo === 'terminos' || !tipo) {
     await borrarPorTandas(db.terminos, id);
     await borrarPorTandas(db.formas, id);
+    await borrarPorTandas(db.lecturas, id);
   }
   if (tipo === 'frecuencia' || !tipo) await borrarPorTandas(db.frecuencias, id);
   if (tipo === 'acento' || !tipo) await db.acentos.clear();
@@ -173,15 +174,31 @@ async function importarZip(
   const mejoresRangos = new Map<string, FrecuenciaImportada>();
   // Las formas de una misma palabra pueden venir en bancos distintos: se juntan antes de guardarlas.
   const formas = motorLengua().formasDeDiccionario ? new Map<string, FormaImportada>() : null;
+  // Y las lecturas de cada término, igual: 长 trae una fila con cháng y otra con zhǎng.
+  const lecturas = motorLengua().lecturasDeDiccionario ? new Map<string, Set<string>>() : null;
 
   for (let i = 0; i < bancos.length; i++) {
     const n = bancos[i];
     const crudo = JSON.parse(abrir(n)) as unknown[][];
     if (n.startsWith('term_bank')) {
-      const filas = leerBancoTerminos(crudo, motorLengua().seccionesOmitidas).map((f) => ({ ...f, dic: id }));
+      const { normalizarLectura: normalizar, limpiarGlosa: limpiar } = motorLengua();
+      const filas = leerBancoTerminos(crudo, motorLengua().seccionesOmitidas).map((f) => ({
+        ...f,
+        dic: id,
+        ...(normalizar ? { lectura: normalizar(f.lectura) } : {}),
+        ...(limpiar ? { glosas: f.glosas.map(limpiar) } : {}),
+      }));
       for (let j = 0; j < filas.length; j += LOTE) await db.terminos.bulkAdd(filas.slice(j, j + LOTE));
       filasTerminos += filas.length;
       if (formas) leerBancoFormas(crudo, formas);
+      if (lecturas) {
+        for (const f of filas) {
+          if (!f.lectura) continue;
+          const previas = lecturas.get(f.termino);
+          if (previas) previas.add(f.lectura);
+          else lecturas.set(f.termino, new Set([f.lectura]));
+        }
+      }
     } else {
       const { frecuencias, acentos: tonos, pronunciaciones } = leerBancoMeta(crudo);
       const fila = motorLengua().filaPronunciacion;
@@ -200,6 +217,17 @@ async function importarZip(
   if (formas?.size) {
     const conDic = [...formas.values()].map((f) => ({ ...f, dic: id }));
     for (let j = 0; j < conDic.length; j += LOTE) await db.formas.bulkPut(conDic.slice(j, j + LOTE));
+  }
+
+  if (lecturas?.size) {
+    const paraBuscar = lengua().lectura.paraBuscar;
+    const conDic = [...lecturas].map(([termino, l]) => ({
+      dic: id,
+      termino,
+      lecturas: [...l],
+      ...(paraBuscar ? { busqueda: [...new Set([...l].map(paraBuscar))] } : {}),
+    }));
+    for (let j = 0; j < conDic.length; j += LOTE) await db.lecturas.bulkPut(conDic.slice(j, j + LOTE));
   }
 
   if (mejoresRangos.size) {

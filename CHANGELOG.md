@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.43.0 · 2026-11-21
+
+El chino, cuarta lengua de estudio: lo esencial para ver videos, leer y buscar.
+
+- **Chino, en caracteres simplificados.** Se elige en **Inicio** o en **Ajustes, Idioma y nivel**, y guarda aparte sus palabras, diccionarios, tarjetas y ajustes. Empieza en el HSK 3, con pinyin sobre las palabras que aún no conoces.
+- **Las palabras, sin espacios.** El chino no las separa: Kotonoha las corta con los diccionarios y la lista de frecuencia, eligiendo el corte más probable (我们 / 今天 / 去 / 银行). Un nombre o una palabra que no esté en ningún diccionario queda carácter a carácter, y Claude lo corrige al revisar la línea.
+- **Pinyin sobre cada carácter.** Con marcas de tono o, si se prefiere, con números. Es el del diccionario, con el tono neutro (意思, yìsi); si un carácter se lee de varias formas (长, cháng o zhǎng), se elige la de la frase. Medido con 200 frases frente a jieba y pypinyin: el 96 % de las sílabas igual, y casi todo lo demás es criterio o error de la referencia. En las páginas, cada sílaba deja aire con la siguiente.
+- **CC-CEDICT.** El diccionario abierto del chino, que se publica cada día, con las traducciones breves de Wiktionary en el idioma de la interfaz delante cuando las hay, y la frecuencia de FrequencyWords. Se busca en caracteres o en pinyin, con tonos o sin ellos (*nihao*, *ni3hao3*), y el clasificador de cada palabra se ve como se enseña: 量词：家、个.
+- **Subtítulos en simplificados.** Entre las pistas de un video se elige la simplificada, y una en tradicionales, igual que lo que transcribe Whisper, se ve y se analiza en simplificados.
+- **Lo demás.** 35 puntos de gramática del HSK 1 al 5 sin Claude, los niveles del HSK 3.0 revisado en 2025, el audio de las palabras de Commons y Lingua Libre, las voces de Azure, las instrucciones de Claude para el chino y el comienzo de 《故乡》, de Lu Xun, como texto de ejemplo.
+
 ## 0.42.0 · 2026-11-21
 
 Las voces de AivisSpeech, dentro de Kotonoha: sin el programa abierto.
@@ -433,6 +444,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.43.0 · 2026-11-21
+
+Chinese, the fourth study language: the essentials for watching videos, reading and looking up words.
+
+- **Chinese, in simplified characters.** It is chosen on **Home** or in **Settings, Language and level**, and keeps its own words, dictionaries, cards and settings. It starts at HSK 3, with pinyin over the words you don’t know yet.
+- **Words without spaces.** Chinese does not separate them: Kotonoha splits them with the dictionaries and the frequency list, choosing the most probable split (我们 / 今天 / 去 / 银行). A name or a word that is in no dictionary stays character by character, and Claude fixes it when reviewing the line.
+- **Pinyin over each character.** With tone marks or, if you prefer, with numbers. It is the dictionary’s, with the neutral tone (意思, yìsi); when a character has several readings (长, cháng or zhǎng), the one in the sentence is chosen. Measured with 200 sentences against jieba and pypinyin: 96 % of syllables the same, and almost all the rest is convention or an error in the reference. On web pages, each syllable leaves room for the next.
+- **CC-CEDICT.** The open Chinese dictionary, published every day, with Wiktionary’s short translations in the interface language in front when there are any, and FrequencyWords’ frequency list. You can search in characters or in pinyin, with or without tones (*nihao*, *ni3hao3*), and each word’s measure word shows as it is taught: 量词：家、个.
+- **Subtitles in simplified characters.** Among a video’s tracks the simplified one is chosen, and a traditional one, like what Whisper transcribes, is shown and analyzed in simplified characters.
+- **The rest.** 35 grammar points from HSK 1 to 5 without Claude, the levels of the HSK 3.0 revised in 2025, word audio from Commons and Lingua Libre, the Azure voices, Claude’s instructions for Chinese, and the beginning of Lu Xun’s 《故乡》 as the sample text.
 
 ## 0.42.0 · 2026-11-21
 

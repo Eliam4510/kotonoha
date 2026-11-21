@@ -2,6 +2,7 @@
 
 import { paqueteDe } from '.';
 import { MOTOR_ALEMAN } from './aleman/motor';
+import { MOTOR_CHINO } from './chino/motor';
 import { MOTOR_INGLES } from './ingles/motor';
 import { MOTOR_JAPONES } from './japones/motor';
 import type { MotorLengua } from './tipos';
@@ -9,6 +10,7 @@ import type { MotorLengua } from './tipos';
 const MOTORES = new Map<string, MotorLengua>([
   ['ja', MOTOR_JAPONES],
   ['en', MOTOR_INGLES],
+  ['zh', MOTOR_CHINO],
   ['de', MOTOR_ALEMAN],
 ]);
 
