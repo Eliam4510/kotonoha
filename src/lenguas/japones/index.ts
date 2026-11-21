@@ -11,6 +11,7 @@ import { caracteresConTrazos, kanjiDe } from './trazos';
 import { referenciaEnGlosa } from './referencias';
 import { etiquetaDiccionario } from './etiquetas';
 import { DICCIONARIO_KANJI } from './paginaKanji';
+import { TEXTO_DE_EJEMPLO } from './ejemplo';
 
 function saludo(hora: number, nombre: string): string {
   const base = hora >= 5 && hora < 11 ? 'おはようございます' : hora >= 11 && hora < 18 ? 'こんにちは' : 'こんばんは';
@@ -225,6 +226,7 @@ export const JAPONES: PaqueteLengua = {
     texto: '吾輩は猫である。名前はまだ無い。\nどこで生れたかとんと見当がつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。\n吾輩はここで始めて人間というものを見た。',
     letra: 'あ',
   },
+  textoDeEjemplo: TEXTO_DE_EJEMPLO,
   saludo,
   textos: TEXTOS,
   ideasRelato: [tm('Un gato que pasea por Kioto'), tm('Una tarde de lluvia en el tren'), tm('El festival de verano del barrio')],

@@ -19,6 +19,7 @@ import { Boton, Cabeza, usePantallaCompleta } from './comun';
 import { Atajos, BarraMenus, Paleta } from './Menus';
 import { type AccionesLectura, type EstadoLectura, ordenesDeLectura } from './ordenesTexto';
 import { DesplegableAa, SeccionAyudas } from './Preferencias';
+import { Pista } from '../ui/Pista';
 
 export function VisorLectura({ doc, ajustes: a }: { doc: ElementoBiblioteca; ajustes: Ajustes }) {
   const pags = useMemo(() => paginasDeTexto(doc.texto), [doc.texto]);
@@ -236,6 +237,11 @@ export function VisorLectura({ doc, ajustes: a }: { doc: ElementoBiblioteca; aju
         <div class="vs-zona">
           <main ref={lienzo} class="vs-lienzo vs-lienzo-texto">
             <div class="vs-vista-texto">
+              {!lectura && (
+                <Pista a={a} id="visor-texto">
+                  {tr('Toca una palabra para ver su ficha, y con «Crear tarjeta» guardas tu primera tarjeta.')}
+                </Pista>
+              )}
               <TextoInteractivo key={pagina} texto={pags[pagina] ?? ''} ajustes={a} titulo={doc.titulo} inicioBarra={<b class="ap-lectura-titulo" lang={lengua.value.id}>{doc.titulo}</b>} />
             </div>
           </main>

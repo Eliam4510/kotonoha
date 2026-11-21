@@ -338,23 +338,32 @@ await p.evaluate(() => getSelection().removeAllRanges());
 // ---------- Enlaces y botones ----------
 
 console.log('\n== Enlaces y botones ==');
+// El clic no abre la ficha, pero dejar el ratón quieto 320 ms sobre un enlace o un botón sí (se comprueba más abajo): se
+// mira solo antes de ese plazo. Con el equipo ocupado, esperar 200 ms y mirar después llegaba tarde, y la ficha de la
+// pausa del ratón parecía la del clic.
+const clicSinFicha = async (pt) => {
+  const t0 = Date.now();
+  await p.mouse.click(pt.x, pt.y);
+  while (Date.now() - t0 < 280) {
+    if (await ficha()) return false;
+    await p.waitForTimeout(20);
+  }
+  return true;
+};
 const e1 = await puntoDe('enlace', '新聞');
-await p.mouse.click(e1.x, e1.y);
-await p.waitForTimeout(250);
+const sinFichaEnlace = await clicSinFicha(e1);
 comprobar(await p.evaluate(() => location.hash === '#destino'), 'El enlace sigue llevando a su destino');
-comprobar(!(await ficha()), 'Y el clic no abre la ficha');
+comprobar(sinFichaEnlace, 'Y el clic no abre la ficha');
 await p.evaluate(() => { history.replaceState(null, '', location.pathname); window.scrollTo(0, 0); });
 await p.waitForTimeout(150);
 const b1 = await puntoDe('boton', '送信');
-await p.mouse.click(b1.x, b1.y);
-await p.waitForTimeout(200);
+const sinFichaBoton = await clicSinFicha(b1);
 comprobar((await p.evaluate(() => window.__boton)) === 1, 'El botón sigue funcionando');
-comprobar(!(await ficha()), 'Y su clic no abre la ficha');
+comprobar(sinFichaBoton, 'Y su clic no abre la ficha');
 const t1 = await puntoDe('tarjeta', '記事');
-await p.mouse.click(t1.x, t1.y);
-await p.waitForTimeout(200);
+const sinFichaTarjeta = await clicSinFicha(t1);
 comprobar((await p.evaluate(() => window.__tarjeta)) === 1, 'Una tarjeta entera con su propio clic también');
-comprobar(!(await ficha()), 'Sin abrir la ficha');
+comprobar(sinFichaTarjeta, 'Sin abrir la ficha');
 // El ratón estaba ya encima: hay que salir y volver.
 await p.mouse.move(1250, 300);
 await p.waitForTimeout(100);

@@ -24,6 +24,7 @@ import { Vocabulario } from './Vocabulario';
 import { PracticarFrase } from './PracticarFrase';
 import { ReproductorLocal } from './ReproductorLocal';
 import { MenuLengua } from './SelectorLengua';
+import { Descubre } from './Descubre';
 import { bcp47Actual, fijarIdioma, idiomaActual, tm, tr } from '../compartido/i18n';
 import { seguirEstadosGramatica } from '../ui/gramatica';
 import { conFundido, Preparar } from '../ui/preparacion';
@@ -194,7 +195,8 @@ function Pantalla({ v, a }: { v: Vista; a: Ajustes }) {
       {ruta === 'biblioteca' && <Biblioteca ajustes={a} abrir={params.get('abrir') ?? undefined} coleccion={params.get('coleccion') ?? undefined} exportar={params.get('exportar') ?? undefined} />}
       {ruta === 'vocabulario' && <Vocabulario ajustes={a} libro={params.get('libro') ?? undefined} coleccion={params.get('coleccion') ?? undefined} />}
       {ruta === 'reproductor' && <ReproductorLocal a={a} />}
-      {ruta === 'memoria' && <Memoria />}
+      {ruta === 'memoria' && <Memoria ajustes={a} />}
+      {ruta === 'descubre' && <Descubre a={a} />}
       {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}
       {ruta === 'niveles' && <Niveles ajustes={a} />}
       {ruta === 'practicar' && <PracticarFrase frase={params.get('t') ?? ''} ajustes={a} />}

@@ -10,6 +10,20 @@ import type { TareaPrompt } from './tipos';
 
 const TAREAS: TareaPrompt[] = ['explicar', 'desglosar', 'traducir', 'generar', 'historia', 'preguntar', 'gramatica'];
 
+describe('los textos de ejemplo', () => {
+  it('el alemán va con la ortografía de hoy: el diccionario no conoce «gieng» ni «Thaler»', () => {
+    const de = paqueteDe('de').textoDeEjemplo.texto;
+    for (const vieja of ['daß', 'gieng', 'Thaler', 'Da that', 'hungerig', 'weg geben']) expect(de).not.toContain(vieja);
+    expect(de).toContain('Es war einmal ein kleines Mädchen');
+  });
+
+  it('el japonés acaba antes de la frase con una palabra hoy despectiva', () => {
+    const ja = JAPONES.textoDeEjemplo.texto;
+    expect(ja.startsWith('吾輩は猫である。名前はまだ無い。')).toBe(true);
+    expect(ja).not.toContain('片輪');
+  });
+});
+
 describe('registro de lenguas', () => {
   it('encuentra una lengua por su código, con o sin región', () => {
     expect(paqueteDe('ja')).toBe(JAPONES);
@@ -70,6 +84,16 @@ describe.each(PAQUETES.map((p) => [p.id, p] as const))('paquete %s', (id, p) => 
     if (p.ajustes.nivel) expect(p.ajustes.nivel).toBe(p.nivelInicial);
     if (p.ajustes.formatoLectura) expect(p.ajustes.formatoLectura).toBe(p.lectura.formatoInicial);
     if (p.ajustes.vocesFrase) expect(p.ajustes.vocesFrase).toEqual(p.vocesIniciales);
+  });
+
+  it('su texto de ejemplo, de dominio público, dice de dónde sale y se parte en párrafos', () => {
+    const e = p.textoDeEjemplo;
+    expect(e.titulo && e.autor).toBeTruthy();
+    const parrafos = e.texto.split('\n\n');
+    expect(parrafos.length).toBeGreaterThanOrEqual(2);
+    // La fuente, al final y en la propia lengua: Aozora Bunko o Wikisource.
+    expect(parrafos[parrafos.length - 1]).toMatch(/青空文庫|Wikisource/);
+    expect(e.texto.length).toBeLessThan(2000);
   });
 
   it('su acento sabe qué significa cada color', () => {

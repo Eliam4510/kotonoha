@@ -92,7 +92,8 @@ const nombreContenido = (c: Ajustes['ordenContenido'][number]) => {
 
 interface PropsSeccion {
   a: Ajustes;
-  cambiar: (c: Partial<Ajustes>) => void;
+  /** Con una función, los cambios se calculan sobre lo último guardado: para cambiar en parte un ajuste que es un objeto. */
+  cambiar: (c: Partial<Ajustes> | ((actuales: Ajustes) => Partial<Ajustes>)) => void;
 }
 
 function Seccion({ id, icono, titulo, descripcion, ia, children }: { id: string; icono: NombreIcono; titulo: string; descripcion?: ComponentChildren; ia?: boolean; children: ComponentChildren }) {
@@ -321,7 +322,10 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
           <div class="ap-opcion ap-modelo" key={t}>
             <div class="ap-opcion-texto"><b>{tr(n)}</b></div>
             <div class="ap-opcion-control">
-              <select class="selector" aria-label={tr('Modelo para {0}', tr(n))} value={a.modelos[t]} onChange={(e) => cambiar({ modelos: { ...a.modelos, [t]: e.currentTarget.value } })}>
+              <select class="selector" aria-label={tr('Modelo para {0}', tr(n))} value={a.modelos[t]} onChange={(e) => {
+                const v = e.currentTarget.value;
+                cambiar((x) => ({ modelos: { ...x.modelos, [t]: v } }));
+              }}>
                 <optgroup label="Claude">
                   {MODELOS.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                 </optgroup>
@@ -332,7 +336,10 @@ function SeccionClaude({ a, cambiar }: PropsSeccion) {
                 ))}
               </select>
               {/* El esfuerzo es de Claude: los otros proveedores no lo entienden igual. */}
-              <select class="selector" aria-label={tr('Esfuerzo para {0}', tr(n))} disabled={separarModelo(a.modelos[t]).proveedor !== null} value={a.esfuerzos[t]} onChange={(e) => cambiar({ esfuerzos: { ...a.esfuerzos, [t]: e.currentTarget.value as Esfuerzo } })}>
+              <select class="selector" aria-label={tr('Esfuerzo para {0}', tr(n))} disabled={separarModelo(a.modelos[t]).proveedor !== null} value={a.esfuerzos[t]} onChange={(e) => {
+                const v = e.currentTarget.value as Esfuerzo;
+                cambiar((x) => ({ esfuerzos: { ...x.esfuerzos, [t]: v } }));
+              }}>
                 <option value="low">{tr('Bajo')}</option>
                 <option value="medium">{tr('Medio')}</option>
                 <option value="high">{tr('Alto')}</option>
@@ -757,7 +764,7 @@ function SeccionPrompts({ a, cambiar }: PropsSeccion) {
           <textarea class="campo ap-codigo" rows={4} value={usuario} onInput={(e) => fijarUsuario(e.currentTarget.value)} />
         </label>
         <div class="ap-botones">
-          <button class="btn primario" onClick={() => cambiar({ prompts: { ...a.prompts, [tarea]: { sistema, usuario } } })}>{tr('Guardar')}</button>
+          <button class="btn primario" onClick={() => cambiar((x) => ({ prompts: { ...x.prompts, [tarea]: { sistema, usuario } } }))}>{tr('Guardar')}</button>
           <button class="btn" disabled={!personalizado} onClick={() => {
             const { [tarea]: _quitado, ...resto } = a.prompts;
             cambiar({ prompts: resto });
@@ -1063,7 +1070,10 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
           <div class="ap-grupo">
             {camposTarjeta(lengua.value.textos).map(([dato, nombre]) => (
               <Opcion key={dato} titulo={tr(nombre)}>
-                <select class="selector" aria-label={tr('Campo para {0}', tr(nombre))} value={a.ankiCampos[dato] ?? ''} onChange={(ev) => cambiar({ ankiCampos: { ...a.ankiCampos, [dato]: ev.currentTarget.value } })}>
+                <select class="selector" aria-label={tr('Campo para {0}', tr(nombre))} value={a.ankiCampos[dato] ?? ''} onChange={(ev) => {
+                  const v = ev.currentTarget.value;
+                  cambiar((x) => ({ ankiCampos: { ...x.ankiCampos, [dato]: v } }));
+                }}>
                   <option value="">{tr('No usar')}</option>
                   {campos.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -1118,7 +1128,10 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
             <legend><b>{tr(g.grupo)}</b> {g.ayuda && <span class="ayuda">{tr(g.ayuda)}</span>}</legend>
             {g.items.map(([k, n]) => (
               <label key={k} class="ap-marca">
-                <input class="ap-casilla" type="checkbox" checked={a.prellenado[k]} onChange={(ev) => cambiar({ prellenado: { ...a.prellenado, [k]: ev.currentTarget.checked } })} />
+                <input class="ap-casilla" type="checkbox" checked={a.prellenado[k]} onChange={(ev) => {
+                  const marcado = ev.currentTarget.checked;
+                  cambiar((x) => ({ prellenado: { ...x.prellenado, [k]: marcado } }));
+                }} />
                 {tr(n)}
               </label>
             ))}
@@ -1187,7 +1200,7 @@ function VozNeuronal({ a, cambiar }: PropsSeccion) {
   const [probando, fijarProbando] = useState(false);
   const [error, fijarError] = useState('');
   const aleman = lengua.value.id === 'de';
-  const fijar = (cambios: Partial<AjustesVozNeuronal>) => cambiar({ vozNeuronal: { ...a.vozNeuronal, ...cambios } });
+  const fijar = (cambios: Partial<AjustesVozNeuronal>) => cambiar((x) => ({ vozNeuronal: { ...x.vozNeuronal, ...cambios } }));
   const ejemplo = lengua.value.ejemplos.texto.split(lengua.value.escritura.frase.partir).find((f) => f.trim()) ?? lengua.value.ejemplos.palabra;
   const probar = async () => {
     fijarProbando(true);
@@ -1242,7 +1255,7 @@ function VozLocal({ a, cambiar }: PropsSeccion) {
   useEffect(buscar, [a.vozLocal.url]);
   const hallado = motores?.[0];
   const estilos = hallado?.voces.flatMap((v) => v.estilos.map((e) => ({ id: e.id, nombre: `${v.nombre} · ${e.nombre}` }))) ?? [];
-  const fijar = (cambios: Partial<AjustesVozLocal>) => cambiar({ vozLocal: { ...a.vozLocal, ...cambios } });
+  const fijar = (cambios: Partial<AjustesVozLocal>) => cambiar((x) => ({ vozLocal: { ...x.vozLocal, ...cambios } }));
   const ejemplo = lengua.value.ejemplos.texto.split(lengua.value.escritura.frase.partir).find((f) => f.trim()) ?? lengua.value.ejemplos.palabra;
   const probar = async () => {
     fijarProbando(true);
@@ -1526,7 +1539,7 @@ const SECCIONES: { id: string; nombre: string; icono: NombreIcono }[] = [
 export function PantallaAjustes({ a, seccion }: { a: Ajustes; seccion?: string }) {
   const [visible, fijarVisible] = useState(SECCIONES[0].id);
   const raiz = useRef<HTMLDivElement>(null);
-  const cambiar = (c: Partial<Ajustes>) => {
+  const cambiar = (c: Partial<Ajustes> | ((actuales: Ajustes) => Partial<Ajustes>)) => {
     guardarAjustes(c).catch(console.error);
   };
 

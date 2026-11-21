@@ -18,6 +18,7 @@ import { Dictado, limpiarDictadosSiToca } from './Dictado';
 import { type ApiEditor, EditorCuaderno } from './EditorCuaderno';
 import { TextoInteractivo } from './Lectura';
 import { Mensaje } from './Piezas';
+import { Pista } from '../ui/Pista';
 
 /** Lo que se espera sin escribir antes de guardar: guardar a cada tecla movería la biblioteca sin necesidad. */
 const ESPERA_GUARDADO_MS = 600;
@@ -309,6 +310,11 @@ export function Cuaderno({ ajustes, inicial, editar = false, web = false }: { aj
           {botonWeb}
         </div>
       </header>
+      {!web && (
+        <Pista a={ajustes} id="cuaderno">
+          {tr('Escribe o pega aquí lo que quieras leer, y pasa a «Leer» para verlo analizado, con la ficha de cada palabra.')}
+        </Pista>
+      )}
       {mensaje && <Mensaje error={mensaje.error}>{mensaje.texto}</Mensaje>}
 
       {modo === 'editar' ? (

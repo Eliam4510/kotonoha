@@ -10,6 +10,8 @@ import { Icono, Marca, type NombreIcono } from '../ui/iconos';
 import { Interruptor, Mensaje } from './Piezas';
 import { PAQUETES } from '../lenguas';
 import { estudiarLengua, lengua } from '../ui/lengua';
+import { abrirTextoDeEjemplo } from './Descubre';
+import { navegar } from './estadoApp';
 import { PanelEquipo } from './TuEquipo';
 
 type Paso = 'idioma' | 'lengua' | 'nivel' | 'diccionarios' | 'equipo' | 'claude' | 'tarjetas' | 'listo';
@@ -193,31 +195,75 @@ function PasoTarjetas({ a }: { a: Ajustes }) {
   );
 }
 
-function PasoListo() {
+/**
+ * El último paso: por dónde empezar. Cada camino lleva a algo real (el texto de ejemplo, los videos, la Biblioteca o el
+ * diccionario), y lo demás está en «Descubre Kotonoha». Al elegir uno, la bienvenida termina.
+ */
+function PasoEmpezar({ terminar }: { terminar: () => Promise<unknown> }) {
   const [atajos, fijarAtajos] = useState<Record<string, string>>({});
   useEffect(() => {
     fondo.atajos().then(fijarAtajos).catch(() => {});
   }, []);
   const captura = atajos['alternar-captura'];
+  const ejemplo = lengua.value.textoDeEjemplo;
+  const caminos: { id: string; icono: NombreIcono; titulo: string; que: string; ir: () => void }[] = [
+    {
+      id: 'ejemplo',
+      icono: 'libro',
+      titulo: tr('Leer un texto de ejemplo'),
+      que: tr('{0}, de {1}: toca una palabra para ver su ficha y crear tu primera tarjeta.', ejemplo.titulo, ejemplo.autor),
+      ir: () => void abrirTextoDeEjemplo().catch(console.error),
+    },
+    {
+      id: 'video',
+      icono: 'video',
+      titulo: tr('Ver un video'),
+      que: tr('Abre YouTube o Netflix: los subtítulos aparecen sobre el video. Pasa el ratón por una palabra para ver su ficha.'),
+      ir: () => requestAnimationFrame(() => document.getElementById('ap-t-video')?.scrollIntoView({ block: 'center' })),
+    },
+    {
+      id: 'libros',
+      icono: 'biblioteca',
+      titulo: tr('Leer un libro o un manga'),
+      que: tr('Importa tus PDF, EPUB o CBZ en la Biblioteca: el texto de las páginas que son una imagen se lee con el OCR.'),
+      ir: () => navegar('biblioteca'),
+    },
+    {
+      id: 'diccionario',
+      icono: 'diccionario',
+      titulo: tr('Buscar en el diccionario'),
+      que: tr('Busca {0} y mira todo lo que Kotonoha sabe de una palabra.', lengua.value.ejemplos.palabra),
+      ir: () => navegar(`diccionario?q=${encodeURIComponent(lengua.value.ejemplos.palabra)}`),
+    },
+  ];
   return (
     <>
-      <h1>{tr('Todo listo')}</h1>
-      <p>{tr('Así se usa:')}</p>
-      <div class="ap-bv-lista">
-        <div class="ap-bv-fila">
-          <span class="ap-paso-marca"><Icono n="video" t={14} /></span>
-          <div><b>{tr('En un video')}</b><span>{tr('Abre YouTube o Netflix: los subtítulos aparecen sobre el video. Pasa el ratón por una palabra para ver su ficha.')}</span></div>
-        </div>
-        <div class="ap-bv-fila">
-          <span class="ap-paso-marca"><Icono n="lector" t={14} /></span>
-          <div><b>{tr('En una página')}</b><span>{tr(lengua.value.textos.bienvenidaPagina)}</span></div>
-        </div>
-        <div class="ap-bv-fila">
-          <span class="ap-paso-marca"><Icono n="microfono" t={14} /></span>
-          <div><b>{tr('Audio en tus tarjetas')}</b><span>{captura ? tr('Pulsa {0} en la pestaña del video para grabar la frase.', captura) : tr('Activa la captura en el menú de la extensión para grabar la frase.')}</span></div>
-        </div>
+      <h1>{tr('¿Por dónde quieres empezar?')}</h1>
+      <p>{tr('Todo está listo. Elige un camino; lo demás está en «Descubre Kotonoha», en Inicio.')}</p>
+      <div class="ap-bv-caminos">
+        {caminos.map((c) => (
+          <button
+            type="button"
+            class="ap-bv-camino"
+            key={c.id}
+            data-camino={c.id}
+            onClick={() => {
+              void terminar().then(c.ir);
+            }}
+          >
+            <span class="ap-paso-marca"><Icono n={c.icono} t={16} /></span>
+            <span class="ap-bv-camino-texto">
+              <b>{c.titulo}</b>
+              <span>{c.que}</span>
+            </span>
+            <Icono n="flecha" t={16} />
+          </button>
+        ))}
       </div>
-      <p class="ayuda">{tr('Esta extensión aprende qué palabras conoces a medida que las marcas. Si ya sabes bastante, puedes evaluar tu nivel en Palabras: ahorra mucho tiempo.')}</p>
+      <p class="ayuda">
+        {captura ? tr('Para grabar el audio de una frase en tus tarjetas, pulsa {0} en la pestaña del video.', captura) : tr('Para grabar el audio de una frase en tus tarjetas, activa la captura en el menú de la extensión.')}{' '}
+        {tr('Esta extensión aprende qué palabras conoces a medida que las marcas. Si ya sabes bastante, puedes evaluar tu nivel en Palabras: ahorra mucho tiempo.')}
+      </p>
     </>
   );
 }
@@ -241,7 +287,10 @@ export function Bienvenida({ a }: { a: Ajustes }) {
   useEffect(() => {
     if (paso === 'equipo') fijarVioEquipo(true);
   }, [paso]);
-  const terminar = () => guardar({ bienvenidaVista: true, ...(vioEquipo || paso === 'equipo' ? { avisoEquipoVisto: true } : {}) });
+  // Quien instala Kotonoha con la bienvenida tiene las pistas de la primera vez; las novedades de esta versión ya no le
+  // hacen falta: acaba de verla entera.
+  const terminar = () =>
+    guardar({ bienvenidaVista: true, pistas: true, novedadesVistas: chrome.runtime.getManifest().version, ...(vioEquipo || paso === 'equipo' ? { avisoEquipoVisto: true } : {}) });
   // Quien no toque nada, o se salte la bienvenida, también ha de tener las explicaciones en el idioma que se le muestra.
   useEffect(() => {
     if (a.idiomaInterfaz === 'auto') elegirIdioma(resolverIdioma('auto'), a.idiomaObjetivo);
@@ -264,7 +313,7 @@ export function Bienvenida({ a }: { a: Ajustes }) {
           {paso === 'equipo' && <PasoEquipo a={a} />}
           {paso === 'claude' && <PasoClaude a={a} />}
           {paso === 'tarjetas' && <PasoTarjetas a={a} />}
-          {paso === 'listo' && <PasoListo />}
+          {paso === 'listo' && <PasoEmpezar terminar={terminar} />}
         </div>
         <div class="ap-bv-pie">
           {i > 0 ? <button class="btn fantasma" onClick={() => fijarI(i - 1)}>{tr('Atrás')}</button> : <span />}

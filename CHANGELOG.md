@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.41.0 · 2026-11-20
+
+Presentar las funciones: por dónde empezar, todo lo que hace Kotonoha en una página y un texto de ejemplo en cada lengua.
+
+- **¿Por dónde quieres empezar?** El último paso de la bienvenida propone cuatro caminos: leer un texto de ejemplo, ver un video, leer un libro o un manga y buscar en el diccionario. Lo demás está en **Descubre Kotonoha**.
+- **Descubre Kotonoha.** En **Inicio**, una página con todo lo que hace la extensión, en cinco familias (mirar, leer, repasar, consultar y practicar), cada cosa con una frase y, si se puede probar ya, un botón que lleva a ella. Lo que corre en la tarjeta gráfica dice si en este equipo irá lento, y cada lengua enseña lo suyo.
+- **Un texto de ejemplo.** De dominio público, en cada lengua: el comienzo de 『吾輩は猫である』 (Aozora Bunko), el de *Alice's Adventures in Wonderland* y «Die Sterntaler», de los Grimm, con la ortografía de hoy (los dos de Wikisource). Va a la **Biblioteca** una sola vez y se abre en el visor, para probar la ficha y crear la primera tarjeta sin buscar nada.
+- **Pistas de la primera vez.** Quien instala Kotonoha ve una en el visor, el **Cuaderno**, la **Memoria** y el **Diccionario**; se cierran con **Entendido** y no vuelven. Quien ya lo usaba no las ve.
+- **Lo nuevo.** Tras cada actualización, **Inicio** cuenta una vez lo nuevo de la versión, con un enlace a sus notas.
+- **Arreglado.** Al cambiar seguidas dos opciones de un mismo ajuste, como activar la voz local y elegir su estilo, el modelo de una tarea o los campos de Anki, la segunda ya no deshace la primera.
+
 ## 0.40.0 · 2026-11-20
 
 Medir en el uso real: lo que tardan la voz y el OCR en este equipo, y un consejo cuando no llegan.
@@ -411,6 +422,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.41.0 · 2026-11-20
+
+Introducing the features: where to start, everything Kotonoha does on one page, and a sample text in each language.
+
+- **Where would you like to start?** The last welcome step offers four paths: reading a sample text, watching a video, reading a book or a manga, and searching the dictionary. The rest is in **Discover Kotonoha**.
+- **Discover Kotonoha.** On **Home**, a page with everything the extension does, in five families (watch, read, review, look up and practice), each with a sentence and, if it can be tried right away, a button that takes you there. What runs on the graphics card says whether it will be slow on this computer, and each language shows its own.
+- **A sample text.** In the public domain, in each language: the beginning of 『吾輩は猫である』 (Aozora Bunko), that of *Alice's Adventures in Wonderland* and “Die Sterntaler”, by the Grimms, in today's spelling (both from Wikisource). It goes into the **Library** only once and opens in the viewer, to try the word panel and create a first card without searching for anything.
+- **First-time hints.** Whoever installs Kotonoha sees one in the viewer, the **Notebook**, **Memory** and the **Dictionary**; they close with **Got it** and do not come back. Those who already used it do not see them.
+- **What's new.** After each update, **Home** shows what is new in the version once, with a link to its notes.
+- **Fixed.** Changing two options of the same setting in a row, such as turning on the local voice and choosing its style, the model of a task or the Anki fields, no longer undoes the first one.
 
 ## 0.40.0 · 2026-11-20
 

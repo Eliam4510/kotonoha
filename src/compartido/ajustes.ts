@@ -210,6 +210,12 @@ export interface Ajustes {
   equipoUso: UsoEquipo;
   /** Ya se propuso «Leer una zona» porque el OCR tarda en este equipo: no se repite. */
   avisoOcrLentoVisto: boolean;
+  /** Las pistas de la primera vez: solo para quien instaló Kotonoha con la bienvenida, no para quien ya lo usaba. */
+  pistas: boolean;
+  /** Las pistas ya cerradas, por pantalla: no vuelven. */
+  pistasVistas: string[];
+  /** La versión cuyas novedades ya se vieron en Inicio: tras actualizar, la tarjeta «Lo nuevo» sale una vez. */
+  novedadesVistas: string;
   /** Ya vio «Tu equipo»: en la bienvenida o, quien ya usaba Kotonoha, con el aviso de Inicio. */
   avisoEquipoVisto: boolean;
   /** Cómo se escriben las lecturas: kana, o rōmaji para quien aún no lo lee. */
@@ -415,6 +421,9 @@ export const AJUSTES_INICIALES: Ajustes = {
   equipoPrueba: null,
   equipoUso: {},
   avisoOcrLentoVisto: false,
+  pistas: false,
+  pistasVistas: [],
+  novedadesVistas: '',
   avisoEquipoVisto: false,
   formatoLectura: PAQUETE_INICIAL.lectura.formatoInicial,
   paleta: 'predeterminada',
@@ -644,17 +653,28 @@ export async function leerAjustes(): Promise<Ajustes> {
   return completarAjustes(d[CLAVE] as Partial<Ajustes> | undefined);
 }
 
-export async function guardarAjustes(cambios: Partial<Ajustes>): Promise<Ajustes> {
-  const actuales = await leerAjustes();
-  const nuevos = { ...actuales, ...cambios };
-  await chrome.storage.local.set({ [CLAVE]: nuevos });
-  return nuevos;
+/** Los cambios de esta página, uno tras otro: cada uno lee lo que dejó el anterior. */
+let cola: Promise<unknown> = Promise.resolve();
+
+/**
+ * Guarda unos cambios sobre lo último guardado. Con una función, los calcula a partir de eso: así un ajuste que es un
+ * objeto (la voz local, el prellenado) se cambia en parte sin pisar otro cambio que llegara justo antes, cuando la
+ * pantalla aún no se había enterado de él.
+ */
+export function guardarAjustes(cambios: Partial<Ajustes> | ((actuales: Ajustes) => Partial<Ajustes>)): Promise<Ajustes> {
+  const hecho = cola.then(async () => {
+    const actuales = await leerAjustes();
+    const nuevos = { ...actuales, ...(typeof cambios === 'function' ? cambios(actuales) : cambios) };
+    await chrome.storage.local.set({ [CLAVE]: nuevos });
+    return nuevos;
+  });
+  cola = hecho.catch(() => {});
+  return hecho;
 }
 
 /** Suma algo a lo medido al usar Kotonoha, sobre lo último guardado: la voz y el OCR se miden desde páginas distintas. */
 export async function anotarUso(fn: (u: UsoEquipo) => UsoEquipo): Promise<void> {
-  const { equipoUso } = await leerAjustes();
-  await guardarAjustes({ equipoUso: fn(equipoUso ?? {}) });
+  await guardarAjustes((x) => ({ equipoUso: fn(x.equipoUso ?? {}) }));
 }
 
 export function alCambiarAjustes(fn: (a: Ajustes) => void): () => void {
