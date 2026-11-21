@@ -45,6 +45,7 @@ import { leerTextoLibro, type TextoDePagina } from './textoLibro';
 import { type TipoUnidad, type UnidadAbierta, Ventana } from './Ventana';
 import { VistaTexto } from './VistaTexto';
 import { useVozAlta } from './vozAlta';
+import { Pista } from '../ui/Pista';
 
 /** El tamaño que se supone a una página que aún no se ha leído: el de un tomo de manga. */
 const PAGINA_SUPUESTA: Medida = { ancho: 844, alto: 1200 };
@@ -1951,6 +1952,13 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
           {portadaHecha && (
             <div class="vs-aviso-herramienta vs-aviso-hecho" role="status">
               <Icono n="ok" t={14} /> {tr('Es la portada en la estantería')}
+            </div>
+          )}
+          {herramienta === 'seleccionar' && !lectura && (
+            <div class="vs-primera-pista">
+              <Pista a={a} id="visor-paginas">
+                {tr('Si las páginas son imágenes, «Leer el texto de las páginas», en el menú Texto, las lee con el OCR. Después, toca una palabra para ver su ficha.')}
+              </Pista>
             </div>
           )}
           {ocr && !consejoOcrVisto && herramienta === 'seleccionar' && !lectura && msOcr[modoOcr] !== null && ocrLento(modoOcr, msOcr[modoOcr]!) && (

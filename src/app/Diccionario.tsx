@@ -6,6 +6,7 @@
 // Pasar de una palabra a otra no deja ver la de antes a medio quitar ni la nueva a medio llegar: la nueva se prepara a
 // escondidas mientras se ve la anterior (ui/preparacion.tsx) y entra de una vez, con un fundido corto.
 
+import type { ComponentChildren } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { type Ajustes, guardarAjustes, TAMANO_DICCIONARIO } from '../compartido/ajustes';
 import { idiomaActual, numero, tr } from '../compartido/i18n';
@@ -79,7 +80,7 @@ function juntar(buscado: string, lista: EntradaBreve[], libres: ResultadoBusqued
   return { candidatos: porSentido, porSignificado: porSentido.length > 0 };
 }
 
-export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; consulta: string }) {
+export function PaginaDiccionario({ ajustes, consulta, pista }: { ajustes: Ajustes; consulta: string; pista?: ComponentChildren }) {
   const [texto, fijarTexto] = useState(consulta);
   const [frase, fijarFrase] = useState('');
   // La vista que se ve y la que se pide: son la misma salvo mientras la pedida se prepara.
@@ -196,6 +197,7 @@ export function PaginaDiccionario({ ajustes, consulta }: { ajustes: Ajustes; con
   return (
     <div class={`dic ${ajustes.diccionarioAncho === 'centrado' ? 'centrado' : ''} ${inicial ? 'inicial' : ''}`} style={estilo}>
       {cambiando && <div class="dic-progreso" role="progressbar" aria-label={tr('Cargando…')} />}
+      {pista}
       {inicial && (
         <div class="ap-dic-portada">
           <span class="hoja-icono"><Icono n="diccionario" t={24} /></span>

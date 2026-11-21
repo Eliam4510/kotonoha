@@ -467,6 +467,11 @@ export interface PaqueteLengua {
   enlaces: EnlaceLengua[];
   sitiosLectura: SitioLectura[];
   ejemplos: EjemplosLengua;
+  /**
+   * Un texto de dominio público para probar Kotonoha desde el primer minuto, sin buscar nada: va a la Biblioteca y se abre
+   * en el visor. El texto acaba con su fuente, en la propia lengua.
+   */
+  textoDeEjemplo: { titulo: string; autor: string; texto: string };
   /** El saludo de la pantalla de inicio, en la lengua que se estudia. */
   saludo(hora: number, nombre: string): string;
   textos: TextosLengua;

@@ -7,6 +7,7 @@ import { dePronunciacion, lecturaVisible, patronAcento } from './pronunciacion';
 import { TEXTOS } from './textos';
 import { comoSuena, FENOMENOS } from './conectado';
 import { nombreFlexion, pegarSignos } from './tokens';
+import { TEXTO_DE_EJEMPLO } from './ejemplo';
 
 function saludo(hora: number, nombre: string): string {
   const base = hora >= 5 && hora < 12 ? 'Good morning' : hora >= 12 && hora < 18 ? 'Good afternoon' : 'Good evening';
@@ -127,6 +128,7 @@ export const INGLES: PaqueteLengua = {
     texto: 'Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it.\n"And what is the use of a book," thought Alice, "without pictures or conversations?"',
     letra: 'A',
   },
+  textoDeEjemplo: TEXTO_DE_EJEMPLO,
   saludo,
   textos: TEXTOS,
   comoSuena: { analizar: comoSuena, fenomenos: FENOMENOS },

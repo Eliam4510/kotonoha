@@ -61,7 +61,7 @@ const NIVEL: Record<NivelEquipo, { nombre: string; explicacion: string }> = {
   'sin-medir': { nombre: tm('Sin medir'), explicacion: tm('El navegador no dice si la gráfica es integrada o dedicada. Pruébala para saber qué tal irá cada cosa.') },
 };
 
-const ESTADO: Record<EstadoPieza, string> = {
+export const ESTADO: Record<EstadoPieza, string> = {
   bien: tm('Irá bien'),
   lento: tm('Irá lento'),
   'muy-lento': tm('Muy lento aquí'),
@@ -181,6 +181,22 @@ function TarjetaPieza({ e, a }: { e: EstimacionPieza; a: Ajustes }) {
       <span class={`ap-equipo-estado ${e.estado}`}>{tr(ESTADO[e.estado])}</span>
     </li>
   );
+}
+
+/**
+ * Qué tal irá aquí cada pieza pesada, para quien solo quiere su estado, como «Descubre Kotonoha»: con lo que dice el
+ * navegador, la prueba y lo medido al usarlas. null mientras se mira el equipo.
+ */
+export function useEstimaciones(a: Ajustes): Partial<Record<PiezaPesada, EstimacionPieza>> | null {
+  const [senales, fijarSenales] = useState<SenalesEquipo | null>(null);
+  useEffect(() => {
+    detectarEquipo()
+      .then(fijarSenales)
+      .catch(() => fijarSenales(null));
+  }, []);
+  if (!senales) return null;
+  const todas: PiezaPesada[] = ['voz', 'letras', 'ocr-libro', 'ocr-manga', 'practica'];
+  return Object.fromEntries(estimar(todas, senales, a.equipoPrueba, { uso: a.equipoUso, ...modelosDe(a) }).map((e) => [e.pieza, e]));
 }
 
 /** Lo de este equipo, con «Probar mi equipo». Lo medido se guarda en los ajustes, así que vale en todo Kotonoha. */

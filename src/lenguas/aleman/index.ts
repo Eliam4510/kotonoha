@@ -6,6 +6,7 @@ import { contarEscrituras, esTextoAleman, paginaEnAleman, pareceFrase, SIGNOS_FR
 import { dePronunciacion, lecturaVisible, patronAcento } from './pronunciacion';
 import { TEXTOS } from './textos';
 import { nombreFlexion, pegarSignos } from './tokens';
+import { TEXTO_DE_EJEMPLO } from './ejemplo';
 
 function saludo(hora: number, nombre: string): string {
   const base = hora >= 5 && hora < 11 ? 'Guten Morgen' : hora >= 11 && hora < 18 ? 'Guten Tag' : 'Guten Abend';
@@ -125,6 +126,7 @@ export const ALEMAN: PaqueteLengua = {
     texto: 'In den alten Zeiten, wo das Wünschen noch geholfen hat, lebte ein König, dessen Töchter waren alle schön, aber die jüngste war so schön, dass die Sonne selber, die doch so vieles gesehen hat, sich verwunderte, sooft sie ihr ins Gesicht schien.\nNahe bei dem Schlosse des Königs lag ein großer dunkler Wald.',
     letra: 'Ä',
   },
+  textoDeEjemplo: TEXTO_DE_EJEMPLO,
   saludo,
   textos: TEXTOS,
   ideasRelato: [tm('Un gato que pasea por Berlín'), tm('Una tarde de lluvia en el tren'), tm('El mercado navideño del pueblo')],

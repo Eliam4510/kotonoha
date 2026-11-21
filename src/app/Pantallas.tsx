@@ -16,6 +16,8 @@ import type {
 } from '../compartido/tipos';
 import { AvisoVersion } from './AvisoVersion';
 import { AvisoEquipo } from './TuEquipo';
+import { LoNuevo, TarjetaDescubre } from './Descubre';
+import { Pista } from '../ui/Pista';
 import { CategoriaDiccionario } from './DiccionarioMas';
 import { PaginaDiccionario } from './Diccionario';
 import { SeguirLeyendo } from './Biblioteca';
@@ -184,8 +186,10 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 
       <div class="ap-rejilla">
         <AvisoVersion avisar={ajustes.avisarVersiones} />
+        <LoNuevo a={ajustes} />
         {ajustes.bienvenidaVista && !ajustes.avisoEquipoVisto && <AvisoEquipo />}
         <PrimerosPasos estado={estado} anki={anki} instalando={instalando} alInstalar={instalarRecomendados} />
+        <TarjetaDescubre />
 
         <section class="tarjeta ap-vocabulario ap-c8" aria-label={tr('Tu vocabulario')}>
           <div class="ap-vocabulario-cifras">
@@ -311,7 +315,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 
 export function Diccionario({ ajustes, consulta, categoria }: { ajustes: Ajustes; consulta: string; categoria?: string }) {
   if (categoria) return <CategoriaDiccionario id={categoria} ajustes={ajustes} />;
-  return <PaginaDiccionario ajustes={ajustes} consulta={consulta} />;
+  return <PaginaDiccionario ajustes={ajustes} consulta={consulta} pista={<Pista a={ajustes} id="diccionario">{tr('Busca en la lengua que estudias o en la tuya. Cada palabra trae sus sentidos, ejemplos sacados de lo que ves y lees, y su gramática.')}</Pista>} />;
 }
 
 // ---------- Memoria ----------
@@ -347,7 +351,7 @@ const NOTAS: { nota: 1 | 2 | 3 | 4; nombre: string; clase: string }[] = [
   { nota: 4, nombre: tm('Fácil'), clase: 'facil' },
 ];
 
-export function Memoria() {
+export function Memoria({ ajustes }: { ajustes: Ajustes }) {
   const [cola, fijarCola] = useState<TarjetaMemoria[]>([]);
   const [resumen, fijarResumen] = useState<{ total: number; pendientes: number; nuevas: number } | null>(null);
   const [volteada, fijarVolteada] = useState(false);
@@ -403,6 +407,9 @@ export function Memoria() {
           </dl>
         )}
       </Cabecera>
+      <Pista a={ajustes} id="memoria">
+        {tr('Aquí repasas tus tarjetas: pulsa «Ver respuesta» (Espacio) y di cuánto te costó, del 1 al 4. Eso decide cuándo vuelve cada una.')}
+      </Pista>
 
       {cargada && !t ? (
         <Vacio icono="sello" titulo={resumen?.total ? tr('Todo al día') : tr('Todavía no hay tarjetas')}>
