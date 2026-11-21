@@ -5,11 +5,11 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.41.0',
+  version: '0.42.0',
   puntos: [
-    tm('«Descubre Kotonoha», en Inicio: todo lo que puede hacer, por familias, con un botón para probar cada cosa.'),
-    tm('Un texto de ejemplo en cada lengua, para probar la ficha y crear tu primera tarjeta sin buscar nada.'),
-    tm('Desde ahora, tras cada actualización, esta tarjeta cuenta lo nuevo, una vez.'),
+    tm('Las voces de AivisSpeech, dentro de Kotonoha: se instalan en Ajustes, Voces, y se oyen sin tener AivisSpeech abierto.'),
+    tm('Un catálogo de AivisHub para elegir más voces, oírlas antes de instalarlas y ver la licencia de cada una.'),
+    tm('Corren en tu gráfica: la primera frase tarda unos segundos, y las siguientes, casi nada.'),
   ],
 };
 

@@ -21,7 +21,7 @@ Las tiendas piden justificar cada permiso. Estos textos sirven para el formulari
 | `clipboardRead` y `clipboardWrite` | El Cuaderno: leer el texto copiado para analizarlo, y copiar frases y notas. |
 | Acceso a todos los sitios (`<all_urls>`) | Los subtítulos interactivos y el lector funcionan en cualquier sitio con video o texto; la captura de la imagen de la frase para las tarjetas; la descarga de diccionarios y modelos; Anki y los motores locales en 127.0.0.1; y la API del proveedor de IA que elija el usuario. |
 
-**Código remoto.** La extensión no ejecuta código descargado. Descarga datos: modelos de reconocimiento de voz y de texto (pesos en formato ONNX) y diccionarios, que lee su propio código empaquetado.
+**Código remoto.** La extensión no ejecuta código descargado. Descarga datos: modelos de reconocimiento de voz y de texto y voces sintéticas (pesos en formato ONNX) y diccionarios, que lee su propio código empaquetado.
 
 **Datos.** Nada se recoge ni se vende. Lo que se envía a terceros, solo al usar cada función, está en la [política de privacidad](../privacidad.md).
 
@@ -42,6 +42,6 @@ Las tiendas piden justificar cada permiso. Estos textos sirven para el formulari
 | `clipboardRead` and `clipboardWrite` | The Clipboard feature: reading copied text to analyze it, and copying sentences and notes. |
 | Access to all sites (`<all_urls>`) | Interactive subtitles and the reader work on any site with video or text; capturing the sentence's image for flashcards; downloading dictionaries and models; Anki and local engines on 127.0.0.1; and the API of the AI provider the user chooses. |
 
-**Remote code.** The extension does not run downloaded code. It downloads data: speech and text recognition models (ONNX weights) and dictionaries, which its own packaged code reads.
+**Remote code.** The extension does not run downloaded code. It downloads data: speech and text recognition models and synthetic voices (ONNX weights) and dictionaries, which its own packaged code reads.
 
 **Data.** Nothing is collected or sold. What is sent to third parties, only when each feature is used, is in the [privacy policy](../privacidad.md).

@@ -256,6 +256,10 @@ On the GPU it hears the same as ONNX Runtime on the processor, phoneme by phonem
 
 PASQA, a model that scores the pronunciation of a whole sentence, was left out: converting it requires specific versions of Python, PyTorch and s3prl, and it could not be measured.
 
+### AivisHub voices
+
+AivisSpeech’s voices are ONNX models of Style-Bert-VITS2 JP-Extra (AIVMX) with a 653 MB Japanese BERT. On a Radeon RX 9060 XT, with the voice on the GPU, the audio comes out identical to the processor’s (correlation 1.0000 without noise); the BERT, however, is computed in fp16 on the GPU and changes the intonation somewhat, so it runs on the processor, where it gives the same result as in AivisSpeech. A 10 s sentence is thus read in about 1.4 s (0.44 s with everything on the GPU) and, without a GPU, in about 18 s. The text part, which in AivisSpeech is pyopenjtalk-plus, is here yomi, OpenJTalk in TypeScript, with three of pyopenjtalk-plus’s phrase-linking rules: with 210 sentences (60 modern ones and 150 from 『吾輩は猫である』), it reads 85 % the same and gives each mora AivisSpeech’s pitch in 91.6 % of cases; without the three rules, 90.6 %, and with what Kotonoha already had (Kanjium and the pitch accent practice), 73 %.
+
 ### Cost of the page reader
 
 Main thread time, with every word unknown and furigana on all of them: the worst case. Measured in Edge at 1366×860 with `Performance.getMetrics`, with the reader already loaded.

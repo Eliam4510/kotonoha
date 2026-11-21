@@ -218,6 +218,10 @@ export interface Ajustes {
   novedadesVistas: string;
   /** Ya vio «Tu equipo»: en la bienvenida o, quien ya usaba Kotonoha, con el aviso de Inicio. */
   avisoEquipoVisto: boolean;
+  /** Ya se le preguntó en la ficha si instalar las voces neuronales, al oír una frase con la voz del navegador. */
+  preguntaVocesVista: boolean;
+  /** Quien usaba la voz local (AivisSpeech) ya vio el aviso de que sus voces pueden ir dentro de Kotonoha. */
+  avisoVocesVisto: boolean;
   /** Cómo se escriben las lecturas: kana, o rōmaji para quien aún no lo lee. */
   formatoLectura: string;
   /** Colores de los estados de una palabra. */
@@ -343,6 +347,8 @@ export interface Ajustes {
   vozLocal: AjustesVozLocal;
   /** Las voces neuronales en el propio navegador: Kokoro para el inglés y Piper para el alemán. */
   vozNeuronal: AjustesVozNeuronal;
+  /** Las voces de AivisHub dentro de Kotonoha, para la lengua que las tenga, sin programa aparte. */
+  vozIntegrada: AjustesVozIntegrada;
   /** Otros proveedores de IA, con la API de OpenAI; sus claves se guardan aparte. */
   proveedores: ProveedorIA[];
 
@@ -376,11 +382,66 @@ export interface AjustesVozNeuronal {
   vozIngles: string;
 }
 
+/** Una voz de AivisHub instalada: lo que hace falta para leer con ella y para enseñarla sin pedir nada a la red. */
+export interface VozInstalada {
+  uuid: string;
+  nombre: string;
+  autor: string;
+  version: string;
+  /** El tipo de licencia, como lo da AivisHub: «ACML 1.0», «ACML-NC 1.0», «CC0» o «Custom». */
+  licencia: string;
+  bytes: number;
+  sha256: string;
+  hablantes: { nombre: string; id: number; estilos: { nombre: string; id: number }[] }[];
+}
+
+export interface AjustesVozIntegrada {
+  /** Leer las frases con ella, antes que con la voz local, Azure o el navegador. */
+  activa: boolean;
+  /** La voz elegida (su identificador en AivisHub), y su hablante y estilo. */
+  voz: string | null;
+  hablante: number;
+  estilo: number;
+  instaladas: VozInstalada[];
+}
+
 /**
- * Si hay una voz sintética para las frases: la local, que es japonesa, las neuronales del inglés y del alemán, o la de
- * Azure. Sin ninguna, se lee con la del navegador.
+ * Si hay una voz sintética para las frases: la integrada y la local, que son japonesas, las neuronales del inglés y del
+ * alemán, o la de Azure. Sin ninguna, se lee con la del navegador.
  */
-export const hayVozSintetica = (a: Ajustes): boolean => !!a.azureClave || vozLocalActiva(a) || vozNeuronalActiva(a);
+export const hayVozSintetica = (a: Ajustes): boolean => !!a.azureClave || vozIntegradaActiva(a) || vozLocalActiva(a) || vozNeuronalActiva(a);
+
+/** La voz integrada elegida, si está instalada. */
+export const vozIntegradaElegida = (a: Ajustes): VozInstalada | undefined => a.vozIntegrada.instaladas.find((v) => v.uuid === a.vozIntegrada.voz);
+
+/** Si las frases se leen con una voz de AivisHub dentro de Kotonoha: al estudiar japonés, activa y con una voz instalada. */
+export const vozIntegradaActiva = (a: Ajustes): boolean => a.vozIntegrada.activa && a.idiomaObjetivo === 'ja' && !!vozIntegradaElegida(a);
+
+/** Los ajustes tras instalar una voz integrada. La primera queda elegida y activa: quien la instala quiere oírla. */
+export function conVozInstalada(a: Ajustes, v: VozInstalada): Pick<Ajustes, 'vozIntegrada'> {
+  const instaladas = [...a.vozIntegrada.instaladas.filter((x) => x.uuid !== v.uuid), v];
+  if (instaladas.some((x) => x.uuid === a.vozIntegrada.voz)) return { vozIntegrada: { ...a.vozIntegrada, instaladas } };
+  const [h] = v.hablantes;
+  return { vozIntegrada: { ...a.vozIntegrada, instaladas, activa: true, voz: v.uuid, hablante: h?.id ?? 0, estilo: h?.estilos[0]?.id ?? 0 } };
+}
+
+/** Los ajustes tras borrar una voz integrada. Si era la elegida, pasa a la primera que quede, o a ninguna. */
+export function sinVozInstalada(a: Ajustes, uuid: string): Pick<Ajustes, 'vozIntegrada'> {
+  const instaladas = a.vozIntegrada.instaladas.filter((x) => x.uuid !== uuid);
+  if (a.vozIntegrada.voz !== uuid) return { vozIntegrada: { ...a.vozIntegrada, instaladas } };
+  const [otra] = instaladas;
+  const [h] = otra?.hablantes ?? [];
+  return { vozIntegrada: { ...a.vozIntegrada, instaladas, activa: !!otra && a.vozIntegrada.activa, voz: otra?.uuid ?? null, hablante: h?.id ?? 0, estilo: h?.estilos[0]?.id ?? 0 } };
+}
+
+/** La voz integrada elegida, para nombrarla: «まお · ノーマル». */
+export function nombreVozIntegrada(a: Ajustes): string {
+  const v = vozIntegradaElegida(a);
+  if (!v) return '';
+  const h = v.hablantes.find((x) => x.id === a.vozIntegrada.hablante) ?? v.hablantes[0];
+  const e = h?.estilos.find((x) => x.id === a.vozIntegrada.estilo);
+  return [v.nombre, e?.nombre].filter(Boolean).join(' · ');
+}
 
 /** Si las frases se leen con una voz neuronal del navegador: al estudiar inglés (Kokoro) o alemán (Piper). */
 export const vozNeuronalActiva = (a: Ajustes): boolean => a.vozNeuronal.activa && (a.idiomaObjetivo === 'en' || a.idiomaObjetivo === 'de');
@@ -425,6 +486,8 @@ export const AJUSTES_INICIALES: Ajustes = {
   pistasVistas: [],
   novedadesVistas: '',
   avisoEquipoVisto: false,
+  preguntaVocesVista: false,
+  avisoVocesVisto: false,
   formatoLectura: PAQUETE_INICIAL.lectura.formatoInicial,
   paleta: 'predeterminada',
   lectorActivo: true,
@@ -570,6 +633,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   vozNavegador: '',
   vozLocal: { activa: false, url: '', estilo: null, acentoDiccionario: true },
   vozNeuronal: { activa: false, vozIngles: 'af_heart' },
+  vozIntegrada: { activa: false, voz: null, hablante: 0, estilo: 0, instaladas: [] },
   proveedores: [],
 
   idiomaInterfaz: 'auto',
@@ -620,6 +684,7 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
   salida.esfuerzos = { ...AJUSTES_INICIALES.esfuerzos, ...(guardados?.esfuerzos ?? {}) };
   salida.vozLocal = { ...AJUSTES_INICIALES.vozLocal, ...(guardados?.vozLocal ?? {}) };
   salida.vozNeuronal = { ...AJUSTES_INICIALES.vozNeuronal, ...(guardados?.vozNeuronal ?? {}) };
+  salida.vozIntegrada = { ...AJUSTES_INICIALES.vozIntegrada, ...(guardados?.vozIntegrada ?? {}) };
   // Un modelo que ya no existe (Kotoba se retiró al comparar con videos reales) pasa al de siempre.
   if (salida.whisperModelo !== 'auto' && !MODELOS_WHISPER[salida.whisperModelo]) salida.whisperModelo = AJUSTES_INICIALES.whisperModelo;
   // Quien ya usaba la extensión no tiene por qué pasar por el asistente de bienvenida.

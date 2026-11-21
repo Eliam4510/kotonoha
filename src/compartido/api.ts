@@ -1,7 +1,7 @@
 // Contratos de las llamadas entre contextos.
 
 import type { OpcionesAnalisis, PuntoGramatica } from '../lenguas/tipos';
-import type { Ajustes } from './ajustes';
+import type { Ajustes, VozInstalada } from './ajustes';
 import type { ResumenInmersion, TipoInmersion } from '../nucleo/inmersion';
 import type { EntradaBreve } from '../nucleo/explorar';
 import type { CantoPorTramos } from '../nucleo/letra';
@@ -68,6 +68,50 @@ export interface MotorVozLocal {
   nombre: string;
   version: string;
   voces: { nombre: string; estilos: { nombre: string; id: number }[] }[];
+}
+
+/** Una voz del catálogo de AivisHub que Kotonoha sabe leer, con lo que se enseña antes de instalarla. */
+export interface VozCatalogo {
+  uuid: string;
+  nombre: string;
+  autor: string;
+  descripcion: string;
+  /** Como lo da AivisHub: «YouthfulFemale», «AdultMale»… */
+  timbre: string;
+  /** «ACML 1.0», «ACML-NC 1.0», «CC0» o «Custom». */
+  licencia: string;
+  version: string;
+  bytes: number;
+  sha256: string;
+  descargas: number;
+  hablantes: {
+    nombre: string;
+    id: number;
+    icono?: string;
+    estilos: { nombre: string; id: number; muestras: { url: string; texto: string }[] }[];
+  }[];
+}
+
+export interface FiltrosCatalogo {
+  texto?: string;
+  timbre?: string;
+  licencia?: string;
+  orden?: 'download' | 'like' | 'recent';
+  pagina?: number;
+}
+
+export interface PaginaCatalogo {
+  voces: VozCatalogo[];
+  /** Las que AivisHub tiene con estos filtros, contando las que aquí no se enseñan. */
+  total: number;
+  pagina: number;
+  paginas: number;
+}
+
+/** Lo que hay en el disco de las voces integradas: lo que todas comparten y cada una. */
+export interface EstadoVocesIntegradas {
+  base: { instalada: boolean; bytes: number };
+  voces: { uuid: string; presente: boolean; bytes: number }[];
 }
 
 export interface EstadoMotor {
@@ -244,6 +288,16 @@ export interface ApiMotor {
   vozFrase(texto: string, voz: string): Promise<string>;
   /** Los motores de voz local que contestan: el de `url` o, sin ella, los de los puertos de AivisSpeech y VOICEVOX. */
   motoresVoz(url?: string): Promise<MotorVozLocal[]>;
+  /** Una página del catálogo de AivisHub, con las voces que Kotonoha sabe leer. */
+  catalogoVoces(filtros: FiltrosCatalogo): Promise<PaginaCatalogo>;
+  /** El texto de la licencia de una voz del catálogo, para leerlo antes de instalarla. */
+  licenciaVoz(uuid: string): Promise<string>;
+  /** Instala una voz (y la primera vez, lo que todas comparten); avisa de cómo va con eventos de instalación. */
+  instalarVoz(uuid: string): Promise<void>;
+  borrarVoz(uuid: string): Promise<void>;
+  /** Borra lo que comparten todas las voces: sin ello no se puede leer con ninguna hasta volver a instalar una. */
+  borrarBaseVoces(): Promise<void>;
+  estadoVoces(): Promise<EstadoVocesIntegradas>;
   descargarMedio(url: string): Promise<{ datos: string; tipo: string }>;
   imagenes(consulta: string): Promise<ResultadoImagen[]>;
   consultaImagen(lema: string, frase?: string): Promise<string>;
@@ -310,6 +364,13 @@ export interface ApiFondo {
   /** Las claves de los otros proveedores de IA, por su identificador. Solo para el motor. */
   clavesProveedores(): Promise<Record<string, string>>;
   ajustesCompletos(): Promise<unknown>;
+  /**
+   * Para el motor, que en su documento offscreen no puede escribir los ajustes: anota una voz integrada instalada, quita
+   * una borrada y suma lo medido al leer con ellas («Tu equipo»).
+   */
+  vozIntegradaInstalada(voz: VozInstalada): Promise<void>;
+  vozIntegradaBorrada(uuid: string): Promise<void>;
+  medidaHabla(audioS: number, ms: number, dispositivo: string): Promise<void>;
   capturaVisible(): Promise<string>;
   /** Deja a la vista solo el video de la pestaña que lo pide, para capturarla. */
   soloVideo(si: boolean): Promise<void>;

@@ -227,6 +227,8 @@ export const JAPONES: PaqueteLengua = {
     letra: 'あ',
   },
   textoDeEjemplo: TEXTO_DE_EJEMPLO,
+  // まお, la voz de serie de AivisSpeech (ACML 1.0).
+  vocesIntegradas: { inicial: 'a59cb814-0083-4369-8542-f51a29e72af7', nombreInicial: 'まお' },
   saludo,
   textos: TEXTOS,
   ideasRelato: [tm('Un gato que pasea por Kioto'), tm('Una tarde de lluvia en el tren'), tm('El festival de verano del barrio')],

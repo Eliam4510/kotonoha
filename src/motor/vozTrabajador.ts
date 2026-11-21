@@ -1,23 +1,28 @@
-// Las voces neuronales del inglés y del alemán, en un trabajador aparte: Kokoro-82M (Apache-2.0) para el inglés y Piper
-// con la voz Thorsten (MIT, entrenada con un conjunto de datos CC0) para el alemán, las dos con ONNX en el procesador.
-// Los fonemas salen de piper-phonemize, el espeak-ng con el que se entrenó Piper, en WebAssembly; sus datos van en la
-// extensión con solo los diccionarios de esas dos lenguas. Los modelos se bajan una vez, fijados a un commit de Hugging
-// Face, y se guardan en su propia caché.
+// Las voces neuronales, en un trabajador aparte: Kokoro-82M (Apache-2.0) para el inglés y Piper con la voz Thorsten (MIT,
+// entrenada con un conjunto de datos CC0) para el alemán, las dos con ONNX en el procesador, y las voces de AivisHub
+// (Style-Bert-VITS2, vozSbv2.ts), que llegan ya pasadas a fonemas por la lengua. Los fonemas de Kokoro y Piper salen de
+// piper-phonemize, el espeak-ng con el que se entrenó Piper, en WebAssembly; sus datos van en la extensión con solo los
+// diccionarios de esas dos lenguas. Los modelos se bajan una vez, fijados a un commit de Hugging Face (o comprobados por
+// su huella, los de AivisHub), y se guardan en su propia caché.
 
 import * as ort from 'onnxruntime-web/webgpu';
 import { fonemasKokoro, frasesParaVoz, idsKokoro, prepararTextoIngles, unirAudio } from '../nucleo/vozNeuronal';
-import { leerModelo, urlDeModelo } from './modelos';
+import { CACHE_MODELOS_VOZ, leerModelo, urlDeModelo } from './modelos';
+import { type ArchivoVoz, leerSbv2, liberarSbv2, obtener, type PedidoSbv2, presente } from './vozSbv2';
 
 export type MotorVoz = 'kokoro' | 'piper';
 
-export type PedidoVoz = { tipo: 'leer'; id: number; motor: MotorVoz; texto: string; voz: string; velocidad: number } | { tipo: 'liberar' };
+export type PedidoVoz =
+  | { tipo: 'leer'; id: number; motor: MotorVoz; texto: string; voz: string; velocidad: number }
+  | ({ tipo: 'leerSbv2'; id: number } & PedidoSbv2)
+  | { tipo: 'instalar'; id: number; archivos: ArchivoVoz[] }
+  | { tipo: 'liberar' };
 
 export type RespuestaVoz =
-  | { tipo: 'descarga'; archivo: string; cargado: number; total: number }
-  | { tipo: 'audio'; id: number; muestras: Float32Array; frecuencia: number; ms: number }
+  | { tipo: 'descarga'; id?: number; archivo: string; cargado: number; total: number }
+  | { tipo: 'audio'; id: number; muestras: Float32Array; frecuencia: number; ms: number; dispositivo?: string; msCalculo?: number; recienCargada?: boolean }
+  | { tipo: 'instalado'; id: number }
   | { tipo: 'error'; id: number; mensaje: string };
-
-export const CACHE_MODELOS_VOZ = 'kotonoha-modelos-voz';
 
 const MODELOS = {
   kokoro: {
@@ -184,18 +189,42 @@ async function leerPiper(texto: string, velocidad: number): Promise<{ muestras: 
 
 let cola: Promise<unknown> = Promise.resolve();
 
+/** Baja lo que falte, uno tras otro, avisando de lo que se lleva de cada uno; lo que ya está no se vuelve a leer. */
+async function instalar(id: number, archivos: ArchivoVoz[]): Promise<void> {
+  try {
+    for (const a of archivos) {
+      if (await presente(a.url)) continue;
+      await obtener(a, (x) => avisar({ tipo: 'descarga', id, archivo: a.nombre, cargado: x.cargado, total: x.total || a.bytes }));
+    }
+    avisar({ tipo: 'instalado', id });
+  } catch (err) {
+    avisar({ tipo: 'error', id, mensaje: err instanceof Error ? err.message : String(err) });
+  }
+}
+
 self.onmessage = (e: MessageEvent<PedidoVoz>) => {
   const p = e.data;
+  // Las descargas van aparte: cientos de MB no deben hacer esperar a quien quiere oír una frase.
+  if (p.tipo === 'instalar') {
+    void instalar(p.id, p.archivos);
+    return;
+  }
   // Una lectura detrás de otra: ONNX en un solo hilo no gana nada leyendo dos a la vez.
   cola = cola.then(async () => {
     if (p.tipo === 'liberar') {
       for (const promesa of [kokoro, piper]) await (await promesa?.catch(() => null))?.sesion.release().catch(() => {});
       kokoro = null;
       piper = null;
+      await liberarSbv2();
       return;
     }
     const inicio = performance.now();
     try {
+      if (p.tipo === 'leerSbv2') {
+        const { muestras, frecuencia, dispositivo, msCalculo, recienCargada } = await leerSbv2(p);
+        avisar({ tipo: 'audio', id: p.id, muestras, frecuencia, dispositivo, msCalculo, recienCargada, ms: Math.round(performance.now() - inicio) }, [muestras.buffer]);
+        return;
+      }
       const { muestras, frecuencia } = p.motor === 'piper' ? await leerPiper(p.texto, p.velocidad) : await leerKokoro(p.texto, p.voz, p.velocidad);
       avisar({ tipo: 'audio', id: p.id, muestras, frecuencia, ms: Math.round(performance.now() - inicio) }, [muestras.buffer]);
     } catch (err) {

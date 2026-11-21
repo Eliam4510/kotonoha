@@ -256,6 +256,10 @@ narabas 是一个 wav2vec2 模型，每 20 毫秒给出日语每个音素的概�
 
 PASQA 是给整句发音打分的模型，没有纳入：转换它需要特定版本的 Python、PyTorch 和 s3prl，因此无法测量。
 
+### AivisHub 语音
+
+AivisSpeech 的语音是 Style-Bert-VITS2 JP-Extra 的 ONNX 模型（AIVMX），外加一个 653 MB 的日语 BERT。在 Radeon RX 9060 XT 上，语音放在 GPU 上运行时，音频与处理器上的完全相同（无噪声时相关系数 1.0000）；而 BERT 在 GPU 上以 fp16 计算，会稍微改变语调，所以放在处理器上运行，结果与 AivisSpeech 相同。这样一句 10 秒的话大约 1.4 秒读完（全部放在 GPU 上为 0.44 秒，没有 GPU 时约 18 秒）。文本处理部分在 AivisSpeech 中是 pyopenjtalk-plus，这里是 yomi（OpenJTalk 的 TypeScript 版本），加上 pyopenjtalk-plus 的三条重音短语连接规则：在 210 句（60 句现代句子和 150 句《吾輩は猫である》）中，读音相同的占 85 %，在 91.6 % 的音拍上给出与 AivisSpeech 相同的音高；没有这三条规则时为 90.6 %，用 Kotonoha 原有的方法（Kanjium 和重音练习）则为 73 %。
+
 ### 网页阅读器的开销
 
 主线程时间，所有单词都未知且全部显示注音：最坏情况。在 Edge 中以 1366×860 用 `Performance.getMetrics` 测量，阅读器已加载。

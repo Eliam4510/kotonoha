@@ -200,6 +200,15 @@ const FAMILIAS: Familia[] = [
         que: () => tr('Cómo se dice de verdad una frase hablando seguido, en su pestaña de la ficha.'),
         hay: (l) => !!l.comoSuena,
       },
+      {
+        id: 'voces',
+        icono: 'altavoz',
+        nombre: nombre(tm('Voces neuronales de AivisHub')),
+        que: () => tr('Las frases, leídas con las voces de AivisSpeech en tu equipo y sin programas aparte.'),
+        pieza: 'habla',
+        probar: { texto: PROBAR, ir: () => navegar('ajustes?seccion=voces') },
+        hay: (l) => !!l.vocesIntegradas,
+      },
     ],
   },
 ];

@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.41.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.42.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -178,6 +178,7 @@ Estado de cada función en la versión 0.41.0, con la forma en que se ha verific
 | «Tu equipo», en la bienvenida y en Ajustes: qué tal irán aquí la voz local, las letras de canciones y el OCR, con lo que el navegador dice de la gráfica y una prueba con el OCR de una página de muestra; cada pieza, con su tiempo y un consejo. Nada se apaga | Automática: pruebas unitarias de los niveles y las estimaciones; de extremo a extremo con la gráfica de verdad y sin ella |
 | Medir en el uso real: lo que tardan la voz y el OCR se guarda en «Tu equipo» y manda sobre la prueba; si un video se ve más deprisa de lo que se transcribe, se avisa, y «Esperar a la transcripción» lo pausa hasta que vuelve a ir por delante; en «Automática», la gráfica descansa más si el video da tirones; el OCR lee menos páginas por delante en un equipo lento y propone «Leer una zona» | Automática: pruebas unitarias del ritmo, los tirones y lo medido; de extremo a extremo con una transcripción de verdad más lenta que el video, y con el OCR |
 | Presentar las funciones: la bienvenida acaba en «¿Por dónde quieres empezar?», con cuatro caminos; «Descubre Kotonoha», en Inicio, con las funciones por familias y un botón para probar cada una; un texto de ejemplo de dominio público en cada lengua; pistas de la primera vez, solo para quien instala; y «Lo nuevo» tras actualizar, una vez | Automática: pruebas unitarias de los textos de ejemplo y de lo nuevo; de extremo a extremo con un perfil nuevo, en japonés y en inglés |
+| Voces de AivisHub dentro de Kotonoha: «Instalar las voces» baja el BERT de AivisSpeech, un diccionario y la voz まお (unos 0,9 GB, comprobados con su SHA-256) y lee las frases en japonés sin AivisSpeech abierto, con la voz en la gráfica; un catálogo de AivisHub con búsqueda, filtros, muestras y licencias; el acento con yomi y las reglas de enlace de AivisSpeech (el 92 % de las moras como él); una pregunta en la ficha y un aviso en Inicio, una vez | Automática: pruebas unitarias de la entrada de la voz, del lector de AIVMX y del acento con un corpus de 210 frases frente a AivisSpeech; de extremo a extremo instalando y leyendo con la voz de verdad, y con el catálogo de AivisHub |
 | La ventana no tapa lo que queda por leer: va al margen de la página si cabe, y si no, sobre lo ya leído (encima del renglón, o a la derecha de la columna en vertical); se mueve, se agranda y se fija a un lado como panel, que se ensancha y recuerda su ancho | Automática (pruebas unitarias de la colocación) |
 | Seleccionar arrastrando, letra a letra y entre renglones, con Traducir, Explicar, Desglosar, Escuchar, Resaltar, Nota y Copiar; Ctrl+C copia lo abierto | Automática |
 | Pasar de página con flechas a la vista a los lados, el teclado o deslizando: tocar la página solo cierra lo abierto, y fallar por poco al tocar una palabra ya no pasa de página | Automática |

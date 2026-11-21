@@ -36,7 +36,7 @@ Tarjetas y Anki
 
 Pronunciación y voz
 • Práctica del acento tonal japonés: tu curva de tono sobre la del diccionario.
-• Voz japonesa local con el acento del diccionario, con AivisSpeech o VOICEVOX.
+• Las voces japonesas de AivisHub dentro de la extensión, sin programas aparte, o la voz local de AivisSpeech o VOICEVOX, con el acento del diccionario.
 
 Explicaciones con IA, solo cuando las pides
 • Claude, de Anthropic, u otro proveedor compatible con la API de OpenAI (OpenRouter, DeepSeek, OpenAI, LM Studio, Ollama), con tu propia clave y el gasto de cada petición a la vista.
@@ -79,7 +79,7 @@ Flashcards and Anki
 
 Pronunciation and voice
 • Japanese pitch-accent practice: your pitch curve over the dictionary's.
-• A local Japanese voice with the dictionary's accent, with AivisSpeech or VOICEVOX.
+• Japanese AivisHub voices inside the extension, with no separate program, or the local voice of AivisSpeech or VOICEVOX, with the dictionary's accent.
 
 AI explanations, only when you ask
 • Claude, by Anthropic, or another OpenAI-compatible provider (OpenRouter, DeepSeek, OpenAI, LM Studio, Ollama), with your own key and the cost of each request in view.

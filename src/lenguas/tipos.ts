@@ -10,6 +10,7 @@ import type { EntradaDiccionario, FichaCaracter, FuenteBiblioteca, PalabraToken,
 import type { TipoMoraEspecial } from '../nucleo/alineacion';
 import type { FormasAnki } from '../nucleo/gramaticaAnki';
 import type { FraseAcentual } from '../nucleo/practicaAcento';
+import type { EntradaSbv2 } from '../nucleo/sbv2';
 import type { ReglasTranscripcion } from '../nucleo/transcripcion';
 import type { CaracterImportado, FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
 import type { DatosTrazos } from '../nucleo/trazos';
@@ -461,6 +462,11 @@ export interface PaqueteLengua {
   nivelInicial: string;
   /** El nivel guardado, tal como se enseña en pequeño. */
   nombreNivel(valor: string): string;
+  /**
+   * Si se puede leer con las voces de AivisHub dentro de Kotonoha (su parte de texto está en lenguas/voces.ts), y la voz
+   * que se instala la primera vez: su identificador en AivisHub y su nombre.
+   */
+  vocesIntegradas?: { inicial: string; nombreInicial: string };
   /** Voces de Azure Speech. */
   voces: VozLengua[];
   vocesIniciales: string[];
@@ -547,6 +553,33 @@ export interface TranscripcionLengua {
 export interface DatosDiccionarios {
   diccionarios: { get(id: string): PromiseLike<unknown> };
   frecuencias: { get(clave: [string, string, string]): PromiseLike<{ rango: number } | undefined> };
+}
+
+/** Una oración lista para la voz neuronal: sus frases acentuales y lo que la lengua necesita para leerla. */
+export interface OracionVoz {
+  /** Las moras de cada frase acentual y su núcleo (0, sin bajada): como un motor de VOICEVOX, se pueden corregir. */
+  frases: { moras: string[]; nucleo: number }[];
+  /** El silencio antes de ella: más entre líneas que entre los trozos de una línea larga. */
+  pausaAntesS: number;
+  /** Lo que la lengua guarda para armar la entrada de la voz. */
+  interno: unknown;
+}
+
+/**
+ * La parte de texto de una voz neuronal de Style-Bert-VITS2 (las de AivisHub): corre en el motor, y el trabajador de
+ * voz solo recibe fonemas, tonos y word2ph. Su diccionario se baja al instalar las voces. Cada lengua la registra en
+ * lenguas/voces.ts, no en su motor: así no la cargan la ventana ni el lector.
+ */
+export interface VozIntegradaLengua {
+  diccionario: { url: string; sha256: string; bytes: number };
+  /** Cambia cuando cambia cómo se lee un texto: lo guardado con otra versión se vuelve a leer. */
+  version: number;
+  /** El diccionario, ya descomprimido. */
+  cargar(diccionario: Uint8Array): void;
+  listo(): boolean;
+  analizar(texto: string): OracionVoz[];
+  /** La entrada de la voz para una oración, con los núcleos dados (uno por frase) o con los suyos. */
+  entrada(oracion: OracionVoz, nucleos?: number[]): EntradaSbv2;
 }
 
 export interface MotorLengua {

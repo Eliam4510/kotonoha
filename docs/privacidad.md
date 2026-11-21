@@ -23,6 +23,7 @@ Solo cuando el usuario usa la función correspondiente, y solo a los servicios i
 | Anthropic (API de Claude) u otro proveedor de IA que el usuario configure, como OpenRouter, DeepSeek u OpenAI | El texto de la frase, la página o los subtítulos que se piden explicar, traducir, corregir o revisar; en la revisión del OCR, la imagen de la página | Al pedir una explicación, una traducción, una corrección o una revisión, con la clave del propio usuario |
 | Microsoft Azure Speech | El texto de la frase que se va a leer | Al escuchar una frase, con la clave del propio usuario |
 | Hugging Face, GitHub y jsDelivr | Solo la petición del archivo | Al descargar modelos y diccionarios |
+| AivisHub (api.aivis-project.com, assets.aivis-project.com y su almacenamiento en Cloudflare R2) | La búsqueda en el catálogo de voces (nombre, timbre y licencia) y la petición de la voz que se instala o de la muestra que se oye | Al abrir el catálogo de voces, oír una muestra o instalar una voz |
 | JapanesePod101, Lingua Libre, Wikimedia Commons y Openverse | La palabra buscada | Al buscar el audio o la imagen de una palabra |
 | API de GitHub | Solo la consulta de la última versión publicada | Una vez al día, si los avisos de versión están activados |
 | Sitios de video | Las peticiones normales del sitio, como las de sus subtítulos | Al ver un video en ese sitio |
@@ -64,6 +65,7 @@ Only when the user uses the corresponding feature, and only to the services list
 | Anthropic (Claude API), or another AI provider the user sets up, such as OpenRouter, DeepSeek or OpenAI | The text of the sentence, page or subtitles to be explained, translated, corrected or reviewed; for OCR review, the page image | When the user asks for an explanation, translation, correction or review, with the user's own key |
 | Microsoft Azure Speech | The text of the sentence to be read aloud | When the user plays a sentence, with the user's own key |
 | Hugging Face, GitHub and jsDelivr | Only the request for the file | When downloading models and dictionaries |
+| AivisHub (api.aivis-project.com, assets.aivis-project.com and its Cloudflare R2 storage) | The voice catalog search (name, voice type and license) and the request for the voice being installed or the sample being played | When opening the voice catalog, playing a sample or installing a voice |
 | JapanesePod101, Lingua Libre, Wikimedia Commons and Openverse | The word being looked up | When looking up a word's audio or image |
 | GitHub API | Only the query for the latest published version | Once a day, if version notices are on |
 | Video sites | The site's own normal requests, such as those for its subtitles | When watching a video on that site |

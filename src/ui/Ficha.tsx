@@ -3,7 +3,7 @@
 
 import { Fragment } from 'preact';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { type Ajustes, hayVozSintetica, type PestanaDiccionario, vozLocalActiva, vozNeuronalActiva } from '../compartido/ajustes';
+import { type Ajustes, guardarAjustes, hayVozSintetica, nombreVozIntegrada, type PestanaDiccionario, vozIntegradaActiva, vozLocalActiva, vozNeuronalActiva } from '../compartido/ajustes';
 import { type FlujoCancelable, flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
@@ -14,7 +14,7 @@ import { useEsperar } from './preparacion';
 import { type Compartida, compartir, PanelCompartir } from './Compartir';
 import { Icono, type NombreIcono } from './iconos';
 import { formatoLectura, lengua } from './lengua';
-import { numero, tm, tr } from '../compartido/i18n';
+import { bcp47Actual, numero, tm, tr } from '../compartido/i18n';
 import { PanelTrazos } from './Trazos';
 import { type DatosTarjeta, type EstiloTarjeta, primerPunto, resolverLetra } from './tarjeta';
 import { BotonesEstadoGramatica, BotonOpcionMultiple, VistoEn } from './EstadoGramatica';
@@ -339,6 +339,8 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
     motor.audiosPalabra(lema, lectura).then(fijarAudios).catch(() => fijarAudios([]));
   }, [lema, lectura]);
 
+  // La primera vez que una frase suena con la voz del sistema, se ofrecen las voces integradas de la lengua, si las hay.
+  const [ofrecerVoces, fijarOfrecerVoces] = useState(false);
   const tocarVoz = async (voz: string, texto: string) => {
     fijarError('');
     if (hayVozSintetica(ajustes)) {
@@ -351,6 +353,12 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
       }
     }
     await decirConNavegador(texto).catch(() => {});
+    if (!hayVozSintetica(ajustes) && lengua.value.vocesIntegradas && !ajustes.preguntaVocesVista) fijarOfrecerVoces(true);
+  };
+  const responderVoces = (instalar: boolean) => {
+    fijarOfrecerVoces(false);
+    guardarAjustes({ preguntaVocesVista: true }).catch(() => {});
+    if (instalar) fondo.abrirApp('ajustes?seccion=voces').catch(() => {});
   };
 
   return (
@@ -386,7 +394,12 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
       {frase && (
         <>
           <div class="subtitulo-def">{tr('Frase')}</div>
-          {vozLocalActiva(ajustes) ? (
+          {vozIntegradaActiva(ajustes) ? (
+            <div class="fila-audio">
+              <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con la voz neuronal')} onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
+              <span class="fila-audio-nombre" lang={lengua.value.id}>{nombreVozIntegrada(ajustes)}</span>
+            </div>
+          ) : vozLocalActiva(ajustes) ? (
             <div class="fila-audio">
               <button class="btn-icono chico relleno" aria-label={tr('Leer la frase con la voz local')} onClick={() => tocarVoz('', frase)}><Icono n="reproducir" t={14} /></button>
               <span class="fila-audio-nombre">{tr('Voz local')}</span>
@@ -410,6 +423,15 @@ function PanelAudio({ lema, lectura, frase, ajustes, enviar }: { lema: string; l
             </div>
           )}
         </>
+      )}
+      {ofrecerVoces && (
+        <div class="oferta-voces" role="note">
+          <span>{tr('¿Instalar las voces neuronales de AivisHub? Se oyen mucho mejor que la del sistema, sin programas aparte (unos {0} GB).', (0.9).toLocaleString(bcp47Actual()))}</span>
+          <span class="oferta-voces-botones">
+            <button class="btn chico primario" onClick={() => responderVoces(true)}>{tr('Instalar')}</button>
+            <button class="btn chico fantasma" onClick={() => responderVoces(false)}>{tr('Ahora no')}</button>
+          </span>
+        </div>
       )}
       {error && <div class="texto-error">{error}</div>}
     </div>

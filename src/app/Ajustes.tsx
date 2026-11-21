@@ -1,6 +1,6 @@
 // Pantalla de ajustes de la ventana de la app.
 
-import type { InfoAyudante, MotorVozLocal } from '../compartido/api';
+import type { EstadoVocesIntegradas, InfoAyudante, MotorVozLocal } from '../compartido/api';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { AJUSTES_INICIALES, type Ajustes, type AjustesVozLocal, type AjustesVozNeuronal, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, TAMANO_DICCIONARIO, type TareaIA, type Tema } from '../compartido/ajustes';
@@ -15,8 +15,8 @@ import type { TareaPrompt, TextosLengua } from '../lenguas/tipos';
 import { TAREAS_PERSONALIZABLES } from '../motor/prompts';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { estadoAnki, refrescarAnki } from './estadoApp';
-import { BotonBorrar, Cabecera, Interruptor, Mensaje } from './Piezas';
-import { IDIOMAS_INTERFAZ, bcp47Actual, lenguaDe, lenguasExplicacion, lenguasTraduccion, numero, resolverIdioma, tm, tr } from '../compartido/i18n';
+import { BotonBorrar, Cabecera, Interruptor, Mensaje, Opcion, textoTamano } from './Piezas';
+import { IDIOMAS_INTERFAZ, lenguaDe, lenguasExplicacion, lenguasTraduccion, numero, resolverIdioma, tm, tr } from '../compartido/i18n';
 import { PAQUETES } from '../lenguas';
 import { estudiarLengua, lengua } from '../ui/lengua';
 import { buscarVersionNueva, type VersionPublicada } from '../compartido/actualizaciones';
@@ -31,6 +31,7 @@ import { ConFurigana } from '../ui/Ficha';
 import { estiloDiccionario } from './TarjetaPalabra';
 import { familiaDe, letrasDe } from '../ui/letra';
 import { PanelEquipo } from './TuEquipo';
+import { VocesIntegradas } from './VocesIntegradas';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -108,19 +109,6 @@ function Seccion({ id, icono, titulo, descripcion, ia, children }: { id: string;
       </header>
       {children}
     </section>
-  );
-}
-
-/** Fila de ajuste: lo que hace a la izquierda, el control a la derecha. */
-function Opcion({ titulo, ayuda, children }: { titulo: ComponentChildren; ayuda?: ComponentChildren; children: ComponentChildren }) {
-  return (
-    <div class="ap-opcion">
-      <div class="ap-opcion-texto">
-        <b>{titulo}</b>
-        {ayuda && <span>{ayuda}</span>}
-      </div>
-      <div class="ap-opcion-control">{children}</div>
-    </div>
   );
 }
 
@@ -567,11 +555,6 @@ function SeccionIdioma({ a, cambiar }: PropsSeccion) {
   );
 }
 
-/** Un tamaño para leerlo: 1,5 GB o 185 MB. */
-function textoTamano(mb: number): string {
-  return mb >= 1000 ? `${(mb / 1000).toLocaleString(bcp47Actual(), { maximumFractionDigits: 1 })} GB` : `${Math.max(1, Math.round(mb))} MB`;
-}
-
 const INTENSIDADES: { id: Ajustes['whisperIntensidad']; nombre: string; ayuda: string }[] = [
   { id: 'auto', nombre: tm('Automática'), ayuda: tm('Equilibra velocidad y fluidez, y acelera cuando te alejas. Un video de 30 minutos tarda alrededor de uno con Haas-ja o Parakeet, y unos 5 con Whisper.') },
   { id: 'suave', nombre: tm('Suave'), ayuda: tm('La mínima carga, por si estás jugando o editando video. Un video de 30 minutos tarda unos 3 con Haas-ja o Parakeet, y unos 12 con Whisper.') },
@@ -655,11 +638,15 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
   const [moras, fijarMoras] = useState(0);
   // YAMNet, que oye dónde se canta al colocar la letra de una canción: también en su propia caché.
   const [canto, fijarCanto] = useState(0);
+  // Las voces de AivisHub, en la lengua que las tenga: lo que comparten y cada voz.
+  const [voces, fijarVoces] = useState<EstadoVocesIntegradas | null>(null);
   const releer = () => {
     leerModelosGuardados().then(fijarGuardados).catch(() => {});
     bytesModeloMoras().then(fijarMoras).catch(() => {});
     bytesModeloCanto().then(fijarCanto).catch(() => {});
+    if (lengua.value.vocesIntegradas) motor.estadoVoces().then(fijarVoces).catch(() => {});
   };
+  const bytesVoces = (voces?.base.bytes ?? 0) + (voces?.voces.reduce((n, v) => n + v.bytes, 0) ?? 0);
   useEffect(() => {
     releer();
   }, []);
@@ -695,14 +682,29 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
         </Opcion>
         <AyudanteLocal />
       </div>
-      {guardados && guardados.totalBytes + moras + canto > 0 && (
+      {guardados && guardados.totalBytes + moras + canto + bytesVoces > 0 && (
         <>
           <Subtitulo>{tr('Modelos guardados')}</Subtitulo>
           <p class="ayuda ap-subtitulo-ayuda">
             {tr('Se guardan en este navegador: se leen del disco y no se vuelven a descargar. Si borras uno, se descargará de nuevo la próxima vez que lo uses. Desinstalar la extensión también los borra.')}
-            {guardados.modelos.length + (moras ? 1 : 0) + (canto ? 1 : 0) > 1 && ` ${tr('En total ocupan {0}.', textoTamano((guardados.totalBytes + moras + canto) / 1e6))}`}
+            {guardados.modelos.length + (moras ? 1 : 0) + (canto ? 1 : 0) + (bytesVoces ? 1 : 0) > 1 && ` ${tr('En total ocupan {0}.', textoTamano((guardados.totalBytes + moras + canto + bytesVoces) / 1e6))}`}
           </p>
           <div class="ap-grupo">
+            {voces && voces.base.bytes > 0 && (
+              <Opcion titulo={tr('Voces de AivisHub: lo que comparten todas (BERT y diccionario)')} ayuda={`${textoTamano(voces.base.bytes / 1e6)}. ${tr('Sin esto no se puede leer con ninguna, hasta volver a instalar una.')}`}>
+                <BotonBorrar etiqueta={`${tr('Borrar')}: BERT`} texto={tr('Borrar')} alBorrar={() => motor.borrarBaseVoces().then(releer)} />
+              </Opcion>
+            )}
+            {voces?.voces
+              .filter((v) => v.presente)
+              .map((v) => {
+                const nombre = a.vozIntegrada.instaladas.find((x) => x.uuid === v.uuid)?.nombre ?? v.uuid;
+                return (
+                  <Opcion key={v.uuid} titulo={tr('Voz {0}', nombre)} ayuda={textoTamano(v.bytes / 1e6)}>
+                    <BotonBorrar etiqueta={`${tr('Borrar')}: ${nombre}`} texto={tr('Borrar')} alBorrar={() => motor.borrarVoz(v.uuid).then(releer)} />
+                  </Opcion>
+                );
+              })}
             {moras > 0 && (
               <Opcion titulo={tr('narabas, para las moras de la práctica del acento')} ayuda={textoTamano(moras / 1e6)}>
                 <BotonBorrar etiqueta={`${tr('Borrar')}: narabas`} texto={tr('Borrar')} alBorrar={() => borrarModeloMoras().then(releer)} />
@@ -1297,9 +1299,6 @@ function VozLocal({ a, cambiar }: PropsSeccion) {
           {error && <span class="texto-error">{error}</span>}
         </Opcion>
       )}
-      <Opcion titulo={tr('Acento del diccionario')} ayuda={tr('Antes de leer, corrige el acento de cada palabra con el del diccionario de acento: la voz dice lo que el diccionario dice, no lo que adivina.')}>
-        <Interruptor etiqueta={tr('Acento del diccionario')} on={a.vozLocal.acentoDiccionario} alCambiar={(v) => fijar({ acentoDiccionario: v })} />
-      </Opcion>
       <Opcion titulo={tr('Dirección de la voz local')} ayuda={tr('Vacía, se busca en los puertos de AivisSpeech (10101) y de VOICEVOX (50021).')}>
         <input class="campo ap-campo-medio" aria-label={tr('Dirección de la voz local')} placeholder="http://127.0.0.1:10101" value={a.vozLocal.url} onChange={(e) => fijar({ url: e.currentTarget.value.trim() })} />
       </Opcion>
@@ -1312,7 +1311,13 @@ function SeccionVoces({ a, cambiar }: PropsSeccion) {
   return (
     <Seccion id="voces" icono="voz" titulo={tr('Voces')} descripcion={tr('Para frases sin audio del video. Azure Speech ofrece medio millón de caracteres gratis al mes con tu propia cuenta. Sin clave se usa la voz del navegador, que no se puede guardar en tarjetas.')}>
       <div class="ap-grupo">
+        {lengua.value.vocesIntegradas && <VocesIntegradas a={a} cambiar={cambiar} />}
         {lengua.value.id === 'ja' && <VozLocal a={a} cambiar={cambiar} />}
+        {lengua.value.id === 'ja' && (
+          <Opcion titulo={tr('Acento del diccionario')} ayuda={tr('Antes de leer, corrige el acento de cada palabra con el del diccionario de acento: la voz dice lo que el diccionario dice, no lo que adivina.')}>
+            <Interruptor etiqueta={tr('Acento del diccionario')} on={a.vozLocal.acentoDiccionario} alCambiar={(v) => cambiar((x) => ({ vozLocal: { ...x.vozLocal, acentoDiccionario: v } }))} />
+          </Opcion>
+        )}
         {(lengua.value.id === 'en' || lengua.value.id === 'de') && <VozNeuronal a={a} cambiar={cambiar} />}
         <VozDelNavegador a={a} cambiar={cambiar} />
         <Opcion titulo={tr('Clave de Azure Speech')}>

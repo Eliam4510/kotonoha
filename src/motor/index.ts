@@ -1,6 +1,6 @@
 // Punto de entrada del motor: vive en un documento offscreen para no detenerse a mitad de una tarea.
 
-import { type Ajustes, completarAjustes, modeloParaTranscribir, type ModeloWhisper } from '../compartido/ajustes';
+import { type Ajustes, completarAjustes, modeloParaTranscribir, type ModeloWhisper, vozIntegradaActiva } from '../compartido/ajustes';
 import type { ApiMotor, CambioPalabra, FiltroPalabras, PalabraConocida } from '../compartido/api';
 import { atender, atenderFlujos, flujosActivos, fondo } from '../compartido/rpc';
 import type { BorradorTarjeta, ContextoIA, ElementoBiblioteca, FilaPalabra } from '../compartido/tipos';
@@ -31,6 +31,7 @@ import * as narabas from './narabas';
 import * as niveles from './niveles';
 import * as explorar from './explorar';
 import * as vozNeuronal from './vozNeuronal';
+import * as vozIntegrada from './vozIntegrada';
 import * as compatible from './compatible';
 import * as memoria from './memoria';
 import * as whisper from './whisper';
@@ -534,6 +535,14 @@ const api: ApiMotor = {
         if (!a.azureClave) throw e;
       }
     }
+    if (vozIntegradaActiva(a)) {
+      try {
+        return (await vozIntegrada.leer(a, t)).datos;
+      } catch (e) {
+        // Si falla, la voz local o Azure si las hay; si no, quien llama usa la voz del navegador.
+        if (!vozLocal.usarVozLocal(a) && !a.azureClave) throw e;
+      }
+    }
     if (vozLocal.usarVozLocal(a)) {
       try {
         return await vozLocal.leer(a, t);
@@ -545,6 +554,14 @@ const api: ApiMotor = {
     return medios.vozAzure(a, t, v);
   },
   motoresVoz: (u) => vozLocal.buscarMotores(u),
+  catalogoVoces: (f) => vozIntegrada.catalogo(f),
+  licenciaVoz: (u) => vozIntegrada.licencia(u),
+  instalarVoz: (u) => vozIntegrada.instalar(u),
+  borrarVoz: (u) => vozIntegrada.borrar(u),
+  borrarBaseVoces: () => vozIntegrada.borrarBase(),
+  async estadoVoces() {
+    return vozIntegrada.estado(await aj());
+  },
   descargarMedio: (u) => medios.descargarMedio(u),
   imagenes: (c) => medios.buscarImagenes(c),
   async consultaImagen(l, f) {
@@ -689,8 +706,9 @@ const api: ApiMotor = {
       };
     }
     // Las claves de API no van en la copia: un archivo así acaba en cualquier sitio. Se vuelven a escribir al restaurar.
-    // Lo medido de este equipo tampoco: en otro, con otra gráfica, no valdría.
-    const { azureClave: _clave, equipoPrueba: _prueba, equipoUso: _uso, ...sinClaves } = ajustes;
+    // Lo medido de este equipo tampoco: en otro, con otra gráfica, no valdría. Ni las voces integradas: sus archivos
+    // están en el disco de este equipo, y en otro hay que volver a instalarlas.
+    const { azureClave: _clave, equipoPrueba: _prueba, equipoUso: _uso, vozIntegrada: _voces, ...sinClaves } = ajustes;
     return JSON.stringify({ version: 2, ajustes: sinClaves, lenguas, consumo: await baseGeneral.consumo.toArray() });
   },
   async importarDatos(json) {

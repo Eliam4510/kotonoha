@@ -256,6 +256,10 @@ GPU でも、プロセッサーの ONNX Runtime と音素ひとつひとつま�
 
 文全体の発音を採点するモデル PASQA は入れませんでした。変換には特定のバージョンの Python、PyTorch、s3prl が必要で、測定できませんでした。
 
+### AivisHub の音声
+
+AivisSpeech の音声は、Style-Bert-VITS2 JP-Extra の ONNX モデル（AIVMX）と 653 MB の日本語 BERT です。Radeon RX 9060 XT で音声を GPU で動かすと、プロセッサーと同じ音声になります（ノイズなしで相関 1.0000）。一方 BERT は GPU では fp16 で計算され、イントネーションが少し変わるため、AivisSpeech と同じ結果になるプロセッサーで動かします。これで 10 秒の文を約 1.4 秒で読み上げます（すべて GPU なら 0.44 秒、GPU なしなら約 18 秒）。テキスト処理は、AivisSpeech では pyopenjtalk-plus ですが、ここでは OpenJTalk の TypeScript 版である yomi に pyopenjtalk-plus のアクセント句の結合規則を三つ加えたものです。210 文（現代の文 60、『吾輩は猫である』150）で、85 % を同じに読み、91.6 % のモーラで AivisSpeech と同じ高さになります。三つの規則なしでは 90.6 %、Kotonoha に元からあったもの（Kanjium とアクセント練習）では 73 % でした。
+
 ### ページリーダーの負荷
 
 すべての単語が未知で、すべてにふりがなを付けた最悪の場合のメインスレッドの時間です。Edge で 1366×860 で `Performance.getMetrics` を使い、リーダーを読み込んだ状態で測定しました。

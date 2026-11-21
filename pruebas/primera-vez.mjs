@@ -113,7 +113,7 @@ const descubre = await app.evaluate(() => ({
 }));
 console.log('  ', JSON.stringify(descubre));
 comprobar(JSON.stringify(descubre.familias) === JSON.stringify(['ver', 'leer', 'repasar', 'consultar', 'practicar']), 'Inicio lleva a «Descubre Kotonoha», con sus cinco familias');
-comprobar(['niveles', 'kanji', 'acento'].every((f) => descubre.funciones.includes(f)) && !descubre.funciones.includes('como-suena'), 'En japonés, con el JLPT, los kanji y el acento, y sin «Cómo suena»');
+comprobar(['niveles', 'kanji', 'acento', 'voces'].every((f) => descubre.funciones.includes(f)) && !descubre.funciones.includes('como-suena'), 'En japonés, con el JLPT, los kanji, el acento y las voces de AivisHub, y sin «Cómo suena»');
 // El cambio de pantalla funde una con otra: la captura, ya con la nueva sola.
 await app.waitForTimeout(900);
 await app.screenshot({ path: join(CAPTURAS, 'descubre.png'), fullPage: true });
@@ -169,7 +169,7 @@ await ajustes({ idiomaObjetivo: 'en' });
 await app.goto(`chrome-extension://${id}/app.html#/descubre`);
 await app.waitForSelector('.ap-familia', { timeout: 10000 });
 const ingles = await app.evaluate(() => [...document.querySelectorAll('.ap-funcion')].map((f) => f.getAttribute('data-funcion')));
-comprobar(ingles.includes('como-suena') && !ingles.includes('kanji') && !ingles.includes('acento'), 'En inglés, «Cómo suena», y ni kanji ni acento', JSON.stringify(ingles));
+comprobar(ingles.includes('como-suena') && !ingles.includes('kanji') && !ingles.includes('acento') && !ingles.includes('voces'), 'En inglés, «Cómo suena», y ni kanji, ni acento, ni las voces de AivisHub', JSON.stringify(ingles));
 pestana = nuevaPestana();
 await app.locator('.ap-funcion[data-funcion="ejemplo"] .btn').click();
 v = await pestana;

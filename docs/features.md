@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.41.0, along with how it has been verified.
+Status of each feature in version 0.42.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -178,6 +178,7 @@ Status of each feature in version 0.41.0, along with how it has been verified.
 | “Your computer”, in the welcome screen and in Settings: how local voice, song lyrics and OCR will run here, from what the browser says about the graphics card and a test that reads a sample page with OCR; each part with its time and a tip. Nothing is turned off | Automated: unit tests of the levels and estimates; end to end with the real graphics card and without one |
 | Measuring in real use: how long voice and OCR take is saved in “Your computer” and takes precedence over the test; if a video is watched faster than it is transcribed, a notice says so, and “Wait for the transcription” pauses it until the transcription is ahead again; on “Automatic”, the graphics card rests more if the video stutters; OCR reads fewer pages ahead on a slow computer and suggests “Read an area” | Automated: unit tests of the pace, stutters and measurements; end to end with a real transcription slower than the video, and with OCR |
 | Introducing the features: the welcome screen ends with “Where would you like to start?”, with four paths; “Discover Kotonoha”, on Home, with the features by family and a button to try each one; a public-domain sample text in each language; first-time hints, only for new installs; and what's new after updating, once | Automated: unit tests of the sample texts and of what's new; end to end with a new profile, in Japanese and English |
+| AivisHub voices inside Kotonoha: “Install the voices” downloads AivisSpeech’s BERT, a dictionary and the voice まお (about 0.9 GB, checked with their SHA-256) and reads Japanese sentences without AivisSpeech open, with the voice on the graphics card; an AivisHub catalog with search, filters, samples and licenses; the accent with yomi and AivisSpeech’s phrase-linking rules (92 % of morae as AivisSpeech); a question in the word panel and a notice on Home, once | Automated: unit tests of the voice input, the AIVMX reader and the accent with a 210-sentence corpus against AivisSpeech; end to end installing and reading with the real voice, and with the AivisHub catalog |
 | The window does not cover what is left to read: it goes in the page margin if it fits, otherwise over text already read (above the line, or to the right of the column in vertical text); it can be moved, enlarged and pinned to the side as a panel that widens and remembers its width | Automated (unit tests of the placement) |
 | Selecting by dragging, character by character and across lines, with Translate, Explain, Break down, Listen, Highlight, Note and Copy; Ctrl+C copies what is open | Automated |
 | Turning pages with visible arrows at the sides, the keyboard or a swipe: tapping the page only closes what is open, and narrowly missing a word no longer turns the page | Automated |

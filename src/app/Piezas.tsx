@@ -2,8 +2,26 @@
 
 import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { tr } from '../compartido/i18n';
+import { bcp47Actual, tr } from '../compartido/i18n';
 import { Icono, type NombreIcono } from '../ui/iconos';
+
+/** Una fila de Ajustes: su nombre y su ayuda a un lado, y lo que se toca al otro. */
+export function Opcion({ titulo, ayuda, children }: { titulo: ComponentChildren; ayuda?: ComponentChildren; children: ComponentChildren }) {
+  return (
+    <div class="ap-opcion">
+      <div class="ap-opcion-texto">
+        <b>{titulo}</b>
+        {ayuda && <span>{ayuda}</span>}
+      </div>
+      <div class="ap-opcion-control">{children}</div>
+    </div>
+  );
+}
+
+/** Un tamaño para leerlo: 1,5 GB o 185 MB. */
+export function textoTamano(mb: number): string {
+  return mb >= 1000 ? `${(mb / 1000).toLocaleString(bcp47Actual(), { maximumFractionDigits: 1 })} GB` : `${Math.max(1, Math.round(mb))} MB`;
+}
 
 export function Cabecera({ titulo, sub, children }: { titulo: string; sub?: ComponentChildren; children?: ComponentChildren }) {
   return (

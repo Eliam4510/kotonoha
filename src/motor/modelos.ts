@@ -4,6 +4,13 @@
 import { CACHE_MODELOS } from '../compartido/modelosGuardados';
 
 export const CACHE_MODELOS_OCR = 'kotonoha-modelos-ocr';
+/** Los de las voces neuronales: Kokoro, Piper y las voces de AivisHub con lo que comparten. */
+export const CACHE_MODELOS_VOZ = 'kotonoha-modelos-voz';
+
+/** Si un archivo ya está en una caché, sin leerlo. */
+export async function enCache(url: string, nombreCache: string): Promise<boolean> {
+  return !!(await (await caches.open(nombreCache)).match(url));
+}
 
 export type AvanceDescarga = (p: { archivo: string; cargado: number; total: number; estado: 'progress' | 'done' }) => void;
 

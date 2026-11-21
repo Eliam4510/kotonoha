@@ -29,7 +29,7 @@ export interface PruebaEquipo {
 }
 
 export type NivelEquipo = 'potente' | 'medio' | 'basico' | 'sin-medir';
-export type PiezaPesada = 'voz' | 'letras' | 'ocr-libro' | 'ocr-manga' | 'practica';
+export type PiezaPesada = 'voz' | 'letras' | 'ocr-libro' | 'ocr-manga' | 'practica' | 'habla';
 export type EstadoPieza = 'bien' | 'lento' | 'muy-lento' | 'sin-medir';
 
 export interface EstimacionPieza {
@@ -50,6 +50,8 @@ export interface EstimacionPieza {
 export interface UsoEquipo {
   voz?: Partial<Record<string, MedidaVoz>>;
   ocr?: Partial<Record<'libro' | 'manga', MedidaOcr>>;
+  /** Las voces de AivisHub al leer una frase, sin contar la primera tras cargarlas. */
+  habla?: MedidaVoz;
 }
 
 export interface MedidaVoz {
@@ -79,6 +81,8 @@ export const PIEZAS: Record<PiezaPesada, { segundos: number; bien: number; lento
   'ocr-manga': { segundos: 1.6, bien: 4, lento: 20 },
   // Lo que se espera tras decir una frase, al dictar o al practicar el acento.
   practica: { segundos: 0.5, bien: 2, lento: 6 },
+  // Una frase de 3 s con una voz de AivisHub: el BERT en el procesador y la voz en la gráfica (sin gráfica, unos 5,5 s).
+  habla: { segundos: 0.6, bien: 2, lento: 6, audioS: 3 },
 };
 
 /**
@@ -121,9 +125,9 @@ const estadoPorTiempo = (p: PiezaPesada, segundos: number): EstadoPieza => (segu
 
 /** Sin prueba, lo probable en cada clase de equipo. */
 const PROBABLE: Record<Exclude<NivelEquipo, 'sin-medir'>, Record<PiezaPesada, EstadoPieza>> = {
-  potente: { voz: 'bien', letras: 'bien', 'ocr-libro': 'bien', 'ocr-manga': 'bien', practica: 'bien' },
-  medio: { voz: 'lento', letras: 'lento', 'ocr-libro': 'bien', 'ocr-manga': 'lento', practica: 'bien' },
-  basico: { voz: 'muy-lento', letras: 'muy-lento', 'ocr-libro': 'lento', 'ocr-manga': 'muy-lento', practica: 'lento' },
+  potente: { voz: 'bien', letras: 'bien', 'ocr-libro': 'bien', 'ocr-manga': 'bien', practica: 'bien', habla: 'bien' },
+  medio: { voz: 'lento', letras: 'lento', 'ocr-libro': 'bien', 'ocr-manga': 'lento', practica: 'bien', habla: 'bien' },
+  basico: { voz: 'muy-lento', letras: 'muy-lento', 'ocr-libro': 'lento', 'ocr-manga': 'muy-lento', practica: 'lento', habla: 'lento' },
 };
 
 /** Lo medido al usarlo y los modelos con los que se compara: el de la voz de la lengua y el de las canciones. */
@@ -166,6 +170,20 @@ function segundosDeUso(pieza: PiezaPesada, o: OpcionesUso): number | undefined {
     const ms = msPorPagina(o.uso.ocr?.[pieza === 'ocr-libro' ? 'libro' : 'manga']);
     return ms === null ? undefined : ms / 1000;
   }
+  if (pieza === 'habla') {
+    const m = o.uso.habla;
+    return m && m.velocidad > 0 ? (PIEZAS.habla.audioS ?? 0) / m.velocidad : undefined;
+  }
+}
+
+/**
+ * Suma una frase leída con una voz de AivisHub a lo medido: segundos de habla por segundo de cálculo, suavizado para
+ * que una frase rara no lo mueva de golpe. Si cambió dónde corre la voz (la gráfica o el procesador), empieza de nuevo.
+ */
+export function anotarHabla(previa: MedidaVoz | undefined, audioS: number, ms: number, dispositivo: string, fecha: number): MedidaVoz {
+  const velocidad = audioS / Math.max(ms / 1000, 0.001);
+  const media = previa && previa.dispositivo === dispositivo ? previa.velocidad * 0.7 + velocidad * 0.3 : velocidad;
+  return { velocidad: Math.round(media * 100) / 100, dispositivo, fecha };
 }
 
 /**

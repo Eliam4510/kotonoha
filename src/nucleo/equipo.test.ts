@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { anotarOcr, estimar, lecturaCorrecta, msPorPagina, MUESTRAS_OCR, nivelDe, nombreDeGpu, ocrLento, paginasPorDelante, PIEZAS, type UsoEquipo, type PiezaPesada, pocoEspacio, type PruebaEquipo, REFERENCIA_MUESTRA_MS, type SenalesEquipo } from './equipo';
+import { anotarHabla, anotarOcr, estimar, lecturaCorrecta, msPorPagina, MUESTRAS_OCR, nivelDe, nombreDeGpu, ocrLento, paginasPorDelante, PIEZAS, type UsoEquipo, type PiezaPesada, pocoEspacio, type PruebaEquipo, REFERENCIA_MUESTRA_MS, type SenalesEquipo } from './equipo';
 
 const senales = (o: Partial<SenalesEquipo> = {}, gpu: Partial<SenalesEquipo['gpu']> = {}): SenalesEquipo => ({
   webgpu: true,
@@ -138,5 +138,29 @@ describe('lo demás', () => {
     expect(lecturaCorrecta('Kotonoha 2O26 reading tesl', 'Kotonoha 2026 reading test')).toBe(true);
     expect(lecturaCorrecta('###### ## ###', 'Kotonoha 2026 reading test')).toBe(false);
     expect(lecturaCorrecta('', 'Kotonoha')).toBe(false);
+  });
+});
+
+describe('las voces de AivisHub', () => {
+  it('sin probar, van bien en un equipo medio y lentas en uno básico', () => {
+    expect(estimar(['habla'], senales({ webgpu: false }))[0].estado).toBe('lento');
+  });
+
+  it('en el procesador no quedan muy lentas sin más: corren, aunque más despacio', () => {
+    const [habla] = estimar(['habla'], senales(), prueba(REFERENCIA_MUESTRA_MS * 6.6, { dispositivo: 'wasm' }));
+    expect(habla.estado).toBe('lento');
+    expect(habla.segundos).toBeCloseTo(PIEZAS.habla.segundos * 6.6);
+  });
+
+  it('lo medido al leer manda: segundos de habla por segundo de cálculo, para una frase de 3 s', () => {
+    const [habla] = estimar(['habla'], senales(), prueba(REFERENCIA_MUESTRA_MS), { uso: { habla: { velocidad: 6, dispositivo: 'webgpu', fecha: 1 } } });
+    expect(habla).toMatchObject({ estado: 'bien', deUso: true, segundos: 0.5 });
+  });
+
+  it('cada frase mueve un poco lo medido, y si cambia dónde corre la voz, se empieza de nuevo', () => {
+    const m = anotarHabla(undefined, 3, 500, 'webgpu', 1);
+    expect(m.velocidad).toBe(6);
+    expect(anotarHabla(m, 3, 1000, 'webgpu', 2).velocidad).toBe(5.1);
+    expect(anotarHabla(m, 3, 1000, 'wasm', 2).velocidad).toBe(3);
   });
 });

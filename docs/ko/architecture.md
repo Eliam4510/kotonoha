@@ -256,6 +256,10 @@ GPU에서도 프로세서의 ONNX Runtime과 음소 하나하나까지 같은 �
 
 문장 전체의 발음에 점수를 매기는 모델 PASQA는 넣지 않았습니다. 변환하려면 특정 버전의 Python, PyTorch, s3prl이 필요해 측정할 수 없었습니다.
 
+### AivisHub 음성
+
+AivisSpeech 음성은 Style-Bert-VITS2 JP-Extra의 ONNX 모델(AIVMX)과 653 MB의 일본어 BERT입니다. Radeon RX 9060 XT에서 음성을 GPU로 실행하면 프로세서와 같은 오디오가 나옵니다(노이즈 없이 상관 1.0000). 반면 BERT는 GPU에서 fp16으로 계산되어 억양이 조금 달라지므로, AivisSpeech와 같은 결과를 내는 프로세서에서 실행합니다. 이렇게 10초짜리 문장을 약 1.4초에 읽습니다(모두 GPU면 0.44초, GPU 없이는 약 18초). 텍스트 처리는 AivisSpeech에서는 pyopenjtalk-plus이지만, 여기서는 OpenJTalk의 TypeScript 판인 yomi에 pyopenjtalk-plus의 악센트 구 연결 규칙 세 가지를 더한 것입니다. 210문장(요즘 문장 60개와 『吾輩は猫である』 150개)에서 85 %를 같게 읽고, 모라의 91.6 %에서 AivisSpeech와 같은 높낮이를 줍니다. 세 규칙이 없으면 90.6 %, Kotonoha에 원래 있던 것(Kanjium과 악센트 연습)으로는 73 %였습니다.
+
 ### 페이지 리더의 비용
 
 모든 단어가 모르는 단어이고 전부 후리가나를 단 최악의 경우의 메인 스레드 시간입니다. Edge에서 1366×860으로 `Performance.getMetrics`를 사용해, 리더가 이미 로드된 상태로 측정했습니다.

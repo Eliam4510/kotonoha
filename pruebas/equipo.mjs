@@ -57,7 +57,7 @@ const paso = await app.evaluate(() => ({
 }));
 console.log('  ', JSON.stringify(paso));
 comprobar(paso.titulo === 'Tu equipo', 'Tras los diccionarios, la bienvenida enseña «Tu equipo»');
-comprobar(JSON.stringify(paso.piezas) === JSON.stringify(['voz', 'letras', 'ocr-libro', 'ocr-manga', 'practica']), 'Con una tarjeta por cada pieza pesada del japonés', JSON.stringify(paso.piezas));
+comprobar(JSON.stringify(paso.piezas) === JSON.stringify(['voz', 'letras', 'ocr-libro', 'ocr-manga', 'practica', 'habla']), 'Con una tarjeta por cada pieza pesada del japonés', JSON.stringify(paso.piezas));
 comprobar(!!paso.datos?.startsWith('Gráfica:'), 'Y lo que el navegador dice del equipo', paso.datos);
 
 // ---------- Probar mi equipo ----------
@@ -79,7 +79,7 @@ const tras = await app.evaluate(() => ({
   estados: [...document.querySelectorAll('.ap-equipo-pieza')].map((p) => p.querySelector('.ap-equipo-estado')?.className.split(' ').pop()),
 }));
 console.log('  ', JSON.stringify(tras));
-comprobar(tras.tiempos.length === 5, 'Cada pieza dice cuánto tardaría aquí', JSON.stringify(tras.tiempos));
+comprobar(tras.tiempos.length === 6, 'Cada pieza dice cuánto tardaría aquí', JSON.stringify(tras.tiempos));
 comprobar(tras.nivel === 'potente' && tras.estados.every((e) => e === 'bien'), 'Y en este equipo todo irá bien', `${tras.nivel} ${JSON.stringify(tras.estados)}`);
 await app.screenshot({ path: join(CAPTURAS, 'bienvenida.png') });
 // Hasta el final: quien pasó por «Tu equipo» no necesita el aviso de Inicio.

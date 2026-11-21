@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.42.0 · 2026-11-21
+
+Las voces de AivisSpeech, dentro de Kotonoha: sin el programa abierto.
+
+- **Voces neuronales de AivisHub.** En **Ajustes, Voces**, al estudiar japonés, **Instalar las voces** baja una vez lo que comparten todas (el BERT de AivisSpeech y un diccionario, unos 660 MB) y la voz まお, la de serie de AivisSpeech (unos 255 MB), todo comprobado con su SHA-256, y la deja activa: la lectura en voz alta, **Oír la frase**, la ficha y el audio de las tarjetas suenan con ella sin tener AivisSpeech abierto. **Voz y estilo** elige entre las instaladas, y cada frase leída queda guardada.
+- **En la gráfica, y exacta.** La voz corre en la tarjeta gráfica con WebGPU, donde se comprobó que suena igual que en el procesador, y el BERT en el procesador, donde da lo mismo que en AivisSpeech. Una frase de 10 s se lee en algo más de un segundo; la primera, mientras se cargan los modelos, en unos segundos. Sin WebGPU también funciona, más despacio, y **Tu equipo** dice qué tal irá, con lo medido al leer.
+- **El acento, como en AivisSpeech.** Lo da yomi, una versión de OpenJTalk en TypeScript, con las reglas de enlace de frase de AivisSpeech: frente a AivisSpeech, en 210 frases, el 92 % de las moras lleva el mismo tono. **Acento del diccionario** lo corrige además con el del diccionario de acento, como con la voz local.
+- **Más voces.** **Ver el catálogo** busca en AivisHub por nombre, timbre y licencia. Cada voz se oye antes de instalarla y enseña su licencia (ACML, ACML-NC o CC0); si es propia, pide leerla antes. No se ofrecen voces de personajes existentes ni de personas reales.
+- **AivisSpeech sigue.** La **Voz local**, con AivisSpeech o VOICEVOX abiertos, se queda como alternativa. A quien leía con ella, **Inicio** le cuenta una vez que sus voces pueden ir dentro; y quien aún no tiene voz ve una vez, al oír una frase con la del sistema, la pregunta de si instalarlas.
+- **Modelos guardados.** Las voces y lo que comparten se ven y se borran en **Ajustes, Transcripción de voz**. No van en la copia completa: en otro equipo se vuelven a instalar.
+
 ## 0.41.0 · 2026-11-20
 
 Presentar las funciones: por dónde empezar, todo lo que hace Kotonoha en una página y un texto de ejemplo en cada lengua.
@@ -422,6 +433,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.42.0 · 2026-11-21
+
+AivisSpeech’s voices, inside Kotonoha: without the program open.
+
+- **AivisHub neural voices.** In **Settings, Voices**, when studying Japanese, **Install the voices** downloads once what they all share (AivisSpeech’s BERT and a dictionary, about 660 MB) and the voice まお, AivisSpeech’s default (about 255 MB), all checked with their SHA-256, and turns it on: read aloud, **Hear the sentence**, the word panel and the audio for cards use it without AivisSpeech open. **Voice and style** chooses among the installed ones, and every sentence read is saved.
+- **On the graphics card, and exact.** The voice runs on the graphics card with WebGPU, where it was checked to sound the same as on the processor, and the BERT on the processor, where it gives the same result as in AivisSpeech. A 10 s sentence is read in just over a second; the first one, while the models load, in a few seconds. Without WebGPU it works too, more slowly, and **Your computer** says how it will go, with what is measured while reading.
+- **The accent, as in AivisSpeech.** It comes from yomi, a TypeScript version of OpenJTalk, with AivisSpeech’s phrase-linking rules: against AivisSpeech, over 210 sentences, 92 % of morae get the same pitch. **Dictionary accent** also corrects it with the accent dictionary, as with the local voice.
+- **More voices.** **See the catalog** searches AivisHub by name, voice type and license. Each voice can be heard before installing it and shows its license (ACML, ACML-NC or CC0); if it has its own, you are asked to read it first. Voices of existing characters and real people are not offered.
+- **AivisSpeech stays.** The **Local voice**, with AivisSpeech or VOICEVOX open, remains as an alternative. Whoever read with it is told once on **Home** that its voices can live inside; and whoever has no voice yet is asked once, after hearing a sentence with the system voice, whether to install them.
+- **Saved models.** The voices and what they share are listed and deleted in **Settings, Speech transcription**. They are not in the full backup: on another computer they are installed again.
 
 ## 0.41.0 · 2026-11-20
 

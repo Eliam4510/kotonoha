@@ -114,10 +114,24 @@ const PIEZA: Record<PiezaPesada, Pieza> = {
     icono: 'microfono',
     consejo: tm('Cada frase tardará un poco en corregirse.'),
   },
+  habla: {
+    nombre: tm('Voces neuronales de AivisHub'),
+    que: tm('Lee las frases en voz alta en este equipo.'),
+    unidad: tm('Una frase de 3 segundos'),
+    icono: 'voz',
+    consejo: tm('Funciona igual, pero cada frase nueva tarda; las ya leídas quedan guardadas.'),
+  },
 };
 
-/** Las piezas que hay en la lengua que se estudia: el manga, con manga-ocr, es del japonés. */
-const piezasDeLengua = (): PiezaPesada[] => ['voz', 'letras', 'ocr-libro', ...(lengua.value.id === 'ja' ? (['ocr-manga'] as const) : []), 'practica'];
+/** Las piezas que hay en la lengua que se estudia: el manga, con manga-ocr, es del japonés, y las voces de AivisHub también. */
+const piezasDeLengua = (): PiezaPesada[] => [
+  'voz',
+  'letras',
+  'ocr-libro',
+  ...(lengua.value.id === 'ja' ? (['ocr-manga'] as const) : []),
+  'practica',
+  ...(lengua.value.vocesIntegradas ? (['habla'] as const) : []),
+];
 
 /** Los modelos con los que se transcribiría aquí: el de la voz de la lengua, o el elegido, y el de las canciones. */
 const modelosDe = (a: Ajustes) => ({
@@ -129,6 +143,8 @@ const modelosDe = (a: Ajustes) => ({
 function descargaDe(p: PiezaPesada, a: Ajustes): number {
   if (p === 'ocr-libro') return OCR_LIBRO_MB;
   if (p === 'ocr-manga') return OCR_MANGA_MB;
+  // Lo que comparten todas las voces (el BERT y el diccionario) y la primera voz.
+  if (p === 'habla') return 915;
   const { modeloVoz, modeloLetras } = modelosDe(a);
   if (p === 'letras') return MODELOS_WHISPER[modeloLetras].mb;
   // La práctica usa siempre el modelo de voz de la lengua, sea cual sea el elegido para los videos.
@@ -195,7 +211,7 @@ export function useEstimaciones(a: Ajustes): Partial<Record<PiezaPesada, Estimac
       .catch(() => fijarSenales(null));
   }, []);
   if (!senales) return null;
-  const todas: PiezaPesada[] = ['voz', 'letras', 'ocr-libro', 'ocr-manga', 'practica'];
+  const todas: PiezaPesada[] = ['voz', 'letras', 'ocr-libro', 'ocr-manga', 'practica', 'habla'];
   return Object.fromEntries(estimar(todas, senales, a.equipoPrueba, { uso: a.equipoUso, ...modelosDe(a) }).map((e) => [e.pieza, e]));
 }
 

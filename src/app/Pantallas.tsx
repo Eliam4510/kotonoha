@@ -16,6 +16,7 @@ import type {
 } from '../compartido/tipos';
 import { AvisoVersion } from './AvisoVersion';
 import { AvisoEquipo } from './TuEquipo';
+import { AvisoVoces } from './VocesIntegradas';
 import { LoNuevo, TarjetaDescubre } from './Descubre';
 import { Pista } from '../ui/Pista';
 import { CategoriaDiccionario } from './DiccionarioMas';
@@ -188,6 +189,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
         <AvisoVersion avisar={ajustes.avisarVersiones} />
         <LoNuevo a={ajustes} />
         {ajustes.bienvenidaVista && !ajustes.avisoEquipoVisto && <AvisoEquipo />}
+        {ajustes.bienvenidaVista && !ajustes.avisoVocesVisto && ajustes.vozLocal.activa && lengua.value.vocesIntegradas && !ajustes.vozIntegrada.instaladas.length && <AvisoVoces />}
         <PrimerosPasos estado={estado} anki={anki} instalando={instalando} alInstalar={instalarRecomendados} />
         <TarjetaDescubre />
 

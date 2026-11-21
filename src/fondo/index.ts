@@ -1,6 +1,7 @@
 // Service worker: comandos, captura y difusión de eventos. No guarda estado: Chrome puede detenerlo.
 
-import { alCambiarAjustes, CLAVE_API, leerAjustes } from '../compartido/ajustes';
+import { alCambiarAjustes, anotarUso, CLAVE_API, conVozInstalada, guardarAjustes, leerAjustes, sinVozInstalada } from '../compartido/ajustes';
+import { anotarHabla } from '../nucleo/equipo';
 import { CLAVES_PROVEEDORES } from '../compartido/proveedores';
 import { type ApiFondo, type EventoDifundido, HOST_AYUDANTE, PUERTO_AYUDANTE } from '../compartido/api';
 import { atender, motor, type ConRemitente } from '../compartido/rpc';
@@ -193,6 +194,15 @@ const api: ApiFondo & { _: never } = {
     return (d.urlBaseIA as string | undefined) ?? null;
   },
   ajustesCompletos: () => leerAjustes(),
+  async vozIntegradaInstalada(voz) {
+    await guardarAjustes((a) => conVozInstalada(a, voz));
+  },
+  async vozIntegradaBorrada(uuid) {
+    await guardarAjustes((a) => sinVozInstalada(a, uuid));
+  },
+  async medidaHabla(audioS, ms, dispositivo) {
+    await anotarUso((u) => ({ ...u, habla: anotarHabla(u.habla, audioS, ms, dispositivo, Date.now()) }));
+  },
   // Sin tocar teclado ni ratón durante dos minutos se considera que no estás usando el equipo.
   estadoUso: () => chrome.idle.queryState(120),
   // Tras actualizar los archivos de la copia, para no esperar a la próxima comprobación de la alarma.

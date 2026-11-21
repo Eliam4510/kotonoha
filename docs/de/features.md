@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.41.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.42.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -178,6 +178,7 @@ Stand jeder Funktion in Version 0.41.0 und die Art ihrer Überprüfung.
 | „Dein Computer“ in der Begrüßung und in den Einstellungen: wie gut lokale Spracherkennung, Liedtexte und Texterkennung hier laufen, nach den Angaben des Browsers zur Grafikkarte und einem Test, der eine Beispielseite mit der Texterkennung liest; jeder Teil mit seiner Zeit und einem Tipp. Nichts wird abgeschaltet | Automatisch: Unit-Tests der Stufen und Schätzungen; End-to-End mit echter Grafikkarte und ohne |
 | Messen im echten Gebrauch: Wie lange Spracherkennung und Texterkennung brauchen, wird in „Dein Computer“ gespeichert und zählt mehr als der Test; wird ein Video schneller angesehen, als es transkribiert wird, gibt es einen Hinweis, und „Auf die Transkription warten“ hält es an, bis die Transkription wieder vorne liegt; bei „Automatisch“ ruht die Grafikkarte mehr, wenn das Video ruckelt; die Texterkennung liest auf einem langsamen Computer weniger Seiten voraus und schlägt „Einen Bereich lesen“ vor | Automatisch: Unit-Tests von Tempo, Rucklern und Messwerten; End-to-End mit einer echten Transkription, die langsamer als das Video ist, und mit der Texterkennung |
 | Die Funktionen vorstellen: Die Begrüßung endet mit „Womit möchtest du anfangen?“ und vier Wegen; „Kotonoha entdecken“ auf Start, mit den Funktionen nach Bereichen und einer Schaltfläche zum Ausprobieren; ein gemeinfreier Beispieltext in jeder Sprache; Hinweise beim ersten Mal, nur für neue Installationen; und nach jedem Update einmal das Neue | Automatisch: Unit-Tests der Beispieltexte und der Neuerungen; End-to-End mit einem neuen Profil, auf Japanisch und Englisch |
+| Stimmen von AivisHub direkt in Kotonoha: „Stimmen installieren“ lädt das BERT von AivisSpeech, ein Wörterbuch und die Stimme まお herunter (etwa 0,9 GB, geprüft mit ihrem SHA-256) und liest japanische Sätze vor, ohne dass AivisSpeech geöffnet ist, mit der Stimme auf der Grafikkarte; ein Katalog von AivisHub mit Suche, Filtern, Hörproben und Lizenzen; der Akzent mit yomi und den Verkettungsregeln von AivisSpeech (92 % der Moren wie dort); eine Frage in der Wortkarte und ein Hinweis auf Start, einmalig | Automatisch: Unit-Tests der Stimmeingabe, des AIVMX-Lesers und des Akzents mit einem Korpus von 210 Sätzen gegen AivisSpeech; End-to-End mit Installieren und Vorlesen mit der echten Stimme und mit dem Katalog von AivisHub |
 | Das Fenster verdeckt nicht, was noch zu lesen ist: Es steht am Seitenrand, wenn es Platz hat, sonst über bereits Gelesenem (über der Zeile oder rechts der Spalte bei senkrechtem Text); es lässt sich verschieben, vergrößern und als Fenster am Rand anheften, das sich verbreitern lässt und seine Breite behält | Automatisch (Unit-Tests der Platzierung) |
 | Durch Ziehen auswählen, Zeichen für Zeichen und über Zeilen hinweg, mit Übersetzen, Erklären, Aufschlüsseln, Anhören, Hervorheben, Notiz und Kopieren; Strg+C kopiert das Geöffnete | Automatisch |
 | Umblättern mit sichtbaren Pfeilen an den Seiten, der Tastatur oder durch Wischen: Ein Tippen auf die Seite schließt nur das Geöffnete, und ein knapp verfehltes Wort blättert nicht mehr um | Automatisch |
