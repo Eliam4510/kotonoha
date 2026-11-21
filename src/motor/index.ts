@@ -148,12 +148,15 @@ const api: ApiMotor = {
     return sinGpu;
   },
   async estado() {
+    // Los ajustes, antes que la lista: fijan la lengua y, con ella, la base de la que sale. Recién arrancado el motor, la
+    // base es la del japonés, y lo que preguntaba en ese momento (Ajustes, la ficha) recibía los diccionarios de otra lengua.
+    const a = await aj();
     return {
       tokenizadorListo: analisis.analizadorListo(),
       diccionarios: await dics.listaDiccionarios(),
       terminosCargados: analisis.totalTerminos(),
       // Con otro proveedor de IA en los ajustes, la IA también se puede usar sin la clave de Claude.
-      claveIA: ia.hayClave() || (await aj()).proveedores.length > 0,
+      claveIA: ia.hayClave() || a.proveedores.length > 0,
       capturaActiva: grabacion.capturaActiva(),
     };
   },

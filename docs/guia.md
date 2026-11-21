@@ -22,7 +22,7 @@ Esta guía describe el uso diario de Kotonoha. La instalación está en el [READ
 
 ## Puesta en marcha
 
-La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, y propone instalar los diccionarios, añadir la clave de Claude y elegir dónde van las tarjetas. Se puede saltar, y volver a verla desde **Ajustes, Apariencia**. Todo se configura después en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+K`.
+La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere estudiar y el nivel, y propone instalar los diccionarios, ver qué tal irá el equipo, añadir la clave de Claude y elegir dónde van las tarjetas. Se puede saltar, y volver a verla desde **Ajustes, Apariencia**. Todo se configura después en **Ajustes**, dentro de la ventana de la extensión, que se abre con `Alt+Shift+K`.
 
 | Paso | Dónde | Para qué sirve |
 |---|---|---|
@@ -34,6 +34,8 @@ La primera vez se abre una bienvenida que pregunta el idioma, el que se quiere e
 | Anki | Ajustes, Tarjetas y Anki | Opcional. Requiere Anki abierto con el complemento AnkiConnect |
 
 La extensión funciona sin clave de Claude: los subtítulos, el diccionario, el furigana, los colores, las tarjetas y Whisper no la necesitan.
+
+**Tu equipo.** La voz, las letras de canciones y el OCR corren en el propio equipo, en la tarjeta gráfica, y no en la nube. **Tu equipo**, en la bienvenida y en **Ajustes**, dice qué tal irá cada cosa: con lo que el navegador cuenta de la gráfica y, con **Probar mi equipo**, leyendo una página de muestra con el OCR (la primera vez descarga 25 MB, que luego usa el lector). Cada pieza dice cuánto tardaría y si irá bien, lenta o muy lenta, con un consejo, como **Usar Whisper Base** para transcribir en un equipo sin una gráfica potente. Nada se apaga: todo sigue disponible, y lo medido no sale del equipo. Quien ya usaba Kotonoha lo encuentra con un aviso en **Inicio**.
 
 **Otros proveedores de IA.** En **Ajustes, Otros proveedores de IA** se añaden OpenRouter, DeepSeek u OpenAI, con su clave, o LM Studio y Ollama en el propio equipo, sin clave. **Ver sus modelos** busca los que ofrece cada uno y **Probar la conexión** le hace una petición mínima. Después, en **Modelo y esfuerzo por tarea**, cada tarea puede usar uno de sus modelos. Las respuestas con estructura se piden con su esquema JSON y, si el proveedor no lo admite, como DeepSeek, en modo JSON con el esquema en las instrucciones; si no admite tantos tokens de respuesta, se piden menos. El gasto se anota con el coste que dice el proveedor (OpenRouter lo dice), y los modelos del propio equipo cuentan cero. Las claves se guardan aparte, como la de Claude, y nunca llegan a las páginas. Las instrucciones están afinadas para Claude: con otros modelos, las respuestas pueden salir peores. Ollama solo atiende a las extensiones si se arranca con `OLLAMA_ORIGINS=chrome-extension://*`.
 

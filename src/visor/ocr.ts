@@ -63,6 +63,8 @@ export class LectorOcr {
   private ocupado = false;
   private cerrado = false;
   private llegadas = 0;
+  /** Lo que tardó la última lectura en el trabajador y dónde se hizo: en la gráfica o en el procesador. */
+  ultima: { ms: number; dispositivo: string } | null = null;
 
   constructor(private alDescargar: (d: Descarga) => void) {}
 
@@ -79,6 +81,7 @@ export class LectorOcr {
         this.pendientes.delete(r.id);
         if (r.tipo === 'lineas') {
           console.debug('Kotonoha OCR', r.ms, 'ms', r.dispositivo, JSON.stringify(r.fases));
+          this.ultima = { ms: r.ms, dispositivo: r.dispositivo };
           p?.ok(r.lineas);
         } else p?.mal(new Error(r.mensaje));
       }

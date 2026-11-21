@@ -185,7 +185,7 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 
 ## 安装
 
-要求：Chrome 或 Edge 120 及以上版本。
+要求：Chrome 或 Edge 120 及以上版本。转录、歌词和 OCR 在显卡上运行，有独立显卡会更快；没有也能用，只是更慢。
 
 1. 从[最新版本](https://github.com/Eliam4510/kotonoha/releases/latest)下载 `kotonoha-<版本>-extension.zip`，解压到一个固定的位置。
 2. 打开 `chrome://extensions` 或 `edge://extensions`，开启**开发者模式**。
@@ -193,7 +193,7 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 
 在 Windows 上也可以先装助手：`kotonoha-<版本>-ayudante.zip` 里有 `Instalar.cmd`，双击即可安装助手；如果没找到 Kotonoha，还会以固定的标识符安装扩展。之后只剩第 2 步和第 3 步。
 
-首次启动时，欢迎页面会询问你的语言、想学的语言和水平，并安装词典。更新时，只需把新版本解压覆盖旧版本：扩展会自动重新加载。有新版本时，Kotonoha 会在首页提示；安装了助手的话，点**立即更新**一下就能装好。[使用指南](docs/zh/guide.md)介绍了每项功能，[CONTRIBUTING.md](CONTRIBUTING.md) 介绍了如何从源代码构建。
+首次启动时，欢迎页面会询问你的语言、想学的语言和水平，安装词典，并显示各项功能在这台电脑上的运行情况。更新时，只需把新版本解压覆盖旧版本：扩展会自动重新加载。有新版本时，Kotonoha 会在首页提示；安装了助手的话，点**立即更新**一下就能装好。[使用指南](docs/zh/guide.md)介绍了每项功能，[CONTRIBUTING.md](CONTRIBUTING.md) 介绍了如何从源代码构建。
 
 ## 主要快捷键
 

@@ -30,6 +30,7 @@ import { useEsperar } from '../ui/preparacion';
 import { ConFurigana } from '../ui/Ficha';
 import { estiloDiccionario } from './TarjetaPalabra';
 import { familiaDe, letrasDe } from '../ui/letra';
+import { PanelEquipo } from './TuEquipo';
 
 const NOMBRES_TAREA: [TareaIA, string][] = [
   ['explicar', tm('Explicación de palabras')],
@@ -630,6 +631,14 @@ function AyudanteLocal() {
         <button class="btn chico fantasma" onClick={comprobar}>{tr('Comprobar')}</button>
       </span>
     </Opcion>
+  );
+}
+
+function SeccionEquipo({ a }: PropsSeccion) {
+  return (
+    <Seccion id="equipo" icono="monitor" titulo={tr('Tu equipo')} descripcion={tr('Qué tal irá en este equipo lo que corre en la gráfica: la voz local, las letras de canciones y el OCR. Nada se apaga: solo se recomienda.')}>
+      <PanelEquipo a={a} />
+    </Seccion>
   );
 }
 
@@ -1504,6 +1513,7 @@ const SECCIONES: { id: string; nombre: string; icono: NombreIcono }[] = [
   { id: 'claude', nombre: tm('Claude'), icono: 'ia' },
   { id: 'proveedores', nombre: tm('Otros proveedores de IA'), icono: 'ia' },
   { id: 'diccionarios', nombre: tm('Diccionarios'), icono: 'diccionario' },
+  { id: 'equipo', nombre: tm('Tu equipo'), icono: 'monitor' },
   { id: 'transcripcion', nombre: tm('Transcripción'), icono: 'ondas' },
   { id: 'anki', nombre: tm('Tarjetas y Anki'), icono: 'tarjetas' },
   { id: 'voces', nombre: tm('Voces'), icono: 'voz' },
@@ -1512,7 +1522,8 @@ const SECCIONES: { id: string; nombre: string; icono: NombreIcono }[] = [
   { id: 'version', nombre: tm('Versión'), icono: 'sello' },
 ];
 
-export function PantallaAjustes({ a }: { a: Ajustes }) {
+/** Ajustes. Con `seccion`, se abre en esa sección: así llega el aviso de Inicio a «Tu equipo». */
+export function PantallaAjustes({ a, seccion }: { a: Ajustes; seccion?: string }) {
   const [visible, fijarVisible] = useState(SECCIONES[0].id);
   const raiz = useRef<HTMLDivElement>(null);
   const cambiar = (c: Partial<Ajustes>) => {
@@ -1548,6 +1559,18 @@ export function PantallaAjustes({ a }: { a: Ajustes }) {
       { root: contenedor, rootMargin: '-10% 0px -70% 0px' }
     );
     secciones.forEach((x) => observador.observe(x));
+    // La sección pedida al entrar. Las de arriba cargan lo suyo después (los diccionarios, las voces) y crecen: se vuelve
+    // a llevar a la vista cuando ya han cargado.
+    const llevarALaPedida = () => {
+      const s = seccion ? secciones.find((x) => x.id === seccion) : undefined;
+      if (!s || !seccion) return;
+      pausa.current = performance.now() + 2500;
+      pedida.current = seccion;
+      fijarVisible(seccion);
+      s.scrollIntoView({ block: 'start' });
+    };
+    llevarALaPedida();
+    const reintentos = seccion ? [setTimeout(llevarALaPedida, 400), setTimeout(llevarALaPedida, 1200)] : [];
     // Cuando la página acaba de deslizarse hasta la sección pedida, se vuelve a mirar.
     const alParar = () => {
       pausa.current = 0;
@@ -1557,6 +1580,7 @@ export function PantallaAjustes({ a }: { a: Ajustes }) {
     contenedor?.addEventListener('scrollend', alParar);
     return () => {
       observador.disconnect();
+      reintentos.forEach(clearTimeout);
       contenedor?.removeEventListener('scroll', elegir);
       contenedor?.removeEventListener('scrollend', alParar);
     };
@@ -1592,6 +1616,7 @@ export function PantallaAjustes({ a }: { a: Ajustes }) {
           <SeccionClaude a={a} cambiar={cambiar} />
           <SeccionProveedores a={a} cambiar={cambiar} />
           <SeccionDiccionarios a={a} cambiar={cambiar} />
+          <SeccionEquipo a={a} cambiar={cambiar} />
           <SeccionTranscripcion a={a} cambiar={cambiar} />
           <SeccionAnki a={a} cambiar={cambiar} />
           <SeccionVoces a={a} cambiar={cambiar} />

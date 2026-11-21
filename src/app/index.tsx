@@ -198,7 +198,7 @@ function Pantalla({ v, a }: { v: Vista; a: Ajustes }) {
       {ruta === 'palabras' && <Palabras evaluar={params.has('evaluar')} />}
       {ruta === 'niveles' && <Niveles ajustes={a} />}
       {ruta === 'practicar' && <PracticarFrase frase={params.get('t') ?? ''} ajustes={a} />}
-      {ruta === 'ajustes' && <PantallaAjustes a={a} />}
+      {ruta === 'ajustes' && <PantallaAjustes a={a} seccion={params.get('seccion') ?? undefined} />}
     </>
   );
 }

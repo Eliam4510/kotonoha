@@ -15,6 +15,7 @@ import type {
   TarjetaMemoria,
 } from '../compartido/tipos';
 import { AvisoVersion } from './AvisoVersion';
+import { AvisoEquipo } from './TuEquipo';
 import { CategoriaDiccionario } from './DiccionarioMas';
 import { PaginaDiccionario } from './Diccionario';
 import { SeguirLeyendo } from './Biblioteca';
@@ -183,6 +184,7 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 
       <div class="ap-rejilla">
         <AvisoVersion avisar={ajustes.avisarVersiones} />
+        {ajustes.bienvenidaVista && !ajustes.avisoEquipoVisto && <AvisoEquipo />}
         <PrimerosPasos estado={estado} anki={anki} instalando={instalando} alInstalar={instalarRecomendados} />
 
         <section class="tarjeta ap-vocabulario ap-c8" aria-label={tr('Tu vocabulario')}>

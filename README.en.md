@@ -183,7 +183,7 @@ Normal use costs cents a month. The key is stored only in your browser. Task by 
 
 ## Installation
 
-Requirement: Chrome or Edge 120 or later.
+Requirement: Chrome or Edge 120 or later. Transcription, song lyrics and OCR run on the graphics card and are faster with a dedicated one; without one they still work, more slowly.
 
 1. Download `kotonoha-<version>-extension.zip` from the [latest release](https://github.com/Eliam4510/kotonoha/releases/latest) and unzip it somewhere permanent.
 2. Open `chrome://extensions` or `edge://extensions` and turn on **Developer mode**.
@@ -191,7 +191,7 @@ Requirement: Chrome or Edge 120 or later.
 
 On Windows you can also start with the helper: `kotonoha-<version>-ayudante.zip` contains `Instalar.cmd`, which with a double click installs the helper and, if it does not find Kotonoha, the extension too, with a fixed ID. Then only steps 2 and 3 remain.
 
-On first run a welcome screen asks for your language, the one you want to study and your level, and installs the dictionaries. To update, unzip the new version over the old one: the extension reloads by itself. When there is a new version, Kotonoha says so on Home and, with the helper installed, **Update now** puts it in place with one click. The [user guide](docs/guide.md) explains every feature, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to build it from source.
+On first run a welcome screen asks for your language, the one you want to study and your level, installs the dictionaries and shows how each part will run on your computer. To update, unzip the new version over the old one: the extension reloads by itself. When there is a new version, Kotonoha says so on Home and, with the helper installed, **Update now** puts it in place with one click. The [user guide](docs/guide.md) explains every feature, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to build it from source.
 
 ## Main shortcuts
 

@@ -934,15 +934,22 @@ if (quiere('atajos')) {
 
   // Las tarjetas, en la memoria de este perfil.
   const total = async () => (await motor('memoriaResumen')).total;
-  const esperarTarjeta = async (antes) => {
+  const esperarTarjeta = async (antes, mirar = async () => {}) => {
     const limite = Date.now() + 30000;
-    while ((await total()) === antes && Date.now() < limite) await p.waitForTimeout(100);
+    while ((await total()) === antes && Date.now() < limite) {
+      await mirar();
+      await p.waitForTimeout(100);
+    }
+    await mirar();
     return (await total()) > antes;
   };
   let n = await total();
+  // El aviso de la captura dura 6 s y sale antes de que la tarjeta se guarde (faltan aún la voz de la frase y los
+  // ejemplos): se mira mientras se espera, porque con el equipo ocupado la tarjeta llega cuando el aviso ya se fue.
+  const vistos = new Set();
   await p.keyboard.press('KeyQ');
-  comprobar(await esperarTarjeta(n), 'Q crea una tarjeta');
-  comprobar(/Alt\+Shift\+M/.test(await avisos()), 'Y, sin captura, dice la tecla real', await avisos());
+  comprobar(await esperarTarjeta(n, async () => (await avisos()).split(' | ').filter(Boolean).forEach((a) => vistos.add(a))), 'Q crea una tarjeta');
+  comprobar([...vistos].some((a) => /Alt\+Shift\+M/.test(a)), 'Y, sin captura, dice la tecla real', [...vistos].join(' | '));
   n = await total();
   await p.keyboard.press('Alt+KeyQ');
   comprobar(await esperarTarjeta(n), 'Alt+Q también, aunque Chrome no le diera esa tecla');

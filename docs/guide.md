@@ -22,7 +22,7 @@ This guide covers day-to-day use of Kotonoha. Installation is described in the [
 
 ## Getting started
 
-The first time, a welcome screen asks for the language, the one to study and the level, and suggests installing the dictionaries, adding a Claude key and choosing where cards go. It can be skipped, and seen again from **Settings, Appearance**. Everything is configured afterwards under **Settings**, in the extension window, which opens with `Alt+Shift+K`.
+The first time, a welcome screen asks for the language, the one to study and the level, and suggests installing the dictionaries, seeing how the computer will cope, adding a Claude key and choosing where cards go. It can be skipped, and seen again from **Settings, Appearance**. Everything is configured afterwards under **Settings**, in the extension window, which opens with `Alt+Shift+K`.
 
 | Step | Where | Purpose |
 |---|---|---|
@@ -34,6 +34,8 @@ The first time, a welcome screen asks for the language, the one to study and the
 | Anki | Settings, Cards and Anki | Optional. Requires Anki to be open with the AnkiConnect add-on |
 
 The extension works without a Claude key: subtitles, the dictionary, furigana, colors, flashcards and Whisper do not need one.
+
+**Your computer.** Voice, song lyrics and OCR run on the computer itself, on the graphics card, not in the cloud. **Your computer**, in the welcome screen and in **Settings**, shows how each one will go: from what the browser says about the graphics card and, with **Test my computer**, by reading a sample page with OCR (the first time it downloads 25 MB, which the reader then uses). Each part shows how long it would take and whether it will run well, slowly or very slowly, with a tip, such as **Use Whisper Base** to transcribe on a computer without a powerful graphics card. Nothing is turned off: everything stays available, and what is measured never leaves the computer. Those who already used Kotonoha find it through a notice on **Home**.
 
 **Other AI providers.** In **Settings, Other AI providers**, add OpenRouter, DeepSeek or OpenAI, with their key, or LM Studio and Ollama on the computer itself, without one. **See its models** lists what each one offers, and **Test the connection** sends it a minimal request. Then, in **Model and effort per task**, each task can use one of their models. Structured answers are requested with their JSON schema and, if the provider does not support it, as DeepSeek does not, in JSON mode with the schema in the instructions; if it does not allow that many answer tokens, fewer are requested. Spending is recorded with the cost the provider reports (OpenRouter does), and models on the computer itself count as zero. Keys are stored separately, like Claude’s, and never reach the pages. The instructions are tuned for Claude: with other models, answers may be worse. Ollama only answers extensions if it is started with `OLLAMA_ORIGINS=chrome-extension://*`.
 

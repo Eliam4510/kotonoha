@@ -10,9 +10,10 @@ import { Icono, Marca, type NombreIcono } from '../ui/iconos';
 import { Interruptor, Mensaje } from './Piezas';
 import { PAQUETES } from '../lenguas';
 import { estudiarLengua, lengua } from '../ui/lengua';
+import { PanelEquipo } from './TuEquipo';
 
-type Paso = 'idioma' | 'lengua' | 'nivel' | 'diccionarios' | 'claude' | 'tarjetas' | 'listo';
-const PASOS: Paso[] = ['idioma', 'lengua', 'nivel', 'diccionarios', 'claude', 'tarjetas', 'listo'];
+type Paso = 'idioma' | 'lengua' | 'nivel' | 'diccionarios' | 'equipo' | 'claude' | 'tarjetas' | 'listo';
+const PASOS: Paso[] = ['idioma', 'lengua', 'nivel', 'diccionarios', 'equipo', 'claude', 'tarjetas', 'listo'];
 
 const guardar = (c: Partial<Ajustes>) => guardarAjustes(c).catch(console.error);
 
@@ -221,10 +222,26 @@ function PasoListo() {
   );
 }
 
+/** Lo que corre en la gráfica, y qué tal irá en este equipo: nada se apaga, solo se avisa. */
+function PasoEquipo({ a }: { a: Ajustes }) {
+  return (
+    <>
+      <h1>{tr('Tu equipo')}</h1>
+      <p>{tr('La voz, las letras de canciones y el OCR corren en tu equipo, sin la nube. Aquí ves qué tal irá cada cosa.')}</p>
+      <PanelEquipo a={a} />
+    </>
+  );
+}
+
 export function Bienvenida({ a }: { a: Ajustes }) {
   const [i, fijarI] = useState(0);
   const paso = PASOS[i];
-  const terminar = () => guardar({ bienvenidaVista: true });
+  // Quien pasó por «Tu equipo» ya no necesita el aviso de Inicio que lo presenta.
+  const [vioEquipo, fijarVioEquipo] = useState(false);
+  useEffect(() => {
+    if (paso === 'equipo') fijarVioEquipo(true);
+  }, [paso]);
+  const terminar = () => guardar({ bienvenidaVista: true, ...(vioEquipo || paso === 'equipo' ? { avisoEquipoVisto: true } : {}) });
   // Quien no toque nada, o se salte la bienvenida, también ha de tener las explicaciones en el idioma que se le muestra.
   useEffect(() => {
     if (a.idiomaInterfaz === 'auto') elegirIdioma(resolverIdioma('auto'), a.idiomaObjetivo);
@@ -244,6 +261,7 @@ export function Bienvenida({ a }: { a: Ajustes }) {
           {paso === 'lengua' && <PasoLengua a={a} />}
           {paso === 'nivel' && <PasoNivel a={a} />}
           {paso === 'diccionarios' && <PasoDiccionarios />}
+          {paso === 'equipo' && <PasoEquipo a={a} />}
           {paso === 'claude' && <PasoClaude a={a} />}
           {paso === 'tarjetas' && <PasoTarjetas a={a} />}
           {paso === 'listo' && <PasoListo />}
