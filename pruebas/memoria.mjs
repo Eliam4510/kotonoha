@@ -155,6 +155,14 @@ comprobar(fin, 'Con las nuevas del día hechas, todo al día', await p.evaluate(
 comprobar((await p.evaluate(() => document.querySelector('.ap-vacio')?.textContent ?? '')).includes('Hoy has repasado 3: 3 a la primera o casi'), 'Y dice cómo fue hoy');
 await p.screenshot({ path: join(CAPTURAS, 'al-dia.png') });
 
+// Con nuevas esperando por el límite, se pueden pedir unas cuantas más, solo por hoy (aquí, 山: 犬 está suspendida).
+const mas = p.locator('.ap-memoria-fin button', { hasText: 'más hoy' });
+comprobar((await mas.innerText().catch(() => '')).includes('Estudiar 1 nueva más hoy'), 'Ofrece estudiar la nueva que espera, solo por hoy', await mas.innerText().catch(() => 'no está'));
+await mas.click();
+comprobar(await frenteCon('あの山は'), 'Y sale ya', await frente());
+const extra = await sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes.memoriaExtra);
+comprobar(extra?.n === 1, 'Lo pedido vale solo para hoy', JSON.stringify(extra));
+
 // ---------- Tarjetas ----------
 
 console.log('\n== Tarjetas ==');

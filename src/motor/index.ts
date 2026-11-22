@@ -10,6 +10,7 @@ import { olvidarOcr } from '../compartido/paginasOcr';
 import { grabacionesSinUso } from '../nucleo/dictado';
 import { aplicarCambio } from '../nucleo/estanteria';
 import { diaLocal, resumirInmersion } from '../nucleo/inmersion';
+import { nuevasDelDia } from '../nucleo/memoria';
 import { puntosEnNotas } from '../nucleo/gramaticaAnki';
 import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
@@ -678,8 +679,14 @@ const api: ApiMotor = {
     await db.anotaciones.delete(id);
   },
 
-  memoriaPendientes: async (n) => memoria.pendientes(n, (await aj()).memoriaNuevasDia),
-  memoriaResumen: async () => memoria.resumen((await aj()).memoriaNuevasDia),
+  memoriaPendientes: async (n) => {
+    const a = await aj();
+    return memoria.pendientes(n, nuevasDelDia(a.memoriaNuevasDia, a.memoriaExtra, Date.now()));
+  },
+  memoriaResumen: async () => {
+    const a = await aj();
+    return memoria.resumen(nuevasDelDia(a.memoriaNuevasDia, a.memoriaExtra, Date.now()));
+  },
   memoriaResponder: (id, nota) => memoria.responder(id, nota),
   memoriaDeshacer: () => memoria.deshacer(),
   memoriaObtener: (id) => memoria.obtener(id),

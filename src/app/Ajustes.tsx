@@ -751,7 +751,7 @@ function SeccionPrompts({ a, cambiar }: PropsSeccion) {
       <div class="ap-grupo ap-prompts">
         <div class="ap-prompts-cab">
           <select class="selector" aria-label={tr('Tarea')} value={tarea} onChange={(e) => fijarTarea(e.currentTarget.value as typeof tarea)}>
-            {TAREAS_PERSONALIZABLES.map((t) => <option key={t.id} value={t.id}>{t.nombre}{a.prompts[t.id] ? tr(' (personalizado)') : ''}</option>)}
+            {TAREAS_PERSONALIZABLES.map((t) => <option key={t.id} value={t.id}>{tr(t.nombre)}{a.prompts[t.id] ? tr(' (personalizado)') : ''}</option>)}
           </select>
           <div class="ap-variables" aria-label={tr('Variables disponibles')}>
             {VARIABLES_PROMPT.map((v) => <code key={v}>[{v}]</code>)}

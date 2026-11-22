@@ -2,6 +2,13 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.48.1 · 2026-11-22
+
+Estudiar más hoy en la Memoria, y dos textos que ya salen en el idioma de la interfaz.
+
+- **Estudiar más hoy.** En la Memoria, con las nuevas del día hechas y otras esperando, **Estudiar 10 nuevas más hoy** pide unas cuantas más, solo por ese día: mañana vuelve el límite de **Ajustes**.
+- **En tu idioma.** El gasto con Claude, en Inicio, y los nombres de las instrucciones, en **Ajustes**, salían en español con la interfaz en otro idioma. Lo encontró una revisión nueva de cada pantalla en los seis idiomas, que busca texto sin traducir.
+
 ## 0.48.0 · 2026-11-22
 
 La Memoria, a fondo: deshacer, editar y suspender al repasar, un límite de nuevas al día, todas las tarjetas a la vista y el progreso.
@@ -496,6 +503,13 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.48.1 · 2026-11-22
+
+Study more today in Memory, and two texts that now appear in the interface language.
+
+- **Study more today.** In Memory, once today's new cards are done and others are waiting, **Study 10 more new cards today** asks for a few more, just for that day: tomorrow the limit in **Settings** applies again.
+- **In your language.** Claude spending on Home and the names of the instructions in **Settings** appeared in Spanish with the interface in another language. A new review of every screen in the six languages, which looks for untranslated text, found them.
 
 ## 0.48.0 · 2026-11-22
 

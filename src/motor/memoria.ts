@@ -47,6 +47,8 @@ export async function resumen(nuevasDia: number) {
     pendientes: debidas.length - nuevasDebidas + nuevas,
     nuevas,
     nuevasQuedan: nuevas,
+    // Las nuevas que ya podrían salir, pero esperan por el límite del día: «Estudiar más hoy» las ofrece.
+    nuevasEsperan: nuevasDebidas - nuevas,
     hoy: { repasos: hoy.length, aciertos: hoy.filter((a) => a.nota > 1).length },
   };
 }

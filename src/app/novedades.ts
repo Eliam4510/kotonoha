@@ -5,12 +5,10 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.48.0',
+  version: '0.48.1',
   puntos: [
-    tm('La Memoria tiene tres vistas: Repasar, Tarjetas y Progreso.'),
-    tm('Al repasar, Z deshace la última respuesta, E edita la tarjeta y R repite su audio; una tarjeta se puede suspender hasta que la reactives.'),
-    tm('Cada día salen las tarjetas que ya estás aprendiendo y, como mucho, las nuevas que elijas en Ajustes (20 de serie).'),
-    tm('Tarjetas las reúne todas, con su estado y cuándo vuelven, para buscarlas, editarlas, suspenderlas o empezar de cero. Progreso enseña la racha, los aciertos y los repasos de cada día.'),
+    tm('En la Memoria, con las nuevas del día hechas, «Estudiar 10 nuevas más hoy» pide unas cuantas más, solo por ese día.'),
+    tm('El gasto con Claude, en Inicio, y los nombres de las instrucciones, en Ajustes, ya salen en el idioma de la interfaz.'),
   ],
 };
 

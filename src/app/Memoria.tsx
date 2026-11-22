@@ -3,11 +3,11 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { type Card, fsrs, type Grade } from 'ts-fsrs';
-import type { Ajustes } from '../compartido/ajustes';
+import { type Ajustes, guardarAjustes } from '../compartido/ajustes';
 import { motor } from '../compartido/rpc';
 import type { BorradorTarjeta, TarjetaMemoria } from '../compartido/tipos';
 import { bcp47Actual, numero, tm, tr } from '../compartido/i18n';
-import { estadoDe, type EstadoMemoria } from '../nucleo/memoria';
+import { estadoDe, type EstadoMemoria, masNuevasHoy } from '../nucleo/memoria';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
 import { Pista } from '../ui/Pista';
@@ -187,6 +187,12 @@ function Repasar({ ajustes }: { ajustes: Ajustes }) {
   }, [t?.id, volteada, deshacer, editando]);
 
   const hoy = resumen?.hoy;
+  // Con el límite del día cumplido y nuevas esperando, se pueden pedir unas cuantas más, solo por hoy.
+  const masHoy = Math.min(10, resumen?.nuevasEsperan ?? 0);
+  const estudiarMas = async () => {
+    await guardarAjustes((a) => ({ memoriaExtra: masNuevasHoy(a.memoriaExtra, Date.now(), masHoy) }));
+    await cargar();
+  };
   return (
     <>
       <Pista a={ajustes} id="memoria">
@@ -214,6 +220,11 @@ function Repasar({ ajustes }: { ajustes: Ajustes }) {
           )}
           <div class="ap-memoria-fin">
             {deshacer && <button class="btn" onClick={alDeshacer}><Icono n="deshacer" t={15} /> {tr('Deshacer')} <kbd class="tecla">Z</kbd></button>}
+            {masHoy > 0 && (
+              <button class="btn" onClick={estudiarMas} data-tip={tr('Solo por hoy: mañana vuelve el límite de Ajustes.')}>
+                <Icono n="mas" t={15} /> {masHoy === 1 ? tr('Estudiar 1 nueva más hoy') : tr('Estudiar {0} nuevas más hoy', numero(masHoy))}
+              </button>
+            )}
             <button class="btn primario" onClick={() => (creadorAbierto.value = true)}><Icono n="mas" t={15} /> {tr('Crear tarjeta')}</button>
           </div>
         </Vacio>

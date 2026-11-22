@@ -338,7 +338,7 @@ export interface ApiMotor {
   anotacionEliminar(id: string): Promise<void>;
 
   memoriaPendientes(limite: number): Promise<TarjetaMemoria[]>;
-  memoriaResumen(): Promise<{ total: number; pendientes: number; nuevas: number; nuevasQuedan: number; hoy: { repasos: number; aciertos: number } }>;
+  memoriaResumen(): Promise<{ total: number; pendientes: number; nuevas: number; nuevasQuedan: number; nuevasEsperan: number; hoy: { repasos: number; aciertos: number } }>;
   memoriaResponder(id: string, nota: 1 | 2 | 3 | 4): Promise<void>;
   /** Deshace la última respuesta y dice de qué tarjeta era. */
   memoriaDeshacer(): Promise<string | null>;

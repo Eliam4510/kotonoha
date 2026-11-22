@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.48.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.48.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -116,7 +116,7 @@ Stand jeder Funktion in Version 0.48.0 und die Art ihrer Überprüfung.
 | Bilder von Openverse | Automatisch |
 | Erstellen mehrerer Karten aus ausgewählten Zeilen | Simulator |
 | Bekannte Wörter aus Anki-Stapeln | Simulator |
-| Eingebaute Wiederholung mit FSRS: Rückgängig (`Z`), Bearbeiten (`E`), Ton wiederholen (`R`) und Aussetzen; ein Tageslimit für neue Karten; alle Karten mit Status, Suche und Aktionen; der Fortschritt mit Serie, Behaltensquote und zwei Diagrammen mit Tabelle | Automatisch |
+| Eingebaute Wiederholung mit FSRS: Rückgängig (`Z`), Bearbeiten (`E`), Ton wiederholen (`R`) und Aussetzen; ein Tageslimit für neue Karten, mit mehr nur für heute; alle Karten mit Status, Suche und Aktionen; der Fortschritt mit Serie, Behaltensquote und zwei Diagrammen mit Tabelle | Automatisch |
 
 ## Anwendungsfenster
 

@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.48.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.48.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -116,7 +116,7 @@ Estado de cada función en la versión 0.48.0, con la forma en que se ha verific
 | Imágenes de Openverse | Automática |
 | Creación de varias tarjetas desde líneas seleccionadas | Simulador |
 | Palabras conocidas a partir de los mazos de Anki | Simulador |
-| Repaso integrado con FSRS: deshacer (`Z`), editar (`E`), repetir el audio (`R`) y suspender; un límite de nuevas al día; todas las tarjetas con su estado, búsqueda y acciones; el progreso con la racha, los aciertos y dos gráficas con su tabla | Automática |
+| Repaso integrado con FSRS: deshacer (`Z`), editar (`E`), repetir el audio (`R`) y suspender; un límite de nuevas al día, con más solo por hoy; todas las tarjetas con su estado, búsqueda y acciones; el progreso con la racha, los aciertos y dos gráficas con su tabla | Automática |
 
 ## Ventana de la aplicación
 

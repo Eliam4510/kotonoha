@@ -312,6 +312,8 @@ export interface Ajustes {
   memoriaNuevasDia: number;
   /** En la Memoria, la frase suena sola al enseñar la tarjeta. */
   memoriaAudio: boolean;
+  /** Nuevas de más pedidas para un día («Estudiar más hoy»): solo cuentan ese día (nucleo/memoria.ts). */
+  memoriaExtra: { dia: string; n: number } | null;
   ankiMazo: string;
   ankiModelo: string;
   ankiCampos: Record<string, string>;
@@ -563,6 +565,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   destino: 'memoria',
   memoriaNuevasDia: 20,
   memoriaAudio: true,
+  memoriaExtra: null,
   ankiMazo: 'Kotonoha',
   ankiModelo: 'Kotonoha',
   ankiCampos: {},

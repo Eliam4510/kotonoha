@@ -30,6 +30,17 @@ export function estadoDe(t: Pick<TarjetaParaOrden, 'suspendida' | 'fsrs'>): Esta
   return s === 2 ? 'repaso' : 'aprendiendo';
 }
 
+/** Las nuevas del día: las de Ajustes y, solo el día en que se pidieron, las de más de «Estudiar más hoy». */
+export function nuevasDelDia(nuevasDia: number, extra: { dia: string; n: number } | null | undefined, ahora: number): number {
+  return nuevasDia + (extra && extra.dia === diaLocal(ahora) ? extra.n : 0);
+}
+
+/** Pedir `n` nuevas más hoy: se suman a las ya pedidas hoy; las de otro día ya no cuentan. */
+export function masNuevasHoy(extra: { dia: string; n: number } | null | undefined, ahora: number, n: number): { dia: string; n: number } {
+  const hoy = diaLocal(ahora);
+  return { dia: hoy, n: (extra?.dia === hoy ? extra.n : 0) + n };
+}
+
 /** Las nuevas que se pueden ver aún hoy: las del día menos las que ya se estrenaron hoy. */
 export function nuevasQuedan(nuevasDia: number, apuntesHoy: Pick<Apunte, 'estadoPrevio' | 'tarjeta'>[]): number {
   const estrenadas = new Set(apuntesHoy.filter((a) => a.estadoPrevio === 0).map((a) => a.tarjeta)).size;

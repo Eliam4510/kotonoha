@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { type Apunte, enOrdenDeRepaso, estadisticas, estadoDe, nuevasQuedan, type TarjetaParaOrden } from './memoria';
+import { type Apunte, enOrdenDeRepaso, estadisticas, estadoDe, masNuevasHoy, nuevasDelDia, nuevasQuedan, type TarjetaParaOrden } from './memoria';
 
 const H = 3600_000;
 const D = 24 * H;
@@ -18,6 +18,17 @@ describe('la Memoria', () => {
     expect([t('a', {}), t('b', { estado: 1 }), t('c', { estado: 2 }), t('d', { estado: 3 }), t('e', { estado: 2, suspendida: true })].map(estadoDe)).toEqual([
       'nueva', 'aprendiendo', 'repaso', 'aprendiendo', 'suspendida',
     ]);
+  });
+
+  it('las nuevas de más se suman solo el día en que se piden', () => {
+    const hoy = masNuevasHoy(null, AHORA, 10);
+    expect(nuevasDelDia(20, hoy, AHORA)).toBe(30);
+    // Pedir más otra vez el mismo día se suma a lo ya pedido.
+    expect(nuevasDelDia(20, masNuevasHoy(hoy, AHORA, 5), AHORA)).toBe(35);
+    // Al día siguiente vuelve el límite de Ajustes, y lo pedido entonces empieza de cero.
+    expect(nuevasDelDia(20, hoy, AHORA + D)).toBe(20);
+    expect(masNuevasHoy(hoy, AHORA + D, 5).n).toBe(5);
+    expect(nuevasDelDia(20, undefined, AHORA)).toBe(20);
   });
 
   it('las nuevas del día se gastan al estrenarlas, una vez por tarjeta', () => {

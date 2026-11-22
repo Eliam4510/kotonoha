@@ -173,7 +173,7 @@ export function TarjetaGasto({ credito }: { credito: number }) {
               <ul class="ap-gasto-tareas">
                 {r.porTarea.map((g) => (
                   <li key={g.clave}>
-                    <span>{g.nombre}</span>
+                    <span>{tr(g.nombre)}</span>
                     <small class="num">{g.peticiones === 1 ? tr('1 petición') : tr('{0} peticiones', numero(g.peticiones))}</small>
                     <b class="num">{dolares(g.coste)}</b>
                     <i class="ap-gasto-parte" aria-hidden="true"><i style={{ width: `${(g.coste / Math.max(r.coste, 1e-9)) * 100}%` }} /></i>
