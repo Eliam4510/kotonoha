@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.45.0, along with how it has been verified.
+Status of each feature in version 0.46.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -287,7 +287,10 @@ Status of each feature in version 0.45.0, along with how it has been verified.
 | Tone practice with the microphone, without models: the voice split into syllables and the shape of each tone judged in the speaker’s range | Measured with 364 Lingua Libre words from 16 native speakers, alone and joined three at a time: calibrated with half and checked with the other half, from different speakers. In sentences it accepts 70 % of syllables said with their tone and 19 % of those said with another. A synthetic voice with the four tones passes in full in the automatic test |
 | CC-CEDICT, Wiktionary’s short translations in the interface language and frequency, with all their readings unified | Automatic, with real data |
 | Search by pinyin, with or without tones | Automatic, with real data |
-| Grammar from HSK 1 to 5: 35 rules, confirmed by Claude | Automatic |
+| Grammar from HSK 1 to 6: 105 rules, each at the level of the 2025 syllabus, confirmed by Claude | Automatic, with each rule checked against the syllabus level |
+| HSK screen: vocabulary, hanzi and grammar of each level of the 2025 syllabus, with pinyin and glosses from CC-CEDICT | Automatic, with the generated lists and the real screen |
+| Page of each hanzi: pinyin, level, radical with its class name, components, formation, the sound and meaning components, traditional form and those read the same way | Automatic, with the Make Me a Hanzi dictionary actually downloaded |
+| Hanzi Writer stroke order and writing practice | Automatic, with the strokes actually downloaded |
 | Page reader, with pinyin over each character | Automatic |
 | Word audio from Wikimedia Commons and Lingua Libre | Automatic |
 | Whisper Turbo for speech and songs | Pending |

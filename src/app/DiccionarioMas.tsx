@@ -29,7 +29,7 @@ export function ResultadosGramatica({ puntos }: { puntos: PuntoEncontrado[] }) {
         {visibles.map(({ nivel, g }) => (
           <div key={g.patron} class={`ap-patron ${abierto === g.patron ? 'abierto' : ''}`}>
             <button class="ap-patron-cab" aria-expanded={abierto === g.patron} onClick={() => fijarAbierto(abierto === g.patron ? null : g.patron)}>
-              <b lang={lengua.value.id}>{g.patron} <small class="chip-nivel">{nivel}</small></b>
+              <b lang={lengua.value.id}>{g.patron} <small class="chip-nivel">{lengua.value.nombreNivel(nivel)}</small></b>
               <span>{significadoEn(g, idioma)}</span>
               <Icono n={abierto === g.patron ? 'arriba' : 'abajo'} t={14} />
             </button>

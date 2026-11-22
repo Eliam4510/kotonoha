@@ -2,6 +2,15 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.46.0 · 2026-11-21
+
+Hanzi y HSK, la tercera fase del chino: cada carácter con su página y sus trazos, y las listas de cada nivel.
+
+- **Un hanzi, su página.** Buscar un solo hanzi abre su página: el pinyin, con la lectura más usada en las palabras del HSK primero; su nivel; su radical, con el nombre que tiene en clase (氵, 三点水); sus piezas; cómo se formó, con la pista del diccionario; la pieza que le da el sonido y la que le da el significado; su forma tradicional, y los hanzi que se leen igual, con el mismo tono o con otro. Viene del diccionario **Hanzi (Make Me a Hanzi)**, que se instala en la biblioteca o en la propia página (unos 3 MB).
+- **Los trazos.** La pestaña **Trazos** de la ficha y la página de cada hanzi enseñan cómo se escribe, con las formas de China continental, y **Practicar** corrige la escritura como con los kanji. Los datos son de Hanzi Writer: cada hanzi se descarga la primera vez y queda guardado.
+- **La pantalla del HSK.** Como la del JLPT: el vocabulario, los hanzi y la gramática de cada nivel, del HSK 1 al 7–9, con el temario de 2025 (unas 11 000 palabras, 3 088 hanzi y 590 puntos), y cuánto conoces de cada uno. El pinyin y las glosas son de CC-CEDICT, cada hanzi lleva sus lecturas por orden de uso, y la gramática, una explicación en español y en inglés.
+- **Más gramática sin IA.** Las reglas del chino pasan de 35 a 105, del HSK 1 al 6, cada una en el nivel en que la enseña el temario: 还是…吧, 一点儿也不, 难道…吗, 不是…而是, 除非…否则, A来A去… Los ejemplos de cada punto del temario salen de las frases ya vistas, buscando sus trozos fijos: 因为……，所以…… encuentra las frases con 因为 y, después, 所以.
+
 ## 0.45.0 · 2026-11-21
 
 Bilibili, con soporte propio: la fuente natural de video en chino.
@@ -464,6 +473,15 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.46.0 · 2026-11-21
+
+Hanzi and HSK, the third phase of Chinese: each character with its page and its strokes, and the lists of each level.
+
+- **A hanzi, its page.** Searching for a single hanzi opens its page: the pinyin, with the reading most used in HSK words first; its level; its radical, with the name it has in class (氵, 三点水); its components; how it was formed, with the dictionary's hint; the component that gives its sound and the one that gives its meaning; its traditional form, and the hanzi read the same way, with the same tone or another. It comes from the **Hanzi (Make Me a Hanzi)** dictionary, installed from the library or from the page itself (about 3 MB).
+- **The strokes.** The **Strokes** tab of the word card and the page of each hanzi show how it is written, with the mainland China forms, and **Practice** checks your writing as it does for kanji. The data comes from Hanzi Writer: each hanzi is downloaded the first time and stays saved.
+- **The HSK screen.** Like the JLPT one: the vocabulary, hanzi and grammar of each level, from HSK 1 to 7–9, following the 2025 syllabus (about 11,000 words, 3,088 hanzi and 590 points), and how much of each you know. Pinyin and glosses come from CC-CEDICT, each hanzi carries its readings in order of use, and grammar, an explanation in Spanish and English.
+- **More grammar without AI.** The Chinese rules go from 35 to 105, from HSK 1 to 6, each at the level where the syllabus teaches it: 还是…吧, 一点儿也不, 难道…吗, 不是…而是, 除非…否则, A来A去… The examples of each syllabus point come from the sentences you have already seen, by their fixed pieces: 因为……，所以…… finds the sentences with 因为 and, after it, 所以.
 
 ## 0.45.0 · 2026-11-21
 

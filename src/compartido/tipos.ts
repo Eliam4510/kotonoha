@@ -3,6 +3,7 @@
 import type { PuntoGramatica, SegmentoLectura, Transcripcion } from '../lenguas/tipos';
 import type { Caja } from '../nucleo/ocr';
 import type { Linea } from '../nucleo/subtitulos';
+import type { PiezaCaracter } from '../nucleo/trazos';
 
 export type EstadoPalabra = 'desconocida' | 'aprendiendo' | 'conocida' | 'ignorada';
 
@@ -237,6 +238,14 @@ export interface FichaCaracter {
   };
   /** Las piezas que lleva dentro, a cualquier profundidad: así se encuentran los caracteres que llevan una. */
   piezas: string[];
+  /** Las piezas que se ven, con las suyas dentro, si las trae el diccionario y no los trazos (en chino). */
+  componentes?: PiezaCaracter[];
+  /**
+   * Cómo se formó, en pocas palabras y en inglés, si el diccionario lo cuenta (Make Me a Hanzi): «A woman 女 with a son 子».
+   * En un fonosemántico, lo que significa la pieza que da el significado, que es `semantico`.
+   */
+  pista?: string;
+  semantico?: string;
   /** Si es un radical, las formas que toma como pieza: 氵 y 氺 de 水. */
   formasComoPieza: string[];
   opuestos: string[];

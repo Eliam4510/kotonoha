@@ -32,7 +32,7 @@ export function significadoDe(s: Record<string, string[]> | undefined): { textos
 /** Una lectura, con lo que va tras el punto (el kana que sigue al carácter) más suave y la época de la que viene. */
 function Lectura({ l, d }: { l: LecturaCaracter; d?: DiccionarioCaracteresLengua }) {
   const [raiz, cola] = l.texto.split('.');
-  const origen = l.origen ? d?.origenes[l.origen] : undefined;
+  const origen = l.origen ? d?.origenes?.[l.origen] : undefined;
   return (
     <span class={`dic-lectura ${l.poco ? 'poco' : ''}`} lang={lengua.value.id} data-tip={l.poco ? tr('Oficial, pero solo en unas pocas palabras') : undefined}>
       {raiz}
@@ -58,7 +58,7 @@ function FilaLecturas({ rotulo, l, sinLista, d }: { rotulo: RotuloConAyuda; l: L
       <dd>
         {principales.map((x) => <Lectura key={x.texto} l={x} d={d} />)}
         {!principales.length && <span class="dic-lecturas-ninguna">{tr('Ninguna oficial')}</span>}
-        {otras.length > 0 && d && (
+        {otras.length > 0 && d?.otras && (
           <span class="dic-lecturas-otras">
             <span class="dic-lecturas-otras-rotulo" data-tip={tr(d.otras.ayuda)}>{tr(d.otras.nombre)}</span>
             {vistas.map((x) => <Lectura key={x.texto} l={x} d={d} />)}
@@ -86,7 +86,7 @@ function FilaNombres({ rotulo, nombres }: { rotulo: RotuloConAyuda; nombres: str
   );
 }
 
-function Piezas({ piezas, fonetico }: { piezas: PiezaCaracter[]; fonetico?: string }) {
+function Piezas({ piezas, fonetico, semantico }: { piezas: PiezaCaracter[]; fonetico?: string; semantico?: string }) {
   const id = lengua.value.id;
   return (
     <div class="dic-piezas">
@@ -99,6 +99,11 @@ function Piezas({ piezas, fonetico }: { piezas: PiezaCaracter[]; fonetico?: stri
             {p.radical && <small class="dic-pieza-radical">{tr('Radical')}</small>}
           </button>
         ))}
+        {semantico && (
+          <button class="dic-pieza-fonetico" data-tip={tr('La pieza que le da su significado')} onClick={() => buscarPalabra(semantico)}>
+            {tr('Da el significado')} <b lang={id}>{semantico}</b>
+          </button>
+        )}
         {fonetico && (
           <button class="dic-pieza-fonetico" data-tip={tr('La pieza que le da su lectura')} onClick={() => buscarPalabra(fonetico)}>
             {tr('Da el sonido')} <b lang={id}>{fonetico}</b>
@@ -148,7 +153,7 @@ function FormasAntiguas({ ficha, d }: { ficha: FichaCaracter; d: DiccionarioCara
   return (
     <section class="dic-seccion" aria-label={tr('Formas antiguas y variantes')}>
       <h3 class="dic-seccion-titulo">{tr('Formas antiguas y variantes')}</h3>
-      {v.antiguas.length > 0 && <p class="ayuda dic-seccion-ayuda">{tr(d.antiguas)}</p>}
+      {v.antiguas.length > 0 && d.antiguas && <p class="ayuda dic-seccion-ayuda">{tr(d.antiguas)}</p>}
       <div class="dic-formas variantes">
         {[...rotulos].map(([c, rs]) => (
           <button key={c} class="dic-forma dic-variante" onClick={() => buscarPalabra(c)}>
@@ -387,11 +392,16 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
   const sinLista = !!ficha && !ficha.on.oficiales.length && !ficha.kun.oficiales.length;
   const nTrazos = ficha?.trazos ?? trazos?.trazos.length;
   const nivel = info?.nivel ?? ficha?.nivel;
-  const lista = ficha?.lista ? d?.lista(ficha.lista) : undefined;
+  // «JLPT N3»; los niveles que ya llevan el nombre del examen se dejan como se enseñan: «HSK 7–9».
+  const etiquetaNivel = nivel ? (listas && !nivel.startsWith(listas.examen) ? `${listas.examen} ${nivel}` : paquete.nombreNivel(nivel)) : '';
+  const lista = ficha?.lista ? d?.lista?.(ficha.lista) : undefined;
   const significado = ficha ? significadoDe(ficha.significados) : { textos: info?.glosa ? [info.glosa] : [], lang: info?.glosa ? 'en' : undefined };
   const enTuIdioma = ficha?.enOtrasLenguas[idiomaActual()];
   const formacion = ficha?.formacion ? d?.formaciones[ficha.formacion] : undefined;
   const fonetico = ficha?.fonetico && ficha.fonetico !== caracter ? ficha.fonetico : trazos?.fonetico;
+  // Las piezas, de los trazos (KanjiVG las trae); si no, del diccionario (en chino, Make Me a Hanzi).
+  const piezas = trazos?.componentes?.length ? trazos.componentes : (ficha?.componentes ?? []);
+  const semantico = ficha?.semantico && ficha.semantico !== caracter ? ficha.semantico : undefined;
   const radical = ficha?.radical;
   // Lo que significa el radical: en el idioma de la interfaz si el diccionario lo trae; si no, el nombre corto de la
   // lista de radicales, mejor que la glosa del radical como carácter («box or enclosure radical (no. 31)»).
@@ -428,11 +438,11 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
           <div class="dic-caracter-titulo">
             <span class="dic-caracter-glifo" lang={id}>{caracter}</span>
             <span class="dic-caracter-tipo">{tr(pc.nombre)}</span>
-            {nivel && <span class="chip-nivel">{listas?.examen} {nivel}</span>}
+            {etiquetaNivel && <span class="chip-nivel">{etiquetaNivel}</span>}
             {lista && <span class="dic-dato dic-dato-lista" data-tip={tr(lista.ayuda)}>{tr(lista.nombre, lista.dato)}</span>}
             {nTrazos ? <span class="dic-dato num">{nTrazos === 1 ? tr('1 trazo') : tr('{0} trazos', nTrazos)}</span> : null}
             {ficha?.frecuencia && <span class="dic-dato num" data-tip={tr('Su puesto entre los más usados en textos')}>{tr('N.º {0} en uso', numero(ficha.frecuencia))}</span>}
-            {ficha?.kanken && d && <span class="dic-dato" data-tip={tr(d.examen.ayuda)}>{tr(d.examen.nombre)} <span lang={id}>{d.examen.nivel(ficha.kanken)}</span></span>}
+            {ficha?.kanken && d?.examen && <span class="dic-dato" data-tip={tr(d.examen.ayuda)}>{tr(d.examen.nombre)} <span lang={id}>{d.examen.nivel(ficha.kanken)}</span></span>}
           </div>
           <p class="dic-caracter-significado" lang={significado.lang}>{significado.textos.length ? significado.textos.slice(0, 6).join(', ') : info ? tr('Fuera de las listas') : ''}</p>
           {!!ficha?.variantes.nuevas.length && (
@@ -449,7 +459,7 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
             <dl class="dic-lecturas">
               <FilaLecturas rotulo={pc.lecturas.on} l={on} sinLista={sinLista} d={d} />
               <FilaLecturas rotulo={pc.lecturas.kun} l={kun} sinLista={sinLista} d={d} />
-              {ficha && d && <FilaNombres rotulo={d.nombres} nombres={ficha.nombres} />}
+              {ficha && d?.nombres && <FilaNombres rotulo={d.nombres} nombres={ficha.nombres} />}
               {radical && d && (
                 <div class="dic-lecturas-fila">
                   <dt data-tip={tr(d.radical.ayuda)}>{tr(d.radical.nombre)}</dt>
@@ -469,12 +479,16 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
               {formacion && (
                 <div class="dic-lecturas-fila">
                   <dt>{tr('Cómo se formó')}</dt>
-                  <dd><span class="dic-formacion" data-tip={tr(formacion.ayuda)}>{tr(formacion.nombre)}</span></dd>
+                  <dd>
+                    <span class="dic-formacion" data-tip={tr(formacion.ayuda)}>{tr(formacion.nombre)}</span>
+                    {/* Cómo se formó, en pocas palabras y en inglés, como lo cuenta el diccionario (FichaCaracter.pista). */}
+                    {ficha?.pista && <span class="dic-formacion-pista" lang="en">{ficha.pista}</span>}
+                  </dd>
                 </div>
               )}
             </dl>
           )}
-          {(!!trazos?.componentes?.length || fonetico) && <Piezas piezas={trazos?.componentes ?? []} fonetico={fonetico} />}
+          {(piezas.length > 0 || fonetico || semantico) && <Piezas piezas={piezas} fonetico={fonetico} semantico={semantico} />}
           {d && ficha === null && !hayDic && <InvitarAInstalar texto={d.instalar} />}
         </div>
       </header>
@@ -532,9 +546,13 @@ export function PaginaCaracter({ caracter, ajustes }: { caracter: string; ajuste
                     <div key={h.lectura} class="dic-homonimo">
                       <div class="dic-homonimo-cab">
                         <span class="dic-lectura" lang={id}>{h.lectura}</span>
-                        <small data-tip={h.mismoAcento ? tr('Suenan igual: solo se distinguen por cómo se escriben.') : tr('Se distinguen al oído por el acento.')}>
-                          {h.mismoAcento ? tr('Mismo acento') : tr('Otro acento')}
-                        </small>
+                        {d.homonimos ? (
+                          <small data-tip={tr((h.mismoAcento ? d.homonimos.mismo : d.homonimos.otro).ayuda)}>{tr((h.mismoAcento ? d.homonimos.mismo : d.homonimos.otro).nombre)}</small>
+                        ) : (
+                          <small data-tip={h.mismoAcento ? tr('Suenan igual: solo se distinguen por cómo se escriben.') : tr('Se distinguen al oído por el acento.')}>
+                            {h.mismoAcento ? tr('Mismo acento') : tr('Otro acento')}
+                          </small>
+                        )}
                       </div>
                       <div class="dic-kanjis">{breve(h.caracteres).map((c) => <TarjetaCaracter key={c.caracter} c={c} />)}</div>
                     </div>

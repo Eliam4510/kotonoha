@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.45.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.46.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -287,7 +287,10 @@ Estado de cada función en la versión 0.45.0, con la forma en que se ha verific
 | Práctica de los tonos con el micrófono, sin modelos: la voz partida en sílabas y la forma de su tono juzgada en el registro de quien habla | Medida con 364 palabras de Lingua Libre de 16 hablantes nativos, sueltas y juntas de tres en tres: calibrada con la mitad y comprobada con la otra mitad, de hablantes distintos. En frases da por buenas el 70 % de las sílabas dichas con su tono y el 19 % de las dichas con otro. Una voz sintética con los cuatro tonos sale entera en la prueba automática |
 | CC-CEDICT, traducciones breves de Wiktionary en el idioma de la interfaz y frecuencia, con las lecturas de todos igualadas | Automática, con datos reales |
 | Buscar por pinyin, con tonos o sin ellos | Automática, con datos reales |
-| Gramática del HSK 1 al 5: 35 reglas, confirmadas por Claude | Automática |
+| Gramática del HSK 1 al 6: 105 reglas, cada una en el nivel del temario de 2025, confirmadas por Claude | Automática, con cada regla contrastada con el nivel del temario |
+| Pantalla del HSK: vocabulario, hanzi y gramática de cada nivel del temario de 2025, con el pinyin y la glosa de CC-CEDICT | Automática, con las listas generadas y la pantalla real |
+| Página de cada hanzi: pinyin, nivel, radical con su nombre de clase, piezas, cómo se formó, la pieza del sonido y la del significado, forma tradicional y los que se leen igual | Automática, con el diccionario de Make Me a Hanzi descargado de verdad |
+| Orden de los trazos de Hanzi Writer y práctica de la escritura | Automática, con los trazos descargados de verdad |
 | Lector de páginas, con el pinyin sobre cada carácter | Automática |
 | Audio de las palabras de Wikimedia Commons y Lingua Libre | Automática |
 | Whisper Turbo para la voz y las canciones | Pendiente |

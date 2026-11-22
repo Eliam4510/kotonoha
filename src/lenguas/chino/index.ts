@@ -3,7 +3,8 @@
 
 import { idiomaActual, tm } from '../../compartido/i18n';
 import type { PaqueteLengua } from '../tipos';
-import { contarEscrituras, esTextoChino, paginaEnChino, pareceFrase, pegarSignos, SIGNOS_FRASE, tieneChino } from './escritura';
+import { contarEscrituras, esTextoChino, hanziDe, paginaEnChino, pareceFrase, pegarSignos, SIGNOS_FRASE, tieneChino } from './escritura';
+import { DICCIONARIO_HANZI } from './paginaHanzi';
 import { esSoloPinyin, normalizarPinyin, pinyinVisible, repartirPinyin, sinTonos, tonoDeSilaba } from './pinyin';
 import { comoSuenaChino, FENOMENOS, silabasParaPracticar } from './sandhi';
 import { TEXTOS } from './textos';
@@ -92,6 +93,44 @@ export const CHINO: PaqueteLengua = {
     ],
   },
   nombreFlexion: () => undefined,
+  // El orden de los trazos con las formas de China continental (Hanzi Writer, de Make Me a Hanzi).
+  trazos: {
+    caracteres: hanziDe,
+    credito: { nombre: 'Make Me a Hanzi · Hanzi Writer', url: 'https://github.com/chanind/hanzi-writer-data', licencia: 'Arphic Public License' },
+    conocidas: {
+      caracteres: hanziDe,
+      titulo: tm('Con estos hanzi ya conoces'),
+      ninguna: tm('Aún no conoces otras palabras con {0}. Cuando las marques como conocidas o en aprendizaje, aparecerán aquí.'),
+    },
+  },
+  // El temario del HSK de 2025, con el que se examina desde diciembre de 2026 (ver herramientas/hsk.mjs).
+  listasNivel: {
+    examen: 'HSK',
+    niveles: ['HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6', 'HSK 7-9'],
+    carpeta: 'datos/hsk',
+    descripcion: tm('El vocabulario, los hanzi y la gramática de cada nivel del HSK, con el temario de 2025, y lo que ya conoces de cada uno.'),
+    caracteres: tm('Hanzi'),
+    palabrasConCaracter: tm('Palabras del nivel con este hanzi'),
+    rotulosLecturas: { on: 'pinyin', kun: '' },
+    credito: tm('Vocabulario, hanzi y gramática: el temario del HSK de 2025, en las listas de krmanik/HSK-3.0 (CC BY-SA 4.0), con el pinyin y las glosas de CC-CEDICT. Las explicaciones de la gramática son de Kotonoha.'),
+  },
+  paginaCaracter: {
+    es: (texto) => [...texto.trim()].length === 1 && hanziDe(texto.trim()).length === 1,
+    nombre: tm('Hanzi'),
+    lecturas: {
+      on: { nombre: tm('Pinyin'), ayuda: tm('Cómo se lee, con su tono. Si tiene varias lecturas, la primera es la que más se usa en las palabras del HSK.') },
+      // El chino no tiene una segunda clase de lecturas: la fila no se enseña.
+      kun: { nombre: '', ayuda: '' },
+    },
+    formas: tm('El mismo hanzi en letra impresa, de libro y a mano. La de escribir a mano es el kaiti, la letra de pincel con que se aprende en la escuela.'),
+    preguntaOrigen: tm('¿De dónde viene el hanzi {0}? Explica sus piezas y qué aporta cada una, su origen y, si lo hay, un truco para recordarlo. Sé breve.'),
+    enlaces: [
+      { nombre: 'MDBG', url: (c) => `https://www.mdbg.net/chinese/dictionary?page=chardict&cdcanoce=0&cdqchi=${encodeURIComponent(c)}` },
+      { nombre: '汉典', url: (c) => `https://www.zdic.net/hans/${encodeURIComponent(c)}` },
+      { nombre: tm('Wiktionary'), url: (c) => `https://${idiomaActual()}.wiktionary.org/wiki/${encodeURIComponent(c)}` },
+    ],
+    diccionario: DICCIONARIO_HANZI,
+  },
   letras: {
     gotica: GOTICA,
     libro: "'SimSun', 'NSimSun', 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'Noto Serif CJK SC', serif",

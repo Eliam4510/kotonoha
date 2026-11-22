@@ -5,11 +5,12 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.45.0',
+  version: '0.46.0',
   puntos: [
-    tm('Bilibili tiene su propio soporte: Kotonoha usa los subtítulos de cada video, los de su autor o los de la IA de Bilibili, con tu sesión iniciada en Bilibili.'),
-    tm('Cada video de Bilibili se reconoce por su BV y su parte, con su título original aunque Bilibili esté traducido: lo ya analizado se encuentra aunque la dirección cambie.'),
-    tm('Los subtítulos de Bilibili quedan ocultos tras los de Kotonoha, y el anime de bangumi funciona igual, donde Bilibili deja verlo.'),
+    tm('En chino, buscar un solo hanzi abre su página: su pinyin, su radical con su nombre de clase, sus piezas, cómo se formó, la pieza que le da el sonido y los hanzi que se leen igual.'),
+    tm('Cada hanzi enseña el orden de sus trazos, con las formas de China continental, y su escritura se practica en su página, con cada trazo corregido al soltarlo.'),
+    tm('La pantalla del HSK reúne el vocabulario, los hanzi y la gramática de cada nivel, con el temario de 2025, y cuánto conoces de cada uno.'),
+    tm('La gramática del chino que se detecta sin IA pasa de 35 a 105 puntos, cada uno en el nivel del HSK en que se enseña.'),
   ],
 };
 

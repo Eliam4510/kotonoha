@@ -261,6 +261,11 @@ export interface ListasNivelLengua {
   caracteres?: string;
   /** Lo que se dice en la ficha de un carácter de la lista, sobre las palabras del nivel que lo llevan. */
   palabrasConCaracter?: string;
+  /**
+   * Cómo se rotulan, en corto, las dos columnas de lecturas de kanji.json en la ficha de un carácter de la lista. Sin
+   * esto, «on» y «kun», las del japonés; la que va vacía no se enseña.
+   */
+  rotulosLecturas?: { on: string; kun: string };
   credito: string;
 }
 
@@ -315,23 +320,32 @@ export interface RotuloConAyuda {
 
 /** Los rótulos de lo que el diccionario de caracteres sabe de uno: sus listas oficiales, sus lecturas, su origen. */
 export interface DiccionarioCaracteresLengua {
-  /** La lista oficial en que está, como se guarda (kyoiku-4, jinmeiyo…). `dato` va en el `{0}` del nombre. */
-  lista(valor: string): (RotuloConAyuda & { dato?: string | number }) | undefined;
+  /**
+   * La lista oficial en que está, como se guarda (kyoiku-4, jinmeiyo…). `dato` va en el `{0}` del nombre. Lo que no
+   * trae el diccionario de una lengua (en chino: listas, examen propio, épocas de las lecturas, lecturas de nombres y
+   * formas antiguas) no tiene rótulo: la página no lo enseña.
+   */
+  lista?(valor: string): (RotuloConAyuda & { dato?: string | number }) | undefined;
   /** El examen de caracteres y cómo se escribe uno de sus niveles. */
-  examen: RotuloConAyuda & { nivel(valor: string): string };
+  examen?: RotuloConAyuda & { nivel(valor: string): string };
   /** De dónde viene una lectura, por la marca que trae: en japonés, la época en que llegó de China. */
-  origenes: Record<string, RotuloConAyuda>;
+  origenes?: Record<string, RotuloConAyuda>;
   /** Cómo se formó el carácter: pictograma, indicativo, compuesto o fonosemántico. */
   formaciones: Record<string, RotuloConAyuda>;
   /** Las lecturas fuera de la lista oficial. */
-  otras: RotuloConAyuda;
+  otras?: RotuloConAyuda;
   /** Las lecturas que solo se usan en nombres de persona. */
-  nombres: RotuloConAyuda;
+  nombres?: RotuloConAyuda;
   radical: RotuloConAyuda;
   /** Lo que se cuenta de las formas antiguas. */
-  antiguas: string;
+  antiguas?: string;
   /** Los títulos de las listas de caracteres emparentados. */
   titulos: { contienen: string; contienenOtros: string; parecidos: string; opuestos: string; sinonimos: string; homonimos: string };
+  /**
+   * Cómo se distinguen los que se leen igual: con el mismo acento o con otro (en chino, el tono). Sin esto, se habla del
+   * acento, como en japonés.
+   */
+  homonimos?: { mismo: RotuloConAyuda; otro: RotuloConAyuda };
   /** Lo que se gana instalando el diccionario, para invitar a hacerlo. */
   instalar: string;
   credito: { nombre: string; url: string; licencia: string };

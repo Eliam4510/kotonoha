@@ -472,7 +472,7 @@ function Lateral({ r, frase }: { r: ResultadoBusqueda | null; frase: string }) {
                   <em lang={glosa ? s.lang : undefined}>{glosa || tr('Fuera de las listas')}</em>
                   {(k.on || k.kun) && <small lang={paquete.id}>{[k.on, k.kun].filter(Boolean).join(' · ')}</small>}
                 </span>
-                {k.nivel && <small class="chip-nivel">{k.nivel}</small>}
+                {k.nivel && <small class="chip-nivel">{paquete.nombreNivel(k.nivel)}</small>}
               </button>
               );
             })}

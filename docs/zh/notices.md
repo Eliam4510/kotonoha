@@ -30,6 +30,7 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | 为 AivisHub 语音提供读音、重音和重音短语，连同 LICENSE 和 NOTICE 一起并入代码 src/lenguas/japones/voz/yomi | MIT |
 | [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | 按上下文给出汉语拼音：在一个字的几个读音中（长：cháng 或 zhǎng）选出句中的读音 | MIT |
 | [opencc-js](https://github.com/nk2028/opencc-js)，及 [OpenCC](https://github.com/BYVoid/OpenCC) 的转换表（`opencc-data`） | 把繁体字幕轨道和 Whisper 的转写转成简体字；其声明见 `licencias/AVISO-opencc.txt` | 代码 MIT，转换表 Apache-2.0 |
+| [krmanik/HSK-3.0](https://github.com/krmanik/HSK-3.0)（作者 Mani）的 HSK 列表，依据 2025 年 HSK 考试大纲，附 [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) 的拼音和释义 | HSK 页面中各级的词汇、汉字和语法（`datos/hsk`），由 `herramientas/hsk.mjs` 生成；语法说明由本项目编写 | CC BY-SA 4.0（派生列表亦同） |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/ffmpeg` | 读取本地文件 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)，`@ffmpeg/core` | FFmpeg 核心，编译时复制 | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) 与 [eSpeak NG](https://github.com/espeak-ng/espeak-ng)，`@diffusionstudio/piper-wasm` | 神经网络语音的音素，编译时复制，只含英语和德语词典 | MIT 和 GPL-3.0-or-later |
@@ -56,6 +57,8 @@ Kotonoha 的代码以 [MIT 许可证](../../LICENSE)发布。第三方组件保�
 | 音调重音和汉字词典 | [Kanjium](https://github.com/mifunetoshiro/kanjium)，作者 Uros O.：音调标记、声旁、同训字以及对 EDICT、KANJIDIC 和 KRADFILE 的其他增补和修改来自他的自由数据库，其余部分属于 EDRDG。汉语读音来自 CC-CEDICT，韩语读音来自 libhangul（Choe Hwanjin，BSD 三条款许可） | CC BY-SA 4.0 |
 | 频率 | [JPDB](https://jpdb.io)，[yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) 格式 | 以该项目的说明为准 |
 | 笔顺 | [KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，原始文件由 jsDelivr 提供；它没有的文件由该项目的 GitHub 仓库提供 | CC BY-SA 3.0 |
+| 中文笔顺 | [Hanzi Writer](https://github.com/chanind/hanzi-writer-data)，作者 David Chanin，基于 Shaunak Kishore 的 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)，采用文鼎（Arphic）字体的笔画；由 jsDelivr 提供，无响应时改用 unpkg | Arphic Public License |
+| 汉字词典 | [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)，作者 Shaunak Kishore，基于 Unihan 和 CJKlib，从 GitHub 下载 | LGPL-3.0 |
 | 单词音频 | JapanesePod101 和 [Lingua Libre](https://lingualibre.org) | 以各来源为准 |
 | 图片 | [Openverse](https://openverse.org) | 以每张图片的许可证为准 |
 | 英语和德语词典和发音，以及汉语的简短译文 | [Wiktionary](https://www.wiktionary.org)，由 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 根据 [kaikki.org](https://kaikki.org) 整理，从 Hugging Face 提供 | CC BY-SA 4.0 |

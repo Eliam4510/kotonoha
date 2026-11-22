@@ -910,7 +910,7 @@ function FilaPalabraLibro({ f, glosa, elegida, abierta, barra, lugarDe, alElegir
           <span class="ap-voc-barra" aria-hidden="true"><i style={{ width: `${Math.max(8, Math.round(barra * 100))}%` }} /></span>
           <b>×{numero(f.veces)}</b>
         </span>
-        <span class="ap-voc-nivel">{f.nivel && <span class={`chip-nivel n-${f.nivel}`}>{f.nivel}</span>}</span>
+        <span class="ap-voc-nivel">{f.nivel && <span class={`chip-nivel n-${f.nivel}`}>{lengua.value.nombreNivel(f.nivel)}</span>}</span>
         <label class={`ap-estado-fila ${f.estado}`}>
           <i class={`ap-punto-estado ${f.estado}`} />
           <select aria-label={tr('Estado de {0}', f.lema)} value={f.estado} onChange={(e) => alCambiar(e.currentTarget.value as EstadoPalabra)}>
@@ -980,7 +980,7 @@ function GramaticaDelLibro({ puntos, lugarDe }: { puntos: GramaticaVocabulario[]
               <button class="ap-patron-cab ap-voc-patron-cab" aria-expanded={abierto === g.patron} onClick={() => fijarAbierto(abierto === g.patron ? null : g.patron)}>
                 <b lang={lengua.value.id}><i class={`punto-gram ${estadoGramatica(g.patron)}`} aria-label={tr(NOMBRE_ESTADO_GRAMATICA[estadoGramatica(g.patron)])} /> {g.patron}</b>
                 <span>{tr(g.significado)}</span>
-                <span class="ap-voc-nivel">{g.nivel && <span class={`chip-nivel n-${g.nivel}`}>{g.nivel}</span>}</span>
+                <span class="ap-voc-nivel">{g.nivel && <span class={`chip-nivel n-${g.nivel}`}>{lengua.value.nombreNivel(g.nivel)}</span>}</span>
                 <span class="ap-voc-veces-texto num">×{numero(g.veces)}</span>
                 <Icono n={abierto === g.patron ? 'arriba' : 'abajo'} t={14} />
               </button>

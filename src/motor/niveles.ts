@@ -3,6 +3,7 @@
 
 import type { CaracterConNivel, FraseEjemplo, ListaNivel, PuntoEncontrado, ResumenNivel } from '../compartido/tipos';
 import { buscarGramatica as buscarEnGramatica } from '../nucleo/explorar';
+import { normalizarPatron } from '../nucleo/gramaticaAnki';
 import {
   caracteresDelNivel,
   clavesDe,
@@ -114,7 +115,9 @@ export async function buscarGramatica(carpeta: string, texto: string, idioma: st
  */
 export async function frasesConPatron(patron: string, limite = 4): Promise<FraseEjemplo[]> {
   const trozos = trozosDePatron(patron);
-  const coincide = (texto: string) => fraseConPatron(texto, trozos) || motorLengua().detectarGramatica(texto).some((p) => p.patron === patron);
+  // La regla de la lengua puede escribir el patrón algo distinto del temario: 虽然…但是 es 虽然……，但是…….
+  const objetivo = normalizarPatron(patron);
+  const coincide = (texto: string) => fraseConPatron(texto, trozos) || motorLengua().detectarGramatica(texto).some((p) => p.patron === patron || normalizarPatron(p.patron) === objetivo);
   const filas = await db.frases
     .orderBy('creada')
     .reverse()

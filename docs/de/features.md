@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.45.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.46.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -287,7 +287,10 @@ Stand jeder Funktion in Version 0.45.0 und die Art ihrer Überprüfung.
 | Tonübung mit dem Mikrofon, ohne Modelle: die Stimme in Silben geteilt und die Form jedes Tons im Stimmumfang des Sprechers beurteilt | Gemessen mit 364 Wörtern von Lingua Libre von 16 Muttersprachlern, einzeln und zu dritt verbunden: mit der Hälfte kalibriert und mit der anderen Hälfte von anderen Sprechern geprüft. In Sätzen werden 70 % der mit ihrem Ton gesprochenen Silben angenommen und 19 % der mit einem anderen gesprochenen. Eine synthetische Stimme mit den vier Tönen besteht den automatischen Test vollständig |
 | CC-CEDICT, kurze Übersetzungen von Wiktionary in der Sprache der Oberfläche und Häufigkeit, mit vereinheitlichten Lesungen | Automatisch, mit echten Daten |
 | Suche nach Pinyin, mit oder ohne Töne | Automatisch, mit echten Daten |
-| Grammatik von HSK 1 bis 5: 35 Regeln, von Claude bestätigt | Automatisch |
+| Grammatik von HSK 1 bis 6: 105 Regeln, jede auf der Stufe des Lehrplans von 2025, von Claude bestätigt | Automatisch, jede Regel mit der Stufe des Lehrplans abgeglichen |
+| HSK-Bildschirm: Wortschatz, Hanzi und Grammatik jeder Stufe des Lehrplans von 2025, mit Pinyin und Glossen aus CC-CEDICT | Automatisch, mit den erzeugten Listen und dem echten Bildschirm |
+| Seite jedes Hanzi: Pinyin, Stufe, Radikal mit seinem Namen aus dem Unterricht, Bestandteile, Entstehung, Laut- und Bedeutungsbestandteil, Langzeichenform und gleich gelesene | Automatisch, mit dem tatsächlich heruntergeladenen Wörterbuch Make Me a Hanzi |
+| Strichfolge von Hanzi Writer und Schreibübung | Automatisch, mit tatsächlich heruntergeladenen Strichen |
 | Seiten-Reader, mit Pinyin über jedem Zeichen | Automatisch |
 | Wort-Audio von Wikimedia Commons und Lingua Libre | Automatisch |
 | Whisper Turbo für Sprache und Lieder | Ausstehend |

@@ -279,7 +279,7 @@ console.log('\n== Un video con pistas simplificada y tradicional ==');
     comprobar(ficha.lectura === 'yín háng', 'Con su pinyin sobre cada carácter', ficha.lectura);
     comprobar(ficha.defs.length > 0, 'Con definiciones', ficha.defs[0]);
     comprobar(ficha.defs.some((d) => d === '量词：家、个'), 'Y el clasificador como se enseña, en simplificado', ficha.defs.join(' | '));
-    comprobar(!ficha.pestanas.includes('Trazos'), 'Sin la pestaña de trazos, que llega con los hanzi');
+    comprobar(ficha.pestanas.includes('Trazos'), 'La ficha tiene la pestaña de los trazos de sus hanzi', ficha.pestanas.join(' | '));
     await p.screenshot({ path: join(CAPTURAS, 'ficha.png') });
     comprobar(ficha.pestanas.includes('Cómo suena'), 'La ficha tiene «Cómo suena»', ficha.pestanas.join(' | '));
     await enOverlay((r) => [...r.querySelectorAll('.ficha-dock .pestana')].find((x) => x.textContent.trim() === 'Cómo suena')?.click());
@@ -336,6 +336,73 @@ comprobar(fichaWeb === '图书馆', 'Un clic en una palabra de la página abre s
 await w.screenshot({ path: join(CAPTURAS, 'pagina.png') });
 await w.close();
 
+// ---------- Los hanzi y el HSK ----------
+
+console.log('\n== Los hanzi y el HSK ==');
+if (!(await motor('estado')).diccionarios.some((d) => d.id === 'hanzi')) {
+  const t1 = Date.now();
+  await motor('instalarDiccionario', 'hanzi');
+  console.log(`  instalado hanzi en ${Math.round((Date.now() - t1) / 1000)} s`);
+}
+const fichaDi = await motor('fichaCaracter', '地');
+comprobar(fichaDi?.on.oficiales.map((l) => l.texto).slice(0, 2).join(' ') === 'dì de' && fichaDi.nivel === 'HSK 2', 'El diccionario de hanzi lleva las lecturas del HSK, la más usada primero, y su nivel', `${fichaDi?.on.oficiales.map((l) => l.texto).join(' ')} · ${fichaDi?.nivel}`);
+const fichaJiang = await motor('fichaCaracter', '江');
+comprobar(fichaJiang?.radical?.caracter === '水' && fichaJiang.radical.forma === '氵' && fichaJiang.radical.nombres.includes('三点水'), 'Su radical, con la forma que toma y su nombre de clase', JSON.stringify(fichaJiang?.radical));
+comprobar(fichaJiang?.fonetico === '工' && fichaJiang.componentes?.some((p) => p.caracter === '氵'), 'La pieza que le da el sonido y sus piezas', `${fichaJiang?.fonetico} · ${fichaJiang?.componentes?.map((p) => p.caracter).join('')}`);
+const trazosWo = await motor('trazos', '我');
+comprobar(trazosWo?.trazos.length === 7 && trazosWo.trazos.every((d) => /^M[\d.]+,[\d.]+ C/.test(d)), 'Los trazos de Hanzi Writer: 我 tiene siete', trazosWo?.trazos.length);
+
+await app.goto(`chrome-extension://${id}/app.html#/diccionario?q=${encodeURIComponent('妈')}`);
+await app.waitForSelector('.dic-caracter .dic-lecturas', { timeout: 20000 }).catch(() => null);
+await app.waitForTimeout(1500);
+const paginaHanzi = await app.evaluate(() => {
+  const t = (s) => document.querySelector(s)?.textContent?.trim() ?? '';
+  return {
+    tipo: t('.dic-caracter-tipo'),
+    nivel: t('.dic-caracter-titulo .chip-nivel'),
+    lecturas: t('.dic-lecturas-fila dd'),
+    rotulos: [...document.querySelectorAll('.dic-lecturas-fila dt')].map((x) => x.textContent.trim()),
+    formacion: t('.dic-formacion'),
+    pista: t('.dic-formacion-pista'),
+    piezas: [...document.querySelectorAll('.dic-pieza b')].map((x) => x.textContent),
+    sonido: [...document.querySelectorAll('.dic-pieza-fonetico')].map((x) => x.textContent.trim()).join(' | '),
+    trazos: document.querySelectorAll('.dic-caracter-trazos svg path').length,
+    credito: t('.trazos-credito'),
+  };
+});
+console.log('  ', JSON.stringify(paginaHanzi));
+comprobar(paginaHanzi.tipo === 'Hanzi' && paginaHanzi.nivel === 'HSK 1', 'La página del hanzi, con su nivel del HSK', `${paginaHanzi.tipo} · ${paginaHanzi.nivel}`);
+comprobar(paginaHanzi.lecturas.includes('mā') && paginaHanzi.rotulos[0] === 'Pinyin', 'Su pinyin', `${paginaHanzi.rotulos.join(' | ')} · ${paginaHanzi.lecturas}`);
+comprobar(paginaHanzi.formacion === 'Fonosemántico' && paginaHanzi.pista.length > 0, 'Cómo se formó, con la pista del diccionario', `${paginaHanzi.formacion} · ${paginaHanzi.pista}`);
+comprobar(
+  paginaHanzi.piezas.includes('女') && paginaHanzi.piezas.includes('马') && /Da el sonido\s*马/.test(paginaHanzi.sonido) && /Da el significado\s*女/.test(paginaHanzi.sonido),
+  'Sus piezas, la que le da el sonido y la que le da el significado',
+  `${paginaHanzi.piezas.join(' ')} · ${paginaHanzi.sonido}`
+);
+comprobar(paginaHanzi.trazos > 0 && /Make Me a Hanzi/.test(paginaHanzi.credito), 'Con el orden de sus trazos y su crédito', `${paginaHanzi.trazos} trazados · ${paginaHanzi.credito}`);
+await app.screenshot({ path: join(CAPTURAS, 'hanzi.png') });
+await app.getByRole('radio', { name: 'Practicar' }).click();
+comprobar(await app.waitForSelector('.escritura', { timeout: 10000 }).then(() => true).catch(() => false), 'Y se practica su escritura');
+
+await app.goto(`chrome-extension://${id}/app.html#/niveles`);
+await app.waitForSelector('.ap-nivel-examen', { timeout: 20000 }).catch(() => null);
+await app.waitForTimeout(1200);
+const tarjetas = await app.$$eval('.ap-nivel-examen-cab b', (xs) => xs.map((x) => x.textContent));
+comprobar(tarjetas.join(' | ') === 'HSK 1 | HSK 2 | HSK 3 | HSK 4 | HSK 5 | HSK 6 | HSK 7–9', 'La pantalla del HSK tiene sus siete niveles', tarjetas.join(' | '));
+const pestanasNiveles = await app.$$eval('.ap-niveles-filtros [role="tab"]', (xs) => xs.map((x) => x.textContent.trim()));
+comprobar(pestanasNiveles.some((p) => p.startsWith('Vocabulario')) && pestanasNiveles.some((p) => p.startsWith('Hanzi')), 'Con su vocabulario y sus hanzi', pestanasNiveles.join(' | '));
+await app.getByRole('radio', { name: /^HSK 2/ }).click();
+await app.getByRole('tab', { name: /^Gramática/ }).click();
+await app.waitForSelector('.ap-patron-cab', { timeout: 10000 }).catch(() => null);
+const puntos = await app.$$eval('.ap-patron-cab b', (xs) => xs.map((x) => x.textContent.trim()));
+comprobar(puntos.includes('因为……，所以……'), 'Y la gramática del temario, nivel a nivel', `${puntos.length} puntos`);
+await app.getByRole('tab', { name: /^Hanzi/ }).click();
+await app.locator('.ap-caracter').first().click();
+await app.waitForSelector('.ap-caracter-detalle', { timeout: 10000 }).catch(() => null);
+const rotulosDetalle = await app.$$eval('.ap-caracter-cab small', (xs) => xs.map((x) => x.textContent));
+comprobar(rotulosDetalle.join(' ') === 'pinyin', 'El hanzi elegido, con su pinyin y sin on ni kun', rotulosDetalle.join(' '));
+await app.screenshot({ path: join(CAPTURAS, 'niveles.png') });
+
 // ---------- La práctica de los tonos ----------
 
 console.log('\n== Practicar los tonos ==');
@@ -355,7 +422,11 @@ await app.screenshot({ path: join(CAPTURAS, 'practica-tonos.png') });
 await app.goto(`chrome-extension://${id}/app.html#/descubre`);
 await app.waitForSelector('.ap-familia', { timeout: 10000 }).catch(() => null);
 const descubre = await app.evaluate(() => [...document.querySelectorAll('.ap-funcion')].map((f) => f.getAttribute('data-funcion')));
-comprobar(descubre.includes('tonos') && descubre.includes('como-suena') && !descubre.includes('acento') && !descubre.includes('kanji'), 'Descubre Kotonoha enseña los tonos y «Cómo suena», y no el acento ni los kanji', JSON.stringify(descubre));
+comprobar(
+  ['tonos', 'como-suena', 'kanji', 'niveles'].every((f) => descubre.includes(f)) && !descubre.includes('acento'),
+  'Descubre Kotonoha enseña los tonos, «Cómo suena», los hanzi y el HSK, y no el acento',
+  JSON.stringify(descubre)
+);
 
 // ---------- Vuelta al japonés ----------
 

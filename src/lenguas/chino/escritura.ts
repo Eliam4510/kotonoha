@@ -22,6 +22,9 @@ const DELATORES = new Set([...'我你她它们这哪么个吗呢吧啊呀还给�
 
 export const tieneChino = (texto: string) => HAN.test(texto);
 
+/** Los hanzi de una palabra, sin repetir: los que tienen trazos y página propia. */
+export const hanziDe = (palabra: string): string[] => [...new Set(palabra)].filter((c) => HAN.test(c));
+
 function otrasEscrituras(texto: string): number {
   return texto.replace(/の/g, '').match(OTRAS_ESCRITURAS)?.length ?? 0;
 }

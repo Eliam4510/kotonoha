@@ -30,6 +30,7 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | AivisHub 음성을 위한 읽기, 악센트, 악센트 구. src/lenguas/japones/voz/yomi에 LICENSE, NOTICE와 함께 포함 | MIT |
 | [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | 문맥에 맞는 중국어 병음: 한 글자의 여러 읽기(长의 cháng과 zhǎng) 가운데 그 문장의 읽기 | MIT |
 | [opencc-js](https://github.com/nk2028/opencc-js), [OpenCC](https://github.com/BYVoid/OpenCC) 변환표(`opencc-data`) 포함 | 번체자 자막 트랙과 Whisper 받아쓰기를 간체자로 변환. 고지는 `licencias/AVISO-opencc.txt` | 코드는 MIT, 변환표는 Apache-2.0 |
+| [krmanik/HSK-3.0](https://github.com/krmanik/HSK-3.0)(Mani)의 HSK 목록. 2025년 HSK 시험 요강을 따르며, [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)의 병음과 뜻풀이를 붙였습니다 | HSK 화면의 급수별 어휘, 한자, 문법(`datos/hsk`). `herramientas/hsk.mjs`로 만들었고, 문법 설명은 이 프로젝트가 직접 썼습니다 | CC BY-SA 4.0(파생 목록도) |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/ffmpeg` | 내 파일 읽기 | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), `@ffmpeg/core` | FFmpeg 코어, 컴파일 시 복사 | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize)와 [eSpeak NG](https://github.com/espeak-ng/espeak-ng), `@diffusionstudio/piper-wasm` | 신경망 음성의 음소, 컴파일 시 영어와 독일어 사전만 넣어 복사 | MIT와 GPL-3.0-or-later |
@@ -56,6 +57,8 @@ Kotonoha의 코드는 [MIT 라이선스](../../LICENSE)로 공개됩니다. 서�
 | 고저 악센트와 한자 사전 | Uros O.의 [Kanjium](https://github.com/mifunetoshiro/kanjium): 악센트 표기, 소리 부분, 동훈이자, 그리고 EDICT, KANJIDIC, KRADFILE에 대한 그 밖의 추가와 수정은 그의 자유 데이터베이스에서 온 것이며, 나머지는 EDRDG의 것입니다. 중국어 읽기는 CC-CEDICT, 한국어 읽기는 libhangul(Choe Hwanjin, BSD 3조항)에서 왔습니다 | CC BY-SA 4.0 |
 | 빈도 | [JPDB](https://jpdb.io), [yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) 형식 | 프로젝트가 명시한 조건 |
 | 획순 | [KanjiVG](https://kanjivg.tagaini.net), Ulrich Apel, jsDelivr가 제공하는 원본 파일(없는 파일은 프로젝트의 GitHub 저장소에서 제공) | CC BY-SA 3.0 |
+| 중국어 획순 | David Chanin의 [Hanzi Writer](https://github.com/chanind/hanzi-writer-data). Shaunak Kishore의 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)를 바탕으로 Arphic 글꼴의 획을 씁니다. jsDelivr에서, 응답이 없으면 unpkg에서 받습니다 | Arphic Public License |
+| 한자 사전(중국어) | Shaunak Kishore의 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi). Unihan과 CJKlib을 바탕으로 하며, GitHub에서 내려받습니다 | LGPL-3.0 |
 | 단어 오디오 | JapanesePod101과 [Lingua Libre](https://lingualibre.org) | 각 출처의 조건 |
 | 이미지 | [Openverse](https://openverse.org) | 각 이미지의 라이선스 |
 | 영어와 독일어 사전과 발음, 중국어 짧은 번역 | [Wiktionary](https://www.wiktionary.org), [kaikki.org](https://kaikki.org)를 바탕으로 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)이 정리, Hugging Face에서 제공 | CC BY-SA 4.0 |

@@ -256,7 +256,11 @@ export async function instalarDesdeBiblioteca(idFuente: string): Promise<void> {
     emitir({ id: f.id, titulo: f.titulo, fase, avance, error });
   try {
     progreso('descargando', 0);
-    const datos = await (f.formato === 'yomitan' ? descargarZip(f.url, (a) => progreso('descargando', a)) : descargar(f.url, (a) => progreso('descargando', a)));
+    // Un diccionario de caracteres son varios archivos, que se bajan al instalarlo: su dirección es la de su proyecto.
+    const datos =
+      f.formato === 'caracteres'
+        ? new Uint8Array(0)
+        : await (f.formato === 'yomitan' ? descargarZip(f.url, (a) => progreso('descargando', a)) : descargar(f.url, (a) => progreso('descargando', a)));
     progreso('guardando', 0);
     if (f.formato === 'kanjium') {
       const filas = leerKanjium(new TextDecoder().decode(datos));

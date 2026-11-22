@@ -44,6 +44,7 @@ El código de Kotonoha se publica bajo la [licencia MIT](LICENSE). Los component
 | [Phosphor Icons](https://phosphoricons.com) | Iconos | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) y [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Tipografía | OFL-1.1 |
 | Listas del JLPT de Jonathan Waller ([JLPT Resources, tanos.co.uk](https://web.archive.org/web/20251114165345/https://www.tanos.co.uk/jlpt/sharing/)) | El vocabulario y los kanji de cada nivel en la pantalla JLPT (`datos/jlpt`); la gramática es una lista propia del proyecto | Creative Commons BY |
+| Listas del HSK de [krmanik/HSK-3.0](https://github.com/krmanik/HSK-3.0) (Mani), del temario del HSK de 2025, con el pinyin y las glosas de [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) | El vocabulario, los hanzi y la gramática de cada nivel en la pantalla HSK (`datos/hsk`), hechos con `herramientas/hsk.mjs`; las explicaciones de la gramática son del proyecto | CC BY-SA 4.0, también las listas derivadas |
 
 El código de este repositorio no incluye binarios de terceros: se obtienen de npm al instalar. La carpeta `dist` y los paquetes compilados de cada versión sí contienen `@ffmpeg/core`, `lamejs` y eSpeak NG, y llevan en su carpeta `licencias` los textos y avisos de todos los componentes.
 
@@ -59,6 +60,8 @@ Ninguno de estos datos forma parte del repositorio. La extensión los descarga b
 | Acento tonal y diccionario de kanji | [Kanjium](https://github.com/mifunetoshiro/kanjium), de Uros O.: la notación del acento, las partes fonéticas, los homónimos y los demás añadidos y cambios sobre EDICT, KANJIDIC y KRADFILE son de su base de datos libre; el resto es del EDRDG. La lectura en chino viene de CC-CEDICT y la coreana, de libhangul (Choe Hwanjin, BSD de 3 cláusulas) | CC BY-SA 4.0 |
 | Frecuencias | [JPDB](https://jpdb.io), en el formato de [yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) | Las indicadas por el proyecto |
 | Orden de los trazos | [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, con los archivos originales servidos por jsDelivr o, si no los tiene, por el repositorio del proyecto en GitHub | CC BY-SA 3.0 |
+| Orden de los trazos del chino | [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), de David Chanin, a partir de [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), de Shaunak Kishore, con los trazos de las letras de Arphic; servido por jsDelivr o, si no responde, por unpkg | Arphic Public License |
+| Diccionario de hanzi | [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), de Shaunak Kishore, a partir de Unihan y CJKlib, descargado de GitHub | LGPL-3.0 |
 | Audio de palabras | JapanesePod101 y [Lingua Libre](https://lingualibre.org) | Las de cada fuente |
 | Imágenes | [Openverse](https://openverse.org) | La licencia de cada imagen |
 | Diccionarios y pronunciación del inglés y del alemán, y traducciones breves del chino | [Wiktionary](https://www.wiktionary.org), preparados por [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) a partir de [kaikki.org](https://kaikki.org), y servidos desde Hugging Face | CC BY-SA 4.0 |
@@ -125,6 +128,7 @@ Kotonoha's code is released under the [MIT license](LICENSE). Third-party compon
 | [Phosphor Icons](https://phosphoricons.com) | Icons | MIT |
 | [Nunito](https://fonts.google.com/specimen/Nunito) and [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) | Typography | OFL-1.1 |
 | Jonathan Waller's JLPT lists ([JLPT Resources, tanos.co.uk](https://web.archive.org/web/20251114165345/https://www.tanos.co.uk/jlpt/sharing/)) | The vocabulary and kanji of each level on the JLPT screen (`datos/jlpt`); the grammar is the project's own list | Creative Commons BY |
+| HSK lists from [krmanik/HSK-3.0](https://github.com/krmanik/HSK-3.0) (Mani), from the 2025 HSK syllabus, with pinyin and glosses from [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) | The vocabulary, hanzi and grammar of each level on the HSK screen (`datos/hsk`), made with `herramientas/hsk.mjs`; the grammar explanations are the project's own | CC BY-SA 4.0, also the derived lists |
 
 The code in this repository contains no third-party binaries: they come from npm on install. The `dist` folder and the compiled packages of each version do contain `@ffmpeg/core`, `lamejs` and eSpeak NG, and carry the texts and notices of every component in their `licencias` folder.
 
@@ -140,6 +144,8 @@ None of this data is part of the repository. The extension downloads it on deman
 | Pitch accent and kanji dictionary | [Kanjium](https://github.com/mifunetoshiro/kanjium), by Uros O.: the pitch accent notation, phonetics, homonyms and other additions or modifications to EDICT, KANJIDIC or KRADFILE were provided by Uros O. through his free database; the rest belongs to the EDRDG. The Chinese reading comes from CC-CEDICT and the Korean one from libhangul (Choe Hwanjin, BSD 3-clause) | CC BY-SA 4.0 |
 | Frequencies | [JPDB](https://jpdb.io), in the format of [yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) | As stated by the project |
 | Stroke order | [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, with the original files served by jsDelivr or, when it does not have them, by the project's repository on GitHub | CC BY-SA 3.0 |
+| Chinese stroke order | [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), by David Chanin, based on [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), by Shaunak Kishore, with the strokes of the Arphic fonts; served by jsDelivr or, if it doesn't respond, by unpkg | Arphic Public License |
+| Hanzi dictionary | [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), by Shaunak Kishore, based on Unihan and CJKlib, downloaded from GitHub | LGPL-3.0 |
 | Word audio | JapanesePod101 and [Lingua Libre](https://lingualibre.org) | Those of each source |
 | Images | [Openverse](https://openverse.org) | The license of each image |
 | English and German dictionaries and pronunciation, and short Chinese translations | [Wiktionary](https://www.wiktionary.org), prepared by [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) from [kaikki.org](https://kaikki.org), and served from Hugging Face | CC BY-SA 4.0 |

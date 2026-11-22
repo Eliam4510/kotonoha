@@ -6,7 +6,7 @@ import type { Ajustes } from '../compartido/ajustes';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { motor } from '../compartido/rpc';
 import type { CaracterNivel, EstadoPalabra, FraseEjemplo, GramaticaNivel, ListaNivel, PalabraNivel, ResumenNivel } from '../compartido/tipos';
-import { significadoEn, trozosDePatron } from '../nucleo/niveles';
+import { buscarTrozo, significadoEn, trozosDePatron } from '../nucleo/niveles';
 import type { ListasNivelLengua } from '../lenguas/tipos';
 import { NOMBRE_ESTADO, PanelFlujo } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
@@ -66,7 +66,7 @@ function TarjetaNivel({ id, r, activo, listas, alElegir, sabidos }: { id: string
   return (
     <button role="radio" aria-checked={activo} class={`tarjeta ap-nivel-examen ${activo ? 'activo' : ''}`} onClick={alElegir}>
       <span class="ap-nivel-examen-cab">
-        <b>{id}</b>
+        <b>{lengua.value.nombreNivel(id)}</b>
         <Anillo parte={parte} aprendiendo={aprendiendo} />
       </span>
       <dl>
@@ -308,6 +308,7 @@ function RejillaCaracteres({ caracteres, elegido, alElegir, palabras, listas }: 
     );
   }
   const conEste = elegido ? palabras.filter((p) => p.lema.includes(elegido.caracter)).slice(0, 24) : [];
+  const rotulos = listas.rotulosLecturas ?? { on: "on", kun: "kun" };
   return (
     <div class={`ap-caracteres ${elegido ? 'con-detalle' : ''}`}>
       <div class="ap-caracteres-rejilla">
@@ -329,8 +330,8 @@ function RejillaCaracteres({ caracteres, elegido, alElegir, palabras, listas }: 
           <div class="ap-caracter-cab">
             <b lang={lengua.value.id}>{elegido.caracter}</b>
             <div>
-              {elegido.on && <p lang={lengua.value.id}><small>on</small> {elegido.on}</p>}
-              {elegido.kun && <p lang={lengua.value.id}><small>kun</small> {elegido.kun}</p>}
+              {elegido.on && rotulos.on && <p lang={lengua.value.id}><small>{rotulos.on}</small> {elegido.on}</p>}
+              {elegido.kun && rotulos.kun && <p lang={lengua.value.id}><small>{rotulos.kun}</small> {elegido.kun}</p>}
               <p class="ap-caracter-glosa" lang="en">{elegido.glosa}</p>
             </div>
             <button class="btn-icono chico" aria-label={tr('Cerrar')} onClick={() => alElegir(null)}><Icono n="cerrar" t={15} /></button>
@@ -385,10 +386,10 @@ export function ConPatron({ texto, trozos }: { texto: string; trozos: string[] }
   const partes: preact.ComponentChildren[] = [];
   let desde = 0;
   for (const t of trozos) {
-    const i = texto.indexOf(t, desde);
-    if (i < 0) break;
-    partes.push(texto.slice(desde, i), <mark key={i}>{t}</mark>);
-    desde = i + t.length;
+    const h = buscarTrozo(texto, t, desde);
+    if (!h) break;
+    partes.push(texto.slice(desde, h.desde), <mark key={h.desde}>{texto.slice(h.desde, h.hasta)}</mark>);
+    desde = h.hasta;
   }
   partes.push(texto.slice(desde));
   return <>{partes}</>;

@@ -6,6 +6,7 @@ import { ANALIZADOR, simplificar } from './analizador';
 import { audiosChino } from './audio';
 import { FUENTES, SECCIONES_OMITIDAS } from './diccionarios';
 import { detectarGramatica, puntosGramatica } from './gramatica';
+import { archivosHanzi, leerDiccionarioHanzi, leerTrazosHanzi, urlTrazos, urlTrazosAlternativa } from './hanzi';
 import { normalizarPinyin } from './pinyin';
 import { PROMPTS_CHINO } from './prompts';
 import { REGLAS_TRANSCRIPCION } from './transcripcion';
@@ -47,4 +48,13 @@ export const MOTOR_CHINO: MotorLengua = {
   // Las pistas en tradicionales y lo que transcribe Whisper, que mezcla las dos, se ven y se analizan en simplificados.
   normalizarTexto: simplificar,
   seccionesOmitidas: SECCIONES_OMITIDAS,
+  // Los trazos, de Hanzi Writer: se piden carácter a carácter y se guardan, como los de KanjiVG en japonés.
+  trazos: { url: urlTrazos, urlAlternativa: urlTrazosAlternativa, leer: leerTrazosHanzi },
+  diccionarioCaracteres: {
+    // Se calcula al instalar: la dirección de las listas del HSK es la del paquete de la extensión.
+    get archivos() {
+      return archivosHanzi();
+    },
+    leer: leerDiccionarioHanzi,
+  },
 };

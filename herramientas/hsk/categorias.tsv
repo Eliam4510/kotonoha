@@ -1,0 +1,115 @@
+# Lo que significa cada categoría de la gramática del temario del HSK (2025), en español y en inglés: cada punto la lleva
+# como explicación, salvo las estructuras fijas, que tienen la suya en estructuras.tsv. Escrito para Kotonoha.
+# 类别	细目 (sin los números ni los espacios del temario)	español	inglés
+动作的态	变化态	Cambio de estado, con 了 al final de la frase	Change of state, with sentence-final 了
+动作的态	完成态	Acción terminada, con 了 tras el verbo	Completed action, with 了 after the verb
+动作的态	持续态	Estado que dura, con 着	Continuing state, with 着
+动作的态	经历态	Experiencia pasada, con 过	Past experience, with 过
+动作的态	进行态	Acción en curso, con 在 o 正在	Action in progress, with 在 or 正在
+句子成分	主语	El sujeto	The subject
+句子成分	可能补语	Complemento de posibilidad: 得 o 不 entre el verbo y su resultado	Potential complement: 得 or 不 between the verb and its result
+句子成分	定语	Lo que modifica a un nombre	Noun modifiers
+句子成分	宾语	El objeto	The object
+句子成分	数量补语	Complemento de cantidad: cuántas veces o cuánto tiempo	Quantity complement: how many times or how long
+句子成分	状态补语	Complemento de estado, con 得: cómo se hace algo	Complement of state, with 得: how something is done
+句子成分	状语	Lo que modifica al verbo	Verb modifiers
+句子成分	程度补语	Complemento de grado: cuánto	Complement of degree: how much
+句子成分	结果补语	Complemento de resultado	Resultative complement
+句子成分	谓语	El predicado	The predicate
+句子成分	趋向补语	Complemento de dirección: 来, 去, 上, 下…	Directional complement: 来, 去, 上, 下…
+句子的类型	“把”字句	Oración con 把: lo que se hace con el objeto	把 sentence: what is done to the object
+句子的类型	“是”字句	Oración con 是	是 sentence
+句子的类型	“是……的”句	是……的: resaltar cuándo, dónde o cómo	是……的: highlighting when, where or how
+句子的类型	“有”字句	Oración con 有: tener, haber	有 sentence: to have, there is
+句子的类型	不用关联词语的复句	Oración compuesta sin conectores	Complex sentence without connectives
+句子的类型	假设复句	Oración hipotética: si…	Hypothetical sentence: if…
+句子的类型	兼语句	Pedir o hacer que alguien haga algo	Asking or making someone do something
+句子的类型	单句	Oración simple	Simple sentence
+句子的类型	双宾语句	Oración con dos objetos	Sentence with two objects
+句子的类型	双重否定句	Doble negación, para afirmar con fuerza	Double negation, for a strong affirmation
+句子的类型	反问句	Pregunta retórica	Rhetorical question
+句子的类型	因果复句	Causa y consecuencia: porque…, por eso…	Cause and effect: because…, so…
+句子的类型	多重复句	Oración compuesta de varios niveles	Multi-level complex sentence
+句子的类型	存现句	Existencia, aparición o desaparición de algo en un lugar	Something exists, appears or disappears somewhere
+句子的类型	并列复句	Oración coordinada	Coordinate sentence
+句子的类型	感叹句	Oración exclamativa	Exclamatory sentence
+句子的类型	承接复句	Sucesión: primero…, luego…	Sequence: first…, then…
+句子的类型	条件复句	Condición: solo si…, siempre que…	Condition: only if…, as long as…
+句子的类型	比较句	Comparación	Comparison
+句子的类型	疑问句	Preguntas	Questions
+句子的类型	目的复句	Finalidad: para…	Purpose: in order to…
+句子的类型	祈使句	Órdenes y peticiones	Commands and requests
+句子的类型	紧缩复句	Oración compuesta abreviada, como 一……就……	Contracted complex sentence, like 一……就……
+句子的类型	被动句	Voz pasiva	Passive sentence
+句子的类型	解说复句	Oración explicativa	Explanatory sentence
+句子的类型	让步复句	Concesión: aunque…, incluso si…	Concession: although…, even if…
+句子的类型	转折复句	Contraste: pero…	Contrast: but…
+句子的类型	连动句	Varios verbos seguidos para una sola acción	Serial verbs for a single action
+句子的类型	选择复句	Elección: o…, o…	Alternatives: either…, or…
+句子的类型	递进复句	Progresión: no solo…, sino también…	Progression: not only…, but also…
+句子的类型	重动句	El verbo repetido, con su objeto y su complemento	Repeated verb, with its object and its complement
+句子的类型	陈述句	Oración declarativa	Declarative sentence
+固定格式	固定格式	Estructura fija	Fixed pattern
+特殊表达法	数的表示法	Cómo se dicen números, cantidades y precios	Expressing numbers, amounts and prices
+特殊表达法	数的表达法	Cómo se dicen números, cantidades y precios	Expressing numbers, amounts and prices
+特殊表达法	时间表示法	Cómo se dicen fechas y horas	Expressing dates and times
+短语	其他	Frase hecha	Set phrase
+短语	其他结构类型	Otros tipos de frase: de número y clasificador, de lugar…	Other phrase types: numeral and measure word, place…
+短语	其他（话语标记）	Marcador del discurso	Discourse marker
+短语	动词性短语	Frase verbal	Verb phrase
+短语	名词性短语	Frase nominal	Noun phrase
+短语	四字格	Fórmula de cuatro sílabas	Four-syllable frame
+短语	基本结构类型	Tipos básicos de frase: coordinada, de sujeto y predicado, de verbo y objeto…	Basic phrase types: coordinate, subject and predicate, verb and object…
+短语	形容词性短语	Frase adjetiva	Adjective phrase
+短语	结构类型	Tipo de frase	Phrase type
+词类	人称代词	Pronombres personales	Personal pronouns
+词类	关联副词	Adverbios que enlazan	Linking adverbs
+词类	其他助词	Otras partículas	Other particles
+词类	判断副词	Adverbio de juicio	Adverb of judgment
+词类	动态助词	Partículas de aspecto: 了, 着, 过	Aspect particles: 了, 着, 过
+词类	动词	Verbos	Verbs
+词类	动词重叠	El verbo repetido: hacer algo un poco	Reduplicated verbs: doing something a little
+词类	动量词	Clasificadores de acciones: cuántas veces	Verbal measure words: how many times
+词类	叹词	Interjecciones	Interjections
+词类	名量词	Clasificadores de los nombres	Measure words for nouns
+词类	否定副词	Negación	Negation
+词类	复合量词	Clasificador compuesto	Compound measure word
+词类	引出凭借、依据	Preposiciones de medio o base: según, con	Prepositions of means or basis: according to, by
+词类	引出原因	Preposiciones de causa	Prepositions of cause
+词类	引出对象	Preposiciones que presentan a quién o con quién	Prepositions introducing whom or with whom
+词类	引出方向、路径	Preposiciones de dirección o camino	Prepositions of direction or path
+词类	引出施事、受事	Preposiciones del que hace y del que recibe: 把, 被	Prepositions of agent and patient: 把, 被
+词类	引出时间、处所	Preposiciones de tiempo y lugar	Prepositions of time and place
+词类	引出目的、原因	Preposiciones de finalidad o causa	Prepositions of purpose or cause
+词类	形容词重叠	El adjetivo repetido, para reforzarlo	Reduplicated adjectives, for emphasis
+词类	情态副词	Adverbios de modalidad: quizá, sin falta…	Modal adverbs: probably, must…
+词类	指示代词	Demostrativos	Demonstratives
+词类	数词	Numerales	Numerals
+词类	数量代词	Pronombre de cantidad	Quantity pronoun
+词类	方位名词	Nombres de posición: arriba, dentro, delante…	Locative nouns: above, inside, in front…
+词类	方式副词	Adverbios de modo	Adverbs of manner
+词类	时量词	Unidades de tiempo y fecha	Time units
+词类	时间副词	Adverbios de tiempo	Time adverbs
+词类	疑问代词	Interrogativos	Question words
+词类	离合词	Verbos separables: verbo y objeto	Separable verbs: verb and object
+词类	程度副词	Adverbios de grado: muy, demasiado…	Degree adverbs: very, too…
+词类	结构助词	Partículas estructurales: 的, 地, 得	Structural particles: 的, 地, 得
+词类	能愿动词	Verbos modales: poder, querer, deber	Modal verbs: can, want, should
+词类	范围副词	Adverbios de alcance: todos, solo…	Scope adverbs: all, only…
+词类	表示排除	Exclusión: excepto	Exclusion: except
+词类	语气副词	Adverbios de actitud	Mood adverbs
+词类	语气助词	Partículas finales de actitud: 吗, 呢, 吧…	Sentence-final particles: 吗, 呢, 吧…
+词类	连接分句或句子	Conjunciones entre oraciones	Conjunctions between clauses
+词类	连接分句或者句子	Conjunciones entre oraciones	Conjunctions between clauses
+词类	连接词或短语	Conjunciones entre palabras o frases	Conjunctions between words or phrases
+词类	连接词或者短语	Conjunciones entre palabras o frases	Conjunctions between words or phrases
+词类	连接词或词组	Conjunciones entre palabras o frases	Conjunctions between words or phrases
+词类	连接词语或短语	Conjunciones entre palabras o frases	Conjunctions between words or phrases
+词类	连接词或词组以及分句或句子	Conjunciones entre palabras y entre oraciones	Conjunctions between words and between clauses
+词类	量词重叠	El clasificador repetido: cada uno	Reduplicated measure words: every one
+词类	频率副词	Adverbios de frecuencia	Frequency adverbs
+语段（句群）	语段（句群）	Párrafos: cómo se enlazan las frases	Paragraphs: how sentences connect
+语素	前缀	Prefijos	Prefixes
+语素	后缀	Sufijos	Suffixes
+语素	类前缀	Casi prefijos	Quasi-prefixes
+语素	类后缀	Casi sufijos	Quasi-suffixes

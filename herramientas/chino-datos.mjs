@@ -20,7 +20,7 @@ export const FRECUENCIA = {
   sha256: '25599e00347b893e55c3058a748819b3fe19403291cd12f7c03af128e7f3fe45',
 };
 
-async function bajar(fuente, nombre) {
+export async function bajar(fuente, nombre) {
   const ruta = join(CACHE, nombre);
   let datos = existsSync(ruta) ? readFileSync(ruta) : null;
   if (!datos || huella(datos) !== fuente.sha256) {

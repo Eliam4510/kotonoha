@@ -30,6 +30,7 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | [yomi](https://jsr.io/@hdae/yomi) 0.4.2 | AivisHub の音声のための読み、アクセント、アクセント句。src/lenguas/japones/voz/yomi に LICENSE と NOTICE ごと取り込み | MIT |
 | [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | 中国語の文脈に応じたピンイン：一つの漢字の読み（长 の cháng と zhǎng）から、その文での読みを選ぶ | MIT |
 | [opencc-js](https://github.com/nk2028/opencc-js)、[OpenCC](https://github.com/BYVoid/OpenCC) の変換表（`opencc-data`）とともに | 繁体字の字幕トラックと Whisper の書き起こしを簡体字に変換。告知は `licencias/AVISO-opencc.txt` | コードは MIT、変換表は Apache-2.0 |
+| [krmanik/HSK-3.0](https://github.com/krmanik/HSK-3.0)（Mani 氏）の HSK リスト。2025 年版 HSK 大綱によるもので、[CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) のピンインと訳を付けています | HSK 画面の各級の語彙・漢字・文法（`datos/hsk`）。`herramientas/hsk.mjs` で作成し、文法の説明は本プロジェクト独自のもの | CC BY-SA 4.0（派生したリストも） |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/ffmpeg` | 手元のファイルの読み取り | MIT |
 | [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)、`@ffmpeg/core` | FFmpeg のコア、コンパイル時にコピー | GPL-2.0-or-later |
 | [piper-phonemize](https://github.com/rhasspy/piper-phonemize) と [eSpeak NG](https://github.com/espeak-ng/espeak-ng)、`@diffusionstudio/piper-wasm` | ニューラル音声の音素、コンパイル時に英語とドイツ語の辞書だけを入れてコピー | MIT と GPL-3.0-or-later |
@@ -56,6 +57,8 @@ Kotonoha のコードは [MIT ライセンス](../../LICENSE)で公開してい�
 | ピッチアクセントと漢字辞典 | Uros O. 氏の [Kanjium](https://github.com/mifunetoshiro/kanjium)：アクセント表記、音符、同訓異字、および EDICT、KANJIDIC、KRADFILE へのその他の追加・変更は同氏のフリーデータベースによるもので、それ以外は EDRDG のものです。中国語の読みは CC-CEDICT、韓国語の読みは libhangul（Choe Hwanjin、三条項 BSD）によります | CC BY-SA 4.0 |
 | 頻度 | [JPDB](https://jpdb.io)、[yomitan-dictionaries](https://github.com/Kuuuube/yomitan-dictionaries) の形式 | プロジェクトの定めるとおり |
 | 書き順 | [KanjiVG](https://kanjivg.tagaini.net)、Ulrich Apel、jsDelivr が配信する元のファイル（ない場合はプロジェクトの GitHub リポジトリから取得） | CC BY-SA 3.0 |
+| 中国語の書き順 | David Chanin 氏の [Hanzi Writer](https://github.com/chanind/hanzi-writer-data)。Shaunak Kishore 氏の [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) をもとに、Arphic フォントの字画を使っています。jsDelivr から、応答がなければ unpkg から配信 | Arphic Public License |
+| 漢字辞書（中国語） | Shaunak Kishore 氏の [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)。Unihan と CJKlib をもとにしたもので、GitHub からダウンロード | LGPL-3.0 |
 | 単語の音声 | JapanesePod101 と [Lingua Libre](https://lingualibre.org) | 各出所の条件 |
 | 画像 | [Openverse](https://openverse.org) | 各画像のライセンス |
 | 英語とドイツ語の辞書と発音、中国語の短い訳語 | [Wiktionary](https://www.wiktionary.org)。[kaikki.org](https://kaikki.org) をもとに [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) が整形し、Hugging Face から配信 | CC BY-SA 4.0 |

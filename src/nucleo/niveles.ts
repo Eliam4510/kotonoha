@@ -92,15 +92,36 @@ export function resumirNivel(nivel: string, palabras: PalabraNivel[], caracteres
 export const significadoEn = (g: GramaticaNivel, idioma: string): string => g.significado[idioma] ?? g.significado.en ?? Object.values(g.significado)[0] ?? '';
 
 /**
- * Los trozos fijos de un patrón, en orden: 〜ば〜ほど da «ば» y «ほど». Sin las notas entre paréntesis y sin los trozos
- * que no se escriben tal cual (como «疑問詞＋»). Sirve para encontrar ejemplos en las frases que se han visto.
+ * Lo que en un patrón es un hueco y no texto: letras (X是X, A比B) y el «+» que une un nombre de clase de palabra con lo
+ * demás (动词+得). Con huecos así no hay trozos fijos fiables. Un patrón que solo describe (名词作主语) sí los da, pero
+ * no salen en ninguna frase: no estorban.
+ */
+const HUECOS = /[A-Za-z+]/;
+
+/**
+ * Los trozos fijos de un patrón, en orden: 〜ば〜ほど da «ば» y «ほど», y 因为……，所以…… da «因为» y «所以». Sin las notas
+ * entre paréntesis, sin los trozos que no se escriben tal cual (como «疑問詞＋») y sin la puntuación de alrededor. Una
+ * barra separa formas que valen igual (还/也/都). Un patrón con huecos no tiene trozos: sus ejemplos los encuentran las
+ * reglas de la lengua. Sirve para encontrar ejemplos en las frases que se han visto.
  */
 export function trozosDePatron(patron: string): string[] {
+  if (HUECOS.test(patron)) return [];
   return patron
     .replace(/[（(][^）)]*[）)]/g, '')
-    .split(/[〜～]/)
-    .map((t) => t.replace(/^.*＋/, '').trim())
+    .split(/[〜～]|…+/)
+    .map((t) => t.replace(/^.*＋/, '').replace(/^[\s，,、。；;？?！!]+|[\s，,、。；;？?！!]+$/g, ''))
     .filter(Boolean);
+}
+
+/** Dónde está un trozo en una frase, a partir de `desde`: el primero que aparezca, si tiene varias formas (还/也/都). */
+export function buscarTrozo(frase: string, trozo: string, desde = 0): { desde: number; hasta: number } | null {
+  let mejor: { desde: number; hasta: number } | null = null;
+  for (const forma of trozo.split('/')) {
+    if (!forma) continue;
+    const i = frase.indexOf(forma, desde);
+    if (i >= 0 && (!mejor || i < mejor.desde)) mejor = { desde: i, hasta: i + forma.length };
+  }
+  return mejor;
 }
 
 /** Si una frase contiene los trozos de un patrón, en orden. Los patrones de un solo carácter no se buscan: saldría todo. */
@@ -108,9 +129,9 @@ export function fraseConPatron(frase: string, trozos: string[]): boolean {
   if (!trozos.length || trozos.join('').length < 2) return false;
   let desde = 0;
   for (const t of trozos) {
-    const i = frase.indexOf(t, desde);
-    if (i < 0) return false;
-    desde = i + t.length;
+    const h = buscarTrozo(frase, t, desde);
+    if (!h) return false;
+    desde = h.hasta;
   }
   return true;
 }
