@@ -554,6 +554,16 @@ section .ap-botones { margin-top: 10px; }
 /* Una mora de dos letras (じゅ, ぎょ) cabe en el ancho de una: la pequeña se junta, sin partirse en dos líneas. */
 .ap-practica-moras span.doble { letter-spacing: -0.22em; text-indent: -0.22em; }
 .ap-practica-moras span.revisar { border-radius: 4px; background: color-mix(in srgb, var(--aviso) 30%, transparent); }
+/* Los tonos: cada sílaba con la forma de su tono encima, del color de su tono; la de tono neutro, en gris y sin juzgar. */
+.ap-practica-tonos { gap: 6px 4px; }
+.ap-practica-silaba { display: inline-flex; flex-direction: column; align-items: center; min-width: 30px; padding: 0 1px 2px; border-radius: 6px; }
+.ap-practica-silaba svg { display: block; overflow: visible; }
+.ap-practica-silaba polyline { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.ap-practica-silaba circle { fill: currentColor; }
+.ap-practica-silaba.neutra { color: var(--texto-3); }
+.ap-practica-caracter { font-size: 19px; font-weight: 600; line-height: 1.35; }
+.ap-practica-pinyin { font-family: var(--letra); font-size: 11.5px; font-weight: 700; line-height: 1.2; }
+.ap-practica-silaba.revisar { background: color-mix(in srgb, var(--aviso) 26%, transparent); }
 .ap-practica-aviso { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 12px; border-radius: var(--r-3); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); font-size: 12.5px; line-height: 1.5; color: var(--texto-2); }
 .ap-practica-aviso > span { flex: 1 1 220px; }
 .ap-practica-aviso .ico { flex: none; color: var(--info); }

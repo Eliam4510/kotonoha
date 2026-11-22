@@ -36,6 +36,7 @@ import { estadoReloj } from './relojSitio';
 import { ajustandoLetra, ajustes, analisisEnCurso, anclas, letraPegada, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
 import { cambiarAjuste } from './Reproductor';
 import { LENGUAS, lenguasTraduccion, numero, tm, tr } from '../compartido/i18n';
+import { nombreColorAcento } from '../ui/palabras';
 import { estudiarLengua, lengua } from '../ui/lengua';
 import { PAQUETES } from '../lenguas';
 import { familiaDe, letrasDe } from '../ui/letra';
@@ -206,8 +207,8 @@ function PanelVisual() {
         <Fila etq={tr('Traducción de palabras')}>
           <Selector etiqueta={tr('Traducción de palabras')} valor={a.glosas} opciones={[['ninguna', tr('Ninguna')], ['desconocidas', tr('Desconocidas')], ['alPasar', tr('Al pasar el ratón')]]} alCambiar={(v) => cambiarAjuste({ glosas: v })} />
         </Fila>
-        <Fila etq={tr('Color de acento')} teclas={[tr('Alt'), '+', 'C']}>
-          <Selector etiqueta={tr('Color de acento')} valor={a.colorAcento} opciones={[['ninguno', tr('Ninguno')], ['alPasar', tr('Al pasar el ratón')], ['siempre', tr('Siempre')]]} alCambiar={(v) => cambiarAjuste({ colorAcento: v })} />
+        <Fila etq={tr(nombreColorAcento())} teclas={[tr('Alt'), '+', 'C']}>
+          <Selector etiqueta={tr(nombreColorAcento())} valor={a.colorAcento} opciones={[['ninguno', tr('Ninguno')], ['alPasar', tr('Al pasar el ratón')], ['siempre', tr('Siempre')]]} alCambiar={(v) => cambiarAjuste({ colorAcento: v })} />
         </Fila>
         <div class="leyenda">
           {lengua.value.acento?.leyenda.map((l) => <span key={l.clase} class={`ac-${l.clase}`}>{tr(l.nombre)}</span>)}

@@ -8,6 +8,7 @@ import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
 import { Anillo } from '../app/Piezas';
 import { type Ajustes, anotarUso, guardarAjustes, type ModoLectura } from '../compartido/ajustes';
 import { numero, tr } from '../compartido/i18n';
+import { nombreColorAcento } from '../ui/palabras';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import type { AnotacionLibro, ColorAnotacion, ElementoBiblioteca, Nitidez, PalabraToken } from '../compartido/tipos';
 import { resaltadoDeTramo, resaltadosEn } from '../nucleo/anotaciones';
@@ -1443,7 +1444,7 @@ export function VisorPaginas({ doc: inicial, archivo, ajustes: a }: { doc: Eleme
     traduccionBajo,
     teclaFicha,
     voz: !!vozAlta.voz,
-    lengua: { lectura: tr(lengua.value.textos.lectura), lecturaEnPagina: lengua.value.lectura.distingue, acento: !!lengua.value.acento, comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
+    lengua: { lectura: tr(lengua.value.textos.lectura), lecturaEnPagina: lengua.value.lectura.distingue, acento: !!lengua.value.acento, nombreAcento: tr(nombreColorAcento()), comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
   };
   const acciones: AccionesVisor = {
     biblioteca: () => fondo.abrirApp('biblioteca').catch(console.error),

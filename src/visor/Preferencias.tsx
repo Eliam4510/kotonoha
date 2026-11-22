@@ -70,9 +70,9 @@ export function SeccionAyudas({ e, ajuste }: { e: AyudasLectura; ajuste: (c: Aju
         <Interruptor etiqueta={tr('Estado de aprendizaje')} on={e.mostrarEstado} alCambiar={(v) => ajuste({ mostrarEstado: v })} />
       </Fila>
       {e.lengua.acento && (
-        <Fila nombre={tr('Color de acento')}>
+        <Fila nombre={e.lengua.nombreAcento ?? tr('Color de acento')}>
           <Segmentado
-            etiqueta={tr('Color de acento')}
+            etiqueta={e.lengua.nombreAcento ?? tr('Color de acento')}
             valor={e.colorAcento}
             opciones={[
               { v: 'siempre', texto: tr('Siempre') },

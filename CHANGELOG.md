@@ -2,6 +2,15 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.44.0 · 2026-11-21
+
+Los tonos del chino: verlos, saber cómo cambian al hablar y practicarlos con la voz.
+
+- **Cada sílaba, del color de su tono.** En chino, el carácter y su pinyin llevan el color de su tono en los subtítulos, el lector de páginas, el visor, la Biblioteca y la ficha, con la paleta elegida, también la de daltonismo y la de alto contraste; el tono neutro va sin color. Se cambia en **Color de los tonos**, o con Alt+C sobre el video, y quien ya estudiaba chino lo estrena encendido.
+- **Cómo suena.** La pestaña de la ficha pone sobre cada sílaba el pinyin tal como se dice en la frase: el tercer tono que pasa al segundo delante de otro (你好, níhǎo), 一 y 不, que cambian según el tono siguiente (一起, yìqǐ; 不是, búshì) pero no al contar ni en las fechas, el tono neutro y el 儿化, que pega la r a la sílaba de antes (一点儿 suena yìdiǎr). Son reglas, sin Claude.
+- **Practicar los tonos.** Con **Practicar**, en el Cuaderno, la Biblioteca y el visor, o con **Repetir con tu voz** (P sobre un subtítulo): se oye la frase, se graba y Kotonoha pone la curva de la voz sobre la forma del tono de cada sílaba, con el tono que lleva en la frase. Las que no cuadran dicen qué se oyó: «Segundo tono: sube. En tu grabación cae.». Sin modelos de voz ni descargas: el tono se mide con YIN y las sílabas se parten por la voz y la energía, al momento.
+- **Medido con voces reales.** Calibrado con 182 palabras de Lingua Libre dichas por hablantes nativos y comprobado con otras 182 de hablantes distintos, juntas de tres en tres como frases: da por buenas el 70 % de las sílabas dichas con su tono y el 19 % de las dichas con otro. Es una orientación, como la práctica del acento japonés.
+
 ## 0.43.0 · 2026-11-21
 
 El chino, cuarta lengua de estudio: lo esencial para ver videos, leer y buscar.
@@ -444,6 +453,15 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.44.0 · 2026-11-21
+
+Chinese tones: seeing them, knowing how they change in speech and practicing them with your voice.
+
+- **Each syllable in the color of its tone.** In Chinese, the character and its pinyin take the color of their tone in subtitles, the page reader, the viewer, the Library and the word card, in the chosen palette, including the color-blind and high-contrast ones; the neutral tone has no color. It is changed in **Tone colors**, or with Alt+C over the video, and if you already studied Chinese it starts switched on.
+- **How it sounds.** The word card tab puts over each syllable the pinyin as it is said in the sentence: the third tone that becomes a second before another (你好, níhǎo), 一 and 不, which change depending on the next tone (一起, yìqǐ; 不是, búshì) but not when counting or in dates, the neutral tone and 儿化, which joins the r to the syllable before (一点儿 sounds yìdiǎr). Rules, without Claude.
+- **Practice tones.** With **Practice**, in the Notebook, the Library and the viewer, or with **Repeat in your voice** (P over a subtitle): you hear the sentence, record it and Kotonoha lays your voice’s curve over the tone shape of each syllable, with the tone it has in the sentence. Those that don’t fit say what was heard: “Second tone: it rises. In your recording it falls.” No voice models or downloads: pitch is measured with YIN and syllables are split by voicing and energy, instantly.
+- **Measured with real voices.** Calibrated with 182 words from Lingua Libre said by native speakers and checked with another 182 from different speakers, joined three at a time like sentences: it accepts 70 % of syllables said with their tone and 19 % of those said with another. It is a guide, like the Japanese pitch-accent practice.
 
 ## 0.43.0 · 2026-11-21
 

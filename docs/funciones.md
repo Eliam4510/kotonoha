@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.43.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.44.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -281,6 +281,9 @@ Estado de cada función en la versión 0.43.0, con la forma en que se ha verific
 | Subtítulos en chino, con cada palabra analizada, el pinyin sobre cada carácter y los secundarios en el idioma de apoyo | Página imitada |
 | La pista simplificada antes que la tradicional, y una tradicional pasada a caracteres simplificados | Página imitada |
 | Palabras partidas con los diccionarios y la frecuencia, y el pinyin del diccionario; si hay varios, el de la frase | Medida con 200 frases frente a jieba y pypinyin: iguales el 91 % de los cortes y el 96 % de las sílabas. Lo demás es casi todo criterio (el tono neutro de CC-CEDICT, el cambio de tono que no se aplica) o error de la referencia |
+| Cada sílaba y su pinyin, del color de su tono, en los subtítulos, el lector de páginas, el visor y la ficha | Automática, en un video imitado |
+| Cómo suena: el pinyin como se dice en la frase, con el cambio de tono de 一, 不 y los terceros tonos seguidos, el tono neutro y el 儿化 | Automática, con casos como 你好, 我很好, 展览馆, 一个, 第一, 看一看, 是不是 y 一点儿 |
+| Práctica de los tonos con el micrófono, sin modelos: la voz partida en sílabas y la forma de su tono juzgada en el registro de quien habla | Medida con 364 palabras de Lingua Libre de 16 hablantes nativos, sueltas y juntas de tres en tres: calibrada con la mitad y comprobada con la otra mitad, de hablantes distintos. En frases da por buenas el 70 % de las sílabas dichas con su tono y el 19 % de las dichas con otro. Una voz sintética con los cuatro tonos sale entera en la prueba automática |
 | CC-CEDICT, traducciones breves de Wiktionary en el idioma de la interfaz y frecuencia, con las lecturas de todos igualadas | Automática, con datos reales |
 | Buscar por pinyin, con tonos o sin ellos | Automática, con datos reales |
 | Gramática del HSK 1 al 5: 35 reglas, confirmadas por Claude | Automática |
@@ -315,7 +318,8 @@ Estado de cada función en la versión 0.43.0, con la forma en que se ha verific
 | Análisis del inglés | Lo hace un modelo pequeño, que cabe en la extensión. En frases ambiguas puede equivocarse de categoría, y con ella de traducción bajo la palabra. La ficha sigue mostrando todas las definiciones |
 | Análisis del alemán | Sale de las formas de los diccionarios: sin el alemán–inglés, cada palabra es su propia forma. Entre dos palabras posibles decide la frecuencia, sin mirar la frase; Claude corrige lo que falle al revisar la línea |
 | Compuestos alemanes | Un sustantivo compuesto que no esté en los diccionarios no se descompone en sus partes |
-| Análisis del chino | Las palabras salen de los diccionarios y la frecuencia, sin un modelo: un nombre o una palabra nueva queda carácter a carácter. El pinyin lleva el tono de diccionario: el cambio de tono de 一 y 不 todavía no se enseña |
+| Análisis del chino | Las palabras salen de los diccionarios y la frecuencia, sin un modelo: un nombre o una palabra nueva queda carácter a carácter. El pinyin sobre las palabras lleva el tono de diccionario; cómo cambia al hablar se ve en Cómo suena |
+| Práctica de los tonos | Sin transcribir, las sílabas se sitúan por la voz: una sílaba de más o de menos descoloca las de después. El tercer tono es el que menos se distingue (el 62 % de los bien dichos sale bien), porque en lo más grave la voz se vuelve áspera y se pierde el tono |
 | Diccionario inglés-inglés | Es grande: descarga unos 110 MB y ocupa unos 220 MB. Instalarlo y quitarlo lleva unos minutos. Solo se propone con la interfaz en inglés |
 | Traducciones de la interfaz | Escritas con ayuda de IA, sin revisión nativa todavía. Los errores se corrigen en `idiomas/` |
 | Lector de páginas | Solo actúa en el marco principal: no llega al texto dentro de un iframe. Lo que una página dibuje en un lienzo o en una imagen no es texto |

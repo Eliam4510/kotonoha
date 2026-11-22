@@ -142,7 +142,7 @@
 .etq-doble small { font-size: 12px; font-weight: 500; color: var(--texto-3); }
 .leyenda { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 8px 14px; border-top: 1px solid var(--borde); font-size: 12.5px; color: var(--texto-2); }
 .leyenda i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; }
-.leyenda .ac-heiban, .leyenda .ac-atamadaka, .leyenda .ac-nakadaka, .leyenda .ac-odaka { font-weight: 700; }
+.leyenda > span[class^='ac-'] { font-weight: 700; }
 .teclas { display: inline-flex; align-items: center; gap: 3px; flex-wrap: wrap; }
 .teclas .sep { color: var(--texto-3); font-size: 11.5px; }
 .selector.ancho { width: 100%; }

@@ -3,13 +3,13 @@
 
 import type { Ajustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
-import { lengua } from '../ui/lengua';
+import { hayPractica } from '../ui/lengua';
 import { Cabecera, Vacio } from './Piezas';
 import { Practica } from './Practica';
 
 export function PracticarFrase({ frase, ajustes }: { frase: string; ajustes: Ajustes }) {
   const texto = frase.replace(/\s*\n\s*/g, ' ').trim();
-  if (!texto || !lengua.value.acento?.practica) {
+  if (!texto || !hayPractica()) {
     return (
       <div class="ap-lienzo">
         <Vacio icono="microfono" titulo={tr('Nada que practicar')}>

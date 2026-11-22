@@ -194,6 +194,14 @@ const FAMILIAS: Familia[] = [
         hay: (l) => !!l.acento?.practica,
       },
       {
+        id: 'tonos',
+        icono: 'voz',
+        nombre: nombre(tm('Tonos')),
+        que: () => tr('Lee una frase en voz alta y compara la curva de cada sílaba con la forma de su tono. Sin modelos de voz: se mide al momento.'),
+        probar: { texto: PROBAR, ir: () => navegar(`practicar?t=${encodeURIComponent(primeraFrase())}`) },
+        hay: (l) => !!l.acento?.tonos,
+      },
+      {
         id: 'como-suena',
         icono: 'oido',
         nombre: nombre(tm('Cómo suena')),

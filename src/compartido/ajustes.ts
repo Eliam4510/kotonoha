@@ -475,7 +475,7 @@ export interface Prellenado {
 const VELO_NO: Velo = { modo: 'no', revelarEnPausa: [], revelarPorEstado: [], revelarAlPasar: true };
 
 export const AJUSTES_INICIALES: Ajustes = {
-  migracion: 2,
+  migracion: 3,
   creditoMensual: 0,
   limiteGasto: 0,
   bienvenidaVista: false,
@@ -709,6 +709,13 @@ export function completarAjustes(guardados: Partial<Ajustes> | undefined): Ajust
     if (salida.esfuerzos.letra === 'medium') salida.esfuerzos = { ...salida.esfuerzos, letra: 'high' };
     // Turbo era el valor inicial: ahora lo es elegir según el video. Quien eligió otro modelo lo conserva.
     if (salida.whisperModelo === 'turbo') salida.whisperModelo = 'auto';
+  }
+  // En la 0.43.0 el chino aún no coloreaba sus tonos y empezaba con el color apagado: quien ya lo estudiaba los estrena.
+  if (guardados && (guardados.migracion ?? 0) < 3) {
+    salida.migracion = 3;
+    if (salida.idiomaObjetivo === 'zh' && salida.colorAcento === 'ninguno') salida.colorAcento = 'siempre';
+    const zh = salida.porLengua?.zh;
+    if (zh?.colorAcento === 'ninguno') salida.porLengua = { ...salida.porLengua, zh: { ...zh, colorAcento: 'siempre' } };
   }
   return salida;
 }

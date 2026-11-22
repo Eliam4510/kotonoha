@@ -8,6 +8,7 @@ import { TextoInteractivo } from '../app/Lectura';
 import { Creador } from '../app/Creador';
 import { type Ajustes, guardarAjustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
+import { nombreColorAcento } from '../ui/palabras';
 import { fondo, motor } from '../compartido/rpc';
 import { pasarAlCuaderno } from '../compartido/textoLector';
 import type { ElementoBiblioteca } from '../compartido/tipos';
@@ -69,7 +70,7 @@ export function VisorLectura({ doc, ajustes: a }: { doc: ElementoBiblioteca; aju
     mostrarEstado: a.mostrarEstado,
     colorAcento: a.colorAcento,
     letra: a.diccionarioLetra,
-    lengua: { lectura: tr(lengua.value.textos.lectura), lecturaEnPagina: lengua.value.lectura.distingue, acento: !!lengua.value.acento, comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
+    lengua: { lectura: tr(lengua.value.textos.lectura), lecturaEnPagina: lengua.value.lectura.distingue, acento: !!lengua.value.acento, nombreAcento: tr(nombreColorAcento()), comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
   };
   const acciones: AccionesLectura = {
     biblioteca: () => fondo.abrirApp('biblioteca').catch(console.error),

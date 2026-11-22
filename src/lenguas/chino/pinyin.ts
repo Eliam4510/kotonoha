@@ -158,6 +158,20 @@ function conMarca(silaba: string, tono: number): string {
   return letras.join('');
 }
 
+/** La sílaba con otro tono: yī con el 2 da yí, y con el 5, el neutro, yi sin marca. */
+export function conTono(silaba: string, tono: number): string {
+  return conMarca([...silaba.normalize('NFC')].map((c) => TONOS[c]?.[0] ?? c).join(''), tono);
+}
+
+/**
+ * El tono de un trozo de lectura que es una sola sílaba con tono, para colorearlo: «nǐ» da 3. El neutro, la «r» del 儿
+ * y una lectura de varias sílabas (la de una palabra que no se pudo repartir) no llevan color.
+ */
+export function tonoDeSilaba(lectura: string): number | null {
+  const t = tonoDe(lectura);
+  return t < 5 && SILABAS.has(sinTonos(lectura)) ? t : null;
+}
+
 /** «ni3hao3» o «ni3 hao3» con marcas: nǐhǎo. El 5 y el 0 son el neutro. Lo que no lleve números queda igual. */
 export function numerosAMarcas(texto: string): string {
   return texto.normalize('NFC').replace(/(u:|v)/gi, (m) => (m[0] === m[0].toUpperCase() ? 'Ü' : 'ü')).replace(/([a-zA-ZüÜê]+)([0-5])/g, (_, s: string, t: string) => conMarca(s, Number(t)));

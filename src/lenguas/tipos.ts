@@ -10,6 +10,7 @@ import type { EntradaDiccionario, FichaCaracter, FuenteBiblioteca, PalabraToken,
 import type { TipoMoraEspecial } from '../nucleo/alineacion';
 import type { FormasAnki } from '../nucleo/gramaticaAnki';
 import type { FraseAcentual } from '../nucleo/practicaAcento';
+import type { SilabaTonal } from '../nucleo/practicaTonos';
 import type { EntradaSbv2 } from '../nucleo/sbv2';
 import type { ReglasTranscripcion } from '../nucleo/transcripcion';
 import type { CaracterImportado, FrecuenciaImportada, PronunciacionImportada } from '../nucleo/yomitan';
@@ -166,11 +167,23 @@ export interface LecturaLengua {
 /** El acento de las palabras, si la lengua lo marca. */
 export interface AcentoLengua {
   /** El nombre del patrón: colorea la palabra con la clase `ac-<patrón>`. Sin patrón, no se colorea. */
-  patron(posicion: number, lectura: string): string | undefined;
+  patron?(posicion: number, lectura: string): string | undefined;
+  /**
+   * El patrón de un trozo de la lectura, si el color va sílaba a sílaba y no por palabras: en chino, el tono de cada
+   * carácter, que ya dice su pinyin. Colorea el trozo con la clase `ac-<patrón>`, sin diccionario de acento.
+   */
+  silaba?(lectura: string): string | undefined;
+  /** Cómo se llama el ajuste de su color, si no es «Color de acento»: en chino, «Color de los tonos». */
+  nombreColor?: string;
   /** Las moras de una palabra, si el acento se dibuja como una curva sobre ellas. */
   moras?(lectura: string): string[];
   /** Qué significa cada color. */
   leyenda: { clase: string; nombre: string }[];
+  /**
+   * La práctica de los tonos con el micrófono, en una lengua tonal: las sílabas de una frase analizada, con el tono con que
+   * se dicen. Ocupa el lugar de la del acento; sin ninguna de las dos, no se ofrece.
+   */
+  tonos?: { silabas(palabras: PalabraToken[]): SilabaTonal[] };
   /** La práctica del acento con el micrófono: las frases acentuales de una frase analizada. Sin esto, no se ofrece. */
   practica?: {
     frases(palabras: PalabraToken[]): FraseAcentual[];
@@ -453,7 +466,14 @@ export interface PaqueteLengua {
    * Cómo suena de verdad una frase al hablar seguido: reducciones, formas débiles, uniones… Se enseña en la ficha, en su
    * propia pestaña, con la forma hablada encima de lo escrito.
    */
-  comoSuena?: { analizar(frase: string): TrozoHablado[]; fenomenos: Record<string, { nombre: string; explicacion: string }> };
+  comoSuena?: {
+    /** Con `conPalabras`, recibe también la frase analizada: en chino, los tonos salen del pinyin de cada carácter. */
+    analizar(frase: string, palabras?: PalabraToken[]): TrozoHablado[];
+    conPalabras?: boolean;
+    fenomenos: Record<string, { nombre: string; explicacion: string }>;
+    /** Lo que se dice si en la frase no cambia nada, si no vale lo de siempre (que habla de reducciones y uniones). */
+    sinFenomenos?: string;
+  };
   /** Categorías para explorar el diccionario, por las etiquetas de sus entradas: en JMdict, «on-mim» son las onomatopeyas. */
   categoriasDiccionario?: CategoriaDiccionario[];
   /** La página de un carácter suelto, al buscarlo. Sin ella, buscar un carácter es buscar una palabra. */

@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.43.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.44.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -281,6 +281,9 @@ Stand jeder Funktion in Version 0.43.0 und die Art ihrer Überprüfung.
 | Chinesische Untertitel, mit jedem Wort analysiert, Pinyin über jedem Zeichen und den zweiten Untertiteln in der Hilfssprache | Nachgebaute Seite |
 | Die vereinfachte Spur vor der traditionellen, und eine traditionelle in vereinfachte Schriftzeichen umgewandelt | Nachgebaute Seite |
 | Wörter mit den Wörterbüchern und der Häufigkeit zerlegt, und das Pinyin des Wörterbuchs; bei mehreren das des Satzes | Gemessen mit 200 Sätzen gegen jieba und pypinyin: 91 % der Trennungen und 96 % der Silben gleich. Der Rest ist fast nur Konvention (der neutrale Ton von CC-CEDICT, der nicht angewandte Tonwechsel) oder ein Fehler der Referenz |
+| Jede Silbe und ihr Pinyin in der Farbe ihres Tons, in Untertiteln, im Seitenleser, im Viewer und in der Wortkarte | Automatisch, mit einem nachgebildeten Video |
+| Wie es klingt: das Pinyin, wie es im Satz gesprochen wird, mit dem Tonwechsel von 一, 不 und aufeinanderfolgenden dritten Tönen, dem neutralen Ton und 儿化 | Automatisch, mit Fällen wie 你好, 我很好, 展览馆, 一个, 第一, 看一看, 是不是 und 一点儿 |
+| Tonübung mit dem Mikrofon, ohne Modelle: die Stimme in Silben geteilt und die Form jedes Tons im Stimmumfang des Sprechers beurteilt | Gemessen mit 364 Wörtern von Lingua Libre von 16 Muttersprachlern, einzeln und zu dritt verbunden: mit der Hälfte kalibriert und mit der anderen Hälfte von anderen Sprechern geprüft. In Sätzen werden 70 % der mit ihrem Ton gesprochenen Silben angenommen und 19 % der mit einem anderen gesprochenen. Eine synthetische Stimme mit den vier Tönen besteht den automatischen Test vollständig |
 | CC-CEDICT, kurze Übersetzungen von Wiktionary in der Sprache der Oberfläche und Häufigkeit, mit vereinheitlichten Lesungen | Automatisch, mit echten Daten |
 | Suche nach Pinyin, mit oder ohne Töne | Automatisch, mit echten Daten |
 | Grammatik von HSK 1 bis 5: 35 Regeln, von Claude bestätigt | Automatisch |
@@ -315,7 +318,8 @@ Stand jeder Funktion in Version 0.43.0 und die Art ihrer Überprüfung.
 | Analyse des Englischen | Sie erfolgt mit einem kleinen Modell, das in die Erweiterung passt. In mehrdeutigen Sätzen kann es die Wortart falsch bestimmen und damit auch die Übersetzung unter dem Wort. Das Wortfenster zeigt weiterhin alle Definitionen |
 | Analyse des Deutschen | Sie stammt aus den Formen der Wörterbücher: Ohne Deutsch–Englisch ist jedes Wort seine eigene Form. Zwischen zwei möglichen Wörtern entscheidet die Häufigkeit, ohne auf den Satz zu achten; Claude korrigiert Fehler, wenn es die Zeile prüft |
 | Deutsche Komposita | Ein zusammengesetztes Nomen, das nicht in den Wörterbüchern steht, wird nicht in seine Teile zerlegt |
-| Analyse des Chinesischen | Die Wörter stammen aus den Wörterbüchern und der Häufigkeit, ohne Modell: Ein Name oder ein neues Wort bleibt Zeichen für Zeichen. Das Pinyin trägt den Ton des Wörterbuchs: Der Tonwechsel von 一 und 不 wird noch nicht gezeigt |
+| Analyse des Chinesischen | Die Wörter stammen aus den Wörterbüchern und der Häufigkeit, ohne Modell: Ein Name oder ein neues Wort bleibt Zeichen für Zeichen. Das Pinyin über den Wörtern trägt den Ton des Wörterbuchs; wie er sich beim Sprechen ändert, zeigt Wie es klingt |
+| Tonübung | Ohne Transkription werden die Silben über die Stimme verortet: eine Silbe zu viel oder zu wenig verschiebt die folgenden. Der dritte Ton ist am schwersten zu unterscheiden (62 % der richtig gesprochenen werden angenommen), weil die Stimme ganz unten knarrt und die Tonhöhe verloren geht |
 | Englisch-Englisch-Wörterbuch | Es ist groß: etwa 110 MB Download und etwa 220 MB Speicherplatz. Installieren und Entfernen dauern einige Minuten. Es wird nur bei englischer Oberfläche vorgeschlagen |
 | Übersetzungen der Oberfläche | Mit KI-Unterstützung geschrieben, noch ohne Prüfung durch Muttersprachler. Fehler werden in `idiomas/` korrigiert |
 | Seiten-Reader | Wirkt nur im Hauptframe: Text in einem iframe erreicht er nicht. Was eine Seite auf eine Leinwand oder in ein Bild zeichnet, ist kein Text |

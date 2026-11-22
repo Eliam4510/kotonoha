@@ -21,7 +21,7 @@ import { enviarAlCreador } from '../ui/borrador';
 import { Desglose, Ficha, PanelFlujo } from '../ui/Ficha';
 import { Icono, type NombreIcono } from '../ui/iconos';
 import { lecturaDeTarjeta, lengua } from '../ui/lengua';
-import { clasesPalabras } from '../ui/palabras';
+import { claseSilaba, clasesPalabras } from '../ui/palabras';
 import { sinCortes } from '../ui/sinCorte';
 import { decirConNavegador } from '../ui/vozNavegador';
 import { COLORES, EditorNota, resaltarEn } from './Anotaciones';
@@ -352,9 +352,9 @@ export function Ventana(p: PropsVentana) {
           const clases = ['pal', `est-${w.estado}`, w.rastreada ? 'rastreada' : '', w.patron && ajustes.colorAcento !== 'ninguno' ? `ac-${w.patron}` : '', elegida === k ? 'ap-elegida' : ''].join(' ');
           const trozo = (s: { texto: string; lectura?: string }, j: number) =>
             s.lectura && ajustes.furigana !== 'ninguna' ? (
-              <ruby key={j}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
+              <ruby key={j} class={claseSilaba(s.lectura, ajustes.colorAcento)}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
             ) : (
-              <span key={j}>{s.texto}</span>
+              <span key={j} class={claseSilaba(s.lectura, ajustes.colorAcento)}>{s.texto}</span>
             );
           // Una palabra larga se puede partir entre sus trozos con lectura: así no salta entera de renglón.
           const partible = w.esPalabra && w.furigana.length > 1 && [...w.superficie].length >= PALABRA_LARGA;

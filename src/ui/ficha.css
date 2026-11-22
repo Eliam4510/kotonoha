@@ -13,7 +13,13 @@
 .ac-atamadaka { color: var(--ac-atamadaka); }
 .ac-nakadaka { color: var(--ac-nakadaka); }
 .ac-odaka { color: var(--ac-odaka); }
+/* Los tonos del chino, sílaba a sílaba, con los colores del acento de la paleta; el neutro va sin color. */
+.ac-tono1 { color: var(--ac-atamadaka); }
+.ac-tono2 { color: var(--ac-odaka); }
+.ac-tono3 { color: var(--ac-heiban); }
+.ac-tono4 { color: var(--ac-nakadaka); }
 .color-alpasar .pal:not(:hover) { color: inherit; }
+.color-alpasar .pal:not(:hover) :is(.ac-tono1, .ac-tono2, .ac-tono3, .ac-tono4) { color: inherit; }
 /* Una palabra y el signo que la cierra, o el que la abre: juntos en un renglón (sinCorte.tsx). */
 .sin-corte { white-space: nowrap; }
 ruby { ruby-position: over; ruby-align: center; }
@@ -378,6 +384,14 @@ button.chip-gram:active { transform: scale(0.96); }
 .como-suena .cs-union { --c: var(--hoja); }
 .como-suena .cs-fusion { --c: var(--est-aprendiendo); }
 .como-suena .cs-tSuave { --c: var(--ac-odaka); }
+/* En chino, cada sílaba lleva su pinyin hablado: lo que no cambia, sin fondo y en gris. */
+.como-suena-frase ruby.cs-igual { background: none; }
+.como-suena .cs-igual { --c: var(--texto-3); }
+.como-suena .cs-tercero { --c: var(--ac-heiban); }
+.como-suena .cs-yi { --c: var(--hoja); }
+.como-suena .cs-bu { --c: var(--est-aprendiendo); }
+.como-suena .cs-neutro { --c: var(--info); }
+.como-suena .cs-erhua { --c: var(--ac-nakadaka); }
 .como-suena-leyenda { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--texto-2); }
 .como-suena-leyenda b { color: var(--c, var(--texto)); font-weight: 800; }
 .como-suena > .btn { width: fit-content; }

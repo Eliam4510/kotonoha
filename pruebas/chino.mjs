@@ -1,6 +1,8 @@
 // Estudiar chino de principio a fin: elegir la lengua, instalar sus diccionarios de verdad, analizar con pinyin, buscar
 // por pinyin, ver un video (con la pista simplificada antes que la tradicional, y una tradicional pasada a simplificados),
-// leer una página y volver al japonés sin que se mezcle nada. Los diccionarios se descargan una vez y se quedan en el perfil.
+// con cada sílaba del color de su tono y «Cómo suena» en la ficha, leer una página, practicar los tonos con un micrófono
+// falso que lee una voz sintética, y volver al japonés sin que se mezcle nada. Los diccionarios se descargan una vez y
+// se quedan en el perfil.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/chino.mjs
 
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -8,6 +10,7 @@ import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { recargarExtension } from './extension.mjs';
 import { iniciarMock } from './mock-claude.mjs';
+import { wavDeTonos } from './voz-sintetica.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -67,12 +70,26 @@ const PAGINA_CHINO = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><t
 <p id="uno">经过两年的修缮，城里的老图书馆终于重新开放了。很多人第一天就来借书，有的人还带着孩子一起来。</p>
 <p>“我们没想到会来这么多人。”图书馆的工作人员说。</p></main></html>`;
 
+// La frase de la práctica de tonos y su grabación sintética: 天 (primero), 气 (cuarto), 很 (tercero, que pasa al segundo
+// delante de otro) y 好 (tercero, al final).
+const FRASE_TONOS = '天气很好。';
+const VOZ_TONOS = join(CAPTURAS, 'tonos.wav');
+wavDeTonos([1, 4, 2, '3f'], VOZ_TONOS);
+
 const mock = await iniciarMock();
 const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
   headless: true,
   viewport: { width: 1600, height: 900 },
-  args: ['--mute-audio', `--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`, '--autoplay-policy=no-user-gesture-required'],
+  args: [
+    '--mute-audio',
+    `--disable-extensions-except=${DIST}`,
+    `--load-extension=${DIST}`,
+    '--autoplay-policy=no-user-gesture-required',
+    '--use-fake-ui-for-media-stream',
+    '--use-fake-device-for-media-stream',
+    `--use-file-for-fake-audio-capture=${VOZ_TONOS}%noloop`,
+  ],
 });
 const bytesVideo = readFileSync(join(RAIZ, 'pruebas', 'fixtures', 'video.webm'));
 await contexto.route('https://media.test/**', (r) => {
@@ -229,6 +246,12 @@ console.log('\n== Un video con pistas simplificada y tradicional ==');
   comprobar(/我们今天去银行/.test(texto ?? ''), 'Elige la pista simplificada, aunque la tradicional vaya antes', texto);
   const rt = await enOverlay((r) => [...r.querySelectorAll('.linea-sub.objetivo rt')].map((x) => x.textContent));
   comprobar(rt?.includes('yín') && rt?.includes('háng'), 'Con el pinyin sobre cada carácter', rt?.join(' '));
+  const tonos = await enOverlay((r) =>
+    [...r.querySelectorAll('.linea-sub.objetivo ruby')].map((x) => ({ c: x.firstChild?.textContent, clase: x.className, color: getComputedStyle(x).color }))
+  );
+  const deTono = (c) => tonos?.find((x) => x.c === c);
+  comprobar(deTono('银')?.clase === 'ac-tono2' && deTono('我')?.clase === 'ac-tono3' && deTono('去')?.clase === 'ac-tono4' && deTono('天')?.clase === 'ac-tono1', 'Cada sílaba lleva el color de su tono', tonos?.map((x) => `${x.c}:${x.clase}`).join(' '));
+  comprobar(deTono('们')?.clase === '' && deTono('们')?.color !== deTono('银')?.color && deTono('银')?.color !== deTono('去')?.color, 'El neutro va sin color, y cada tono tiene el suyo', tonos?.map((x) => `${x.c}:${x.color}`).slice(0, 4).join(' '));
   comprobar((await enOverlay((r) => r.querySelector('.linea-sub.secundaria')?.textContent ?? '')).includes('Línea traducida'), 'Y los secundarios en el idioma de quien estudia');
   await p.screenshot({ path: join(CAPTURAS, 'video.png') });
   const sitio = await enOverlay(`(r) => {
@@ -258,6 +281,15 @@ console.log('\n== Un video con pistas simplificada y tradicional ==');
     comprobar(ficha.defs.some((d) => d === '量词：家、个'), 'Y el clasificador como se enseña, en simplificado', ficha.defs.join(' | '));
     comprobar(!ficha.pestanas.includes('Trazos'), 'Sin la pestaña de trazos, que llega con los hanzi');
     await p.screenshot({ path: join(CAPTURAS, 'ficha.png') });
+    comprobar(ficha.pestanas.includes('Cómo suena'), 'La ficha tiene «Cómo suena»', ficha.pestanas.join(' | '));
+    await enOverlay((r) => [...r.querySelectorAll('.ficha-dock .pestana')].find((x) => x.textContent.trim() === 'Cómo suena')?.click());
+    const suena = await hasta((r) => {
+      const f = r.querySelector('.como-suena-frase');
+      return f && f.querySelector('ruby') ? { rubies: [...f.querySelectorAll('ruby')].map((x) => `${x.firstChild?.textContent}:${x.querySelector('rt')?.textContent}:${x.className}`), leyenda: r.querySelector('.como-suena-leyenda')?.textContent ?? '' } : null;
+    }, undefined, 10000);
+    comprobar(suena?.rubies.join(' ').startsWith('我:wǒ:cs-igual 们:men:cs-neutro 今:jīn:cs-igual'), 'Cómo suena: el pinyin hablado sobre cada sílaba, con el neutro señalado', suena?.rubies.join(' '));
+    comprobar(/Tono neutro/.test(suena?.leyenda ?? ''), 'Y la leyenda lo explica', suena?.leyenda.slice(0, 80));
+    await p.screenshot({ path: join(CAPTURAS, 'como-suena.png') });
   }
   await p.close();
 }
@@ -303,6 +335,27 @@ const fichaWeb = conFicha
 comprobar(fichaWeb === '图书馆', 'Un clic en una palabra de la página abre su ficha', fichaWeb);
 await w.screenshot({ path: join(CAPTURAS, 'pagina.png') });
 await w.close();
+
+// ---------- La práctica de los tonos ----------
+
+console.log('\n== Practicar los tonos ==');
+await app.goto(`chrome-extension://${id}/app.html#/practicar?t=${encodeURIComponent(FRASE_TONOS)}`);
+await app.waitForSelector('.ap-practica-silaba', { timeout: 20000 }).catch(() => null);
+const esperadas = await app.$$eval('.ap-practica-silaba', (xs) => xs.map((x) => `${x.querySelector('.ap-practica-caracter')?.textContent}:${x.querySelector('.ap-practica-pinyin')?.textContent}:${x.className.split(' ')[1]}`));
+comprobar(esperadas.join(' ') === '天:tiān:ac-tono1 气:qì:ac-tono4 很:hén:ac-tono2 好:hǎo:ac-tono3', 'Las sílabas con el tono con que se dicen: 很 pasa al segundo delante de 好', esperadas.join(' '));
+comprobar((await app.locator('.ap-practica-cab h3').textContent()) === 'Practicar los tonos', 'El panel es el de los tonos');
+await app.getByRole('button', { name: 'Grabar' }).click();
+await app.waitForSelector('.ap-dictado.grabando', { timeout: 10000 }).catch(() => null);
+await app.waitForTimeout(3200);
+await app.getByRole('button', { name: 'Terminar' }).click();
+const resumen = await app.waitForSelector('.ap-practica-resumen', { timeout: 20000 }).then((e) => e.textContent()).catch(() => null);
+comprobar(resumen === '4 de 4 sílabas con la forma de su tono.', 'La voz sintética, con cada tono en su sitio, sale bien entera', resumen ?? (await app.locator('.ap-dictado.error').textContent().catch(() => '')));
+comprobar((await app.locator('.ap-practica-grafica polyline.tuya').count()) > 0 && (await app.locator('.ap-practica-grafica polyline.esperado').count()) === 4, 'Con la curva de la voz sobre la forma de cada tono');
+await app.screenshot({ path: join(CAPTURAS, 'practica-tonos.png') });
+await app.goto(`chrome-extension://${id}/app.html#/descubre`);
+await app.waitForSelector('.ap-familia', { timeout: 10000 }).catch(() => null);
+const descubre = await app.evaluate(() => [...document.querySelectorAll('.ap-funcion')].map((f) => f.getAttribute('data-funcion')));
+comprobar(descubre.includes('tonos') && descubre.includes('como-suena') && !descubre.includes('acento') && !descubre.includes('kanji'), 'Descubre Kotonoha enseña los tonos y «Cómo suena», y no el acento ni los kanji', JSON.stringify(descubre));
 
 // ---------- Vuelta al japonés ----------
 

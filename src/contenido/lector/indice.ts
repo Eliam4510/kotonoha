@@ -19,6 +19,8 @@ export interface TokenPagina {
   rango?: Range;
   /** En qué grupo de color está pintado. */
   resalte?: string;
+  /** Sus sílabas pintadas con el color de su tono, si la lengua colorea sílaba a sílaba (el chino). */
+  tonos?: { rango: Range; nombre: string }[];
 }
 
 export interface Bloque {

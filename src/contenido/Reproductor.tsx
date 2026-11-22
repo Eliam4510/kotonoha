@@ -74,7 +74,7 @@ import { Anillo, asomar, PanelesFlotantes, pestanaVideo } from './Paneles';
 import { contextoDe, crearUnClic, crearVarias, enviarACreador } from './tarjetas';
 import { numero, tm, tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
-import { clasesPalabras } from '../ui/palabras';
+import { claseSilaba, clasesPalabras } from '../ui/palabras';
 import { sinCortes } from '../ui/sinCorte';
 import { BotonesEstadoGramatica, BotonOpcionMultiple, VistoEn } from '../ui/EstadoGramatica';
 import { EjercicioDictado } from './Dictado';
@@ -191,12 +191,12 @@ export const PalabraVista = memo(function PalabraVista({ p, l, glosaDebajo }: { 
   if (p.sentido && p.uso && p.uso !== 'literal') clases.push('con-sentido');
   const segmentos = p.furigana.map((s, i) =>
     s.lectura ? (
-      <ruby key={i}>
+      <ruby key={i} class={claseSilaba(s.lectura, a.colorAcento)}>
         {s.texto}
         <rt>{lengua.value.lectura.visible(s.lectura, a.formatoLectura)}</rt>
       </ruby>
     ) : (
-      <span key={i}>{s.texto}</span>
+      <span key={i} class={claseSilaba(s.lectura, a.colorAcento)}>{s.texto}</span>
     )
   );
   return (

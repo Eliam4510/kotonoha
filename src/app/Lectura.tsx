@@ -17,8 +17,8 @@ import { guardarPreferencia, leerPreferencia } from './estadoApp';
 import { Anillo } from './Piezas';
 import { Practica } from './Practica';
 import { numero, tm, tr } from '../compartido/i18n';
-import { lecturaDeTarjeta, lengua } from '../ui/lengua';
-import { clasesPalabras, MODOS_LECTURA } from '../ui/palabras';
+import { hayPractica, lecturaDeTarjeta, lengua, nombrePractica } from '../ui/lengua';
+import { claseSilaba, clasesPalabras, MODOS_LECTURA } from '../ui/palabras';
 import { sinCortes } from '../ui/sinCorte';
 import { decirConNavegador } from '../ui/vozNavegador';
 
@@ -241,9 +241,9 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
     >
       {p.furigana.map((s, j) =>
         s.lectura && ajustes.furigana !== 'ninguna' ? (
-          <ruby key={j}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
+          <ruby key={j} class={claseSilaba(s.lectura, ajustes.colorAcento)}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby>
         ) : (
-          <span key={j}>{s.texto}</span>
+          <span key={j} class={claseSilaba(s.lectura, ajustes.colorAcento)}>{s.texto}</span>
         )
       )}
     </span>
@@ -284,8 +284,8 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
     return <span key={indice} class={indice === actual ? 'oracion-activa' : ''}>{sinCortes(salida, signos)}</span>;
   };
 
-  // Se practica una frase con palabras: la lengua tiene que saber partirla en frases acentuales.
-  const puedePracticar = !!lengua.value.acento?.practica && tokens.length > 0;
+  // Se practica una frase con palabras: la lengua tiene que saber partirla en frases acentuales, o en sílabas con su tono.
+  const puedePracticar = hayPractica() && tokens.length > 0;
   const frasePractica = Math.max(actual, 0);
   const practicar = () => {
     if (practicando && !trozoPractica) {
@@ -453,7 +453,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
             <button class="btn-icono ap-dock-velocidad num" aria-label={tr('Velocidad de la voz: {0}', `${numero(velocidad)}×`)} data-tip={tr('Velocidad de la voz')} data-tip-lado="arriba" onClick={cambiarVelocidad}>{numero(velocidad)}×</button>
             <button class={`btn-icono ${modoVoz !== 'seguido' ? 'activo' : ''}`} aria-label={`${tr(modoActual.nombre)}: ${tr(modoActual.ayuda)}`} data-tip={`${tr(modoActual.nombre)} · ${tr(modoActual.ayuda)}`} data-tip-lado="arriba" onClick={cambiarModoVoz}><Icono n={modoActual.icono} /></button>
             {puedePracticar && (
-              <button class={`btn ${practicando ? 'activo' : ''}`} aria-pressed={practicando} data-tip={tr('Lee la frase en voz alta y mira dónde cae el tono en cada palabra')} data-tip-lado="arriba" onClick={practicar}>
+              <button class={`btn ${practicando ? 'activo' : ''}`} aria-pressed={practicando} data-tip={lengua.value.acento?.tonos ? tr('Lee la frase en voz alta y mira la forma del tono de cada sílaba') : tr('Lee la frase en voz alta y mira dónde cae el tono en cada palabra')} data-tip-lado="arriba" onClick={practicar}>
                 <Icono n="ondas" t={16} /> {tr('Practicar')}
               </button>
             )}
@@ -462,7 +462,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
       </div>
 
       {practicando && puedePracticar && !abierta && (
-        <div class="ap-lectura-ficha ap-lectura-practica" role="dialog" aria-label={tr('Practicar el acento')} key={`practica-${trozoPractica ?? frasePractica}`}>
+        <div class="ap-lectura-ficha ap-lectura-practica" role="dialog" aria-label={tr(nombrePractica())} key={`practica-${trozoPractica ?? frasePractica}`}>
           <Practica
             frase={trozoPractica ?? frases[frasePractica] ?? ''}
             palabras={trozoPractica ? [] : tokens[frasePractica] ?? []}
@@ -478,7 +478,7 @@ export function TextoInteractivo({ texto, bloques: hechos, ajustes, titulo, tama
       {seleccion && (
         <div class="ap-seleccion-texto" role="toolbar" aria-label={tr('Lo seleccionado')} style={{ left: `${seleccion.x}px`, top: `${seleccion.y}px` }} onMouseDown={(e) => e.preventDefault()}>
           <button class="btn chico fantasma" onClick={() => void decirTexto(seleccion.texto)}><Icono n="altavoz" t={14} /> {tr('Escuchar')}</button>
-          {lengua.value.acento?.practica && <button class="btn chico fantasma" onClick={() => practicarTrozo(seleccion.texto)}><Icono n="ondas" t={14} /> {tr('Practicar')}</button>}
+          {hayPractica() && <button class="btn chico fantasma" onClick={() => practicarTrozo(seleccion.texto)}><Icono n="ondas" t={14} /> {tr('Practicar')}</button>}
         </div>
       )}
 

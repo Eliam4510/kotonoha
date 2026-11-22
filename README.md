@@ -166,7 +166,7 @@ En inglés, la ficha da la pronunciación americana y británica en IPA, encuent
 
 ### Chino
 
-En chino, las palabras se separan solas aunque el texto no lleve espacios, y el pinyin va sobre cada carácter, con el tono del diccionario y, si un carácter se lee de varias formas (长, cháng o zhǎng), la de la frase. El diccionario es CC-CEDICT, con las traducciones breves de Wiktionary delante cuando están en tu idioma, y se busca en caracteres o en pinyin, con tonos o sin ellos. Se estudian los caracteres simplificados: si un video solo trae subtítulos en tradicionales, se ven en simplificados. Los niveles son los del HSK 3.0.
+En chino, las palabras se separan solas aunque el texto no lleve espacios, y el pinyin va sobre cada carácter, con el tono del diccionario y, si un carácter se lee de varias formas (长, cháng o zhǎng), la de la frase. El diccionario es CC-CEDICT, con las traducciones breves de Wiktionary delante cuando están en tu idioma, y se busca en caracteres o en pinyin, con tonos o sin ellos. Se estudian los caracteres simplificados: si un video solo trae subtítulos en tradicionales, se ven en simplificados. Los niveles son los del HSK 3.0. Cada sílaba lleva el color de su tono; **Cómo suena**, en la ficha, dice cómo cambian los tonos al hablar (一, 不, dos terceros seguidos), y **Practicar** compara tu voz, sílaba a sílaba, con la forma de cada tono, sin modelos de voz.
 
 ### Y además
 

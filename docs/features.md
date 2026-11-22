@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.43.0, along with how it has been verified.
+Status of each feature in version 0.44.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -281,6 +281,9 @@ Status of each feature in version 0.43.0, along with how it has been verified.
 | Chinese subtitles, with every word analyzed, pinyin over each character and the secondary ones in the support language | Mock page |
 | The simplified track before the traditional one, and a traditional one turned into simplified characters | Mock page |
 | Words split with the dictionaries and the frequency list, and the dictionary’s pinyin; if there are several, the sentence’s | Measured with 200 sentences against jieba and pypinyin: 91 % of splits and 96 % of syllables the same. The rest is almost all convention (CC-CEDICT’s neutral tone, the tone change that is not applied) or errors in the reference |
+| Each syllable and its pinyin in the color of its tone, in subtitles, the page reader, the viewer and the word card | Automatic, on a simulated video |
+| How it sounds: the pinyin as said in the sentence, with the tone change of 一, 不 and third tones in a row, the neutral tone and 儿化 | Automatic, with cases such as 你好, 我很好, 展览馆, 一个, 第一, 看一看, 是不是 and 一点儿 |
+| Tone practice with the microphone, without models: the voice split into syllables and the shape of each tone judged in the speaker’s range | Measured with 364 Lingua Libre words from 16 native speakers, alone and joined three at a time: calibrated with half and checked with the other half, from different speakers. In sentences it accepts 70 % of syllables said with their tone and 19 % of those said with another. A synthetic voice with the four tones passes in full in the automatic test |
 | CC-CEDICT, Wiktionary’s short translations in the interface language and frequency, with all their readings unified | Automatic, with real data |
 | Search by pinyin, with or without tones | Automatic, with real data |
 | Grammar from HSK 1 to 5: 35 rules, confirmed by Claude | Automatic |
@@ -315,7 +318,8 @@ Status of each feature in version 0.43.0, along with how it has been verified.
 | English analysis | It is done by a small model that fits in the extension. In ambiguous sentences it can pick the wrong category, and with it the wrong translation under the word. The word panel still shows every definition |
 | German analysis | It comes from the dictionaries' forms: without German–English, each word is its own form. Between two possible words, frequency decides, without looking at the sentence; Claude fixes what goes wrong when it reviews the line |
 | German compounds | A compound noun that is not in the dictionaries is not split into its parts |
-| Chinese analysis | Words come from the dictionaries and the frequency list, without a model: a name or a new word stays character by character. Pinyin carries the dictionary tone: the tone change of 一 and 不 is not taught yet |
+| Chinese analysis | Words come from the dictionaries and the frequency list, without a model: a name or a new word stays character by character. The pinyin over words carries the dictionary tone; how it changes in speech is shown in How it sounds |
+| Tone practice | Without transcribing, syllables are placed by the voice: an extra or missing syllable throws off the ones after it. The third tone is the hardest to tell apart (62 % of correct ones pass), because at the very bottom the voice turns creaky and the pitch is lost |
 | English-English dictionary | It is large: about 110 MB to download and about 220 MB on disk. Installing and removing it takes a few minutes. It is only suggested with the interface in English |
 | Interface translations | Written with AI assistance, with no native review yet. Mistakes are fixed in `idiomas/` |
 | Page reader | Acts only on the main frame: it does not reach text inside an iframe. What a page draws on a canvas or in an image is not text |

@@ -29,6 +29,8 @@ export interface LenguaVisor {
   lectura: string;
   lecturaEnPagina: boolean;
   acento: boolean;
+  /** Cómo se llama el ajuste de su color, ya traducido: «Color de acento» o, en chino, «Color de los tonos». */
+  nombreAcento?: string;
   comic: boolean;
   letras: { id: LetraDiccionario; nombre: string }[];
 }
@@ -404,7 +406,7 @@ export function ordenesAyudasLectura(e: AyudasLectura, ajuste: (c: AjusteLectura
     { id: 'estado', etiqueta: tr('Estado de aprendizaje'), menu: 'ayudas', grupo: 'palabras', tipo: 'casilla', marcada: e.mostrarEstado, ayuda: tr('El color de cada palabra según la conozcas, la estés aprendiendo o sea nueva'), ejecutar: () => ajuste({ mostrarEstado: !e.mostrarEstado }) }
   );
   if (e.lengua.acento) {
-    const acento = tr('Color de acento');
+    const acento = e.lengua.nombreAcento ?? tr('Color de acento');
     o.push(
       ...([
         ['siempre', tr('Siempre')],

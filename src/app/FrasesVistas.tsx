@@ -1,7 +1,6 @@
 // Lo que comparten la página de una palabra y la de un carácter: las frases donde se ha visto, con su minuto, y las
 // referencias que el diccionario mete entre las definiciones (sus opuestos, las que hay que ver).
 
-import { Fragment } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import type { Ajustes } from '../compartido/ajustes';
 import { numero } from '../compartido/i18n';
@@ -12,7 +11,7 @@ import { momentoLegible } from '../nucleo/momento';
 import { BotonMomento, momentoDe } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { lengua } from '../ui/lengua';
-import { clasesPalabras } from '../ui/palabras';
+import { claseSilaba, clasesPalabras } from '../ui/palabras';
 import { useEsperar } from '../ui/preparacion';
 import { sinCortes } from '../ui/sinCorte';
 import { buscarPalabra } from './TarjetaPalabra';
@@ -84,7 +83,7 @@ export function FrasesVistas({ clave, titulo, cargar, resaltar, ajustes, vacio }
                   {tokens?.[i]
                     ? sinCortes(tokens[i].map((t, j) => {
                         const contenido = t.furigana?.length
-                          ? t.furigana.map((s, k) => (s.lectura && furigana ? <ruby key={k}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby> : <Fragment key={k}>{s.texto}</Fragment>))
+                          ? t.furigana.map((s, k) => (s.lectura && furigana ? <ruby key={k} class={claseSilaba(s.lectura, ajustes.colorAcento)}>{s.texto}<rt>{lengua.value.lectura.visible(s.lectura, ajustes.formatoLectura)}</rt></ruby> : <span key={k} class={claseSilaba(s.lectura, ajustes.colorAcento)}>{s.texto}</span>))
                           : t.superficie;
                         return t.esPalabra ? (
                           <span key={j} class={`pal est-${t.estado} ${resaltar(t) ? 'dic-resaltada' : ''}`} onClick={() => buscarPalabra(t.lema)}>{contenido}</span>

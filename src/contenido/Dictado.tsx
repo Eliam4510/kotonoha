@@ -7,7 +7,7 @@ import { fondo, motor } from '../compartido/rpc';
 import type { LineaAnalizada } from '../compartido/tipos';
 import { evaluarConLecturas, evaluarDictado, palabrasDe, type ParteDictado, type ResultadoDictado } from '../nucleo/ejercicioDictado';
 import { Icono } from '../ui/iconos';
-import { lengua } from '../ui/lengua';
+import { hayPractica, lengua } from '../ui/lengua';
 import { reproducir } from './controlador';
 
 /** Lo que se oye de un trozo en la lengua que distingue lecturas: su lectura en hiragana, sin signos ni espacios. */
@@ -99,7 +99,7 @@ export function EjercicioDictado({ l, alRepetir }: { l: LineaAnalizada; alRepeti
             {escrito && <span class="dictado-escrito" lang={lengua.value.id}>{tr('Escribiste: {0}', escrito)}</span>}
             <span class="dictado-hueco" />
             <button class="btn chico" onClick={alRepetir}><Icono n="repetir" t={14} /> {tr('Oír otra vez')}</button>
-            {lengua.value.acento?.practica && (
+            {hayPractica() && (
               <button class="btn chico" onClick={() => fondo.abrirApp(`practicar?t=${encodeURIComponent(l.texto)}`)}><Icono n="microfono" t={14} /> {tr('Repetir con tu voz')}</button>
             )}
             <button ref={botonSeguir} class="btn chico primario" onClick={seguir}>{tr('Seguir')} <kbd class="tecla">Enter</kbd></button>

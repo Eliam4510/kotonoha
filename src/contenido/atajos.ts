@@ -5,7 +5,7 @@ import { motor, fondo } from '../compartido/rpc';
 import { type Combinacion, leerCombinacion, teclaLatina, textoCombinacion } from '../nucleo/teclas';
 import type { EstadoPalabra, LineaAnalizada } from '../compartido/tipos';
 import { desconocidas } from '../nucleo/frases';
-import { lengua } from '../ui/lengua';
+import { hayPractica, lengua } from '../ui/lengua';
 import {
   abrirConsultaDe,
   ajustarDesfase,
@@ -304,7 +304,7 @@ export function instalarAtajos(): void {
           return hecho();
         case 'p':
           // Repetir con tu voz: la práctica del acento con este subtítulo, en la ventana de Kotonoha.
-          if (linea && lengua.value.acento?.practica) {
+          if (linea && hayPractica()) {
             fondo.abrirApp(`practicar?t=${encodeURIComponent(linea.texto)}`);
             return hecho();
           }

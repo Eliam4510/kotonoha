@@ -4,7 +4,8 @@
 import { idiomaActual, tm } from '../../compartido/i18n';
 import type { PaqueteLengua } from '../tipos';
 import { contarEscrituras, esTextoChino, paginaEnChino, pareceFrase, pegarSignos, SIGNOS_FRASE, tieneChino } from './escritura';
-import { esSoloPinyin, normalizarPinyin, pinyinVisible, repartirPinyin, sinTonos } from './pinyin';
+import { esSoloPinyin, normalizarPinyin, pinyinVisible, repartirPinyin, sinTonos, tonoDeSilaba } from './pinyin';
+import { comoSuenaChino, FENOMENOS, silabasParaPracticar } from './sandhi';
 import { TEXTOS } from './textos';
 import { TEXTO_DE_EJEMPLO } from './ejemplo';
 
@@ -30,8 +31,8 @@ export const CHINO: PaqueteLengua = {
     formatoLectura: 'marcas',
     furigana: 'desconocidas',
     lectorFurigana: 'desconocidas',
-    // Los tonos se colorean en otra versión: de momento, sin color de acento.
-    colorAcento: 'ninguno',
+    // Cada sílaba, del color de su tono: es lo que más ayuda a recordarlos.
+    colorAcento: 'siempre',
     particulasConocidas: true,
     vocesFrase: ['zh-CN-XiaoxiaoNeural', 'zh-CN-YunxiNeural'],
     prompts: {},
@@ -73,6 +74,22 @@ export const CHINO: PaqueteLengua = {
     anchoCaracter: () => 0.63,
     // Y las de cinco o seis letras (zhōng, chuáng) sobre un solo carácter necesitan estrecharse más que el kana.
     compresionMinima: 0.5,
+  },
+  // Los tonos van en el pinyin de cada carácter: no hace falta diccionario de acento. Con los colores del acento de la
+  // paleta, en el orden más extendido entre quienes estudian chino (rojo, verde, azul y morado); el neutro, sin color.
+  acento: {
+    silaba: (lectura) => {
+      const t = tonoDeSilaba(lectura);
+      return t ? `tono${t}` : undefined;
+    },
+    nombreColor: tm('Color de los tonos'),
+    tonos: { silabas: silabasParaPracticar },
+    leyenda: [
+      { clase: 'tono1', nombre: tm('Primer tono') },
+      { clase: 'tono2', nombre: tm('Segundo tono') },
+      { clase: 'tono3', nombre: tm('Tercer tono') },
+      { clase: 'tono4', nombre: tm('Cuarto tono') },
+    ],
   },
   nombreFlexion: () => undefined,
   letras: {
@@ -135,5 +152,11 @@ export const CHINO: PaqueteLengua = {
   textoDeEjemplo: TEXTO_DE_EJEMPLO,
   saludo,
   textos: TEXTOS,
+  comoSuena: {
+    analizar: comoSuenaChino,
+    conPalabras: true,
+    fenomenos: FENOMENOS,
+    sinFenomenos: tm('Aquí ningún tono cambia al hablar: cada sílaba se dice con el suyo.'),
+  },
   ideasRelato: [tm('Un gato que pasea por Pekín'), tm('Una tarde de lluvia en el tren'), tm('La fiesta de primavera del pueblo')],
 };

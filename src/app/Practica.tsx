@@ -31,6 +31,7 @@ import { decirConNavegador } from '../ui/vozNavegador';
 import { navegar } from './estadoApp';
 import { abrirPermisosMicrofono, empezarGrabacion, errorDeMicrofono, type Grabadora, type GrabacionHecha } from './grabadora';
 import { Interruptor } from './Piezas';
+import { PracticaTonos } from './PracticaTonos';
 
 /** Una frase se lee en unos segundos: la grabación se termina sola a los veinte. */
 const MAXIMO_MS = 20_000;
@@ -311,8 +312,12 @@ function GraficaTono({ r, frases }: { r: Resultado; frases: FraseAcentual[] }) {
   );
 }
 
-/** El panel de práctica de una frase, al lado del texto. */
-export function Practica({ frase, palabras, ajustes, alCerrar }: { frase: string; palabras: PalabraToken[]; ajustes: Ajustes; alCerrar: () => void }) {
+/** El panel de práctica de una frase, al lado del texto: la del acento o, en una lengua tonal, la de los tonos. */
+export function Practica(props: { frase: string; palabras: PalabraToken[]; ajustes: Ajustes; alCerrar: () => void }) {
+  return lengua.value.acento?.tonos ? <PracticaTonos {...props} /> : <PracticaAcento {...props} />;
+}
+
+function PracticaAcento({ frase, palabras, ajustes, alCerrar }: { frase: string; palabras: PalabraToken[]; ajustes: Ajustes; alCerrar: () => void }) {
   // El texto viene partido para leer: 雨が降る es una expresión que se consulta entera. Para el acento, cada palabra lleva el
   // suyo, así que la frase se vuelve a partir sin las expresiones con partícula.
   const [sueltas, fijarSueltas] = useState<PalabraToken[] | null>(null);

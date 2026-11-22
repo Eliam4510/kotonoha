@@ -5,7 +5,7 @@ import { Fragment } from 'preact';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { type Ajustes, guardarAjustes, hayVozSintetica, nombreVozIntegrada, type PestanaDiccionario, vozIntegradaActiva, vozLocalActiva, vozNeuronalActiva } from '../compartido/ajustes';
 import { type FlujoCancelable, flujoMotor, fondo, motor } from '../compartido/rpc';
-import type { ContextoIA, EstadoPalabra, FraseEjemplo, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
+import type { ContextoIA, EstadoPalabra, FraseEjemplo, PalabraToken, ResultadoAudio, ResultadoBusqueda, ResultadoImagen, SentidoEnContexto } from '../compartido/tipos';
 import { NOMBRES_USO } from '../nucleo/analisisProfundo';
 import { claveDeVideo, momentoLegible } from '../nucleo/momento';
 import type { PuntoGramatica } from '../lenguas/tipos';
@@ -13,7 +13,8 @@ import { enviarAlCreador } from './borrador';
 import { useEsperar } from './preparacion';
 import { type Compartida, compartir, PanelCompartir } from './Compartir';
 import { Icono, type NombreIcono } from './iconos';
-import { formatoLectura, lengua } from './lengua';
+import { colorAcento, formatoLectura, lengua } from './lengua';
+import { claseSilaba } from './palabras';
 import { bcp47Actual, numero, tm, tr } from '../compartido/i18n';
 import { PanelTrazos } from './Trazos';
 import { type DatosTarjeta, type EstiloTarjeta, primerPunto, resolverLetra } from './tarjeta';
@@ -96,7 +97,7 @@ export function ConFurigana({ texto, lectura, partible }: { texto: string; lectu
         s.lectura ? (
           <Fragment key={i}>
             {partible && i > 0 && !seg[i - 1].lectura && <wbr />}
-            <ruby>
+            <ruby class={claseSilaba(s.lectura, colorAcento.value)}>
               {s.texto}
               <rt>{lengua.value.lectura.visible(s.lectura, formatoLectura.value)}</rt>
             </ruby>
@@ -1298,15 +1299,30 @@ export function Ficha(p: PropsFicha) {
  */
 function PanelComoSuena({ frase }: { frase: string }) {
   const paquete = lengua.value.comoSuena;
-  const trozos = useMemo(() => paquete?.analizar(frase) ?? [], [frase, paquete]);
+  // En chino, lo que suena sale del pinyin de cada carácter: hace falta la frase analizada.
+  const [palabras, fijarPalabras] = useState<PalabraToken[] | null>(null);
+  useEffect(() => {
+    if (!paquete?.conPalabras) return;
+    let vigente = true;
+    fijarPalabras(null);
+    motor
+      .analizarTexto(frase)
+      .then((l) => vigente && fijarPalabras(l.flat()))
+      .catch(() => vigente && fijarPalabras([]));
+    return () => {
+      vigente = false;
+    };
+  }, [frase, paquete]);
+  const trozos = useMemo(() => (!paquete || (paquete.conPalabras && !palabras) ? null : paquete.analizar(frase, palabras ?? undefined)), [frase, paquete, palabras]);
   if (!paquete) return null;
+  if (!trozos) return <span class="giro" aria-label={tr('Cargando…')} />;
   const presentes = [...new Set(trozos.map((t) => t.fenomeno).filter((f): f is string => !!f))];
   return (
     <div class="como-suena">
       <p class="como-suena-frase" lang={lengua.value.id}>
         {trozos.map((t, i) =>
           t.suena ? (
-            <ruby key={i} class={`cs-${t.fenomeno}`}>
+            <ruby key={i} class={t.fenomeno ? `cs-${t.fenomeno}` : 'cs-igual'}>
               {t.texto}
               <rt>{t.suena}</rt>
             </ruby>
@@ -1322,7 +1338,7 @@ function PanelComoSuena({ frase }: { frase: string }) {
           ))}
         </ul>
       ) : (
-        <p class="ayuda">{tr('Esta frase se dice como se escribe: no hay reducciones ni uniones que marcar.')}</p>
+        <p class="ayuda">{paquete.sinFenomenos ? tr(paquete.sinFenomenos) : tr('Esta frase se dice como se escribe: no hay reducciones ni uniones que marcar.')}</p>
       )}
       <button class="btn chico" onClick={() => decirConNavegador(frase).catch(() => {})}><Icono n="altavoz" t={14} /> {tr('Escuchar la frase')}</button>
     </div>

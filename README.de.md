@@ -162,7 +162,7 @@ Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache i
 
 ### Auch Chinesisch
 
-Auf Chinesisch werden die Wörter von selbst getrennt, auch ohne Leerzeichen im Text, und das Pinyin steht über jedem Zeichen, mit dem Ton des Wörterbuchs und, wenn ein Zeichen mehrere Lesungen hat (长, cháng oder zhǎng), der des Satzes. Das Wörterbuch ist CC-CEDICT, davor die kurzen Übersetzungen von Wiktionary, wenn es sie in deiner Sprache gibt, und gesucht wird in Schriftzeichen oder in Pinyin, mit oder ohne Töne. Gelernt werden vereinfachte Schriftzeichen: Hat ein Video nur Untertitel in traditionellen, erscheinen sie in vereinfachten. Die Niveaus sind die des HSK 3.0.
+Auf Chinesisch werden die Wörter von selbst getrennt, auch ohne Leerzeichen im Text, und das Pinyin steht über jedem Zeichen, mit dem Ton des Wörterbuchs und, wenn ein Zeichen mehrere Lesungen hat (长, cháng oder zhǎng), der des Satzes. Das Wörterbuch ist CC-CEDICT, davor die kurzen Übersetzungen von Wiktionary, wenn es sie in deiner Sprache gibt, und gesucht wird in Schriftzeichen oder in Pinyin, mit oder ohne Töne. Gelernt werden vereinfachte Schriftzeichen: Hat ein Video nur Untertitel in traditionellen, erscheinen sie in vereinfachten. Die Niveaus sind die des HSK 3.0. Jede Silbe trägt die Farbe ihres Tons; **Wie es klingt** in der Wortkarte zeigt, wie sich die Töne beim Sprechen ändern (一, 不, zwei dritte Töne hintereinander), und **Üben** vergleicht deine Stimme Silbe für Silbe mit der Form jedes Tons, ohne Sprachmodelle.
 
 ### Außerdem
 

@@ -91,13 +91,28 @@ describe('el modelo de transcripción en los ajustes guardados', () => {
   });
 });
 
+describe('los tonos del chino estrenan su color', () => {
+  it('quien estudiaba chino con la 0.43.0, sin color, lo estrena; también si lo tiene guardado para cuando vuelva', () => {
+    const actual = completarAjustes({ migracion: 2, idiomaObjetivo: 'zh', colorAcento: 'ninguno' } as never);
+    expect(actual.colorAcento).toBe('siempre');
+    const guardado = completarAjustes({ migracion: 2, idiomaObjetivo: 'ja', colorAcento: 'ninguno', porLengua: { zh: { nivel: 'HSK 2', colorAcento: 'ninguno' } } } as never);
+    expect(guardado.colorAcento).toBe('ninguno');
+    expect(guardado.porLengua.zh).toEqual({ nivel: 'HSK 2', colorAcento: 'siempre' });
+    expect(guardado.migracion).toBe(3);
+  });
+
+  it('lo que se apague después se respeta', () => {
+    expect(completarAjustes({ migracion: 3, idiomaObjetivo: 'zh', colorAcento: 'ninguno' } as never).colorAcento).toBe('ninguno');
+  });
+});
+
 describe('la ficha abre con el diccionario', () => {
   it('quien tenía los valores de antes deja de gastar al abrir una palabra', () => {
     const a = completarAjustes({ diccionarioPestana: 'explicar', sentidoAutomatico: true, usarGuion: true } as never);
     expect(a.diccionarioPestana).toBe('ninguna');
     expect(a.sentidoAutomatico).toBe(false);
     expect(a.usarGuion).toBe(false);
-    expect(a.migracion).toBe(2);
+    expect(a.migracion).toBe(3);
   });
 
   it('otra pestaña elegida a propósito se respeta', () => {

@@ -10,6 +10,7 @@ import { guardarPreferencia, leerPreferencia } from '../app/estadoApp';
 import { Interruptor } from '../app/Piezas';
 import { type Ajustes, guardarAjustes } from '../compartido/ajustes';
 import { tr } from '../compartido/i18n';
+import { nombreColorAcento } from '../ui/palabras';
 import { marcarActividad } from '../compartido/relojInmersion';
 import { fondo, motor } from '../compartido/rpc';
 import type { ElementoBiblioteca } from '../compartido/tipos';
@@ -181,7 +182,7 @@ export function VisorTexto({ doc, archivo, ajustes: a }: { doc: ElementoBibliote
     mostrarEstado: a.mostrarEstado,
     colorAcento: a.colorAcento,
     letra: a.diccionarioLetra,
-    lengua: { lectura: tr(lengua.value.textos.lectura), lecturaEnPagina: lengua.value.lectura.distingue, acento: !!lengua.value.acento, comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
+    lengua: { lectura: tr(lengua.value.textos.lectura), lecturaEnPagina: lengua.value.lectura.distingue, acento: !!lengua.value.acento, nombreAcento: tr(nombreColorAcento()), comic: lengua.value.escritura.globos === 'lector', letras: letrasDe(lengua.value) },
   };
   const acciones: AccionesTexto = {
     biblioteca: () => fondo.abrirApp('biblioteca').catch(console.error),

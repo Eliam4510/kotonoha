@@ -228,6 +228,9 @@ export class Pintor {
         if (decl.trim()) reglas.push(`::highlight(${nombre}) { ${decl} }`);
       }
     }
+    // Los tonos de cada sílaba, por encima del color de la palabra: el subrayado de su estado se sigue viendo.
+    const TONOS: [string, string][] = [['1', p.atamadaka], ['2', p.odaka], ['3', p.heiban], ['4', p.nakadaka]];
+    for (const [t, c] of TONOS) reglas.push(`::highlight(kk-tono${t}) { color: ${c}; }`);
     reglas.push(`::highlight(kk-pasar) { background-color: ${this.oscuro ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.08)'}; }`);
     reglas.push(`::highlight(kk-activa) { background-color: ${this.oscuro ? 'rgba(188,169,255,.34)' : 'rgba(110,82,217,.2)'}; }`);
     this.hojaPagina.replaceSync(reglas.join('\n'));
@@ -257,6 +260,7 @@ export class Pintor {
   }
 
   private pintarColor(b: Bloque, tk: TokenPagina) {
+    this.pintarTonos(b, tk);
     const nombre = this.nombreDe(tk);
     if (!nombre) return;
     tk.rango ??= rangoDe(b, tk.inicio, tk.fin) ?? undefined;
@@ -265,7 +269,27 @@ export class Pintor {
     tk.resalte = nombre;
   }
 
+  /** En chino, cada sílaba del color de su tono: un resalte por carácter, con más prioridad que el de la palabra. */
+  private pintarTonos(b: Bloque, tk: TokenPagina) {
+    const silaba = lengua.value.acento?.silaba;
+    if (!silaba || !tk.p.esPalabra || !this.a.lectorColor || this.a.colorAcento !== 'siempre') return;
+    let desde = tk.inicio;
+    for (const s of tk.p.furigana) {
+      const hasta = desde + s.texto.length;
+      const patron = s.lectura ? silaba(s.lectura) : undefined;
+      const rango = patron ? rangoDe(b, desde, hasta) : null;
+      if (patron && rango) {
+        const nombre = `kk-${patron}`;
+        this.resalte(nombre, 1)?.add(rango);
+        (tk.tonos ??= []).push({ rango, nombre });
+      }
+      desde = hasta;
+    }
+  }
+
   private quitarColor(tk: TokenPagina) {
+    for (const t of tk.tonos ?? []) this.resaltes.get(t.nombre)?.delete(t.rango);
+    tk.tonos = undefined;
     if (!tk.rango || !tk.resalte) return;
     this.resaltes.get(tk.resalte)?.delete(tk.rango);
     tk.resalte = undefined;
