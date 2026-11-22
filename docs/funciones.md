@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.44.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.45.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|

@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.44.0, along with how it has been verified.
+Status of each feature in version 0.45.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
