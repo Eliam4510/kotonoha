@@ -116,7 +116,9 @@ El **Cuaderno** es una página a todo lo ancho para escribir y pegar texto en la
 
 ### El acento, en voz alta
 
-<img src="docs/img/practica.png" alt="Práctica del acento tonal: la curva del tono de la voz sobre el acento esperado de cada palabra" width="100%">
+<img src="docs/img/practica.png" alt="Práctica del acento con la voz del discurso en la Dieta: la curva del tono sobre el acento esperado de cada palabra, cuatro de cuatro en su sitio y una pausa larga" width="100%">
+
+<sub>La voz es la del mismo discurso en la Dieta (首相官邸, PDL 1.0), recortada del video y puesta en el lugar de la grabación propia.</sub>
 
 **Practicar** enseña el acento de cada palabra de la frase. Se lee en voz alta y Kotonoha pone la curva del tono de la voz sobre la esperada, dice en qué palabras cae el tono en otro sitio, señala las pausas largas y, si se quiere, las っ, ん y vocales largas que faltan o sobran. El tono se mide en el navegador y la grabación se transcribe en el equipo, sin salir de él. La voz modelo lee cada frase con el acento del diccionario, gratis y también sin salir del equipo: con las voces de AivisHub, que se instalan dentro de Kotonoha, o con AivisSpeech o VOICEVOX abiertos.
 

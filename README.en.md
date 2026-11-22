@@ -112,7 +112,9 @@ The **Notebook** is a full-width page to write and paste text in the language yo
 
 ### Pitch accent, out loud
 
-<img src="docs/img/practica.en.png" alt="Pitch accent practice: the pitch curve of the voice over each word’s expected accent" width="100%">
+<img src="docs/img/practica.en.png" alt="Pitch accent practice with the voice from the speech in the Diet: the pitch curve over each word’s expected accent, four of four in place and one long pause" width="100%">
+
+<sub>The voice is from the same speech in the Diet (Prime Minister’s Office of Japan, PDL 1.0), cut from the video and used in place of your own recording.</sub>
 
 **Practice** shows the accent of each word in the sentence. You read it aloud and Kotonoha lays the pitch curve of your voice over the expected one, says which words have the fall in the wrong place, points out long pauses and, if you want, any っ, ん or long vowels that are missing or extra. The pitch is measured in the browser and the recording is transcribed on your computer, without leaving it. The model voice reads each sentence with the dictionary’s accent, for free and also without leaving your computer: with the AivisHub voices, installed inside Kotonoha, or with AivisSpeech or VOICEVOX open.
 

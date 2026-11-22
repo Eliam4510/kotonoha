@@ -290,8 +290,10 @@ function GraficaTono({ r, frases }: { r: Resultado; frases: FraseAcentual[] }) {
       ))}
       {frases.map((f, i) => {
         const t = r.tramos[i];
-        const ancho = x(t.fin) - x(t.inicio);
-        const texto = ancho < 26 ? '' : ancho < 52 ? Array.from(f.texto).slice(0, 2).join('') : f.texto;
+        // Lo que cabe en su tramo: cada carácter mide lo que la letra, 12. Entera, スタートアップは, la primera de su frase,
+        // se salía de la gráfica por la izquierda.
+        const caben = Math.floor((x(t.fin) - x(t.inicio)) / 12);
+        const texto = caben < 2 ? '' : Array.from(f.texto).slice(0, caben).join('');
         return (
           <text key={`t${i}`} class="etiqueta" x={(x(t.inicio) + x(t.fin)) / 2} y={ALTO - 10} text-anchor="middle" lang="ja">
             {texto}

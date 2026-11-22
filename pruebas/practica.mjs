@@ -3,15 +3,13 @@
 // esperada con un veredicto por palabra. Después, que la práctica sigue a la frase en curso, que consultar una palabra la
 // cierra y que en inglés no aparece. No gasta nada y no descarga nada: el perfil ya tiene el modelo de voz. El perfil no
 // tiene el diccionario de acento: la prueba pone el de las palabras de la frase y lo quita al acabar.
-// Uso: KK_SALIDA=.dist-whisper node build.mjs && node pruebas/practica.mjs voz.wav [--imagenes]
+// Uso: KK_SALIDA=.dist-whisper node build.mjs && node pruebas/practica.mjs voz.wav
 // La grabación dice «箸を使います。», con una voz del sistema y un segundo de silencio delante; no se publica.
-// Con --imagenes, el diccionario de acento cuenta como instalado (sin el aviso de que falta) y, con el resultado a la
-// vista, guarda la imagen del README en cada idioma de la interfaz que presenta el japonés: docs/img/practica[.id].png.
+// Las imágenes del README salen de pruebas/capturas/practica.mjs, con la voz real de un discurso.
 
 import { mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import sharp from 'sharp';
 import { recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
@@ -21,9 +19,6 @@ const CAPTURAS = join(RAIZ, 'capturas-e2e', 'practica');
 mkdirSync(CAPTURAS, { recursive: true });
 const [voz] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (!voz) throw new Error('Falta la grabación');
-const IMAGENES = process.argv.includes('--imagenes');
-/** Los idiomas de la interfaz cuyo README presenta el japonés: el japonés presenta el inglés y el alemán. */
-const IDIOMAS_README = ['es', 'en', 'de', 'zh', 'ko'];
 const FRASE = '箸を使います。';
 const SEGUNDA = '橋を渡ります。';
 /** El acento de las palabras de las dos frases, como lo da el diccionario. */
@@ -70,12 +65,12 @@ p.on('pageerror', (e) => errores.push(e.message));
 await p.goto(`chrome-extension://${id}/app.html#/inicio`);
 
 /**
- * Pone o quita filas en la tabla de acentos del motor, la misma que llena el diccionario. Con `instalado`, también la ficha
- * del diccionario de acento, como si se hubiera instalado.
+ * Pone o quita filas en la tabla de acentos del motor, la misma que llena el diccionario. Al quitarlas, quita también la
+ * ficha del diccionario de acento, por si la dejó una pasada antigua que lo daba por instalado.
  */
-const tablaAcentos = (borrar, instalado = false) =>
+const tablaAcentos = (borrar) =>
   p.evaluate(
-    async ({ filas, borrar, instalado }) => {
+    async ({ filas, borrar }) => {
       const db = await new Promise((ok, mal) => {
         const r = indexedDB.open('kikitori');
         r.onsuccess = () => ok(r.result);
@@ -87,15 +82,13 @@ const tablaAcentos = (borrar, instalado = false) =>
           if (borrar) tx.objectStore('acentos').delete([termino, lectura]);
           else tx.objectStore('acentos').put({ termino, lectura, posiciones });
         }
-        const ficha = { id: 'kanjium-acento', titulo: 'Acento tonal (Kanjium)', tipo: 'acento', orden: 99, filas: filas.length, fuente: 'prueba', instalado: Date.now() };
-        if (borrar) tx.objectStore('diccionarios').delete(ficha.id);
-        else if (instalado) tx.objectStore('diccionarios').put(ficha);
+        if (borrar) tx.objectStore('diccionarios').delete('kanjium-acento');
         tx.oncomplete = () => ok();
         tx.onerror = () => mal(tx.error);
       });
       db.close();
     },
-    { filas: ACENTOS, borrar, instalado }
+    { filas: ACENTOS, borrar }
   );
 await p.waitForTimeout(1500);
 // Este perfil no tiene el diccionario de acento: si ya lo tuviera, la prueba no podría quitar lo que pone.
@@ -104,7 +97,7 @@ const yaInstalado = await p.evaluate(async () => {
   return r.valor.diccionarios.some((d) => d.tipo === 'acento');
 });
 if (yaInstalado) throw new Error('El perfil ya tiene un diccionario de acento: la prueba espera uno sin él');
-await tablaAcentos(false, IMAGENES);
+await tablaAcentos(false);
 
 // El Cuaderno añade lo que llega al final de lo que ya hay: se empieza vacío.
 await sw.evaluate(() => chrome.storage.local.remove(['lectorTexto', 'notaCuaderno']));
@@ -130,14 +123,9 @@ comprobar(
   palabras.map((w) => `${w.moras}·${w.puntos}`).join(' ')
 );
 const aviso = p.locator('.ap-practica-aviso');
-if (IMAGENES) {
-  await p.waitForTimeout(1500);
-  comprobar(!(await aviso.isVisible()), 'Con el diccionario de acento instalado, no avisa de nada');
-} else {
-  await aviso.waitFor({ timeout: 3000 }).catch(() => {});
-  comprobar((await aviso.innerText().catch(() => '')).includes('Acento tonal (Kanjium)'), 'Sin el diccionario de acento instalado, dice cuál instalar');
-  comprobar(await aviso.getByRole('button', { name: 'Abrir Ajustes' }).isVisible(), 'Con un botón a los Ajustes');
-}
+await aviso.waitFor({ timeout: 3000 }).catch(() => {});
+comprobar((await aviso.innerText().catch(() => '')).includes('Acento tonal (Kanjium)'), 'Sin el diccionario de acento instalado, dice cuál instalar');
+comprobar(await aviso.getByRole('button', { name: 'Abrir Ajustes' }).isVisible(), 'Con un botón a los Ajustes');
 comprobar(await panel.getByRole('button', { name: 'Oír la frase' }).isVisible(), 'Se puede oír la frase');
 await p.screenshot({ path: join(CAPTURAS, '1-antes.png') });
 
@@ -192,21 +180,6 @@ if (await resultado.isVisible()) {
   await p.waitForTimeout(700);
   await panel.screenshot({ path: join(CAPTURAS, '4-panel-claro.png') });
   await ajustar({ tema: 'oscuro' });
-
-  if (IMAGENES) {
-    // Del tamaño de las demás imágenes del README, guardadas igual: PNG de paleta.
-    await p.setViewportSize({ width: 1280, height: 720 });
-    for (const id of IDIOMAS_README) {
-      await ajustar({ idiomaInterfaz: id });
-      await p.waitForTimeout(1200);
-      const archivo = join(RAIZ, 'docs', 'img', id === 'es' ? 'practica.png' : `practica.${id}.png`);
-      await sharp(await p.screenshot()).png({ palette: true, quality: 92, effort: 10 }).toFile(archivo);
-      console.log('      imagen:', archivo.slice(RAIZ.length + 1));
-    }
-    await ajustar({ idiomaInterfaz: 'es' });
-    await p.setViewportSize({ width: 1360, height: 900 });
-    await p.waitForTimeout(800);
-  }
 }
 
 // ---------- Sigue a la frase en curso ----------

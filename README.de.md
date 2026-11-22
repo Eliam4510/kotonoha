@@ -112,7 +112,9 @@ Das **Notizbuch** ist eine Seite über die ganze Breite, um Text in der Lernspra
 
 ### Der Akzent, laut gesprochen
 
-<img src="docs/img/practica.de.png" alt="Akzentübung: die Tonhöhenkurve der Stimme über dem erwarteten Akzent jedes Worts" width="100%">
+<img src="docs/img/practica.de.png" alt="Akzentübung mit der Stimme aus der Rede im japanischen Parlament: die Tonhöhenkurve über dem erwarteten Akzent jedes Worts, vier von vier an der richtigen Stelle und eine lange Pause" width="100%">
+
+<sub>Die Stimme stammt aus derselben Rede im japanischen Parlament (Premierministeramt, PDL 1.0), aus dem Video geschnitten und anstelle der eigenen Aufnahme verwendet.</sub>
 
 **Üben** zeigt den Akzent jedes Worts im Satz. Man liest ihn laut vor, und Kotonoha legt die Tonhöhenkurve der Stimme über die erwartete, sagt, bei welchen Wörtern die Tonhöhe an der falschen Stelle fällt, zeigt lange Pausen an und auf Wunsch auch fehlende oder überzählige っ, ん und lange Vokale. Die Tonhöhe wird im Browser gemessen und die Aufnahme auf dem Rechner transkribiert, ohne ihn zu verlassen. Die Modellstimme liest jeden Satz mit dem Akzent aus dem Wörterbuch, kostenlos und ebenfalls ohne den Rechner zu verlassen: mit den Stimmen von AivisHub, die direkt in Kotonoha installiert werden, oder mit geöffnetem AivisSpeech oder VOICEVOX.
 
