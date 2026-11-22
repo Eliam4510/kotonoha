@@ -3,6 +3,7 @@
 import { effect } from '@preact/signals';
 import { alRecibirEvento, flujoMotor, fondo, motor } from '../compartido/rpc';
 import type { LineaAnalizada, PalabraToken, PistaInfo } from '../compartido/tipos';
+import { urlDeVideo as urlDeVideoBilibili } from '../nucleo/bilibili';
 import { desconocidas } from '../nucleo/frases';
 import { decidirSalto, duracionPausaDinamica, type LineaModo, MotorModos } from '../nucleo/modos';
 import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, sincroniaDesdePuntos } from '../nucleo/sincronia';
@@ -798,8 +799,10 @@ export async function cargarVideoActual() {
 
   cargandoPista.value = true;
   await control.ocultarNativos(ajustes.value.activo).catch(() => {});
+  let errorLista: string | null = null;
   const lista = await control.listarPistas().catch((e) => {
-    errorPista.value = e instanceof Error ? e.message : String(e);
+    errorLista = e instanceof Error ? e.message : String(e);
+    errorPista.value = errorLista;
     return [] as PistaInfo[];
   });
   const propias = [...lista];
@@ -826,6 +829,9 @@ export async function cargarVideoActual() {
   const conIngles = a.idiomaObjetivo.split('-')[0] !== 'en' ? elegirPista(propias, 'en') : undefined;
   const secundaria = elegirPista(propias, a.idiomaSecundario) ?? conIngles;
   await seleccionarObjetivo(objetivo?.id ?? null);
+  // Sin pista que poner, lo que impidió listarlas es lo que hay que decir (Bilibili, sin la sesión iniciada): al
+  // seleccionar se había borrado.
+  if (!objetivo && errorLista) errorPista.value = errorLista;
   if (secundaria) await seleccionarSecundaria(secundaria.id);
   else if (objetivo && a.generarSecundariosAuto) generarSecundarios().catch(() => {});
 
@@ -1338,10 +1344,12 @@ export const modeloQueTranscribiria = () => modeloParaTranscribir(ajustes.value.
 
 const TITULO_DE_CANCION = /\b(mv|m\/v|music video|lyric video|lyrics?|official video|official audio|karaoke)\b/i;
 
-/** La dirección limpia del video: sin la lista de reproducción ni la marca de tiempo. */
+/** La dirección limpia del video: sin la lista de reproducción, la marca de tiempo ni lo que añade el sitio para seguirla. */
 function urlDelVideo(): string {
   const info = infoVideo.value;
-  return info?.sitio === 'youtube' && info.idVideo ? `https://www.youtube.com/watch?v=${info.idVideo}` : location.href;
+  if (info?.sitio === 'youtube' && info.idVideo) return `https://www.youtube.com/watch?v=${info.idVideo}`;
+  if (info?.sitio === 'bilibili' && info.idVideo) return urlDeVideoBilibili(info.idVideo);
+  return location.href;
 }
 
 /**

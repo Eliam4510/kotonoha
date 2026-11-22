@@ -704,7 +704,7 @@ function Barra() {
             <span class="barra-estado"><span class="giro" /> {tr('Analizando subtítulos…')}</span>
           ) : errorPista.value ? (
             <>
-              <span class="barra-estado error" title={errorPista.value}><Icono n="aviso" t={16} /> {tr('Error con los subtítulos')}</span>
+              <span class="barra-estado error" title={tr(errorPista.value)}><Icono n="aviso" t={16} /> {tr('Error con los subtítulos')}</span>
               <button class="btn chico" onClick={() => abrirVideo('subtitulos')}>{tr('Elegir otros')}</button>
             </>
           ) : hayLineas ? (

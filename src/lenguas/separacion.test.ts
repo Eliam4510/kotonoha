@@ -46,6 +46,9 @@ describe('lo japonés está en su paquete', () => {
       // Cómo se nombran los tomos, los capítulos y las portadas en las carpetas y los CBZ de manga, se estudie lo que se estudie.
       'nucleo/carpetas.ts': /^const (TOMO|CAPITULO|EMPIEZA_POR_TOMO) = \//,
       'nucleo/libro.ts': /^const PORTADA = \//,
+      // Lo que Bilibili añade a sus títulos y cómo numera sus episodios: va en chino se estudie lo que se estudie.
+      'nucleo/bilibili.ts': /哔哩哔哩|番剧/,
+      'pagina/bilibili.ts': /`第\$\{ep\.title\}话`/,
     });
     expect(encontrados).toEqual([]);
   });

@@ -2,6 +2,7 @@
 // Atiende las órdenes del content script por postMessage.
 
 import type { Adaptador } from './adaptador';
+import { adaptadorBilibili } from './bilibili';
 import { adaptadorGenerico, instalarEscucha } from './generico';
 import { adaptadorNetflix } from './netflix';
 import { adaptadorYouTube, instalarEscuchaYouTube } from './youtube';
@@ -23,6 +24,9 @@ if (!window.__kotonohaPagina) {
   } else if (/(^|\.)netflix\.com$/.test(host)) {
     adaptador = adaptadorNetflix;
     instalarEscucha();
+  } else if (/^(www\.)?bilibili\.com$|^player\.bilibili\.com$/.test(host)) {
+    // Sus subtítulos los da la API de su reproductor: la escucha genérica los duplicaría.
+    adaptador = adaptadorBilibili;
   } else {
     instalarEscucha();
   }

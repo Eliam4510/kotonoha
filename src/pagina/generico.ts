@@ -1,9 +1,10 @@
 // Detección genérica: observa las peticiones de la página y reconoce subtítulos sin reglas por sitio.
 // Cubre archivos sueltos, listas HLS y DASH, y respuestas JSON con enlaces a subtítulos.
-// Con esto funcionan sitios como Disney+, Crunchyroll, Viki o Bilibili, y cualquier reproductor web.
+// Con esto funcionan sitios como Disney+, Crunchyroll o Viki, y cualquier reproductor web. Bilibili tiene su adaptador.
 
 import { type Adaptador, normalizarIdioma, videoPrincipal } from './adaptador';
 import type { PistaInfo } from '../compartido/tipos';
+import { vttDeBilibili } from '../nucleo/bilibili';
 
 interface Detectada extends PistaInfo {
   url?: string;
@@ -190,30 +191,29 @@ export function pistasDetectadas(): PistaInfo[] {
   return [...todas.values()].map(({ id, idioma, nombre, origen }) => ({ id, idioma, nombre, origen }));
 }
 
+/**
+ * Un archivo de subtítulos, con las cookies del sitio por si las pide. Un CDN que responde a cualquiera
+ * (Access-Control-Allow-Origin: *) no admite cookies: el navegador rechaza la respuesta, y se pide otra vez sin ellas.
+ */
+async function pedirTexto(url: string): Promise<string> {
+  try {
+    return await (await fetch(url, { credentials: 'include' })).text();
+  } catch {
+    return (await fetch(url, { credentials: 'omit' })).text();
+  }
+}
+
 async function descargarSegmentado(url: string): Promise<string> {
-  const lista = await (await fetch(url, { credentials: 'include' })).text();
+  const lista = await pedirTexto(url);
   if (!lista.startsWith('#EXTM3U')) return lista;
   const partes = lista.split(/\r?\n/).filter((f) => f && !f.startsWith('#')).map((f) => new URL(f, url).toString());
   const textos: string[] = [];
   // Unos pocos a la vez, para no saturar el sitio.
   for (let i = 0; i < partes.length; i += 6) {
-    const lote = await Promise.all(partes.slice(i, i + 6).map(async (p) => (await fetch(p, { credentials: 'include' })).text()));
+    const lote = await Promise.all(partes.slice(i, i + 6).map(pedirTexto));
     textos.push(...lote);
   }
   return ['WEBVTT\n', ...textos.map((t) => t.replace(/^WEBVTT[^\n]*\n/, '').replace(/^X-TIMESTAMP-MAP[^\n]*\n/m, ''))].join('\n');
-}
-
-/** Bilibili entrega sus subtítulos en un JSON propio. */
-function convertirSiBilibili(texto: string): string {
-  if (!texto.trimStart().startsWith('{') || !texto.includes('"body"')) return texto;
-  try {
-    const d = JSON.parse(texto) as { body?: { from: number; to: number; content: string }[] };
-    if (!d.body) return texto;
-    const h = (s: number) => new Date(s * 1000).toISOString().slice(11, 23);
-    return 'WEBVTT\n\n' + d.body.map((l) => `${h(l.from)} --> ${h(l.to)}\n${l.content}`).join('\n\n');
-  } catch {
-    return texto;
-  }
 }
 
 export const adaptadorGenerico: Adaptador = {
@@ -229,7 +229,8 @@ export const adaptadorGenerico: Adaptador = {
     const p = detectadas.get(id) ?? pistasDeElemento().find((t) => t.id === id);
     if (!p?.url) throw new Error('Pista no encontrada');
     if (p.texto) return p.texto;
-    return convertirSiBilibili(await descargarSegmentado(p.url));
+    // Hay reproductores, como el de Bilibili incrustado en otras páginas, que dan sus subtítulos en un JSON propio.
+    return vttDeBilibili(await descargarSegmentado(p.url));
   },
   saltar(ms) {
     const v = videoPrincipal();
