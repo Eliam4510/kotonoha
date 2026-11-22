@@ -1,5 +1,6 @@
-// La imagen de «Cómo suena» (音声変化) del README japonés, que presenta el inglés: el Cuaderno con un texto inglés propio y
-// la ficha de una palabra abierta en esa pestaña, con la interfaz en japonés.
+// La imagen de «Cómo suena» (音声変化) del README japonés, que presenta el inglés: el Cuaderno con lo que dice la NASA en
+// «What’s Up: November 2026» (sus subtítulos, de dominio público: ver contenido-real.mjs) y la ficha de want abierta en
+// esa pestaña, con la interfaz en japonés.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/capturas/como-suena.mjs
 
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
@@ -12,13 +13,13 @@ const RAIZ = resolve(import.meta.dirname, '..', '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-readme'));
 const IMAGENES = join(RAIZ, 'docs', 'img');
-// Un texto escrito para la imagen: frases de todos los días, con reducciones, formas débiles y uniones.
+// Lo que dice la NASA, con reducciones, formas débiles y uniones de verdad (want to, find a, take in).
 const TEXTO = [
-  '# Weekend plans',
+  '# What’s Up: November 2026',
   '',
-  'What are you going to do this weekend? I want to get out of the city for a while.',
+  'November offers a buffet of opportunities to see a meteor streak across the sky!',
   '',
-  "Let me know if you want to come with us. We could check it out and have a cup of coffee by the lake. Nice to meet you, by the way!",
+  'To level up your viewing experience, you will want to find a dark location, give your eyes about half an hour to adjust, and take in as much sky as you can.',
 ].join('\n');
 
 if (!existsSync(PERFIL) && existsSync(join(RAIZ, '.perfil-base', 'Default/IndexedDB'))) {
@@ -44,7 +45,7 @@ const p = await contexto.newPage();
 await p.goto(`chrome-extension://${id}/app.html#/lector`);
 await p.locator('.ap-papel .pal').first().waitFor({ timeout: 60000 });
 await p.waitForTimeout(1500);
-await p.locator('.ap-papel .pal', { hasText: 'going' }).first().click();
+await p.locator('.ap-papel .pal', { hasText: 'want' }).first().click();
 const pestana = p.locator('.ficha [role="tab"]', { hasText: '音声変化' });
 await pestana.waitFor({ timeout: 15000 });
 await pestana.click();

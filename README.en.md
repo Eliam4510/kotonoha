@@ -63,9 +63,11 @@ Every word you mark as known stops being highlighted everywhere, and the compreh
 
 ### Subtitles you can actually read
 
-<img src="docs/img/ficha.en.png" alt="Word panel for 食べる over a video, with its meaning in the sentence" width="100%">
+<img src="docs/img/ficha.en.png" alt="Word panel for 担い手 over a speech in the Diet, with its meaning in the sentence" width="100%">
 
-Subtitles appear over the player with furigana, a colour for each pitch accent and an underline for the state of each word: new, learning or known. Hovering opens the word panel with the dictionary, at no cost. Claude adds the meaning of the word in that sentence, even when it is figurative or poetic, like the 食べる in the image.
+<sub>Video: [“第221回国会における高市内閣総理大臣施政方針演説”](https://www.youtube.com/watch?v=alk-cIHwTIU) (Prime Minister’s Office of Japan on YouTube), with its official text and English translation ([首相官邸ホームページ](https://www.kantei.go.jp/jp/105/statement/2026/0220shiseihoshin.html)), under the [Public Data License 1.0](https://www.digital.go.jp/resources/open_data/public_data_license_v1.0), compatible with CC BY 4.0; edited with Kotonoha’s subtitles and word panels. It is also the video in the dictation, grammar and card images.</sub>
+
+Subtitles appear over the player with furigana, a colour for each pitch accent and an underline for the state of each word: new, learning or known. Hovering opens the word panel with the dictionary, at no cost. Claude adds the meaning of the word in that sentence, even when it is figurative or poetic, like the 担い手 in the image: not someone carrying a load on their shoulders, but the one who carries the task forward.
 
 - `Q` creates a card with the sentence, its audio and the video frame, straight into Anki or the built-in review.
 - `A` and `D` move between lines and `S` repeats the current one. The subtitle navigator (`G`) shows them all, with filters and bookmarks.
@@ -74,13 +76,17 @@ Subtitles appear over the player with furigana, a colour for each pitch accent a
 
 ### Any web page
 
-<img src="docs/img/paginas.en.png" alt="Japanese article with colours, furigana and a word panel" width="100%">
+<img src="docs/img/paginas.en.png" alt="『羅生門』 on Aozora Bunko, with colours, furigana and the reader panel" width="100%">
+
+<sub>『羅生門』 (Rashōmon), by Akutagawa Ryūnosuke, on [Aozora Bunko](https://www.aozora.gr.jp/cards/000879/card127.html) (public domain).</sub>
 
 On news sites, blogs, wikis or in a chat such as Claude’s, Japanese text gets the same colours and furigana, and clicking a word opens its panel. The page content is never changed: links and buttons keep working, and sites built with React notice nothing. It has been tested on about thirty real sites.
 
 ### Books, PDFs and manga
 
-<img src="docs/img/libro-texto.en.png" alt="Vertical Japanese novel with ruby, colours and a word panel" width="100%">
+<img src="docs/img/libro-texto.en.png" alt="Yosano Akiko’s Genji in vertical text, with ruby, colours and the panel for 後宮" width="100%">
+
+<sub>『源氏物語』 (The Tale of Genji), chapter 「桐壺」, in Yosano Akiko’s version, from [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (public domain). It is also the book in the vocabulary image.</sub>
 
 The **Library** is a complete viewer, like a PDF reader: zoom, two-page spreads, continuous scrolling, table of contents, thumbnails and the page where you left each book. Its commands sit in named menus, and Ctrl+K finds any of them by typing what it does; there is a hand tool, a highlighter and a reading mode that leaves just the page. On the page itself, each word can carry its furigana and the underline of its status, a sentence's translation appears under it like a subtitle, you can read aloud following the sentence, and the words you looked up become cards with a crop of the page. An area drawn on the page is read on its own with OCR, and text EPUBs and Library texts are read in the same viewer, with the same menus. A text EPUB, such as a novel, keeps its own formatting, ruby and vertical writing, with the page reader on top: colours, furigana and word panels, as on the web. A PDF that contains text can be read word by word right away. Manga that comes in image folders is imported by choosing the folder: each volume becomes a book, with its cover first and its colour spreads whole. The shelf groups books into collections, such as a series with its volumes, each with its cover and a description, and shows how much of each book and each collection has been read. In the viewer, pages can be bookmarked, text highlighted or underlined with a comment, and notes left on the page, as in a PDF reader. A word can be searched for in the whole book, each page can be read as text with the reading help, and Claude can review the text read by OCR by comparing it with the page image.
 
@@ -94,7 +100,7 @@ Pages that are images, such as manga, scanned books and many PDFs, are read with
 
 ### A book's vocabulary, before you read it
 
-<img src="docs/img/vocabulario.en.png" alt="Vocabulary of 吾輩は猫である: comprehension, words to learn, goals of 90, 95 and 98 % and the list with 書生 open and its sentences from the book" width="100%">
+<img src="docs/img/vocabulario.en.png" alt="Vocabulary of 桐壺, from the Genji: comprehension, words to learn, goals of 90, 95 and 98 % and the list with お open and its sentences from the book" width="100%">
 
 Every book and every collection has its **vocabulary**: all its words, counted, the most frequent first, with their reading, their gloss, their JLPT level and their best sentence from the book. At the top you see how much you already understand and how many words you need to understand 90, 95 or 98 %. Words are marked as known or learning right there, and the selected ones go straight to Memory or Anki with their sentence from the book. It works with novels, PDFs, texts and manga read with OCR; in a series, each volume shows how many new words it brings. The book's grammar is there too, point by point.
 
@@ -112,25 +118,25 @@ The **Notebook** is a full-width page to write and paste text in the language yo
 
 ### Dictation
 
-<img src="docs/img/dictado.en.png" alt="Dictation mode on a video: what was heard in green, what was missing underlined, what was partly heard in amber, and the score" width="100%">
+<img src="docs/img/dictado.en.png" alt="Dictation mode on a speech in the Diet: what was heard in green, what was missing underlined, and the score" width="100%">
 
 **Dictation** mode hides the line while it plays, pauses at its end and asks you to type what you heard. On checking, each part turns green if you got it, amber if you got it partly, or underlined if it was missing, with a score for the line. In Japanese it compares how it is read, so typing in kana is fine. **Repeat in your voice** opens the pitch-accent practice with that same line, and `P` does it with any subtitle.
 
 ### Grammar you already know
 
-<img src="docs/img/gramatica.en.png" alt="The bubble for 〜ことができる over a video, marked as Learning, with its explanation and where it has been seen" width="100%">
+<img src="docs/img/gramatica.en.png" alt="The bubble for 〜ために over a speech in the Diet, marked as Learning, with its explanation and where it has been seen" width="100%">
 
 Under each subtitle are the grammar points in the line, with their JLPT level. Tapping one opens its bubble: what it means, Claude’s explanation for that line and where you have seen it before. Each point is marked as **New**, **Learning** or **Known**; what you are learning gets a yellow line, and what you know is no longer flagged. What you already knew can be imported from Anki, and **Multiple-choice card** prepares one with three options easily confused with the right one.
 
 ### How each kanji is written
 
-<img src="docs/img/trazos.en.png" alt="Stroke order of a word in the word panel" width="100%">
+<img src="docs/img/trazos.en.png" alt="Stroke order of 下人, in 『羅生門』, in the word panel" width="100%">
 
 The word panel shows the stroke order of every kanji in the word, one stroke at a time and on a loop, with their numbers, and below, the words you already know with the same kanji.
 
 ### Share what you find
 
-<img src="docs/img/tarjeta.en.png" alt="Card for the word 食べる with what it means in the sentence, ready to paste into a chat" width="520">
+<img src="docs/img/tarjeta.en.png" alt="Card for the word 担い手 with what it means in the sentence, ready to paste into a chat" width="520">
 
 **Share as image**, on the word panel, turns a word or a grammar point into a card with what it means in that sentence and the sentence it appeared in, and leaves it on the clipboard to paste into any chat with Ctrl+V. It comes in ink or paper, like the themes.
 
@@ -244,7 +250,8 @@ The code is released under the [MIT license](LICENSE). Third-party components, t
 - Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) and KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io); for English and German, [Wiktionary](https://www.wiktionary.org) through [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) and [kaikki.org](https://kaikki.org); for Chinese, [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) through [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan).
 - Speech: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja and Parakeet, with [Transformers.js](https://github.com/huggingface/transformers.js).
 - Text recognition: [PP-OCRv5 and PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) and a [speech bubble detector](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
-- Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0.
+- Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0; for Chinese, [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), from [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), Arphic Public License.
+- Image content: a speech in the Diet from the Prime Minister’s Office of Japan (PDL 1.0) and, in the public domain, Yosano Akiko’s 『源氏物語』 and 『羅生門』 from Aozora Bunko and the opening of 『吾輩は猫である』. The pages from two books carry their credit below the image.
 - Icons: [Phosphor](https://phosphoricons.com). Typefaces: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) and [Nunito](https://fonts.google.com/specimen/Nunito).
 
 The name comes from the preface of the *Kokin Wakashū* (c. 905): Japanese poetry takes the human heart as its seed, and from it grow countless leaves of words.

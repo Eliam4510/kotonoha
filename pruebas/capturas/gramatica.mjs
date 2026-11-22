@@ -1,6 +1,7 @@
 // La imagen de la gramática con estados del README en un idioma de la interfaz que estudia japonés: el globo de
-// 〜ことができる sobre el video de pruebas/gramatica-video.mjs, marcado como «Aprendiendo», con la explicación del Claude
-// simulado en ese idioma y la frase traducida debajo. Deja el punto como estaba. Un idioma por vez, como el Dictado.
+// 〜ために sobre un discurso en la Dieta del canal del 首相官邸 (PDL 1.0, ver contenido-real.mjs), marcado como
+// «Aprendiendo», con la explicación del Claude simulado en ese idioma y la frase traducida debajo. Deja el punto como
+// estaba. Un idioma por vez, como el Dictado. Antes: node herramientas/contenido-readme.mjs.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/capturas/gramatica.mjs es   (y en, de, zh, ko)
 
 import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
@@ -9,6 +10,7 @@ import { chromium } from 'playwright';
 import sharp from 'sharp';
 import { recargarExtension } from '../extension.mjs';
 import { iniciarMock } from '../mock-claude.mjs';
+import { archivoLibre, DIETA, json3, traduccionDieta } from './contenido-real.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..', '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -17,28 +19,17 @@ const IMAGENES = join(RAIZ, 'docs', 'img');
 const IDIOMA = process.argv[2] ?? 'es';
 /** El nombre con que los ajustes guardan el idioma de las explicaciones, como en readme.mjs. */
 const NOMBRE = { es: 'español', en: 'inglés', de: 'alemán', zh: 'chino simplificado', ko: 'coreano' };
-const VIDEO = join(RAIZ, 'pruebas', 'fixtures', 'video.webm');
+const VIDEO = archivoLibre(DIETA.video);
 mkdirSync(IMAGENES, { recursive: true });
 if (!existsSync(PERFIL) && existsSync(join(RAIZ, '.perfil-base', 'Default/IndexedDB'))) {
   cpSync(join(RAIZ, '.perfil-base', 'Default/IndexedDB'), join(PERFIL, 'Default/IndexedDB'), { recursive: true });
 }
 
-const LARGA = '今日はとても長い説明をしますので最後までゆっくり聞いてくださいそれから次の話題に移りますが難しいところは何度でも繰り返して確認しましょうそして最後に今日の内容をまとめてみなさんと一緒に振り返っていきたいと思いますよろしくお願いします';
-const CUES = [
-  [1000, 2000, '授業の後は勉強します'],
-  [2050, 3000, '明日もまた会いましょう'],
-  [3000, 4000, '私はまだ立ち上がることができます'],
-  [7000, 8000, 'ここから先は静かです'],
-  [20000, 24000, LARGA],
-];
-const json3 = JSON.stringify({ events: CUES.map(([a, b, t]) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: t }] })) });
-/** La traducción de la frase del globo en cada idioma; las demás líneas no salen en la imagen. */
-const TRADUCCION = { es: 'Todavía puedo levantarme', en: 'I can still stand up', de: 'Ich kann noch aufstehen', zh: '我还能站起来', ko: '나는 아직 일어설 수 있다' };
-const SECUNDARIA = JSON.stringify({ events: CUES.map(([a, b], i) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: i === 2 ? TRADUCCION[IDIOMA] : '…' }] })) });
-const ES = JSON.stringify({ events: CUES.map(([a, b], i) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: `Traducción de la línea ${i + 1}` }] })) });
+const PRINCIPAL = json3(DIETA.lineas);
+const SECUNDARIA = json3(traduccionDieta(IDIOMA));
 
-const ID = 'experiencia1';
-const PAGINA = `<!doctype html><meta charset="utf-8"><title>講義の動画 - YouTube</title>
+const ID = DIETA.idVideo;
+const PAGINA = `<!doctype html><meta charset="utf-8"><title>${DIETA.titulo} - YouTube</title>
 <body style="margin:0;background:#0f0f0f;color:#fff;font-family:sans-serif">
 <div style="height:56px"></div>
 <div id="movie_player" style="position:relative;width:1280px;height:600px;margin:0 auto;background:#000"><video id="v" src="https://media.test/video.webm" muted style="width:100%;height:100%"></video></div>
@@ -51,9 +42,9 @@ const PAGINA = `<!doctype html><meta charset="utf-8"><title>講義の動画 - Yo
   ].map((t) => ({ ...t, baseUrl: 'https://www.youtube.com/api/timedtext?v=${ID}&lang=' + t.languageCode, url: 'https://www.youtube.com/api/timedtext?v=${ID}&pot=x&lang=' + t.languageCode }));
   const j = document.getElementById('movie_player');
   const v = document.getElementById('v');
-  j.getPlayerResponse = () => ({ videoDetails: { videoId: '${ID}', title: '講義の動画' }, captions: { playerCaptionsTracklistRenderer: { captionTracks: pistas } } });
+  j.getPlayerResponse = () => ({ videoDetails: { videoId: '${ID}', title: '${DIETA.titulo}' }, captions: { playerCaptionsTracklistRenderer: { captionTracks: pistas } } });
   j.getAudioTrack = () => ({ captionTracks: pistas });
-  j.getVideoData = () => ({ video_id: '${ID}', title: '講義の動画' });
+  j.getVideoData = () => ({ video_id: '${ID}', title: '${DIETA.titulo}' });
   j.seekTo = (s) => { v.currentTime = s; };
   j.playVideo = () => v.play();
   j.pauseVideo = () => v.pause();
@@ -78,7 +69,7 @@ await contexto.route('https://media.test/**', (r) => {
 });
 await contexto.route('https://www.youtube.com/**', (r) => {
   const u = new URL(r.request().url());
-  if (u.pathname.includes('/api/timedtext')) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: u.searchParams.get('lang') === IDIOMA ? SECUNDARIA : json3 });
+  if (u.pathname.includes('/api/timedtext')) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: u.searchParams.get('lang') === IDIOMA ? SECUNDARIA : PRINCIPAL });
   if (u.pathname === '/watch') return r.fulfill({ status: 200, contentType: 'text/html', body: PAGINA });
   return r.fulfill({ status: 204 });
 });
@@ -128,16 +119,17 @@ const motor = async (metodo, ...args) => {
     await app.waitForTimeout(250);
   }
 };
-const PATRON = '〜ことができる';
+const PATRON = '〜ために';
 const previoEstado = (await motor('estadosGramatica'))[PATRON] ?? 'nuevo';
 await motor('fijarEstadoGramatica', PATRON, 'nuevo');
 
 await p.bringToFront();
 await p.goto(`https://www.youtube.com/watch?v=${ID}`);
 await hasta((r) => r.querySelector('.barra') != null, undefined, 30000);
-await irA(3.5);
-await hasta((r) => [...r.querySelectorAll('.fila-gram .chip-gram')].some((b) => b.textContent.includes('ことができる')) || null, undefined, 60000);
-await enOverlay((r) => { [...r.querySelectorAll('.fila-gram .chip-gram')].find((b) => b.textContent.includes('ことができる'))?.click(); return true; });
+// 「投資を強力に促進していくための認定制度を創設します。」
+await irA(54);
+await hasta((r) => [...r.querySelectorAll('.fila-gram .chip-gram')].some((b) => b.textContent.includes('ために')) || null, undefined, 60000);
+await enOverlay((r) => { [...r.querySelectorAll('.fila-gram .chip-gram')].find((b) => b.textContent.includes('ために'))?.click(); return true; });
 await hasta((r) => r.querySelector('.popup-gramatica .estado-gram button') != null || null, undefined, 8000);
 await enOverlay((r) => { r.querySelectorAll('.popup-gramatica .estado-gram button')[1]?.click(); return true; });
 await hasta((r) => (r.querySelectorAll('.popup-gramatica .estado-gram button')[1]?.getAttribute('aria-checked') === 'true' ? true : null), undefined, 5000);

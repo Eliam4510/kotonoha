@@ -63,9 +63,11 @@ flowchart LR
 
 ### 真正能读懂的字幕
 
-<img src="docs/img/ficha.zh.png" alt="视频上 食べる 的单词面板，显示它在句中的含义" width="100%">
+<img src="docs/img/ficha.zh.png" alt="日本国会演讲视频上 担い手 的单词面板，显示它在句中的含义" width="100%">
 
-字幕显示在播放器上方，带有振假名、按音调重音区分的颜色，以及表示每个词学习状态的下划线：未知、学习中或已知。鼠标悬停即可打开带词典的单词面板，不产生任何费用。Claude 会补充这个词在这句话里的含义，即使是比喻或诗意的用法，比如图中的 食べる。
+<sub>视频：[《第221回国会における高市内閣総理大臣施政方針演説》](https://www.youtube.com/watch?v=alk-cIHwTIU)（日本首相官邸 YouTube），附官方文本及英译（[首相官邸ホームページ](https://www.kantei.go.jp/jp/105/statement/2026/0220shiseihoshin.html)），采用与 CC BY 4.0 兼容的公共数据许可 [PDL 1.0](https://www.digital.go.jp/resources/open_data/public_data_license_v1.0)；已用 Kotonoha 的字幕和单词面板加工。听写、语法和卡片也使用这段视频。</sub>
+
+字幕显示在播放器上方，带有振假名、按音调重音区分的颜色，以及表示每个词学习状态的下划线：未知、学习中或已知。鼠标悬停即可打开带词典的单词面板，不产生任何费用。Claude 会补充这个词在这句话里的含义，即使是比喻或诗意的用法，比如图中的 担い手：不是用肩膀扛东西的人，而是推动这件事的主力。
 
 - 按 `Q` 用这句话、它的音频和视频画面生成卡片，直接送往 Anki 或内置复习。
 - `A` 和 `D` 在台词之间移动，`S` 重复当前台词。字幕导航（`G`）列出全部台词，支持筛选和书签。
@@ -74,13 +76,17 @@ flowchart LR
 
 ### 任意网页
 
-<img src="docs/img/paginas.zh.png" alt="带颜色、振假名和单词面板的日语文章" width="100%">
+<img src="docs/img/paginas.zh.png" alt="青空文库中的『羅生門』，带颜色、振假名和阅读面板" width="100%">
+
+<sub>芥川龙之介『羅生門』，来自[青空文库](https://www.aozora.gr.jp/cards/000879/card127.html)（公有领域）。</sub>
 
 在新闻、博客、百科或 Claude 这样的聊天页面里，日语文本同样会有颜色和振假名，点击一个词就能打开它的单词面板。网页内容不会被改动：链接和按钮照常工作，用 React 构建的网站也察觉不到。已在约三十个真实网站上测试。
 
 ### 书籍、PDF 和漫画
 
-<img src="docs/img/libro-texto.zh.png" alt="竖排的日语小说，带注音、颜色和单词面板" width="100%">
+<img src="docs/img/libro-texto.zh.png" alt="竖排的与谢野晶子译本『源氏物語』，带注音、颜色和 後宮 的单词面板" width="100%">
+
+<sub>『源氏物語』「桐壺」，与谢野晶子译本，来自[青空文库](https://www.aozora.gr.jp/cards/000052/card5016.html)（公有领域）。词汇图中的书也是它。</sub>
 
 **书库**是一个完整的阅读器，就像 PDF 阅读器一样：缩放、双页、连续滚动、目录、缩略图，并记住每本书读到的页码。各项操作都放在有名称的菜单里，按 Ctrl+K 输入想做的事即可找到任何操作；还有抓手、荧光笔，以及只留下页面的阅读模式。页面上的每个词都可以带上注音和按状态的下划线，句子的译文会像字幕一样显示在句子下方，还可以跟随句子朗读，并把查过的词连同页面截图做成卡片。在页面上框出的区域可以单独用文字识别读取，文字版 EPUB 和书库中的文本也在同一个查看器中阅读，菜单相同。像小说这样的文字版 EPUB 会保留原有的排版、注音和竖排，上面叠加网页阅读器：颜色、振假名和单词面板，和在网页上一样。带文字的 PDF 可以直接逐词阅读。图片文件夹形式的漫画只需选择文件夹即可导入：每一卷成为一本书，封面在前，彩色跨页完整显示。书架可以把书归入合集，例如一个系列及其各卷，并配上封面和描述，还会显示每本书和每个合集读了多少。在阅读器中可以给页面加书签、高亮或为文字加下划线并附评论，还能在页面上贴笔记，就像在 PDF 阅读器中一样。可以在整本书中搜索一个词，把每一页当作文字配合阅读辅助来读，还可以让 Claude 对照页面图像检查文字识别读出的文字。
 
@@ -94,7 +100,7 @@ flowchart LR
 
 ### 读书之前，先看它的词汇
 
-<img src="docs/img/vocabulario.zh.png" alt="吾輩は猫である 的词汇：理解度、待学习的词、90%、95% 和 98% 的目标，以及展开了 書生 和书中例句的列表" width="100%">
+<img src="docs/img/vocabulario.zh.png" alt="『源氏物語』「桐壺」的词汇：理解度、待学习的词、90%、95% 和 98% 的目标，以及展开了 お 和书中例句的列表" width="100%">
 
 每本书和每个合集都有自己的**词汇**：统计其中的所有词，出现最多的排在前面，附读音、释义、JLPT 级别和书中最合适的句子。上方显示你已经理解多少，以及要理解 90%、95% 或 98% 还需要多少个词。可以直接在这里把词标为已知或学习中，选中的词会连同书中的句子一次性加入记忆库或 Anki。小说、PDF、文本和用文字识别读取的漫画都适用；在系列中，每一卷都会显示它带来多少新词。书中的语法也在这里，逐条列出。
 
@@ -112,25 +118,25 @@ flowchart LR
 
 ### 听写
 
-<img src="docs/img/dictado.zh.png" alt="视频上的听写模式：听对的部分为绿色，漏掉的部分有下划线，听对一半的部分为黄色，并显示得分" width="100%">
+<img src="docs/img/dictado.zh.png" alt="日本国会演讲视频上的听写模式：听对的部分为绿色，漏掉的部分有下划线，并显示得分" width="100%">
 
 **听写**模式会在播放时隐藏这句台词，在句末暂停，让你写下听到的内容。检查时，听对的部分显示为绿色，听对一半的显示为黄色，漏掉的加下划线，并给出这句的得分。日语按读音比较，所以用假名输入也可以。**跟着说一遍**会用这句话打开音调重音练习，按 `P` 则可以练习任意字幕。
 
 ### 已经掌握的语法
 
-<img src="docs/img/gramatica.zh.png" alt="视频上〜ことができる的气泡，标为学习中，附讲解和见过的地方" width="100%">
+<img src="docs/img/gramatica.zh.png" alt="日本国会演讲视频上〜ために的气泡，标为学习中，附讲解和见过的地方" width="100%">
 
 每条字幕下方会列出这句话里的语法点和它的 JLPT 级别。点一下就会打开气泡：它的意思、Claude 针对这句话的讲解，以及你之前在哪里见过。每个语法点可以标为**新**、**学习中**或**已掌握**；正在学的会加一条黄线，已掌握的不再标出。已经会的可以从 Anki 导入，**选择题卡片**会生成一张卡片，附三个容易和正确答案混淆的选项。
 
 ### 每个汉字怎么写
 
-<img src="docs/img/trazos.zh.png" alt="单词面板中一个词的笔顺" width="100%">
+<img src="docs/img/trazos.zh.png" alt="单词面板中『羅生門』里 下人 的笔顺" width="100%">
 
 单词面板会逐笔、循环演示词中每个汉字的笔顺，并标出笔画编号；下方列出你已经认识、含有同一个汉字的词。
 
 ### 分享你发现的内容
 
-<img src="docs/img/tarjeta.zh.png" alt="单词 食べる 的卡片，写有它在句中的含义，可直接粘贴到聊天中" width="520">
+<img src="docs/img/tarjeta.zh.png" alt="单词 担い手 的卡片，写有它在句中的含义，可直接粘贴到聊天中" width="520">
 
 单词面板中的**以图片分享**会把一个单词或语法点做成卡片，写明它在这句话中的含义以及它出现的句子，并放进剪贴板，可用 Ctrl+V 粘贴到任何聊天中。卡片和主题一样，有墨色和纸张两种样式。
 
@@ -156,7 +162,9 @@ flowchart LR
 
 ### 也能学英语
 
-<img src="docs/img/ingles-subtitulos.zh.png" alt="视频上一个英语单词的单词面板，显示 IPA 发音" width="100%">
+<img src="docs/img/ingles-subtitulos.zh.png" alt="NASA 视频上 refer 的单词面板，显示 IPA 发音" width="100%">
+
+<sub>视频与字幕：[《What’s Up: November 2026 Skywatching Tips from NASA》](https://www.youtube.com/watch?v=PN-iD6VTmyc)，NASA/JPL-Caltech（公有领域）。</sub>
 
 学习英语时，单词面板会给出美式和英式的 IPA 发音，即使短语动词被拆开（如 *picked it up*）也能找到，并说明每个不规则形式来自哪个词。词典来自 Wiktionary，释义为中文。漫画按对话框从左到右逐个读取，句子由本机的神经网络语音朗读：英语用 Kokoro，德语用 Piper。每种语言分别保存自己的单词、卡片和设置，一键即可切换。
 
@@ -246,7 +254,8 @@ flowchart LR
 - 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) 和 KANJIDIC（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)；英语和德语使用 [Wiktionary](https://www.wiktionary.org)，经 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理；中文使用 [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)，经 [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) 整理。
 - 语音：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja 和 Parakeet，借助 [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 文字识别：[PP-OCRv5 和 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr) 和[对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
-- 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0。
+- 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0；中文为源自 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) 的 [Hanzi Writer](https://github.com/chanind/hanzi-writer-data)，Arphic Public License。
+- 图片内容：日本首相官邸的国会演讲（PDL 1.0）、NASA 的视频、青空文库的与谢野晶子译『源氏物語』和『羅生門』，以及『吾輩は猫である』的开头；除演讲外均为公有领域。两本书的页面在图片下方注明出处。
 - 图标：[Phosphor](https://phosphoricons.com)。字体：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) 和 [Nunito](https://fonts.google.com/specimen/Nunito)。
 
 名字出自《古今和歌集》假名序（约 905 年）：和歌以人心为种子，生出万千言语之叶。

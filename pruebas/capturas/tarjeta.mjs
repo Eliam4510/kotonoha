@@ -1,6 +1,7 @@
-// La tarjeta para compartir del README en cada idioma de la interfaz: la de 食べる en la frase del sueño, con lo que
-// significa allí (Claude simulado), copiada al portapapeles con el botón de la ficha. Con la interfaz en japonés se estudia
-// inglés, como en las demás imágenes del README. Los textos son de dominio público (Lewis Carroll, 1865).
+// La tarjeta para compartir del README en cada idioma de la interfaz: la de 担い手 en una frase de un discurso en la Dieta
+// (首相官邸, PDL 1.0), con lo que significa allí (Claude simulado), copiada al portapapeles con el botón de la ficha. Con
+// la interfaz en japonés se estudia inglés, como en las demás imágenes del README, con una frase de Lewis Carroll (1865).
+// Todo el contenido es real: ver contenido-real.mjs.
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/capturas/tarjeta.mjs [es en de zh ko ja]
 
 import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
@@ -9,6 +10,7 @@ import { chromium } from 'playwright';
 import sharp from 'sharp';
 import { recargarExtension } from '../extension.mjs';
 import { iniciarMock } from '../mock-claude.mjs';
+import { DIETA } from './contenido-real.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..', '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -16,8 +18,9 @@ const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-local'));
 const IMAGENES = join(RAIZ, 'docs', 'img');
 const IDIOMAS = process.argv.slice(2).length ? process.argv.slice(2) : ['es', 'en', 'de', 'zh', 'ko', 'ja'];
 
-const NOTA = { ja: '赤い星と青い星を食べる夢を見た。', en: 'Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do.' };
-const PALABRA = { ja: '食', en: 'tired' };
+// 「スタートアップは、技術を実用化していく主要な担い手です。」
+const NOTA = { ja: DIETA.lineas.find(([, , t]) => t.includes('担い手'))[2], en: 'Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do.' };
+const PALABRA = { ja: '担', en: 'tired' };
 const nombreBoton = (idioma) => (idioma === 'es' ? 'Compartir como imagen' : JSON.parse(readFileSync(join(RAIZ, 'idiomas', `${idioma}.json`), 'utf8'))['Compartir como imagen']);
 
 if (!existsSync(PERFIL) && existsSync(join(RAIZ, '.perfil-base', 'Default/IndexedDB'))) {

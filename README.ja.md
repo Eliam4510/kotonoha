@@ -63,7 +63,9 @@ flowchart LR
 
 ### 英語の字幕を、ちゃんと読めるように
 
-<img src="docs/img/ingles-subtitulos.ja.png" alt="動画の上に表示された英単語 pick の単語パネルと IPA の発音" width="100%">
+<img src="docs/img/ingles-subtitulos.ja.png" alt="NASA の動画の上に表示された英単語 refer の単語パネルと IPA の発音" width="100%">
+
+<sub>動画と字幕：[「What’s Up: November 2026 Skywatching Tips from NASA」](https://www.youtube.com/watch?v=PN-iD6VTmyc)、NASA/JPL-Caltech（パブリックドメイン）。</sub>
 
 プレーヤーの上に、単語ごとに学習状態（未知・学習中・既知）を示す下線付きの英語字幕が表示されます。マウスを合わせると辞書入りの単語パネルが費用なしで開きます。アメリカ英語とイギリス英語の発音を IPA で示し、*picked it up* のように離れていても句動詞の *pick up* を見つけ、*went* のような不規則形がどの単語から来ているかも教えてくれます。辞書は Wiktionary のもので、意味は日本語で表示されます。
 
@@ -74,7 +76,9 @@ flowchart LR
 
 ### どんなウェブページでも
 
-<img src="docs/img/ingles-pagina.ja.png" alt="英語の記事の上に表示された句動詞の単語パネル" width="100%">
+<img src="docs/img/ingles-pagina.ja.png" alt="Wikisource の『不思議の国のアリス』の上に表示された句動詞 get up の単語パネル" width="100%">
+
+<sub>『不思議の国のアリス』1866 年版の第 1 章、[Wikisource](https://en.wikisource.org/wiki/Alice%27s_Adventures_in_Wonderland_%281866%29/Chapter_1)（パブリックドメイン）。</sub>
 
 ニュース、ブログ、Wikipedia、Claude のようなチャットでも、英語の文章に同じ色分けが付き、単語をクリックすると単語パネルが開きます。ページの内容は書き換えません。リンクやボタンはそのまま使え、React で作られたサイトも影響を受けません。英語はどこにでもあるので、ページリーダーは最初はオフになっていて、拡張機能のメニューからオンにします。
 
@@ -82,9 +86,13 @@ flowchart LR
 
 <img src="docs/img/libro-texto.ja.png" alt="『不思議の国のアリス』の EPUB に IPA と色分けが付き、consider の単語パネルが開いている" width="100%">
 
+<sub>ルイス・キャロル『不思議の国のアリス』（1865 年）の第 1 章の冒頭（パブリックドメイン）。語彙とカードの画像も同じ本です。</sub>
+
 **ライブラリ**は、PDF リーダーのような本格的なビューアーです。拡大・縮小、見開き、連続スクロール、目次、サムネイルに加え、本ごとに読んでいたページを覚えています。操作は名前の付いたメニューにまとまり、Ctrl+K でしたいことを入力すればどの操作も見つかります。手のひら、蛍光ペン、ページだけを残す読書モードもあります。ページの上には単語のふりがなと状態の下線を表示でき、文の訳は字幕のように文の下に出ます。文を追って読み上げることも、調べた語をページの切り抜き付きのカードにすることもできます。ページ上に描いた範囲だけを文字認識で読み取ることもでき、テキストの EPUB やライブラリのテキストも同じメニューの同じビューアーで読めます。小説のようなテキストの EPUB は、元のレイアウトのまま表示され、その上にページリーダーが重なります。ウェブと同じように、色分け、発音記号、単語パネルが使えます。テキストを含む PDF は、そのまま単語ごとに読めます。画像フォルダーの漫画はフォルダーを選ぶだけで読み込め、巻ごとに1冊の本になり、表紙が先頭に、カラーの見開きはそのまま表示されます。本棚では、シリーズとその各巻のように本をコレクションにまとめて表紙と説明を付けられ、本ごと・コレクションごとにどこまで読んだかが分かります。ビューアーでは PDF リーダーのように、ページにしおりを挟み、文字にハイライトや下線を引いてコメントを付け、ページにメモを貼れます。本全体から単語を検索し、各ページを読書支援付きの文字で読めるほか、文字認識が読み取った文字を Claude がページの画像と照らし合わせて確認できます。
 
-<img src="docs/img/ocr.ja.png" alt="スキャンした英語のページから読み取った文字、ページ上の各単語の下線、文と borrow を示すフローティングウィンドウ" width="100%">
+<img src="docs/img/ocr.ja.png" alt="『不思議の国のアリス』1866 年版のスキャンしたページから読み取った文字、ページ上の各単語の下線、文と tired を示すフローティングウィンドウ" width="100%">
+
+<sub>『不思議の国のアリス』1866 年版、第 1 章の最初のページ。[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Carroll_-_Alice%27s_adventures_in_Wonderland,_1866.djvu)（パブリックドメイン）。</sub>
 
 スキャンした本や多くの PDF のように画像でできたページは、自分のパソコンのグラフィックボードで文字認識（OCR）をして読みます。ページ上の単語をタップすると、その文全体がフローティングウィンドウに単語パネルとともに開き、まだ読んでいない文字を隠しません。ドラッグすれば好きな部分を選んで翻訳や説明ができます。各ページは一度だけ読み取り、保存されます。**文字付きPDFを書き出す**で、その文字を見えないように重ねた PDF として本を書き出し、どの PDF ビューアーでも検索やコピーができます。解像度の低いスキャンには、ビューアーの**シャープネス**が使えます。
 
@@ -96,7 +104,9 @@ flowchart LR
 
 ### 書いて読むためのノート
 
-<img src="docs/img/lector-web.ja.png" alt="タブで開いたノート。英語の段落に発音記号と理解度が表示されている" width="100%">
+<img src="docs/img/lector-web.ja.png" alt="タブで開いたノート。『高慢と偏見』の冒頭に発音記号と理解度が表示されている" width="100%">
+
+<sub>ジェイン・オースティン『高慢と偏見』（1813 年）の冒頭（パブリックドメイン）。</sub>
 
 **ノート**は画面の幅いっぱいのページで、学んでいる言語の文章を見出し、箇条書き、引用付きで書いたり貼り付けたりでき、解析済みでふりがな付きで読めます。**整理**は、ひと続きで貼り付けた文章に言葉を変えずに構造を付け、ノートはどれもライブラリに保存されます。好きな速さで、続けて、一文ずつ、または一文を繰り返して読み上げ、選択した部分はどこでも聞いたり練習したりできます。音声入力もできます。マイクに話した内容はパソコン上で文字起こしされ、録音と一緒に新しい段落として入ります。通常のタブでも開けるので、分割表示で読んでいるページの横に置き、どこでコピーした文章も集められます。
 
@@ -108,7 +118,9 @@ flowchart LR
 
 ### 続けて話したときの音
 
-<img src="docs/img/como-suena.ja.png" alt="ノートの英文と単語パネルの音声変化タブ。What are you が Whaddaya に、going to が gonna になる" width="100%">
+<img src="docs/img/como-suena.ja.png" alt="NASA の動画の字幕を貼ったノートと単語パネルの音声変化タブ。want to が wanna に、take in が ta‿kin になる" width="100%">
+
+<sub>文章：NASA の動画[「What’s Up: November 2026 Skywatching Tips from NASA」](https://www.youtube.com/watch?v=PN-iD6VTmyc)の字幕（パブリックドメイン）。</sub>
 
 単語パネルの**音声変化**タブは、英語の文を続けて話したときにどう聞こえるかを、変わる部分の上に書いて示します。*going to* が *gonna* に、*meet you* が *meechu* に、*turn off* が *tur‿noff* になるような短縮、弱形、連結、t・d と you の融合、アメリカ英語の柔らかい t を、それぞれの説明付きで表示します。規則で計算するので、すぐに表示され、費用もかかりません。
 
@@ -208,6 +220,8 @@ TypeScript、Preact、Dexie、esbuild で作られ、音声と OCR には WebGPU
 - 辞書：英語とドイツ語は [Wiktionary](https://www.wiktionary.org)（[wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org) による整形）、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、英語の解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。中国語は [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)（[cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) による整形）。日本語は [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium)、[JPDB](https://jpdb.io)。
 - 音声：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja、Parakeet と [Transformers.js](https://github.com/huggingface/transformers.js)。
 - 文字認識：[PP-OCRv5 と PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr)、[吹き出し検出モデル](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
+- 書き順：日本語は [KanjiVG](https://kanjivg.tagaini.net)（Ulrich Apel、CC BY-SA 3.0）、中国語は [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) 由来の [Hanzi Writer](https://github.com/chanind/hanzi-writer-data)（Arphic Public License）。
+- 画像の内容：NASA の動画とその字幕、ルイス・キャロル『不思議の国のアリス』（本文と 1866 年版のスキャンは Wikisource と Wikimedia Commons から）、ジェイン・オースティン『高慢と偏見』の冒頭で、すべてパブリックドメインです。
 - アイコン：[Phosphor](https://phosphoricons.com)。フォント：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic)、[Nunito](https://fonts.google.com/specimen/Nunito)。
 
 名前は『古今和歌集』仮名序（905 年頃）に由来します。「やまとうたは、人の心を種として、万の言の葉とぞなれりける」。

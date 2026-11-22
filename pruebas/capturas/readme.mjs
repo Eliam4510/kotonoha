@@ -1,11 +1,12 @@
 // Las imágenes del README en cada idioma de la interfaz: la ficha sobre el video, un EPUB de texto en el visor, una
 // página leída con el OCR y una de manga. Con la interfaz en japonés se estudia inglés, que es lo que tiene sentido para
-// quien habla japonés. Los textos del video y del EPUB son de dominio público (Natsume Sōseki, Lewis Carroll) o están
-// escritos para esto; la API de Claude es la simulada y los diccionarios, los del perfil base.
-// Las páginas reales salen de libros que no están en el repositorio, con KK_ESCANEO="<pdf>|<página>|<palabra>" (un
+// quien habla japonés. Todo el contenido es real (ver contenido-real.mjs): el video es un discurso en la Dieta publicado
+// por el 首相官邸, con su texto oficial; el EPUB, el Genji de Yosano Akiko o «Alice’s Adventures in Wonderland»; la
+// página en inglés, la de la edición de 1866, y el texto del lector, el comienzo de «Pride and Prejudice». La API de
+// Claude es la simulada y los diccionarios, los del perfil base. Antes: node herramientas/contenido-readme.mjs.
+// Las páginas en japonés salen de libros que no están en el repositorio, con KK_ESCANEO="<pdf>|<página>|<palabra>" (un
 // libro escaneado, en modo Libro) y KK_MANGA="<epub o pdf>|<página>|<palabra>" (en modo Manga): la página, contada
-// desde 1 como en el visor, y la palabra cuya ficha se abre. Sin KK_ESCANEO se lee una página escrita para esto, y sin
-// KK_MANGA no hay imagen del manga. Con la interfaz en japonés siempre se usa la página escrita, que está en inglés.
+// desde 1 como en el visor, y la palabra cuya ficha se abre. Sin ellas no hay imagen del OCR ni del manga en japonés.
 // El vocabulario es el del mismo EPUB, con las palabras más fáciles marcadas como conocidas mientras se fotografía.
 // KK_SOLO="vocabulario" (o una lista separada por comas de video, libro, ocr, manga y vocabulario) rehace solo esas
 // imágenes: así no se pierden las de los libros reales al rehacer otra.
@@ -20,6 +21,7 @@ import sharp from 'sharp';
 import { confirmarBorrado, recargarExtension } from '../extension.mjs';
 import { iniciarMock } from '../mock-claude.mjs';
 import { estadoOrden, orden } from '../ordenes.mjs';
+import { ALICE_1866, archivoLibre, AUSTEN, DIETA, GENJI, genji, servirVideo, traduccionDieta, vtt } from './contenido-real.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..', '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -59,30 +61,8 @@ async function guardar(p, base, id) {
 
 // ---------- Los textos ----------
 
-const VTT = {
-  ja: ['泥だらけの道でも花は咲いた', '授業の後は、たぶん日本語の勉強を続けると思います。', '赤い星と青い星を食べる夢を見た', '一日でも休むと、ペースが遅れてしまうので', 'できるだけ毎日やるようにしています', '私はまだ立ち上がることができます'],
-  es: ['Incluso en un camino lleno de barro, la flor brotó', 'Después de clase, probablemente seguiré estudiando japonés.', 'Soñé que devoraba estrellas rojas y azules', 'Si descanso aunque sea un día, me atraso', 'Así que intento hacerlo todos los días', 'Todavía puedo volver a levantarme'],
-  en: ['Even on a muddy road, the flower bloomed', 'After class, I think I’ll probably keep studying Japanese.', 'I dreamed I devoured red and blue stars', 'If I take even one day off, I fall behind', 'so I try to do it every day if I can', 'I can still get back up'],
-  de: ['Selbst auf einem schlammigen Weg blühte die Blume', 'Nach dem Unterricht lerne ich wohl weiter Japanisch.', 'Ich träumte, ich verschlänge rote und blaue Sterne', 'Wenn ich auch nur einen Tag pausiere, falle ich zurück', 'deshalb versuche ich, es möglichst jeden Tag zu tun', 'Ich kann noch wieder aufstehen'],
-  zh: ['即使在泥泞的路上，花也开了', '下课后，我想我大概会继续学日语。', '我梦见自己吞下了红色和蓝色的星星', '哪怕休息一天，进度也会落后', '所以我尽量每天都做', '我还能再站起来'],
-  ko: ['진흙투성이 길에서도 꽃은 피었다', '수업이 끝나면 아마 일본어 공부를 계속할 것 같아요.', '빨간 별과 파란 별을 삼키는 꿈을 꿨다', '하루라도 쉬면 진도가 늦어져서', '되도록 매일 하려고 해요', '나는 아직 다시 일어설 수 있어요'],
-};
-const TIEMPOS = ['00:00:01.000 --> 00:00:04.000', '00:00:05.000 --> 00:00:08.000', '00:00:09.000 --> 00:00:12.000', '00:00:14.000 --> 00:00:17.000', '00:00:18.000 --> 00:00:21.000', '00:00:42.000 --> 00:00:48.000'];
-const vtt = (lineas) => `WEBVTT\n\n${lineas.map((l, i) => `${TIEMPOS[i]}\n${l}`).join('\n\n')}\n`;
-
-// Natsume Sōseki, «Wagahai wa neko de aru» (1905), de dominio público. Con ruby, como en un EPUB japonés.
-const SOSEKI = [
-  '<ruby>吾輩<rt>わがはい</rt></ruby>は猫である。名前はまだ無い。',
-  'どこで生れたかとんと<ruby>見当<rt>けんとう</rt></ruby>がつかぬ。何でも<ruby>薄暗<rt>うすぐら</rt></ruby>いじめじめした所でニャーニャー泣いていた事だけは記憶している。吾輩はここで始めて人間というものを見た。しかもあとで聞くとそれは書生という人間中で一番<ruby>獰悪<rt>どうあく</rt></ruby>な種族であったそうだ。',
-  'この書生というのは時々我々を<ruby>捕<rt>つかま</rt></ruby>えて煮て食うという話である。しかしその当時は何という考もなかったから別段恐しいとも思わなかった。ただ彼の<ruby>掌<rt>てのひら</rt></ruby>に載せられてスーと持ち上げられた時何だかフワフワした感じがあったばかりである。',
-  '掌の上で少し落ちついて書生の顔を見たのがいわゆる人間というものの<ruby>見始<rt>みはじめ</rt></ruby>であろう。この時妙なものだと思った感じが今でも残っている。第一毛をもって装飾されべきはずの顔がつるつるしてまるで<ruby>薬缶<rt>やかん</rt></ruby>だ。',
-  'その後猫にもだいぶ逢ったがこんな<ruby>片輪<rt>かたわ</rt></ruby>には一度も出会わした事がない。のみならず顔の真中があまりに突起している。そうしてその穴の中から時々ぷうぷうと煙を吹く。どうも咽せぽくて実に弱った。',
-  'この書生の掌の裏でしばらくはよい心持に<ruby>坐<rt>すわ</rt></ruby>っておったが、しばらくすると非常な<ruby>速力<rt>そくりょく</rt></ruby>で運転し始めた。書生が動くのか自分だけが動くのか分らないが<ruby>無暗<rt>むやみ</rt></ruby>に眼が<ruby>廻<rt>まわ</rt></ruby>る。胸が悪くなる。<ruby>到底<rt>とうてい</rt></ruby>助からないと思っていると、どさりと音がして眼から火が出た。',
-  'それまでは記憶しているがあとは何の事やらいくら考え出そうとしても分らない。ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋も見えぬ。<ruby>肝心<rt>かんじん</rt></ruby>の母親さえ姿を隠してしまった。',
-  'その上今までの所とは違って無暗に明るい。眼を明いていられぬくらいだ。はてな何でも<ruby>容子<rt>ようす</rt></ruby>がおかしいと、のそのそ這い出して見ると非常に痛い。吾輩は<ruby>藁<rt>わら</rt></ruby>の上から急に<ruby>笹原<rt>ささはら</rt></ruby>の中へ棄てられたのである。',
-  'ようやくの思いで笹原を這い出すと向うに大きな池がある。吾輩は池の前に坐ってどうしたらよかろうと考えて見た。別にこれという<ruby>分別<rt>ふんべつ</rt></ruby>も出ない。しばらくして泣いたら書生がまた迎に来てくれるかと考え付いた。',
-  'ニャー、ニャーと試みにやって見たが誰も来ない。そのうち池の上をさらさらと風が渡って日が暮れかかる。腹が非常に減って来た。泣きたくても声が出ない。仕方がない、何でもよいから<ruby>食物<rt>くいもの</rt></ruby>のある所まであるこうと決心をしてそろりそろりと池を左りに廻り始めた。',
-];
+// El Genji de Yosano Akiko: los primeros párrafos de 桐壺, con su ruby, como en un EPUB japonés.
+const GENJI_PARRAFOS = genji(5);
 // Lewis Carroll, «Alice’s Adventures in Wonderland» (1865), de dominio público.
 const CARROLL = [
   'Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, “and what is the use of a book,” thought Alice “without pictures or conversations?”',
@@ -104,38 +84,24 @@ function epub({ titulo, autor, idioma, vertical, capitulo, parrafos }) {
   });
 }
 
-/** Una página impresa, como la de un libro escaneado: papel claro, un título y unos renglones. */
-async function pagina({ titulo, lineas, letra, numero }) {
-  const ancho = 1240;
-  const alto = 1754;
-  const texto = (t, x, y, tam, peso = 400) => `<text x="${x}" y="${y}" font-size="${tam}" font-weight="${peso}" font-family="${letra}" fill="#26221d">${t}</text>`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ancho}" height="${alto}"><rect width="100%" height="100%" fill="#f6f1e6"/>${texto(titulo, 150, 260, 64, 700)}<rect x="150" y="300" width="940" height="3" fill="#8b7f6a"/>${lineas.map((l, i) => texto(l, 150, 440 + i * 96, 40)).join('')}${texto(String(numero), ancho / 2 - 12, alto - 110, 30)}</svg>`;
-  return sharp(Buffer.from(svg)).jpeg({ quality: 90 }).toBuffer();
-}
 const cbz = (titulo, imagen) => zipSync({ 'ComicInfo.xml': strToU8(`<ComicInfo><Title>${titulo}</Title><Manga>No</Manga></ComicInfo>`), 'p001.jpg': new Uint8Array(imagen) });
 
 const LIBROS = {
   ja: {
-    epub: { titulo: '吾輩は猫である', archivo: 'soseki.epub', datos: epub({ titulo: '吾輩は猫である', autor: '夏目漱石', idioma: 'ja', vertical: true, capitulo: '一', parrafos: SOSEKI }) },
-    pagina: {
-      titulo: '町の図書館',
-      archivo: 'biblioteca.cbz',
-      lineas: ['日本の町には、小さな図書館がたくさんあります。', '週末になると、子どもから大人まで多くの人が本を', '借りに来ます。最近は、外国語の本や漫画を置く図', '書館も増えてきました。静かな部屋で新聞を読む人', 'もいれば、試験の勉強をする学生もいます。図書館', 'は、だれでも自由に使える大切な場所です。'],
-      letra: "'Yu Mincho','MS Mincho',serif",
-    },
-    palabraEpub: '人間',
-    palabraPagina: '週末',
+    epub: { titulo: GENJI.titulo, archivo: 'genji.epub', datos: epub({ titulo: GENJI.titulo, autor: GENJI.autor, idioma: 'ja', vertical: true, capitulo: GENJI.capitulo, parrafos: GENJI_PARRAFOS }) },
+    // La página escaneada en japonés es la de KK_ESCANEO, de un libro de verdad: sin ella no hay imagen del OCR.
+    pagina: null,
+    texto: GENJI_PARRAFOS,
+    palabraEpub: '後宮',
   },
   en: {
     epub: { titulo: 'Alice’s Adventures in Wonderland', archivo: 'carroll.epub', datos: epub({ titulo: 'Alice’s Adventures in Wonderland', autor: 'Lewis Carroll', idioma: 'en', vertical: false, capitulo: 'Chapter I. Down the Rabbit-Hole', parrafos: CARROLL }) },
-    pagina: {
-      titulo: 'The Town Library',
-      archivo: 'library.cbz',
-      lineas: ['Every town in Japan has a small public library.', 'On weekends, people of all ages come to borrow', 'books. Recently, many libraries have added comics', 'and books in other languages. Some visitors read', 'the newspaper in a quiet room, while students', 'prepare for exams. A library is a place that', 'everyone can use freely.'],
-      letra: "Georgia,'Times New Roman',serif",
-    },
+    // La primera página del capítulo I en la edición de 1866, escaneada (Wikimedia Commons).
+    // Un título que no contenga el del EPUB: las tapas se buscan por lo que contiene su etiqueta.
+    pagina: { titulo: 'Wonderland · 1866', archivo: 'alice-1866.cbz', imagen: ALICE_1866.imagen },
+    texto: CARROLL,
     palabraEpub: 'considering',
-    palabraPagina: 'borrow',
+    palabraPagina: ALICE_1866.palabra,
   },
 };
 
@@ -217,22 +183,15 @@ async function video(id) {
       res.setHeader('access-control-allow-origin', '*');
       if (req.url === '/') {
         res.setHeader('content-type', 'text/html; charset=utf-8');
-        res.end(`<!doctype html><html lang="ja"><meta charset="utf-8"><title>夜明けの星</title><body style="margin:0;background:#0b0b0d"><video id="v" src="/video.webm" muted style="position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#000"><track kind="subtitles" srclang="ja" label="日本語" src="/ja.vtt"><track kind="subtitles" srclang="${id}" label="${id}" src="/apoyo.vtt"></video></body></html>`);
+        res.end(`<!doctype html><html lang="ja"><meta charset="utf-8"><title>${DIETA.titulo}</title><body style="margin:0;background:#0b0b0d"><video id="v" src="/video.webm" muted style="position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#000"><track kind="subtitles" srclang="ja" label="日本語" src="/ja.vtt"><track kind="subtitles" srclang="${id}" label="${id}" src="/apoyo.vtt"></video></body></html>`);
       } else if (req.url === '/ja.vtt' || req.url === '/apoyo.vtt') {
         res.setHeader('content-type', 'text/vtt; charset=utf-8');
-        res.end(vtt(req.url === '/ja.vtt' ? VTT.ja : VTT[id]));
+        res.end(vtt(req.url === '/ja.vtt' ? DIETA.lineas : traduccionDieta(id)));
       } else if (req.url === '/video.webm') {
-        const datos = readFileSync(join(RAIZ, 'pruebas', 'fixtures', 'video.webm'));
-        res.setHeader('content-type', 'video/webm');
-        res.setHeader('accept-ranges', 'bytes');
-        const r = /bytes=(\d+)-(\d*)/.exec(req.headers.range ?? '');
-        if (r) {
-          const ini = +r[1];
-          const fin = r[2] ? +r[2] : datos.length - 1;
-          res.statusCode = 206;
-          res.setHeader('content-range', `bytes ${ini}-${fin}/${datos.length}`);
-          res.end(datos.subarray(ini, fin + 1));
-        } else res.end(datos);
+        servirVideo(readFileSync(archivoLibre(DIETA.video)), req.headers.range, (estado, cuerpo, cabeceras) => {
+          res.writeHead(estado, cabeceras);
+          res.end(cuerpo);
+        });
       } else {
         res.statusCode = 404;
         res.end();
@@ -261,12 +220,13 @@ async function video(id) {
   await p.evaluate(() => {
     const v = document.querySelector('#v');
     v.pause();
-    v.currentTime = 10;
+    // 「スタートアップは、技術を実用化していく主要な担い手です。」
+    v.currentTime = 60;
   });
   await p.waitForFunction(() => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.linea-sub.objetivo .pal'), null, { timeout: 30000 });
   await p.waitForTimeout(3000);
   const caja = await enSombra((r) => {
-    const e = [...r.querySelectorAll('.linea-sub.objetivo .pal')].find((x) => x.textContent.includes('食'));
+    const e = [...r.querySelectorAll('.linea-sub.objetivo .pal')].find((x) => x.textContent.includes('担'));
     const c = e?.getBoundingClientRect();
     return c ? { x: c.left + c.width / 2, y: c.top + c.height / 2 } : null;
   });
@@ -306,8 +266,8 @@ async function biblioteca(datos, reales) {
     await b.waitForFunction((antes) => document.querySelectorAll('.ap-libro').length < antes, n, { timeout: 15000 });
   }
   const propios = [{ name: datos.epub.archivo, mimeType: 'application/epub+zip', buffer: Buffer.from(datos.epub.datos) }];
-  if (!reales.some((r) => r.base === 'ocr')) {
-    const imagen = await pagina({ ...datos.pagina, numero: 12 });
+  if (datos.pagina && !reales.some((r) => r.base === 'ocr')) {
+    const imagen = readFileSync(archivoLibre(datos.pagina.imagen));
     propios.push({ name: datos.pagina.archivo, mimeType: 'application/zip', buffer: Buffer.from(cbz(datos.pagina.titulo, imagen)) });
   }
   await importar(b, propios);
@@ -453,7 +413,7 @@ async function paginaReal(b, etiqueta, real, id) {
 async function vocabularioDeLibro(b, datos, estudia, id) {
   const libro = (await motor('bibliotecaListar')).find((e) => e.titulo === datos.epub.titulo);
   if (!libro) throw new Error(`No está en la estantería: ${datos.epub.titulo}`);
-  const texto = (estudia === 'ja' ? SOSEKI : CARROLL).map((p) => p.replace(/<rt>.*?<\/rt>/g, '').replace(/<[^>]+>/g, '')).join('\n');
+  const texto = datos.texto.map((p) => p.replace(/<rt>.*?<\/rt>/g, '').replace(/<[^>]+>/g, '')).join('\n');
   const cuenta = await motor('contarPalabras', [{ texto, lugar: 0 }]);
   const datosPalabras = await motor('datosPalabras', cuenta.palabras.map(({ clave, lema, lectura, categoria, gramatica }) => ({ clave, lema, lectura, categoria, gramatica })));
   const faciles = cuenta.palabras.filter((p, i) => {
@@ -479,8 +439,8 @@ async function vocabularioDeLibro(b, datos, estudia, id) {
 
 // ---------- El Portapapeles en inglés, para quien habla japonés ----------
 
-const PORTAPAPELES_EN =
-  'Our town library has opened a new reading room with large windows. On sunny days, you can read a book while enjoying the view of the mountains.\n\nAccording to the librarian, there will be story time for children every Saturday starting next month. People in town are glad to have another quiet place to spend their time.';
+// El comienzo de «Pride and Prejudice» (1813), de dominio público.
+const PORTAPAPELES_EN = AUSTEN;
 
 async function portapapeles(id) {
   await sw.evaluate((t) => chrome.storage.local.set({ lectorTexto: t }), PORTAPAPELES_EN);
@@ -529,7 +489,7 @@ for (const id of IDIOMAS) {
   const reales = estudia === 'ja' && (hacer('ocr') || hacer('manga')) ? [ESCANEO, MANGA].filter(Boolean) : [];
   const { b, etiquetas } = await biblioteca(datos, reales);
   if (hacer('libro')) await libroDeTexto(b, datos, id);
-  if (hacer('ocr') && !etiquetas.ocr) await paginaConOcr(b, datos, id);
+  if (hacer('ocr') && !etiquetas.ocr && datos.pagina) await paginaConOcr(b, datos, id);
   for (const r of reales) if (hacer(r.base)) await paginaReal(b, etiquetas[r.base], r, id);
   if (hacer('vocabulario')) await vocabularioDeLibro(b, datos, estudia, id);
   await b.close();

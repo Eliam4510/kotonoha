@@ -67,9 +67,11 @@ Cada palabra que se marca como conocida deja de resaltarse en todas partes, y el
 
 ### Subtítulos que se pueden leer
 
-<img src="docs/img/ficha.png" alt="Ficha de la palabra 食べる sobre un video, con su sentido en la frase" width="100%">
+<img src="docs/img/ficha.png" alt="Ficha de 担い手 sobre un discurso en la Dieta, con su sentido en la frase" width="100%">
 
-Sobre el reproductor aparecen los subtítulos con furigana, un color por acento tonal y un subrayado según el estado de cada palabra: nueva, en aprendizaje o conocida. Al pasar el ratón se abre la ficha con el diccionario, sin ningún coste. Claude añade el sentido de la palabra en esa frase, aunque sea figurado o poético, como el 食べる de la imagen.
+<sub>Video: [«第221回国会における高市内閣総理大臣施政方針演説»](https://www.youtube.com/watch?v=alk-cIHwTIU) (首相官邸YouTube), con su texto oficial y su traducción al inglés ([首相官邸ホームページ](https://www.kantei.go.jp/jp/105/statement/2026/0220shiseihoshin.html)), bajo la licencia [PDL 1.0](https://www.digital.go.jp/resources/open_data/public_data_license_v1.0), compatible con CC BY 4.0; editado con los subtítulos y las fichas de Kotonoha. Es también el video de la animación de arriba, del dictado, de la gramática y de la tarjeta.</sub>
+
+Sobre el reproductor aparecen los subtítulos con furigana, un color por acento tonal y un subrayado según el estado de cada palabra: nueva, en aprendizaje o conocida. Al pasar el ratón se abre la ficha con el diccionario, sin ningún coste. Claude añade el sentido de la palabra en esa frase, aunque sea figurado o poético, como el 担い手 de la imagen: no quien carga algo a hombros, sino quien lleva adelante la tarea.
 
 - Una tarjeta con la frase, su audio y el fotograma se crea con `Q`, directa a Anki o al repaso integrado.
 - Las líneas se recorren con `A` y `D`, y `S` repite la actual. El navegador de subtítulos (`G`) las muestra todas, con filtros y marcadores.
@@ -78,13 +80,17 @@ Sobre el reproductor aparecen los subtítulos con furigana, un color por acento 
 
 ### Cualquier página web
 
-<img src="docs/img/paginas.png" alt="Artículo japonés con colores, furigana y la ficha de una palabra" width="100%">
+<img src="docs/img/paginas.png" alt="『羅生門』 en el Aozora Bunko, con colores, furigana y el panel del lector" width="100%">
+
+<sub>『羅生門』, de 芥川龍之介, en el [Aozora Bunko](https://www.aozora.gr.jp/cards/000879/card127.html) (dominio público).</sub>
 
 En noticias, blogs, wikis o en un chat como el de Claude, el texto japonés recibe los mismos colores y el mismo furigana, y un clic en una palabra abre su ficha. No cambia el contenido de la página: los enlaces y los botones siguen funcionando, y los sitios hechos con React no notan nada. Se ha probado en una treintena de sitios reales.
 
 ### Libros, PDF y manga
 
-<img src="docs/img/libro-texto.png" alt="Novela japonesa en vertical, con ruby, colores y la ficha de una palabra" width="100%">
+<img src="docs/img/libro-texto.png" alt="El Genji de Yosano Akiko en vertical, con ruby, colores y la ficha de 後宮" width="100%">
+
+<sub>『源氏物語』「桐壺」, en la versión de 与謝野晶子, del [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (dominio público). Es también el libro del vocabulario.</sub>
 
 La **Biblioteca** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Sus órdenes van en menús con nombre, y Ctrl+K encuentra cualquiera escribiendo lo que hace; hay mano, resaltador y un modo lectura que deja solo la página. Sobre la propia página, cada palabra puede llevar su furigana y el subrayado de su estado, la traducción de una frase sale debajo como un subtítulo, se puede leer en voz alta siguiendo la frase y las palabras consultadas pasan a tarjetas con un recorte de la página. Una zona dibujada sobre la página se lee aparte con el OCR, y los EPUB de texto y los textos de la Biblioteca se leen en el mismo visor, con los mismos menús. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras. La estantería agrupa los libros en colecciones, como una serie con sus tomos, con su portada y una descripción, y muestra cuánto se ha leído de cada libro y de cada colección. En el visor se marcan páginas, se resalta o subraya el texto con un comentario y se dejan notas sobre la página, como en un lector de PDF. Se busca una palabra en todo el libro, cada página se puede leer como texto, con la ayuda de lectura, y Claude puede revisar el texto que leyó el OCR comparándolo con la imagen de la página.
 
@@ -98,7 +104,7 @@ Las páginas que son imágenes, como los mangas, los libros escaneados y muchos 
 
 ### El vocabulario de un libro, antes de leerlo
 
-<img src="docs/img/vocabulario.png" alt="Vocabulario de 吾輩は猫である: comprensión, palabras por aprender, metas del 90, 95 y 98 % y la lista con 書生 abierto y sus frases del libro" width="100%">
+<img src="docs/img/vocabulario.png" alt="Vocabulario de 桐壺, del Genji: comprensión, palabras por aprender, metas del 90, 95 y 98 % y la lista con お abierto y sus frases del libro" width="100%">
 
 Cada libro y cada colección tienen su **vocabulario**: todas sus palabras, contadas, las que más salen primero, con su lectura, su glosa, su nivel del JLPT y su mejor frase del libro. Arriba se ve cuánto se entiende ya y cuántas palabras hacen falta para entender el 90, el 95 o el 98 %. Las palabras se marcan aquí mismo como conocidas o en aprendizaje, y las elegidas pasan de golpe a Memoria o a Anki con su frase del libro. Vale para novelas, PDF, textos y manga leído con el OCR; en una serie, cada tomo dice cuántas palabras nuevas trae. También está la gramática del libro, punto por punto.
 
@@ -116,25 +122,25 @@ El **Cuaderno** es una página a todo lo ancho para escribir y pegar texto en la
 
 ### Dictado
 
-<img src="docs/img/dictado.png" alt="Modo Dictado sobre un video: lo oído en verde, lo que faltó subrayado, lo oído a medias en amarillo y la nota" width="100%">
+<img src="docs/img/dictado.png" alt="Modo Dictado sobre un discurso en la Dieta: lo oído en verde, lo que faltó subrayado y la nota" width="100%">
 
 El modo **Dictado** oculta la frase mientras suena, pausa al terminarla y pide escribir lo que se oyó. Al comprobar, cada parte sale en verde si se oyó bien, en amarillo si a medias o subrayada si faltó, con la nota de la frase. En japonés se compara cómo se lee, así que vale escribir en kana. **Repetir con tu voz** abre la práctica del acento con esa misma frase, y `P` lo hace con cualquier subtítulo.
 
 ### La gramática que ya sabes
 
-<img src="docs/img/gramatica.png" alt="Globo de 〜ことができる sobre un video, marcado como Aprendiendo, con su explicación y dónde se ha visto" width="100%">
+<img src="docs/img/gramatica.png" alt="Globo de 〜ために sobre un discurso en la Dieta, marcado como Aprendiendo, con su explicación y dónde se ha visto" width="100%">
 
 Bajo cada subtítulo salen los puntos de gramática que lleva la frase, con su nivel del JLPT. Al tocar uno se abre su globo: qué significa, la explicación de Claude para esa frase y dónde lo has visto antes. Cada punto se marca como **Nuevo**, **Aprendiendo** o **Sabido**; lo que se está aprendiendo lleva una raya amarilla y lo sabido deja de señalarse. Lo que ya se sabía se puede importar desde Anki, y **Tarjeta de opción múltiple** prepara una con tres opciones que se confunden con la buena.
 
 ### Cómo se escribe cada kanji
 
-<img src="docs/img/trazos.png" alt="Orden de los trazos de una palabra en la ficha" width="100%">
+<img src="docs/img/trazos.png" alt="Orden de los trazos de 下人, en 『羅生門』, en la ficha" width="100%">
 
 La ficha enseña el orden de los trazos de cada kanji de la palabra, uno a uno y en bucle, con sus números, y debajo, las palabras que ya conoces con ese mismo kanji.
 
 ### Para compartir lo que encuentras
 
-<img src="docs/img/tarjeta.png" alt="Tarjeta de la palabra 食べる con lo que significa en la frase, lista para pegar en un chat" width="520">
+<img src="docs/img/tarjeta.png" alt="Tarjeta de la palabra 担い手 con lo que significa en la frase, lista para pegar en un chat" width="520">
 
 **Compartir como imagen**, en la ficha, convierte una palabra o un punto de gramática en una tarjeta con lo que significa en esa frase y la frase donde apareció, y la deja en el portapapeles para pegarla en cualquier chat con Ctrl+V. Sale en tinta o en papel, como los temas.
 
@@ -160,7 +166,9 @@ Y se practica ahí mismo: se escribe con el ratón, un lápiz o el dedo, calcand
 
 ### Inglés y alemán
 
-<img src="docs/img/ingles-subtitulos.png" alt="Ficha de una palabra inglesa sobre un video, con la pronunciación en IPA" width="100%">
+<img src="docs/img/ingles-subtitulos.png" alt="Ficha de refer sobre un video de la NASA, con la pronunciación en IPA" width="100%">
+
+<sub>Video y subtítulos: [«What’s Up: November 2026 Skywatching Tips from NASA»](https://www.youtube.com/watch?v=PN-iD6VTmyc), NASA/JPL-Caltech (dominio público).</sub>
 
 En inglés, la ficha da la pronunciación americana y británica en IPA, encuentra los verbos con partícula aunque vayan separados, como *picked it up*, y dice de qué palabra viene cada forma irregular. En alemán, dice de qué palabra sale cada forma conjugada o declinada, como *ging* de *gehen*, y encuentra los verbos separables aunque la partícula vaya al final. Los diccionarios salen de Wiktionary, en el idioma propio. Los cómics se leen globo a globo, de izquierda a derecha, y las frases suenan con voces neuronales en el propio equipo: Kokoro en inglés y Piper en alemán. Cada idioma guarda sus propias palabras, tarjetas y ajustes, y se cambia de uno a otro con un clic.
 
@@ -250,7 +258,8 @@ El código se publica bajo la [licencia MIT](LICENSE). Los componentes de tercer
 - Diccionarios: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) y KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) y [JPDB](https://jpdb.io); para el inglés y el alemán, [Wiktionary](https://www.wiktionary.org) mediante [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) y [kaikki.org](https://kaikki.org); para el chino, [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) mediante [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan).
 - Voz: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja y Parakeet, con [Transformers.js](https://github.com/huggingface/transformers.js).
 - Reconocimiento de texto: [PP-OCRv5 y PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) y un [detector de globos de texto](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
-- Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0.
+- Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0; en chino, [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), de [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), Arphic Public License.
+- Contenido de las imágenes: un discurso en la Dieta del 首相官邸 (PDL 1.0), un video de la NASA, 『源氏物語』 en la versión de 与謝野晶子 y 『羅生門』, del Aozora Bunko, y el comienzo de 『吾輩は猫である』, todos de dominio público salvo el discurso. Las páginas de dos libros llevan su crédito debajo de la imagen.
 - Iconos: [Phosphor](https://phosphoricons.com). Tipografía: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) y [Nunito](https://fonts.google.com/specimen/Nunito).
 
 El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Japón tiene por semilla el corazón humano, y de él brotan miríadas de hojas de palabras.

@@ -30,26 +30,28 @@ const estrellas = Array.from({ length: 70 }, (_, i) => {
   return `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(1)}" fill="#fff" opacity="${(0.25 + ((i * 7) % 10) / 16).toFixed(2)}"/>`;
 }).join('');
 
-// Cada palabra lleva el color de su acento tonal y un subrayado según se conozca o no, como sobre el video.
+// El final de la primera frase del prefacio en kana del 古今和歌集 (905), de Ki no Tsurayuki, de donde viene el nombre:
+// «やまとうたは、人の心を種として、よろづの言の葉とぞなれりける». Cada palabra con su color y un subrayado según se
+// conozca o no, como sobre el video.
 const PALABRAS = [
   { t: '言', r: 'こと', c: '#FF9393', s: '#93DF56' },
   { t: 'の', c: '#F2F5EE' },
   { t: '葉', r: 'は', c: '#7FE6B3', s: '#F7CB52' },
-  { t: 'を', c: '#F2F5EE' },
-  { t: '集', r: 'あつ', c: '#8FCBFF', s: '#FF9166' },
-  { t: 'める', c: '#8FCBFF', s: '#FF9166', u: true },
+  { t: 'とぞ', c: '#F2F5EE' },
+  { t: 'なれ', c: '#8FCBFF', s: '#FF9166' },
+  { t: 'りける', c: '#8FCBFF', s: '#FF9166', u: true },
 ];
 
 const palabrasHtml = PALABRAS.map(({ t, r, c, s, u }) => `<span class="pal${s ? ' con' : ''}${u ? ' cola' : ''}" style="color:${c};${s ? `--sub:${s}` : ''}">${r ? `<ruby>${t}<rt>${r}</rt></ruby>` : t}</span>`).join('');
 
 // Quien lee en japonés no estudia japonés: su banner habla del inglés, del chino y del alemán.
 const TEXTOS = {
-  'banner.png': { lema: 'Subtítulos interactivos, diccionario, ayuda de lectura para libros y manga, y tarjetas: japonés, inglés, chino y alemán con video y texto real', traduccion: 'Recoger hojas de palabras' },
-  'banner.en.png': { lema: 'Interactive subtitles, a dictionary, reading help for books and manga, and flashcards: Japanese, English, Chinese and German from real video and text', traduccion: 'Gathering leaves of words' },
-  'banner.de.png': { lema: 'Interaktive Untertitel, Wörterbuch, Lesehilfe für Bücher und Manga, und Karten: Japanisch, Englisch, Chinesisch und Deutsch mit echten Videos und Texten', traduccion: 'Blätter aus Worten sammeln' },
-  'banner.zh.png': { lema: '交互式字幕、词典、书籍和漫画阅读助手，以及记忆卡片：通过真实的视频和文章学日语、英语、中文和德语', traduccion: '拾取言语之叶' },
-  'banner.ko.png': { lema: '대화형 자막, 사전, 책과 만화 읽기 도우미, 카드로 실제 영상과 글에서 일본어, 영어, 중국어, 독일어를 배웁니다', traduccion: '말의 잎을 모으다' },
-  'banner.ja.png': { lema: 'インタラクティブな字幕、辞書、本や記事の読書アシスト、カードで、本物の動画や文章から英語、中国語、ドイツ語を学ぶ', traduccion: '人の心を種として' },
+  'banner.png': { lema: 'Subtítulos interactivos, diccionario, ayuda de lectura para libros y manga, y tarjetas: japonés, inglés, chino y alemán con video y texto real', traduccion: '…y se hizo hojas de palabras · Kokinshū, 905' },
+  'banner.en.png': { lema: 'Interactive subtitles, a dictionary, reading help for books and manga, and flashcards: Japanese, English, Chinese and German from real video and text', traduccion: '…and became leaves of words · Kokinshū, 905' },
+  'banner.de.png': { lema: 'Interaktive Untertitel, Wörterbuch, Lesehilfe für Bücher und Manga, und Karten: Japanisch, Englisch, Chinesisch und Deutsch mit echten Videos und Texten', traduccion: '…und wurde zu Wortblättern · Kokinshū, 905' },
+  'banner.zh.png': { lema: '交互式字幕、词典、书籍和漫画阅读助手，以及记忆卡片：通过真实的视频和文章学日语、英语、中文和德语', traduccion: '……化作万千言叶 · 《古今和歌集》，905年' },
+  'banner.ko.png': { lema: '대화형 자막, 사전, 책과 만화 읽기 도우미, 카드로 실제 영상과 글에서 일본어, 영어, 중국어, 독일어를 배웁니다', traduccion: '…말의 잎이 되었노라 · 고킨와카슈, 905' },
+  'banner.ja.png': { lema: 'インタラクティブな字幕、辞書、本や記事の読書アシスト、カードで、本物の動画や文章から英語、中国語、ドイツ語を学ぶ', traduccion: 'やまとうたは、人の心を種として ·『古今和歌集』仮名序' },
 };
 
 const contexto = await chromium.launch({ channel: process.env.KK_CANAL ?? 'msedge', headless: true });
@@ -65,16 +67,16 @@ for (const [archivo, { lema, traduccion }] of Object.entries(TEXTOS)) {
     .marca svg { width: 108px; height: 108px; filter: drop-shadow(0 10px 26px rgba(147, 223, 86, 0.32)); }
     h1 { font-size: 74px; font-weight: 800; letter-spacing: -0.01em; line-height: 1; }
     .kanji { margin-top: 6px; font-family: Zen, sans-serif; font-size: 25px; font-weight: 700; letter-spacing: 0.32em; color: #CDF372; }
-    .lema { position: absolute; left: 80px; top: 226px; width: 590px; font-size: 22px; line-height: 1.42; font-weight: 600; color: #E2E6EF; text-shadow: 0 1px 10px rgba(16, 12, 40, 0.6); }
+    .lema { position: absolute; left: 80px; top: 226px; width: 548px; font-size: 22px; line-height: 1.42; font-weight: 600; color: #E2E6EF; text-shadow: 0 1px 10px rgba(16, 12, 40, 0.6); }
     .lema:lang(ko) { word-break: keep-all; } .lema:lang(ja) { word-break: auto-phrase; }
     .subtitulo { position: absolute; right: 72px; top: 138px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-    .linea { display: flex; align-items: flex-end; padding: 26px 30px 16px; border-radius: 26px; background: rgba(14, 12, 32, 0.66); font-family: Zen, sans-serif; font-size: 58px; font-weight: 700; line-height: 1.1; box-shadow: 0 18px 50px rgba(8, 6, 24, 0.45); }
+    .linea { display: flex; align-items: flex-end; padding: 26px 30px 16px; border-radius: 26px; background: rgba(14, 12, 32, 0.66); font-family: Zen, sans-serif; font-size: 50px; font-weight: 700; line-height: 1.1; box-shadow: 0 18px 50px rgba(8, 6, 24, 0.45); }
     .pal { position: relative; padding-bottom: 12px; }
     .pal.con::after { content: ''; position: absolute; left: 3px; right: 3px; bottom: 0; height: 4px; border-radius: 3px; background: var(--sub); }
     .pal.con:has(+ .pal.cola)::after { right: 0; border-radius: 3px 0 0 3px; }
     .pal.cola::after { left: 0 !important; border-radius: 0 3px 3px 0; }
     rt { font-size: 21px; font-weight: 700; letter-spacing: 0.04em; padding-bottom: 3px; color: inherit; }
-    .trad { padding: 8px 22px; border-radius: 16px; background: rgba(14, 12, 32, 0.56); font-size: 26px; font-weight: 700; }
+    .trad { padding: 8px 22px; border-radius: 16px; background: rgba(14, 12, 32, 0.56); font-size: 22px; font-weight: 700; }
   </style></head><body>
     <svg class="fondo" viewBox="0 0 1280 420" preserveAspectRatio="none"><defs><radialGradient id="g"><stop offset="0" stop-color="#FFF3CF" stop-opacity=".5"/><stop offset="1" stop-color="#FFF3CF" stop-opacity="0"/></radialGradient></defs>${estrellas}<circle cx="1120" cy="70" r="140" fill="url(#g)"/><circle cx="1120" cy="70" r="40" fill="#FFF3CF"/>${montana(330, 80, '#46305F', 1.2)}${montana(372, 62, '#2F2449', 3.1)}${montana(404, 42, '#1C1833', 5.3)}</svg>
     <div class="marca">${hoja.replace(/id="kk-/g, 'id="b-').replace(/url\(#kk-/g, 'url(#b-')}<div><h1>Kotonoha</h1><div class="kanji">言の葉</div></div></div>

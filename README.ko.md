@@ -63,9 +63,11 @@ flowchart LR
 
 ### 제대로 읽을 수 있는 자막
 
-<img src="docs/img/ficha.ko.png" alt="영상 위 食べる의 단어 패널과 문장 속 의미" width="100%">
+<img src="docs/img/ficha.ko.png" alt="일본 국회 연설 영상 위 担い手의 단어 패널과 문장 속 의미" width="100%">
 
-플레이어 위에 후리가나, 높낮이 악센트별 색, 단어마다 학습 상태(모르는 단어, 학습 중, 아는 단어)를 나타내는 밑줄이 있는 자막이 나타납니다. 마우스를 올리면 사전이 담긴 단어 패널이 무료로 열립니다. Claude는 그림 속 食べる처럼 비유적이거나 시적인 쓰임이라도 그 문장에서의 뜻을 알려 줍니다.
+<sub>영상: [「第221回国会における高市内閣総理大臣施政方針演説」](https://www.youtube.com/watch?v=alk-cIHwTIU) (일본 총리관저 YouTube), 공식 원문과 영어 번역([首相官邸ホームページ](https://www.kantei.go.jp/jp/105/statement/2026/0220shiseihoshin.html)) 포함, CC BY 4.0과 호환되는 공공 데이터 이용 약관 [PDL 1.0](https://www.digital.go.jp/resources/open_data/public_data_license_v1.0)에 따름. Kotonoha의 자막과 단어 패널로 가공했습니다. 받아쓰기, 문법, 카드도 같은 영상입니다.</sub>
+
+플레이어 위에 후리가나, 높낮이 악센트별 색, 단어마다 학습 상태(모르는 단어, 학습 중, 아는 단어)를 나타내는 밑줄이 있는 자막이 나타납니다. 마우스를 올리면 사전이 담긴 단어 패널이 무료로 열립니다. Claude는 그림 속 担い手처럼 비유적이거나 시적인 쓰임이라도 그 문장에서의 뜻을 알려 줍니다. 여기서는 어깨에 짐을 지는 사람이 아니라 일을 이끌어 가는 주체입니다.
 
 - `Q`를 누르면 문장, 오디오, 영상 프레임으로 카드를 만들어 Anki나 내장 복습으로 바로 보냅니다.
 - `A`와 `D`로 대사 사이를 이동하고 `S`로 현재 대사를 반복합니다. 자막 탐색기(`G`)는 모든 대사를 필터와 북마크와 함께 보여 줍니다.
@@ -74,13 +76,17 @@ flowchart LR
 
 ### 모든 웹페이지
 
-<img src="docs/img/paginas.ko.png" alt="색, 후리가나, 단어 패널이 표시된 일본어 기사" width="100%">
+<img src="docs/img/paginas.ko.png" alt="색, 후리가나, 리더 패널이 표시된 아오조라 문고의 『羅生門』" width="100%">
+
+<sub>아쿠타가와 류노스케 『羅生門』, [아오조라 문고](https://www.aozora.gr.jp/cards/000879/card127.html) (퍼블릭 도메인).</sub>
 
 뉴스, 블로그, 위키, Claude 같은 채팅에서도 일본어 텍스트에 같은 색과 후리가나가 붙고, 단어를 클릭하면 단어 패널이 열립니다. 페이지 내용은 바뀌지 않습니다. 링크와 버튼은 그대로 작동하고 React로 만든 사이트도 알아채지 못합니다. 실제 사이트 약 서른 곳에서 시험했습니다.
 
 ### 책, PDF, 만화
 
-<img src="docs/img/libro-texto.ko.png" alt="루비, 색, 단어 패널이 표시된 세로쓰기 일본어 소설" width="100%">
+<img src="docs/img/libro-texto.ko.png" alt="루비, 색, 後宮의 단어 패널이 표시된 세로쓰기 『源氏物語』(요사노 아키코판)" width="100%">
+
+<sub>『源氏物語』(겐지 이야기) 「桐壺」, 요사노 아키코 번역본, [아오조라 문고](https://www.aozora.gr.jp/cards/000052/card5016.html) (퍼블릭 도메인). 어휘 그림의 책도 이것입니다.</sub>
 
 **서재**는 PDF 리더처럼 완전한 뷰어입니다. 확대·축소, 두 쪽 보기, 연속 스크롤, 목차, 썸네일을 갖추고 책마다 읽던 페이지를 기억합니다. 동작은 이름 있는 메뉴에 모여 있고, Ctrl+K로 하려는 일을 입력하면 어떤 동작이든 찾을 수 있습니다. 손 도구, 형광펜, 페이지만 남기는 읽기 모드도 있습니다. 페이지 위에는 단어마다 후리가나와 상태별 밑줄을 표시할 수 있고, 문장의 번역은 자막처럼 그 아래에 나옵니다. 문장을 따라 소리 내어 읽을 수 있으며, 찾아본 단어는 페이지 일부를 잘라 낸 이미지와 함께 카드가 됩니다. 페이지에 그린 영역만 문자 인식으로 따로 읽을 수 있고, 텍스트 EPUB과 서재의 텍스트도 같은 메뉴의 같은 뷰어에서 읽습니다. 소설 같은 텍스트 EPUB은 원래의 서식, 루비, 세로쓰기를 그대로 살리고, 그 위에 페이지 리더가 웹에서처럼 색, 후리가나, 단어 패널을 더합니다. 텍스트가 들어 있는 PDF는 곧바로 단어 단위로 읽을 수 있습니다. 이미지 폴더로 된 만화는 폴더를 고르기만 하면 들어오며, 권마다 책 한 권이 되고 표지가 맨 앞에, 컬러 두 쪽 그림은 통째로 보입니다. 책장은 시리즈와 그 권들처럼 책을 컬렉션으로 묶어 표지와 설명을 붙이고, 책과 컬렉션마다 얼마나 읽었는지 보여 줍니다. 뷰어에서는 PDF 리더처럼 페이지에 책갈피를 달고, 글을 강조하거나 밑줄을 그어 코멘트를 붙이고, 페이지에 메모를 남길 수 있습니다. 책 전체에서 단어를 찾고, 각 페이지를 읽기 도우미와 함께 글로 읽을 수 있으며, Claude가 문자 인식으로 읽은 글을 페이지 이미지와 비교해 검토할 수 있습니다.
 
@@ -94,7 +100,7 @@ flowchart LR
 
 ### 읽기 전에 보는 책의 어휘
 
-<img src="docs/img/vocabulario.ko.png" alt="吾輩は猫である의 어휘: 이해도, 배울 단어, 90·95·98% 목표, 書生을 펼쳐 책 속 문장을 보여 주는 목록" width="100%">
+<img src="docs/img/vocabulario.ko.png" alt="『源氏物語』 「桐壺」의 어휘: 이해도, 배울 단어, 90·95·98% 목표, お를 펼쳐 책 속 문장을 보여 주는 목록" width="100%">
 
 책과 컬렉션마다 **어휘**가 있습니다. 모든 단어를 세어 가장 많이 나오는 것부터 읽기, 뜻, JLPT 급수, 책 속 가장 알맞은 문장과 함께 보여 줍니다. 위쪽에는 지금 얼마나 이해하는지, 90·95·98%를 이해하려면 몇 단어가 더 필요한지가 나옵니다. 단어는 바로 여기서 아는 단어나 학습 중으로 표시하고, 고른 단어는 책 속 문장과 함께 한꺼번에 메모리나 Anki로 보냅니다. 소설, PDF, 글, 문자 인식으로 읽은 만화 모두에 쓸 수 있고, 시리즈에서는 권마다 새 단어가 몇 개인지 알려 줍니다. 책의 문법도 하나씩 볼 수 있습니다.
 
@@ -112,25 +118,25 @@ flowchart LR
 
 ### 받아쓰기
 
-<img src="docs/img/dictado.ko.png" alt="동영상 위의 받아쓰기 모드: 맞게 들은 부분은 초록색, 빠진 부분은 밑줄, 반만 들은 부분은 노란색, 그리고 점수" width="100%">
+<img src="docs/img/dictado.ko.png" alt="일본 국회 연설 영상 위의 받아쓰기 모드: 맞게 들은 부분은 초록색, 빠진 부분은 밑줄, 그리고 점수" width="100%">
 
 **받아쓰기** 모드는 재생 중에 문장을 숨기고, 문장이 끝나면 멈춘 뒤 들은 내용을 쓰게 합니다. 확인하면 맞게 들은 부분은 초록색, 반만 들은 부분은 노란색, 빠진 부분은 밑줄로 표시되고 문장 점수가 나옵니다. 일본어는 읽는 법으로 비교하므로 가나로 써도 됩니다. **내 목소리로 따라 하기**는 그 문장으로 악센트 연습을 열고, `P`는 어떤 자막으로든 그렇게 합니다.
 
 ### 이미 아는 문법
 
-<img src="docs/img/gramatica.ko.png" alt="동영상 위 〜ことができる의 말풍선. 학습 중으로 표시되고 설명과 본 곳이 나온다" width="100%">
+<img src="docs/img/gramatica.ko.png" alt="일본 국회 연설 영상 위 〜ために의 말풍선. 학습 중으로 표시되고 설명과 본 곳이 나온다" width="100%">
 
 자막마다 아래에 그 문장의 문법 항목이 JLPT 급수와 함께 나옵니다. 하나를 누르면 말풍선이 열려 뜻, 그 문장에 맞춘 Claude의 설명, 전에 본 곳을 보여 줍니다. 항목마다 **새 항목**, **학습 중**, **익힘**으로 표시하며, 학습 중인 것은 노란 줄이 붙고 익힌 것은 더 이상 표시되지 않습니다. 이미 아는 것은 Anki에서 가져올 수 있고, **객관식 카드**는 정답과 헷갈리기 쉬운 선택지 세 개가 있는 카드를 만듭니다.
 
 ### 한자를 쓰는 순서
 
-<img src="docs/img/trazos.ko.png" alt="단어 패널에 표시된 단어의 획순" width="100%">
+<img src="docs/img/trazos.ko.png" alt="단어 패널에 표시된 『羅生門』의 下人 획순" width="100%">
 
 단어 패널은 단어에 든 한자 하나하나의 획순을 번호와 함께 한 획씩 반복해서 보여 주고, 아래에는 같은 한자가 들어간 이미 아는 단어를 보여 줍니다.
 
 ### 찾은 것을 공유하기
 
-<img src="docs/img/tarjeta.ko.png" alt="이 문장에서의 뜻이 담긴 단어 食べる의 카드, 채팅에 바로 붙여 넣을 수 있음" width="520">
+<img src="docs/img/tarjeta.ko.png" alt="이 문장에서의 뜻이 담긴 단어 担い手의 카드, 채팅에 바로 붙여 넣을 수 있음" width="520">
 
 단어 패널의 **이미지로 공유**는 단어나 문법 항목을 이 문장에서의 뜻과 원래 문장이 담긴 카드로 만들어 클립보드에 넣어 둡니다. 어떤 채팅에든 Ctrl+V로 붙여 넣을 수 있습니다. 카드는 테마처럼 먹색과 종이 두 가지입니다.
 
@@ -156,7 +162,9 @@ flowchart LR
 
 ### 영어도 배울 수 있습니다
 
-<img src="docs/img/ingles-subtitulos.ko.png" alt="영상 위 영어 단어의 단어 패널과 IPA 발음" width="100%">
+<img src="docs/img/ingles-subtitulos.ko.png" alt="NASA 영상 위 refer의 단어 패널과 IPA 발음" width="100%">
+
+<sub>영상과 자막: [「What’s Up: November 2026 Skywatching Tips from NASA」](https://www.youtube.com/watch?v=PN-iD6VTmyc), NASA/JPL-Caltech (퍼블릭 도메인).</sub>
 
 영어에서는 단어 패널이 미국식과 영국식 발음을 IPA로 보여 주고, *picked it up*처럼 떨어져 있는 구동사도 찾아내며, 불규칙형이 어느 단어에서 왔는지 알려 줍니다. 사전은 Wiktionary에서 가져오며 뜻은 한국어로 나옵니다. 코믹스는 말풍선마다 왼쪽에서 오른쪽으로 읽고, 문장은 이 컴퓨터의 신경망 음성으로 들려줍니다. 영어는 Kokoro, 독일어는 Piper입니다. 언어마다 단어, 카드, 설정을 따로 보관하고 클릭 한 번으로 전환합니다.
 
@@ -246,7 +254,8 @@ TypeScript, Preact, Dexie, esbuild를 쓰며, 음성과 OCR에는 WebGPU 위의 
 - 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)와 KANJIDIC(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io). 영어와 독일어는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org)를 거친 [Wiktionary](https://www.wiktionary.org). 중국어는 [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan)을 거친 [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict).
 - 음성: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja, Parakeet과 [Transformers.js](https://github.com/huggingface/transformers.js).
 - 문자 인식: [PP-OCRv5와 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr), [말풍선 검출기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
-- 획순: Ulrich Apel의 [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0.
+- 획순: Ulrich Apel의 [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0. 중국어는 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)에서 나온 [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), Arphic Public License.
+- 그림의 내용: 일본 총리관저의 국회 연설(PDL 1.0), NASA 영상, 아오조라 문고의 요사노 아키코판 『源氏物語』와 『羅生門』, 『吾輩は猫である』의 첫머리로, 연설을 빼면 모두 퍼블릭 도메인입니다. 두 책의 페이지는 그림 아래에 출처를 적었습니다.
 - 아이콘: [Phosphor](https://phosphoricons.com). 글꼴: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic), [Nunito](https://fonts.google.com/specimen/Nunito).
 
 이름은 『고킨와카슈』 가나 서문(905년경)에서 왔습니다. 일본의 노래는 사람의 마음을 씨앗으로 삼아 수많은 말의 잎이 되었다는 구절입니다.

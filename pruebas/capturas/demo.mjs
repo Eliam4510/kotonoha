@@ -1,15 +1,18 @@
-// Graba el GIF de demostración del README, con el video de prueba y la API de Claude simulada.
+// Graba el GIF de demostración del README con contenido real: un tramo de un discurso en la Dieta del canal del 首相官邸
+// (PDL 1.0), con su texto oficial como subtítulos (ver contenido-real.mjs). La API de Claude es la simulada.
+// Antes: node herramientas/contenido-readme.mjs.
 // Uso: KK_SALIDA=.dist-capturas node build.mjs && KK_DIST=.dist-capturas node pruebas/capturas/demo.mjs
 // Necesita ffmpeg en el PATH y un perfil con diccionarios (KK_PERFIL, por omisión .perfil-galeria).
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { recargarExtension } from '../extension.mjs';
 import { iniciarMock } from '../mock-claude.mjs';
-import { servidor } from './overlay.mjs';
+import { archivoLibre, DIETA, servirVideo, traduccionDieta, vtt } from './contenido-real.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..', '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-capturas'));
@@ -18,7 +21,29 @@ const SALIDA = join(RAIZ, 'docs', 'img', 'demo.gif');
 const ANCHO = 1280;
 const ALTO = 720;
 
-const s = await servidor(RAIZ);
+// El discurso, con sus subtítulos en japonés y la traducción en español debajo.
+const videoDieta = readFileSync(archivoLibre(DIETA.video));
+const s = await new Promise((ok) => {
+  const srv = createServer((req, res) => {
+    res.setHeader('access-control-allow-origin', '*');
+    if (req.url === '/') {
+      res.setHeader('content-type', 'text/html; charset=utf-8');
+      res.end(`<!doctype html><html lang="ja"><meta charset="utf-8"><title>${DIETA.titulo}</title><body style="margin:0;background:#0b0b0d"><video id="v" src="/video.webm" muted style="position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#000"><track kind="subtitles" srclang="ja" label="日本語" src="/ja.vtt"><track kind="subtitles" srclang="es" label="Español" src="/es.vtt"></video></body></html>`);
+    } else if (req.url === '/ja.vtt' || req.url === '/es.vtt') {
+      res.setHeader('content-type', 'text/vtt; charset=utf-8');
+      res.end(vtt(req.url === '/ja.vtt' ? DIETA.lineas : traduccionDieta('es')));
+    } else if (req.url === '/video.webm') {
+      servirVideo(videoDieta, req.headers.range, (estado, cuerpo, cabeceras) => {
+        res.writeHead(estado, cabeceras);
+        res.end(cuerpo);
+      });
+    } else {
+      res.statusCode = 404;
+      res.end();
+    }
+  });
+  srv.listen(0, '127.0.0.1', () => ok(srv));
+});
 const mock = await iniciarMock();
 const contexto = await chromium.launchPersistentContext(PERFIL, {
   channel: process.env.KK_CANAL ?? 'msedge',
@@ -102,7 +127,8 @@ const ir = async (c, pasos = 28) => c && p.mouse.move(c.x, c.y, { steps: pasos }
 const buscar = (t) => p.evaluate((x) => { const v = document.querySelector('#v'); v.pause(); v.currentTime = x; }, t);
 
 await esperar('.barra');
-await buscar(6);
+// 「日本には優れた研究成果が数多くあります。」
+await buscar(34);
 await esperar('.linea-sub.objetivo .pal', 30000);
 await p.waitForTimeout(3000); // Deja terminar la revisión simulada para que no cambie a mitad de la grabación.
 
@@ -126,11 +152,12 @@ await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: 
 
 // 1. Subtítulos con furigana, acento y estado.
 await p.waitForTimeout(1600);
-await buscar(10);
+// 「スタートアップは、技術を実用化していく主要な担い手です。」
+await buscar(60);
 await p.waitForTimeout(1300);
 
 // 2. Al pasar el ratón, el diccionario. Un botón le pregunta a Claude qué significa en esta frase.
-await ir(await caja('赤'));
+await ir(await caja('実用'));
 await esperar('.sentido-pedir');
 await p.waitForTimeout(1500);
 await ir(await cajaBoton('¿Qué significa', '.sentido-pedir'), 18);
@@ -143,7 +170,7 @@ await p.waitForTimeout(1600);
 // 3. La palabra con un uso figurado ya viene señalada por la revisión de Claude.
 await p.mouse.move(640, 300, { steps: 14 });
 await p.waitForTimeout(450);
-await ir(await caja('食'), 18);
+await ir(await caja('担'), 18);
 await esperar('.sentido b');
 await p.waitForTimeout(2400);
 
@@ -172,25 +199,7 @@ await p.mouse.move(640, 300, { steps: 10 });
 await p.keyboard.press('g');
 await p.waitForTimeout(1500);
 
-// 7. Claude corrige los homófonos de los subtítulos.
-await p.mouse.move(300, 4, { steps: 16 });
-await p.waitForTimeout(350);
-await ir(await cajaBoton('Generar subtítulos', '.barra-acciones'), 16);
-await p.waitForTimeout(200);
-await enOverlay((r) => r.querySelector('.barra-acciones button[aria-label="Generar subtítulos"]')?.click());
-await p.waitForTimeout(1100);
-await enOverlay((r) => {
-  const b = [...r.querySelectorAll('.panel-generar button')].find((x) => x.textContent.includes('Corregir estos subtítulos'));
-  b?.scrollIntoView({ block: 'center' });
-});
-await p.waitForTimeout(300);
-const corregir = await cajaBoton('Corregir estos subtítulos', '.panel-generar');
-await ir(corregir, 22);
-await p.waitForTimeout(350);
-await p.mouse.down();
-await p.mouse.up();
-await p.waitForFunction(() => document.querySelector('kotonoha-overlay').shadowRoot.querySelector('.nav-corregida'), undefined, { timeout: 15000 });
-await p.waitForTimeout(2600);
+await p.waitForTimeout(1200);
 
 await cdp.send('Page.stopScreencast');
 await new Promise((r) => setTimeout(r, 200));

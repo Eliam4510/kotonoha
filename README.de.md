@@ -63,9 +63,11 @@ Jedes als bekannt markierte Wort wird überall nicht mehr hervorgehoben, und das
 
 ### Untertitel, die sich wirklich lesen lassen
 
-<img src="docs/img/ficha.de.png" alt="Wortfenster zu 食べる über einem Video, mit seiner Bedeutung im Satz" width="100%">
+<img src="docs/img/ficha.de.png" alt="Wortfenster zu 担い手 über einer Rede im japanischen Parlament, mit seiner Bedeutung im Satz" width="100%">
 
-Über dem Player erscheinen die Untertitel mit Furigana, einer Farbe je Tonhöhenakzent und einer Unterstreichung für den Stand jedes Wortes: neu, am Lernen oder bekannt. Beim Überfahren öffnet sich das Wortfenster mit dem Wörterbuch, ganz ohne Kosten. Claude ergänzt die Bedeutung des Wortes in diesem Satz, auch wenn sie bildlich oder dichterisch ist, wie bei dem 食べる im Bild.
+<sub>Video: [„第221回国会における高市内閣総理大臣施政方針演説“](https://www.youtube.com/watch?v=alk-cIHwTIU) (YouTube-Kanal des japanischen Premierministeramts), mit dem offiziellen Text und seiner englischen Übersetzung ([首相官邸ホームページ](https://www.kantei.go.jp/jp/105/statement/2026/0220shiseihoshin.html)), unter der [Public Data License 1.0](https://www.digital.go.jp/resources/open_data/public_data_license_v1.0), kompatibel mit CC BY 4.0; bearbeitet mit den Untertiteln und Wortfenstern von Kotonoha. Dasselbe Video zeigen das Diktat, die Grammatik und die Karte.</sub>
+
+Über dem Player erscheinen die Untertitel mit Furigana, einer Farbe je Tonhöhenakzent und einer Unterstreichung für den Stand jedes Wortes: neu, am Lernen oder bekannt. Beim Überfahren öffnet sich das Wortfenster mit dem Wörterbuch, ganz ohne Kosten. Claude ergänzt die Bedeutung des Wortes in diesem Satz, auch wenn sie bildlich oder dichterisch ist, wie bei dem 担い手 im Bild: nicht jemand, der eine Last auf den Schultern trägt, sondern wer die Aufgabe vorantreibt.
 
 - `Q` erstellt eine Karte mit dem Satz, seinem Ton und dem Videobild, direkt in Anki oder in die eingebaute Wiederholung.
 - `A` und `D` springen zwischen den Zeilen, `S` wiederholt die aktuelle. Der Untertitel-Navigator (`G`) zeigt alle, mit Filtern und Lesezeichen.
@@ -74,13 +76,17 @@ Jedes als bekannt markierte Wort wird überall nicht mehr hervorgehoben, und das
 
 ### Jede Webseite
 
-<img src="docs/img/paginas.de.png" alt="Japanischer Artikel mit Farben, Furigana und einem Wortfenster" width="100%">
+<img src="docs/img/paginas.de.png" alt="『羅生門』 im Aozora Bunko, mit Farben, Furigana und dem Leserfenster" width="100%">
+
+<sub>『羅生門』 (Rashōmon) von Akutagawa Ryūnosuke, im [Aozora Bunko](https://www.aozora.gr.jp/cards/000879/card127.html) (gemeinfrei).</sub>
 
 Auf Nachrichtenseiten, Blogs, Wikis oder in einem Chat wie dem von Claude bekommt japanischer Text dieselben Farben und Furigana, und ein Klick auf ein Wort öffnet sein Wortfenster. Der Inhalt der Seite bleibt unverändert: Links und Schaltflächen funktionieren weiter, und mit React gebaute Seiten merken nichts. Getestet auf rund dreißig echten Websites.
 
 ### Bücher, PDFs und Manga
 
-<img src="docs/img/libro-texto.de.png" alt="Japanischer Roman in vertikaler Schrift, mit Ruby, Farben und einem Wortfenster" width="100%">
+<img src="docs/img/libro-texto.de.png" alt="Das Genji-monogatari in der Fassung von Yosano Akiko, vertikal, mit Ruby, Farben und dem Wortfenster zu 後宮" width="100%">
+
+<sub>『源氏物語』 (Die Geschichte vom Prinzen Genji), Kapitel 「桐壺」, in der Fassung von Yosano Akiko, aus dem [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (gemeinfrei). Es ist auch das Buch im Wortschatz.</sub>
 
 Die **Bibliothek** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Doppelseiten, fortlaufendes Scrollen, Inhaltsverzeichnis, Miniaturen und die Seite, an der jedes Buch zuletzt aufgeschlagen war. Seine Befehle stehen in benannten Menüs, und Strg+K findet jeden, wenn man eintippt, was er tut; dazu gibt es eine Hand, einen Textmarker und einen Lesemodus, der nur die Seite lässt. Auf der Seite selbst kann jedes Wort sein Furigana und die Unterstreichung seines Status tragen, die Übersetzung eines Satzes erscheint wie ein Untertitel darunter, man kann dem Satz folgend vorlesen lassen, und die nachgeschlagenen Wörter werden zu Karten mit einem Ausschnitt der Seite. Ein auf der Seite gezogener Bereich wird eigens mit der Texterkennung gelesen, und Text-EPUBs und die Texte der Bibliothek werden im selben Betrachter mit denselben Menüs gelesen. Ein Text-EPUB wie ein Roman behält sein eigenes Layout, seine Ruby und seine vertikale Schrift, mit dem Seiten-Reader darüber: Farben, Furigana und Wortfenster wie im Web. Ein PDF, das Text enthält, lässt sich sofort Wort für Wort lesen. Manga in Bilderordnern werden durch Auswahl des Ordners importiert: Jeder Band wird ein Buch, mit der Titelseite vorn und den Farbdoppelseiten im Ganzen. Das Regal ordnet die Bücher in Sammlungen, etwa eine Reihe mit ihren Bänden, mit Titelbild und Beschreibung, und zeigt, wie viel von jedem Buch und jeder Sammlung gelesen ist. Im Betrachter lassen sich Seiten markieren, Text mit Kommentar hervorheben oder unterstreichen und Notizen auf der Seite hinterlassen, wie in einem PDF-Reader. Ein Wort lässt sich im ganzen Buch suchen, jede Seite als Text mit der Lesehilfe lesen, und Claude kann den von der Texterkennung gelesenen Text prüfen, indem es ihn mit dem Seitenbild vergleicht.
 
@@ -94,7 +100,7 @@ Seiten, die Bilder sind, wie Manga, eingescannte Bücher und viele PDFs, werden 
 
 ### Der Wortschatz eines Buchs, bevor du es liest
 
-<img src="docs/img/vocabulario.de.png" alt="Wortschatz von 吾輩は猫である: Verständnis, zu lernende Wörter, Ziele von 90, 95 und 98 % und die Liste mit 書生 geöffnet und seinen Sätzen aus dem Buch" width="100%">
+<img src="docs/img/vocabulario.de.png" alt="Wortschatz von 桐壺 aus dem Genji-monogatari: Verständnis, zu lernende Wörter, Ziele von 90, 95 und 98 % und die Liste mit お geöffnet und seinen Sätzen aus dem Buch" width="100%">
 
 Jedes Buch und jede Sammlung hat ihren **Wortschatz**: alle Wörter, gezählt, die häufigsten zuerst, mit Lesung, Glosse, JLPT-Stufe und ihrem besten Satz aus dem Buch. Oben steht, wie viel du schon verstehst und wie viele Wörter dir für 90, 95 oder 98 % fehlen. Die Wörter werden gleich dort als bekannt oder am Lernen markiert, und die ausgewählten gehen auf einmal ins Gedächtnis oder nach Anki, mit ihrem Satz aus dem Buch. Das geht mit Romanen, PDFs, Texten und mit der Texterkennung gelesenem Manga; in einer Reihe zeigt jeder Band, wie viele neue Wörter er bringt. Auch die Grammatik des Buchs ist da, Punkt für Punkt.
 
@@ -112,25 +118,25 @@ Das **Notizbuch** ist eine Seite über die ganze Breite, um Text in der Lernspra
 
 ### Diktat
 
-<img src="docs/img/dictado.de.png" alt="Diktat-Modus auf einem Video: Gehörtes in Grün, Fehlendes unterstrichen, halb Gehörtes in Gelb und die Bewertung" width="100%">
+<img src="docs/img/dictado.de.png" alt="Diktat-Modus auf einer Rede im japanischen Parlament: Gehörtes in Grün, Fehlendes unterstrichen und die Bewertung" width="100%">
 
 Der **Diktat**-Modus blendet die Zeile beim Abspielen aus, pausiert an ihrem Ende und fragt, was du gehört hast. Beim Prüfen wird jeder Teil grün, wenn du ihn verstanden hast, gelb, wenn nur halb, oder unterstrichen, wenn er fehlte, mit einer Bewertung der Zeile. Im Japanischen wird die Lesung verglichen, Kana zu tippen genügt also. **Mit deiner Stimme nachsprechen** öffnet die Akzentübung mit genau dieser Zeile, und `P` tut das mit jedem Untertitel.
 
 ### Grammatik, die du schon kannst
 
-<img src="docs/img/gramatica.de.png" alt="Die Blase zu 〜ことができる über einem Video, als Am Lernen markiert, mit Erklärung und wo es vorkam" width="100%">
+<img src="docs/img/gramatica.de.png" alt="Die Blase zu 〜ために über einer Rede im japanischen Parlament, als Am Lernen markiert, mit Erklärung und wo es vorkam" width="100%">
 
 Unter jedem Untertitel stehen die Grammatikpunkte der Zeile mit ihrer JLPT-Stufe. Ein Tippen öffnet die Blase: was der Punkt bedeutet, Claudes Erklärung für genau diese Zeile und wo du ihn schon gesehen hast. Jeder Punkt wird als **Neu**, **Am Lernen** oder **Gelernt** markiert; was du lernst, bekommt einen gelben Strich, und Gelerntes wird nicht mehr hervorgehoben. Bereits Bekanntes lässt sich aus Anki importieren, und **Multiple-Choice-Karte** bereitet eine Karte mit drei leicht verwechselbaren Antworten vor.
 
 ### Wie jedes Kanji geschrieben wird
 
-<img src="docs/img/trazos.de.png" alt="Strichfolge eines Wortes im Wortfenster" width="100%">
+<img src="docs/img/trazos.de.png" alt="Strichfolge von 下人 aus 『羅生門』 im Wortfenster" width="100%">
 
 Das Wortfenster zeigt die Strichfolge jedes Kanji im Wort, Strich für Strich und in Schleife, mit ihren Nummern, und darunter die Wörter, die du mit demselben Kanji schon kennst.
 
 ### Teilen, was man findet
 
-<img src="docs/img/tarjeta.de.png" alt="Karte des Wortes 食べる mit seiner Bedeutung im Satz, bereit zum Einfügen in einen Chat" width="520">
+<img src="docs/img/tarjeta.de.png" alt="Karte des Wortes 担い手 mit seiner Bedeutung im Satz, bereit zum Einfügen in einen Chat" width="520">
 
 **Als Bild teilen** im Wortfenster macht aus einem Wort oder einem Grammatikpunkt eine Karte mit seiner Bedeutung in diesem Satz und dem Satz, in dem es vorkam, und legt sie in die Zwischenablage, um sie mit Strg+V in jeden Chat einzufügen. Es gibt sie in Tinte oder Papier, wie die Designs.
 
@@ -156,7 +162,9 @@ Und geübt wird gleich dort: Man schreibt mit Maus, Stift oder Finger, nachzeich
 
 ### Auch Englisch
 
-<img src="docs/img/ingles-subtitulos.de.png" alt="Wortfenster zu einem englischen Wort über einem Video, mit der Aussprache in IPA" width="100%">
+<img src="docs/img/ingles-subtitulos.de.png" alt="Wortfenster zu refer über einem NASA-Video, mit der Aussprache in IPA" width="100%">
+
+<sub>Video und Untertitel: [„What’s Up: November 2026 Skywatching Tips from NASA“](https://www.youtube.com/watch?v=PN-iD6VTmyc), NASA/JPL-Caltech (gemeinfrei).</sub>
 
 Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache in IPA, findet Partikelverben auch dann, wenn sie getrennt stehen, wie *picked it up*, und nennt das Wort, von dem jede unregelmäßige Form stammt. Die Wörterbücher stammen aus Wiktionary, auf Deutsch. Comics werden Sprechblase für Sprechblase gelesen, von links nach rechts, und Sätze klingen mit neuronalen Stimmen auf dem eigenen Rechner: Kokoro auf Englisch und Piper auf Deutsch. Jede Sprache behält ihre eigenen Wörter, Karten und Einstellungen, und der Wechsel braucht einen Klick.
 
@@ -246,7 +254,8 @@ Der Code steht unter der [MIT-Lizenz](LICENSE). Komponenten Dritter, die bei der
 - Wörterbücher: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) und KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) und [JPDB](https://jpdb.io); für Englisch und Deutsch [Wiktionary](https://www.wiktionary.org) über [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) und [kaikki.org](https://kaikki.org); für Chinesisch [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) über [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan).
 - Sprache: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja und Parakeet, mit [Transformers.js](https://github.com/huggingface/transformers.js).
 - Texterkennung: [PP-OCRv5 und PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) und ein [Sprechblasen-Detektor](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
-- Strichfolge: [KanjiVG](https://kanjivg.tagaini.net), von Ulrich Apel, CC BY-SA 3.0.
+- Strichfolge: [KanjiVG](https://kanjivg.tagaini.net), von Ulrich Apel, CC BY-SA 3.0; für Chinesisch [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), aus [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), Arphic Public License.
+- Bildinhalte: eine Rede im japanischen Parlament vom Premierministeramt (PDL 1.0), ein NASA-Video, 『源氏物語』 in der Fassung von Yosano Akiko und 『羅生門』 aus dem Aozora Bunko und der Anfang von 『吾輩は猫である』, alle gemeinfrei außer der Rede. Die Seiten aus zwei Büchern tragen ihren Nachweis unter dem Bild.
 - Symbole: [Phosphor](https://phosphoricons.com). Schriften: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) und [Nunito](https://fonts.google.com/specimen/Nunito).
 
 Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japans hat das menschliche Herz zum Samen, und aus ihm sprießen unzählige Blätter aus Worten.

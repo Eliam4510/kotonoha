@@ -30,3 +30,6 @@ idiomas/trabajo/
 
 # Clave privada de la extensión: fija el identificador en Chrome Web Store. Nunca se sube.
 .claves/
+
+# El contenido real de las imágenes del README: se baja con herramientas/contenido-readme.mjs
+/contenido-libre/
