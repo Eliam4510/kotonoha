@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { olvidarReproductor, recargarExtension } from './extension.mjs';
 import { iniciarMock } from './mock-claude.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
@@ -67,6 +67,7 @@ execFileSync(FFMPEG, ['-y', '-loglevel', 'error', '-stream_loop', '-1', '-i', jo
 const r = await contexto.newPage();
 r.on('pageerror', (e) => errores.push(`reproductor: ${e.message}`));
 await r.goto(`chrome-extension://${id}/app.html#/reproductor`);
+await olvidarReproductor(r);
 await r.waitForTimeout(1200);
 await r.setInputFiles('input[type="file"]', ruta);
 await r.waitForFunction(() => document.querySelector('.ap-local video')?.readyState >= 2, undefined, { timeout: 30000 });

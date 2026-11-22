@@ -31,6 +31,7 @@ import {
   seleccionarObjetivo,
   seleccionarSecundaria,
   sincronizarConSitio,
+  quitarAjusteDeAnuncios,
 } from './controlador';
 import { estadoReloj } from './relojSitio';
 import { ajustandoLetra, ajustes, analisisEnCurso, anclas, letraPegada, atajosChrome, ayudante, capturaActiva, correccion, estadisticas, generacion, idObjetivo, infoVideo, originales, idSecundaria, lineasObjetivo, lineasSecundarias, panel, pistas, sinAceleracion, sincronias, transcribeArchivo, whisper } from './estado';
@@ -353,7 +354,7 @@ function ControlPista({ titulo, icono, valor, idioma, alElegir, destino, puedeEx
 function RelojNetflix() {
   const e = estadoReloj.value;
   const midiendo = useSignal(false);
-  const s = numero(Math.abs(e.correccionMs) / 1000, { maximumFractionDigits: 1 });
+  const s = numero(Math.abs(e.porAnuncios ? e.descuentoMs : e.correccionMs) / 1000, { maximumFractionDigits: 1 });
   const [titulo, detalle] = !e.medido
     ? [tr('Sin comparar aún'), tr('Se compara con el video en marcha.')]
     : e.porAnuncios
@@ -361,24 +362,40 @@ function RelojNetflix() {
       : e.correccionMs === 0
         ? [tr('A la par'), tr('El video y Netflix marcan el mismo momento.')]
         : [tr('Ajustado'), e.correccionMs < 0 ? tr('El video va {0} s por delante de Netflix: los subtítulos siguen a Netflix.', s) : tr('El video va {0} s por detrás de Netflix: los subtítulos siguen a Netflix.', s)];
+  // Lo que marcan ahora los dos relojes: si algún día no cuadran, se ve qué se está comparando.
+  const m = e.muestra && Date.now() - e.muestra.hora < 5000 ? e.muestra : null;
   return (
     <>
       <TituloGrupo>{tr('Reloj de Netflix')}</TituloGrupo>
       <div class="grupo reloj-netflix">
         <Fila etq={titulo} ayuda={detalle} teclas={[tm('Alt'), '+', tm('Shift'), '+', 'S']}>
-          <button class="btn chico" disabled={midiendo.value} onClick={async () => {
-            midiendo.value = true;
-            try {
-              await sincronizarConSitio();
-            } finally {
-              midiendo.value = false;
-            }
-          }}><Icono n="recargar" t={15} /> {midiendo.value ? tr('Midiendo…') : tr('Volver a sincronizar')}</button>
+          <div class="reloj-botones">
+            {e.porAnuncios && <button class="btn chico" onClick={quitarAjusteDeAnuncios}>{tr('Quitar el ajuste')}</button>}
+            <button class="btn chico" disabled={midiendo.value} onClick={async () => {
+              midiendo.value = true;
+              try {
+                await sincronizarConSitio();
+              } finally {
+                midiendo.value = false;
+              }
+            }}><Icono n="recargar" t={15} /> {midiendo.value ? tr('Midiendo…') : tr('Volver a sincronizar')}</button>
+          </div>
         </Fila>
+        {m && <p class="nota-grupo reloj-ahora">{tr('Video {0} · Netflix {1}', marcaDeTiempo(m.video), marcaDeTiempo(m.jugador))}</p>}
         <p class="nota-grupo">{tr('Tras un anuncio, al pasar solo al siguiente episodio o tras un salto, el reloj del video puede irse del de Netflix. Kotonoha los compara mientras ves el video y lleva los subtítulos por el de Netflix, sin recargar la página.')}</p>
       </div>
     </>
   );
+}
+
+/** Un momento en m:ss,d, o h:mm:ss,d: al comparar dos relojes, las décimas cuentan. */
+function marcaDeTiempo(ms: number): string {
+  const d = Math.max(0, Math.round(ms / 100));
+  const h = Math.floor(d / 36000);
+  const min = Math.floor(d / 600) % 60;
+  const dos = (n: number) => String(n).padStart(2, '0');
+  const coma = numero(1.5, { minimumFractionDigits: 1 }).replace(/\d/g, '');
+  return `${h ? `${h}:${dos(min)}` : min}:${dos(Math.floor(d / 10) % 60)}${coma}${d % 10}`;
 }
 
 function ControlSincronia({ titulo, pista, disponible }: { titulo: string; pista: 'objetivo' | 'secundaria'; disponible: boolean }) {

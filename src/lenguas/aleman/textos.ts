@@ -66,7 +66,7 @@ export const TEXTOS: TextosLengua = {
   diccionariosResumen: tm('Wiktionary, pronunciación y frecuencia'),
   buscarAyuda: tm('Escríbela en alemán. También entiende formas conjugadas y declinadas, y frases enteras.'),
   pegarLista: tm('Pega una lista o cualquier texto en alemán.'),
-  localArrastrar: tm('Arrastra aquí un video y sus subtítulos. Tendrás pronunciación, diccionario, tarjetas y Claude, y el video no sale de tu ordenador.'),
+  localArrastrar: tm('Arrastra aquí videos o audios con sus subtítulos, o una carpeta entera. Tendrás pronunciación, diccionario, tarjetas y Claude, y nada sale de tu ordenador.'),
   seguirPortapapeles: tm('Añade aquí el alemán que copies en cualquier sitio, mientras esta pestaña esté a la vista.'),
   dictar: tm('Habla en alemán y Kotonoha lo escribe aquí, con tu grabación para volver a oírla.'),
   temaRelato: tm('Un gato que pasea por Berlín…'),

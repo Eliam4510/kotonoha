@@ -34,18 +34,26 @@ const MINIMO = 3;
 export const ANUNCIO_MINIMO_MS = 3000;
 
 /**
- * Tras un anuncio del medio: lo normal es que el reloj del sitio lo descuente, y entonces manda su medida. Si no lo
- * descontó (su corrección no se movió aunque el video corrió varios segundos durante el anuncio) o no dio ninguna, el
- * video va por delante justo lo que corrió durante el anuncio. Devuelve la corrección nueva, o null si manda el reloj.
+ * Tras un anuncio del medio en el mismo <video>, lo que el reloj del sitio no sabe y hay que descontar, en ms (negativo),
+ * o null si no hace falta nada. Lo normal es que su reloj lo descuente: su medida cambia tanto como corrió el video, y
+ * manda ella. Si el video volvió atrás al acabar el anuncio, devolvió lo que corrió durante él. Si el reloj midió lo
+ * mismo que antes (cuenta el anuncio como si fuera el episodio) o no dio ninguna medida, el video va por delante justo
+ * lo que corrió durante el anuncio. El descuento se suma a lo que mida el reloj: no lo sustituye.
  */
-export function correccionTrasAnuncio(
-  anuncio: { avance: number; correccionAntes: number },
-  despues: { midio: boolean; correccion: number }
+export function descuentoTrasAnuncio(
+  anuncio: { avance: number; base: number },
+  despues: { midio: boolean; correccion: number; volvioAtras: boolean }
 ): number | null {
-  if (anuncio.avance < ANUNCIO_MINIMO_MS) return null;
-  if (despues.midio && Math.abs(despues.correccion - anuncio.correccionAntes) >= UMBRAL_MS) return null;
-  return Math.round(anuncio.correccionAntes - anuncio.avance);
+  if (anuncio.avance < ANUNCIO_MINIMO_MS || despues.volvioAtras) return null;
+  if (despues.midio && Math.abs(despues.correccion - anuncio.base) >= UMBRAL_MS) return null;
+  return -Math.round(anuncio.avance);
 }
+
+/**
+ * Con un descuento por anuncios puesto, una medida nueva del reloj del sitio que ya no es la de cuando se puso: su reloj
+ * cuenta ya lo que corrió el video (por ejemplo, su medida llegó tarde tras el anuncio), y el descuento sobra.
+ */
+export const sobraDescuento = (medida: number, base: number) => Math.abs(medida - base) >= UMBRAL_MS;
 
 function mediana(xs: number[]): number {
   const o = [...xs].sort((a, b) => a - b);
@@ -93,13 +101,6 @@ export class AjusteReloj {
   /** Tras un salto, un anuncio o al pedirlo a mano: lo medido antes ya no vale, y la corrección sigue hasta tener otra. */
   olvidarMuestras() {
     this.muestras = [];
-  }
-
-  /** Una corrección que no sale del reloj del sitio, sino de lo que duró un anuncio (ver correccionTrasAnuncio). */
-  fijar(correccion: number) {
-    this.muestras = [];
-    this.correccion = Math.round(correccion);
-    this.medido = true;
   }
 
   /** Otro episodio: se empieza de cero. */

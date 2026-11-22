@@ -12,6 +12,11 @@ const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-whisper'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-whisper'));
 const [audio] = process.argv.slice(2);
+// Sin una grabación con voz, el micrófono falso no da nada que grabar y la prueba de la grabación no diría nada.
+if (!audio) {
+  console.error('Falta la grabación con voz: node pruebas/tarjetas.mjs ruta/haruka.wav');
+  process.exit(2);
+}
 
 let fallos = 0;
 const comprobar = (cond, texto, extra = '') => {
@@ -170,10 +175,10 @@ await motor('whisperCapturaPrueba');
 await motor('empezarClip');
 await new Promise((r) => setTimeout(r, 2500));
 const clip = await motor('terminarClip');
-const cabecera = clip ? Buffer.from(clip.datos.slice(0, 8), 'base64') : Buffer.alloc(0);
-comprobar(clip?.tipo === 'audio/mpeg', 'Graba y convierte a MP3', clip?.tipo);
+const cabecera = clip?.datos ? Buffer.from(clip.datos.slice(0, 8), 'base64') : Buffer.alloc(0);
+comprobar(clip?.tipo === 'audio/mpeg', 'Graba y convierte a MP3', clip?.tipo ?? JSON.stringify(clip));
 comprobar(cabecera[0] === 0xff && (cabecera[1] & 0xe0) === 0xe0, 'El resultado empieza por una trama MP3 válida', cabecera.subarray(0, 2).toString('hex'));
-comprobar(clip && clip.datos.length > 10000, 'El clip contiene audio', clip ? `${Math.round((clip.datos.length * 0.75) / 1024)} KB` : '');
+comprobar(clip?.datos?.length > 10000, 'El clip contiene audio', clip?.datos ? `${Math.round((clip.datos.length * 0.75) / 1024)} KB` : '');
 await motor('detenerCaptura');
 
 // ---------- Recorte de captura ----------

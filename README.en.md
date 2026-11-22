@@ -74,6 +74,14 @@ Subtitles appear over the player with furigana, a colour for each pitch accent a
 - Subtitles are translated into your language, and auto-generated ones are corrected using the title and the whole script as context.
 - Videos without subtitles are transcribed on your own computer, on the graphics card: 30 minutes of video in about a minute.
 
+### Your videos and audio
+
+<img src="docs/img/reproductor.en.png" alt="The Kotonoha player with a speech in the Diet: the Japanese subtitles with their translation and, when hovering over the timeline, the sentence of another moment" width="100%">
+
+<sub>The same video of "第221回国会における高市内閣総理大臣施政方針演説", opened as a local file.</sub>
+
+The **Player** opens your own videos and audio files, or a whole folder as a playlist, with each episode's subtitles; those whose name carries another language become the translation. It has its own controls: speed, volume, jumping between lines and, when you hover over the timeline, the sentence spoken at that moment. In full screen, the subtitles stay. It remembers where you left each file, and **Continue watching** opens it again with one click. Podcasts and audiobooks without subtitles are transcribed by Whisper on your computer.
+
 ### Any web page
 
 <img src="docs/img/paginas.en.png" alt="『羅生門』 on Aozora Bunko, with colours, furigana and the reader panel" width="100%">
@@ -167,6 +175,8 @@ And you practice it right there: you write with the mouse, a pen or your finger,
 The same tools work for German: the word panel tells you which word each conjugated or declined form comes from, such as *ging* from *gehen* or *Häuser* from *Haus*, finds separable verbs even when the particle sits at the end of the sentence, and gives the pronunciation in IPA. Its dictionaries come from Wiktionary, and German speech is transcribed by Parakeet. Speakers of other languages can study English the same way. Comics are read balloon by balloon, from left to right, and sentences are spoken by neural voices on your own computer: Kokoro in English and Piper in German. Each language keeps its own words, cards and settings, and switching takes one click.
 
 ### Chinese too
+
+<img src="docs/img/hanzi.en.png" alt="The page of the hanzi 河: its pinyin, the radical 氵 (三点水), its components, the one that gives its sound (可) and its stroke order" width="100%">
 
 In Chinese, words are split on their own even though the text has no spaces, and pinyin goes over each character, with the dictionary tone and, when a character has several readings (长, cháng or zhǎng), the one in the sentence. The dictionary is CC-CEDICT, with Wiktionary’s short translations in front when they exist in your language, and you can search in characters or in pinyin, with or without tones. You study simplified characters: if a video only has subtitles in traditional characters, they show in simplified ones. The levels are those of the HSK 3.0, with their own screen: the vocabulary, hanzi and grammar of each level of the 2025 syllabus. Searching for a single hanzi opens its page, with its radical, its components, how it was formed and its stroke order, which you practice as you do with kanji. Each syllable takes the color of its tone; **How it sounds**, in the word card, shows how tones change in speech (一, 不, two third tones in a row), and **Practice** compares your voice, syllable by syllable, with the shape of each tone, with no voice models.
 

@@ -66,7 +66,7 @@ export const TEXTOS: TextosLengua = {
   diccionariosResumen: tm('CC-CEDICT, pinyin y frecuencia'),
   buscarAyuda: tm('Escríbela en caracteres o en pinyin, con tonos o sin ellos (nihao, ni3hao3). También entiende frases enteras.'),
   pegarLista: tm('Pega una lista o cualquier texto en chino.'),
-  localArrastrar: tm('Arrastra aquí un video y sus subtítulos. Tendrás pinyin, diccionario, tarjetas y Claude, y el video no sale de tu ordenador.'),
+  localArrastrar: tm('Arrastra aquí videos o audios con sus subtítulos, o una carpeta entera. Tendrás pinyin, diccionario, tarjetas y Claude, y nada sale de tu ordenador.'),
   seguirPortapapeles: tm('Añade aquí el chino que copies en cualquier sitio, mientras esta pestaña esté a la vista.'),
   dictar: tm('Habla en chino y Kotonoha lo escribe aquí, con tu grabación para volver a oírla.'),
   temaRelato: tm('Un gato que pasea por Pekín…'),

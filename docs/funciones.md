@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.46.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.47.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -75,7 +75,7 @@ Estado de cada función en la versión 0.46.0, con la forma en que se ha verific
 | Exportación a SRT, con la sincronía aplicada | Página imitada |
 | Pistas de japonés recordadas entre regiones de Netflix | Página imitada. Falta confirmar con sesiones reales que el identificador del título coincide |
 | Sincronización por desfase o con una o dos marcas | Automática |
-| Reloj de Netflix: tras un anuncio del medio, al pasar solo al siguiente episodio o tras un salto, los subtítulos siguen el momento del episodio que da el reproductor de Netflix, sin recargar la página; si su reloj no descuenta el anuncio, se ajusta por lo que corrió el video durante él. **Volver a sincronizar** y `Alt+Shift+S` | Automática, con un Netflix simulado |
+| Reloj de Netflix: tras un anuncio del medio, al pasar solo al siguiente episodio o tras un salto, los subtítulos siguen el momento del episodio que da el reproductor de Netflix, sin recargar la página; si su reloj no descuenta el anuncio, se ajusta por lo que corrió el video durante él, hasta que su reloj dé su medida; ese ajuste se puede quitar. **Volver a sincronizar**, **Quitar el ajuste** y `Alt+Shift+S` | Automática, con un Netflix simulado |
 
 ## Transcripción
 
@@ -192,6 +192,10 @@ Estado de cada función en la versión 0.46.0, con la forma en que se ha verific
 | Relatos generados según el nivel | Simulador |
 | Reproductor de archivos propios | Automática |
 | Subtítulos incrustados en MKV y elección de pista de audio, con ffmpeg.wasm | Automática |
+| Controles propios del reproductor: velocidad, volumen, saltar de línea, la frase de cada momento en la barra de tiempo y pantalla completa con los subtítulos | Automática |
+| Carpetas enteras como lista de reproducción, en orden natural, con los subtítulos de cada capítulo repartidos por idioma | Automática |
+| Seguir donde se dejó cada archivo, «Seguir viendo» y abrir otra vez con un clic | Automática |
+| Audio en el reproductor: MP3, M4A, OGG, WAV y FLAC | Automática |
 | Explorador de palabras por estado | Automática |
 | Horas de inmersión: el tiempo con un video en marcha y subtítulos en la lengua que se estudia, con un libro en el visor y leyendo en el Cuaderno o la biblioteca; en Inicio, hoy, los últimos siete días, el total, la racha, una barra por día y lo que más se vio y leyó | Automática: un video propio que se reproduce de verdad y días anteriores sembrados en la base |
 | Evaluación de nivel | Automática |

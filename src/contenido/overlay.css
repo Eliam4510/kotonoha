@@ -192,6 +192,9 @@
 .letras-video span[lang] { margin-right: 2px; font-size: 15px; font-weight: 700; }
 .panel-ia-error.separada { margin-top: 12px; }
 .nota-grupo.pie { margin-top: 14px; }
+/* El reloj de Netflix: quitar el ajuste por los anuncios junto a volver a sincronizar, y lo que marcan los dos relojes. */
+.reloj-botones { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; flex: none; }
+.reloj-ahora { font-variant-numeric: tabular-nums; }
 .salida-traductor .esqueleto.larga { width: 92%; }
 .salida-traductor .esqueleto.corta { width: 60%; }
 .p-desconocida { background: var(--est-desconocida); }

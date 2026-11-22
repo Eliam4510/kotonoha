@@ -42,18 +42,44 @@ interface JugadorNetflix {
   play?(): void;
   pause?(): void;
   getMovieId?(): number;
+  isPlaying?(): boolean;
+  isPaused?(): boolean;
 }
 
 const api = () => (typeof netflix === 'undefined' ? undefined : netflix?.appContext?.state?.playerApp?.getAPI?.());
 
-function idSesion(): string | undefined {
-  const ids = api()?.videoPlayer?.getAllPlayerSessionIds?.() ?? [];
-  return ids.find((i) => i.startsWith('watch')) ?? ids[ids.length - 1];
+/** Lo que da un método del reproductor que quizá no exista o lance. */
+function leer<T>(f: () => T): T | undefined {
+  try {
+    return f();
+  } catch {
+    return undefined;
+  }
 }
+
+/**
+ * La sesión de su reproductor del episodio que se ve, y cuántas hay. Puede haber varias: la del episodio anterior, que
+ * queda al pasar solo al siguiente, o la de un anuncio. Primero, las del episodio de la URL; entre ellas, la que está
+ * en marcha; y si no, la más reciente, que es la última. Antes se tomaba la primera, que podía ser una que ya no se ve.
+ */
+function sesion(): { id: string | undefined; total: number } {
+  const vp = api()?.videoPlayer;
+  const ids = leer(() => vp?.getAllPlayerSessionIds?.()) ?? [];
+  if (ids.length <= 1) return { id: ids[0], total: ids.length };
+  const todas = ids.map((id) => ({ id, j: leer(() => vp?.getVideoPlayerBySessionId?.(id)) }));
+  const pelicula = /\/watch\/(\d+)/.exec(location.pathname)?.[1];
+  const delEpisodio = todas.filter(({ j }) => !!j && !!pelicula && String(leer(() => j.getMovieId?.()) ?? '') === pelicula);
+  const deVer = todas.filter(({ id }) => id.startsWith('watch'));
+  const candidatas = delEpisodio.length ? delEpisodio : deVer.length ? deVer : todas;
+  const enMarcha = candidatas.filter(({ j }) => !!j && (leer(() => j.isPlaying?.()) === true || leer(() => j.isPaused?.()) === false));
+  return { id: (enMarcha.length ? enMarcha : candidatas).at(-1)?.id, total: ids.length };
+}
+
+const idSesion = () => sesion().id;
 
 function jugador(): JugadorNetflix | undefined {
   const id = idSesion();
-  return id ? api()?.videoPlayer?.getVideoPlayerBySessionId?.(id) : undefined;
+  return id ? leer(() => api()?.videoPlayer?.getVideoPlayerBySessionId?.(id)) : undefined;
 }
 
 function urlsTexto(): Map<string, string> {
@@ -216,12 +242,16 @@ export const adaptadorNetflix: Adaptador = {
     jugador()?.seek?.(Math.max(0, Math.round(ms)));
   },
   // Tras un anuncio, al pasar solo al siguiente episodio o tras algunos saltos, video.currentTime ya no es el momento del
-  // episodio, y su reproductor sí lo sabe. Los dos se leen en el mismo instante, con el video en marcha.
+  // episodio, y su reproductor sí lo sabe. Los dos se leen en el mismo instante, con el video en marcha: el <video>, el
+  // de los subtítulos, y el reproductor, el de la sesión del episodio.
   tiempos() {
     const v = videoPrincipal();
     if (!v || v.paused || v.seeking || v.readyState < 3) return null;
-    const t = jugador()?.getCurrentTime?.();
-    return typeof t === 'number' && Number.isFinite(t) ? { video: v.currentTime * 1000, jugador: t } : null;
+    const s = sesion();
+    const j = s.id ? leer(() => api()?.videoPlayer?.getVideoPlayerBySessionId?.(s.id!)) : undefined;
+    const t = leer(() => j?.getCurrentTime?.());
+    const video = v.currentTime * 1000;
+    return typeof t === 'number' && Number.isFinite(t) ? { video, jugador: t, sesion: s.id, sesiones: s.total } : null;
   },
   reproducir() {
     jugador()?.play?.();

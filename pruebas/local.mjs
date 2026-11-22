@@ -7,7 +7,7 @@ import { cpSync, existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { iniciarMock } from './mock-claude.mjs';
-import { recargarExtension } from './extension.mjs';
+import { olvidarReproductor, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -54,6 +54,7 @@ p.on('console', (m) => {
   if (m.type() === 'error' && !/Failed to load resource|net::|favicon/.test(m.text())) errores.push(m.text().slice(0, 240));
 });
 await p.goto(`chrome-extension://${id}/app.html#/reproductor`);
+await olvidarReproductor(p);
 await p.waitForTimeout(1200);
 await p.setInputFiles('input[type="file"]', ARCHIVO);
 

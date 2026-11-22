@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AjusteReloj, correccionTrasAnuncio } from './reloj';
+import { AjusteReloj, descuentoTrasAnuncio, sobraDescuento } from './reloj';
 
 /** Muestras cada `paso` ms de video desde `desde`, con el reproductor diciendo `jugador(video)`. */
 function anotarSerie(r: AjusteReloj, desde: number, paso: number, n: number, jugador: (video: number) => number) {
@@ -95,34 +95,57 @@ describe('AjusteReloj', () => {
     expect(r.medido).toBe(false);
   });
 
-  it('fijar pone una corrección que no sale de las muestras', () => {
+  it('una medida nueva tras olvidar las muestras cuenta aunque no cambie nada', () => {
     const r = new AjusteReloj();
-    r.fijar(-30_000.4);
-    expect(r.correccion).toBe(-30_000);
-    expect(r.medido).toBe(true);
+    anotarSerie(r, 615_000, 300, 5, (v) => v - 16_200);
+    const medidas = r.medidas;
+    r.olvidarMuestras();
+    expect(anotarSerie(r, 700_000, 300, 5, (v) => v - 16_200)).toBe(0);
+    // Así se sabe que «Volver a sincronizar» midió de verdad, y no que repite lo de antes.
+    expect(r.medidas).toBeGreaterThan(medidas);
   });
 });
 
-describe('correccionTrasAnuncio', () => {
+describe('descuentoTrasAnuncio', () => {
+  const sinVolver = { volvioAtras: false };
+
   it('si el reloj del sitio descontó el anuncio, manda su medida', () => {
-    expect(correccionTrasAnuncio({ avance: 30_000, correccionAntes: 0 }, { midio: true, correccion: -30_000 })).toBeNull();
+    expect(descuentoTrasAnuncio({ avance: 30_000, base: 0 }, { midio: true, correccion: -30_000, ...sinVolver })).toBeNull();
     // Aunque los bordes del anuncio se vean con algo de retraso y no cuadren al milisegundo.
-    expect(correccionTrasAnuncio({ avance: 31_400, correccionAntes: 0 }, { midio: true, correccion: -30_000 })).toBeNull();
+    expect(descuentoTrasAnuncio({ avance: 31_400, base: 0 }, { midio: true, correccion: -30_000, ...sinVolver })).toBeNull();
   });
 
-  it('si el reloj no se movió aunque el video corrió, se corrige por lo que corrió durante el anuncio', () => {
-    expect(correccionTrasAnuncio({ avance: 30_000, correccionAntes: 0 }, { midio: true, correccion: 0 })).toBe(-30_000);
-    // Y se suma a lo que ya llevaba por otros anuncios.
-    expect(correccionTrasAnuncio({ avance: 15_200, correccionAntes: -30_000 }, { midio: true, correccion: -30_000 })).toBe(-45_200);
+  it('si el reloj no se movió aunque el video corrió, se descuenta lo que corrió durante el anuncio', () => {
+    expect(descuentoTrasAnuncio({ avance: 30_000, base: 0 }, { midio: true, correccion: 0, ...sinVolver })).toBe(-30_000);
+    // Lo que ya medía su reloj (un anuncio del principio, por ejemplo) no se toca: el descuento va aparte.
+    expect(descuentoTrasAnuncio({ avance: 15_200, base: -16_200 }, { midio: true, correccion: -16_200, ...sinVolver })).toBe(-15_200);
   });
 
   it('sin medida del reloj del sitio, también', () => {
-    expect(correccionTrasAnuncio({ avance: 20_000, correccionAntes: 0 }, { midio: false, correccion: 0 })).toBe(-20_000);
+    expect(descuentoTrasAnuncio({ avance: 20_000, base: 0 }, { midio: false, correccion: 0, ...sinVolver })).toBe(-20_000);
+  });
+
+  it('si el video volvió atrás al acabar, devolvió lo que corrió y no hay nada que descontar', () => {
+    expect(descuentoTrasAnuncio({ avance: 16_200, base: 0 }, { midio: true, correccion: 0, volvioAtras: true })).toBeNull();
+    expect(descuentoTrasAnuncio({ avance: 16_200, base: 0 }, { midio: false, correccion: 0, volvioAtras: true })).toBeNull();
   });
 
   it('un anuncio que no movió el video no cambia nada', () => {
     // Por ejemplo, un anuncio en otro <video>, con el del episodio quieto.
-    expect(correccionTrasAnuncio({ avance: 400, correccionAntes: 0 }, { midio: false, correccion: 0 })).toBeNull();
-    expect(correccionTrasAnuncio({ avance: 2_900, correccionAntes: -5_000 }, { midio: true, correccion: -5_000 })).toBeNull();
+    expect(descuentoTrasAnuncio({ avance: 400, base: 0 }, { midio: false, correccion: 0, ...sinVolver })).toBeNull();
+    expect(descuentoTrasAnuncio({ avance: 2_900, base: -5_000 }, { midio: true, correccion: -5_000, ...sinVolver })).toBeNull();
+  });
+});
+
+describe('sobraDescuento', () => {
+  it('sobra en cuanto su reloj mide otra cosa que cuando se puso: ya cuenta lo que corrió el video', () => {
+    // Su medida llegó tarde tras el anuncio: el descuento se puso con 0 y ahora mide −5 s.
+    expect(sobraDescuento(-5_000, 0)).toBe(true);
+    expect(sobraDescuento(-21_200, -16_200)).toBe(true);
+  });
+
+  it('no sobra mientras su reloj siga diciendo lo mismo, con algo de vaivén', () => {
+    expect(sobraDescuento(0, 0)).toBe(false);
+    expect(sobraDescuento(-16_500, -16_200)).toBe(false);
   });
 });

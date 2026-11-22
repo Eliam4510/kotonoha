@@ -56,7 +56,7 @@ import {
   type EstadoWhisper,
 } from './estado';
 import type { Control } from './puente';
-import { acaboAnuncio, anotarSinAnuncio, desfaseDeSaltos, empezoAnuncio, iniciarRelojSitio, medirDeNuevo, momentoDelVideo, reiniciarReloj, sincronizarAhora } from './relojSitio';
+import { acaboAnuncio, anotarSinAnuncio, desfaseDeSaltos, empezoAnuncio, iniciarRelojSitio, medirDeNuevo, momentoDelVideo, quitarDescuento, reiniciarReloj, sincronizarAhora, usarVideo } from './relojSitio';
 import { numero, tm, tr } from '../compartido/i18n';
 import { relojInmersion } from '../compartido/relojInmersion';
 import { lengua } from '../ui/lengua';
@@ -94,14 +94,16 @@ export function iniciarControlador(c: Control) {
   const tiempos = c.tiempos;
   if (tiempos) {
     iniciarRelojSitio({
+      activo: () => infoVideo.value?.sitio === 'netflix',
       tomar: () => tiempos(),
       medible: () => {
         const v = control.video();
         return infoVideo.value?.sitio === 'netflix' && !anuncio.value && !!v && !v.paused && !v.seeking;
       },
-      alCambiar: (ms) => {
+      alCambiar: (ms, porAnuncios) => {
         alCambiarReloj();
-        if (ms) avisar(tr('Subtítulos sincronizados con Netflix ({0} s).', segundosReloj(ms)), 'exito', undefined, 3500);
+        if (porAnuncios) avisar(tr('Subtítulos ajustados por los anuncios ({0} s).', segundosReloj(ms)), 'exito', { texto: tr('Quitar el ajuste'), fn: quitarAjusteDeAnuncios }, 7000);
+        else if (ms) avisar(tr('Subtítulos sincronizados con Netflix ({0} s).', segundosReloj(ms)), 'exito', undefined, 3500);
       },
     });
     // Durante un anuncio del medio el reloj del video sigue corriendo: al acabar se mide enseguida, y se sabe cuánto corrió.
@@ -200,11 +202,18 @@ function actualizarRect() {
   const o = origenSubs.el?.getBoundingClientRect();
   const left = r.left - (o?.left ?? 0);
   const top = r.top - (o?.top ?? 0);
+  const height = Math.max(0, r.height - (control.recorteInferior?.() ?? 0));
   const p = rectVideo.value;
-  if (!p || p.left !== left || p.top !== top || p.width !== r.width || p.height !== r.height) {
-    rectVideo.value = { left, top, width: r.width, height: r.height };
+  if (!p || p.left !== left || p.top !== top || p.width !== r.width || p.height !== height) {
+    rectVideo.value = { left, top, width: r.width, height };
   }
 }
+
+/**
+ * Si hay un video abierto. En la app, el reproductor de archivos suelta el suyo al salir de su pantalla, pero sus
+ * subtítulos siguen cargados: sin esto, sus atajos (A, D, G, Q…) seguirían vivos en Memoria o en el Cuaderno.
+ */
+export const hayVideoAbierto = (): boolean => !!control?.video();
 
 /** Si el video se ha ido de la pantalla, por ejemplo al leer los comentarios, la barra no estorba. */
 export function videoEnPantalla(): boolean {
@@ -259,12 +268,22 @@ function alCambiarReloj() {
 /** «Volver a sincronizar», con el botón del panel o con Alt+Shift+S: se mide de nuevo y se dice cómo quedó. */
 export async function sincronizarConSitio() {
   const r = await sincronizarAhora(() => control.video()?.paused ?? true);
+  const quitar = { texto: tr('Quitar el ajuste'), fn: quitarAjusteDeAnuncios };
   if (r.tipo === 'en-pausa') avisar(tr('Se medirá en cuanto siga el video.'), undefined, undefined, 3000);
+  else if (r.tipo === 'sin-reloj' && r.descuentoMs) avisar(tr('Netflix no dio su posición: siguen ajustados por los anuncios ({0} s).', segundosReloj(r.descuentoMs)), 'error', quitar, 9000);
   else if (r.tipo === 'sin-reloj') avisar(tr('Netflix no dio su posición: los subtítulos siguen el reloj del video. Puedes moverlos a mano en Sincronizar.'), 'error', undefined, 7000);
   else {
     if (r.cambio) alCambiarReloj();
-    avisar(r.correccionMs ? tr('Subtítulos sincronizados con Netflix ({0} s).', segundosReloj(r.correccionMs)) : tr('Ya iban a la par con Netflix.'), 'exito', undefined, 3500);
+    if (r.descuentoMs) avisar(tr('Subtítulos ajustados por los anuncios ({0} s).', segundosReloj(r.correccionMs)), 'exito', quitar, 7000);
+    else avisar(r.correccionMs ? tr('Subtítulos sincronizados con Netflix ({0} s).', segundosReloj(r.correccionMs)) : tr('Ya iban a la par con Netflix.'), 'exito', undefined, 3500);
   }
+}
+
+/** «Quitar el ajuste»: el descuento por anuncios no cuadraba. Los subtítulos vuelven a ir por lo que mida Netflix. */
+export function quitarAjusteDeAnuncios() {
+  if (!quitarDescuento()) return;
+  alCambiarReloj();
+  avisar(tr('Ajuste por los anuncios quitado.'), undefined, undefined, 3500);
 }
 
 function alPausar() {
@@ -392,6 +411,7 @@ function tick() {
   const v = control.video();
   if (!v) return;
   enlazarVideo(v);
+  usarVideo(v);
   const ms = momentoDelVideo(v);
   tiempoMs.value = Math.round(ms);
   pausado.value = v.paused;

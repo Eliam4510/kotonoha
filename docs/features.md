@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.46.0, along with how it has been verified.
+Status of each feature in version 0.47.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -75,7 +75,7 @@ Status of each feature in version 0.46.0, along with how it has been verified.
 | Exporting to SRT, with synchronization applied | Imitation page |
 | Japanese tracks remembered across Netflix regions | Imitation page. Real sessions must still confirm that the title identifier matches |
 | Synchronization by offset or with one or two marks | Automated |
-| Netflix clock: after a mid-roll ad, when the next episode starts on its own or after a jump, subtitles follow the episode time given by the Netflix player, without reloading the page; if its clock does not leave the ad out, the adjustment is how long the video ran during it. **Sync again** and `Alt+Shift+S` | Automated, with a simulated Netflix |
+| Netflix clock: after a mid-roll ad, when the next episode starts on its own or after a jump, subtitles follow the episode time given by the Netflix player, without reloading the page; if its clock does not leave the ad out, the adjustment is how long the video ran during it, until its clock gives its measurement; that adjustment can be removed. **Sync again**, **Remove adjustment** and `Alt+Shift+S` | Automated, with a simulated Netflix |
 
 ## Transcription
 
@@ -192,6 +192,10 @@ Status of each feature in version 0.46.0, along with how it has been verified.
 | Stories generated for the user's level | Simulator |
 | Player for local files | Automated |
 | Embedded MKV subtitles and audio track selection, with ffmpeg.wasm | Automated |
+| The player's own controls: speed, volume, jumping between lines, the sentence of each moment on the timeline, and full screen with subtitles | Automated |
+| Whole folders as a playlist, in natural order, with each episode's subtitles split by language | Automated |
+| Resuming each file where it was left, “Continue watching” and reopening with one click | Automated |
+| Audio in the player: MP3, M4A, OGG, WAV and FLAC | Automated |
 | Word explorer by status | Automated |
 | Immersion hours: the time with a playing video and subtitles in the language you study, with a book in the viewer and while reading in the Notebook or the library; on Home, today, the last seven days, the total, the streak, one bar per day and what was watched and read the most | Automated: one of your own videos actually playing, and earlier days seeded in the database |
 | Level assessment | Automated |

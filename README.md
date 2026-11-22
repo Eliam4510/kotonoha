@@ -78,6 +78,14 @@ Sobre el reproductor aparecen los subtítulos con furigana, un color por acento 
 - Los subtítulos se traducen al idioma propio, y los automáticos se corrigen con el título y todo el guion como contexto.
 - Lo que no trae subtítulos se transcribe en el propio equipo, con la tarjeta gráfica: 30 minutos de video en alrededor de un minuto.
 
+### Tus videos y audios
+
+<img src="docs/img/reproductor.png" alt="El reproductor de Kotonoha con un discurso en la Dieta: los subtítulos en japonés con su traducción y, al pasar por la barra de tiempo, la frase de otro momento" width="100%">
+
+<sub>El mismo video de «第221回国会における高市内閣総理大臣施政方針演説», abierto como un archivo propio.</sub>
+
+El **Reproductor** abre tus videos y audios, o una carpeta entera como lista de reproducción, con los subtítulos de cada capítulo; los que llevan otro idioma en el nombre se ponen como traducción. Tiene sus propios controles: velocidad, volumen, saltar de línea y, al pasar por la barra de tiempo, la frase que se dice en ese momento. En pantalla completa, los subtítulos siguen ahí. Recuerda dónde dejaste cada archivo y **Seguir viendo** lo vuelve a abrir con un clic. Los podcasts y audiolibros sin subtítulos los transcribe Whisper en el equipo.
+
 ### Cualquier página web
 
 <img src="docs/img/paginas.png" alt="『羅生門』 en el Aozora Bunko, con colores, furigana y el panel del lector" width="100%">
@@ -175,6 +183,8 @@ Y se practica ahí mismo: se escribe con el ratón, un lápiz o el dedo, calcand
 En inglés, la ficha da la pronunciación americana y británica en IPA, encuentra los verbos con partícula aunque vayan separados, como *picked it up*, y dice de qué palabra viene cada forma irregular. En alemán, dice de qué palabra sale cada forma conjugada o declinada, como *ging* de *gehen*, y encuentra los verbos separables aunque la partícula vaya al final. Los diccionarios salen de Wiktionary, en el idioma propio. Los cómics se leen globo a globo, de izquierda a derecha, y las frases suenan con voces neuronales en el propio equipo: Kokoro en inglés y Piper en alemán. Cada idioma guarda sus propias palabras, tarjetas y ajustes, y se cambia de uno a otro con un clic.
 
 ### Chino
+
+<img src="docs/img/hanzi.png" alt="La página del hanzi 河: su pinyin, el radical 氵 (三点水), sus piezas, la que le da el sonido (可) y el orden de sus trazos" width="100%">
 
 En chino, las palabras se separan solas aunque el texto no lleve espacios, y el pinyin va sobre cada carácter, con el tono del diccionario y, si un carácter se lee de varias formas (长, cháng o zhǎng), la de la frase. El diccionario es CC-CEDICT, con las traducciones breves de Wiktionary delante cuando están en tu idioma, y se busca en caracteres o en pinyin, con tonos o sin ellos. Se estudian los caracteres simplificados: si un video solo trae subtítulos en tradicionales, se ven en simplificados. Los niveles son los del HSK 3.0, con su pantalla: el vocabulario, los hanzi y la gramática de cada nivel del temario de 2025. Buscar un solo hanzi abre su página, con su radical, sus piezas, cómo se formó y el orden de sus trazos, que se practica como el de los kanji. Cada sílaba lleva el color de su tono; **Cómo suena**, en la ficha, dice cómo cambian los tonos al hablar (一, 不, dos terceros seguidos), y **Practicar** compara tu voz, sílaba a sílaba, con la forma de cada tono, sin modelos de voz.
 

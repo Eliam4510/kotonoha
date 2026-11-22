@@ -74,6 +74,14 @@ Jedes als bekannt markierte Wort wird überall nicht mehr hervorgehoben, und das
 - Untertitel werden in die eigene Sprache übersetzt, und automatisch erzeugte werden mit dem Titel und dem ganzen Skript als Kontext korrigiert.
 - Videos ohne Untertitel werden auf dem eigenen Rechner transkribiert, auf der Grafikkarte: 30 Minuten Video in etwa einer Minute.
 
+### Deine Videos und Audios
+
+<img src="docs/img/reproductor.de.png" alt="Der Player von Kotonoha mit einer Rede im japanischen Parlament: die japanischen Untertitel mit ihrer Übersetzung und, über der Zeitleiste, der Satz eines anderen Moments" width="100%">
+
+<sub>Dasselbe Video von „第221回国会における高市内閣総理大臣施政方針演説“, als eigene Datei geöffnet.</sub>
+
+Der **Player** öffnet eigene Videos und Audiodateien, oder einen ganzen Ordner als Wiedergabeliste, mit den Untertiteln jeder Folge; die, deren Name eine andere Sprache nennt, werden zur Übersetzung. Er hat eigene Steuerelemente: Geschwindigkeit, Lautstärke, Sprünge von Zeile zu Zeile und, wenn du über die Zeitleiste fährst, den Satz, der in diesem Moment gesagt wird. Im Vollbild bleiben die Untertitel da. Er merkt sich, wo du bei jeder Datei aufgehört hast, und **Weiterschauen** öffnet sie mit einem Klick wieder. Podcasts und Hörbücher ohne Untertitel transkribiert Whisper auf deinem Rechner.
+
 ### Jede Webseite
 
 <img src="docs/img/paginas.de.png" alt="『羅生門』 im Aozora Bunko, mit Farben, Furigana und dem Leserfenster" width="100%">
@@ -171,6 +179,8 @@ Und geübt wird gleich dort: Man schreibt mit Maus, Stift oder Finger, nachzeich
 Für Englisch zeigt das Wortfenster die amerikanische und britische Aussprache in IPA, findet Partikelverben auch dann, wenn sie getrennt stehen, wie *picked it up*, und nennt das Wort, von dem jede unregelmäßige Form stammt. Die Wörterbücher stammen aus Wiktionary, auf Deutsch. Comics werden Sprechblase für Sprechblase gelesen, von links nach rechts, und Sätze klingen mit neuronalen Stimmen auf dem eigenen Rechner: Kokoro auf Englisch und Piper auf Deutsch. Jede Sprache behält ihre eigenen Wörter, Karten und Einstellungen, und der Wechsel braucht einen Klick.
 
 ### Auch Chinesisch
+
+<img src="docs/img/hanzi.de.png" alt="Die Seite des Hanzi 河: sein Pinyin, das Radikal 氵 (三点水), seine Bestandteile, der lautgebende (可) und die Strichfolge" width="100%">
 
 Auf Chinesisch werden die Wörter von selbst getrennt, auch ohne Leerzeichen im Text, und das Pinyin steht über jedem Zeichen, mit dem Ton des Wörterbuchs und, wenn ein Zeichen mehrere Lesungen hat (长, cháng oder zhǎng), der des Satzes. Das Wörterbuch ist CC-CEDICT, davor die kurzen Übersetzungen von Wiktionary, wenn es sie in deiner Sprache gibt, und gesucht wird in Schriftzeichen oder in Pinyin, mit oder ohne Töne. Gelernt werden vereinfachte Schriftzeichen: Hat ein Video nur Untertitel in traditionellen, erscheinen sie in vereinfachten. Die Niveaus sind die des HSK 3.0, mit eigenem Bildschirm: Wortschatz, Hanzi und Grammatik jeder Stufe des Lehrplans von 2025. Die Suche nach einem einzelnen Hanzi öffnet seine Seite, mit Radikal, Bestandteilen, Entstehung und Strichfolge, die man wie bei den Kanji übt. Jede Silbe trägt die Farbe ihres Tons; **Wie es klingt** in der Wortkarte zeigt, wie sich die Töne beim Sprechen ändern (一, 不, zwei dritte Töne hintereinander), und **Üben** vergleicht deine Stimme Silbe für Silbe mit der Form jedes Tons, ohne Sprachmodelle.
 

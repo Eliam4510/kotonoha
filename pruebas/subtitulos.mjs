@@ -39,18 +39,38 @@ function paginaNetflix() {
   return `<!doctype html><meta charset="utf-8"><title>Película de prueba - Netflix</title>
 <body style="margin:0;background:#000"><video id="v" src="https://media.test/video.webm" muted style="width:100vw;height:100vh"></video>
 <script>
-  const pais = new URLSearchParams(location.search).get('r') ?? 'jp';
+  const consulta = new URLSearchParams(location.search);
+  const pais = consulta.get('r') ?? 'jp';
   const pistas = pais === 'jp'
     ? [{ trackId: 't-ja', displayName: '日本語', bcp47: 'ja' }, { trackId: 't-en', displayName: 'English', bcp47: 'en' }]
     : [{ trackId: 't-es', displayName: 'Español (Latinoamérica)', bcp47: 'es-419' }];
   const v = document.getElementById('v');
+  // Con ?sobra, el <video> de un anuncio que acabó se queda en la página, en pausa, del mismo tamaño y antes que el del
+  // episodio.
+  if (consulta.has('sobra')) {
+    const a = document.createElement('video');
+    a.id = 'a';
+    a.src = 'https://media.test/video.webm';
+    a.muted = true;
+    a.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh';
+    a.addEventListener('loadedmetadata', () => { a.currentTime = 3; }, { once: true });
+    v.before(a);
+  }
   // Como el de Netflix, su reproductor cuenta el momento del episodio, y window.__adelanto hace que el video vaya por
-  // delante, como tras un anuncio: seek y getCurrentTime van por el episodio. Con window.__sinReloj no da su momento.
+  // delante, como tras un anuncio: seek y getCurrentTime van por el episodio. Con window.__sinReloj no da su momento, y
+  // durante un anuncio que descuenta, su momento se queda en window.__congelado.
   const adelanto = () => window.__adelanto ?? 0;
-  const jugador = { getTimedTextTrackList: () => pistas, getTimedTextTrack: () => pistas[0], setTimedTextTrack: async () => {}, seek: (ms) => { v.currentTime = (ms + adelanto()) / 1000; }, getCurrentTime: () => (window.__sinReloj ? undefined : v.currentTime * 1000 - adelanto()), play: () => v.play(), pause: () => v.pause(), getMovieId: () => 1 };
+  const momento = () => (window.__sinReloj ? undefined : window.__congelado ?? v.currentTime * 1000 - adelanto());
+  const pelicula = Number(/\\/watch\\/(\\d+)/.exec(location.pathname)?.[1] ?? 1);
+  const jugador = { getTimedTextTrackList: () => pistas, getTimedTextTrack: () => pistas[0], setTimedTextTrack: async () => {}, seek: (ms) => { v.currentTime = (ms + adelanto()) / 1000; }, getCurrentTime: momento, play: () => v.play(), pause: () => v.pause(), getMovieId: () => pelicula };
+  // Con ?vieja, queda antes la sesión de otro episodio: su reloj, parado, y otras pistas.
+  const pistasViejas = [{ trackId: 't-viejo', displayName: '한국어', bcp47: 'ko' }];
+  const viejo = { getTimedTextTrackList: () => pistasViejas, getTimedTextTrack: () => pistasViejas[0], setTimedTextTrack: async () => {}, seek: () => {}, getCurrentTime: () => 777000, play() {}, pause() {}, getMovieId: () => 70000001 };
+  const sesiones = consulta.has('vieja') ? ['watch-viejo', 'watch1'] : ['watch1'];
+  const urls = (ps) => ({ datos: ps.map((p) => ({ type: 'timedtext', trackId: p.trackId, urls: [{ url: 'https://subs.test/' + p.trackId + '.vtt' }] })) });
   window.netflix = { appContext: { state: { playerApp: {
-    getAPI: () => ({ videoPlayer: { getAllPlayerSessionIds: () => ['watch1'], getVideoPlayerBySessionId: () => jugador }, getVideoMetadataByVideoId: () => ({ getCurrentVideo: () => ({ getTitle: () => 'Película de prueba' }) }) }),
-    getState: () => ({ videoPlayer: { cadmiumPlayerRepository: { playersById: { watch1: { datos: pistas.map((p) => ({ type: 'timedtext', trackId: p.trackId, urls: [{ url: 'https://subs.test/' + p.trackId + '.vtt' }] })) } } } } }),
+    getAPI: () => ({ videoPlayer: { getAllPlayerSessionIds: () => sesiones, getVideoPlayerBySessionId: (id) => (id === 'watch-viejo' ? viejo : jugador) }, getVideoMetadataByVideoId: () => ({ getCurrentVideo: () => ({ getTitle: () => 'Película de prueba' }) }) }),
+    getState: () => ({ videoPlayer: { cadmiumPlayerRepository: { playersById: { watch1: urls(pistas), 'watch-viejo': urls(pistasViejas) } } } }),
   } } } };
 </script>`;
 }
@@ -398,36 +418,85 @@ if (quiere('reloj')) {
   await p.close();
 
   // Un anuncio del medio de 5 s, en el mismo <video>: mientras dura, el video corre y el episodio no. Con descuenta, el
-  // reloj de Netflix lo descuenta (como se espera de él); sin, cuenta como el video y hay que medir el anuncio.
-  async function anuncioDelMedio(nombre, descuenta) {
+  // reloj de Netflix lo descuenta, como se espera de él: se queda quieto mientras dura y luego va por el episodio. Sin,
+  // cuenta como el video y hay que medir el anuncio.
+  async function abrirNetflix(nombre, extra = '', episodio = 81234567) {
     const q = abrir(await contexto.newPage(), nombre);
-    await q.goto('https://www.netflix.com/watch/81234567?r=jp');
-    await hasta(q, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000);
-    await q.evaluate(() => { const v = document.querySelector('#v'); v.currentTime = 6; return v.play(); });
-    await q.waitForFunction(() => document.querySelector('#v').currentTime >= 7);
-    const desde = await q.evaluate(() => {
+    await q.goto(`https://www.netflix.com/watch/${episodio}?r=jp${extra}`);
+    const ok = !!(await hasta(q, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000));
+    return { q, ok };
+  }
+  const reproducirDesde = (q, s) => q.evaluate((s) => { const v = document.querySelector('#v'); v.currentTime = s; return v.play(); }, s);
+  const hastaVideo = (q, s) => q.waitForFunction((s) => document.querySelector('#v').currentTime >= s, s, { timeout: 30000 });
+  const empezarAnuncio = (q, descuenta) =>
+    q.evaluate((descuenta) => {
       const d = document.createElement('div');
       d.className = 'watch-video--modular-ads-container';
       document.body.append(d);
-      return document.querySelector('#v').currentTime;
-    });
-    await q.waitForFunction(() => document.querySelector('#v').currentTime >= 12);
-    await q.evaluate(({ desde, descuenta }) => {
-      document.querySelector('.watch-video--modular-ads-container').remove();
-      if (descuenta) window.__adelanto = Math.round((document.querySelector('#v').currentTime - desde) * 1000);
-    }, { desde, descuenta });
-    const dicho = await hasta(q, (r) => [...r.querySelectorAll('.aviso-texto')].find((a) => a.textContent.includes('sincronizados con Netflix'))?.textContent, undefined, 8000);
+      const v = document.querySelector('#v');
+      if (descuenta) window.__congelado = v.currentTime * 1000 - (window.__adelanto ?? 0);
+      return v.currentTime;
+    }, descuenta);
+  /** Acaba el anuncio. Con descuenta, el reloj de Netflix vuelve a ir por el episodio; devuelve cuánto va por delante el video. */
+  const acabarAnuncio = (q, desde, { descuenta, quitar = true }) =>
+    q.evaluate(({ desde, descuenta, quitar }) => {
+      if (quitar) document.querySelector('.watch-video--modular-ads-container')?.remove();
+      if (descuenta) {
+        window.__adelanto = (window.__adelanto ?? 0) + Math.round((document.querySelector('#v').currentTime - desde) * 1000);
+        window.__congelado = undefined;
+      }
+      return window.__adelanto ?? 0;
+    }, { desde, descuenta, quitar });
+  const quitarContenedor = (q) => q.evaluate(() => document.querySelector('.watch-video--modular-ads-container')?.remove());
+  const segundosDe = (texto) => Number(/\(([\d,.]+) s\)/.exec(texto ?? '')?.[1]?.replace(',', '.'));
+  const avisosDe = (q) => enOverlay(q, (r) => [...r.querySelectorAll('.aviso-texto')].map((a) => a.textContent).join(' | '));
+  /** El aviso que dice `re`; con `s`, solo si su cifra está a menos de 0,3 s de ella. */
+  const avisoQue = (q, re, s = null, ms = 9000) =>
+    hasta(
+      q,
+      (r, { f, s }) =>
+        [...r.querySelectorAll('.aviso-texto')]
+          .map((a) => a.textContent)
+          .find((t) => new RegExp(f).test(t) && (s === null || Math.abs(Number(/\(([\d,.]+) s\)/.exec(t)?.[1]?.replace(',', '.')) - s) <= 0.3)),
+      { f: re.source, s },
+      ms
+    );
+  /** Todos los avisos que salen durante `ms`: uno breve se iría antes de mirarlo al final. */
+  async function avisosDurante(q, ms) {
+    const vistos = new Set();
+    const fin = Date.now() + ms;
+    while (Date.now() < fin) {
+      for (const t of (await enOverlay(q, (r) => [...r.querySelectorAll('.aviso-texto')].map((a) => a.textContent))) ?? []) vistos.add(t);
+      await q.waitForTimeout(200);
+    }
+    return [...vistos];
+  }
+  /** Alt+Shift+S, y lo que dice: tiene que medir y dar `s` segundos, y no repetir otra cifra. */
+  async function sincronizarAMano(q, s, texto) {
+    await q.keyboard.press('Alt+Shift+S');
+    const vistos = await avisosDurante(q, 6000);
+    comprobar(vistos.some((t) => /sincronizados con Netflix/.test(t) && Math.abs(segundosDe(t) - s) <= 0.3), texto, `${vistos.join(' | ') || 'sin avisos'} (va ${Math.round(s * 1000)} ms por delante)`);
+  }
+
+  async function anuncioDelMedio(nombre, descuenta) {
+    const { q } = await abrirNetflix(nombre);
+    await reproducirDesde(q, 6);
+    await hastaVideo(q, 7);
+    const desde = await empezarAnuncio(q, descuenta);
+    await hastaVideo(q, 12);
+    const adelanto = await acabarAnuncio(q, desde, { descuenta });
+    const dicho = await avisoQue(q, /sincronizados con Netflix|ajustados por los anuncios/, null, 8000);
     await q.evaluate(() => document.querySelector('#v').pause());
     await q.waitForTimeout(150);
     const t = await q.evaluate(() => document.querySelector('#v').currentTime);
     const linea = await textoLinea(q, 'objetivo');
-    return { q, dicho, t, linea };
+    return { q, dicho, t, linea, adelanto };
   }
 
   console.log('\n== Netflix: un anuncio del medio que su reloj descuenta ==');
   {
-    const { q, dicho, t, linea } = await anuncioDelMedio('netflix-anuncio', true);
-    comprobar(/\(5 s\)/.test(dicho ?? ''), 'Al acabar el anuncio se sincroniza con el reloj de Netflix, al milisegundo', dicho);
+    const { q, dicho, t, linea, adelanto } = await anuncioDelMedio('netflix-anuncio', true);
+    comprobar(/sincronizados con Netflix/.test(dicho ?? '') && Math.abs(segundosDe(dicho) - adelanto / 1000) <= 0.1, 'Al acabar el anuncio se sincroniza con el reloj de Netflix, al milisegundo', `${dicho} (va ${adelanto} ms por delante)`);
     comprobar(linea.includes('授業'), 'La línea es la del episodio, no la del video', `video ${t.toFixed(1)} s: ${linea}`);
     await abrirPanel(q, 'Ajustes de video');
     await pulsar(q, 'Sincronizar', '.panel-flotante');
@@ -456,6 +525,116 @@ if (quiere('reloj')) {
     const tras = await q.evaluate(() => document.querySelector('#v').currentTime);
     const despues = await textoLinea(q, 'objetivo');
     comprobar(despues.includes('赤い星') && Math.abs(tras - (16 + s)) < 0.6, 'Saltar a una línea lleva a su momento del episodio', `video ${tras.toFixed(2)} s: ${despues}`);
+    await q.close();
+  }
+
+  // Lo que pasó en su Netflix (0.47.0): tras los anuncios, «Volver a sincronizar» repetía siempre la misma cifra y los
+  // subtítulos no cuadraban hasta recargar la página.
+  console.log('\n== Netflix: dos anuncios del medio, y sincronizar a mano mide de nuevo ==');
+  {
+    const { q } = await abrirNetflix('netflix-dos-anuncios');
+    await reproducirDesde(q, 6);
+    await hastaVideo(q, 7);
+    let desde = await empezarAnuncio(q, true);
+    await hastaVideo(q, 12);
+    const uno = await acabarAnuncio(q, desde, { descuenta: true });
+    comprobar(!!(await avisoQue(q, /sincronizados con Netflix/, uno / 1000)), 'Tras el primero, va por su reloj', await avisosDe(q));
+    await hastaVideo(q, 15);
+    desde = await empezarAnuncio(q, true);
+    await hastaVideo(q, 20);
+    const dos = await acabarAnuncio(q, desde, { descuenta: true });
+    comprobar(!!(await avisoQue(q, /sincronizados con Netflix/, dos / 1000)), 'Tras el segundo, la cuenta sigue con los dos', `${await avisosDe(q)} (va ${dos} ms por delante)`);
+    await q.waitForTimeout(3800);
+    await sincronizarAMano(q, dos / 1000, 'Volver a sincronizar mide de nuevo y da la misma cuenta');
+    await q.evaluate(() => document.querySelector('#v').pause());
+    await enOverlay(q, (r) => r.querySelectorAll('.nav-linea')[3]?.click());
+    await q.waitForTimeout(600);
+    const tras = await q.evaluate(() => document.querySelector('#v').currentTime);
+    const linea = await textoLinea(q, 'objetivo');
+    comprobar(linea.includes('赤い星') && Math.abs(tras - (16 + dos / 1000)) < 0.4, 'Saltar a una línea lleva a su momento del episodio', `video ${tras.toFixed(2)} s: ${linea}`);
+    await q.close();
+  }
+
+  console.log('\n== Netflix: su reloj contesta tarde tras el anuncio, y el descuento no se queda ==');
+  {
+    const { q } = await abrirNetflix('netflix-reloj-tarde');
+    await reproducirDesde(q, 6);
+    await hastaVideo(q, 7);
+    const desde = await empezarAnuncio(q, true);
+    await hastaVideo(q, 12);
+    // Acaba el anuncio, pero su contenedor tarda dos segundos más en irse, y su reloj, en contestar.
+    await q.evaluate(() => { window.__sinReloj = true; });
+    const real = await acabarAnuncio(q, desde, { descuenta: true, quitar: false });
+    await hastaVideo(q, 14);
+    await quitarContenedor(q);
+    const porAnuncios = await avisoQue(q, /ajustados por los anuncios/);
+    comprobar(Math.abs(segundosDe(porAnuncios) - 7) <= 0.5, 'Sin su reloj, descuenta lo que corrió el video con el anuncio en pantalla', porAnuncios ?? (await avisosDe(q)));
+    await q.evaluate(() => { window.__sinReloj = false; });
+    const suyo = await avisoQue(q, /sincronizados con Netflix/, real / 1000);
+    comprobar(!!suyo, 'En cuanto su reloj contesta, manda él: el descuento sobraba', `${suyo ?? (await avisosDe(q))} (va ${real} ms por delante)`);
+    await q.waitForTimeout(3800);
+    await sincronizarAMano(q, real / 1000, 'Volver a sincronizar mide de nuevo: no repite la cifra del anuncio');
+    await q.close();
+  }
+
+  console.log('\n== Netflix: al acabar el anuncio, el video vuelve atrás ==');
+  {
+    const { q } = await abrirNetflix('netflix-vuelve-atras');
+    await reproducirDesde(q, 6);
+    await hastaVideo(q, 7);
+    const desde = await empezarAnuncio(q, true);
+    await hastaVideo(q, 12);
+    await quitarContenedor(q);
+    await q.waitForTimeout(300);
+    // Devuelve lo que corrió durante el anuncio: su reloj y el del video vuelven a marcar lo mismo.
+    await q.evaluate((desde) => { window.__congelado = undefined; document.querySelector('#v').currentTime = desde; }, desde);
+    const vistos = await avisosDurante(q, 5000);
+    comprobar(!vistos.some((t) => /ajustados por los anuncios|sincronizados con Netflix \(/.test(t)), 'No descuenta nada', vistos.join(' | ') || 'sin avisos');
+    await q.evaluate(() => { const v = document.querySelector('#v'); v.pause(); v.currentTime = 23; });
+    await q.waitForTimeout(400);
+    comprobar((await textoLinea(q, 'objetivo')).includes('立ち上がる'), 'Y los subtítulos siguen al video', await textoLinea(q, 'objetivo'));
+    await q.close();
+  }
+
+  console.log('\n== Netflix: sin su reloj, el ajuste por los anuncios se puede quitar ==');
+  {
+    const { q } = await abrirNetflix('netflix-quitar-ajuste');
+    await q.evaluate(() => { window.__sinReloj = true; });
+    await reproducirDesde(q, 6);
+    await hastaVideo(q, 7);
+    await empezarAnuncio(q, false);
+    await hastaVideo(q, 12);
+    await quitarContenedor(q);
+    const dicho = await avisoQue(q, /ajustados por los anuncios/);
+    comprobar(Math.abs(segundosDe(dicho) - 5) <= 0.5, 'Descuenta lo que corrió el video durante el anuncio', dicho ?? (await avisosDe(q)));
+    await q.waitForTimeout(7300);
+    await q.keyboard.press('Alt+Shift+S');
+    const sinPosicion = await avisoQue(q, /no dio su posición: siguen ajustados por los anuncios/, null, 8000);
+    comprobar(!!sinPosicion, 'A mano, sin su reloj, dice que sigue el ajuste por los anuncios', sinPosicion ?? (await avisosDe(q)));
+    await pulsar(q, 'Quitar el ajuste', '.avisos');
+    comprobar(!!(await avisoQue(q, /Ajuste por los anuncios quitado/, null, 3000)), 'Y se quita desde el aviso', await avisosDe(q));
+    await q.evaluate(() => { const v = document.querySelector('#v'); v.pause(); v.currentTime = 23; });
+    await q.waitForTimeout(400);
+    comprobar((await textoLinea(q, 'objetivo')).includes('立ち上がる'), 'Sin el ajuste, los subtítulos siguen al video', await textoLinea(q, 'objetivo'));
+    await q.close();
+  }
+
+  console.log('\n== Netflix: la sesión de otro episodio y el <video> de un anuncio que quedó ==');
+  {
+    // Otro episodio, sin subtítulos guardados de las pruebas de antes: las pistas tienen que salir de su sesión.
+    const { q, ok } = await abrirNetflix('netflix-sesion-vieja', '&vieja&sobra', 81234568);
+    comprobar(ok, 'Toma las pistas de la sesión del episodio, no de la que quedó de otro');
+    await q.evaluate(() => { window.__adelanto = 5000; });
+    await reproducirDesde(q, 11);
+    const dicho = await avisoQue(q, /sincronizados con Netflix/, 5);
+    comprobar(!!dicho, 'Mide con el reloj de esa sesión', dicho ?? (await avisosDe(q)));
+    await q.evaluate(() => document.querySelector('#v').pause());
+    await q.waitForTimeout(200);
+    const t = await q.evaluate(() => document.querySelector('#v').currentTime);
+    const linea = await textoLinea(q, 'objetivo');
+    comprobar(linea.includes('授業'), 'Los subtítulos siguen al video del episodio, no al que quedó del anuncio', `video ${t.toFixed(1)} s: ${linea}`);
+    const marcado = await q.evaluate(() => document.querySelector('video[data-kotonoha-video]')?.id);
+    comprobar(marcado === 'v', 'El <video> marcado es el del episodio', marcado);
     await q.close();
   }
 }

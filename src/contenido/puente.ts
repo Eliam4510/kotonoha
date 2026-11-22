@@ -1,7 +1,8 @@
 // Comunicación con el adaptador del mundo MAIN.
 
-import type { PistaInfo } from '../compartido/tipos';
+import type { PistaInfo, TiemposSitio } from '../compartido/tipos';
 import { tm, tr } from '../compartido/i18n';
+import { elegirVideo, MARCA_VIDEO } from '../compartido/videoPrincipal';
 
 // Los adaptadores corren en la página, sin acceso a las traducciones: sus mensajes se traducen al llegar aquí.
 void [
@@ -26,7 +27,9 @@ export interface Control {
   prepararPanel(ancho: number): Promise<void>;
   video(): HTMLVideoElement | null;
   /** El momento del <video> y el del reproductor del sitio, tomados a la vez (ver relojSitio.ts). */
-  tiempos?(): Promise<{ video: number; jugador: number } | null>;
+  tiempos?(): Promise<TiemposSitio | null>;
+  /** Lo que tapan abajo los controles propios, en px: los subtítulos se colocan por encima (el reproductor de archivos). */
+  recorteInferior?(): number;
 }
 
 let contador = 0;
@@ -71,18 +74,20 @@ export const alNavegar = (f: () => void) => {
   oyentesNavegacion.add(f);
 };
 
+let principal: HTMLVideoElement | null = null;
+
+/**
+ * El <video> de los subtítulos (ver compartido/videoPrincipal.ts). Queda marcado para que la parte que corre en la página
+ * use el mismo: si no, con dos del mismo tamaño, como el de un anuncio que acabó, cada una podía tomar uno distinto.
+ */
 export function videoPrincipal(): HTMLVideoElement | null {
-  let mejor: HTMLVideoElement | null = null;
-  let area = 0;
-  for (const v of document.querySelectorAll('video')) {
-    const r = v.getBoundingClientRect();
-    const a = r.width * r.height;
-    if (a > area) {
-      area = a;
-      mejor = v;
-    }
+  const v = elegirVideo(principal?.isConnected ? principal : null);
+  if (v !== principal) {
+    principal?.removeAttribute(MARCA_VIDEO);
+    principal = v;
   }
-  return mejor;
+  if (v && !v.hasAttribute(MARCA_VIDEO)) v.setAttribute(MARCA_VIDEO, '');
+  return v;
 }
 
 export const controlSitio: Control = {

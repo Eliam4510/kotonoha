@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { olvidarReproductor, recargarExtension } from './extension.mjs';
 import { iniciarMock } from './mock-claude.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
@@ -58,6 +58,7 @@ await p.waitForTimeout(800);
 comprobar((await sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes.idiomaObjetivo)) === 'en', 'Se estudia inglés');
 
 await p.goto(`chrome-extension://${id}/app.html#/reproductor`);
+await olvidarReproductor(p);
 await p.waitForTimeout(1200);
 await p.setInputFiles('input[type="file"]', video);
 await p.waitForFunction(() => document.querySelector('.ap-local video')?.readyState >= 2, undefined, { timeout: 20000 });

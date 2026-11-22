@@ -10,7 +10,7 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { iniciarMock } from './mock-claude.mjs';
-import { recargarExtension } from './extension.mjs';
+import { olvidarReproductor, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-whisper'));
@@ -73,6 +73,7 @@ const errores = [];
 const r = await contexto.newPage();
 r.on('pageerror', (e) => errores.push(e.message));
 await r.goto(`chrome-extension://${id}/app.html#/reproductor`);
+await olvidarReproductor(r);
 await r.waitForTimeout(1200);
 const motor = (metodo, ...args) =>
   r.evaluate(({ metodo, args }) => chrome.runtime.sendMessage({ canal: 'motor', metodo, args }), { metodo, args }).then((x) => {

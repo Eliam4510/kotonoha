@@ -772,23 +772,125 @@ section .ap-botones { margin-top: 10px; }
 .ap-portada-opcion:hover { transform: translateY(-3px); }
 .ap-portada-opcion.elegida { box-shadow: 0 0 0 3px var(--hoja), 0 6px 14px rgba(0, 0, 0, 0.2); }
 
-/* ---------- Reproductor local ---------- */
+/* ---------- Reproductor de archivos ---------- */
 .ap-local { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; animation: kk-fundido 0.3s var(--salida); }
-.ap-local.con-video { padding: 0; background: #000; }
-.ap-local video { width: 100%; height: 100%; }
+/* Con un archivo: el video arriba, sus controles debajo y, si se abre, la lista a la derecha. */
+.ap-local.con-video { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; justify-items: stretch; padding: 0; background: #000; }
+/* El navegador de subtítulos va fijo a la derecha de la ventana: el video le deja su sitio. */
+.ap-local.con-nav { padding-right: 380px; }
+.ap-rep-escena { grid-column: 1; grid-row: 1; position: relative; min-height: 0; display: flex; align-items: center; justify-content: center; background: #000; }
+.ap-local video { display: block; width: 100%; height: 100%; object-fit: contain; outline: none; }
+.ap-local.pantalla.inactivo, .ap-local.pantalla.inactivo video { cursor: none; }
+
+/* Un audio no tiene imagen: su portada, detrás de los subtítulos. */
+.ap-rep-portada { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 24px 22vh; text-align: center; pointer-events: none; background: radial-gradient(640px 420px at 50% 34%, var(--hoja-suave), transparent 72%); }
+.ap-rep-portada-icono { width: 104px; height: 104px; border-radius: 14px 48px 14px 48px; }
+.ap-rep-portada b { max-width: 60ch; font-size: 22px; line-height: 1.3; color: var(--texto); text-wrap: balance; }
+.ap-rep-portada small { font-size: 13px; color: var(--texto-3); }
+.ap-rep-portada .btn { margin-top: 6px; pointer-events: auto; }
+
+/* Los controles: debajo del video, y encima de él en pantalla completa, donde se van si no se mueve el ratón. */
+.ap-rep-controles { grid-column: 1; grid-row: 2; position: relative; z-index: 4; padding: 2px 12px 6px; color: var(--texto); background: var(--fondo); box-shadow: 0 -1px 0 var(--borde); }
+.ap-local.pantalla .ap-rep-controles { grid-row: 1; align-self: end; padding-top: 40px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.82) 64%); box-shadow: none; opacity: 0; transform: translateY(8px); transition: opacity 0.26s, transform 0.26s var(--salida); pointer-events: none; }
+.ap-local.pantalla .ap-rep-controles.visible { opacity: 1; transform: none; pointer-events: auto; }
+
+.ap-rep-barra { position: relative; height: 20px; display: flex; align-items: center; cursor: pointer; }
+.ap-rep-pista { position: relative; width: 100%; height: 4px; border-radius: 4px; overflow: hidden; background: rgba(255, 255, 255, 0.16); transition: height 0.12s; }
+.ap-rep-barra:hover .ap-rep-pista, .ap-rep-barra:focus-within .ap-rep-pista { height: 6px; }
+.ap-rep-hecho { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--hoja); }
+.ap-rep-sombra { position: absolute; inset: 0 auto 0 0; background: rgba(255, 255, 255, 0.16); }
+.ap-rep-bolita { position: absolute; top: 50%; width: 13px; height: 13px; margin-left: -6.5px; border-radius: 50%; background: var(--hoja); box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35); transform: translateY(-50%) scale(0); transition: transform 0.12s; pointer-events: none; }
+.ap-rep-barra:hover .ap-rep-bolita, .ap-rep-barra:focus-within .ap-rep-bolita { transform: translateY(-50%) scale(1); }
+/* La barra que se ve es un dibujo: encima, un deslizador invisible da el clic, el arrastre y las flechas del teclado. */
+.ap-rep-buscar { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; -webkit-appearance: none; appearance: none; background: transparent; }
+.ap-rep-buscar::-webkit-slider-runnable-track { height: 20px; background: transparent; }
+.ap-rep-buscar::-webkit-slider-thumb { -webkit-appearance: none; width: 2px; height: 20px; }
+.ap-rep-barra:focus-within .ap-rep-pista { box-shadow: 0 0 0 2px var(--hoja-suave); }
+.ap-rep-vista { position: absolute; bottom: calc(100% + 8px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 11px; border-radius: 10px; white-space: nowrap; color: #F2F5EE; background: #050806; box-shadow: var(--sombra-2); pointer-events: none; }
+.ap-rep-vista.con-linea { width: max-content; max-width: min(520px, 80vw); white-space: normal; }
+.ap-rep-vista-linea { font-family: var(--letra-lengua); font-size: 15px; line-height: 1.45; text-align: center; text-wrap: balance; }
+.ap-rep-vista-tiempo { font-size: 12px; font-weight: 700; color: #B8C2B2; }
+
+.ap-rep-fila { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; height: 46px; }
+.ap-rep-grupo { display: flex; align-items: center; gap: 2px; }
+.ap-rep-boton { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 38px; height: 38px; border-radius: 50%; color: var(--texto); opacity: 0.86; transition: background 0.14s, opacity 0.14s, transform 0.14s; }
+.ap-rep-boton:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
+.ap-rep-boton:active { transform: scale(0.92); }
+.ap-rep-boton.grande { width: 44px; height: 44px; }
+.ap-rep-boton.activo { opacity: 1; color: var(--hoja); background: var(--hoja-suave); }
+.ap-rep-boton.texto { width: auto; min-width: 48px; padding: 0 10px; border-radius: var(--r-pill); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ap-rep-boton.texto.cambiado { color: var(--hoja); }
+.ap-rep-volumen { display: flex; align-items: center; }
+.ap-rep-nivel { width: 0; margin: 0; opacity: 0; accent-color: var(--hoja); transition: width 0.18s var(--salida), opacity 0.18s, margin 0.18s; }
+.ap-rep-volumen:hover .ap-rep-nivel, .ap-rep-volumen:focus-within .ap-rep-nivel { width: 84px; margin: 0 6px 0 2px; opacity: 1; }
+.ap-rep-reloj { margin-left: 8px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.ap-rep-total { font-weight: 600; color: var(--texto-3); }
+.ap-rep-titulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; font-size: 13px; font-weight: 700; color: var(--texto-2); }
+.ap-rep-menu-ancla { position: relative; }
+.ap-rep-menu { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 8; display: flex; flex-direction: column; min-width: 124px; padding: 6px; border-radius: 14px; background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde-2), var(--sombra-3); animation: kk-aparecer 0.16s var(--salida); }
+.ap-rep-menu button { height: 32px; padding: 0 12px; border-radius: 9px; text-align: left; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--texto-2); }
+.ap-rep-menu button:hover { color: var(--texto); background: var(--superficie-3); }
+.ap-rep-menu button.activo { color: var(--hoja); background: var(--hoja-suave); }
+/* La pista de audio, cuando el archivo trae más de una. */
+.ap-local-audio { display: flex; align-items: center; gap: 6px; height: 34px; margin-right: 6px; padding: 0 4px 0 10px; border-radius: var(--r-pill); color: var(--texto-2); background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); }
+.ap-local-audio .selector { height: 28px; max-width: 200px; font-size: 12.5px; }
+.ap-local-audio .ayuda { padding-right: 8px; }
+
+/* La lista de reproducción, a la derecha. */
+.ap-rep-lista { grid-column: 2; grid-row: 1 / span 2; width: 320px; min-height: 0; display: flex; flex-direction: column; background: var(--fondo); border-left: 1px solid var(--borde); animation: kk-fundido 0.2s var(--salida); }
+.ap-rep-lista-cab { display: flex; align-items: center; gap: 2px; padding: 12px 10px 10px 16px; border-bottom: 1px solid var(--borde); }
+.ap-rep-lista-cab h2 { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.ap-rep-lista-cab h2 .num { font-size: 12px; color: var(--texto-3); }
+.ap-rep-lista-elementos { flex: 1; overflow-y: auto; margin: 0; padding: 6px; list-style: none; }
+.ap-rep-elemento { position: relative; display: flex; align-items: center; border-radius: 12px; }
+.ap-rep-elemento:hover { background: var(--superficie-2); }
+.ap-rep-elemento.actual { background: var(--hoja-suave); }
+.ap-rep-elemento-abrir { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px; text-align: left; border-radius: 12px; }
+.ap-rep-elemento-texto { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.ap-rep-elemento-texto b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.ap-rep-elemento.terminado .ap-rep-elemento-texto b { color: var(--texto-2); }
+.ap-rep-elemento-texto small { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11.5px; color: var(--texto-3); }
+.ap-rep-ahora { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: var(--hoja); }
+.ap-rep-con-subs { display: inline-flex; align-items: center; gap: 3px; }
+.ap-rep-carpeta { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-rep-quitar { margin-right: 4px; opacity: 0; }
+.ap-rep-elemento:hover .ap-rep-quitar, .ap-rep-quitar:focus-visible { opacity: 1; }
+.ap-rep-mini { position: relative; flex: none; display: flex; align-items: center; justify-content: center; width: 88px; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; color: var(--texto-3); background: var(--superficie-3); }
+.ap-rep-mini img { width: 100%; height: 100%; object-fit: cover; }
+.ap-rep-mini-avance { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--hoja); }
+.ap-rep-avance { display: inline-flex; align-items: center; gap: 4px; }
+.ap-rep-avance.terminado { font-weight: 700; color: var(--hoja); }
+
+/* Sin archivo: elegir o soltar, y lo último que se vio. */
+.ap-local-inicio { display: flex; flex-direction: column; align-items: center; gap: 32px; width: 100%; max-height: 100%; overflow-y: auto; padding: 8px 0 24px; }
 .ap-local-vacio { display: flex; flex-direction: column; align-items: center; gap: 14px; width: min(680px, 100%); padding: 52px 40px; text-align: center; border-radius: var(--r-5); border: 1.5px dashed var(--borde-2); transition: border-color 0.16s, background 0.16s, transform 0.2s var(--resorte); }
 .ap-local-vacio.activo { border-color: var(--hoja); background: var(--hoja-suave); transform: scale(1.01); }
 .ap-local-icono { width: 68px; height: 68px; border-radius: 9px 32px 9px 32px; }
 .ap-local-vacio h1 { font-size: 28px; }
 .ap-local-vacio p { max-width: 50ch; font-size: 15px; color: var(--texto-2); margin-bottom: 8px; }
+.ap-local-botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .ap-local-formatos { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; margin-top: 12px; }
+.ap-rep-recientes { width: min(980px, 100%); }
+.ap-rep-recientes h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 15px; color: var(--texto-2); }
+.ap-rep-recientes ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.ap-rep-reciente { position: relative; }
+.ap-rep-reciente-abrir { width: 100%; display: flex; flex-direction: column; gap: 8px; padding: 8px; text-align: left; border-radius: 14px; background: var(--superficie-2); box-shadow: inset 0 0 0 1px var(--borde); transition: background 0.14s, transform 0.18s var(--resorte); }
+.ap-rep-reciente-abrir:hover { background: var(--superficie-3); transform: translateY(-2px); }
+.ap-rep-reciente .ap-rep-mini { width: 100%; }
+.ap-rep-reciente-texto { min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 0 2px 2px; }
+.ap-rep-reciente-texto b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
+.ap-rep-reciente-texto small { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--texto-3); }
+.ap-rep-sin-acceso { position: absolute; top: 14px; left: 14px; display: inline-flex; padding: 4px; border-radius: 8px; color: var(--texto-2); background: var(--vidrio); backdrop-filter: blur(8px); }
+.ap-rep-olvidar { position: absolute; top: 12px; right: 12px; opacity: 0; background: var(--vidrio); backdrop-filter: blur(8px); }
+.ap-rep-reciente:hover .ap-rep-olvidar, .ap-rep-olvidar:focus-visible { opacity: 1; }
+
 .ap-local-soltar { position: absolute; inset: 16px; z-index: 5; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 20px; font-weight: 700; color: var(--hoja); border-radius: var(--r-5); border: 2px dashed var(--hoja); background: var(--vidrio-denso); pointer-events: none; }
 .ap-local-error { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 6; max-width: 80%; }
 .ap-local-error .ap-mensaje { margin: 0; background: var(--superficie); box-shadow: inset 0 0 0 1px var(--error), var(--sombra-2); }
-.ap-local-lista { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; gap: 2px; max-width: 90%; overflow-x: auto; padding: 3px; border-radius: var(--r-pill); background: var(--vidrio); backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px var(--borde-2); }
-.ap-local-lista button { flex: none; height: 28px; padding: 0 12px; border-radius: var(--r-pill); font-size: 12px; font-weight: 700; color: var(--texto-2); }
-.ap-local-lista button:hover { color: var(--texto); }
-.ap-local-lista button.activo { color: var(--texto); background: var(--superficie-4); }
+/* Los avisos de la capa salen arriba a la izquierda de la ventana: aquí, junto al video y no sobre la barra lateral. */
+.ap-local .avisos { left: 246px; }
+.ap-app:has(.ap-lateral.compacta) .ap-local .avisos { left: 82px; }
+.ap-local.pantalla .avisos { left: 14px; }
 
 /* ---------- Memoria ---------- */
 .ap-memoria-datos { display: flex; gap: 26px; margin: 0; }
@@ -1003,10 +1105,6 @@ section .ap-botones { margin-top: 10px; }
   .ap-opcion-control { max-width: 100%; }
 }
 
-/* ---------- Reproductor local: pista de audio ---------- */
-.ap-local-audio { position: absolute; top: 12px; right: 16px; z-index: 6; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 14px; border-radius: var(--r-pill); color: var(--texto-2); background: var(--vidrio); backdrop-filter: blur(20px) saturate(1.3); box-shadow: inset 0 0 0 1px var(--borde), var(--sombra-2); }
-.ap-local-audio .selector { height: 30px; max-width: 220px; font-size: 12.5px; }
-.ap-local-audio .ayuda { padding-right: 8px; }
 
 /* ---------- Ajustes: modelos de transcripción ---------- */
 .ap-whisper-modelos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 14px; }

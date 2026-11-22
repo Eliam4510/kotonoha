@@ -5,12 +5,13 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.46.0',
+  version: '0.47.0',
   puntos: [
-    tm('En chino, buscar un solo hanzi abre su página: su pinyin, su radical con su nombre de clase, sus piezas, cómo se formó, la pieza que le da el sonido y los hanzi que se leen igual.'),
-    tm('Cada hanzi enseña el orden de sus trazos, con las formas de China continental, y su escritura se practica en su página, con cada trazo corregido al soltarlo.'),
-    tm('La pantalla del HSK reúne el vocabulario, los hanzi y la gramática de cada nivel, con el temario de 2025, y cuánto conoces de cada uno.'),
-    tm('La gramática del chino que se detecta sin IA pasa de 35 a 105 puntos, cada uno en el nivel del HSK en que se enseña.'),
+    tm('El reproductor de archivos tiene sus propios controles: velocidad, volumen, saltar de línea y, al pasar por la barra de tiempo, la frase que se dice en ese momento. En pantalla completa, los subtítulos siguen ahí.'),
+    tm('Abre una carpeta entera como lista de reproducción, en el orden de sus capítulos y con los subtítulos de cada uno; los que dicen otro idioma en su nombre se ponen como traducción.'),
+    tm('Recuerda dónde dejaste cada video o audio y sigue desde ahí. «Seguir viendo» los reúne, y lo que se eligió con el selector se vuelve a abrir con un clic.'),
+    tm('También lee audio, como podcasts y audiolibros: en MP3, M4A, OGG, WAV o FLAC, con sus subtítulos o con los que escribe Whisper.'),
+    tm('En Netflix, tras los anuncios, los subtítulos ya no se quedan desfasados: «Volver a sincronizar» mide de nuevo, y el ajuste por los anuncios se puede quitar.'),
   ],
 };
 

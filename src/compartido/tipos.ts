@@ -72,6 +72,15 @@ export interface PistaInfo {
   origen: 'sitio' | 'importada' | 'claude' | 'whisper' | 'recordada' | 'letra';
 }
 
+/** El momento del <video> y el del reproductor del sitio, en ms y leídos a la vez (el reloj de Netflix). */
+export interface TiemposSitio {
+  video: number;
+  jugador: number;
+  /** La sesión de su reproductor que dio su momento, y cuántas había: con varias, pudo tomarse la que no era. */
+  sesion?: string;
+  sesiones?: number;
+}
+
 export interface EntradaDiccionario {
   dic: string;
   dicTitulo: string;

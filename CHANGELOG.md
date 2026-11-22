@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.47.0 · 2026-11-22
+
+El reproductor de archivos, completo: controles propios, carpetas enteras, seguir donde se dejó y también audio. Y en Netflix, los subtítulos ya no se quedan desfasados tras los anuncios.
+
+- **Controles propios.** Reproducir y pausar, velocidad (de 0,5× a 2×), volumen, saltar de línea, el archivo anterior y el siguiente, y una barra de tiempo que, al pasar por ella, enseña la frase que se dice en ese momento. Con los del navegador, la pantalla completa dejaba fuera los subtítulos; ahora es la del reproductor entero, con los subtítulos por encima de los controles. Teclas: Espacio, F, M, `<` y `>`.
+- **Carpetas y lista de reproducción.** **Abrir una carpeta** (o soltarla en la ventana) pone sus videos y audios en la **Lista de reproducción**, en el orden de sus capítulos (el 2 antes que el 10) y con los subtítulos de cada uno: los que dicen en el nombre la lengua que estudias son los principales, y los de otro idioma, la traducción. Al terminar uno, empieza el siguiente.
+- **Seguir donde se dejó.** Cada archivo recuerda dónde se dejó y guarda una miniatura; al volver, sigue unos segundos antes, con **Desde el principio** a mano. **Seguir viendo** reúne lo último, y lo que se eligió con el selector del sistema o se soltó en la ventana se abre otra vez con un clic.
+- **Audio.** Podcasts y audiolibros en MP3, M4A, OGG, WAV o FLAC, con su portada y sus subtítulos, o con los que escribe Whisper desde **Generar los subtítulos**.
+- **Subtítulos.** Un botón de la barra abre sus pistas, importar otras y la sincronía. El navegador de subtítulos y la lista dejan sitio al video en lugar de taparlo, y los avisos salen junto al video, no sobre el menú. Y sus atajos (A, D, G, Q…) ya no actúan en otras pantallas de la app después de usarlo.
+- **Netflix tras los anuncios.** «Volver a sincronizar» repetía la misma cifra después de un anuncio, y los subtítulos no cuadraban hasta recargar la página. Ahora el reloj de Netflix se sigue comparando después de ajustar por un anuncio, y en cuanto da su medida, manda ella; sincronizar a mano siempre mide de nuevo. Se toma la sesión de su reproductor del episodio que se ve y el video en marcha, no los que quedan de otro episodio o de un anuncio. El ajuste por los anuncios se puede quitar desde su aviso o desde **Sincronizar**, que ahora enseña lo que marcan los dos relojes.
+
 ## 0.46.0 · 2026-11-21
 
 Hanzi y HSK, la tercera fase del chino: cada carácter con su página y sus trazos, y las listas de cada nivel.
@@ -475,6 +486,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.47.0 · 2026-11-22
+
+The file player, complete: its own controls, whole folders, resuming where you left off, and audio too. And on Netflix, subtitles no longer stay out of sync after ads.
+
+- **Its own controls.** Play and pause, speed (from 0.5× to 2×), volume, jumping between lines, the previous and next file, and a timeline that shows the sentence spoken at each moment when you hover over it. With the browser's controls, full screen left the subtitles out; now it is the whole player, with the subtitles above the controls. Keys: Space, F, M, `<` and `>`.
+- **Folders and playlist.** **Open a folder** (or drop it on the window) puts its videos and audio files in the **Playlist**, in the order of its episodes (2 before 10) and with each one's subtitles: those whose name says the language you study are the main ones, and those in another language, the translation. When one ends, the next one starts.
+- **Resume where you left off.** Each file remembers where it was left and keeps a thumbnail; when you come back, it continues a few seconds earlier, with **From the start** at hand. **Continue watching** gathers the latest ones, and anything chosen with the system file picker or dropped on the window opens again with one click.
+- **Audio.** Podcasts and audiobooks in MP3, M4A, OGG, WAV or FLAC, with their cover and their subtitles, or with the ones Whisper writes from **Generate the subtitles**.
+- **Subtitles.** A button on the bar opens their tracks, importing others and sync. The subtitle navigator and the playlist make room for the video instead of covering it, and notices appear next to the video, not over the menu. And its shortcuts (A, D, G, Q…) no longer act on other screens of the app after using it.
+- **Netflix after ads.** “Sync again” kept repeating the same figure after an ad, and subtitles were off until you reloaded the page. Now Netflix's clock is still compared after adjusting for an ad, and as soon as it gives its measurement, that one rules; syncing by hand always measures again. It takes the player session of the episode you are watching and the video that is playing, not those left over from another episode or an ad. The ad adjustment can be removed from its notice or from **Sync**, which now shows what both clocks say.
 
 ## 0.46.0 · 2026-11-21
 

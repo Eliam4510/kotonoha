@@ -7,7 +7,7 @@
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { recargarExtension } from './extension.mjs';
+import { olvidarReproductor, recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-whisper'));
@@ -114,6 +114,7 @@ await p.locator('.ficha').first().screenshot({ path: join(CAPTURAS, '1-kanji-con
 const apartadas = await leerTabla('inmersion').catch(() => []);
 if (apartadas.length) await escribir('inmersion', apartadas.map((f) => [f.dia, f.tipo, f.fuente]), true);
 await p.goto(`chrome-extension://${id}/app.html#/reproductor`);
+await olvidarReproductor(p);
 await p.waitForTimeout(1200);
 await p.setInputFiles('input[type="file"]', ARCHIVO);
 await p.waitForSelector('.linea-sub.objetivo .pal', { timeout: 30000 }).catch(() => {});

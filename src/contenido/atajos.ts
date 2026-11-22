@@ -13,6 +13,7 @@ import {
   alternarSeleccion,
   combinarSeleccionadas,
   generarSecundarios,
+  hayVideoAbierto,
   irALinea,
   lineaAnteriorOSiguiente,
   reproducir,
@@ -157,7 +158,7 @@ export function instalarAtajos(): void {
             return hecho();
           // Si Chrome no le dio esta tecla a la extensión, porque ya la tiene otra, llega hasta aquí.
           case 'q':
-            if (consulta.value || lineaActual()) ejecutarComando('crear-tarjeta');
+            if (consulta.value || (hayVideoAbierto() && lineaActual())) ejecutarComando('crear-tarjeta');
             return hecho();
           case 'r':
             explicarCaptura();
@@ -261,9 +262,10 @@ export function instalarAtajos(): void {
         return;
       }
 
-      // Teclas sueltas. Si no hay subtítulos, se dejan pasar para no romper los atajos del sitio.
-      if (!hay) {
-        if (k === 'g') {
+      // Teclas sueltas. Si no hay subtítulos, se dejan pasar para no romper los atajos del sitio. Sin video abierto
+      // tampoco: en la app, los subtítulos del reproductor siguen cargados al ir a otra pantalla.
+      if (!hay || !hayVideoAbierto()) {
+        if (k === 'g' && hayVideoAbierto()) {
           cambiarAjuste({ navegadorAbierto: !a.navegadorAbierto });
           hecho();
         }

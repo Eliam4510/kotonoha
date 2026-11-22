@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.46.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.47.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -75,7 +75,7 @@ Stand jeder Funktion in Version 0.46.0 und die Art ihrer Überprüfung.
 | Export als SRT, mit angewendeter Synchronisierung | Nachgebildete Seite |
 | Gemerkte japanische Spuren über Netflix-Regionen hinweg | Nachgebildete Seite. Mit echten Sitzungen ist noch zu bestätigen, dass die Titelkennung übereinstimmt |
 | Synchronisierung über Versatz oder mit einer oder zwei Markierungen | Automatisch |
-| Netflix-Uhr: Nach Werbung, wenn die nächste Folge von selbst startet, oder nach einem Sprung folgen die Untertitel dem Zeitpunkt der Folge, den der Netflix-Player angibt, ohne die Seite neu zu laden; zieht seine Uhr die Werbung nicht ab, wird um die Zeit angepasst, die das Video währenddessen lief. **Erneut synchronisieren** und `Alt+Shift+S` | Automatisch, mit einem simulierten Netflix |
+| Netflix-Uhr: Nach Werbung, wenn die nächste Folge von selbst startet, oder nach einem Sprung folgen die Untertitel dem Zeitpunkt der Folge, den der Netflix-Player angibt, ohne die Seite neu zu laden; zieht seine Uhr die Werbung nicht ab, wird um die Zeit angepasst, die das Video währenddessen lief, bis ihre Uhr einen Messwert liefert; diese Anpassung lässt sich entfernen. **Erneut synchronisieren**, **Anpassung entfernen** und `Alt+Shift+S` | Automatisch, mit einem simulierten Netflix |
 
 ## Transkription
 
@@ -192,6 +192,10 @@ Stand jeder Funktion in Version 0.46.0 und die Art ihrer Überprüfung.
 | Nach Niveau erzeugte Geschichten | Simulator |
 | Player für eigene Dateien | Automatisch |
 | In MKV eingebettete Untertitel und Wahl der Audiospur, mit ffmpeg.wasm | Automatisch |
+| Eigene Steuerelemente des Players: Geschwindigkeit, Lautstärke, Sprünge von Zeile zu Zeile, der Satz jedes Moments auf der Zeitleiste und Vollbild mit Untertiteln | Automatisch |
+| Ganze Ordner als Wiedergabeliste, in natürlicher Reihenfolge, mit den Untertiteln jeder Folge nach Sprache verteilt | Automatisch |
+| Weitermachen, wo jede Datei aufgehört hat, „Weiterschauen“ und erneutes Öffnen mit einem Klick | Automatisch |
+| Audio im Player: MP3, M4A, OGG, WAV und FLAC | Automatisch |
 | Wortübersicht nach Status | Automatisch |
 | Immersionsstunden: die Zeit mit einem laufenden Video und Untertiteln in der Lernsprache, mit einem Buch im Viewer und beim Lesen im Notizbuch oder in der Bibliothek; auf Start heute, die letzten sieben Tage, insgesamt, die Serie, ein Balken pro Tag und das am meisten Gesehene und Gelesene | Automatisch: ein eigenes Video, das wirklich läuft, und frühere Tage in der Datenbank |
 | Niveaubewertung | Automatisch |

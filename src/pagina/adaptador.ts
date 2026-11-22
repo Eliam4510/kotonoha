@@ -1,6 +1,7 @@
 // Interfaz común de los adaptadores por sitio. Si un sitio cambia, solo se toca su adaptador.
 
-import type { PistaInfo } from '../compartido/tipos';
+import type { PistaInfo, TiemposSitio } from '../compartido/tipos';
+import { elegirVideo, MARCA_VIDEO } from '../compartido/videoPrincipal';
 
 export interface Adaptador {
   nombre: string;
@@ -25,7 +26,7 @@ export interface Adaptador {
    * El momento del <video> y el del episodio según el reproductor del sitio, en ms y tomados a la vez, para un sitio
    * cuyo reproductor lleva su propia cuenta (Netflix); null si ahora no se pueden comparar.
    */
-  tiempos?(): { video: number; jugador: number } | null;
+  tiempos?(): TiemposSitio | null;
 }
 
 export const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -44,18 +45,13 @@ export async function sondear<T>(fn: () => T | null | undefined | false, tiempoM
   }
 }
 
+/**
+ * El <video> de los subtítulos: el que marca la otra parte de la extensión (ver compartido/videoPrincipal.ts), y si aún
+ * no hay marca, el que elegiría ella.
+ */
 export function videoPrincipal(): HTMLVideoElement | null {
-  let mejor: HTMLVideoElement | null = null;
-  let area = 0;
-  for (const v of document.querySelectorAll('video')) {
-    const r = v.getBoundingClientRect();
-    const a = r.width * r.height;
-    if (a > area) {
-      area = a;
-      mejor = v;
-    }
-  }
-  return mejor;
+  const marcado = document.querySelector<HTMLVideoElement>(`video[${MARCA_VIDEO}]`);
+  return marcado ?? elegirVideo(null);
 }
 
 export const normalizarIdioma = (c: string | undefined) => (c ?? '').toLowerCase().replace(/_/g, '-');

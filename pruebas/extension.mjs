@@ -46,3 +46,35 @@ export async function confirmarBorrado(pagina) {
   await pagina.waitForTimeout(450);
   await boton.click();
 }
+
+/**
+ * Olvida lo que recuerda el reproductor de archivos (0.47.0): dónde se dejó cada archivo, la última lista, la velocidad
+ * y el volumen. Una prueba que vuelve a abrir un archivo ya visto en su perfil empezaría donde lo dejó otra pasada, quizá
+ * pasados ya sus subtítulos. Se llama en la página del reproductor, antes de abrir nada: al final la recarga, porque el
+ * reproductor lee la velocidad y el volumen guardados al montarse.
+ */
+export async function olvidarReproductor(pagina) {
+  await pagina.evaluate(async () => {
+    const db = await new Promise((ok, mal) => {
+      const r = indexedDB.open('kotonoha-reproductor', 1);
+      r.onupgradeneeded = () => {
+        r.result.createObjectStore('vistos', { keyPath: 'clave' });
+        r.result.createObjectStore('listas');
+      };
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => mal(r.error);
+    });
+    await new Promise((ok, mal) => {
+      const tx = db.transaction(['vistos', 'listas'], 'readwrite');
+      tx.objectStore('vistos').clear();
+      tx.objectStore('listas').clear();
+      tx.oncomplete = () => ok();
+      tx.onerror = () => mal(tx.error);
+    });
+    db.close();
+    localStorage.removeItem('kk-reproductor-velocidad');
+    localStorage.removeItem('kk-reproductor-volumen');
+  });
+  await pagina.reload();
+  await pagina.waitForTimeout(800);
+}
