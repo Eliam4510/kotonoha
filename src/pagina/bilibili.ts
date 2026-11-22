@@ -151,30 +151,30 @@ export const adaptadorBilibili: Adaptador = {
     if (!r.ok) throw new Error(`Bilibili ${r.status}`);
     return vttDeBilibili(await r.text());
   },
-  // Con el reproductor de Bilibili, si lo hay: así su barra y sus comentarios siguen al video.
+  // Con el reproductor de Bilibili, para que su barra y sus comentarios sigan al video. Si no lo deja donde se pidió (o
+  // aún no está), se mueve el video directamente.
   saltar(ms) {
+    const s = ms / 1000;
     try {
-      const p = reproductor();
-      if (p?.seek) return void p.seek(ms / 1000);
+      reproductor()?.seek?.(s);
     } catch {
       // Se mueve el video directamente.
     }
     const v = videoPrincipal();
-    if (v) v.currentTime = ms / 1000;
+    if (v && Math.abs(v.currentTime - s) > 1) v.currentTime = s;
   },
   async reproducir() {
     try {
-      const p = reproductor();
-      if (p?.play) return void (await p.play());
+      await reproductor()?.play?.();
     } catch {
       // Se reproduce el video directamente.
     }
-    await videoPrincipal()?.play();
+    const v = videoPrincipal();
+    if (v?.paused) await v.play();
   },
   pausar() {
     try {
-      const p = reproductor();
-      if (p?.pause) return void p.pause();
+      reproductor()?.pause?.();
     } catch {
       // Se para el video directamente.
     }
