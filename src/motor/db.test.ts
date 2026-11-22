@@ -19,10 +19,10 @@ describe('bases de datos por lengua', () => {
   });
 
   it('abre lo que dejó la versión anterior sin perder nada', async () => {
-    // Una base como la de quien ya usaba la extensión, en la versión 5: se abre en la 11, que solo añade la tabla de las
+    // Una base como la de quien ya usaba la extensión, en la versión 5: se abre en la 13, que solo añade la tabla de las
     // formas flexionadas (6), la de las colecciones de la estantería (7), la de lo anotado en los libros (8), la de las
-    // horas de inmersión (9), las de la gramática (10) y las del diccionario de caracteres y los índices (11), con sus
-    // datos intactos.
+    // horas de inmersión (9), las de la gramática (10), las del diccionario de caracteres y los índices (11), la de las
+    // lecturas (12) y la de los repasos de la Memoria (13), con sus datos intactos.
     const anterior = new Dexie('kikitori-anterior');
     anterior.version(5).stores({ palabras: 'clave, estado, lema, actualizada, rastreada', biblioteca: 'id, creado' });
     await anterior.open();
@@ -33,8 +33,8 @@ describe('bases de datos por lengua', () => {
     const base = baseDe('anterior');
     expect(base.name).toBe('kikitori-anterior');
     await base.open();
-    expect(base.verno).toBe(12);
-    expect(base.tables.map((t) => t.name)).toEqual(expect.arrayContaining(['formas', 'colecciones', 'anotaciones', 'inmersion', 'gramatica', 'gramaticaVista', 'caracteres', 'indices', 'lecturas']));
+    expect(base.verno).toBe(13);
+    expect(base.tables.map((t) => t.name)).toEqual(expect.arrayContaining(['formas', 'colecciones', 'anotaciones', 'inmersion', 'gramatica', 'gramaticaVista', 'caracteres', 'indices', 'lecturas', 'repasos']));
     expect(await base.palabras.get('猫|')).toMatchObject({ lema: '猫', estado: 'conocida' });
     expect(await base.biblioteca.get('l')).toMatchObject({ titulo: 'Un libro', pagina: 4 });
     // La misma palabra de la versión anterior no aparece repetida ni con otra clave.

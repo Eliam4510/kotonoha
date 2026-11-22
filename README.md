@@ -193,7 +193,7 @@ En chino, las palabras se separan solas aunque el texto no lleve espacios, y el 
 - **Cómo suena de verdad el inglés.** La ficha enseña la frase como se dice al hablar seguido: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, con lo que pasa en cada caso.
 - **Horas de inmersión.** Inicio cuenta el tiempo que escuchas y lees la lengua que estudias, con la racha de días seguidos.
 - **El gasto, a la vista.** La pantalla de inicio muestra lo gastado este mes en Claude, por días, modelos y tareas, con un tope mensual. Nada se paga dos veces: cada respuesta se guarda. El [estudio de costos](docs/costos.md) da cifras medidas.
-- **Repaso integrado.** Con el algoritmo FSRS, para quien no usa Anki.
+- **Repaso integrado.** Con el algoritmo FSRS, para quien no usa Anki: deshacer, editar y suspender al repasar, un límite de nuevas al día, todas las tarjetas a la vista y el progreso, con la racha y sus gráficas.
 - **Archivos propios.** Un reproductor para videos del equipo, con los subtítulos que traiga el MKV.
 - **A medida.** Colores para daltonismo y de alto contraste, lecturas en kana o rōmaji, atajos que se pueden cambiar y sitios donde no actuar.
 

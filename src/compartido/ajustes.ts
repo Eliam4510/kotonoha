@@ -308,6 +308,10 @@ export interface Ajustes {
 
   // Tarjetas
   destino: 'anki' | 'memoria';
+  /** Las tarjetas nuevas que la Memoria enseña cada día. */
+  memoriaNuevasDia: number;
+  /** En la Memoria, la frase suena sola al enseñar la tarjeta. */
+  memoriaAudio: boolean;
   ankiMazo: string;
   ankiModelo: string;
   ankiCampos: Record<string, string>;
@@ -557,6 +561,8 @@ export const AJUSTES_INICIALES: Ajustes = {
   rellenoFinMs: 500,
 
   destino: 'memoria',
+  memoriaNuevasDia: 20,
+  memoriaAudio: true,
   ankiMazo: 'Kotonoha',
   ankiModelo: 'Kotonoha',
   ankiCampos: {},

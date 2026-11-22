@@ -893,10 +893,6 @@ section .ap-botones { margin-top: 10px; }
 .ap-local.pantalla .avisos { left: 14px; }
 
 /* ---------- Memoria ---------- */
-.ap-memoria-datos { display: flex; gap: 26px; margin: 0; }
-.ap-memoria-datos div { text-align: right; }
-.ap-memoria-datos dd { margin: 0; font-size: 22px; line-height: 1.1; font-weight: 800; letter-spacing: -0.015em; }
-.ap-memoria-datos dt { font-size: 12px; font-weight: 600; color: var(--texto-3); }
 .ap-repaso { max-width: 720px; margin: 0 auto; }
 .ap-naipe { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 300px; padding: 44px 48px; text-align: center; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-2); animation: kk-aparecer 0.3s var(--salida); }
 /* Si quedan más tarjetas, se adivina el mazo debajo. */
@@ -1765,3 +1761,67 @@ button.dic-variante:hover { background: var(--superficie-2); transform: translat
 .ap-catalogo-acciones { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .ap-catalogo-instalada { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 650; color: var(--exito); }
 .ap-catalogo-paginas { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 12.5px; color: var(--texto-3); }
+
+/* ---------- Memoria: vistas, lo de hoy, herramientas del repaso, todas las tarjetas y el progreso ---------- */
+.ap-memoria-vistas button { display: inline-flex; align-items: center; gap: 6px; }
+.ap-memoria-hoy { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 36px; margin: 0 auto 20px; max-width: 720px; }
+.ap-memoria-hoy div { text-align: center; }
+.ap-memoria-hoy dd { margin: 0; font-size: 22px; line-height: 1.1; font-weight: 800; letter-spacing: -0.015em; }
+.ap-memoria-hoy dt { font-size: 12px; font-weight: 600; color: var(--texto-3); }
+.ap-naipe-nueva { align-self: center; }
+.ap-repaso-herramientas { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 16px; }
+.ap-repaso-herramientas .tecla { min-width: 16px; padding: 0 4px; font-size: 10px; line-height: 15px; }
+.ap-memoria-fin { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.ap-editar-tarjeta { width: min(560px, 100%); }
+.ap-editar-tarjeta textarea { min-height: 0; resize: vertical; }
+
+.ap-lista-tarjetas { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.ap-fila-tarjeta { display: grid; grid-template-columns: minmax(0, 1fr) auto 96px auto; align-items: center; gap: 14px; min-height: 54px; padding: 6px 8px 6px 16px; border-radius: var(--r-3); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde); }
+.ap-fila-tarjeta.suspendida { opacity: 0.62; }
+.ap-fila-tarjeta-texto { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ap-fila-tarjeta-texto b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+.ap-fila-tarjeta-texto span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; color: var(--texto-3); }
+.ap-fila-tarjeta-vuelve { font-size: 12.5px; color: var(--texto-2); text-align: right; }
+.ap-fila-tarjeta-acciones { display: flex; gap: 2px; }
+.ap-estado-memoria.nueva { color: var(--fuji); background: var(--fuji-suave); }
+.ap-estado-memoria.aprendiendo { color: var(--aviso); background: color-mix(in srgb, var(--aviso) 14%, transparent); }
+.ap-estado-memoria.repaso { color: var(--hoja); background: var(--hoja-suave); }
+.ap-estado-memoria.suspendida { color: var(--texto-3); background: var(--superficie-3); }
+@container lienzo (max-width: 640px) {
+  .ap-fila-tarjeta { grid-template-columns: minmax(0, 1fr) auto; }
+  .ap-fila-tarjeta-vuelve { display: none; }
+}
+
+/* El progreso. Las columnas de las gráficas llevan un verde propio de cada tema, validado como serie sobre su superficie:
+   el --hoja oscuro es demasiado claro para una marca de datos. */
+.ap-progreso-memoria { --serie-memoria: #68A02B; display: flex; flex-direction: column; gap: 20px; }
+.kk-raiz[data-tema='claro'] .ap-progreso-memoria { --serie-memoria: #3E8417; }
+.ap-memoria-cifras { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0; }
+.ap-memoria-cifra { display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border-radius: var(--r-4); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde); }
+.ap-memoria-cifra dt { font-size: 12.5px; font-weight: 700; color: var(--texto-2); }
+.ap-memoria-cifra dd { margin: 0; font-size: 28px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+.ap-memoria-cifra small { font-size: 12px; color: var(--texto-3); }
+.ap-graficas { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+.ap-grafica { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 18px 18px 14px; border-radius: var(--r-4); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--borde); }
+.ap-grafica figcaption { font-size: 14px; font-weight: 800; }
+.ap-grafica-zona { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; height: 150px; }
+.ap-grafica-eje { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; font-size: 11px; font-variant-numeric: tabular-nums; color: var(--texto-3); transform: translateY(-0.5em); }
+.ap-grafica-eje span:last-child { transform: translateY(0.5em); }
+.ap-grafica-plano { position: relative; display: flex; align-items: stretch; gap: 2px; }
+/* La rejilla: tres líneas finas y continuas, un paso por encima de la superficie. */
+.ap-grafica-rejilla { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+.ap-grafica-rejilla i { height: 1px; background: var(--borde-2); }
+.ap-grafica-columna { position: relative; flex: 1; display: flex; align-items: flex-end; justify-content: center; min-width: 0; }
+.ap-grafica-columna.encima::before { content: ''; position: absolute; inset: 0 -1px; border-radius: 4px; background: color-mix(in srgb, var(--texto) 5%, transparent); }
+.ap-grafica-barra { position: relative; width: 100%; max-width: 24px; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--serie-memoria); }
+.ap-grafica-columna.encima .ap-grafica-barra { filter: brightness(1.12); }
+.ap-grafica-cifra { position: absolute; font-size: 11.5px; font-weight: 800; color: var(--texto); white-space: nowrap; }
+.ap-grafica-ayuda { position: absolute; bottom: calc(100% + 6px); transform: translateX(-50%); z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 10px; border-radius: 10px; white-space: nowrap; color: #F2F5EE; background: #050806; box-shadow: var(--sombra-2); pointer-events: none; }
+.ap-grafica-ayuda b { font-size: 13px; }
+.ap-grafica-ayuda span { font-size: 11.5px; color: #B8C2B2; }
+.ap-grafica-fechas { display: flex; justify-content: space-between; padding-left: 30px; font-size: 11.5px; color: var(--texto-3); }
+.ap-grafica-tabla summary { width: fit-content; font-size: 12.5px; font-weight: 700; color: var(--texto-2); cursor: pointer; }
+.ap-grafica-tabla table { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 12.5px; }
+.ap-grafica-tabla th { padding: 4px 0; font-weight: 600; text-align: left; color: var(--texto-2); }
+.ap-grafica-tabla td { padding: 4px 0; text-align: right; font-variant-numeric: tabular-nums; }
+.ap-grafica-tabla tr + tr { border-top: 1px solid var(--borde); }

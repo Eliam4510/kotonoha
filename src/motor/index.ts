@@ -126,6 +126,7 @@ interface DatosDeLengua {
   colecciones?: never[];
   anotaciones?: never[];
   memoria?: never[];
+  repasos?: never[];
   generados?: never[];
   correcciones?: never[];
   gramatica?: never[];
@@ -677,9 +678,18 @@ const api: ApiMotor = {
     await db.anotaciones.delete(id);
   },
 
-  memoriaPendientes: (n) => memoria.pendientes(n),
-  memoriaResumen: () => memoria.resumen(),
+  memoriaPendientes: async (n) => memoria.pendientes(n, (await aj()).memoriaNuevasDia),
+  memoriaResumen: async () => memoria.resumen((await aj()).memoriaNuevasDia),
   memoriaResponder: (id, nota) => memoria.responder(id, nota),
+  memoriaDeshacer: () => memoria.deshacer(),
+  memoriaObtener: (id) => memoria.obtener(id),
+  memoriaEditar: (id, cambios) => memoria.editar(id, cambios),
+  async memoriaSuspender(id, si) {
+    await memoria.suspender(id, si);
+  },
+  memoriaReiniciar: (id) => memoria.reiniciar(id),
+  memoriaListar: () => memoria.listar(),
+  memoriaEstadisticas: () => memoria.estadisticas(),
   async memoriaEliminar(id) {
     await memoria.eliminar(id);
   },
@@ -696,6 +706,7 @@ const api: ApiMotor = {
         colecciones: await base.colecciones.toArray(),
         anotaciones: await base.anotaciones.toArray(),
         memoria: await base.memoria.toArray(),
+        repasos: await base.repasos.toArray(),
         // Subtítulos importados, recordados y generados: traducirlos otra vez costaría API.
         generados: await base.generados.toArray(),
         correcciones: await base.correcciones.toArray(),
@@ -722,6 +733,7 @@ const api: ApiMotor = {
       if (datos.colecciones) await base.colecciones.bulkPut(datos.colecciones);
       if (datos.anotaciones) await base.anotaciones.bulkPut(datos.anotaciones);
       if (datos.memoria) await base.memoria.bulkPut(datos.memoria);
+      if (datos.repasos) await base.repasos.bulkPut(datos.repasos);
       if (datos.generados) await base.generados.bulkPut(datos.generados);
       if (datos.correcciones) await base.correcciones.bulkPut(datos.correcciones);
       if (datos.inmersion) await base.inmersion.bulkPut(datos.inmersion);

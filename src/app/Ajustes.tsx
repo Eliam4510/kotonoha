@@ -1029,6 +1029,13 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
             <button role="radio" aria-checked={a.destino === 'memoria'} class={a.destino === 'memoria' ? 'activo' : ''} onClick={() => cambiar({ destino: 'memoria' })}>{tr('Memoria')}</button>
           </div>
         </Opcion>
+        {/* Cómo repasa la Memoria. Se ven también con las tarjetas en Anki: lo que ya está en la Memoria sigue repasándose. */}
+        <Opcion titulo={tr('Tarjetas nuevas al día')} ayuda={tr('Las que la Memoria enseña por primera vez cada día. Las que ya estás aprendiendo salen siempre que toca.')}>
+          <input class="campo ap-campo-corto" type="number" min="0" max="999" step="5" aria-label={tr('Tarjetas nuevas al día')} value={a.memoriaNuevasDia} onInput={(ev) => cambiar({ memoriaNuevasDia: Math.min(999, Math.max(0, Math.round(Number(ev.currentTarget.value) || 0))) })} />
+        </Opcion>
+        <Opcion titulo={tr('Oír la frase al enseñar cada tarjeta')}>
+          <Interruptor etiqueta={tr('Oír la frase')} on={a.memoriaAudio} alCambiar={(v) => cambiar({ memoriaAudio: v })} />
+        </Opcion>
         <Opcion
           titulo={<span class="ap-estado-anki"><span class={`ap-punto ${e?.conectado ? 'ok' : ''}`} /> {e?.conectado ? tr('Conectado con AnkiConnect, versión {0}', e.version) : tr('Anki sin conectar')}</span>}
           ayuda={e?.conectado ? undefined : tr('Abre Anki con AnkiConnect instalado y pulsa Conectar. Anki te pedirá confirmación la primera vez.')}

@@ -2,6 +2,16 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.48.0 · 2026-11-22
+
+La Memoria, a fondo: deshacer, editar y suspender al repasar, un límite de nuevas al día, todas las tarjetas a la vista y el progreso.
+
+- **Repasar.** Lo de hoy, arriba: por repasar, nuevas que quedan, repasadas y en total. `Z` deshace la última respuesta (la tarjeta vuelve delante, como estaba), `E` edita la palabra, la lectura, la frase, la traducción o las notas, y `R` repite el audio, que también puede sonar solo al enseñar cada tarjeta. **Suspender** aparta una tarjeta hasta que se reactive. Al terminar, cuántas se repasaron hoy y cuántas a la primera o casi.
+- **Nuevas al día.** Salen siempre las tarjetas que ya se están aprendiendo y, como mucho, las nuevas que se elijan en **Ajustes**, **Tarjetas y Anki** (20 de serie), por orden de llegada.
+- **Tarjetas.** Todas, con su estado (nueva, aprendiendo, en repaso o suspendida) y cuándo vuelven. Se buscan por la palabra, la frase o la traducción y se filtran por estado, y cada una se edita, se suspende o se reactiva, empieza de cero o se elimina.
+- **Progreso.** La racha, cuántas se recuerdan de las que ya están en repaso, lo de hoy y cuántas hay de cada estado, con dos gráficas: los repasos de los últimos 30 días y lo que vence en los próximos 14, cada una con su tabla.
+- **Un detalle.** Un botón pulsado con el ratón ya no se queda con el foco: el Espacio siguiente sigue enseñando la respuesta y no vuelve a suspender la tarjeta siguiente.
+
 ## 0.47.0 · 2026-11-22
 
 El reproductor de archivos, completo: controles propios, carpetas enteras, seguir donde se dejó y también audio. Y en Netflix, los subtítulos ya no se quedan desfasados tras los anuncios.
@@ -486,6 +496,16 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.48.0 · 2026-11-22
+
+Memory, in depth: undo, edit and suspend while reviewing, a limit of new cards per day, all your cards in view, and your progress.
+
+- **Review.** Today's numbers on top: due, new left, reviewed and total. `Z` undoes the last answer (the card comes back first, as it was), `E` edits the word, reading, sentence, translation or notes, and `R` replays the audio, which can also play by itself when each card is shown. **Suspend** sets a card aside until you reactivate it. At the end, how many you reviewed today and how many on the first try or nearly.
+- **New cards per day.** The cards you are already learning always come up and, at most, the number of new ones you choose in **Settings**, **Cards and Anki** (20 by default), in the order they arrived.
+- **Cards.** All of them, with their status (new, learning, in review or suspended) and when they come back. Search them by word, sentence or translation and filter them by status, and edit, suspend or reactivate, start over or delete each one.
+- **Progress.** Your streak, how many of the cards already in review you remember, today's numbers and how many there are in each status, with two charts: the reviews of the last 30 days and what is due in the next 14, each with its table.
+- **A detail.** A button clicked with the mouse no longer keeps the focus: the next Space still shows the answer and does not suspend the next card.
 
 ## 0.47.0 · 2026-11-22
 

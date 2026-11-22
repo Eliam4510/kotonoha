@@ -10,6 +10,17 @@ import type { FormaFlexionada, Transcripcion } from '../lenguas/tipos';
 import type { FilaInmersion } from '../nucleo/inmersion';
 import type { DatosTrazos } from '../nucleo/trazos';
 
+/** Un repaso de la Memoria, con el estado de la tarjeta de antes: para deshacerlo y para el progreso. */
+export interface FilaRepaso {
+  id?: number;
+  tarjeta: string;
+  fecha: number;
+  nota: 1 | 2 | 3 | 4;
+  /** El estado FSRS de antes: 0 si era nueva. */
+  estadoPrevio: number;
+  previo: { fsrs: Record<string, unknown>; vence: number };
+}
+
 export interface FilaTermino {
   id?: number;
   dic: string;
@@ -151,6 +162,7 @@ class BaseKotonoha extends Dexie {
   glosas!: Table<FilaGlosa, string>;
   biblioteca!: Table<ElementoBiblioteca, string>;
   memoria!: Table<TarjetaMemoria, string>;
+  repasos!: Table<FilaRepaso, number>;
   generados!: Table<FilaSubtitulosGenerados, string>;
   analisis!: Table<FilaAnalisis, string>;
   correcciones!: Table<FilaCorrecciones, string>;
@@ -201,6 +213,8 @@ class BaseKotonoha extends Dexie {
     // Las lecturas de cada término (0.43.0), para las lenguas que las necesitan al analizar, como el chino; y por ellas,
     // sin tonos, se busca en el diccionario: nihao encuentra 你好.
     this.version(12).stores({ lecturas: '[dic+termino], dic, *busqueda' });
+    // Los repasos de la Memoria (0.48.0): para deshacer el último y para el progreso.
+    this.version(13).stores({ repasos: '++id, tarjeta, fecha' });
   }
 }
 

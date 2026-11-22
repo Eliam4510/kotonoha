@@ -579,6 +579,8 @@ export interface TarjetaMemoria {
   creada: number;
   fsrs: Record<string, unknown>;
   vence: number;
+  /** No sale en el repaso hasta que se reactive. */
+  suspendida?: boolean;
 }
 
 export interface EstadoAnki {

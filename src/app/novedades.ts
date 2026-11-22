@@ -5,13 +5,12 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.47.0',
+  version: '0.48.0',
   puntos: [
-    tm('El reproductor de archivos tiene sus propios controles: velocidad, volumen, saltar de línea y, al pasar por la barra de tiempo, la frase que se dice en ese momento. En pantalla completa, los subtítulos siguen ahí.'),
-    tm('Abre una carpeta entera como lista de reproducción, en el orden de sus capítulos y con los subtítulos de cada uno; los que dicen otro idioma en su nombre se ponen como traducción.'),
-    tm('Recuerda dónde dejaste cada video o audio y sigue desde ahí. «Seguir viendo» los reúne, y lo que se eligió con el selector se vuelve a abrir con un clic.'),
-    tm('También lee audio, como podcasts y audiolibros: en MP3, M4A, OGG, WAV o FLAC, con sus subtítulos o con los que escribe Whisper.'),
-    tm('En Netflix, tras los anuncios, los subtítulos ya no se quedan desfasados: «Volver a sincronizar» mide de nuevo, y el ajuste por los anuncios se puede quitar.'),
+    tm('La Memoria tiene tres vistas: Repasar, Tarjetas y Progreso.'),
+    tm('Al repasar, Z deshace la última respuesta, E edita la tarjeta y R repite su audio; una tarjeta se puede suspender hasta que la reactives.'),
+    tm('Cada día salen las tarjetas que ya estás aprendiendo y, como mucho, las nuevas que elijas en Ajustes (20 de serie).'),
+    tm('Tarjetas las reúne todas, con su estado y cuándo vuelven, para buscarlas, editarlas, suspenderlas o empezar de cero. Progreso enseña la racha, los aciertos y los repasos de cada día.'),
   ],
 };
 

@@ -8,6 +8,7 @@ import type { CantoPorTramos } from '../nucleo/letra';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { DatosTrazos } from '../nucleo/trazos';
+import type { Estadisticas as EstadisticasMemoria } from '../nucleo/memoria';
 import type {
   AnotacionLibro,
   BorradorTarjeta,
@@ -337,8 +338,16 @@ export interface ApiMotor {
   anotacionEliminar(id: string): Promise<void>;
 
   memoriaPendientes(limite: number): Promise<TarjetaMemoria[]>;
-  memoriaResumen(): Promise<{ total: number; pendientes: number; nuevas: number }>;
+  memoriaResumen(): Promise<{ total: number; pendientes: number; nuevas: number; nuevasQuedan: number; hoy: { repasos: number; aciertos: number } }>;
   memoriaResponder(id: string, nota: 1 | 2 | 3 | 4): Promise<void>;
+  /** Deshace la última respuesta y dice de qué tarjeta era. */
+  memoriaDeshacer(): Promise<string | null>;
+  memoriaObtener(id: string): Promise<TarjetaMemoria | undefined>;
+  memoriaEditar(id: string, cambios: Partial<Pick<BorradorTarjeta, 'palabra' | 'lectura' | 'frase' | 'traduccion' | 'notas'>>): Promise<void>;
+  memoriaSuspender(id: string, si: boolean): Promise<void>;
+  memoriaReiniciar(id: string): Promise<void>;
+  memoriaListar(): Promise<TarjetaMemoria[]>;
+  memoriaEstadisticas(): Promise<EstadisticasMemoria>;
   memoriaEliminar(id: string): Promise<void>;
 
   /** La copia lleva lo de todas las lenguas que se han usado, y los ajustes que se le pasan. */

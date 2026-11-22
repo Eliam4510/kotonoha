@@ -17,6 +17,7 @@ const responde = (w) =>
  * puede estar ya muerto y no atenderla, y entonces nunca se notifica uno nuevo.
  */
 export async function recargarExtension(contexto) {
+  await vozMuda(contexto);
   const inicial = contexto.serviceWorkers().at(-1) ?? (await contexto.waitForEvent('serviceworker'));
   const id = new URL(inicial.url()).host;
   for (let intento = 0; intento < 4; intento++) {
@@ -34,6 +35,52 @@ export async function recargarExtension(contexto) {
     }
   }
   throw new Error('El service worker no arrancó tras recargar la extensión');
+}
+
+const conVozMuda = new WeakSet();
+
+/**
+ * Las voces del sistema (en Windows, Haruka, Zira…) las reproduce el propio sistema, fuera del navegador: `--mute-audio`
+ * no las calla, y de madrugada se oían las pruebas que leen con la voz del navegador (voz-local, producto). En cada página
+ * de las pruebas, speechSynthesis habla en silencio: cada frase empieza y acaba como si sonara, con sus eventos, sin
+ * llegar al sistema. La lista de voces sigue siendo la de verdad. `window.__frasesMudas` cuenta las que se «dijeron».
+ * No llega al mundo aislado de un content script: una prueba que lea en voz alta desde la capa de una página web sí sonaría.
+ */
+export async function vozMuda(contexto) {
+  if (conVozMuda.has(contexto)) return;
+  conVozMuda.add(contexto);
+  await contexto.addInitScript(() => {
+    const s = window.speechSynthesis;
+    // Si la prueba ya puso su propia voz falsa (lector-aumentado apunta lo que se dice), esa manda.
+    if (!(s instanceof SpeechSynthesis) || window.__frasesMudas !== undefined) return;
+    window.__frasesMudas = 0;
+    const sonando = new Set();
+    const evento = (tipo, u) => {
+      try {
+        u.dispatchEvent(new SpeechSynthesisEvent(tipo, { utterance: u, charIndex: 0, elapsedTime: 0 }));
+      } catch {
+        // Un manejador que lanza no debe parar los demás.
+      }
+    };
+    const acabar = (u) => {
+      if (sonando.delete(u)) evento('end', u);
+    };
+    s.speak = (u) => {
+      window.__frasesMudas++;
+      sonando.add(u);
+      setTimeout(() => {
+        if (!sonando.has(u)) return;
+        evento('start', u);
+        // Lo que tardaría en decirse, más o menos, sin hacer esperar a las pruebas.
+        setTimeout(() => acabar(u), Math.min(2500, 150 + 30 * (u.text?.length ?? 0)));
+      }, 10);
+    };
+    s.cancel = () => [...sonando].forEach(acabar);
+    s.pause = () => {};
+    s.resume = () => {};
+    Object.defineProperty(s, 'speaking', { configurable: true, get: () => sonando.size > 0 });
+    Object.defineProperty(s, 'pending', { configurable: true, get: () => false });
+  });
 }
 
 /**

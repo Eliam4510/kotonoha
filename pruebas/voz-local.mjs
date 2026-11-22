@@ -181,6 +181,9 @@ await p.locator('.ap-papel .pal').first().waitFor({ timeout: 30000 });
 await p.locator('.ap-dock').getByRole('button', { name: 'Leer en voz alta' }).click();
 await p.waitForTimeout(4000);
 comprobar(errores.length === 0, 'Con la voz local cerrada se lee igual, sin errores', errores.join(' | '));
+// Con la voz del navegador, que en las pruebas habla en silencio (pruebas/extension.mjs): la del sistema sonaría.
+const mudas = await p.evaluate(() => window.__frasesMudas ?? -1);
+comprobar(mudas > 0, 'Lee con la voz del navegador, en silencio', String(mudas));
 
 // ---------- El motor de verdad, si está abierto ----------
 

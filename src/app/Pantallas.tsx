@@ -1,8 +1,7 @@
-// Pantallas de la ventana de la app: inicio, diccionario, lector, memoria y palabras. La Biblioteca está en
-// Biblioteca.tsx.
+// Pantallas de la ventana de la app: inicio, diccionario, lector y palabras. La Memoria está en Memoria.tsx, y la
+// Biblioteca, en Biblioteca.tsx.
 
-import { useEffect, useMemo, useState } from 'preact/hooks';
-import { type Card, fsrs, type Grade } from 'ts-fsrs';
+import { useEffect, useState } from 'preact/hooks';
 import type { Ajustes } from '../compartido/ajustes';
 import type { EstadoMotor } from '../compartido/api';
 import { alRecibirEvento, motor } from '../compartido/rpc';
@@ -12,7 +11,6 @@ import type {
   EstadoPalabra,
   FilaPalabra,
   ProgresoInstalacion,
-  TarjetaMemoria,
 } from '../compartido/tipos';
 import { AvisoVersion } from './AvisoVersion';
 import { AvisoEquipo } from './TuEquipo';
@@ -28,7 +26,7 @@ import { NOMBRE_ESTADO } from '../ui/Ficha';
 import { Icono } from '../ui/iconos';
 import { TarjetaGasto } from './Gasto';
 import { creadorAbierto, estadoAnki, navegar, refrescarAnki } from './estadoApp';
-import { BotonBorrar, Cabecera, Mensaje, Vacio } from './Piezas';
+import { Cabecera, Mensaje, Vacio } from './Piezas';
 import { idiomaActual, numero, tm, tr } from '../compartido/i18n';
 import { fuentesRecomendadas } from '../nucleo/diccionariosRecomendados';
 import { lengua } from '../ui/lengua';
@@ -318,151 +316,6 @@ export function Inicio({ ajustes }: { ajustes: Ajustes }) {
 export function Diccionario({ ajustes, consulta, categoria }: { ajustes: Ajustes; consulta: string; categoria?: string }) {
   if (categoria) return <CategoriaDiccionario id={categoria} ajustes={ajustes} />;
   return <PaginaDiccionario ajustes={ajustes} consulta={consulta} pista={<Pista a={ajustes} id="diccionario">{tr('Busca en la lengua que estudias o en la tuya. Cada palabra trae sus sentidos, ejemplos sacados de lo que ves y lees, y su gramática.')}</Pista>} />;
-}
-
-// ---------- Memoria ----------
-
-const programador = fsrs({ enable_fuzz: false });
-
-function duracion(ms: number): string {
-  const min = ms / 60000;
-  if (min < 1) return tr('<1 min');
-  if (min < 60) return `${Math.round(min)} min`;
-  const h = min / 60;
-  if (h < 24) return `${Math.round(h)} h`;
-  const d = h / 24;
-  if (d < 30) return `${Math.round(d)} d`;
-  const meses = d / 30.4;
-  if (meses < 12) return `${Math.round(meses)} m`;
-  return `${(d / 365).toFixed(1).replace('.0', '').replace('.', ',')} a`;
-}
-
-/** Cuándo volverá la tarjeta con cada respuesta. El motor añade algo de azar, así que es orientativo. */
-function intervalos(t: TarjetaMemoria): Record<Grade, string> {
-  const c = t.fsrs as unknown as Card;
-  const tarjeta: Card = { ...c, due: new Date(c.due), last_review: c.last_review ? new Date(c.last_review) : undefined };
-  const ahora = new Date();
-  const de = (g: Grade) => duracion(new Date(programador.next(tarjeta, ahora, g).card.due).getTime() - ahora.getTime());
-  return { 1: de(1), 2: de(2), 3: de(3), 4: de(4) } as Record<Grade, string>;
-}
-
-const NOTAS: { nota: 1 | 2 | 3 | 4; nombre: string; clase: string }[] = [
-  { nota: 1, nombre: tm('Otra vez'), clase: 'otra' },
-  { nota: 2, nombre: tm('Difícil'), clase: 'dificil' },
-  { nota: 3, nombre: tm('Bien'), clase: 'bien' },
-  { nota: 4, nombre: tm('Fácil'), clase: 'facil' },
-];
-
-export function Memoria({ ajustes }: { ajustes: Ajustes }) {
-  const [cola, fijarCola] = useState<TarjetaMemoria[]>([]);
-  const [resumen, fijarResumen] = useState<{ total: number; pendientes: number; nuevas: number } | null>(null);
-  const [volteada, fijarVolteada] = useState(false);
-  const [cargada, fijarCargada] = useState(false);
-  const esperar = useEsperar();
-
-  const cargar = async () => {
-    fijarCola(await motor.memoriaPendientes(50));
-    fijarResumen(await motor.memoriaResumen());
-    fijarVolteada(false);
-    fijarCargada(true);
-  };
-  useEffect(() => {
-    esperar(cargar()).catch(console.error);
-  }, []);
-
-  const t = cola[0];
-  const responder = async (nota: 1 | 2 | 3 | 4) => {
-    await motor.memoriaResponder(t.id, nota);
-    await cargar();
-  };
-  const medio = (m: { tipo: string; datos?: string; url?: string }) => (m.datos ? `data:${m.tipo};base64,${m.datos}` : m.url);
-  const plazos = useMemo(() => (t ? intervalos(t) : null), [t?.id, t?.vence]);
-
-  // Espacio para ver la respuesta y del 1 al 4 para valorarla, como en Anki.
-  useEffect(() => {
-    if (!t) return;
-    const alPulsar = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
-      const objetivo = e.composedPath()[0] as HTMLElement | undefined;
-      if (objetivo && /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(objetivo.tagName)) return;
-      if (!volteada && (e.key === ' ' || e.key === 'Enter')) {
-        e.preventDefault();
-        e.stopPropagation();
-        fijarVolteada(true);
-      } else if (volteada && /^[1-4]$/.test(e.key)) {
-        e.stopPropagation();
-        responder(Number(e.key) as 1 | 2 | 3 | 4);
-      }
-    };
-    window.addEventListener('keydown', alPulsar, true);
-    return () => window.removeEventListener('keydown', alPulsar, true);
-  }, [t?.id, volteada]);
-
-  return (
-    <div class="ap-lienzo ap-memoria">
-      <Cabecera titulo={tr('Memoria')} sub={tr('Repaso espaciado con FSRS para las tarjetas que no envías a Anki.')}>
-        {resumen && resumen.total > 0 && (
-          <dl class="ap-memoria-datos">
-            <div><dd class="num">{numero(resumen.pendientes)}</dd><dt>{tr('Por repasar')}</dt></div>
-            <div><dd class="num">{numero(resumen.nuevas)}</dd><dt>{tr('Nuevas')}</dt></div>
-            <div><dd class="num">{numero(resumen.total)}</dd><dt>{tr('En total')}</dt></div>
-          </dl>
-        )}
-      </Cabecera>
-      <Pista a={ajustes} id="memoria">
-        {tr('Aquí repasas tus tarjetas: pulsa «Ver respuesta» (Espacio) y di cuánto te costó, del 1 al 4. Eso decide cuándo vuelve cada una.')}
-      </Pista>
-
-      {cargada && !t ? (
-        <Vacio icono="sello" titulo={resumen?.total ? tr('Todo al día') : tr('Todavía no hay tarjetas')}>
-          <p>{resumen?.total ? tr('No queda nada por repasar ahora mismo. Las tarjetas volverán cuando toque.') : tr('Las tarjetas que crees con destino Memoria aparecerán aquí.')}</p>
-          <button class="btn primario" onClick={() => (creadorAbierto.value = true)}><Icono n="mas" t={15} /> {tr('Crear tarjeta')}</button>
-        </Vacio>
-      ) : t ? (
-        <div class="ap-repaso">
-          <div class={`ap-naipe ${volteada ? 'volteada' : ''} ${cola.length > 1 ? 'mazo' : ''}`} key={t.id}>
-            <div class="ap-naipe-frente" lang={lengua.value.id} dangerouslySetInnerHTML={{ __html: t.frente }} />
-            {t.borrador.audioFrase[0] && <button class="btn chico" onClick={() => new Audio(medio(t.borrador.audioFrase[0])).play()}><Icono n="altavoz" t={15} /> {tr('Escuchar')}</button>}
-            {volteada && (
-              <div class="ap-naipe-reverso">
-                {t.borrador.palabra && (
-                  <h3>
-                    <span lang={lengua.value.id}>{t.borrador.palabra}</span>
-                    {t.borrador.lectura && <small lang={lengua.value.id}>{t.borrador.lectura}</small>}
-                  </h3>
-                )}
-                {t.borrador.traduccion && <p class="ap-naipe-traduccion">{t.borrador.traduccion}</p>}
-                <div class="ap-naipe-definicion" dangerouslySetInnerHTML={{ __html: t.reverso }} />
-                {t.borrador.imagenes[0] && <img src={medio(t.borrador.imagenes[0])} alt="" />}
-                {t.borrador.notas && <p class="ayuda">{t.borrador.notas}</p>}
-              </div>
-            )}
-          </div>
-
-          {!volteada ? (
-            <div class="ap-repaso-acciones">
-              <button class="btn primario grande" onClick={() => fijarVolteada(true)}>{tr('Ver respuesta')} <kbd class="tecla">{tr('Espacio')}</kbd></button>
-            </div>
-          ) : (
-            <>
-              <div class="ap-notas" role="group" aria-label={tr('¿Cómo te ha ido?')}>
-                {NOTAS.map((n) => (
-                  <button key={n.nota} class={`ap-nota ${n.clase}`} onClick={() => responder(n.nota)}>
-                    <b>{tr(n.nombre)}</b>
-                    <span class="num">{plazos?.[n.nota]}</span>
-                    <kbd class="tecla">{n.nota}</kbd>
-                  </button>
-                ))}
-              </div>
-              <div class="ap-repaso-acciones">
-                <BotonBorrar etiqueta={tr('Eliminar esta tarjeta')} texto={tr('Eliminar esta tarjeta')} clase="btn fantasma chico" alBorrar={async () => { await motor.memoriaEliminar(t.id); await cargar(); }} />
-              </div>
-            </>
-          )}
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 // ---------- Palabras ----------

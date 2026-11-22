@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.47.0, along with how it has been verified.
+Status of each feature in version 0.48.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -116,7 +116,7 @@ Status of each feature in version 0.47.0, along with how it has been verified.
 | Images from Openverse | Automated |
 | Creating several cards from selected lines | Simulator |
 | Known words from Anki decks | Simulator |
-| Built-in review with FSRS | Automated |
+| Built-in review with FSRS: undo (`Z`), edit (`E`), replay audio (`R`) and suspend; a limit of new cards per day; all cards with their status, search and actions; progress with the streak, how many you remember and two charts with their table | Automated |
 
 ## Application window
 

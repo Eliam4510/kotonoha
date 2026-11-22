@@ -185,7 +185,7 @@ In Chinese, words are split on their own even though the text has no spaces, and
 - **How English really sounds.** The word panel shows the sentence as it is said in connected speech: *going to* → *gonna*, *meet you* → *meechu*, *turn off* → *tur‿noff*, with what happens in each case.
 - **Immersion hours.** Home counts the time you spend listening to and reading the language you study, with your streak of days in a row.
 - **Costs in plain sight.** The home screen shows what Claude has cost this month, by day, model and task, with a monthly cap. Nothing is paid for twice: every answer is saved. The [cost study](docs/costs.md) gives measured figures.
-- **Built-in review.** With the FSRS algorithm, for those who do not use Anki.
+- **Built-in review.** With the FSRS algorithm, for those who do not use Anki: undo, edit and suspend while reviewing, a limit of new cards per day, all your cards in view, and your progress, with your streak and its charts.
 - **Your own files.** A player for videos on your computer, with the subtitles inside an MKV.
 - **Made to measure.** Colour-blind and high-contrast palettes, readings in kana or rōmaji, rebindable shortcuts and sites where it stays off.
 
