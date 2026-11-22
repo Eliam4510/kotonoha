@@ -40,7 +40,7 @@ Kotonoha（言の葉，“言语之叶”）是一款适用于 Chrome 和 Edge �
 一切都在你自己的电脑上运行。词典、文本分析、语音转写和书页上的文字识别都不会离开浏览器。只有当你请求讲解或翻译时，才会用到 Anthropic 的 Claude，每次请求都会记录费用。
 
 <table>
-  <tr><td><b>看</b></td><td>在 YouTube、Netflix、Disney+、Crunchyroll、Prime Video 和本地文件中，字幕带有振假名、音调重音和每个词的学习状态。</td></tr>
+  <tr><td><b>看</b></td><td>在 YouTube、Netflix、哔哩哔哩、Disney+、Crunchyroll、Prime Video 和本地文件中，字幕带有振假名、音调重音和每个词的学习状态。</td></tr>
   <tr><td><b>读</b></td><td>任意网页、你复制的内容，以及 EPUB、PDF 和漫画书籍，扫描版和图片文件夹也可以。</td></tr>
   <tr><td><b>记</b></td><td>一键生成卡片，附带场景的音频和画面，可送往 Anki 或内置复习。</td></tr>
   <tr><td><b>语言</b></td><td>可以学习日语、英语、中文或德语。界面提供简体中文、英语、西班牙语、德语、韩语和日语。</td></tr>

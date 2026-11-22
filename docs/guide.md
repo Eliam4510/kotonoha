@@ -126,6 +126,10 @@ Each track has **Import** and **Export SRT** buttons. A file can also be dragged
 
 Japanese subtitles from a Netflix title are saved when watched, along with its identifier. If the catalog of another region offers the same title without that track, Kotonoha presents it as "Japanese (saved)", with that region's own subtitles as secondary. Exporting to SRT and importing the file covers the same case manually.
 
+### Bilibili
+
+Bilibili only provides its subtitles when you are signed in: the uploader's and those made by its AI, which Kotonoha marks as automatic and ranks behind the uploader's. Without a session, the bar says **Subtitle error** and, when you hover over it, that you need to sign in; you can also create them with Whisper. Bilibili's own subtitles stay hidden while Kotonoha's are shown; its floating comments (弹幕, danmaku) are turned off with the button in its player. Each video is recognized by its BV and its part, and an anime episode by its number, also when Bilibili is translated (bilibili.com/es/…), and its title is the original one. Bangumi anime works the same way, but almost all of it can only be watched from mainland China.
+
 ### Synchronizing
 
 The **Sync** tab adjusts the offset of each track. **Sync: this line is playing now** in the navigator also works: one mark corrects the offset, and two also correct the speed. The offset is adjusted with `Alt+I` and `Alt+O`.

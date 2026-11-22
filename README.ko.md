@@ -40,7 +40,7 @@ Kotonoha(言の葉, '말의 잎')는 Chrome과 Edge용 확장 프로그램으로
 모든 것이 내 컴퓨터에서 실행됩니다. 사전, 텍스트 분석, 음성 받아쓰기, 책 페이지의 문자 인식은 브라우저 밖으로 나가지 않습니다. Anthropic의 Claude는 설명이나 번역을 요청할 때만 쓰이며, 요청마다 비용이 기록됩니다.
 
 <table>
-  <tr><td><b>보기</b></td><td>YouTube, Netflix, Disney+, Crunchyroll, Prime Video와 내 파일에서 후리가나, 높낮이 악센트, 단어별 학습 상태가 표시되는 자막.</td></tr>
+  <tr><td><b>보기</b></td><td>YouTube, Netflix, Bilibili, Disney+, Crunchyroll, Prime Video와 내 파일에서 후리가나, 높낮이 악센트, 단어별 학습 상태가 표시되는 자막.</td></tr>
   <tr><td><b>읽기</b></td><td>모든 웹페이지, 복사한 내용, 스캔본과 이미지 폴더를 포함한 EPUB, PDF, 만화.</td></tr>
   <tr><td><b>기억하기</b></td><td>장면의 오디오와 이미지가 담긴 카드를 클릭 한 번으로 Anki나 내장 복습에 보냅니다.</td></tr>
   <tr><td><b>언어</b></td><td>일본어, 영어, 중국어, 독일어를 배울 수 있습니다. 인터페이스는 한국어, 영어, 스페인어, 독일어, 중국어, 일본어로 제공됩니다.</td></tr>

@@ -44,7 +44,7 @@ Kotonoha (言の葉, «hojas de palabras») es una extensión para Chrome y Edge
 Funciona en el propio equipo. El diccionario, el análisis, la transcripción de audio y el reconocimiento de texto de las páginas no salen del navegador. Claude, de Anthropic, solo interviene cuando se le pide una explicación o una traducción, y cada petición queda anotada con su coste.
 
 <table>
-  <tr><td><b>Ver</b></td><td>Subtítulos con furigana, acento tonal y el estado de cada palabra en YouTube, Netflix, Disney+, Crunchyroll, Prime Video y archivos propios.</td></tr>
+  <tr><td><b>Ver</b></td><td>Subtítulos con furigana, acento tonal y el estado de cada palabra en YouTube, Netflix, Bilibili, Disney+, Crunchyroll, Prime Video y archivos propios.</td></tr>
   <tr><td><b>Leer</b></td><td>Cualquier página web, lo que se copia, y libros EPUB, PDF y manga, también escaneados o en carpetas de imágenes.</td></tr>
   <tr><td><b>Recordar</b></td><td>Tarjetas de un clic, con el audio y la imagen de la escena, para Anki o para el repaso integrado.</td></tr>
   <tr><td><b>Idiomas</b></td><td>Se estudia japonés, inglés, chino o alemán. La interfaz está en español, inglés, alemán, chino, coreano y japonés.</td></tr>

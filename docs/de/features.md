@@ -65,7 +65,8 @@ Stand jeder Funktion in Version 0.44.0 und die Art ihrer Überprüfung.
 |---|---|
 | YouTube: vom Player signierte Spuren | Echte Sitzung. Die automatischen Tests nutzen eine nachgebildete Seite, weil die Website einem automatisierten Browser keine Untertitel liefert |
 | Netflix: Spuren des Players, TTML | Nachgebildete Seite. Eine echte Sitzung steht aus |
-| Disney+, Crunchyroll, Viki, Bilibili, iQIYI und Prime Video über die generische Erkennung | Ausstehend |
+| Bilibili: die Untertitel des Uploaders und die seiner KI, über die API seines Players und mit Anmeldung; Videos mit ihren Teilen und Bangumi | Nachgebildete Seite, nach dem, was in einer echten Sitzung zu sehen war, weil die Website automatisierte Browser abweist. Mit installierter Erweiterung ausstehend |
+| Disney+, Crunchyroll, Viki, iQIYI und Prime Video über die generische Erkennung | Ausstehend |
 | Zweite Spur in der Hilfssprache | Automatisch |
 | Übersetzung mit Claude in Abschnitten, beginnend an der Abspielposition, mit Fortsetzung nach einem Abbruch | Nachgebildete Seite |
 | Korrektur automatischer Untertitel, mit einsehbarem Originaltext | Nachgebildete Seite |

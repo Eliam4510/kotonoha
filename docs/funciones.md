@@ -65,7 +65,8 @@ Estado de cada función en la versión 0.44.0, con la forma en que se ha verific
 |---|---|
 | YouTube: pistas firmadas por el reproductor | Sesión real. Las pruebas automáticas usan una página imitada, porque el sitio no sirve subtítulos a un navegador automatizado |
 | Netflix: pistas del reproductor, TTML | Página imitada. Pendiente de una sesión real |
-| Disney+, Crunchyroll, Viki, Bilibili, iQIYI y Prime Video, por detección genérica | Pendiente |
+| Bilibili: los subtítulos del autor y los de su IA, por la API de su reproductor y con la sesión iniciada; videos con sus partes y bangumi | Página imitada, hecha con lo visto en una sesión real, porque el sitio rechaza los navegadores automatizados. Con la extensión instalada, pendiente |
+| Disney+, Crunchyroll, Viki, iQIYI y Prime Video, por detección genérica | Pendiente |
 | Segunda pista en el idioma de apoyo | Automática |
 | Traducción con Claude, por tramos, empezando por el punto de reproducción, con continuación si se cancela | Página imitada |
 | Corrección de subtítulos automáticos, con el texto original consultable | Página imitada |

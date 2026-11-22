@@ -9,7 +9,7 @@ Kotonoha (言の葉, „Blätter aus Worten“) ist eine Manifest-V3-Erweiterung
 ```mermaid
 flowchart TB
   subgraph Pagina["Seite der Website (MAIN-Welt)"]
-    AD["Adapter<br/>YouTube, Netflix, generisch"]
+    AD["Adapter<br/>YouTube, Netflix, Bilibili, generisch"]
   end
   subgraph Contenido["Content Script (isolierte Welt, Shadow DOM)"]
     UI["Leiste, Untertitel, Navigator,<br/>Wortfenster, Bereiche, Kürzel"]
@@ -53,7 +53,7 @@ flowchart TB
 
 | Teil | Aufgabe | Grund |
 |---|---|---|
-| **Adapter (MAIN)** | Mit dem Player jeder Website sprechen: Spuren, Sprung, Wiedergabe | Nur aus der Seite heraus ist `#movie_player` oder `netflix` zugänglich |
+| **Adapter (MAIN)** | Mit dem Player jeder Website sprechen: Spuren, Sprung, Wiedergabe | Nur aus der Seite heraus sind `#movie_player`, `netflix` oder der `player` von Bilibili zugänglich |
 | **Content Script** | Die gesamte Oberfläche über dem Video | Die isolierte Welt und das Shadow DOM verhindern Störungen in beide Richtungen |
 | **Service Worker** | APIs, die sonst niemand nutzen kann: Befehle, `tabCapture`, `captureVisibleTab`, `connectNative` | Chrome hält ihn bei Inaktivität an, daher speichert er keinen Zustand |
 | **Engine (Offscreen)** | Tokenizer, Datenbank, Claude, Anki und Aufnahme | Das ist das Schwere und Langlaufende. Ein Offscreen-Dokument wird nicht mitten in einer Antwort angehalten |
@@ -67,7 +67,7 @@ flowchart TB
 
 1. Der Adapter erkennt das Video und listet seine Spuren auf.
 2. Das Content Script wählt die japanische Spur und die Zweituntertitel. Importierte haben Vorrang, von Hand erstellte werden automatischen vorgezogen.
-3. Der Adapter lädt den Text mit der Sitzung der Seite herunter. Das ist bei YouTube wichtig, wo die Adressen vom Player signiert werden.
+3. Der Adapter lädt den Text mit der Sitzung der Seite herunter. Das ist bei YouTube wichtig, wo die Adressen vom Player signiert werden. Bei Bilibili braucht die Liste die Sitzung; jede Untertiteldatei wird ohne Cookies angefordert, weil sein CDN jedem antwortet und der Browser die Antwort mit Cookies ablehnen würde.
 4. Der Kern wandelt das Format (TTML, WebVTT, SRT, ASS oder json3) in Zeilen mit Zeiten um.
 5. Die Engine tokenisiert, fügt Konjugationen zusammen, berechnet Furigana, Akzent, Häufigkeit und Status jedes Wortes und erkennt Grammatik mit Regeln.
 6. Ist die Spur automatisch, korrigiert Claude zuvor ihre Erkennungsfehler: Einen fehlerhaften Text zu analysieren wäre eine unnötige Ausgabe.

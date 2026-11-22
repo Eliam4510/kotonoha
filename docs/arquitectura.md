@@ -9,7 +9,7 @@ Kotonoha (言の葉, «hojas de palabras») es una extensión Manifest V3 para a
 ```mermaid
 flowchart TB
   subgraph Pagina["Página del sitio (mundo MAIN)"]
-    AD["Adaptadores<br/>YouTube, Netflix, genérico"]
+    AD["Adaptadores<br/>YouTube, Netflix, Bilibili, genérico"]
   end
   subgraph Contenido["Content script (mundo aislado, Shadow DOM)"]
     UI["Barra, subtítulos, navegador,<br/>ficha de palabra, paneles, atajos"]
@@ -53,7 +53,7 @@ flowchart TB
 
 | Parte | Responsabilidad | Motivo |
 |---|---|---|
-| **Adaptadores (MAIN)** | Hablar con el reproductor de cada sitio: pistas, salto, reproducción | Solo desde la página se puede acceder a `#movie_player` o a `netflix` |
+| **Adaptadores (MAIN)** | Hablar con el reproductor de cada sitio: pistas, salto, reproducción | Solo desde la página se puede acceder a `#movie_player`, a `netflix` o al `player` de Bilibili |
 | **Content script** | Toda la interfaz sobre el video | El mundo aislado y el Shadow DOM evitan interferencias en ambos sentidos con el sitio |
 | **Service worker** | APIs que nadie más puede usar: comandos, `tabCapture`, `captureVisibleTab`, `connectNative` | Chrome lo detiene si está inactivo, así que no guarda estado |
 | **Motor (offscreen)** | Tokenizador, base de datos, Claude, Anki y grabación | Es lo pesado y de larga duración. Un documento offscreen no se detiene a mitad de una respuesta |
@@ -67,7 +67,7 @@ flowchart TB
 
 1. El adaptador detecta el video y lista sus pistas.
 2. El content script elige la pista en japonés y la secundaria. Las importadas tienen prioridad, y las hechas a mano se prefieren a las automáticas.
-3. El adaptador descarga el texto con la sesión de la página. Esto importa en YouTube, donde las direcciones van firmadas por el reproductor.
+3. El adaptador descarga el texto con la sesión de la página. Esto importa en YouTube, donde las direcciones van firmadas por el reproductor. En Bilibili es la lista la que necesita la sesión; el archivo de cada subtítulo se pide sin cookies, porque su CDN responde a cualquiera y con ellas el navegador rechazaría la respuesta.
 4. El núcleo convierte el formato (TTML, WebVTT, SRT, ASS o json3) en líneas con tiempos.
 5. El motor tokeniza, une las conjugaciones, calcula furigana, acento, frecuencia y estado de cada palabra, y detecta gramática con reglas.
 6. Si la pista es automática, Claude corrige antes sus errores de reconocimiento: analizar un texto con errores sería un gasto inútil.

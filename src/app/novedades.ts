@@ -5,11 +5,11 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.44.0',
+  version: '0.45.0',
   puntos: [
-    tm('En chino, cada sílaba y su pinyin llevan el color de su tono, con la paleta que elijas; el tono neutro va sin color.'),
-    tm('«Cómo suena», en la ficha, dice cómo se dice de verdad una frase en chino: los tonos que cambian según el siguiente, el tono neutro y la r que se pega a la sílaba de antes.'),
-    tm('Practicar los tonos: lee una frase en voz alta y compara la curva de cada sílaba con la forma de su tono, sin modelos de voz ni descargas.'),
+    tm('Bilibili tiene su propio soporte: Kotonoha usa los subtítulos de cada video, los de su autor o los de la IA de Bilibili, con tu sesión iniciada en Bilibili.'),
+    tm('Cada video de Bilibili se reconoce por su BV y su parte, con su título original aunque Bilibili esté traducido: lo ya analizado se encuentra aunque la dirección cambie.'),
+    tm('Los subtítulos de Bilibili quedan ocultos tras los de Kotonoha, y el anime de bangumi funciona igual, donde Bilibili deja verlo.'),
   ],
 };
 

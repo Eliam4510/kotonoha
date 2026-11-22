@@ -126,6 +126,10 @@ Cada pista tiene los botones **Importar** y **Exportar SRT**. También se puede 
 
 Los subtítulos en japonés de un título de Netflix se guardan al verlos, junto con su identificador. Si el catálogo de otra región ofrece el mismo título sin esa pista, Kotonoha la presenta como «Japonés (guardados)», y como secundarios los que ofrezca esa región. Exportar a SRT e importar el archivo cubre el mismo caso de forma manual.
 
+### Bilibili
+
+Bilibili da sus subtítulos solo con la sesión iniciada: los del autor del video y los que hace su IA, que Kotonoha marca como automáticos y deja detrás de los del autor. Sin la sesión, la barra dice **Error con los subtítulos** y, al pasar el ratón, que hay que iniciarla; también se pueden crear con Whisper. Los subtítulos de Bilibili quedan ocultos mientras se ven los de Kotonoha; sus comentarios flotantes (弹幕) se apagan con el botón de su reproductor. Cada video se reconoce por su BV y su parte, y un episodio de anime por su número, también con Bilibili traducido (bilibili.com/es/…), y su título es el original. El anime de bangumi funciona igual, pero casi todo solo se ve desde China continental.
+
 ### Sincronizar
 
 La pestaña **Sincronizar** ajusta el desfase de cada pista. También se puede pulsar **Esta línea suena ahora** en el navegador: con una marca se corrige el desfase, y con dos, también la velocidad. El desfase se ajusta con `Alt+I` y `Alt+O`.

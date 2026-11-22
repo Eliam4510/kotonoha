@@ -126,6 +126,10 @@ Jede Spur hat die Schaltflächen **Importieren** und **SRT exportieren**. Eine D
 
 Die japanischen Untertitel eines Netflix-Titels werden beim Ansehen zusammen mit seiner Kennung gespeichert. Bietet der Katalog einer anderen Region denselben Titel ohne diese Spur an, zeigt Kotonoha sie als „Japanisch (gespeichert)“ an und als Zweituntertitel, was diese Region anbietet. Ein Export als SRT und ein Import der Datei decken denselben Fall von Hand ab.
 
+### Bilibili
+
+Bilibili liefert seine Untertitel nur mit Anmeldung: die des Uploaders und die seiner KI, die Kotonoha als automatisch markiert und hinter die des Uploaders stellt. Ohne Anmeldung zeigt die Leiste **Fehler bei den Untertiteln** und beim Darüberfahren, dass man sich anmelden muss; man kann sie auch mit Whisper erstellen. Die Untertitel von Bilibili bleiben verborgen, solange die von Kotonoha zu sehen sind; seine fliegenden Kommentare (弹幕, Danmaku) schaltet man mit dem Knopf in seinem Player aus. Jedes Video wird an seiner BV und seinem Teil erkannt und eine Anime-Folge an ihrer Nummer, auch wenn Bilibili übersetzt ist (bilibili.com/es/…), und sein Titel ist der Originaltitel. Bangumi-Anime funktionieren genauso, aber fast alle lassen sich nur vom chinesischen Festland aus ansehen.
+
 ### Synchronisieren
 
 Der Tab **Synchronisieren** passt den Versatz jeder Spur an. Alternativ lässt sich im Navigator **Synchronisieren: Diese Zeile ist gerade zu hören** wählen: Eine Markierung korrigiert den Versatz, zwei auch die Geschwindigkeit. Der Versatz lässt sich mit `Alt+I` und `Alt+O` ändern.

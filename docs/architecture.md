@@ -9,7 +9,7 @@ Kotonoha (言の葉, "leaves of words") is a Manifest V3 extension for learning 
 ```mermaid
 flowchart TB
   subgraph Pagina["Site page (MAIN world)"]
-    AD["Adapters<br/>YouTube, Netflix, generic"]
+    AD["Adapters<br/>YouTube, Netflix, Bilibili, generic"]
   end
   subgraph Contenido["Content script (isolated world, Shadow DOM)"]
     UI["Bar, subtitles, navigator,<br/>word panel, panels, shortcuts"]
@@ -53,7 +53,7 @@ flowchart TB
 
 | Part | Responsibility | Reason |
 |---|---|---|
-| **Adapters (MAIN)** | Talking to each site's player: tracks, seeking, playback | `#movie_player` or `netflix` can only be reached from the page |
+| **Adapters (MAIN)** | Talking to each site's player: tracks, seeking, playback | `#movie_player`, `netflix` or Bilibili's `player` can only be reached from the page |
 | **Content script** | The whole interface on top of the video | The isolated world and Shadow DOM prevent interference with the site in both directions |
 | **Service worker** | APIs nothing else can use: commands, `tabCapture`, `captureVisibleTab`, `connectNative` | Chrome stops it when idle, so it holds no state |
 | **Engine (offscreen)** | Tokenizer, database, Claude, Anki and recording | The heavy, long-running work. An offscreen document does not stop halfway through a response |
@@ -67,7 +67,7 @@ flowchart TB
 
 1. The adapter detects the video and lists its tracks.
 2. The content script chooses the Japanese track and the secondary one. Imported tracks take priority, and hand-made ones are preferred over automatic ones.
-3. The adapter downloads the text with the page's session. This matters on YouTube, where addresses are signed by the player.
+3. The adapter downloads the text with the page's session. This matters on YouTube, where addresses are signed by the player. On Bilibili it is the list that needs the session; each subtitle file is requested without cookies, because its CDN answers anyone and with them the browser would reject the response.
 4. The core converts the format (TTML, WebVTT, SRT, ASS or json3) into timed lines.
 5. The engine tokenizes, joins conjugations, computes furigana, accent, frequency and status for each word, and detects grammar with rules.
 6. For an automatic track, Claude first corrects its recognition errors: analyzing text with errors would be wasted effort.

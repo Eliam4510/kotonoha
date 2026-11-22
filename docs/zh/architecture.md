@@ -9,7 +9,7 @@ Kotonoha（言の葉，意为“言语之叶”）是一款 Manifest V3 扩展�
 ```mermaid
 flowchart TB
   subgraph Pagina["网站页面（MAIN 世界）"]
-    AD["适配器<br/>YouTube、Netflix、通用"]
+    AD["适配器<br/>YouTube、Netflix、哔哩哔哩、通用"]
   end
   subgraph Contenido["Content Script（隔离世界，Shadow DOM）"]
     UI["工具栏、字幕、导航、<br/>单词面板、面板、快捷键"]
@@ -53,7 +53,7 @@ flowchart TB
 
 | 部分 | 职责 | 原因 |
 |---|---|---|
-| **适配器（MAIN）** | 与各网站的播放器通信：字幕轨、跳转、播放 | 只有在页面内才能访问 `#movie_player` 或 `netflix` |
+| **适配器（MAIN）** | 与各网站的播放器通信：字幕轨、跳转、播放 | 只有在页面内才能访问 `#movie_player`、`netflix` 或哔哩哔哩的 `player` |
 | **Content Script** | 视频上的全部界面 | 隔离世界和 Shadow DOM 避免了与网站的双向干扰 |
 | **Service Worker** | 其他部分无法使用的 API：命令、`tabCapture`、`captureVisibleTab`、`connectNative` | Chrome 会在其闲置时停止它，因此不保存状态 |
 | **引擎（离屏）** | 分词器、数据库、Claude、Anki 和录音 | 这些是繁重且长时间运行的工作。离屏文档不会在回答中途被停止 |
@@ -67,7 +67,7 @@ flowchart TB
 
 1. 适配器检测视频并列出字幕轨。
 2. Content Script 选择日语字幕轨和第二字幕。导入的优先，人工字幕优先于自动字幕。
-3. 适配器使用页面的会话下载文本。这对 YouTube 很重要，其地址由播放器签名。
+3. 适配器使用页面的会话下载文本。这对 YouTube 很重要，其地址由播放器签名。在哔哩哔哩，需要会话的是字幕列表；每个字幕文件都不带 Cookie 请求，因为它的 CDN 对任何人都会响应，带 Cookie 时浏览器会拒绝该响应。
 4. 核心把格式（TTML、WebVTT、SRT、ASS 或 json3）转换为带时间的行。
 5. 引擎进行分词，合并活用形，计算每个单词的注音、重音、频率和状态，并用规则检测语法。
 6. 如果是自动字幕轨，Claude 会先更正识别错误：分析有错误的文本是无谓的花费。

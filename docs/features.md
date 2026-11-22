@@ -65,7 +65,8 @@ Status of each feature in version 0.44.0, along with how it has been verified.
 |---|---|
 | YouTube: tracks signed by the player | Real session. Automated tests use an imitation page, since the site does not serve subtitles to an automated browser |
 | Netflix: player tracks, TTML | Imitation page. A real session is pending |
-| Disney+, Crunchyroll, Viki, Bilibili, iQIYI and Prime Video, through generic detection | Pending |
+| Bilibili: the uploader's subtitles and its AI's, through its player's API and while signed in; videos with their parts, and bangumi | Imitation page, built from what was seen in a real session, since the site rejects automated browsers. Pending with the extension installed |
+| Disney+, Crunchyroll, Viki, iQIYI and Prime Video, through generic detection | Pending |
 | Second track in the support language | Automated |
 | Translation with Claude, in batches, starting at the playback position, resumable after cancelling | Imitation page |
 | Correction of automatic subtitles, with the original text available | Imitation page |

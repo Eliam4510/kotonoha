@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.45.0 · 2026-11-21
+
+Bilibili, con soporte propio: la fuente natural de video en chino.
+
+- **Sus subtítulos, los del autor y los de su IA.** Kotonoha pide la lista a la API del propio reproductor de Bilibili, con tu sesión, como hace él, y prefiere la del autor a la de la IA, que va marcada como automática. Sin la sesión iniciada Bilibili no da ninguno, y la barra lo dice. Antes Bilibili iba por la detección genérica y no funcionaba: su CDN rechaza los subtítulos pedidos con cookies.
+- **Cada video, con su nombre.** Se reconoce por su BV y, desde la segunda, por su parte (BV…?p=2), y un episodio de bangumi por su número, sin lo que la página añade para seguirte: lo ya analizado se encuentra aunque la dirección cambie, también en Bilibili traducido (bilibili.com/es/…). Cambiar de parte sin recargar trae los subtítulos de la nueva.
+- **Su título original.** Aunque Bilibili enseñe la página traducida, el título es el de su autor, con la parte o, en el anime, con la serie y el episodio. Un video de la zona de música se trata como una canción.
+- **Lo demás.** Los subtítulos de Bilibili quedan ocultos tras los de Kotonoha, saltar y parar van por su reproductor, y el ayudante local recibe la dirección limpia del video. El anime de bangumi funciona igual, donde Bilibili deja verlo: casi todo solo se ve desde China continental.
+- **Comprobado en el sitio real.** La forma de su API, sus subtítulos y su reproductor se miraron en una sesión real; las pruebas automáticas usan páginas imitadas con eso, porque Bilibili rechaza los navegadores automatizados.
+- **Un error al listar los subtítulos ya se ve.** En YouTube, Netflix y Bilibili, si no se podían listar las pistas, el aviso se borraba al momento.
+
 ## 0.44.0 · 2026-11-21
 
 Los tonos del chino: verlos, saber cómo cambian al hablar y practicarlos con la voz.
@@ -453,6 +464,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.45.0 · 2026-11-21
+
+Bilibili, with its own support: the natural source of video in Chinese.
+
+- **Its subtitles, the uploader's and its AI's.** Kotonoha asks the API of Bilibili's own player for the list, with your session, just as the player does, and prefers the uploader's track to the AI one, which is marked as automatic. Without being signed in Bilibili provides none, and the bar says so. Bilibili used to go through the generic detection and didn't work: its CDN rejects subtitles requested with cookies.
+- **Each video, with its name.** It is recognized by its BV and, from the second one on, by its part (BV…?p=2), and a bangumi episode by its number, without what the page adds to track you: what you already analyzed is found again even if the address changes, also on translated Bilibili (bilibili.com/es/…). Switching parts without reloading brings the subtitles of the new one.
+- **Its original title.** Even when Bilibili shows the page translated, the title is the uploader's, with the part or, for anime, with the series and the episode. A video from the music zone is treated as a song.
+- **The rest.** Bilibili's own subtitles stay hidden behind Kotonoha's, seeking and pausing go through its player, and the local helper gets the clean address of the video. Bangumi anime works the same way, wherever Bilibili lets you watch it: almost all of it can only be watched from mainland China.
+- **Checked on the real site.** The shape of its API, its subtitles and its player were examined in a real session; the automated tests use mock pages built from that, because Bilibili rejects automated browsers.
+- **An error listing subtitles is now visible.** On YouTube, Netflix and Bilibili, if the tracks couldn't be listed, the notice was cleared right away.
 
 ## 0.44.0 · 2026-11-21
 
