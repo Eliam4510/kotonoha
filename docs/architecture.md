@@ -125,9 +125,9 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 
 ## Song lyrics
 
-Pasted lyrics are placed on the audio by dividing the work, and each piece decides only what it knows how to do: Whisper hears what is sung and when, Demucs separates the voice from the music, narabas hears where each phoneme starts, YAMNet where there is singing, and `src/nucleo/letra.ts` calculates the timing. Claude only steps in if the lyrics barely match what is heard.
+Pasted lyrics are placed on the audio by dividing the work, and each piece decides only what it knows how to do: Whisper hears what is sung and when, Demucs separates the voice from the music, narabas hears where each phoneme starts, YAMNet where there is singing, and `src/nucleo/letra.ts` calculates the timing. Claude steps in if asked, with **Let Claude read the lyrics**, or if the lyrics barely match what is heard, and it only says what is sung: the times are still set by the voice and the letters.
 
-<p align="center"><img src="img/letra-flujo.en.svg" width="100%" alt="The path of the lyrics: the song's audio goes to Whisper Turbo and to Demucs; the pasted lyrics are matched letter by letter with what Whisper heard, and narabas finds in each verse's zone, on the voice alone, where its phonemes start; Claude only if they barely match; letra.ts calculates the timing and produces the lyrics track"></p>
+<p align="center"><img src="img/letra-flujo.en.svg" width="100%" alt="The path of the lyrics: the song's audio goes to Whisper Turbo and to Demucs; the pasted lyrics are matched letter by letter with what Whisper heard, and narabas finds in each verse's zone, on the voice alone, where its phonemes start; Claude, if asked or if they barely match, says what is sung; letra.ts calculates the timing and produces the lyrics track"></p>
 
 **Song or speech.** A video is treated as a song if it has lyrics waiting to be placed, if YouTube classifies it as music or if the title says so: MV, lyric video, official audio, karaoke and the like. It is then transcribed with Whisper Turbo, which hears singing over music better than the speech models.
 
@@ -143,18 +143,23 @@ Pasted lyrics are placed on the audio by dividing the work, and each piece decid
 
 **The phonemes.** narabas, a wav2vec2 for Japanese phonemes, gives every 20 ms the probability of each of its 43 phonemes. The verses are turned into phonemes with Kuromoji's pronunciation, and a forced alignment (Viterbi over the CTC, in `src/nucleo/alineacionForzada.ts`) places all of the lyrics' phonemes, in order, over those probabilities. Each phoneme can only land in its verse's zone, with 2 s of margin on each side, or between its neighbours' zones if its verse did not match, such as a chorus repeated just like the verse next to it. A verse starts at the first frame of its first phoneme and ends 0.4 s after its last one.
 
-**If they barely match, Claude.** If less than a quarter of the verses match, as with lyrics in rōmaji, Claude receives the lyrics and the transcription as two numbered lists, the second with its timing, which helps it see the instrumental passages. For each verse it returns `{v, de, a}`: the first and the last line of the transcription the verse sounds over. With -1, the verse is sung, but the transcription does not pick it up; with -2, it is not sung, like a section mark, a title or a credit. The prompt asks it to:
+**Claude reads the lyrics.** With **Let Claude read the lyrics**, or if less than a quarter of the verses match, as with lyrics in rōmaji, Claude receives the lyrics as they were pasted, with their marks and a blank line between stanzas, and the transcription, as two numbered lists, the second with its timing, which helps it see the instrumental passages. For each time a verse is sung it returns `{v, de, a}`: the first and the last line of the transcription the verse sounds over. With -1, the verse is sung, but the transcription does not pick it up; with -2, it is not sung, like a section mark, a title or a credit. The prompt asks it to:
 
 - compare by sound, not by spelling: in Japanese, 会いたい, 逢いたい and あいたい are the same; in English, "night" and "knight", and in German, "Meer" and "mehr";
 - keep the order: `de` never goes back;
 - match a line that resembles nothing by its position, since it is usually a misheard verse;
 - repeat a chorus as many times as it is sung, and count choruses in parentheses as sung;
+- understand the marks that ask for a repeat instead of writing it ("(Repeat Chorus)", "サビ繰り返し", "×2" under a stanza): they are not sung, but what they ask for is;
 - ignore rōmaji and translations;
 - return an empty list if the lyrics are not from that song.
 
 The answer is small, follows a JSON schema and is cached: aligning the same lyrics over the same transcription is not paid for twice.
 
-**The timing.** `aplicarAjuste` uses no AI: the same input always gives the same result.
+**What counts in its answer.** From Claude comes which verses are sung and in what order, with the repeats (`guiaDeClaude`). With the voice, narabas places those lyrics like complete ones: each verse is searched near where its letters anchor it, or between the anchored ones before and after. Without the voice, each verse goes where its letters are heard, and one that is not heard, where Claude put it if it fits between the heard ones around it (`colocarConGuia`); in lyrics in rōmaji, which match nothing, everything goes where Claude put it. A line that is not sung (a title, an order to repeat) does not appear even if Claude gives it a time.
+
+**Measured without the API.** With an ideal Claude, taken from the LRC of the 51 songs, lyrics with the chorus written once reach 90 % of the verses within 1 s with the voice (without AI, 80 %) and 84 % without it (placing them on the lines Claude names, as before, 24 %). Searching each verse only in the lines Claude names came out worse (87 %): Whisper dates the lines of a song badly, and one line often holds several verses. If Claude skips one repeat in ten, it stays at 86 %; one in three, at 80 %, the same as without AI. With the real Claude it is not measured yet.
+
+**Where Claude puts it.** `aplicarAjuste` turns its answer into times with no AI: the same input always gives the same result.
 
 1. The text comes from the lyrics, and the timing from the transcription. What Whisper misheard never reaches the screen.
 2. Of Claude's entries, the longest non-decreasing subsequence is kept. An entry out of order loses its timing, but not its verse, and does not affect the rest: if each entry were compared only with the previous one, a single jump forward would invalidate all the following ones.

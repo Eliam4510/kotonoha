@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.50.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.51.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -92,8 +92,9 @@ Stand jeder Funktion in Version 0.50.1 und die Art ihrer Überprüfung.
 | **Jetzt aktualisieren**: Der Helfer legt die neue Version mit ihrer SHA-256 und demselben Schlüssel in den Ordner der Kopie, und die Erweiterung lädt sich neu | Automatisch, durchgehend mit Edge |
 | Vollständige Kopie in einem Ordner: Bücher, OCR-Text und Diktate, ohne API-Schlüssel | Automatisch, hin und zurück |
 | Korrektur des Ergebnisses mit Claude | Simulator |
-| Liedtext dort platziert, wo gesungen wird: mit der Stimme (narabas, in dem Bereich, den das von Whisper Gehörte vorgibt), mit der von Demucs auf der GPU freigestellten Stimme oder Buchstabe für Buchstabe mit dem von Whisper Gehörten; Claude nur, wenn er kaum passt. Die Wörter aus dem Liedtext, ohne Abschnittsmarken und Urheberangaben | Simulator, mit echtem Whisper, narabas und Demucs; gemessen mit 51 japanischen Liedern und ihren synchronisierten Texten: mit freigestellter Stimme die Hälfte der Verse unter 0,16 s und neun von zehn unter 0,9 s (auf der Mischung 0,19 s und 1,59 s) |
+| Liedtext dort platziert, wo gesungen wird: mit der Stimme (narabas, in dem Bereich, den das von Whisper Gehörte vorgibt), mit der von Demucs auf der GPU freigestellten Stimme oder Buchstabe für Buchstabe mit dem von Whisper Gehörten; Claude sagt, wenn gewünscht oder wenn er kaum passt, welche Verse in welcher Reihenfolge gesungen werden. Die Wörter aus dem Liedtext, ohne Abschnittsmarken und Urheberangaben | Simulator, mit echtem Whisper, narabas und Demucs; gemessen mit 51 japanischen Liedern und ihren synchronisierten Texten: mit freigestellter Stimme die Hälfte der Verse unter 0,16 s und neun von zehn unter 0,9 s (auf der Mischung 0,19 s und 1,59 s) |
 | Ein unvollständiger Liedtext wird so ergänzt, wie er gesungen wird: der Refrain einmal geschrieben oder nur sein Titel, wo er wiederkommt („[Chorus]“, „(Repeat Chorus)“, „サビ繰り返し“, „※くり返し“, „×2“); die Marken werden aufgelöst, der Rest ergibt sich ohne KI aus dem, was Whisper gehört hat | Gemessen mit 51 Liedern und aus ihrem LRC erzeugten Texten: mit einmal geschriebenem Refrain 80 % der Verse unter 1 s (vorher 69 %), mit seinem Titel, wo er wiederkommt, 88 % (vorher 72 %); ein vollständiger Text unverändert |
+| Claude den Liedtext lesen lassen: Claude liest ihn ganz, wie eingefügt, mit Markierungen, Strophen und Chören, und sagt, welche Verse in welcher Reihenfolge gesungen werden, mit den nicht ausgeschriebenen Wiederholungen; die Zeiten setzen die Stimme und die Buchstaben, nicht Claude | Simulator in `letra.mjs`; mit einem idealen Claude aus den LRC von 51 Liedern 90 % der Verse unter 1 s bei nur einmal geschriebenem Refrain (ohne KI 80 %); ohne Stimme 84 % (auf den von Claude genannten Zeilen, wie bisher, 24 %); mit der echten API noch nicht gemessen |
 | Beim Anlegen eines Liedtexts landen Verse, die Whisper nicht gehört hat, nicht in einer instrumentalen Passage: YAMNet hört beim Transkribieren des ganzen Lieds, wo gesungen wird. Gemessen mit 21 japanischen Liedern aus offiziellen Kanälen und ihren synchronisierten Texten: Von 164 nicht gehörten Versen liegen 21 mehr als eine Sekunde näher an ihrer Stelle und 3 weiter weg | Gemessen mit echten Liedern und dem echten Code; YAMNet in Kotonoha |
 | Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder, je nach Video gewählt | Automatisch, mit den drei echten Modellen auf der GPU, und echte Sitzung auf YouTube |
 | Liste der gespeicherten Modelle mit dem Platzbedarf jedes Modells und Löschen pro Modell. Das Laden von der Festplatte wird nicht mehr als Download angezeigt | Automatisch und mit echtem Whisper |

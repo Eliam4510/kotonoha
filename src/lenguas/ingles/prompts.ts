@@ -157,6 +157,7 @@ export const PROMPTS_INGLES: PromptsLengua = {
     marcas: '[Chorus] o [Verse 1]',
     sonidos: '«gonna» y «going to», «your» y «you\'re», o «night» y «knight», son lo mismo',
     escritura: 'Si LETRA trae la misma letra traducida a otro idioma, usa solo las líneas en inglés.',
+    repeticiones: '«(Repeat Chorus)», «Chorus x2» o «(Repeat)»',
   }),
   esquemaLetra: ESQUEMA_LETRA,
   aLengua: A_LENGUA,

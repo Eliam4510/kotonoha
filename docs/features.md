@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.50.1, along with how it has been verified.
+Status of each feature in version 0.51.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -92,8 +92,9 @@ Status of each feature in version 0.50.1, along with how it has been verified.
 | **Update now**: the helper puts the new version in the copy's folder, with its SHA-256 and the same key, and the extension reloads | Automated, end to end with Edge |
 | Full copy in a folder: books, OCR text and dictations, without API keys | Automated, round trip |
 | Correction of the result with Claude | Simulator |
-| Song lyrics placed where they are sung: with the voice (narabas, in the zone given by what Whisper heard), with the voice isolated by Demucs on the GPU, or letter by letter with what Whisper heard; Claude, only if they barely match. The words come from the lyrics, without section marks or credits | Simulator, with real Whisper, narabas and Demucs; measured with 51 Japanese songs and their synced lyrics: with the isolated voice, half of the verses within 0.16 s and nine in ten within 0.9 s (on the mix, 0.19 s and 1.59 s) |
+| Song lyrics placed where they are sung: with the voice (narabas, in the zone given by what Whisper heard), with the voice isolated by Demucs on the GPU, or letter by letter with what Whisper heard; Claude, if asked or if they barely match, says which verses are sung and in what order. The words come from the lyrics, without section marks or credits | Simulator, with real Whisper, narabas and Demucs; measured with 51 Japanese songs and their synced lyrics: with the isolated voice, half of the verses within 0.16 s and nine in ten within 0.9 s (on the mix, 0.19 s and 1.59 s) |
 | Incomplete lyrics are completed as they are sung: the chorus written once, or only its title where it comes back ("[Chorus]", "(Repeat Chorus)", "サビ繰り返し", "※くり返し", "×2"); the marks are expanded and the rest is worked out from what Whisper heard, without AI | Measured with 51 songs and lyrics made from their LRC: with the chorus once, 80 % of the verses within 1 s (before, 69 %); with its title where it comes back, 88 % (before, 72 %); complete lyrics, unchanged |
+| Let Claude read the lyrics: it reads them in full, as pasted, with their marks, stanzas and backing vocals, and says which verses are sung and in what order, with the repeats they do not write out; the times are set by the voice and the letters, not by Claude | Simulator in `letra.mjs`; with an ideal Claude taken from the LRC of 51 songs, 90 % of the verses within 1 s with the chorus written once (without AI, 80 %); without the voice, 84 % (placing them on the lines Claude names, as before, 24 %); not measured with the real API |
 | When placing lyrics, verses Whisper did not hear do not land in an instrumental passage: YAMNet hears where there is singing while the whole song is transcribed. Measured with 21 Japanese songs from official channels and their synced lyrics: of 164 unheard verses, 21 end up more than a second closer to their place and 3 farther | Measured with real songs and the real code; YAMNet inside Kotonoha |
 | Haas-ja for Japanese speech, Parakeet for English speech and Whisper Turbo for songs, chosen according to the video | Automated, with the three real models on the GPU, and a real session on YouTube |
 | Saved models list, with the space each one takes and per-model deletion. Loading from disk is no longer announced as a download | Automated, and with real Whisper |

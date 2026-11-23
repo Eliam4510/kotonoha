@@ -7,7 +7,7 @@ import { urlDeVideo as urlDeVideoBilibili } from '../nucleo/bilibili';
 import { desconocidas } from '../nucleo/frases';
 import { decidirSalto, duracionPausaDinamica, type LineaModo, MotorModos } from '../nucleo/modos';
 import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, sincroniaDesdePuntos } from '../nucleo/sincronia';
-import { alinearPorLetras, aplicarAjuste, type CantoPorTramos, type EntradaAjuste, ID_LETRA, type ResultadoAjuste, versosDeLetra, vozDeCanto } from '../nucleo/letra';
+import { alinearPorLetras, type CantoPorTramos, colocarConGuia, type EntradaAjuste, guiaDeClaude, ID_LETRA, letraParaClaude, type ResultadoAjuste, sinMarcas, versosDeLetra, vozDeCanto } from '../nucleo/letra';
 import { versosCantados } from '../nucleo/estructuraLetra';
 import { analizarSubtitulos, aSrt, esSoloAcotacion, type Linea, siguienteLinea } from '../nucleo/subtitulos';
 import { desdeDondeSeguir, fusionarLineas, MedidorTirones, noLlega, type ProgresoTranscripcion, VENTAJA_PARA_SEGUIR_S } from '../nucleo/transcripcion';
@@ -1635,7 +1635,7 @@ const PARTE_CASADA = 0.25;
  * Lo que contesta el motor al colocar la letra con la voz: la letra colocada, o por qué no pudo. `aislada`, si Demucs le
  * quitó antes la música; `sinDemucs`, si no lo hizo porque no está en el disco; `bajarDemucs`, si afinar lo bajaría.
  */
-type AjusteConVoz = { resultado?: ResultadoAjuste & { conVoz: number }; motivo?: 'sin-audio' | 'sin-fonemas' | 'sin-narabas'; aislada?: boolean; sinDemucs?: boolean; bajarDemucs?: boolean; repetidos?: number };
+type AjusteConVoz = { resultado?: ResultadoAjuste & { conVoz: number }; motivo?: 'sin-audio' | 'sin-fonemas' | 'sin-narabas' | 'sin-versos'; aislada?: boolean; sinDemucs?: boolean; bajarDemucs?: boolean; repetidos?: number };
 /** El avance de narabas (1,26 GB) y de Demucs (181 MB), que la primera vez se bajan. */
 type EventoVozLetra =
   | { tipo: 'descarga' | 'descarga-voz' | 'separando'; porcentaje: number }
@@ -1651,13 +1651,16 @@ function textoAvanceVoz(e: EventoVozLetra): string {
 
 /**
  * Coloca la letra pegada sobre lo que se oye y deja el resultado como una pista más; las palabras salen tal cual de la
- * letra. Primero con la voz: en una canción transcrita entera, narabas pone cada verso donde suenan sus fonemas, buscándolo
- * en la zona que da lo que oyó Whisper. Si no se puede, casándola letra a letra con lo que oyó Whisper, sin preguntar a
- * nadie. Y si apenas casa (una letra en rōmaji, por ejemplo), Claude dice qué verso suena sobre qué líneas.
- * `bajarVoz` baja narabas si hace falta; `versosDados`, para volver a colocar la misma letra.
+ * letra. Primero, cómo se canta: sin IA, un estribillo escrito una vez se repite donde lo oyó Whisper. Con «Que Claude lea
+ * la letra», o si apenas casa con lo que se oyó (una letra en rōmaji, por ejemplo), Claude la lee entera, con sus marcas y
+ * sus estrofas, y dice qué versos se cantan y en qué orden. Después, los tiempos: en una canción transcrita entera,
+ * narabas pone cada verso donde suenan sus fonemas, buscándolo cerca de donde lo anclan sus letras; si no se puede, salen
+ * de lo que oyó Whisper.
+ * `bajarVoz` baja narabas si hace falta; `pegadaDada`, para volver a colocar la misma letra.
  */
-export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
-  const versos = versosDados ?? versosDeLetra(letraPegada.value);
+export async function ajustarLetra(bajarVoz = false, pegadaDada?: string) {
+  const pegada = pegadaDada ?? letraPegada.value;
+  const versos = versosDeLetra(pegada);
   if (!versos.length || ajustandoLetra.value) return;
   ajustandoLetra.value = true;
   const lineas = await lineasConTiempos().catch(() => [] as Linea[]);
@@ -1681,12 +1684,31 @@ export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
     else cambiarAviso(avance, texto);
   };
   try {
+    // Cómo se canta, sin IA: la letra con su estribillo donde vuelve, casada letra a letra. Si apenas casa con lo que se
+    // oyó, ni eso se sabe.
+    const cantados = versosCantados(versos, lineas).versos;
+    const porLetras = alinearPorLetras(cantados, lineas, ID_LETRA, voz);
+    const casa = porLetras.conTiempo >= Math.max(2, cantados.length * PARTE_CASADA);
+    // Claude la lee entera si se le pide, o si apenas casa: entiende las marcas, las repeticiones que no se escriben y los
+    // coros, y dice qué versos se cantan y en qué orden. Los tiempos los sigue poniendo la voz.
+    const claveIA = !!(await motor.estado().catch(() => null))?.claveIA;
+    const leida = letraParaClaude(pegada);
+    let deClaude: EntradaAjuste[] | null = null;
+    if (claveIA && (ajustes.value.letraConClaude || !casa)) {
+      decir(tr('Claude está leyendo la letra…'));
+      const ajuste = JSON.parse(await flujoMotor('ajustarLetra', [lineas, leida.renglones, infoVideo.value?.titulo, leida.estrofas], () => {})) as EntradaAjuste[];
+      deClaude = sinMarcas(ajuste, leida.cantados);
+      if (!deClaude.some((e) => e.de >= 0)) {
+        if (sigueAqui()) avisar(tr('Claude no encontró esta letra en lo que se oye. ¿Es la de esta canción?'), 'error', undefined, 8000);
+        return;
+      }
+    }
     let colocada: ResultadoAjuste | null = null;
     let conLaVoz = false;
     let respuestaVoz: AjusteConVoz = {};
     if (video) {
       try {
-        const respuesta = await flujoMotor('alinearLetraConVoz', [lineas, versos, video, canto, bajarVoz], lectorJson<EventoVozLetra>((e) => decir(textoAvanceVoz(e))));
+        const respuesta = await flujoMotor('alinearLetraConVoz', [lineas, deClaude ? leida.cantados : versos, video, canto, bajarVoz, deClaude], lectorJson<EventoVozLetra>((e) => decir(textoAvanceVoz(e))));
         respuestaVoz = JSON.parse(respuesta) as AjusteConVoz;
         if (respuestaVoz.resultado?.conVoz) {
           colocada = respuestaVoz.resultado;
@@ -1697,24 +1719,18 @@ export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
       }
     }
     let repetidos = respuestaVoz.repetidos ?? 0;
-    if (!colocada) {
-      // La letra tal como se canta, también sin la voz: un estribillo escrito una vez se repite donde lo oyó Whisper.
-      const cantados = versosCantados(versos, lineas).versos;
+    if (!colocada && deClaude) colocada = colocarConGuia(guiaDeClaude(leida.cantados, lineas, deClaude, ID_LETRA, voz), lineas, ID_LETRA, voz);
+    else if (!colocada && casa) {
+      colocada = porLetras;
       repetidos = cantados.length - versos.length;
-      const r = alinearPorLetras(cantados, lineas, ID_LETRA, voz);
-      if (r.conTiempo >= Math.max(2, cantados.length * PARTE_CASADA)) colocada = r;
     }
     if (!colocada) {
-      const estado = await motor.estado().catch(() => null);
-      if (!estado?.claveIA) {
-        if (sigueAqui()) avisar(tr('Esta letra apenas casa con lo que se oye. ¿Es la de esta canción? Con tu clave de la API, Claude puede intentarlo.'), 'error', { texto: tr('Ajustes'), fn: () => fondo.abrirApp('ajustes') }, 10000);
-        return;
-      }
-      decir(tr('Claude está colocando la letra…'));
-      const ajuste = JSON.parse(await flujoMotor('ajustarLetra', [lineas, versos, infoVideo.value?.titulo], () => {})) as EntradaAjuste[];
-      colocada = aplicarAjuste(versos, lineas, ajuste, ID_LETRA, voz);
-      repetidos = 0;
+      // Apenas casa, y sin clave no hay quien la lea.
+      if (sigueAqui()) avisar(tr('Esta letra apenas casa con lo que se oye. ¿Es la de esta canción? Con tu clave de la API, Claude puede intentarlo.'), 'error', { texto: tr('Ajustes'), fn: () => fondo.abrirApp('ajustes') }, 10000);
+      return;
     }
+    // Lo que Claude repitió y la letra no escribía ni marcaba: sus marcas ya cuentan en los versos de la letra.
+    if (deClaude) repetidos = Math.max(0, colocada.lineas.length - versos.length);
     const { lineas: finales, conTiempo, estimadas } = colocada;
     if (!conTiempo && !conLaVoz) {
       if (sigueAqui()) avisar(tr('Claude no encontró esta letra en lo que se oye. ¿Es la de esta canción?'), 'error', undefined, 8000);
@@ -1731,19 +1747,40 @@ export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
     letraPegada.value = '';
     await seleccionarObjetivo(id);
     retraducirTrasLetra();
-    // Si la letra traía el estribillo una vez y se canta más, se dice: son versos que no estaban escritos ahí.
-    const conRepetidos = (texto: string) => (repetidos > 0 ? `${texto} ${repetidos === 1 ? tr('Uno se repite donde la letra no lo volvía a escribir.') : tr('{0} se repiten donde la letra no los volvía a escribir.', repetidos)}` : texto);
+    // Al final se dice si la letra traía el estribillo una vez y se canta más (son versos que no estaban escritos ahí), y por
+    // qué no la leyó Claude si se le pidió.
+    const conNotas = (texto: string) =>
+      [
+        texto,
+        repetidos > 0 ? (repetidos === 1 ? tr('Uno se repite donde la letra no lo volvía a escribir.') : tr('{0} se repiten donde la letra no los volvía a escribir.', repetidos)) : '',
+        ajustes.value.letraConClaude && !claveIA ? tr('Para que Claude la lea hace falta tu clave de la API.') : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
     if (conLaVoz) {
       // Demucs la afina más, pero son 181 MB: se ofrece, no se baja sin pedirlo.
-      const aislar = respuestaVoz.sinDemucs ? { texto: tr('Afinar aislando la voz (181 MB)'), fn: () => ajustarLetra(true, versos) } : undefined;
+      const aislar = respuestaVoz.sinDemucs ? { texto: tr('Afinar aislando la voz (181 MB)'), fn: () => ajustarLetra(true, pegada) } : undefined;
       const colocados = finales.length;
-      const texto = respuestaVoz.aislada ? tr('Letra colocada con la voz aislada: {0} versos.', colocados) : tr('Letra colocada con la voz: {0} versos.', colocados);
-      avisar(conRepetidos(texto), 'exito', aislar, aislar ? 15000 : 4500);
+      const texto = deClaude
+        ? respuestaVoz.aislada
+          ? tr('Letra colocada con la voz aislada, como la leyó Claude: {0} versos.', colocados)
+          : tr('Letra colocada con la voz, como la leyó Claude: {0} versos.', colocados)
+        : respuestaVoz.aislada
+          ? tr('Letra colocada con la voz aislada: {0} versos.', colocados)
+          : tr('Letra colocada con la voz: {0} versos.', colocados);
+      avisar(conNotas(texto), 'exito', aislar, aislar ? 15000 : 4500);
     } else {
       // narabas la afina, pero son 1,26 GB (con Demucs, 1,4 GB): se ofrece, no se baja sin pedirlo.
       const tamano = respuestaVoz.bajarDemucs ? tr('Afinar con la voz (1,4 GB)') : tr('Afinar con la voz (1,26 GB)');
-      const afinar = respuestaVoz.motivo === 'sin-narabas' ? { texto: tamano, fn: () => ajustarLetra(true, versos) } : undefined;
-      avisar(conRepetidos(estimadas ? tr('Letra ajustada: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas) : tr('Letra ajustada: {0} versos con sus tiempos.', conTiempo)), 'exito', afinar, afinar ? 15000 : 4500);
+      const afinar = respuestaVoz.motivo === 'sin-narabas' ? { texto: tamano, fn: () => ajustarLetra(true, pegada) } : undefined;
+      const texto = deClaude
+        ? estimadas
+          ? tr('Letra ajustada como la leyó Claude: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas)
+          : tr('Letra ajustada como la leyó Claude: {0} versos con sus tiempos.', conTiempo)
+        : estimadas
+          ? tr('Letra ajustada: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas)
+          : tr('Letra ajustada: {0} versos con sus tiempos.', conTiempo);
+      avisar(conNotas(texto), 'exito', afinar, afinar ? 15000 : 4500);
     }
   } catch (e) {
     avisar(tr('No se pudo ajustar la letra: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);

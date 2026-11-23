@@ -5,10 +5,10 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.50.1',
+  version: '0.51.0',
   puntos: [
-    tm('Una letra que escribe el estribillo una vez, o solo su título donde vuelve, se coloca entera, como se canta.'),
-    tm('Las marcas de repetición, como «(Repeat Chorus)» o «×2», se despliegan solas, sin IA, y el aviso dice cuántos versos se repitieron.'),
+    tm('Con «Que Claude lea la letra», bajo la letra pegada, Claude entiende sus marcas, las repeticiones que no escribe y los coros.'),
+    tm('Claude solo dice qué se canta: los tiempos los sigue poniendo la voz, también cuando la letra apenas casa con lo que se oye.'),
   ],
 };
 

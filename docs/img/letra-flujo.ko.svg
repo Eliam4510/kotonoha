@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:lang="ko" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo desc">
 <title id="titulo">노래 가사를 배치하는 방법</title>
-<desc id="desc">노래 오디오는 무엇이 언제 들리는지 듣는 Whisper Turbo와, 목소리를 분리하는 Demucs로 갑니다. 붙여넣은 가사를 Whisper가 들은 내용과 글자 단위로 대조해 소절마다 구간을 정합니다. narabas는 그 구간 안에서, 분리한 목소리로 음소가 시작되는 곳을 찾습니다. 가사가 거의 맞지 않으면 Claude가 어떤 소절이 어느 줄에 해당하는지 알려 줍니다. letra.ts는 시간을 모아 가사 트랙을 만들고, 이 트랙은 분석되고 번역됩니다.</desc>
+<desc id="desc">노래 오디오는 무엇이 언제 들리는지 듣는 Whisper Turbo와, 목소리를 분리하는 Demucs로 갑니다. 붙여넣은 가사를 Whisper가 들은 내용과 글자 단위로 대조해 소절마다 구간을 정합니다. narabas는 그 구간 안에서, 분리한 목소리로 음소가 시작되는 곳을 찾습니다. 요청하거나 가사가 거의 맞지 않으면 Claude가 어떤 소절을 어떤 순서로 부르는지 알려 줍니다. letra.ts는 시간을 모아 가사 트랙을 만들고, 이 트랙은 분석되고 번역됩니다.</desc>
 <style>
 text { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', 'Noto Sans KR', system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
 .fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
@@ -78,7 +78,7 @@ g rect { stroke-width: 1; }
 <g class="coral" data-caja="">
 <rect x="20" y="370" width="170" height="56" rx="8"/>
 <text class="t" x="105" y="389" text-anchor="middle" dominant-baseline="central">Claude</text>
-<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">거의 맞지 않을 때</text>
+<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">부르는 내용</text>
 </g>
 <g class="verde" data-caja="">
 <rect x="220" y="370" width="240" height="56" rx="8"/>

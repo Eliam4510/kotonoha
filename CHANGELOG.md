@@ -2,6 +2,14 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.51.0 · 2026-11-23
+
+Claude lee la letra, y la voz la coloca.
+
+- **Que Claude lea la letra.** Un interruptor nuevo, bajo la letra pegada: Claude la lee entera tal como se pegó, con sus marcas, sus estrofas y lo que va entre paréntesis, y dice qué versos se cantan y en qué orden, también las repeticiones que la letra no escribe ni marca. Usa tu clave de la API y empieza apagado.
+- **Claude no pone los tiempos.** De su respuesta solo se toma qué se canta. Con la voz, narabas coloca esos versos como una letra completa; sin ella, cada verso va donde se oyen sus letras, y lo que no se oye, donde lo puso Claude si cabe entre sus vecinos. Medido con un Claude ideal sacado de los LRC de 51 canciones: con el estribillo escrito una vez, el 90 % de los versos queda a menos de 1 s (sin IA, el 80 %); sin la voz, el 84 % (antes, cuando colocaba Claude, el 24 %). Con el Claude de verdad aún no está medido.
+- **Si apenas casa.** Cuando la letra casa con menos de una cuarta parte de lo oído, Claude también la lee entera, y sus versos los coloca la voz.
+
 ## 0.50.1 · 2026-11-23
 
 Una letra incompleta se coloca entera, como se canta.
@@ -549,6 +557,14 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.51.0 · 2026-11-23
+
+Claude reads the lyrics, and the voice places them.
+
+- **Let Claude read the lyrics.** A new switch, under the pasted lyrics: Claude reads them in full as they were pasted, with their marks, their stanzas and what goes in parentheses, and says which verses are sung and in what order, including the repeats the lyrics neither write out nor mark. It uses your API key and starts off.
+- **Claude does not set the times.** From its answer only what is sung is taken. With the voice, narabas places those verses like complete lyrics; without it, each verse goes where its letters are heard, and what is not heard, where Claude put it if it fits between its neighbours. Measured with an ideal Claude taken from the LRC of 51 songs: with the chorus written once, 90 % of the verses land within 1 s (without AI, 80 %); without the voice, 84 % (before, when Claude placed them, 24 %). With the real Claude it is not measured yet.
+- **If they barely match.** When the lyrics match less than a quarter of what is heard, Claude also reads them in full, and the voice places its verses.
 
 ## 0.50.1 · 2026-11-23
 

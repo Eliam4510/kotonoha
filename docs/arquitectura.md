@@ -125,9 +125,9 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 
 ## Letras de canciones
 
-Una letra pegada se coloca sobre el audio repartiendo el trabajo, y cada pieza decide solo lo que sabe hacer: Whisper oye qué se canta y cuándo, Demucs separa la voz de la música, narabas oye dónde empieza cada fonema, YAMNet dónde se canta, y `src/nucleo/letra.ts` calcula los tiempos. Claude solo entra si la letra apenas casa con lo que se oye.
+Una letra pegada se coloca sobre el audio repartiendo el trabajo, y cada pieza decide solo lo que sabe hacer: Whisper oye qué se canta y cuándo, Demucs separa la voz de la música, narabas oye dónde empieza cada fonema, YAMNet dónde se canta, y `src/nucleo/letra.ts` calcula los tiempos. Claude entra si se le pide, con **Que Claude lea la letra**, o si la letra apenas casa con lo que se oye, y solo dice qué se canta: los tiempos los siguen poniendo la voz y las letras.
 
-<p align="center"><img src="img/letra-flujo.svg" width="100%" alt="Recorrido de una letra: el audio de la canción va a Whisper Turbo y a Demucs; la letra pegada se casa letra a letra con lo que oyó Whisper, y narabas busca en la zona de cada verso, sobre la voz sola, dónde empiezan sus fonemas; Claude, solo si apenas casa; letra.ts calcula los tiempos y genera la pista de la letra"></p>
+<p align="center"><img src="img/letra-flujo.svg" width="100%" alt="Recorrido de una letra: el audio de la canción va a Whisper Turbo y a Demucs; la letra pegada se casa letra a letra con lo que oyó Whisper, y narabas busca en la zona de cada verso, sobre la voz sola, dónde empiezan sus fonemas; Claude, si se le pide o si apenas casa, dice qué se canta; letra.ts calcula los tiempos y genera la pista de la letra"></p>
 
 **Canción o voz hablada.** Un video se trata como canción si tiene una letra pendiente de colocar, si YouTube lo clasifica como música o si el título lo indica: MV, lyric video, official audio, karaoke y similares. En ese caso se transcribe con Whisper Turbo, que oye el canto sobre la música mejor que los modelos de voz hablada.
 
@@ -143,18 +143,23 @@ Una letra pegada se coloca sobre el audio repartiendo el trabajo, y cada pieza d
 
 **Los fonemas.** narabas, un wav2vec2 de fonemas del japonés, da cada 20 ms la probabilidad de cada uno de sus 43 fonemas. Los versos se pasan a fonemas con la pronunciación de Kuromoji, y una alineación forzada (Viterbi sobre el CTC, en `src/nucleo/alineacionForzada.ts`) coloca todos los de la letra, en orden, sobre esas probabilidades. Cada fonema solo puede caer en la zona de su verso, con 2 s de margen a cada lado, o entre las de sus vecinos si su verso no casó, como un estribillo repetido igual que el verso de al lado. Un verso empieza en el primer marco de su primer fonema y acaba 0,4 s después del último.
 
-**Si apenas casa, Claude.** Si casa menos de una cuarta parte de los versos, como con una letra en rōmaji, Claude recibe la letra y la transcripción como dos listas numeradas, la segunda con sus tiempos, que le ayudan a ver los pasajes instrumentales. Por cada verso devuelve `{v, de, a}`: la primera y la última línea de la transcripción sobre las que suena. Con -1, el verso se canta, pero la transcripción no lo recoge; con -2, no se canta, como una marca de sección, un título o un crédito. El prompt pide:
+**Claude lee la letra.** Con **Que Claude lea la letra**, o si casa menos de una cuarta parte de los versos, como con una letra en rōmaji, Claude recibe la letra tal como se pegó, con sus marcas y una línea en blanco entre estrofas, y la transcripción, como dos listas numeradas, la segunda con sus tiempos, que le ayudan a ver los pasajes instrumentales. Por cada vez que suena un verso devuelve `{v, de, a}`: la primera y la última línea de la transcripción sobre las que suena. Con -1, el verso se canta, pero la transcripción no lo recoge; con -2, no se canta, como una marca de sección, un título o un crédito. El prompt pide:
 
 - comparar por sonido y no por escritura: en japonés, 会いたい, 逢いたい y あいたい son lo mismo; en inglés, «night» y «knight», y en alemán, «Meer» y «mehr»;
 - respetar el orden: `de` nunca retrocede;
 - emparejar por su posición una línea que no se parece a nada, porque suele ser un verso mal oído;
 - repetir un estribillo tantas veces como suena, y contar como cantados los coros entre paréntesis;
+- entender las marcas que piden repetir en vez de escribir («(Repeat Chorus)», «サビ繰り返し», «×2» bajo una estrofa): no se cantan, pero lo que piden, sí;
 - ignorar el rōmaji y las traducciones;
 - devolver una lista vacía si la letra no es de esa canción.
 
 La respuesta ocupa poco, sigue un esquema JSON y queda en caché: ajustar la misma letra sobre la misma transcripción no se paga dos veces.
 
-**Los tiempos.** `aplicarAjuste` no usa IA: la misma entrada da siempre el mismo resultado.
+**Lo que vale de su respuesta.** De Claude se toma qué versos se cantan y en qué orden, con las repeticiones (`guiaDeClaude`). Con la voz, narabas coloca esa letra como una completa: cada verso se busca cerca de donde lo anclan sus letras, o entre los anclados de antes y de después. Sin la voz, cada verso va donde se oyen sus letras, y uno que no se oye, donde lo puso Claude si cabe entre los oídos de alrededor (`colocarConGuia`); en una letra en rōmaji, que no casa en nada, todo va donde lo puso él. Un renglón que no se canta (un título, una orden de repetir) no sale aunque Claude le dé un tiempo.
+
+**Medido sin la API.** Con un Claude ideal, sacado de los LRC de las 51 canciones, la letra con el estribillo escrito una vez queda al 90 % de versos a menos de 1 s con la voz (sin IA, el 80 %) y al 84 % sin ella (colocándola sobre las líneas que nombra Claude, como antes, el 24 %). Buscar cada verso solo en las líneas que nombra Claude salía peor (87 %): Whisper fecha mal las líneas de una canción, y una línea suele juntar varios versos. Si Claude se salta una de cada diez repeticiones, se queda en el 86 %; una de cada tres, en el 80 %, lo mismo que sin IA. Con el Claude de verdad aún no está medido.
+
+**Donde lo pone Claude.** `aplicarAjuste` convierte su respuesta en tiempos sin IA: la misma entrada da siempre el mismo resultado.
 
 1. El texto sale de la letra, y los tiempos, de la transcripción. Lo que Whisper oyó mal no llega a la pantalla.
 2. De las entradas de Claude se conserva la subsecuencia no decreciente más larga. Una entrada fuera de orden pierde su tiempo, pero no su verso, y no afecta a las demás: si cada entrada se comparara solo con la anterior, un único salto hacia delante invalidaría todas las siguientes.

@@ -165,6 +165,7 @@ export const PROMPTS_CHINO: PromptsLengua = {
     marcas: '[副歌] o [Coro]',
     sonidos: 'da igual con qué caracteres esté escrito: 在 y 再 suenan igual, y 的, 地 y 得 también',
     escritura: 'Si LETRA trae la misma letra en varias escrituras o idiomas, usa solo las líneas en chino, en caracteres simplificados: ni pinyin ni traducciones.',
+    repeticiones: '«重复副歌», «副歌 ×2» o «(Repeat)»',
   }),
   esquemaLetra: ESQUEMA_LETRA,
   aLengua: PROMPT_A_CHINO,

@@ -157,6 +157,7 @@ export const PROMPTS_ALEMAN: PromptsLengua = {
     marcas: '[Refrain] o [Strophe 1]',
     sonidos: "«hab» y «habe», «'n» y «ein», o «Meer» y «mehr», son lo mismo",
     escritura: 'Si LETRA trae la misma letra traducida a otro idioma, usa solo las líneas en alemán.',
+    repeticiones: '«(Refrain)», «Refrain 2x» o «(Wiederholung)»',
   }),
   esquemaLetra: ESQUEMA_LETRA,
   aLengua: A_LENGUA,

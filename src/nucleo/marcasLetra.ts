@@ -3,7 +3,7 @@
 // «※くり返し» o «×2» bajo una estrofa. Aquí se despliegan tal como lo dice la letra, antes de colocarla: sin IA y sin
 // inventar nada, solo copiando los versos que la propia letra señala.
 
-import { noSeCanta } from './noSeCanta';
+import { noSeCanta, versosDelRenglon } from './noSeCanta';
 
 /** Un renglón entero entre corchetes o paréntesis: lo que va dentro. */
 const ENVUELTO = /^[[【〔［(（<＜]\s*(.*?)\s*[\]】〕］)）>＞]$/u;
@@ -130,4 +130,15 @@ export function desplegarMarcas(texto: string): string {
   }
   cerrar();
   return salida.join('\n');
+}
+
+/**
+ * Lo que se canta de un renglón leído suelto, para colocar una letra que ordenó Claude: nada si es un título, una orden de
+ * repetir o algo que no se canta; sin el ※ que lo marca, la marca de sección de delante ni su «×2».
+ */
+export function cantadoDelRenglon(renglon: string): string {
+  const r = clasificar(renglon);
+  if (r.tipo !== 'verso' || noSeCanta(r.texto)) return '';
+  const cantado = versosDelRenglon(r.texto)[0] ?? '';
+  return /[\p{L}\p{N}]/u.test(cantado) ? cantado : '';
 }

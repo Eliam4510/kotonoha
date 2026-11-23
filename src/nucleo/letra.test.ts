@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ProbabilidadesCtc } from './alineacionForzada';
-import { alinearConVoz, alinearPorLetras, aplicarAjuste, ID_LETRA, mensajeAjuste, versosDeLetra, vozDeCanto } from './letra';
+import { alinearConVoz, alinearPorLetras, aplicarAjuste, colocarConGuia, type GuiaLetra, guiaDeClaude, ID_LETRA, letraParaClaude, mensajeAjuste, sinMarcas, versosDeLetra, vozDeCanto } from './letra';
 import type { Linea } from './subtitulos';
 
 // Versos inventados para estas pruebas.
@@ -337,5 +337,172 @@ describe('alinearConVoz', () => {
     const r = alinearConVoz(versos, oido, [[1, 2, 3, 1, 2, 3], [2], [3]], modelo(3, {}), 20);
     expect(r.conVoz).toBe(0);
     expect(r.lineas[0].inicio).toBe(2000);
+  });
+});
+
+describe('letraParaClaude', () => {
+  it('los renglones tal como se pegaron, con sus marcas, y lo que se canta de cada uno', () => {
+    const l = letraParaClaude('[Verse]\nCamino por el río\n\n[Chorus]\nLa luna ×2\n(Repeat Chorus)\n作詞：ハチ');
+    expect(l.renglones).toEqual(['[Verse]', 'Camino por el río', '[Chorus]', 'La luna ×2', '(Repeat Chorus)', '作詞：ハチ']);
+    expect(l.cantados).toEqual(['', 'Camino por el río', '', 'La luna', '', '']);
+  });
+
+  it('dónde empieza cada estrofa: tras una línea en blanco o un adorno, aunque sean varios', () => {
+    expect(letraParaClaude('\nuno\ndos\n\n\ntres\n♪♪♪\ncuatro').estrofas).toEqual([2, 3]);
+    const conAsteriscos = letraParaClaude('uno\n* * *\ndos\n***\ntres');
+    expect(conAsteriscos.renglones).toEqual(['uno', 'dos', 'tres']);
+    expect(conAsteriscos.estrofas).toEqual([1, 2]);
+  });
+
+  it('sin la hora de un comentario ni caracteres invisibles; un ※ suelto se queda, que dice algo', () => {
+    const l = letraParaClaude(`[1:02] primer verso\npalabra${String.fromCharCode(0x200b)} unida\n※`);
+    expect(l.renglones).toEqual(['primer verso', 'palabra unida', '※']);
+    expect(l.cantados).toEqual(['primer verso', 'palabra unida', '']);
+  });
+
+  it('una letra en LRC, en el orden de sus horas', () => {
+    expect(letraParaClaude('[00:20.00]segundo\n[00:10.00]primero\n[00:30.00]tercero').renglones).toEqual(['primero', 'segundo', 'tercero']);
+  });
+});
+
+describe('sinMarcas', () => {
+  it('un renglón que no se canta no sale aunque Claude le dé un tiempo, ni vuelve como un verso olvidado', () => {
+    const cantados = ['', 'uno', 'dos', ''];
+    const ajuste = sinMarcas(
+      [
+        { v: 0, de: 0, a: 0 },
+        { v: 1, de: 1, a: 1 },
+        { v: 2, de: 2, a: 2 },
+        { v: 9, de: 3, a: 3 },
+      ],
+      cantados
+    );
+    expect(ajuste).toEqual([
+      { v: 1, de: 1, a: 1 },
+      { v: 2, de: 2, a: 2 },
+      { v: 0, de: -2, a: -2 },
+      { v: 3, de: -2, a: -2 },
+    ]);
+    expect(textos(aplicarAjuste(cantados, LINEAS, ajuste).lineas)).toEqual(['uno', 'dos']);
+  });
+
+  it('un verso que Claude se salta va detrás del anterior que suena, no detrás de un título', () => {
+    const cantados = ['uno', '', 'dos', 'tres'];
+    const r = aplicarAjuste(cantados, LINEAS, sinMarcas([{ v: 0, de: 0, a: 0 }, { v: 3, de: 3, a: 3 }], cantados));
+    expect(textos(r.lineas)).toEqual(['uno', 'dos', 'tres']);
+  });
+});
+
+describe('mensajeAjuste con estrofas', () => {
+  it('una línea en blanco delante de cada estrofa, salvo la primera', () => {
+    expect(mensajeAjuste(LINEAS.slice(0, 1), ['uno', 'dos', 'tres'], undefined, [0, 2])).toContain('LETRA:\n0: uno\n1: dos\n\n2: tres');
+  });
+});
+
+describe('guiaDeClaude', () => {
+  it('los versos en el orden en que los oyó Claude, con lo que repite, y una línea tosca para cada uno', () => {
+    const cantados = ['', VERSOS[0], VERSOS[1], ''];
+    const ajuste = sinMarcas(
+      [
+        { v: 1, de: 0, a: 0 },
+        { v: 2, de: 1, a: 1 },
+        { v: 2, de: 3, a: 3 },
+        { v: 3, de: -2, a: -2 },
+      ],
+      cantados
+    );
+    const g = guiaDeClaude(cantados, LINEAS, ajuste);
+    expect(g.versos).toEqual([VERSOS[0], VERSOS[1], VERSOS[1]]);
+    expect(g.toscas.lineas.map((l) => l.inicio)).toEqual([10000, 14000, 22000]);
+    expect(g.ubicados).toEqual([true, true, true]);
+  });
+
+  it('un verso que Claude no encontró va sin oír, con su línea tosca entre los vecinos', () => {
+    const g = guiaDeClaude(VERSOS.slice(0, 3), LINEAS, [
+      { v: 0, de: 0, a: 0 },
+      { v: 1, de: -1, a: -1 },
+      { v: 2, de: 2, a: 2 },
+    ]);
+    expect(g.ubicados).toEqual([true, false, true]);
+    expect(g.toscas.lineas).toHaveLength(3);
+    expect(g.toscas.lineas[1].inicio).toBeGreaterThanOrEqual(13000);
+    expect(g.toscas.lineas[1].fin).toBeLessThanOrEqual(18000);
+  });
+});
+
+describe('colocarConGuia', () => {
+  it('lo que casa letra a letra va donde se oyen sus letras, no al principio de la línea que nombra Claude', () => {
+    const oido = [lin(1, 10000, 16000, `${VERSOS[0]} ${VERSOS[1]}`), lin(2, 18000, 21000, VERSOS[2])];
+    const guia = guiaDeClaude(VERSOS.slice(0, 3), oido, [
+      { v: 0, de: 0, a: 0 },
+      { v: 1, de: 0, a: 0 },
+      { v: 2, de: 1, a: 1 },
+    ]);
+    const r = colocarConGuia(guia, oido);
+    expect(textos(r.lineas)).toEqual(VERSOS.slice(0, 3));
+    expect(r.lineas[0].inicio).toBe(10000);
+    // El segundo empieza donde se oye su primera letra, dentro de la línea que comparte con el primero.
+    expect(r.lineas[1].inicio).toBeGreaterThan(12000);
+    expect(r.conTiempo).toBe(3);
+  });
+
+  it('una letra que no casa en nada (en rōmaji, por ejemplo) va toda donde la puso Claude', () => {
+    const versos = ['Yoru no kawa wo aruite', 'Tsuki ga watashi wo miteiru'];
+    const oido = [lin(1, 2000, 5000, '夜の川を歩いて'), lin(2, 6000, 9000, '月が私を見ている')];
+    const r = colocarConGuia(
+      guiaDeClaude(versos, oido, [
+        { v: 0, de: 0, a: 0 },
+        { v: 1, de: 1, a: 1 },
+      ]),
+      oido
+    );
+    expect(r.lineas.map((l) => l.inicio)).toEqual([2000, 6000]);
+    expect(r.conTiempo).toBe(2);
+  });
+
+  it('donde Claude pone algo que no cabe entre los versos oídos, se estima entre ellos', () => {
+    const oido = [lin(1, 10000, 13000, VERSOS[0]), lin(2, 14000, 17000, 'nada que ver'), lin(3, 18000, 21000, VERSOS[2]), lin(4, 30000, 33000, 'otra cosa')];
+    // Claude puso el segundo a 30 s, detrás del tercero, que se oye a 18 s: ahí no cabe.
+    const guia: GuiaLetra = {
+      versos: VERSOS.slice(0, 3),
+      toscas: { lineas: [lin(1, 10000, 13000, VERSOS[0]), lin(2, 30000, 33000, VERSOS[1]), lin(3, 18000, 21000, VERSOS[2])], conTiempo: 3, estimadas: 0 },
+      ubicados: [true, true, true],
+    };
+    const r = colocarConGuia(guia, oido);
+    expect(r.lineas[1].inicio).toBeGreaterThan(10000);
+    expect(r.lineas[1].inicio).toBeLessThan(18000);
+    expect(r.estimadas).toBe(1);
+  });
+});
+
+describe('alinearConVoz con lo que entendió Claude', () => {
+  function modelo(marcos: number, suenan: Record<number, number>): ProbabilidadesCtc {
+    const clases = 4;
+    const logp = new Float32Array(marcos * clases);
+    for (let t = 0; t < marcos; t++) {
+      const c = suenan[t] ?? 0;
+      for (let k = 0; k < clases; k++) logp[t * clases + k] = Math.log(k === c ? 0.9 : 0.1 / 3);
+    }
+    return { logp, marcos, clases, blanco: 0 };
+  }
+
+  it('un estribillo escrito una vez, sobre algo oído que no se le parece, suena en cada vuelta que dice Claude', () => {
+    const versos = ['夜の川を歩いて', '月が私を見ている'];
+    const malOido: Linea[] = [
+      { id: 0, inicio: 2000, fin: 5000, texto: 'Sukiyaki' },
+      { id: 1, inicio: 6000, fin: 9000, texto: 'Asahi' },
+      { id: 2, inicio: 14000, fin: 17000, texto: 'Asahi' },
+    ];
+    // El fonema del estribillo (2) suena dos veces: a 6,62 s y a 14,3 s.
+    const p = modelo(1000, { 120: 1, 331: 2, 715: 2 });
+    const guia = guiaDeClaude(versos, malOido, [
+      { v: 0, de: 0, a: 0 },
+      { v: 1, de: 1, a: 1 },
+      { v: 1, de: 2, a: 2 },
+    ]);
+    const r = alinearConVoz(guia.versos, malOido, [[1], [2], [2]], p, 20);
+    expect(r.conVoz).toBe(3);
+    expect(textos(r.lineas)).toEqual([versos[0], versos[1], versos[1]]);
+    expect(r.lineas.map((l) => l.inicio)).toEqual([2400, 6620, 14300]);
   });
 });

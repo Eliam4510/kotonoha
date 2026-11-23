@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:lang="de" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo desc">
 <title id="titulo">Wie ein Liedtext platziert wird</title>
-<desc id="desc">Das Audio des Liedes geht an Whisper Turbo, das hört, was wann gesungen wird, und an Demucs, das die Stimme freistellt. Der eingefügte Liedtext wird Buchstabe für Buchstabe mit dem von Whisper Gehörten abgeglichen; das ergibt den Bereich jedes Verses. Darin sucht narabas auf der freigestellten Stimme, wo seine Phoneme beginnen. Passt der Text kaum, sagt Claude, welcher Vers über welchen Zeilen liegt. letra.ts verbindet die Zeiten und erzeugt die Liedtext-Spur, die analysiert und übersetzt wird.</desc>
+<desc id="desc">Das Audio des Liedes geht an Whisper Turbo, das hört, was wann gesungen wird, und an Demucs, das die Stimme freistellt. Der eingefügte Liedtext wird Buchstabe für Buchstabe mit dem von Whisper Gehörten abgeglichen; das ergibt den Bereich jedes Verses. Darin sucht narabas auf der freigestellten Stimme, wo seine Phoneme beginnen. Wenn gewünscht oder wenn der Text kaum passt, sagt Claude, welche Verse in welcher Reihenfolge gesungen werden. letra.ts verbindet die Zeiten und erzeugt die Liedtext-Spur, die analysiert und übersetzt wird.</desc>
 <style>
 text { font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
 .fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
@@ -78,7 +78,7 @@ g rect { stroke-width: 1; }
 <g class="coral" data-caja="">
 <rect x="20" y="370" width="170" height="56" rx="8"/>
 <text class="t" x="105" y="389" text-anchor="middle" dominant-baseline="central">Claude</text>
-<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">Wenn er kaum passt</text>
+<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">Was gesungen wird</text>
 </g>
 <g class="verde" data-caja="">
 <rect x="220" y="370" width="240" height="56" rx="8"/>

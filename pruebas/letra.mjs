@@ -389,6 +389,37 @@ console.log('\n== Una letra que escribe el estribillo una vez ==');
   comprobar(enSuSitio(marcas.inicios), 'También en su sitio', marcas.inicios.join(' '));
   comprobar(!/se repiten donde la letra/.test(marcas.aviso), 'Ahí la letra ya decía dónde: no hay nada que avisar', marcas.aviso);
   comprobar(pedidasLetra().length === pedidasAntes, 'Las dos, sin preguntar a Claude', pedidasLetra().length - pedidasAntes);
+
+  // Con «Que Claude lea la letra», Claude la lee entera, con sus marcas y sus estrofas, y se coloca como la leyó.
+  console.log('\n== Que Claude lea la letra ==');
+  const LETRA_CLAUDE = `[Verse]\n${VERSOS2[0]}\n\n[サビ]\n${VERSOS2[1]}\n${VERSOS2[2]}\n\n[Verse 2]\n${VERSOS2[3]}\n\n(サビ繰り返し)`;
+  const interruptor = q.locator('kotonoha-overlay .panel-generar button[role="switch"][aria-label="Que Claude lea la letra"]');
+  await abrirGenerar(q);
+  comprobar((await interruptor.getAttribute('aria-checked')) === 'false', 'Empieza apagado');
+  await interruptor.click();
+  await q.waitForTimeout(500);
+  const conClaude = await colocar(LETRA_CLAUDE);
+  comprobar(pedidasLetra().length === pedidasAntes + 1, 'Encendido, se le pregunta a Claude aunque la letra case', pedidasLetra().length - pedidasAntes);
+  const leida = pedidasLetra().at(-1)?.cuerpo.messages?.[0]?.content ?? '';
+  comprobar(leida.includes(`1: ${VERSOS2[0]}\n\n2: [サビ]`) && leida.includes('7: (サビ繰り返し)'), 'Le llega la letra como se pegó: con sus marcas y una línea en blanco entre estrofas', leida.split('LETRA:')[1]);
+  comprobar(conClaude.textos.join('|') === esperado.join('|'), 'Se coloca como la leyó Claude: el estribillo, las dos veces', conClaude.textos.join(' | '));
+  comprobar(enSuSitio(conClaude.inicios), 'Cada verso en su sitio', conClaude.inicios.join(' '));
+  comprobar(/como la leyó Claude/.test(conClaude.aviso), 'El aviso dice que la leyó Claude', conClaude.aviso);
+  comprobar(!/se repiten donde la letra/.test(conClaude.aviso), 'La letra ya pedía la repetición: nada que avisar', conClaude.aviso);
+  await colocar(LETRA_CLAUDE);
+  comprobar(pedidasLetra().length === pedidasAntes + 1, 'La misma letra otra vez sale de lo guardado, sin pagar de nuevo', pedidasLetra().length - pedidasAntes);
+  // Sin clave, la coloca Kotonoha solo y dice por qué no la leyó Claude.
+  await sw.evaluate(async () => { await chrome.storage.local.remove('claveAnthropic'); });
+  await q.waitForTimeout(600);
+  const sinClave = await colocar(LETRA_CORTA);
+  comprobar(sinClave.textos.join('|') === esperado.join('|'), 'Sin clave, la coloca igual, sin IA', sinClave.textos.join(' | '));
+  comprobar(/hace falta tu clave de la API/.test(sinClave.aviso), 'Y dice que para que la lea Claude hace falta la clave', sinClave.aviso);
+  await sw.evaluate(async (url) => { await chrome.storage.local.set({ urlBaseIA: url, claveAnthropic: 'clave-de-prueba' }); }, `http://127.0.0.1:${mock.puerto}`);
+  await abrirGenerar(q);
+  await interruptor.click();
+  await q.waitForTimeout(500);
+  comprobar((await interruptor.getAttribute('aria-checked')) === 'false', 'Y se apaga');
+  await q.screenshot({ path: join(CAPTURAS, 'letra-claude.png') });
   await q.close();
 }
 

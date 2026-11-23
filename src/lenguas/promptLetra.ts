@@ -27,13 +27,15 @@ export interface DetallesLetra {
   sonidos: string;
   /** Qué líneas usar si la letra viene en varias escrituras o idiomas. */
   escritura: string;
+  /** Cómo suelen pedir las letras que se repita una parte en vez de escribirla. */
+  repeticiones: string;
 }
 
-export const promptLetra = ({ cancion, marcas, sonidos, escritura }: DetallesLetra) => `Colocas la letra de una canción ${cancion} sobre los tiempos de una transcripción automática. Recibes dos listas numeradas.
+export const promptLetra = ({ cancion, marcas, sonidos, escritura, repeticiones }: DetallesLetra) => `Colocas la letra de una canción ${cancion} sobre los tiempos de una transcripción automática. Recibes dos listas numeradas.
 
 TRANSCRIPCIÓN es lo que un reconocedor de voz entendió al oír la canción, en orden y con sus tiempos en segundos. Los tiempos son buenos, pero el texto falla mucho: palabras mal oídas, frases inventadas en los pasajes instrumentales y partes que no recoge. Una línea puede contener varios versos, y un verso puede repartirse entre varias líneas.
 
-LETRA es la letra verdadera, tal como la publicó alguien, normalmente verso a verso. Puede traer además cosas que no se cantan: el título, créditos, marcas de sección como ${marcas}, o la misma letra en otra escritura o traducida.
+LETRA es la letra verdadera, tal como la publicó alguien, normalmente verso a verso y con una línea en blanco entre estrofas. Puede traer además cosas que no se cantan: el título, créditos, marcas de sección como ${marcas}, o la misma letra en otra escritura o traducida.
 
 Di qué verso suena en cada momento, en el orden en que suena la canción. Devuelve una lista de entradas con:
 - v: el número del verso en LETRA.
@@ -46,6 +48,7 @@ Reglas:
 - Una línea de TRANSCRIPCIÓN que no se parece a nada suele ser un verso mal oído, sobre todo si cae donde el orden pide un verso que aún no has colocado: el reconocedor puede oír frases en otro idioma donde no las hay. Empareja por la posición antes que dejar el verso sin línea.
 - Sigue el orden de la canción: de una entrada a la siguiente, «de» nunca retrocede.
 - Las letras suelen escribir una sola vez lo que se canta varias. Si un verso o un estribillo se repite al cantarlo, repite su número tantas veces como suene, aunque en LETRA aparezca una sola vez.
+- Muchas letras piden la repetición en vez de escribirla: ${repeticiones}, un «×2» detrás de un verso o debajo de una estrofa, o solo el nombre de la sección donde vuelve. Esas líneas no se cantan (-2); lo que piden, sí: repite ahí los números de los versos que vuelven, en su orden, tantas veces como suenen.
 - ${escritura}
 - Las líneas de TRANSCRIPCIÓN que no corresponden a ningún verso, como ruido o voz hablada que no está en la letra, simplemente no se cubren.
 - Si varios versos seguidos suenan dentro de una misma línea de TRANSCRIPCIÓN, da esa misma línea en todos. Pasa mucho con las líneas largas, que suelen abarcar más de un verso.

@@ -123,9 +123,9 @@ Pausenloses Arbeiten hält die GPU stundenlang bei 100 %, was den Desktop ausbre
 
 ## Liedtexte
 
-Ein eingefügter Liedtext wird durch Arbeitsteilung auf das Audio gelegt, und jedes Teil entscheidet nur, was es kann: Whisper hört, was wann gesungen wird, Demucs trennt die Stimme von der Musik, narabas hört, wo jedes Phonem beginnt, YAMNet, wo gesungen wird, und `src/nucleo/letra.ts` berechnet die Zeiten. Claude kommt nur hinzu, wenn der Text kaum zu dem Gehörten passt.
+Ein eingefügter Liedtext wird durch Arbeitsteilung auf das Audio gelegt, und jedes Teil entscheidet nur, was es kann: Whisper hört, was wann gesungen wird, Demucs trennt die Stimme von der Musik, narabas hört, wo jedes Phonem beginnt, YAMNet, wo gesungen wird, und `src/nucleo/letra.ts` berechnet die Zeiten. Claude kommt hinzu, wenn man es mit **Claude den Liedtext lesen lassen** verlangt oder wenn der Text kaum zu dem Gehörten passt, und sagt nur, was gesungen wird: Die Zeiten setzen weiterhin die Stimme und die Buchstaben.
 
-<p align="center"><img src="../img/letra-flujo.de.svg" width="100%" alt="Der Weg des Liedtexts: Das Audio des Liedes geht an Whisper Turbo und an Demucs; der eingefügte Text wird Buchstabe für Buchstabe mit dem von Whisper Gehörten abgeglichen, und narabas sucht im Bereich jedes Verses auf der freigestellten Stimme, wo seine Phoneme beginnen; Claude nur, wenn er kaum passt; letra.ts berechnet die Zeiten und erzeugt die Liedtext-Spur"></p>
+<p align="center"><img src="../img/letra-flujo.de.svg" width="100%" alt="Der Weg des Liedtexts: Das Audio des Liedes geht an Whisper Turbo und an Demucs; der eingefügte Text wird Buchstabe für Buchstabe mit dem von Whisper Gehörten abgeglichen, und narabas sucht im Bereich jedes Verses auf der freigestellten Stimme, wo seine Phoneme beginnen; Claude sagt, wenn gewünscht oder wenn er kaum passt, was gesungen wird; letra.ts berechnet die Zeiten und erzeugt die Liedtext-Spur"></p>
 
 **Lied oder gesprochene Sprache.** Ein Video gilt als Lied, wenn ein Liedtext auf seine Platzierung wartet, wenn YouTube es als Musik einstuft oder wenn der Titel es sagt: MV, lyric video, official audio, karaoke und Ähnliches. Dann wird es mit Whisper Turbo transkribiert, das Gesang über Musik besser hört als die Sprachmodelle.
 
@@ -141,18 +141,23 @@ Ein eingefügter Liedtext wird durch Arbeitsteilung auf das Audio gelegt, und je
 
 **Die Phoneme.** narabas, ein wav2vec2 für japanische Phoneme, liefert alle 20 ms die Wahrscheinlichkeit jedes seiner 43 Phoneme. Die Verse werden mit der Aussprache von Kuromoji in Phoneme umgewandelt, und eine erzwungene Ausrichtung (Viterbi über die CTC, in `src/nucleo/alineacionForzada.ts`) legt alle Phoneme des Liedtexts der Reihe nach über diese Wahrscheinlichkeiten. Jedes Phonem kann nur im Bereich seines Verses liegen, mit 2 s Spielraum auf jeder Seite, oder zwischen den Bereichen seiner Nachbarn, wenn sein Vers nicht passte, etwa ein Refrain, der genauso wiederholt wird wie der Vers daneben. Ein Vers beginnt im ersten Frame seines ersten Phonems und endet 0,4 s nach dem letzten.
 
-**Wenn er kaum passt, Claude.** Passt weniger als ein Viertel der Verse, etwa bei einem Text in Rōmaji, erhält Claude den Liedtext und die Transkription als zwei nummerierte Listen, die zweite mit ihren Zeiten, die ihm helfen, die Instrumentalpassagen zu erkennen. Für jeden Vers gibt es `{v, de, a}` zurück: die erste und die letzte Zeile der Transkription, über denen der Vers erklingt. Mit -1 wird der Vers gesungen, aber die Transkription erfasst ihn nicht; mit -2 wird er nicht gesungen, etwa eine Abschnittsmarke, ein Titel oder eine Angabe der Mitwirkenden. Der Prompt verlangt:
+**Claude liest den Liedtext.** Mit **Claude den Liedtext lesen lassen**, oder wenn weniger als ein Viertel der Verse passt, etwa bei einem Text in Rōmaji, erhält Claude den Liedtext so, wie er eingefügt wurde, mit seinen Markierungen und einer Leerzeile zwischen den Strophen, und die Transkription als zwei nummerierte Listen, die zweite mit ihren Zeiten, die ihm helfen, die Instrumentalpassagen zu erkennen. Für jedes Erklingen eines Verses gibt es `{v, de, a}` zurück: die erste und die letzte Zeile der Transkription, über denen der Vers erklingt. Mit -1 wird der Vers gesungen, aber die Transkription erfasst ihn nicht; mit -2 wird er nicht gesungen, etwa eine Abschnittsmarke, ein Titel oder eine Angabe der Mitwirkenden. Der Prompt verlangt:
 
 - nach Klang statt nach Schreibweise zu vergleichen: Im Japanischen sind 会いたい, 逢いたい und あいたい dasselbe, im Englischen „night“ und „knight“, im Deutschen „Meer“ und „mehr“;
 - die Reihenfolge einzuhalten: `de` geht nie zurück;
 - eine Zeile, die nichts ähnelt, nach ihrer Position zuzuordnen, weil sie meist ein falsch gehörter Vers ist;
 - einen Refrain so oft zu wiederholen, wie er erklingt, und Chöre in Klammern als gesungen zu zählen;
+- die Markierungen zu verstehen, die eine Wiederholung verlangen, statt sie auszuschreiben („(Repeat Chorus)“, „サビ繰り返し“, „×2“ unter einer Strophe): Sie werden nicht gesungen, das Verlangte aber schon;
 - Rōmaji und Übersetzungen zu ignorieren;
 - eine leere Liste zurückzugeben, wenn der Text nicht zu diesem Lied gehört.
 
 Die Antwort ist klein, folgt einem JSON-Schema und wird zwischengespeichert: Denselben Text erneut auf dieselbe Transkription abzugleichen, kostet nicht zweimal.
 
-**Die Zeiten.** `aplicarAjuste` verwendet keine KI: Dieselbe Eingabe ergibt immer dasselbe Ergebnis.
+**Was von der Antwort zählt.** Von Claude kommt, welche Verse in welcher Reihenfolge gesungen werden, mit den Wiederholungen (`guiaDeClaude`). Mit der Stimme setzt narabas diesen Text wie einen vollständigen: Jeder Vers wird nahe der Stelle gesucht, an der ihn seine Buchstaben verankern, oder zwischen den verankerten davor und danach. Ohne Stimme kommt jeder Vers dorthin, wo seine Buchstaben zu hören sind, und einer, der nicht zu hören ist, dorthin, wo Claude ihn hingesetzt hat, sofern er zwischen die gehörten ringsum passt (`colocarConGuia`); bei einem Text in Rōmaji, der nirgends passt, kommt alles dorthin, wo Claude es hingesetzt hat. Eine Zeile, die nicht gesungen wird (ein Titel, eine Wiederholungsanweisung), erscheint nicht, auch wenn Claude ihr eine Zeit gibt.
+
+**Ohne die API gemessen.** Mit einem idealen Claude, gewonnen aus den LRC der 51 Lieder, liegen bei einem Text mit nur einmal geschriebenem Refrain mit der Stimme 90 % der Verse unter 1 s (ohne KI 80 %) und ohne sie 84 % (auf den von Claude genannten Zeilen, wie bisher, 24 %). Jeden Vers nur in den von Claude genannten Zeilen zu suchen, schnitt schlechter ab (87 %): Whisper datiert die Zeilen eines Liedes ungenau, und eine Zeile enthält oft mehrere Verse. Überspringt Claude jede zehnte Wiederholung, bleibt es bei 86 %; jede dritte, bei 80 %, so viel wie ohne KI. Mit dem echten Claude ist das noch nicht gemessen.
+
+**Wo Claude ihn hinsetzt.** `aplicarAjuste` macht aus seiner Antwort Zeiten, ohne KI: Dieselbe Eingabe ergibt immer dasselbe Ergebnis.
 
 1. Der Text stammt aus dem Liedtext, die Zeiten aus der Transkription. Was Whisper falsch gehört hat, erreicht nie den Bildschirm.
 2. Von Claudes Einträgen bleibt die längste nicht fallende Teilfolge erhalten. Ein Eintrag außerhalb der Reihenfolge verliert seine Zeit, aber nicht seinen Vers, und beeinflusst die übrigen nicht: Würde jeder Eintrag nur mit dem vorigen verglichen, machte ein einziger Sprung nach vorn alle folgenden ungültig.

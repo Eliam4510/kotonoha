@@ -903,6 +903,12 @@ function SeccionLetra() {
         <div class="bloque-generar">
           <p>{tr('Pega aquí la letra, por ejemplo la de un comentario, y Kotonoha la coloca donde se canta: con la voz, si la canción se transcribió entera, o casándola con lo que oyó Whisper. Las palabras salen tal cual de tu letra.')}</p>
           <textarea class="campo area-letra" lang={lengua.value.id} rows={5} aria-label={tr('Letra de la canción')} placeholder={tr('Un verso por línea…')} value={letraPegada.value} disabled={ajustandoLetra.value} onInput={(e) => (letraPegada.value = e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
+        </div>
+        {/* Claude entiende lo que la letra no escribe; los tiempos los sigue poniendo la voz. */}
+        <Fila etq={tr('Que Claude lea la letra')} ayuda={tr('Entiende sus marcas, las repeticiones que no escribe y los coros. Con tu clave de la API.')}>
+          <Interruptor on={ajustes.value.letraConClaude} etiqueta={tr('Que Claude lea la letra')} alCambiar={(v) => cambiarAjuste({ letraConClaude: v })} />
+        </Fila>
+        <div class="bloque-generar">
           {ajustandoLetra.value ? (
             <p class="nota-grupo">{tr('Ajustando la letra a los tiempos…')}</p>
           ) : transcribiendo ? (

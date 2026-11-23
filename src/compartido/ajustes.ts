@@ -253,6 +253,8 @@ export interface Ajustes {
   corregirAutomaticos: boolean;
   /** Corrige kanji y homófonos de la transcripción con Claude a medida que llega. */
   whisperCorregir: boolean;
+  /** Que Claude lea entera la letra que se pega (sus marcas, repeticiones y coros) antes de colocarla con la voz. */
+  letraConClaude: boolean;
   activo: boolean;
   sitiosDesactivados: string[];
 
@@ -511,6 +513,7 @@ export const AJUSTES_INICIALES: Ajustes = {
   whisperIntensidad: 'auto',
   corregirAutomaticos: true,
   whisperCorregir: true,
+  letraConClaude: false,
   activo: true,
   sitiosDesactivados: [],
 

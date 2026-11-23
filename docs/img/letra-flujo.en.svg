@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:lang="en" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo desc">
 <title id="titulo">How song lyrics are placed</title>
-<desc id="desc">The song's audio goes to Whisper Turbo, which hears what is sung and when, and to Demucs, which separates the voice. The pasted lyrics are matched letter by letter with what Whisper heard, which gives each verse's zone. In that zone, narabas finds on the voice alone where its phonemes start. If the lyrics barely match, Claude says which verse goes over which lines. letra.ts combines the timing and produces the lyrics track, which is analyzed and translated.</desc>
+<desc id="desc">The song's audio goes to Whisper Turbo, which hears what is sung and when, and to Demucs, which separates the voice. The pasted lyrics are matched letter by letter with what Whisper heard, which gives each verse's zone. In that zone, narabas finds on the voice alone where its phonemes start. If asked, or if the lyrics barely match, Claude says which verses are sung and in what order. letra.ts combines the timing and produces the lyrics track, which is analyzed and translated.</desc>
 <style>
 text { font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
 .fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
@@ -78,7 +78,7 @@ g rect { stroke-width: 1; }
 <g class="coral" data-caja="">
 <rect x="20" y="370" width="170" height="56" rx="8"/>
 <text class="t" x="105" y="389" text-anchor="middle" dominant-baseline="central">Claude</text>
-<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">If they barely match</text>
+<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">What is sung</text>
 </g>
 <g class="verde" data-caja="">
 <rect x="220" y="370" width="240" height="56" rx="8"/>

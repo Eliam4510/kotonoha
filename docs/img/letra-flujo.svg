@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:lang="es" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo desc">
 <title id="titulo">Cómo se coloca la letra de una canción</title>
-<desc id="desc">El audio de la canción va a Whisper Turbo, que oye qué se canta y cuándo, y a Demucs, que separa la voz. La letra pegada se casa letra a letra con lo que oyó Whisper, y eso da la zona de cada verso. narabas busca en esa zona, sobre la voz sola, dónde empiezan sus fonemas. Si la letra apenas casa, Claude dice qué verso va sobre qué líneas. letra.ts reúne los tiempos y genera la pista de la letra, que se analiza y se traduce.</desc>
+<desc id="desc">El audio de la canción va a Whisper Turbo, que oye qué se canta y cuándo, y a Demucs, que separa la voz. La letra pegada se casa letra a letra con lo que oyó Whisper, y eso da la zona de cada verso. narabas busca en esa zona, sobre la voz sola, dónde empiezan sus fonemas. Si se le pide, o si la letra apenas casa, Claude dice qué versos se cantan y en qué orden. letra.ts reúne los tiempos y genera la pista de la letra, que se analiza y se traduce.</desc>
 <style>
 text { font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
 .fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
@@ -78,7 +78,7 @@ g rect { stroke-width: 1; }
 <g class="coral" data-caja="">
 <rect x="20" y="370" width="170" height="56" rx="8"/>
 <text class="t" x="105" y="389" text-anchor="middle" dominant-baseline="central">Claude</text>
-<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">Si apenas casa</text>
+<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">Qué se canta</text>
 </g>
 <g class="verde" data-caja="">
 <rect x="220" y="370" width="240" height="56" rx="8"/>

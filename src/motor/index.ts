@@ -15,7 +15,7 @@ import { puntosEnNotas } from '../nucleo/gramaticaAnki';
 import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
 import { FONEMAS_NARABAS } from '../nucleo/alineacion';
-import { alinearConVoz, type CantoPorTramos, ID_LETRA, vozDeCanto } from '../nucleo/letra';
+import { alinearConVoz, type CantoPorTramos, type EntradaAjuste, guiaDeClaude, ID_LETRA, vozDeCanto } from '../nucleo/letra';
 import { versosCantados } from '../nucleo/estructuraLetra';
 import { textoCantado } from '../nucleo/noSeCanta';
 import type { Linea } from '../nucleo/subtitulos';
@@ -833,7 +833,7 @@ atenderFlujos({
     return 'ok';
   },
   // Claude solo dice qué verso suena dónde: las líneas las arma quien lo pide, con la letra y los tiempos que ya tiene.
-  ajustarLetra: async (_emitir, _senal, lineas: Linea[], versos: string[], titulo?: string) => JSON.stringify(await ia.ajustarLetra(await aj(), lineas, versos, titulo)),
+  ajustarLetra: async (_emitir, _senal, lineas: Linea[], versos: string[], titulo?: string, estrofas?: number[]) => JSON.stringify(await ia.ajustarLetra(await aj(), lineas, versos, titulo, estrofas)),
   // Revisa las líneas que aún no se han analizado y guarda lo encontrado por cada trozo terminado.
   analisisProfundo: async (emitir, senal, lineas: Linea[], titulo?: string, indiceLinea = -1, tope = 0) => {
     const a = await aj();
@@ -871,9 +871,11 @@ atenderFlujos({
     return String(await whisper.transcribirArchivo(url, modelo ?? (await modeloPorOmision()), intensidad, (e) => emitir(`${JSON.stringify(e)}\n`), senal, pcmCrudo, desdeMs, conCanto, clave));
   },
   // La letra con la voz: lo que oyó Whisper dice dónde va cada verso y narabas, en el audio guardado de la canción, dónde
-  // empieza; antes, Demucs le quita la música, si está. Sin ese audio, sin fonemas en esta lengua o sin narabas en el disco
-  // (con `bajar`, se bajan narabas y Demucs), dice por qué, y el controlador la coloca por letras.
-  alinearLetraConVoz: async (emitir, senal, lineas: Linea[], versos: string[], clave: string, canto: CantoPorTramos | null, bajar: boolean) => {
+  // empieza; antes, Demucs le quita la música, si está. Con `ajuste`, la respuesta de Claude a la letra leída entera, es
+  // Claude quien dice qué versos se cantan y en qué orden (`versos` son entonces sus renglones). Sin ese audio, sin fonemas
+  // en esta lengua o sin narabas en el disco (con `bajar`, se bajan narabas y Demucs), dice por qué, y el controlador la
+  // coloca sin la voz.
+  alinearLetraConVoz: async (emitir, senal, lineas: Linea[], versos: string[], clave: string, canto: CantoPorTramos | null, bajar: boolean, ajuste: EntradaAjuste[] | null = null) => {
     const pcm = whisper.audioDeCancion(clave);
     const fonemasDe = motorLengua().fonemasDeVerso;
     if (!pcm) return JSON.stringify({ motivo: 'sin-audio' });
@@ -884,9 +886,12 @@ atenderFlujos({
     const demucsEnDisco = conDemucs && (await aislarVoz.enDisco());
     if (!bajar && !(await narabas.enDisco())) return JSON.stringify({ motivo: 'sin-narabas', bajarDemucs: conDemucs && !demucsEnDisco });
     await motorLengua().analizador.cargar();
-    // La letra tal como se canta: un estribillo escrito una vez se repite donde lo oyó Whisper.
-    const pegados = versos.length;
-    versos = versosCantados(versos, lineas).versos;
+    // La letra tal como se canta: como la leyó Claude, si se le preguntó; si no, un estribillo escrito una vez se repite
+    // donde lo oyó Whisper.
+    const voz = canto ? vozDeCanto(canto) : undefined;
+    const pegados = versos.filter(Boolean).length;
+    versos = ajuste ? guiaDeClaude(versos, lineas, ajuste, ID_LETRA, voz).versos : versosCantados(versos, lineas).versos;
+    if (!versos.length) return JSON.stringify({ motivo: 'sin-versos' });
     const indice = new Map<string, number>(FONEMAS_NARABAS.map((f, i) => [f, i]));
     const fonemas = versos.map((v) => fonemasDe(textoCantado(v)).flatMap((f) => (indice.has(f) ? [indice.get(f)!] : [])));
     let oido = pcm;
@@ -901,8 +906,8 @@ atenderFlujos({
       }
     }
     const p = await narabas.probabilidadesDe(oido, (e) => emitir(`${JSON.stringify(e)}\n`), senal);
-    const resultado = alinearConVoz(versos, lineas, fonemas, p, narabas.MS_POR_MARCO, ID_LETRA, canto ? vozDeCanto(canto) : undefined);
-    return JSON.stringify({ resultado, aislada, sinDemucs: conDemucs && !aislada && !demucsEnDisco, repetidos: versos.length - pegados });
+    const resultado = alinearConVoz(versos, lineas, fonemas, p, narabas.MS_POR_MARCO, ID_LETRA, voz);
+    return JSON.stringify({ resultado, aislada, sinDemucs: conDemucs && !aislada && !demucsEnDisco, repetidos: Math.max(0, versos.length - pegados) });
   },
   // La práctica del acento: los tokens de la grabación, cada uno con el instante en que empieza, en JSON.
   transcribirPractica: async (emitir, senal, url: string) => JSON.stringify(await whisper.tokensDeGrabacion(url, (e) => emitir(`${JSON.stringify(e)}\n`), senal)),

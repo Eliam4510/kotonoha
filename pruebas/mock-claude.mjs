@@ -106,16 +106,30 @@ function respuestaPara(cuerpo, idioma = 'es', negativa = null) {
     });
   }
   if (formato?.properties?.ajuste) {
-    // Empareja cada verso con la línea que más se le parece, sin volver atrás. Es lo que se le pide a Claude, en tosco.
+    // Lo que se le pide a Claude, en tosco. Recorre lo oído en orden y dice qué versos caben casi enteros en cada línea,
+    // así que un estribillo que vuelve se repite aunque la letra lo escriba una vez; las marcas de sección y las órdenes
+    // de repetir no se cantan. Si así apenas reconoce la letra (lo oyó mal), empareja cada verso con la línea que más se
+    // le parece, sin volver atrás.
     const contenido = cuerpo.messages?.[0]?.content ?? '';
     const [, transcripcion = '', letra = ''] = /TRANSCRIPCIÓN:\n([\s\S]*?)\n\nLETRA:\n([\s\S]*)$/.exec(contenido) ?? [];
     const piezas = (t) => new Set(t.toLowerCase().match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]|[\p{L}\p{N}']+/gu) ?? []);
     const lineas = transcripcion.split('\n').map((l) => piezas(l.replace(/^\d+ \[[^\]]*\] /, '')));
-    const ajuste = [];
+    // Los renglones por su número: entre estrofas va una línea en blanco.
+    const renglones = [...letra.matchAll(/^(\d+): (.*)$/gm)].map(([, n, t]) => ({ v: Number(n), t, p: piezas(t) }));
+    const esMarca = (t) => /^\[.*\]$/.test(t) || /repeat|繰り返し|くり返し/i.test(t);
+    const marcas = renglones.filter((x) => esMarca(x.t)).map((x) => ({ v: x.v, de: -2, a: -2 }));
+    const versos = renglones.filter((x) => !esMarca(x.t));
+    const porLineas = [];
+    lineas.forEach((l, i) => {
+      for (const x of versos) if (x.p.size && [...x.p].filter((y) => l.has(y)).length >= Math.ceil(x.p.size * 0.6)) porLineas.push({ v: x.v, de: i, a: i });
+    });
+    const oidos = new Set(porLineas.map((e) => e.v));
+    if (versos.length && oidos.size * 2 >= versos.length) {
+      return JSON.stringify({ ajuste: [...porLineas, ...versos.filter((x) => !oidos.has(x.v)).map((x) => ({ v: x.v, de: -1, a: -1 })), ...marcas] });
+    }
+    const ajuste = [...marcas];
     let cursor = 0;
-    letra.split('\n').map((l) => l.replace(/^\d+: /, '')).forEach((verso, v) => {
-      if (/^\[.*\]$/.test(verso)) return ajuste.push({ v, de: -2, a: -2 });
-      const p = piezas(verso);
+    for (const { v, p } of versos) {
       const comunes = (i) => [...p].filter((x) => lineas[i].has(x)).length;
       let de = -1;
       let mejor = 0;
@@ -125,7 +139,10 @@ function respuestaPara(cuerpo, idioma = 'es', negativa = null) {
           de = i;
         }
       }
-      if (de < 0) return ajuste.push({ v, de: -1, a: -1 });
+      if (de < 0) {
+        ajuste.push({ v, de: -1, a: -1 });
+        continue;
+      }
       // Un verso largo puede ocupar varias líneas: las de al lado que estén casi enteras en él son suyas.
       const suya = (i) => comunes(i) >= Math.ceil(lineas[i].size * 0.6);
       let a = de;
@@ -133,7 +150,7 @@ function respuestaPara(cuerpo, idioma = 'es', negativa = null) {
       while (de - 1 >= cursor && suya(de - 1)) de--;
       ajuste.push({ v, de, a });
       cursor = de;
-    });
+    }
     return JSON.stringify({ ajuste });
   }
   if (formato?.properties?.cambios) {

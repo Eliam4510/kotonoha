@@ -161,6 +161,7 @@ export const PROMPTS_JAPONES: PromptsLengua = {
     marcas: '[サビ] o [Coro]',
     sonidos: 'da igual con qué kanji esté escrito, y 会いたい, 逢いたい y あいたい son lo mismo',
     escritura: 'Si LETRA trae la misma letra en varias escrituras o idiomas, usa solo las líneas en japonés, con sus kanji: ni rōmaji ni traducciones.',
+    repeticiones: '«サビ繰り返し», «※くり返し» (vuelve el bloque marcado con ※) o «(Repeat)»',
   }),
   esquemaLetra: ESQUEMA_LETRA,
   aLengua: PROMPT_A_JAPONES,

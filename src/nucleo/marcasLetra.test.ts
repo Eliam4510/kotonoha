@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { desplegarMarcas } from './marcasLetra';
+import { cantadoDelRenglon, desplegarMarcas } from './marcasLetra';
 
 const lineas = (t: string) => t.split('\n').filter((l) => l.trim());
 
@@ -39,5 +39,19 @@ describe('desplegarMarcas', () => {
     expect(lineas(desplegarMarcas(letra))).toEqual(['(Shine, your future shine)', 'uno', '(Shine, your future shine)', 'dos']);
     // Entre paréntesis, solo nombrando una sección es un título.
     expect(lineas(desplegarMarcas('(Chorus)\nla luna\n\nfin\n\n(Chorus)'))).toEqual(['la luna', 'fin', 'la luna']);
+  });
+});
+
+describe('cantadoDelRenglon', () => {
+  it('nada si es un título, una orden de repetir o un crédito', () => {
+    for (const r of ['[Chorus]', '(Repeat Chorus)', 'サビ繰り返し', '※くり返し', '※', 'x2', '[サビ]', 'Chorus:', '作詞：ハチ']) expect(cantadoDelRenglon(r), r).toBe('');
+  });
+
+  it('un verso, sin el ※ que lo marca, la marca de delante ni su «×2»', () => {
+    expect(cantadoDelRenglon('※君の名前を呼ぶ')).toBe('君の名前を呼ぶ');
+    expect(cantadoDelRenglon('[Chorus] Shine on')).toBe('Shine on');
+    expect(cantadoDelRenglon('La luna ×2')).toBe('La luna');
+    // Una segunda voz entre paréntesis se canta.
+    expect(cantadoDelRenglon('(Shine, your future shine)')).toBe('(Shine, your future shine)');
   });
 });

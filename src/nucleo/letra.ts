@@ -3,7 +3,7 @@
 
 import { alinearCtc, bandaPorVersos, type ProbabilidadesCtc, zonasDeVersos } from './alineacionForzada';
 import { letrasComparables, versosOidos } from './casarLetra';
-import { desplegarMarcas } from './marcasLetra';
+import { cantadoDelRenglon, desplegarMarcas } from './marcasLetra';
 import { noSeCanta, versosDelRenglon } from './noSeCanta';
 import { analizarLrc, type Linea } from './subtitulos';
 
@@ -42,6 +42,9 @@ function esLetraLrc(texto: string): boolean {
   return conHora >= 3 && conHora >= renglones.length * 0.6;
 }
 
+/** Un renglón sin caracteres invisibles ni la marca de tiempo que traen algunos comentarios, «[1:02]». */
+const limpiarRenglon = (l: string) => l.replace(/[\u200b-\u200d\u2060\ufeff]/g, '').replace(/^\s*\[?\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]?\s*/, '').trim();
+
 /**
  * Los versos de una letra pegada, tal cual, sin líneas vacías, adornos ni la marca de tiempo que traen algunos
  * comentarios. Tampoco lo que no se canta (las marcas de sección y los créditos), y un verso con «×2» va dos veces.
@@ -51,20 +54,63 @@ export function versosDeLetra(texto: string): string[] {
   const fuente = esLetraLrc(texto) ? analizarLrc(texto).map((l) => l.texto).join('\n') : desplegarMarcas(texto);
   return fuente
     .split(/\r?\n/)
-    .map((l) => l.replace(/[\u200b-\u200d\u2060\ufeff]/g, '').replace(/^\s*\[?\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]?\s*/, '').trim())
+    .map(limpiarRenglon)
     .filter((l) => /[\p{L}\p{N}]/u.test(l) && !noSeCanta(l))
     .flatMap(versosDelRenglon)
     .filter((l) => /[\p{L}\p{N}]/u.test(l));
 }
 
+/**
+ * Una letra pegada tal como está, para que Claude la lea entera: sus renglones con las marcas y los «×2» (sin la hora de
+ * un comentario ni caracteres invisibles), lo que se canta de cada uno ('' si nada: un título, una orden de repetir o un
+ * crédito) y los renglones que empiezan estrofa, porque un «×2» debajo de una estrofa la repite entera.
+ */
+export interface LetraLeida {
+  renglones: string[];
+  cantados: string[];
+  estrofas: number[];
+}
+
+export function letraParaClaude(texto: string): LetraLeida {
+  const leida: LetraLeida = { renglones: [], cantados: [], estrofas: [] };
+  const fuente = esLetraLrc(texto) ? analizarLrc(texto).map((l) => l.texto) : texto.split(/\r?\n/);
+  let trasBlanco = false;
+  for (const crudo of fuente) {
+    const renglon = limpiarRenglon(crudo);
+    // Un ※ suelto también dice algo: que vuelve el bloque que marca. «* * *» o «♪♪♪» solo separan estrofas.
+    if (!/[\p{L}\p{N}]/u.test(renglon) && !/^[※＊☆★]$/u.test(renglon)) {
+      trasBlanco = leida.renglones.length > 0;
+      continue;
+    }
+    if (trasBlanco) leida.estrofas.push(leida.renglones.length);
+    trasBlanco = false;
+    leida.renglones.push(renglon);
+    leida.cantados.push(cantadoDelRenglon(renglon));
+  }
+  return leida;
+}
+
+/**
+ * Lo que dijo Claude de una letra leída entera, listo para colocarla: un renglón que no se canta (un título, una orden de
+ * repetir) no sale aunque le dé un tiempo, ni vuelve como un verso olvidado si no lo nombra.
+ */
+export function sinMarcas(ajuste: EntradaAjuste[], cantados: string[]): EntradaAjuste[] {
+  const marcas = cantados.flatMap((t, v) => (t ? [] : [{ v, de: NO_SE_CANTA, a: NO_SE_CANTA }]));
+  return [...ajuste.filter((e) => !!cantados[e.v]), ...marcas];
+}
+
 const segundos = (ms: number) => (ms / 1000).toFixed(1);
 
-/** Lo que se le manda a Claude: las dos listas numeradas. Los tiempos le ayudan a ver dónde hay un pasaje instrumental. */
-export function mensajeAjuste(lineas: Linea[], versos: string[], titulo?: string): string {
+/**
+ * Lo que se le manda a Claude: las dos listas numeradas. Los tiempos le ayudan a ver dónde hay un pasaje instrumental, y
+ * una línea en blanco delante de los versos de `estrofas`, dónde empieza cada estrofa.
+ */
+export function mensajeAjuste(lineas: Linea[], versos: string[], titulo?: string, estrofas: number[] = []): string {
+  const nuevas = new Set(estrofas);
   return [
     titulo ? `Título: ${titulo}` : '',
     `TRANSCRIPCIÓN:\n${lineas.map((l, i) => `${i} [${segundos(l.inicio)}-${segundos(l.fin)}] ${l.texto}`).join('\n')}`,
-    `LETRA:\n${versos.map((v, i) => `${i}: ${v}`).join('\n')}`,
+    `LETRA:\n${versos.map((v, i) => `${i > 0 && nuevas.has(i) ? '\n' : ''}${i}: ${v}`).join('\n')}`,
   ].filter(Boolean).join('\n\n');
 }
 
@@ -95,11 +141,36 @@ function indicesEnOrden(valores: number[]): Set<number> {
 const peso = (texto: string) => Math.max(1, texto.replace(/\s/g, '').length);
 
 interface Pendiente {
+  /** El número del verso en la letra pegada. */
+  v: number;
   texto: string;
   de: number;
   a: number;
 }
 
+/**
+ * Lo que Claude entendió de una letra: los versos en el orden en que se cantan (con las repeticiones y sin lo que no se
+ * canta) y dónde los puso él. Dice qué se canta; dónde empieza cada verso lo dicen mejor sus letras, donde casan con lo
+ * oído, y narabas. Medido con un Claude ideal sacado de los LRC: buscar cada verso en las líneas que nombra Claude, o
+ * partir de donde lo puso, salía peor que entre los versos anclados (del 90 % al 87 % a menos de 1 s), porque Whisper
+ * fecha mal las líneas de una canción y una línea suele juntar varios versos.
+ */
+export interface GuiaLetra {
+  versos: string[];
+  toscas: ResultadoAjuste;
+  /** Si Claude dijo sobre qué líneas oídas suena cada verso. */
+  ubicados: boolean[];
+}
+
+/** La guía que sale de la respuesta de Claude: cada verso cantado, con los tiempos de las líneas sobre las que suena. */
+export function guiaDeClaude(versos: string[], lineas: Linea[], ajuste: EntradaAjuste[], idInicial = ID_LETRA, voz?: Voz): GuiaLetra {
+  const entradas = depurar(versos, lineas, ajuste);
+  return {
+    versos: entradas.map((e) => e.texto),
+    toscas: aplicarAjuste(versos, lineas, ajuste, idInicial, voz),
+    ubicados: entradas.map((e) => e.de >= 0),
+  };
+}
 
 /**
  * Un verso que Claude se salta se sigue cantando, y faltaría en pantalla. Entra sin tiempo, detrás de donde suena por primera
@@ -113,7 +184,7 @@ function completar(versos: string[], ajuste: EntradaAjuste[]): EntradaAjuste[] {
     if (vistos.has(v)) continue;
     let pos = 0;
     for (let anterior = v - 1; anterior >= 0; anterior--) {
-      const i = salida.findIndex((e) => e.v === anterior);
+      const i = salida.findIndex((e) => e.v === anterior && e.de !== NO_SE_CANTA);
       if (i >= 0) {
         pos = i + 1;
         break;
@@ -132,9 +203,9 @@ function depurar(versos: string[], lineas: Linea[], ajuste: EntradaAjuste[]): Pe
   const enOrden = indicesEnOrden(conTiempo.map(({ e }) => e.de));
   const buenas = new Set(conTiempo.filter((_, k) => enOrden.has(k)).map(({ i }) => i));
   return validas.map((e, i) => {
-    if (!buenas.has(i)) return { texto: versos[e.v], de: -1, a: -1 };
+    if (!buenas.has(i)) return { v: e.v, texto: versos[e.v], de: -1, a: -1 };
     const a = Number.isInteger(e.a) && e.a >= e.de && e.a < lineas.length ? e.a : e.de;
-    return { texto: versos[e.v], de: e.de, a };
+    return { v: e.v, texto: versos[e.v], de: e.de, a };
   });
 }
 
@@ -383,6 +454,45 @@ export function alinearPorLetras(versos: string[], lineas: Linea[], idInicial = 
   return { lineas: salida, conTiempo, estimadas };
 }
 
+/**
+ * Los versos que anclan sus letras: los que se oyen, salvo uno igual que su vecino (un estribillo repetido), que no se
+ * sabe a qué copia de lo oído corresponde. Ahí la alineación, que va en orden, pone cada copia en su repetición.
+ */
+function ancladosPorLetras(versos: string[], lineas: Linea[]): boolean[] {
+  const normales = versos.map((v) => letrasComparables(v).join(''));
+  return versosOidos(versos, lineas).map((o, v) => o !== null && normales[v] !== normales[v - 1] && normales[v] !== normales[v + 1]);
+}
+
+/**
+ * Coloca la letra como la leyó Claude, sin la voz: cada verso donde se oyen sus letras, como siempre, y uno que no se
+ * oye, donde lo puso Claude si cabe entre los oídos de antes y de después (una letra en rōmaji no casa en nada, y ahí
+ * todo va donde lo puso él). Claude dice qué se canta, que casando letras no se sabe en una letra incompleta; dónde
+ * empieza un verso lo dicen mejor sus letras, porque Claude solo nombra líneas enteras.
+ */
+export function colocarConGuia(guia: GuiaLetra, lineas: Linea[], idInicial = ID_LETRA, voz?: Voz): ResultadoAjuste {
+  const porLetras = alinearPorLetras(guia.versos, lineas, idInicial, voz);
+  const oidos = versosOidos(guia.versos, lineas);
+  const salida = porLetras.lineas.map((l) => ({ ...l }));
+  let conTiempo = 0;
+  salida.forEach((l, v) => {
+    if (oidos[v]) {
+      conTiempo++;
+      return;
+    }
+    if (!guia.ubicados[v]) return;
+    const suya = guia.toscas.lineas[v];
+    const antes = salida.slice(0, v).findLast((_, k) => !!oidos[k])?.inicio ?? Number.NEGATIVE_INFINITY;
+    const despues = salida.slice(v + 1).find((_, k) => !!oidos[v + 1 + k])?.inicio ?? Number.POSITIVE_INFINITY;
+    if (suya.inicio <= antes || suya.inicio >= despues) return;
+    l.inicio = suya.inicio;
+    l.fin = suya.fin;
+    conTiempo++;
+  });
+  for (let v = 1; v < salida.length; v++) if (salida[v].inicio <= salida[v - 1].inicio) salida[v].inicio = salida[v - 1].inicio + 1;
+  rematar(salida);
+  return { lineas: salida, conTiempo, estimadas: salida.length - conTiempo };
+}
+
 /** La vocal del final de un verso se alarga más allá de donde la marca el modelo, que solo da su comienzo. */
 const COLA_VERSO_MS = 400;
 
@@ -394,11 +504,10 @@ const COLA_VERSO_MS = 400;
  * donde lo pone lo que oyó Whisper. Medido con canciones japonesas y su letra sincronizada: ver la 0.50.0 en el CHANGELOG.
  */
 export function alinearConVoz(versos: string[], lineas: Linea[], fonemas: number[][], p: ProbabilidadesCtc, msPorMarco: number, idInicial = ID_LETRA, voz?: Voz): ResultadoAjuste & { conVoz: number } {
+  // Dónde va cada verso a grandes rasgos, casando la letra letra a letra. Cada uno se busca cerca de donde lo anclan sus
+  // letras, o entre los anclados de antes y de después.
   const toscas = alinearPorLetras(versos, lineas, idInicial, voz);
-  // Un verso igual que su vecino (un estribillo repetido) no se sabe a qué copia de lo oído corresponde: se busca entre los
-  // versos anclados de antes y de después, y la alineación, que va en orden, pone cada copia en su repetición.
-  const normales = versos.map((v) => letrasComparables(v).join(''));
-  const oidos = versosOidos(versos, lineas).map((o, v) => o !== null && normales[v] !== normales[v - 1] && normales[v] !== normales[v + 1]);
+  const oidos = ancladosPorLetras(versos, lineas);
   const zonas = zonasDeVersos(toscas.lineas, oidos, p.marcos * msPorMarco, msPorMarco);
   const colocados = alinearCtc(
     p,

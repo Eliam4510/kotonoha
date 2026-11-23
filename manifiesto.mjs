@@ -50,7 +50,7 @@ export const MENSAJES = {
 export const manifiesto = {
   manifest_version: 3,
   name: 'Kotonoha',
-  version: '0.50.1',
+  version: '0.51.0',
   default_locale: 'en',
   description: '__MSG_descripcion__',
   minimum_chrome_version: '120',
