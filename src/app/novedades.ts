@@ -5,12 +5,11 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.49.0',
+  version: '0.49.1',
   puntos: [
-    tm('Las tarjetas de Anki tienen un diseño nuevo: la frase con la palabra marcada, la escena, la palabra con su lectura y su definición, y modo noche.'),
-    tm('Las que ya tienes cambian solas si no tocaste su plantilla; si la cambiaste, «Usar el diseño nuevo», en Ajustes.'),
-    tm('Cada tarjeta lleva la etiqueta de su lengua y, con ella, la letra que le corresponde; el pinyin del chino, más grande, se lee bien.'),
-    tm('El repaso de la Memoria sigue el mismo estilo.'),
+    tm('Volver a traducir los subtítulos empieza desde cero, con los subtítulos como están ahora.'),
+    tm('Si Claude no traduce una línea, como un verso de una canción, queda vacía y se avisa de cuántas son: su disculpa ya no se guarda como si fuera la traducción.'),
+    tm('Si esa vez no traduce nada, se queda la traducción que había.'),
   ],
 };
 

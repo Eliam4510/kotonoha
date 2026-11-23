@@ -209,7 +209,8 @@ comprobar((await lineaEn(p, 3)).includes('夜の皮を歩いて'), 'Se empieza c
 const traducirPista = async () => {
   await abrirGenerar(p);
   await enOverlay(p, (r) => [...r.querySelectorAll('.aviso')].forEach((x) => x.remove()));
-  await enOverlay(p, (r) => [...r.querySelectorAll('.panel-generar button')].find((b) => b.textContent.includes('Traducir al'))?.click());
+  // «Traducir al…» la primera vez, «Volver a traducir al…» con una traducción ya hecha.
+  await enOverlay(p, (r) => [...r.querySelectorAll('.panel-generar button')].find((b) => /traducir al/i.test(b.textContent))?.click());
   await hasta(p, (r) => [...r.querySelectorAll('.aviso')].some((x) => /Traducción lista/.test(x.textContent)), undefined, 15000);
   return (await motor('subtitulosGenerados', ID)).find((g) => g.idioma === 'es');
 };

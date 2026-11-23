@@ -100,7 +100,8 @@ Die Übersetzungsschaltfläche im Bereich **KI-Untertitel** oder **Mit Claude ü
 
 - Die Arbeit beginnt bei dem Abschnitt, der gerade läuft, sodass dieser Teil in Sekunden fertig ist.
 - Das Ergebnis erscheint nach und nach.
-- Wird abgebrochen, bleibt das Übersetzte erhalten, und ein erneuter Klick fragt nur die fehlenden Zeilen an.
+- Wird abgebrochen, bleibt das Übersetzte erhalten. Gibt es schon eine Übersetzung, übersetzen die Schaltflächen erneut (**Erneut mit Claude übersetzen** neben den Zweituntertiteln) und beginnen von vorn, mit den Untertiteln, wie sie jetzt sind. Übersetzt Claude diesmal nichts, bleibt die bisherige Übersetzung.
+- Übersetzt Claude eine Zeile nicht, etwa einen Vers eines Liedes, bleibt sie leer, der Rest geht weiter, und am Ende sagt ein Hinweis, wie viele es sind.
 
 ### Automatische Untertitel korrigieren
 

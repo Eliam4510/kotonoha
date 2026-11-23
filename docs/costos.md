@@ -19,7 +19,7 @@ Con el crédito de referencia de 100 USD al mes:
 | Subtítulos manuales, con revisión y traducción | 0.75 USD | 104 |
 | Subtítulos manuales, con revisión | 0.36 USD | 175 |
 
-Las horas de la última columna incluyen 30 consultas de palabras por hora de video. Volver a ver un video no cuesta nada, porque lo revisado, corregido y traducido queda guardado.
+Las horas de la última columna incluyen 30 consultas de palabras por hora de video. Volver a ver un video no cuesta nada, porque lo revisado, corregido y traducido queda guardado. Volver a traducir sí se paga otra vez, porque empieza desde cero.
 
 ## Medidas
 

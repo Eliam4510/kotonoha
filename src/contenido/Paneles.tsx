@@ -321,6 +321,9 @@ function ControlVelo({ titulo, clave, cfg, alCambiar }: { titulo: string; clave:
   );
 }
 
+/** Si los secundarios que se ven son una traducción de Claude: entonces el botón la vuelve a hacer, desde cero. */
+const hayTraduccionClaude = () => lineasSecundarias.value.length > 0 && pistas.value.some((p) => p.id === idSecundaria.value && p.origen === 'claude');
+
 function ControlPista({ titulo, icono, valor, idioma, alElegir, destino, puedeExportar }: { titulo: string; icono: NombreIcono; valor: string | null; idioma: string; alElegir: (id: string | null) => void; destino: 'objetivo' | 'secundaria'; puedeExportar: boolean }) {
   const entrada = useRef<HTMLInputElement>(null);
   const lista = pistas.value;
@@ -336,7 +339,7 @@ function ControlPista({ titulo, icono, valor, idioma, alElegir, destino, puedeEx
       <div class="pista-acciones">
         <button class="btn chico" onClick={() => entrada.current?.click()}><Icono n="archivo-subir" t={15} /> {tr('Importar')}</button>
         <button class="btn chico" disabled={!puedeExportar} onClick={() => exportarSrt(destino)}><Icono n="exportar" t={15} /> {tr('Exportar SRT')}</button>
-        {destino === 'secundaria' && <button class="btn chico ia" disabled={!lineasObjetivo.value.length || !!generacion.value} onClick={() => generarSecundarios()}><Icono n="traducir" t={15} /> {tr('Traducir con Claude')}</button>}
+        {destino === 'secundaria' && <button class="btn chico ia" disabled={!lineasObjetivo.value.length || !!generacion.value} onClick={() => generarSecundarios()}><Icono n="traducir" t={15} /> {hayTraduccionClaude() ? tr('Volver a traducir con Claude') : tr('Traducir con Claude')}</button>}
       </div>
       <input ref={entrada} type="file" accept=".srt,.vtt,.ass,.ssa,.ttml,.dfxp,.xml" hidden aria-label={tr('Importar {0}', titulo)} onChange={(e) => {
         const f = e.currentTarget.files?.[0];
@@ -886,7 +889,7 @@ function PanelGenerar() {
           </div>
         ) : (
           <div class="bloque-generar">
-            <button class="btn primario bloque" disabled={!hayObjetivo || !!g} onClick={() => generarSecundarios()}><Icono n="traducir" t={16} /> {tr('Traducir al')} {nombreIdioma(a.idiomaSecundario).toLowerCase()}</button>
+            <button class="btn primario bloque" disabled={!hayObjetivo || !!g} onClick={() => generarSecundarios()}><Icono n="traducir" t={16} /> {hayTraduccionClaude() ? tr('Volver a traducir al') : tr('Traducir al')} {nombreIdioma(a.idiomaSecundario).toLowerCase()}</button>
             {!hayObjetivo && <p class="nota-grupo">{tr(lengua.value.textos.primeroNecesitas)}</p>}
           </div>
         )}

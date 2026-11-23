@@ -942,9 +942,15 @@ interface EventoTraduccion {
   hechas: number;
   total: number;
   parte: { i: number; t: string }[];
+  /** Líneas del lote que Claude no tradujo. */
+  omitidas?: number;
 }
 
-/** Traduce las líneas japonesas al idioma de apoyo. Empiezan a aparecer enseguida, por donde vas. */
+/**
+ * Traduce las líneas japonesas al idioma de apoyo. Empiezan a aparecer enseguida, por donde vas. Siempre desde cero y con
+ * los subtítulos como están ahora: seguir por lo que faltaba conservaba lo de antes, que pudo salir de otro texto o ser
+ * una disculpa de Claude guardada como traducción.
+ */
 export async function generarSecundarios() {
   const fuente = crudas(baseObjetivo);
   if (!fuente.length) {
@@ -955,42 +961,46 @@ export async function generarSecundarios() {
   const id = `generada:${idioma}`;
   const video = infoVideo.value?.idVideo;
   const estudio = ajustes.value.idiomaObjetivo;
-  // Si una traducción anterior quedó a medias se sigue por lo que falta, sin pagarlo dos veces.
-  const delaFuente = new Set(fuente.map((l) => l.id));
-  const hechas = new Map((importadas.get(id) ?? []).filter((l) => delaFuente.has(l.id)).map((l) => [l.id, l]));
-  const faltan = fuente.filter((l) => !hechas.has(l.id));
-  if (!faltan.length) hechas.clear();
-  const porTraducir = faltan.length ? faltan : fuente;
+  // Lo de antes se ve hasta que llega lo nuevo: si esta vez Claude no traduce nada, no se pierde.
+  const anterior = idSecundaria.value;
+  const habia = (importadas.get(id) ?? []).length > 0;
+  const hechas = new Map<number, Linea>();
+  let omitidas = 0;
   pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (Claude)', nombreIdioma(idioma)), origen: 'claude' }];
   idSecundaria.value = id;
-  const yaHechas = fuente.length - porTraducir.length;
-  generacion.value = { tipo: 'secundarios', hechas: yaHechas, total: fuente.length };
-  const publicar = () => {
-    const lista = [...hechas.values()].sort((a, b) => a.inicio - b.inicio);
-    importadas.set(id, lista);
-    publicarSecundaria(lista);
-    return lista;
-  };
-  if (hechas.size) publicar();
+  generacion.value = { tipo: 'secundarios', hechas: 0, total: fuente.length };
   const f = flujoMotor(
     'traducirSubtitulos',
-    [porTraducir, infoVideo.value?.titulo, indiceActualEn(porTraducir)],
+    [fuente, infoVideo.value?.titulo, indiceActualEn(fuente)],
     lectorJson<EventoTraduccion>((e) => {
-      for (const { i, t } of e.parte) if (porTraducir[i]) hechas.set(porTraducir[i].id, { ...porTraducir[i], texto: t });
-      generacion.value = { tipo: 'secundarios', hechas: yaHechas + e.hechas, total: fuente.length };
-      const lista = publicar();
+      omitidas += e.omitidas ?? 0;
+      generacion.value = { tipo: 'secundarios', hechas: e.hechas, total: fuente.length };
+      if (!e.parte.length) return;
+      for (const { i, t } of e.parte) if (fuente[i]) hechas.set(fuente[i].id, { ...fuente[i], texto: t });
+      const lista = [...hechas.values()].sort((a, b) => a.inicio - b.inicio);
+      importadas.set(id, lista);
+      publicarSecundaria(lista);
       if (video) motor.guardarSubtitulosGenerados(video, idioma, lista, 'claude', estudio).catch(() => {});
     })
   );
   flujoGeneracion = f;
   try {
     await f;
-    if (generacion.value) avisar(tr('Traducción lista.'), 'exito');
+    if (generacion.value) {
+      if (!hechas.size) avisar(habia ? tr('Claude no tradujo ninguna línea. Se queda la traducción que había.') : tr('Claude no tradujo ninguna línea.'), 'error', undefined, 8000);
+      else if (omitidas) avisar(omitidas === 1 ? tr('Traducción lista, salvo 1 línea que Claude no tradujo.') : tr('Traducción lista, salvo {0} líneas que Claude no tradujo.', omitidas), undefined, undefined, 8000);
+      else avisar(tr('Traducción lista.'), 'exito');
+    }
   } catch (e) {
     avisar(tr('No se pudo traducir: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
   } finally {
     generacion.value = null;
     flujoGeneracion = null;
+    // Sin nada nuevo, todo sigue como estaba.
+    if (!hechas.size) {
+      if (!habia) pistas.value = pistas.value.filter((p) => p.id !== id);
+      idSecundaria.value = pistas.value.some((p) => p.id === anterior) ? anterior : null;
+    }
   }
 }
 

@@ -84,7 +84,9 @@ A whole video takes time to process, but what matters is the part being watched.
 | Claude's response | Every line | Only the lines that change, usually few |
 | Context | Title and neighboring lines | Title and full text, in a prompt-cached block |
 | First batch | In parallel with the others | Alone: it writes the cache the others reuse |
-| If interrupted | What is translated is saved, and work continues with what is missing | What is corrected is saved, and it is marked complete at the end |
+| If interrupted | What is translated is saved; translating again starts from scratch | What is corrected is saved, and it is marked complete at the end |
+
+In translation, what Claude returns is checked before saving: only numbers from the batch, once each, with text and no apologies. If it does not translate a line, such as a verse of a song, the line stays empty and the final notice says how many there are; a batch the API refuses does not stop the others.
 
 Correction never asks: Claude decides from the context and leaves doubtful lines as they are. If a line is a sentence invented by the recognizer, it returns it empty and the line disappears. Each correction keeps the original text, available in the subtitle navigator.
 

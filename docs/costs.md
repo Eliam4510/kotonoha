@@ -19,7 +19,7 @@ With a reference credit of USD 100 a month:
 | Manual subtitles, with review and translation | USD 0.75 | 104 |
 | Manual subtitles, with review | USD 0.36 | 175 |
 
-The hours in the last column include 30 word queries per hour of video. Watching a video again costs nothing, because reviewed, corrected and translated lines stay stored.
+The hours in the last column include 30 word queries per hour of video. Watching a video again costs nothing, because reviewed, corrected and translated lines stay stored. Translating again is paid again, because it starts from scratch.
 
 ## Measurements
 

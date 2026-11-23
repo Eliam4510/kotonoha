@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.49.0 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.49.1 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|

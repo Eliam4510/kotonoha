@@ -798,7 +798,7 @@ atenderFlujos({
     const a = await aj();
     const { aLengua, subtitulos } = motorLengua().prompts;
     const sistema = destino === 'lengua' ? aLengua : rellenar(subtitulos, a, { idioma: a.idiomaTraduccion });
-    await ia.traducirSubtitulos(a, lineas, titulo, sistema, indice, (parte, hechas, total) => emitir(`${JSON.stringify({ hechas, total, parte })}\n`), senal);
+    await ia.traducirSubtitulos(a, lineas, titulo, sistema, indice, (parte, hechas, total, omitidas) => emitir(`${JSON.stringify({ hechas, total, parte, omitidas })}\n`), senal);
     return 'ok';
   },
   corregirSubtitulos: async (emitir, senal, lineas: Linea[], titulo?: string, indice = -1, guion?: string) => {

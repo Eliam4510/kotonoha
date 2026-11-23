@@ -2,6 +2,13 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.49.1 · 2026-11-22
+
+Volver a traducir empieza desde cero, y una línea que Claude no traduce ya no se guarda con su disculpa.
+
+- **Volver a traducir.** Con una traducción ya hecha, el botón dice **Volver a traducir al español** (o **Volver a traducir con Claude**, junto a la pista secundaria) y traduce todo desde cero, con los subtítulos como están ahora. Antes seguía solo por las líneas que faltaban y conservaba lo de antes, también lo que estaba mal. Si Claude no traduce nada esa vez, se queda la traducción que había.
+- **Cuando Claude no traduce una línea.** A veces Claude no traduce algún verso de una canción y, obligado a rellenar la respuesta, escribía su disculpa en lugar de la traducción, que se guardaba como si lo fuera. Ahora se le pide que deje fuera esa línea, y lo que devuelve se revisa antes de guardarlo. La línea se queda sin traducir, el resto sigue, y al terminar el aviso dice cuántas son.
+
 ## 0.49.0 · 2026-11-22
 
 Las tarjetas de Anki, con un diseño nuevo.
@@ -512,6 +519,13 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.49.1 · 2026-11-22
+
+Translating again starts from scratch, and a line Claude does not translate is no longer saved with its apology.
+
+- **Translate again.** Once there is a translation, the button reads **Translate again into…** (or **Translate again with Claude**, next to the secondary track) and translates everything from scratch, with the subtitles as they are now. Before, it only continued with the missing lines and kept what was there, including what was wrong. If Claude translates nothing that time, the previous translation stays.
+- **When Claude does not translate a line.** Sometimes Claude does not translate a verse of a song and, having to fill in the answer, wrote its apology instead of the translation, which was saved as if it were one. Now it is asked to leave that line out, and what it returns is checked before saving. The line stays untranslated, the rest goes on, and at the end the notice says how many there are.
 
 ## 0.49.0 · 2026-11-22
 

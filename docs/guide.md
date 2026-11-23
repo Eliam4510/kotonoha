@@ -100,7 +100,8 @@ The translate button in the **AI subtitles** panel, or **Translate with Claude**
 
 - Work starts with the part being watched, so that part is ready within seconds.
 - Results appear as they arrive.
-- If it is cancelled, what has been translated is kept, and pressing the button again only requests the missing lines.
+- If it is cancelled, what has been translated is kept. Once there is a translation, the buttons translate again (**Translate again with Claude** next to the secondary track) and start from scratch, with the subtitles as they are now. If Claude translates nothing that time, the previous translation stays.
+- If Claude does not translate a line, such as a verse of a song, that line is left empty, the rest goes on, and at the end a notice says how many there are.
 
 ### Correcting automatic subtitles
 

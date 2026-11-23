@@ -5,6 +5,7 @@ import type { Ajustes, Esfuerzo, TareaIA } from '../compartido/ajustes';
 import type { ContextoIA, ImagenIA, OpcionFalsa, PeticionRevisionOcr, SentidoEnContexto } from '../compartido/tipos';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import { type Lote, ordenarPorCercania, partirEnLotes } from '../nucleo/lotes';
+import { type ParteTexto, traduccionesValidas } from '../nucleo/negativas';
 import { claveDia, claveMes, costeDe, type UsoTokens } from '../nucleo/precios';
 import { type EntradaAjuste, mensajeAjuste } from '../nucleo/letra';
 import { mensajeRevision } from '../nucleo/revision';
@@ -175,6 +176,9 @@ async function comprobarTope(a: Ajustes) {
   }
 }
 
+/** Claude no contesta a la petición por sus reglas de seguridad (`stop_reason: refusal`). */
+export class NegativaClaude extends Error {}
+
 async function ejecutar(o: OpcionesPeticion, emitir?: (t: string) => void, senal?: AbortSignal): Promise<string> {
   await comprobarTope(o.a);
   const { proveedor, modelo } = separarModelo(o.a.modelos[o.profundo ? 'profundo' : o.tarea]);
@@ -185,7 +189,7 @@ async function ejecutar(o: OpcionesPeticion, emitir?: (t: string) => void, senal
     const final = (await flujo.finalMessage()) as unknown as { model?: string; usage?: UsoApi; stop_reason?: string; content: { type: string; text?: string }[] };
     const tarea = o.profundo ? 'profundo' : o.tarea;
     anotarConsumo(tarea, final.model ?? o.a.modelos[tarea], final.usage, o.titulo);
-    if (final.stop_reason === 'refusal') throw new Error(tr('Claude rechazó esta petición por sus reglas de seguridad.'));
+    if (final.stop_reason === 'refusal') throw new NegativaClaude(tr('Claude rechazó esta petición por sus reglas de seguridad.'));
     return textoDe(final);
   } catch (e) {
     if (senal?.aborted) return '';
@@ -502,10 +506,17 @@ const ESQUEMA_LINEAS = {
         additionalProperties: false,
       },
     },
+    sin_traducir: { type: 'string' },
   },
-  required: ['lineas'],
+  required: ['lineas', 'sin_traducir'],
   additionalProperties: false,
 } as const;
+
+/**
+ * Al final de las instrucciones de traducir subtítulos. Obligado a rellenar cada línea, Claude escribía en el sitio de la
+ * que no traducía su disculpa, y se guardaba como si fuera la traducción: así puede dejarla fuera y decirlo aparte.
+ */
+const SIN_TRADUCIR = 'Si no traduces alguna línea, déjala fuera de "lineas" y di por qué en "sin_traducir"; no escribas en su lugar una disculpa ni una explicación. Si las traduces todas, "sin_traducir" va vacío.';
 
 const TAM_LOTE_TRADUCCION = 80;
 /** Corregir apenas devuelve texto, porque solo vienen las líneas que cambian: caben lotes mayores. */
@@ -540,30 +551,36 @@ function mensajeLote(lineas: Linea[], { desde, hasta }: Lote, titulo: string | u
   ].filter(Boolean).join('\n\n');
 }
 
-export interface ParteTexto {
-  i: number;
-  t: string;
-}
-
-/** Traduce un subtítulo en cualquier dirección. Entrega cada lote al terminarlo, para verlo cuanto antes. */
+/**
+ * Traduce un subtítulo en cualquier dirección. Entrega cada lote al terminarlo, para verlo cuanto antes, con cuántas de
+ * sus líneas quedaron sin traducir: las que Claude dejó fuera, y las disculpas, que no se entregan como traducción. Una
+ * negativa de la API deja sin traducir su lote, no los demás.
+ */
 export async function traducirSubtitulos(
   a: Ajustes,
   lineas: Linea[],
   titulo: string | undefined,
   sistema: string,
   indice: number,
-  alLote: (parte: ParteTexto[], hechas: number, total: number) => void,
+  alLote: (parte: ParteTexto[], hechas: number, total: number, omitidas: number) => void,
   senal?: AbortSignal
 ): Promise<void> {
   let hechas = 0;
+  const originales = lineas.map(unaLinea);
   await porLotes(lineas.length, TAM_LOTE_TRADUCCION, indice, false, async (l) => {
     if (senal?.aborted) return;
     const usuario = mensajeLote(lineas, l, titulo, 'Líneas a traducir');
-    const texto = await ejecutar({ a, tarea: 'subtitulos', sistema, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: ESQUEMA_LINEAS } }, undefined, senal);
-    if (!texto) return;
-    const datos = JSON.parse(texto) as { lineas: ParteTexto[] };
+    let entradas: ParteTexto[] = [];
+    try {
+      const texto = await ejecutar({ a, tarea: 'subtitulos', sistema: `${sistema}\n${SIN_TRADUCIR}`, usuario, titulo, maxTokens: 32000, formato: { type: 'json_schema', schema: ESQUEMA_LINEAS } }, undefined, senal);
+      if (!texto) return;
+      entradas = (JSON.parse(texto) as { lineas?: ParteTexto[] }).lineas ?? [];
+    } catch (e) {
+      if (!(e instanceof NegativaClaude)) throw e;
+    }
+    const parte = traduccionesValidas(entradas, originales, l.desde, l.hasta);
     hechas += l.hasta - l.desde;
-    alLote(datos.lineas, hechas, lineas.length);
+    alLote(parte, hechas, lineas.length, l.hasta - l.desde - parte.length);
   });
 }
 

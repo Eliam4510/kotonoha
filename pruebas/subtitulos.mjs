@@ -81,6 +81,7 @@ const PISTAS_YT = {
   autoauto003: [{ languageCode: 'ja', kind: 'asr', vssId: 'a.ja', name: { simpleText: '日本語 (自動生成)' } }],
   soloespanol: [{ languageCode: 'es', vssId: '.es', name: { simpleText: 'Español' } }],
   largolargo1: [{ languageCode: 'ja', vssId: '.ja', name: { simpleText: '日本語' } }],
+  cancion0001: [{ languageCode: 'ja', vssId: '.ja', name: { simpleText: '日本語' } }],
 };
 
 function paginaYouTube(id) {
@@ -730,6 +731,69 @@ if (quiere('japones')) {
   await p.close();
 }
 
+// ---------- Cuando Claude no traduce una línea ----------
+
+if (quiere('negativas')) {
+  console.log('\n== Una línea que Claude no traduce no se guarda con su disculpa ==');
+  const p = abrir(await contexto.newPage(), 'cancion');
+  await p.goto('https://www.youtube.com/watch?v=cancion0001');
+  comprobar(!!(await hasta(p, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000)), 'Carga la canción');
+  // El segundo 2, el 7… caen en cada una de las seis líneas.
+  const secundarias = async () => {
+    const textos = [];
+    for (let k = 0; k < 6; k++) {
+      await irA(p, 2 + k * 5);
+      await p.waitForTimeout(250);
+      textos.push(await textoLinea(p, 'secundaria'));
+    }
+    return textos;
+  };
+  const botonTraducir = () => enOverlay(p, (r) => [...r.querySelectorAll('.panel-generar button')].map((b) => b.textContent).find((t) => /traducir al/i.test(t)) ?? '');
+  const traducir = async (texto) => {
+    await enOverlay(p, (r) => [...r.querySelectorAll('.aviso')].forEach((x) => x.remove()));
+    const antes = mock.peticiones.length;
+    const pulsado = await pulsar(p, texto, '.panel-generar');
+    await hasta(p, (r) => [...r.querySelectorAll('.aviso')].some((x) => /Traducción lista|no tradujo/.test(x.textContent)), undefined, 15000);
+    const aviso = await enOverlay(p, (r) => [...r.querySelectorAll('.aviso')].map((x) => x.textContent).join(' | '));
+    const pedidas = mock.peticiones.slice(antes).filter(esTraduccion);
+    return { pulsado, aviso, pedidas, lineas: pedidas.reduce((n, x) => n + lineasPedidas(x), 0) };
+  };
+  await abrirPanel(p, 'Generar subtítulos');
+
+  // Como con una canción de verdad: Claude escribe su disculpa en el sitio de dos versos.
+  mock.control.negativa = 'disculpa';
+  const primera = await traducir('Traducir al español');
+  comprobar(primera.pulsado, 'Se pide la traducción');
+  comprobar(/salvo 2 líneas que Claude no tradujo/.test(primera.aviso), 'El aviso dice cuántas líneas quedaron sin traducir', primera.aviso);
+  comprobar(sistemaPeticion(primera.pedidas[0] ?? { cuerpo: {} }).includes('sin_traducir'), 'Se le pide dejar fuera lo que no traduzca, sin disculparse en su lugar');
+  let vistas = await secundarias();
+  comprobar(!vistas.some((t) => /Lo siento|derechos de autor/.test(t)), 'Ninguna disculpa se ve como traducción', vistas.join(' | '));
+  comprobar(vistas.filter((t) => t.includes('traducción')).length === 4 && !vistas[0] && !vistas[3], 'Las otras cuatro, traducidas; esas dos, vacías', vistas.join(' | '));
+  comprobar(/Volver a traducir al español/.test(await botonTraducir()), 'Con una traducción hecha, el botón dice «Volver a traducir»', await botonTraducir());
+
+  // Esta vez las deja fuera y lo explica aparte.
+  mock.control.negativa = 'aparte';
+  const segunda = await traducir('Volver a traducir al español');
+  comprobar(segunda.lineas === 6, 'Volver a traducir pide todas las líneas, desde cero', `${segunda.lineas} líneas`);
+  comprobar(/salvo 2 líneas/.test(segunda.aviso), 'Y vuelve a avisar', segunda.aviso);
+
+  // Y a la tercera las traduce todas.
+  mock.control.negativa = null;
+  const tercera = await traducir('Volver a traducir al español');
+  comprobar(tercera.lineas === 6 && /Traducción lista\./.test(tercera.aviso), 'Otra vez desde cero, y esta vez sale entera', `${tercera.lineas} líneas · ${tercera.aviso}`);
+  vistas = await secundarias();
+  comprobar(vistas.every((t) => t.includes('traducción')), 'Las seis líneas, traducidas', vistas.join(' | '));
+
+  // Un rechazo de la API en el único lote: no llega nada, y se queda lo que había.
+  mock.control.negativa = 'rechazo';
+  const cuarta = await traducir('Volver a traducir al español');
+  comprobar(/no tradujo ninguna línea\. Se queda la traducción que había/.test(cuarta.aviso), 'Si Claude no traduce nada, lo dice', cuarta.aviso);
+  vistas = await secundarias();
+  comprobar(vistas.every((t) => t.includes('traducción')), 'Y la traducción anterior sigue ahí', vistas.join(' | '));
+  mock.control.negativa = null;
+  await p.close();
+}
+
 // ---------- Traducción progresiva ----------
 
 if (quiere('progresiva')) {
@@ -754,16 +818,17 @@ if (quiere('progresiva')) {
   comprobar(/"?159: /.test(textoPeticion(primerPedido).replace(/\\n/g, ' ')) && !/\b10: /.test(textoPeticion(primerPedido)), 'Empezó por el tramo donde estás, no por el principio');
   await p.screenshot({ path: join(CAPTURAS, 'traduccion-progresiva.png') });
 
-  // Cancelar conserva lo hecho, y seguir no vuelve a pagarlo.
+  // Cancelar conserva lo hecho, y volver a traducir empieza desde cero.
   const hechasAlCancelar = Number(/Traduciendo (\d+) de/.exec(await enOverlay(p, (r) => r.querySelector('.panel-generar .progreso-linea')?.textContent ?? ''))?.[1] ?? 0);
   await pulsar(p, 'Cancelar', '.panel-generar');
   await p.waitForTimeout(1500);
+  comprobar((await textoLinea(p, 'secundaria')).includes('traducción'), 'Al cancelar, lo traducido se queda');
   const antesSeguir = mock.peticiones.length;
-  await pulsar(p, 'Traducir al español', '.panel-generar');
+  comprobar(await pulsar(p, 'Volver a traducir al español', '.panel-generar'), 'Con algo traducido, el botón dice «Volver a traducir al español»');
   await hasta(p, (r) => !r.querySelector('.panel-generar .progreso-linea') && r.querySelector('.panel-generar'), undefined, 15000);
   await p.waitForTimeout(300);
   const nuevas = mock.peticiones.slice(antesSeguir).filter(esTraduccion).reduce((n, x) => n + lineasPedidas(x), 0);
-  comprobar(hechasAlCancelar > 0 && nuevas === 300 - hechasAlCancelar, 'Al seguir solo pide las que faltan', `${hechasAlCancelar} hechas, pide ${nuevas}`);
+  comprobar(hechasAlCancelar > 0 && nuevas === 300, 'Volver a traducir pide todas las líneas, desde cero', `${hechasAlCancelar} hechas al cancelar, pide ${nuevas}`);
   await irA(p, 1);
   await p.waitForTimeout(400);
   comprobar((await textoLinea(p, 'secundaria')).includes('traducción'), 'Y al final está todo');

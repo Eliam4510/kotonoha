@@ -84,7 +84,9 @@ Un video entero tarda en procesarse, pero lo que importa es la parte que se est�
 | Respuesta de Claude | Todas las líneas | Solo las que cambian, normalmente pocas |
 | Contexto | Título y líneas vecinas | Título y texto completo, en un bloque con caché de prompts |
 | Primer lote | En paralelo con los demás | En solitario: escribe la caché que reutilizan los demás |
-| Si se interrumpe | Lo traducido se guarda y se continúa por lo que falta | Lo corregido se guarda, y al terminar se marca como completo |
+| Si se interrumpe | Lo traducido se guarda; volver a traducir empieza desde cero | Lo corregido se guarda, y al terminar se marca como completo |
+
+En la traducción, lo que devuelve Claude se revisa antes de guardarlo: solo números del lote, una vez cada uno, con texto y sin disculpas. Si no traduce una línea, como un verso de una canción, queda vacía y el aviso final dice cuántas son; un lote que la API rechaza no detiene a los demás.
 
 La corrección nunca pregunta: Claude decide con el contexto y deja las líneas dudosas como están. Si una línea es una frase inventada por el reconocimiento, la devuelve vacía y desaparece. Cada corrección conserva el texto original, consultable en el navegador de subtítulos.
 

@@ -53,7 +53,13 @@ function traduccionDelDiscurso(texto, idioma) {
   return (DIETA.traducciones[idioma] ?? DIETA.traducciones.en)[k] ?? null;
 }
 
-function respuestaPara(cuerpo, idioma = 'es') {
+/** Si la petición es una traducción de subtítulos: líneas con su texto, sin lecturas. */
+const esTraduccionDeLineas = (cuerpo) => {
+  const lineas = cuerpo.output_config?.format?.schema?.properties?.lineas;
+  return !!lineas && !lineas.items?.properties?.lecturas;
+};
+
+function respuestaPara(cuerpo, idioma = 'es', negativa = null) {
   const t = TEXTOS[idioma] ?? TEXTOS.es;
   const formato = cuerpo.output_config?.format?.schema;
   const texto = JSON.stringify(cuerpo.messages ?? '');
@@ -154,8 +160,12 @@ function respuestaPara(cuerpo, idioma = 'es') {
     return JSON.stringify({ lineas });
   }
   if (formato?.properties?.lineas) {
-    const lineas = [...texto.matchAll(/(\d+): ([^\\]+)/g)].map((m) => ({ i: Number(m[1]), t: `[traducción de ${m[1]}]` }));
-    return JSON.stringify({ lineas });
+    const pedidas = [...texto.matchAll(/(\d+): ([^\\]+)/g)].map((m) => ({ i: Number(m[1]), t: `[traducción de ${m[1]}]`, verso: /花|星/.test(m[2]) }));
+    // Con `negativa`, Claude no traduce dos versos (los de 花 y 星): o escribe su disculpa en su sitio, como hizo con una
+    // canción de verdad, o los deja fuera y lo dice aparte.
+    if (negativa === 'disculpa') return JSON.stringify({ lineas: pedidas.map(({ i, t, verso }) => ({ i, t: verso ? 'Lo siento, no puedo traducir la letra de esta canción porque está protegida por derechos de autor.' : t })) });
+    if (negativa === 'aparte') return JSON.stringify({ lineas: pedidas.filter((x) => !x.verso).map(({ i, t }) => ({ i, t })), sin_traducir: 'Son versos de una canción protegida por derechos de autor.' });
+    return JSON.stringify({ lineas: pedidas.map(({ i, t }) => ({ i, t })) });
   }
   if (sistema.includes('desglosa frases')) {
     return '## 赤い星と青い\nSignificado: una estrella roja y una azul\nExplicación: と une los dos nombres, y el adjetivo 青い modifica al sustantivo que sigue.\n\n## 星を\nSignificado: a las estrellas\nExplicación: を marca el objeto directo de la acción.\n\n## 食べる\nSignificado: las devora, las hace suyas\nExplicación: Forma de diccionario del verbo. En la letra tiene un sentido figurado, no literal.';
@@ -182,8 +192,9 @@ function respuestaPara(cuerpo, idioma = 'es') {
 
 export function iniciarMock() {
   const peticiones = [];
-  // Para ver el avance: cada lote de traducción tarda esto. `idioma` es el de las respuestas de las capturas.
-  const control = { retardoLineas: 0, retardoFlujo: 0, idioma: 'es' };
+  // Para ver el avance: cada lote de traducción tarda esto. `idioma` es el de las respuestas de las capturas. `negativa`
+  // hace que Claude no traduzca algo: 'disculpa', 'aparte' o 'rechazo' (la API contesta con stop_reason refusal).
+  const control = { retardoLineas: 0, retardoFlujo: 0, idioma: 'es', negativa: null };
   const servidor = createServer((req, res) => {
     const cors = {
       'access-control-allow-origin': '*',
@@ -199,7 +210,9 @@ export function iniciarMock() {
     req.on('end', async () => {
       const cuerpo = JSON.parse(datos || '{}');
       peticiones.push({ url: req.url, cabeceras: req.headers, cuerpo });
-      const texto = respuestaPara(cuerpo, control.idioma);
+      const rechazo = control.negativa === 'rechazo' && esTraduccionDeLineas(cuerpo);
+      const texto = rechazo ? '' : respuestaPara(cuerpo, control.idioma, control.negativa);
+      const fin = rechazo ? 'refusal' : 'end_turn';
       // Para ver en las capturas la revisión de Claude en marcha.
       if (process.env.KK_MOCK_RETARDO_ANALISIS && cuerpo.output_config?.format?.schema?.properties?.lineas?.items?.properties?.lecturas) {
         await new Promise((r) => setTimeout(r, Number(process.env.KK_MOCK_RETARDO_ANALISIS)));
@@ -211,7 +224,7 @@ export function iniciarMock() {
       if (process.env.KK_MOCK_RETARDO) await new Promise((r) => setTimeout(r, Number(process.env.KK_MOCK_RETARDO)));
       if (!cuerpo.stream) {
         res.writeHead(200, { 'content-type': 'application/json', ...cors });
-        return res.end(JSON.stringify({ id: 'msg_prueba', type: 'message', role: 'assistant', model: cuerpo.model, content: [{ type: 'text', text: texto }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 10, output_tokens: 10 } }));
+        return res.end(JSON.stringify({ id: 'msg_prueba', type: 'message', role: 'assistant', model: cuerpo.model, content: [{ type: 'text', text: texto }], stop_reason: fin, stop_sequence: null, usage: { input_tokens: 10, output_tokens: 10 } }));
       }
       if (control.retardoFlujo) await new Promise((r) => setTimeout(r, control.retardoFlujo));
       res.writeHead(200, { 'content-type': 'text/event-stream', ...cors });
@@ -223,7 +236,7 @@ export function iniciarMock() {
         await new Promise((r) => setTimeout(r, 4));
       }
       enviar('content_block_stop', { index: 0 });
-      enviar('message_delta', { delta: { stop_reason: 'end_turn', stop_sequence: null }, usage: { output_tokens: 20 } });
+      enviar('message_delta', { delta: { stop_reason: fin, stop_sequence: null }, usage: { output_tokens: 20 } });
       enviar('message_stop', {});
       res.end();
     });

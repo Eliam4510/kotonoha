@@ -100,7 +100,8 @@ El botón **Traducir al español** del panel **Subtítulos con IA**, o **Traduci
 
 - El trabajo empieza por el tramo que se está viendo, de modo que esa parte queda lista en segundos.
 - El resultado aparece a medida que llega.
-- Si se cancela, lo traducido se conserva y una nueva pulsación solo pide las líneas que faltan.
+- Si se cancela, lo traducido se conserva. Con una traducción ya hecha, los botones dicen **Volver a traducir al español** y **Volver a traducir con Claude**, y empiezan desde cero, con los subtítulos como están ahora. Si esa vez Claude no traduce nada, se queda la traducción que había.
+- Si Claude no traduce alguna línea, como un verso de una canción, esa línea queda vacía, el resto sigue y al terminar se avisa de cuántas son.
 
 ### Corregir subtítulos automáticos
 
