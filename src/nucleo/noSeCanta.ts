@@ -36,6 +36,17 @@ const MARCA_DELANTE = /^[[【〔［][^\]】〕］]{1,24}[\]】〕］]\s*(?=\S)/u
 /** Más que esto no es una repetición de un verso: es otra cosa. */
 const REPETICIONES_MAXIMAS = 4;
 
+/**
+ * Una lectura entre paréntesis detrás de unos kanji, como 人間(ひと) o 危険(リスク): se canta lo de dentro. Se construye
+ * con los nombres de las escrituras; la raya larga del katakana (U+30FC) es común a las dos y va aparte.
+ */
+const LECTURA = new RegExp(`[\\p{Script=Han}]+[(（]([\\p{Script=Hiragana}\\p{Script=Katakana}${String.fromCharCode(0x30fc)}]+)[)）]`, 'gu');
+
+/** Lo que se canta de un verso, para oírlo: con la lectura de los kanji que la llevan entre paréntesis. */
+export function textoCantado(verso: string): string {
+  return verso.replace(LECTURA, '$1');
+}
+
 /** Si un renglón de una letra no se canta: una marca de sección o un crédito. */
 export function noSeCanta(renglon: string): boolean {
   const r = renglon.trim();

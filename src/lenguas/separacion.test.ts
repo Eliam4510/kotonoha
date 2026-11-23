@@ -47,6 +47,8 @@ describe('lo japonés está en su paquete', () => {
       'nucleo/negativas.ts': /^\s*String\.raw`/,
       // Las marcas de sección y los créditos de una letra pegada, en las lenguas de estudio: no se cantan.
       'nucleo/noSeCanta.ts': /^\s*String\.raw`/,
+      // Las órdenes de repetir y los nombres del estribillo en una letra pegada, en las lenguas de estudio.
+      'nucleo/marcasLetra.ts': /String\.raw`/,
       // Cómo se nombran los tomos, los capítulos y las portadas en las carpetas y los CBZ de manga, se estudie lo que se estudie.
       'nucleo/carpetas.ts': /^const (TOMO|CAPITULO|EMPIEZA_POR_TOMO) = \//,
       'nucleo/libro.ts': /^const PORTADA = \//,

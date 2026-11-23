@@ -3,6 +3,7 @@
 
 import { alinearCtc, bandaPorVersos, type ProbabilidadesCtc, zonasDeVersos } from './alineacionForzada';
 import { letrasComparables, versosOidos } from './casarLetra';
+import { desplegarMarcas } from './marcasLetra';
 import { noSeCanta, versosDelRenglon } from './noSeCanta';
 import { analizarLrc, type Linea } from './subtitulos';
 
@@ -47,7 +48,7 @@ function esLetraLrc(texto: string): boolean {
  * Una letra en LRC se lee en el orden de sus horas, sin ellas: un estribillo con dos marcas va en sus dos sitios.
  */
 export function versosDeLetra(texto: string): string[] {
-  const fuente = esLetraLrc(texto) ? analizarLrc(texto).map((l) => l.texto).join('\n') : texto;
+  const fuente = esLetraLrc(texto) ? analizarLrc(texto).map((l) => l.texto).join('\n') : desplegarMarcas(texto);
   return fuente
     .split(/\r?\n/)
     .map((l) => l.replace(/[\u200b-\u200d\u2060\ufeff]/g, '').replace(/^\s*\[?\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]?\s*/, '').trim())
@@ -98,6 +99,7 @@ interface Pendiente {
   de: number;
   a: number;
 }
+
 
 /**
  * Un verso que Claude se salta se sigue cantando, y faltaría en pantalla. Entra sin tiempo, detrás de donde suena por primera

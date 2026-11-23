@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { noSeCanta, versosDelRenglon } from './noSeCanta';
+import { noSeCanta, textoCantado, versosDelRenglon } from './noSeCanta';
 
 describe('noSeCanta', () => {
   it('un renglón entre corchetes es una marca', () => {
@@ -21,6 +21,19 @@ describe('noSeCanta', () => {
     for (const r of ['夜の川を歩いて', 'Text me when you get home', 'Musik liegt in der Luft', '曲がり角の向こう', '歌うよ', 'Words don’t come easy']) {
       expect(noSeCanta(r), r).toBe(false);
     }
+  });
+});
+
+describe('textoCantado', () => {
+  it('los kanji con su lectura entre paréntesis se cantan como la lectura', () => {
+    expect(textoCantado('乾いた心の人間(ひと)ばかり')).toBe('乾いた心のひとばかり');
+    expect(textoCantado('悪夢の様な危険(リスク) 魔物')).toBe('悪夢の様なリスク 魔物');
+    expect(textoCantado('設定（リアル）')).toBe('リアル');
+  });
+
+  it('una segunda voz entre paréntesis se queda: también se canta', () => {
+    expect(textoCantado('死ぬのがいいわ（死ぬのがいいわ）')).toBe('死ぬのがいいわ（死ぬのがいいわ）');
+    expect(textoCantado('夜の匂いに (I’ll spend all thirty nights)')).toBe('夜の匂いに (I’ll spend all thirty nights)');
   });
 });
 

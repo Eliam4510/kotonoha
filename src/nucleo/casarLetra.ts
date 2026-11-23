@@ -65,11 +65,42 @@ function valorCoincidencia(c: string): number {
   return 4;
 }
 
-interface Tramo {
+/** Un tramo de letras seguidas iguales: empieza en la letra `i` de un texto y en la `j` del otro. */
+export interface Tramo {
   i: number;
   j: number;
   largo: number;
   valor: number;
+}
+
+/**
+ * Todos los tramos de dos o más letras seguidas iguales en los dos textos, también los finales de cada uno: si su
+ * principio se pisa con el tramo de antes, se puede usar solo el resto («い感じ» tras «なんかすごい» comparte la い, y queda
+ * «感じ»). Sirve también para otras tiras, como fonemas, con su propio valor y su largo mínimo.
+ */
+export function tramosComunes(a: string[], b: string[], valorDe: (c: string) => number = valorCoincidencia, minimo = 2): Tramo[] {
+  const posiciones = new Map<string, number[]>();
+  b.forEach((c, j) => {
+    const lista = posiciones.get(c);
+    if (lista) lista.push(j);
+    else posiciones.set(c, [j]);
+  });
+  const valor = a.map(valorDe);
+  const tramos: Tramo[] = [];
+  a.forEach((c, i) => {
+    for (const j of posiciones.get(c) ?? []) {
+      // Solo desde el principio de cada tramo: el resto de la diagonal ya lo cuenta él.
+      if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) continue;
+      let largo = 1;
+      while (i + largo < a.length && j + largo < b.length && a[i + largo] === b[j + largo]) largo++;
+      for (let d = 0; largo - d >= minimo; d++) {
+        let suma = 0;
+        for (let k = d; k < largo; k++) suma += valor[i + k];
+        tramos.push({ i: i + d, j: j + d, largo: largo - d, valor: suma });
+      }
+    }
+  });
+  return tramos;
 }
 
 /**
@@ -80,29 +111,7 @@ interface Tramo {
  * iguales, en orden.
  */
 export function alinearLetras(a: string[], b: string[]): [number, number][] {
-  const posiciones = new Map<string, number[]>();
-  b.forEach((c, j) => {
-    const lista = posiciones.get(c);
-    if (lista) lista.push(j);
-    else posiciones.set(c, [j]);
-  });
-  const valor = a.map(valorCoincidencia);
-  const tramos: Tramo[] = [];
-  a.forEach((c, i) => {
-    for (const j of posiciones.get(c) ?? []) {
-      // Solo desde el principio de cada tramo: el resto de la diagonal ya lo cuenta él.
-      if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) continue;
-      let largo = 1;
-      while (i + largo < a.length && j + largo < b.length && a[i + largo] === b[j + largo]) largo++;
-      // También sus finales: si su principio se pisa con el tramo de antes, se puede usar solo el resto («い感じ» tras
-      // «なんかすごい» comparte la い, y queda «感じ»).
-      for (let d = 0; largo - d >= 2; d++) {
-        let suma = 0;
-        for (let k = d; k < largo; k++) suma += valor[i + k];
-        tramos.push({ i: i + d, j: j + d, largo: largo - d, valor: suma });
-      }
-    }
-  });
+  const tramos = tramosComunes(a, b);
   if (!tramos.length) return [];
   // La mejor cadena que acaba en cada tramo. Se recorren por su principio en la letra; un tramo entra en el árbol (por
   // dónde acaba en lo oído) cuando ya se ha pasado por dónde acaba en la letra, para que el siguiente no lo pise.
@@ -132,7 +141,7 @@ export function alinearLetras(a: string[], b: string[]): [number, number][] {
 }
 
 /** Un árbol de Fenwick de máximos: el mejor valor (y de qué tramo) entre las posiciones 0 a k. */
-class ArbolMaximos {
+export class ArbolMaximos {
   private valor: Float64Array;
   private cual: Int32Array;
   constructor(private n: number) {

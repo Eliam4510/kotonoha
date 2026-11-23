@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.50.0, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.50.1, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -93,6 +93,7 @@ Estado de cada función en la versión 0.50.0, con la forma en que se ha verific
 | Copia completa en una carpeta: libros, texto del OCR y dictados, sin claves de API | Automática, de ida y vuelta |
 | Corrección del resultado con Claude | Simulador |
 | Letra de una canción colocada donde se canta: con la voz (narabas, en la zona que da lo que oyó Whisper), con la voz aislada por Demucs en la GPU, o letra a letra con lo que oyó Whisper; Claude, solo si apenas casa. Las palabras salen de la letra, sin marcas de sección ni créditos | Simulador, con Whisper real, narabas y Demucs; medido con 51 canciones japonesas y su letra sincronizada: con la voz aislada, la mitad de los versos a menos de 0,16 s y nueve de cada diez a menos de 0,9 s (sobre la mezcla, 0,19 s y 1,59 s) |
+| Una letra incompleta se completa como se canta: el estribillo escrito una vez, o solo su título donde vuelve («[Chorus]», «(Repeat Chorus)», «サビ繰り返し», «※くり返し», «×2»); las marcas se despliegan y el resto lo deduce lo que oyó Whisper, sin IA | Medido con 51 canciones y letras fabricadas desde su LRC: con el estribillo una vez, 80 % de los versos a menos de 1 s (antes, 69 %); con su título donde vuelve, 88 % (antes, 72 %); la letra completa, igual |
 | Al colocar una letra, los versos que Whisper no oyó no caen en un pasaje instrumental: YAMNet oye dónde se canta al transcribir la canción entera. Medido con 21 canciones japonesas de canales oficiales y su letra sincronizada: de 164 versos sin oír, 21 quedan más de un segundo más cerca de su sitio y 3 más lejos | Medida con canciones reales y el código real; YAMNet dentro de Kotonoha |
 | Haas-ja para la voz hablada en japonés, Parakeet para la del inglés y Whisper Turbo para las canciones, elegidos según el video | Automática, con los tres modelos reales en la GPU, y sesión real en YouTube |
 | Lista de modelos guardados, con lo que ocupa cada uno y borrado por modelo. Leerlos del disco ya no se anuncia como una descarga | Automática, y con Whisper real |

@@ -73,9 +73,24 @@ const LETRA = `[サビ]
 
 ♪♪♪`;
 const json3 = JSON.stringify({ events: OIDO.map(([a, b, t]) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: t }] })) });
+// Otra canción, que el reconocedor oye entera: el estribillo (los versos 2 y 3) suena dos veces. Las letras que se pegan
+// lo escriben una sola vez, sin marcas o con su título donde se repite.
+const ID2 = 'cancion2';
+const VERSOS2 = ['春の海を渡る風', '夏の空に咲く花火', '秋の森で眠る鳥', '冬の街に灯る窓'];
+const OIDO2 = [
+  [1000, 4000, '春の海を渡る風'],
+  [5000, 8000, '夏の空に咲く花火'],
+  [9000, 12000, '秋の森で眠る鳥'],
+  [14000, 17000, '冬の街に灯る窓'],
+  [18000, 21000, '夏の空に咲く花火'],
+  [22000, 25000, '秋の森で眠る鳥'],
+];
+const LETRA_CORTA = VERSOS2.join('\n');
+const LETRA_MARCAS = `[Verse]\n${VERSOS2[0]}\n\n[サビ]\n${VERSOS2[1]}\n${VERSOS2[2]}\n\n[Verse 2]\n${VERSOS2[3]}\n\n[サビ]`;
+const json3Por = { [ID]: json3, [ID2]: JSON.stringify({ events: OIDO2.map(([a, b, t]) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: t }] })) }) };
 const ES = JSON.stringify({ events: OIDO.map(([a, b], i) => ({ tStartMs: a, dDurationMs: b - a, segs: [{ utf8: `Línea oída ${i + 1}` }] })) });
 
-const PAGINA = `<!doctype html><html lang="ja"><meta charset="utf-8"><title>夜の川 - YouTube</title>
+const pagina = (ID) => `<!doctype html><html lang="ja"><meta charset="utf-8"><title>夜の川 - YouTube</title>
 <body style="margin:0;background:#0f0f0f;color:#fff;font-family:sans-serif">
 <div style="height:56px"></div>
 <div id="movie_player" style="position:relative;width:1280px;height:600px;margin:0 auto;background:#000"><video id="v" src="https://media.test/video.webm" muted style="width:100%;height:100%"></video></div>
@@ -112,8 +127,8 @@ await contexto.route('https://media.test/**', (r) => {
 });
 await contexto.route('https://www.youtube.com/**', (r) => {
   const u = new URL(r.request().url());
-  if (u.pathname.includes('/api/timedtext')) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: u.searchParams.get('lang') === 'es' ? ES : json3 });
-  if (u.pathname === '/watch') return r.fulfill({ status: 200, contentType: 'text/html', body: PAGINA });
+  if (u.pathname.includes('/api/timedtext')) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: u.searchParams.get('lang') === 'es' ? ES : (json3Por[u.searchParams.get('v')] ?? json3) });
+  if (u.pathname === '/watch') return r.fulfill({ status: 200, contentType: 'text/html', body: pagina(u.searchParams.get('v') ?? ID) });
   return r.fulfill({ status: 204 });
 });
 
@@ -151,6 +166,7 @@ await app.evaluate(async (ID) => {
     abrir.onsuccess = () => {
       const t = abrir.result.transaction(['generados', 'cacheIA'], 'readwrite');
       t.objectStore('generados').delete(`${ID}|ja|letra`);
+      t.objectStore('generados').delete('cancion2|ja|letra');
       t.objectStore('generados').delete(`${ID}|es`);
       t.objectStore('cacheIA').clear();
       t.oncomplete = () => ok();
@@ -342,6 +358,39 @@ comprobar(usuario.includes('zzz inventado'), 'Y la letra');
 comprobar(/no encontró esta letra/.test(await avisos(p)), 'Y lo dice en lugar de inventarse una pista', await avisos(p));
 comprobar((await lineaEn(p, 7)) === '月が私を見ている', 'La pista de antes sigue intacta');
 await p.close();
+
+// ---------- Una letra que escribe el estribillo una vez ----------
+
+console.log('\n== Una letra que escribe el estribillo una vez ==');
+{
+  const q = await contexto.newPage();
+  q.on('pageerror', (e) => errores.push(`letra corta: ${e.message}`));
+  await q.goto(`https://www.youtube.com/watch?v=${ID2}`);
+  await hasta(q, (r) => r.querySelector('.barra') != null, undefined, 30000);
+  await hasta(q, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000);
+  const colocar = async (letra) => {
+    await abrirGenerar(q);
+    await enOverlay(q, (r) => [...r.querySelectorAll('.aviso')].forEach((x) => x.remove()));
+    await q.locator('kotonoha-overlay textarea[aria-label="Letra de la canción"]').fill(letra);
+    await q.locator('kotonoha-overlay .panel-generar button', { hasText: 'Ajustar la letra a estos tiempos' }).click();
+    await hasta(q, (r) => [...r.querySelectorAll('.aviso')].some((x) => /Letra ajustada/.test(x.textContent)), undefined, 20000);
+    const fila = (await motor('subtitulosGenerados', ID2)).find((g) => g.origen === 'letra');
+    return { textos: fila?.lineas.map((l) => l.texto) ?? [], inicios: fila?.lineas.map((l) => l.inicio) ?? [], aviso: await avisos(q) };
+  };
+  const pedidasAntes = pedidasLetra().length;
+  const esperado = [...VERSOS2, VERSOS2[1], VERSOS2[2]];
+  const enSuSitio = (inicios) => inicios.length === 6 && inicios.every((t, k) => Math.abs(t - OIDO2[k][0]) <= 150);
+  const corta = await colocar(LETRA_CORTA);
+  comprobar(corta.textos.join('|') === esperado.join('|'), 'Sin marcas: el estribillo sale las dos veces que se oye', corta.textos.join(' | '));
+  comprobar(enSuSitio(corta.inicios), 'Cada vez en su sitio', corta.inicios.join(' '));
+  comprobar(/2 se repiten donde la letra no los volvía a escribir/.test(corta.aviso), 'Y el aviso lo dice', corta.aviso);
+  const marcas = await colocar(LETRA_MARCAS);
+  comprobar(marcas.textos.join('|') === esperado.join('|'), 'Con su título donde se repite, igual, y sin los títulos', marcas.textos.join(' | '));
+  comprobar(enSuSitio(marcas.inicios), 'También en su sitio', marcas.inicios.join(' '));
+  comprobar(!/se repiten donde la letra/.test(marcas.aviso), 'Ahí la letra ya decía dónde: no hay nada que avisar', marcas.aviso);
+  comprobar(pedidasLetra().length === pedidasAntes, 'Las dos, sin preguntar a Claude', pedidasLetra().length - pedidasAntes);
+  await q.close();
+}
 
 // ---------- Con Whisper de verdad ----------
 

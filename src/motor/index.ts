@@ -16,6 +16,8 @@ import { textoConEstructura } from '../nucleo/estructura';
 import { renderizadoPorSoftware } from '../nucleo/medios';
 import { FONEMAS_NARABAS } from '../nucleo/alineacion';
 import { alinearConVoz, type CantoPorTramos, ID_LETRA, vozDeCanto } from '../nucleo/letra';
+import { versosCantados } from '../nucleo/estructuraLetra';
+import { textoCantado } from '../nucleo/noSeCanta';
 import type { Linea } from '../nucleo/subtitulos';
 import * as analisis from './analisis';
 import * as anki from './anki';
@@ -882,8 +884,11 @@ atenderFlujos({
     const demucsEnDisco = conDemucs && (await aislarVoz.enDisco());
     if (!bajar && !(await narabas.enDisco())) return JSON.stringify({ motivo: 'sin-narabas', bajarDemucs: conDemucs && !demucsEnDisco });
     await motorLengua().analizador.cargar();
+    // La letra tal como se canta: un estribillo escrito una vez se repite donde lo oyó Whisper.
+    const pegados = versos.length;
+    versos = versosCantados(versos, lineas).versos;
     const indice = new Map<string, number>(FONEMAS_NARABAS.map((f, i) => [f, i]));
-    const fonemas = versos.map((v) => fonemasDe(v).flatMap((f) => (indice.has(f) ? [indice.get(f)!] : [])));
+    const fonemas = versos.map((v) => fonemasDe(textoCantado(v)).flatMap((f) => (indice.has(f) ? [indice.get(f)!] : [])));
     let oido = pcm;
     let aislada = false;
     if (conDemucs && (bajar || demucsEnDisco)) {
@@ -897,7 +902,7 @@ atenderFlujos({
     }
     const p = await narabas.probabilidadesDe(oido, (e) => emitir(`${JSON.stringify(e)}\n`), senal);
     const resultado = alinearConVoz(versos, lineas, fonemas, p, narabas.MS_POR_MARCO, ID_LETRA, canto ? vozDeCanto(canto) : undefined);
-    return JSON.stringify({ resultado, aislada, sinDemucs: conDemucs && !aislada && !demucsEnDisco });
+    return JSON.stringify({ resultado, aislada, sinDemucs: conDemucs && !aislada && !demucsEnDisco, repetidos: versos.length - pegados });
   },
   // La práctica del acento: los tokens de la grabación, cada uno con el instante en que empieza, en JSON.
   transcribirPractica: async (emitir, senal, url: string) => JSON.stringify(await whisper.tokensDeGrabacion(url, (e) => emitir(`${JSON.stringify(e)}\n`), senal)),

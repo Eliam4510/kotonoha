@@ -8,6 +8,7 @@ import { desconocidas } from '../nucleo/frases';
 import { decidirSalto, duracionPausaDinamica, type LineaModo, MotorModos } from '../nucleo/modos';
 import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, sincroniaDesdePuntos } from '../nucleo/sincronia';
 import { alinearPorLetras, aplicarAjuste, type CantoPorTramos, type EntradaAjuste, ID_LETRA, type ResultadoAjuste, versosDeLetra, vozDeCanto } from '../nucleo/letra';
+import { versosCantados } from '../nucleo/estructuraLetra';
 import { analizarSubtitulos, aSrt, esSoloAcotacion, type Linea, siguienteLinea } from '../nucleo/subtitulos';
 import { desdeDondeSeguir, fusionarLineas, MedidorTirones, noLlega, type ProgresoTranscripcion, VENTAJA_PARA_SEGUIR_S } from '../nucleo/transcripcion';
 import { anotarUso, guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
@@ -1634,7 +1635,7 @@ const PARTE_CASADA = 0.25;
  * Lo que contesta el motor al colocar la letra con la voz: la letra colocada, o por qué no pudo. `aislada`, si Demucs le
  * quitó antes la música; `sinDemucs`, si no lo hizo porque no está en el disco; `bajarDemucs`, si afinar lo bajaría.
  */
-type AjusteConVoz = { resultado?: ResultadoAjuste & { conVoz: number }; motivo?: 'sin-audio' | 'sin-fonemas' | 'sin-narabas'; aislada?: boolean; sinDemucs?: boolean; bajarDemucs?: boolean };
+type AjusteConVoz = { resultado?: ResultadoAjuste & { conVoz: number }; motivo?: 'sin-audio' | 'sin-fonemas' | 'sin-narabas'; aislada?: boolean; sinDemucs?: boolean; bajarDemucs?: boolean; repetidos?: number };
 /** El avance de narabas (1,26 GB) y de Demucs (181 MB), que la primera vez se bajan. */
 type EventoVozLetra =
   | { tipo: 'descarga' | 'descarga-voz' | 'separando'; porcentaje: number }
@@ -1695,9 +1696,13 @@ export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
         console.warn('Kotonoha: no se pudo colocar la letra con la voz', e);
       }
     }
+    let repetidos = respuestaVoz.repetidos ?? 0;
     if (!colocada) {
-      const r = alinearPorLetras(versos, lineas, ID_LETRA, voz);
-      if (r.conTiempo >= Math.max(2, versos.length * PARTE_CASADA)) colocada = r;
+      // La letra tal como se canta, también sin la voz: un estribillo escrito una vez se repite donde lo oyó Whisper.
+      const cantados = versosCantados(versos, lineas).versos;
+      repetidos = cantados.length - versos.length;
+      const r = alinearPorLetras(cantados, lineas, ID_LETRA, voz);
+      if (r.conTiempo >= Math.max(2, cantados.length * PARTE_CASADA)) colocada = r;
     }
     if (!colocada) {
       const estado = await motor.estado().catch(() => null);
@@ -1708,6 +1713,7 @@ export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
       decir(tr('Claude está colocando la letra…'));
       const ajuste = JSON.parse(await flujoMotor('ajustarLetra', [lineas, versos, infoVideo.value?.titulo], () => {})) as EntradaAjuste[];
       colocada = aplicarAjuste(versos, lineas, ajuste, ID_LETRA, voz);
+      repetidos = 0;
     }
     const { lineas: finales, conTiempo, estimadas } = colocada;
     if (!conTiempo && !conLaVoz) {
@@ -1725,16 +1731,19 @@ export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
     letraPegada.value = '';
     await seleccionarObjetivo(id);
     retraducirTrasLetra();
+    // Si la letra traía el estribillo una vez y se canta más, se dice: son versos que no estaban escritos ahí.
+    const conRepetidos = (texto: string) => (repetidos > 0 ? `${texto} ${repetidos === 1 ? tr('Uno se repite donde la letra no lo volvía a escribir.') : tr('{0} se repiten donde la letra no los volvía a escribir.', repetidos)}` : texto);
     if (conLaVoz) {
       // Demucs la afina más, pero son 181 MB: se ofrece, no se baja sin pedirlo.
       const aislar = respuestaVoz.sinDemucs ? { texto: tr('Afinar aislando la voz (181 MB)'), fn: () => ajustarLetra(true, versos) } : undefined;
-      const texto = respuestaVoz.aislada ? tr('Letra colocada con la voz aislada: {0} versos.', versos.length) : tr('Letra colocada con la voz: {0} versos.', versos.length);
-      avisar(texto, 'exito', aislar, aislar ? 15000 : 4500);
+      const colocados = finales.length;
+      const texto = respuestaVoz.aislada ? tr('Letra colocada con la voz aislada: {0} versos.', colocados) : tr('Letra colocada con la voz: {0} versos.', colocados);
+      avisar(conRepetidos(texto), 'exito', aislar, aislar ? 15000 : 4500);
     } else {
       // narabas la afina, pero son 1,26 GB (con Demucs, 1,4 GB): se ofrece, no se baja sin pedirlo.
       const tamano = respuestaVoz.bajarDemucs ? tr('Afinar con la voz (1,4 GB)') : tr('Afinar con la voz (1,26 GB)');
       const afinar = respuestaVoz.motivo === 'sin-narabas' ? { texto: tamano, fn: () => ajustarLetra(true, versos) } : undefined;
-      avisar(estimadas ? tr('Letra ajustada: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas) : tr('Letra ajustada: {0} versos con sus tiempos.', conTiempo), 'exito', afinar, afinar ? 15000 : 4500);
+      avisar(conRepetidos(estimadas ? tr('Letra ajustada: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas) : tr('Letra ajustada: {0} versos con sus tiempos.', conTiempo)), 'exito', afinar, afinar ? 15000 : 4500);
     }
   } catch (e) {
     avisar(tr('No se pudo ajustar la letra: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);

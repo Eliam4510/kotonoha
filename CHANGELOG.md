@@ -2,6 +2,14 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.50.1 · 2026-11-23
+
+Una letra incompleta se coloca entera, como se canta.
+
+- **El estribillo escrito una vez.** Muchas letras escriben el estribillo una sola vez aunque se cante tres, o solo su título donde vuelve. Ahora se repite donde suena: las marcas se despliegan tal como lo dicen («[Chorus]» sin nada debajo, «(Repeat Chorus)», «サビ繰り返し», «※くり返し», «×2» bajo una estrofa), y lo que no dicen lo deduce lo que oyó Whisper, sin IA. El aviso final dice cuántos versos se repitieron así.
+- **Medido.** Con 51 canciones y letras fabricadas a partir de su LRC: con el estribillo escrito una vez, el 80 % de los versos queda a menos de 1 s (antes, el 69 %, y faltaba una cuarta parte); con su título donde vuelve, el 88 % (antes, el 72 %). Una letra completa queda igual.
+- **Lo que va entre paréntesis.** Una segunda voz o un coro entre paréntesis se queda y se canta: quitarlo colocaba peor la letra. Una lectura detrás de unos kanji, como 人間(ひと), se oye como lo que se canta.
+
 ## 0.50.0 · 2026-11-23
 
 Los tiempos de las canciones: cada verso, donde se canta.
@@ -541,6 +549,14 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.50.1 · 2026-11-23
+
+Incomplete lyrics are placed in full, as they are sung.
+
+- **The chorus written once.** Many lyrics write the chorus only once even if it is sung three times, or only its title where it comes back. Now it is repeated where it is sung: the marks are expanded as they say ("[Chorus]" with nothing under it, "(Repeat Chorus)", "サビ繰り返し", "※くり返し", "×2" under a stanza), and what they do not say is worked out from what Whisper heard, without AI. The final notice says how many verses were repeated this way.
+- **Measured.** With 51 songs and lyrics made from their LRC: with the chorus written once, 80 % of the verses land within 1 s (before, 69 %, with a quarter missing); with its title where it comes back, 88 % (before, 72 %). Complete lyrics are unchanged.
+- **What goes in parentheses.** A second voice or a backing chorus in parentheses stays and is sung: removing it placed the lyrics worse. A reading after some kanji, such as 人間(ひと), is heard as what is sung.
 
 ## 0.50.0 · 2026-11-23
 
