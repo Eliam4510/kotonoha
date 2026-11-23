@@ -505,6 +505,10 @@ const api: ApiMotor = {
     await aj();
     await anki.crearModeloPropio();
   },
+  async ankiDisenoTarjetas(forzar) {
+    await aj();
+    return anki.disenoModeloPropio(forzar);
+  },
   async ankiTieneTarjeta(p) {
     await aj();
     return anki.tieneTarjeta(p);

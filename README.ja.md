@@ -40,7 +40,7 @@ Kotonoha（言の葉）は Chrome と Edge の拡張機能です。YouTube や N
 すべてが自分のパソコンの中で動きます。辞書、文の解析、音声の文字起こし、本のページの文字認識はブラウザーの外に出ません。Anthropic の Claude は、解説や翻訳を頼んだときだけ使われ、リクエストごとに費用が記録されます。
 
 <table>
-  <tr><td><b>見る</b></td><td>YouTube、Netflix、Bilibili、Disney+、Crunchyroll、Prime Video、手元の動画ファイルで、単語ごとの学習状態がわかる英語字幕。</td></tr>
+  <tr><td><b>見る</b></td><td>YouTube、Netflix、Bilibili、手元の動画ファイルで、単語ごとの学習状態がわかる英語字幕。</td></tr>
   <tr><td><b>読む</b></td><td>あらゆるウェブページ、コピーした文章、EPUB や PDF の本、画像フォルダーの漫画。スキャンしたページも読めます。</td></tr>
   <tr><td><b>覚える</b></td><td>場面の音声と画像付きのカードをワンクリックで作成し、Anki または内蔵の復習へ。</td></tr>
   <tr><td><b>言語</b></td><td>英語、中国語、ドイツ語を学べます。表示言語は日本語、英語、スペイン語、ドイツ語、中国語、韓国語です。</td></tr>

@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.48.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.49.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -66,7 +66,6 @@ Estado de cada función en la versión 0.48.1, con la forma en que se ha verific
 | YouTube: pistas firmadas por el reproductor | Sesión real. Las pruebas automáticas usan una página imitada, porque el sitio no sirve subtítulos a un navegador automatizado |
 | Netflix: pistas del reproductor, TTML | Página imitada. Pendiente de una sesión real |
 | Bilibili: los subtítulos del autor y los de su IA, por la API de su reproductor y con la sesión iniciada; videos con sus partes y bangumi | Página imitada, hecha con lo visto en una sesión real, porque el sitio rechaza los navegadores automatizados. Con la extensión instalada, pendiente |
-| Disney+, Crunchyroll, Viki, iQIYI y Prime Video, por detección genérica | Pendiente |
 | Segunda pista en el idioma de apoyo | Automática |
 | Traducción con Claude, por tramos, empezando por el punto de reproducción, con continuación si se cancela | Página imitada |
 | Corrección de subtítulos automáticos, con el texto original consultable | Página imitada |
@@ -103,7 +102,7 @@ Estado de cada función en la versión 0.48.1, con la forma en que se ha verific
 |---|---|
 | Creación de un clic | Simulador |
 | Creador con todos los campos | Simulador |
-| Envío a Anki con AnkiConnect, con un tipo de nota propio o el de la extensión | Simulador |
+| Envío a Anki con AnkiConnect, con un tipo de nota propio o el de la extensión, con diseño propio: la palabra marcada, la escena, furigana o pinyin, modo noche, y puesto al día solo si no se cambió | Simulador |
 | Audio de la frase grabado del video, a MP3, del tramo exacto y a velocidad normal | Automática, con la captura real de una pestaña |
 | La captura es por pestaña: desde otra no se graba silencio, y una grabación muda no se guarda | Automática, con la captura real de una pestaña |
 | Captura del fotograma, con el video como única cosa a la vista | Automática, con la captura real de una pestaña |

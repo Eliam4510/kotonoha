@@ -258,6 +258,8 @@ export interface ApiMotor {
   ankiPermiso(): Promise<EstadoAnki>;
   ankiCamposModelo(modelo: string): Promise<string[]>;
   ankiCrearModeloPropio(): Promise<void>;
+  /** Pone el tipo de nota «Kotonoha» con el diseño de ahora, si nadie lo tocó, o siempre con `forzar`. */
+  ankiDisenoTarjetas(forzar: boolean): Promise<'sin-modelo' | 'al-dia' | 'actualizado' | 'personalizado'>;
   ankiTieneTarjeta(palabra: string): Promise<number[]>;
   ankiVerTarjeta(palabra: string): Promise<void>;
 

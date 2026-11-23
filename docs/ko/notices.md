@@ -81,4 +81,4 @@ Kotonoha는 개인 학습용 도구입니다.
 
 ## 상표
 
-YouTube, Netflix, Disney+, Crunchyroll, Viki, Bilibili, iQIYI, Prime Video, Anki, Claude, Anthropic은 각 소유자의 상표입니다. 이 프로젝트는 독립적이며 이들과 제휴하거나 후원 또는 보증을 받지 않습니다.
+YouTube, Netflix, Bilibili, Anki, Claude, Anthropic은 각 소유자의 상표입니다. 이 프로젝트는 독립적이며 이들과 제휴하거나 후원 또는 보증을 받지 않습니다.

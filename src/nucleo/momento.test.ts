@@ -26,7 +26,7 @@ describe('claveDeVideo', () => {
   });
 
   it('en otros sitios, la dirección sin el ancla; lo que no es una página web no cuenta', () => {
-    expect(claveDeVideo('https://www.crunchyroll.com/watch/GX1/ep?x=1#t')).toBe('url:https://www.crunchyroll.com/watch/GX1/ep?x=1');
+    expect(claveDeVideo('https://video.example.com/watch/GX1/ep?x=1#t')).toBe('url:https://video.example.com/watch/GX1/ep?x=1');
     expect(claveDeVideo('chrome-extension://abc/app.html')).toBeNull();
     expect(claveDeVideo('no es una dirección')).toBeNull();
   });

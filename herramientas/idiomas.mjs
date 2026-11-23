@@ -14,7 +14,7 @@ export const CARPETA = join(RAIZ, 'idiomas');
 export const IDIOMAS = ['en', 'de', 'zh', 'ko', 'ja'];
 
 /** Lo que no se traduce: marcas, nombres propios y siglas. Se ve igual en todos los idiomas. */
-const SIN_TRADUCIR = new Set(['Netflix', 'Disney+', 'Crunchyroll', 'Viki', 'Bilibili', 'Prime Video', 'YouTube', 'Matcha', 'NHK Easy', 'Wikipedia', 'Whisper', 'Claude', 'Alt', 'Ctrl', 'Shift', 'Jisho', 'Weblio', 'Goo 辞書', 'Wiktionary', 'Forvo', 'Massif', 'Anki', 'Whisper Turbo', 'Whisper Base', 'Claude Sonnet 5.5', 'Claude Opus 5.5', 'Claude Haiku 5.5', 'JapanDict', 'Kotonoha', 'tokens', 'Ctrl+X', 'USD', 'SRT', 'VTT', 'N1', 'N2', 'N3', 'N4', 'N5', 'Aoi', 'Daichi', 'Keita', 'Masaru', 'Mayu', 'Nanami', 'Shiori']);
+const SIN_TRADUCIR = new Set(['Netflix', 'Bilibili', 'YouTube', 'Matcha', 'NHK Easy', 'Wikipedia', 'Whisper', 'Claude', 'Alt', 'Ctrl', 'Shift', 'Jisho', 'Weblio', 'Goo 辞書', 'Wiktionary', 'Forvo', 'Massif', 'Anki', 'Whisper Turbo', 'Whisper Base', 'Claude Sonnet 5.5', 'Claude Opus 5.5', 'Claude Haiku 5.5', 'JapanDict', 'Kotonoha', 'tokens', 'Ctrl+X', 'USD', 'SRT', 'VTT', 'N1', 'N2', 'N3', 'N4', 'N5', 'Aoi', 'Daichi', 'Keita', 'Masaru', 'Mayu', 'Nanami', 'Shiori']);
 
 function archivos(d) {
   return readdirSync(d, { withFileTypes: true }).flatMap((e) => {

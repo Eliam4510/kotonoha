@@ -84,7 +84,7 @@ Kotonoha es una herramienta de estudio para uso personal.
 
 ### Marcas
 
-YouTube, Netflix, Disney+, Crunchyroll, Viki, Bilibili, iQIYI, Prime Video, Anki, Claude y Anthropic son marcas de sus respectivos titulares. Este proyecto es independiente y no está afiliado, patrocinado ni respaldado por ninguno de ellos.
+YouTube, Netflix, Bilibili, Anki, Claude y Anthropic son marcas de sus respectivos titulares. Este proyecto es independiente y no está afiliado, patrocinado ni respaldado por ninguno de ellos.
 
 ## English
 
@@ -168,4 +168,4 @@ Kotonoha is a study tool for personal use.
 
 ### Trademarks
 
-YouTube, Netflix, Disney+, Crunchyroll, Viki, Bilibili, iQIYI, Prime Video, Anki, Claude and Anthropic are trademarks of their respective owners. This project is independent and is not affiliated with, sponsored by or endorsed by any of them.
+YouTube, Netflix, Bilibili, Anki, Claude and Anthropic are trademarks of their respective owners. This project is independent and is not affiliated with, sponsored by or endorsed by any of them.

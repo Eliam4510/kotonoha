@@ -1,6 +1,6 @@
 // Detección genérica: observa las peticiones de la página y reconoce subtítulos sin reglas por sitio.
 // Cubre archivos sueltos, listas HLS y DASH, y respuestas JSON con enlaces a subtítulos.
-// Con esto funcionan sitios como Disney+, Crunchyroll o Viki, y cualquier reproductor web. Bilibili tiene su adaptador.
+// Así se buscan los subtítulos de cualquier reproductor web. YouTube, Netflix y Bilibili tienen su adaptador.
 
 import { type Adaptador, normalizarIdioma, videoPrincipal } from './adaptador';
 import type { PistaInfo } from '../compartido/tipos';
@@ -92,7 +92,7 @@ export function olfatearJson(raiz: unknown): { url: string; idioma?: string; nom
       if (/^(label|name|title|lan_doc|displayname|display_name)$/.test(kl)) nombre = v;
     }
     if (enlace && /^(https?:)?\/\//.test(enlace)) {
-      // Crunchyroll y otros usan el idioma como clave: { "ja-JP": { url: ... } }
+      // Algunos usan el idioma como clave: { "ja-JP": { url: ... } }
       if (!idioma && /^[a-z]{2}(-[a-zA-Z]{2,4})?$/.test(claveMadre)) idioma = claveMadre;
       salida.push({ url: enlace.startsWith('//') ? `https:${enlace}` : enlace, idioma, nombre });
     }

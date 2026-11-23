@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.48.1, along with how it has been verified.
+Status of each feature in version 0.49.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -66,7 +66,6 @@ Status of each feature in version 0.48.1, along with how it has been verified.
 | YouTube: tracks signed by the player | Real session. Automated tests use an imitation page, since the site does not serve subtitles to an automated browser |
 | Netflix: player tracks, TTML | Imitation page. A real session is pending |
 | Bilibili: the uploader's subtitles and its AI's, through its player's API and while signed in; videos with their parts, and bangumi | Imitation page, built from what was seen in a real session, since the site rejects automated browsers. Pending with the extension installed |
-| Disney+, Crunchyroll, Viki, iQIYI and Prime Video, through generic detection | Pending |
 | Second track in the support language | Automated |
 | Translation with Claude, in batches, starting at the playback position, resumable after cancelling | Imitation page |
 | Correction of automatic subtitles, with the original text available | Imitation page |
@@ -103,7 +102,7 @@ Status of each feature in version 0.48.1, along with how it has been verified.
 |---|---|
 | One-click creation | Simulator |
 | Creator with every field | Simulator |
-| Sending to Anki through AnkiConnect, with a custom note type or the extension's own | Simulator |
+| Sending to Anki through AnkiConnect, with a custom note type or the extension's own, with its own design: the word highlighted, the scene, furigana or pinyin, night mode, and updated by itself if left unchanged | Simulator |
 | Sentence audio recorded from the video, to MP3, from the exact stretch and at normal speed | Automated, with real tab capture |
 | Capture is per tab: no silence is recorded from another tab, and a silent recording is not stored | Automated, with real tab capture |
 | Frame capture, with the video as the only thing in view | Automated, with real tab capture |

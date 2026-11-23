@@ -37,12 +37,7 @@ import { useEsperar } from '../ui/preparacion';
 const SITIOS = [
   ['YouTube', 'https://www.youtube.com'],
   [tm('Netflix'), 'https://www.netflix.com'],
-  [tm('Disney+'), 'https://www.disneyplus.com'],
-  [tm('Crunchyroll'), 'https://www.crunchyroll.com'],
-  [tm('Viki'), 'https://www.viki.com'],
   [tm('Bilibili'), 'https://www.bilibili.com'],
-  ['iQIYI', 'https://www.iq.com'],
-  [tm('Prime Video'), 'https://www.primevideo.com'],
 ];
 
 const NIVELES_LECTURA = [tm('Principiante'), tm('Intermedio'), tm('Avanzado')];

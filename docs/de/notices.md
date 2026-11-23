@@ -81,4 +81,4 @@ Kotonoha ist ein Lernwerkzeug für den persönlichen Gebrauch.
 
 ## Marken
 
-YouTube, Netflix, Disney+, Crunchyroll, Viki, Bilibili, iQIYI, Prime Video, Anki, Claude und Anthropic sind Marken ihrer jeweiligen Inhaber. Dieses Projekt ist unabhängig und weder mit ihnen verbunden noch von ihnen gesponsert oder unterstützt.
+YouTube, Netflix, Bilibili, Anki, Claude und Anthropic sind Marken ihrer jeweiligen Inhaber. Dieses Projekt ist unabhängig und weder mit ihnen verbunden noch von ihnen gesponsert oder unterstützt.

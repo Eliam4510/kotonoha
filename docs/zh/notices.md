@@ -81,4 +81,4 @@ Kotonoha 是供个人使用的学习工具。
 
 ## 商标
 
-YouTube、Netflix、Disney+、Crunchyroll、Viki、Bilibili、iQIYI、Prime Video、Anki、Claude 和 Anthropic 是其各自所有者的商标。本项目是独立的，与它们没有隶属、赞助或认可关系。
+YouTube、Netflix、Bilibili、Anki、Claude 和 Anthropic 是其各自所有者的商标。本项目是独立的，与它们没有隶属、赞助或认可关系。

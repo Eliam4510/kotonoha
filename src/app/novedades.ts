@@ -5,10 +5,12 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.48.1',
+  version: '0.49.0',
   puntos: [
-    tm('En la Memoria, con las nuevas del día hechas, «Estudiar 10 nuevas más hoy» pide unas cuantas más, solo por ese día.'),
-    tm('El gasto con Claude, en Inicio, y los nombres de las instrucciones, en Ajustes, ya salen en el idioma de la interfaz.'),
+    tm('Las tarjetas de Anki tienen un diseño nuevo: la frase con la palabra marcada, la escena, la palabra con su lectura y su definición, y modo noche.'),
+    tm('Las que ya tienes cambian solas si no tocaste su plantilla; si la cambiaste, «Usar el diseño nuevo», en Ajustes.'),
+    tm('Cada tarjeta lleva la etiqueta de su lengua y, con ella, la letra que le corresponde; el pinyin del chino, más grande, se lee bien.'),
+    tm('El repaso de la Memoria sigue el mismo estilo.'),
   ],
 };
 

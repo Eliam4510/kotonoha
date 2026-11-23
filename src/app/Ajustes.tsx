@@ -1019,6 +1019,15 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
     if (e?.conectado && a.ankiModelo && a.ankiModelo !== 'Kotonoha') motor.ankiCamposModelo(a.ankiModelo).then(fijarCampos).catch(() => fijarCampos([]));
     else fijarCampos([]);
   }, [e?.conectado, a.ankiModelo]);
+  // El tipo de nota de Kotonoha que ya estaba en Anki pasa al diseño de ahora, si nadie lo tocó: se dice una vez.
+  const [diseno, fijarDiseno] = useState<Awaited<ReturnType<typeof motor.ankiDisenoTarjetas>> | null>(null);
+  useEffect(() => {
+    if (!e?.conectado || a.destino !== 'anki' || a.ankiModelo !== 'Kotonoha') return;
+    motor.ankiDisenoTarjetas(false).then((d) => {
+      fijarDiseno(d);
+      if (d === 'actualizado') fijarMensaje({ texto: tr('Tus tarjetas de Kotonoha en Anki ya tienen el diseño nuevo.') });
+    }).catch(() => {});
+  }, [e?.conectado, a.destino, a.ankiModelo]);
 
   return (
     <Seccion id="anki" icono="tarjetas" titulo={tr('Tarjetas y Anki')} descripcion={tr('Dónde van tus tarjetas y qué llevan al crearlas.')}>
@@ -1065,6 +1074,14 @@ function SeccionAnki({ a, cambiar }: PropsSeccion) {
             <Opcion titulo={tr('Etiquetas')}>
               <input class="campo ap-campo-corto" aria-label={tr('Etiquetas')} value={a.ankiEtiquetas} onInput={(ev) => cambiar({ ankiEtiquetas: ev.currentTarget.value })} />
             </Opcion>
+            {diseno === 'personalizado' && a.ankiModelo === 'Kotonoha' && (
+              <Opcion titulo={tr('Diseño de las tarjetas')} ayuda={tr('Tu tipo de nota Kotonoha tiene cambios tuyos y no se ha tocado. Con el diseño nuevo, esos cambios se pierden.')}>
+                <BotonBorrar etiqueta={tr('Usar el diseño nuevo')} texto={tr('Usar el diseño nuevo')} clase="btn chico" alBorrar={async () => {
+                  fijarDiseno(await motor.ankiDisenoTarjetas(true));
+                  fijarMensaje({ texto: tr('Tus tarjetas de Kotonoha en Anki ya tienen el diseño nuevo.') });
+                }} />
+              </Opcion>
+            )}
           </>
         )}
         <Opcion titulo={tr('Poner en negrita la palabra en la frase')}>

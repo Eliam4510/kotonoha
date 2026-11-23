@@ -40,7 +40,7 @@ Kotonoha (言の葉, “leaves of words”) is an extension for Chrome and Edge 
 It runs on your own computer. The dictionary, the text analysis, speech transcription and text recognition on book pages never leave the browser. Claude, by Anthropic, steps in only when you ask for an explanation or a translation, and every request is logged with its cost.
 
 <table>
-  <tr><td><b>Watch</b></td><td>Subtitles with furigana, pitch accent and the state of every word on YouTube, Netflix, Bilibili, Disney+, Crunchyroll, Prime Video and your own files.</td></tr>
+  <tr><td><b>Watch</b></td><td>Subtitles with furigana, pitch accent and the state of every word on YouTube, Netflix, Bilibili and your own files.</td></tr>
   <tr><td><b>Read</b></td><td>Any web page, whatever you copy, and EPUB, PDF and manga books, scanned ones and image folders included.</td></tr>
   <tr><td><b>Remember</b></td><td>One-click flashcards with the audio and image of the scene, for Anki or the built-in review.</td></tr>
   <tr><td><b>Languages</b></td><td>Study Japanese, English, Chinese or German. The interface is in English, Spanish, German, Chinese, Korean and Japanese.</td></tr>

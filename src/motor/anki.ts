@@ -3,6 +3,7 @@
 import type { Ajustes } from '../compartido/ajustes';
 import type { BorradorTarjeta, EstadoAnki, MedioTarjeta } from '../compartido/tipos';
 import { tr } from '../compartido/i18n';
+import { ANVERSO, ANVERSO_PLANTILLA_1, CSS_PLANTILLA_1, CSS_TARJETA, MARCA_PLANTILLA, mismoCss, NOMBRE_PLANTILLA, REVERSO_PLANTILLA_1, reverso } from './plantillaAnki';
 
 let puerto = 8765;
 
@@ -65,48 +66,43 @@ const CAMPOS_PROPIOS = [
   'Fuente',
 ];
 
-const CSS_TARJETA = `.card { font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif; font-size: 22px; text-align: center; color: #1B2217; background: #F5F2E9; line-height: 1.65; padding: 12px; }
-.frase { font-size: 30px; font-weight: 700; margin: 18px 0; }
-.frase b { color: #E8622E; font-weight: 700; }
-.palabra { font-size: 26px; font-weight: 700; color: #4C9A1F; }
-.lectura { color: #848D7C; font-size: 17px; }
-.traduccion { color: #525C4C; margin-top: 12px; }
-.definicion { text-align: left; margin: 16px auto; max-width: 640px; font-size: 18px; padding: 12px 18px; background: #FFFEFA; border-radius: 16px; }
-.notas { text-align: left; margin: 14px auto; max-width: 640px; font-size: 16px; color: #525C4C; }
-.fuente, .fuente a { color: #848D7C; font-size: 13px; margin-top: 14px; }
-hr#answer { border: 0; border-top: 1px solid rgba(46, 56, 34, 0.14); margin: 18px 0; }
-img { max-width: 100%; max-height: 320px; border-radius: 16px; }
-.card.nightMode { background: #0D1210; color: #F2F5EE; }
-.nightMode .frase b { color: #FF9166; }
-.nightMode .palabra { color: #A9E45B; }
-.nightMode .traduccion, .nightMode .notas { color: #B5BFB5; }
-.nightMode .definicion { background: #151B18; }
-.nightMode hr#answer { border-top-color: rgba(226, 240, 226, 0.14); }`;
-
 export async function crearModeloPropio(): Promise<void> {
   const modelos = await invocar<string[]>('modelNames');
-  if (modelos.includes(MODELO_PROPIO)) return;
+  if (modelos.includes(MODELO_PROPIO)) {
+    // Ponerlo al día no debe impedir crear la tarjeta: con un AnkiConnect antiguo, sigue el diseño que haya.
+    await disenoModeloPropio(false).catch(() => {});
+    return;
+  }
   await invocar('createModel', {
     modelName: MODELO_PROPIO,
     inOrderFields: CAMPOS_PROPIOS,
     css: CSS_TARJETA,
     isCloze: false,
-    cardTemplates: [
-      {
-        Name: 'Frase',
-        Front: '<div class="frase">{{Frase}}</div>{{AudioFrase}}',
-        Back: `<div class="frase">{{furigana:FraseFurigana}}</div>{{AudioFrase}}
-<hr id="answer">
-<div class="palabra">{{Palabra}}</div><div class="lectura">{{Lectura}}</div>{{AudioPalabra}}
-<div class="traduccion">{{Traduccion}}</div>
-<div class="definicion">{{Definicion}}</div>
-<div>{{Imagen}}</div>
-<div class="notas">{{Notas}}</div>
-<div class="notas">{{Ejemplos}}</div>
-<div class="fuente">{{Fuente}}</div>`,
-      },
-    ],
+    cardTemplates: [{ Name: NOMBRE_PLANTILLA, Front: ANVERSO, Back: reverso() }],
   });
+}
+
+export type DisenoTarjetas = 'sin-modelo' | 'al-dia' | 'actualizado' | 'personalizado';
+
+/**
+ * Pone el tipo de nota «Kotonoha» que ya está en Anki con el diseño de ahora. Solo si nadie lo tocó, porque es el de
+ * antes tal cual (su estilo y su plantilla), o si se pide a mano: lo cambiado a mano se perdería. Al cambiarlo, todas
+ * las tarjetas que ya tiene se ven con el diseño nuevo.
+ */
+export async function disenoModeloPropio(forzar: boolean): Promise<DisenoTarjetas> {
+  const modelos = await invocar<string[]>('modelNames');
+  if (!modelos.includes(MODELO_PROPIO)) return 'sin-modelo';
+  const { css } = await invocar<{ css: string }>('modelStyling', { modelName: MODELO_PROPIO });
+  if (css.includes(MARCA_PLANTILLA) && !forzar) return 'al-dia';
+  if (!forzar) {
+    const plantillas = await invocar<Record<string, { Front: string; Back: string }>>('modelTemplates', { modelName: MODELO_PROPIO });
+    const p = plantillas[NOMBRE_PLANTILLA];
+    const sinTocar = mismoCss(css, CSS_PLANTILLA_1) && !!p && mismoCss(p.Front, ANVERSO_PLANTILLA_1) && mismoCss(p.Back, REVERSO_PLANTILLA_1) && Object.keys(plantillas).length === 1;
+    if (!sinTocar) return 'personalizado';
+  }
+  await invocar('updateModelTemplates', { model: { name: MODELO_PROPIO, templates: { [NOMBRE_PLANTILLA]: { Front: ANVERSO, Back: reverso() } } } });
+  await invocar('updateModelStyling', { model: { name: MODELO_PROPIO, css: CSS_TARJETA } });
+  return 'actualizado';
 }
 
 async function asegurarMazo(mazo: string) {
@@ -173,7 +169,9 @@ export async function crearNota(a: Ajustes, b: BorradorTarjeta): Promise<string>
       modelName: a.ankiModelo,
       fields,
       options: { allowDuplicate: false, duplicateScope: 'deck' },
-      tags: [...a.ankiEtiquetas.split(/\s+/).filter(Boolean), ...(b.etiquetas ?? [])],
+      // La lengua va también como etiqueta: la plantilla de Kotonoha elige con ella la letra (el chino no se escribe con la
+      // del japonés), y en Anki se pueden buscar las de cada lengua.
+      tags: [...new Set([...a.ankiEtiquetas.split(/\s+/).filter(Boolean), ...(b.etiquetas ?? []), `kotonoha::${a.idiomaObjetivo}`])],
       audio: [...adjuntos(b.audioFrase, c['audioFrase']), ...adjuntos(b.audioPalabra, c['audioPalabra'])],
       picture: adjuntos(b.imagenes, c['imagenes']),
     },

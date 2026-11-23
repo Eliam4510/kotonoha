@@ -189,7 +189,7 @@ function Popup() {
         <Icono n="dividir" t={15} /> {esWeb ? tr('Abrir el Cuaderno junto a esta pestaña') : tr('Abrir el Cuaderno en una pestaña')}
       </button>
 
-      {pestana !== undefined && !/youtube|netflix|disneyplus|viki|iq\.com|bilibili|crunchyroll|primevideo/.test(host) && esWeb && (
+      {pestana !== undefined && !/youtube|netflix|bilibili/.test(host) && esWeb && (
         <button class="btn fantasma chico ap-menu-activar" onClick={() => chrome.tabs.sendMessage(pestana, { activarVideoAqui: true })}>
           <Icono n="video" t={15} /> {tr('Usar el reproductor en el video de esta página')}
         </button>

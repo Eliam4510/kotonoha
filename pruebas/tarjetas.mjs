@@ -2,13 +2,21 @@
 // grabación de audio con un micrófono falso del navegador.
 // Uso: KK_SALIDA=.dist-whisper node build.mjs && node pruebas/tarjetas.mjs ruta/haruka.wav
 
+import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { build } from 'esbuild';
 import { chromium } from 'playwright';
 import { iniciarMock } from './mock-claude.mjs';
 import { recargarExtension } from './extension.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..');
+// La plantilla de antes, tal cual la tiene quien creó tarjetas con una versión anterior: para probar que se pone al día.
+mkdirSync(join(RAIZ, 'capturas-e2e'), { recursive: true });
+const modPlantilla = join(RAIZ, 'capturas-e2e', 'plantilla-tarjetas.mjs');
+await build({ entryPoints: [join(RAIZ, 'src/motor/plantillaAnki.ts')], bundle: true, format: 'esm', platform: 'node', outfile: modPlantilla, logLevel: 'error' });
+const PLANTILLA = await import(pathToFileURL(modPlantilla).href);
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-whisper'));
 const PERFIL = resolve(process.env.KK_PERFIL ?? join(RAIZ, '.perfil-whisper'));
 const [audio] = process.argv.slice(2);
@@ -26,7 +34,8 @@ const comprobar = (cond, texto, extra = '') => {
 
 // ---------- AnkiConnect simulado ----------
 
-const anki = { acciones: [], modelos: ['Basic'], mazos: ['Default'], notas: [] };
+// Cada tipo de nota con su estilo y sus plantillas, como los guarda Anki: así se prueba poner al día el de Kotonoha.
+const anki = { acciones: [], modelos: ['Basic'], mazos: ['Default'], notas: [], estilos: {}, plantillas: {} };
 const servidorAnki = createServer((req, res) => {
   res.setHeader('access-control-allow-origin', '*');
   if (req.method === 'OPTIONS') return res.end();
@@ -47,7 +56,19 @@ const servidorAnki = createServer((req, res) => {
       },
       createModel: () => {
         anki.modelos.push(params.modelName);
+        anki.estilos[params.modelName] = params.css;
+        anki.plantillas[params.modelName] = Object.fromEntries(params.cardTemplates.map((t) => [t.Name, { Front: t.Front, Back: t.Back }]));
         return {};
+      },
+      modelStyling: () => ({ css: anki.estilos[params.modelName] ?? '' }),
+      modelTemplates: () => anki.plantillas[params.modelName] ?? {},
+      updateModelStyling: () => {
+        anki.estilos[params.model.name] = params.model.css;
+        return null;
+      },
+      updateModelTemplates: () => {
+        Object.assign(anki.plantillas[params.model.name], params.model.templates);
+        return null;
       },
       addNote: () => {
         anki.notas.push(params.note);
@@ -134,6 +155,10 @@ comprobar(anki.modelos.includes('Kotonoha'), 'Crea el tipo de nota Kotonoha');
 const modelo = anki.acciones.find((a) => a.action === 'createModel')?.params;
 comprobar(modelo?.inOrderFields?.includes('FraseFurigana') && /furigana:FraseFurigana/.test(modelo?.cardTemplates?.[0]?.Back ?? ''), 'La plantilla muestra el furigana en el reverso');
 comprobar(/#F5F2E9/.test(modelo?.css ?? ''), 'La plantilla usa los colores de la marca');
+const reversoNuevo = modelo?.cardTemplates?.[0]?.Back ?? '';
+comprobar(/\{\{#Definicion\}\}/.test(reversoNuevo) && /\{\{#Imagen\}\}/.test(reversoNuevo) && /\{\{\^Frase\}\}/.test(modelo?.cardTemplates?.[0]?.Front ?? ''), 'Lo que no tiene datos no se pinta, y sin frase sale la palabra sola');
+comprobar(/\.nightMode/.test(modelo?.css ?? '') && /\.night_mode/.test(modelo?.css ?? '') && /kotonoha::zh/.test(modelo?.css ?? ''), 'Con modo noche, y la letra de cada lengua');
+comprobar(reversoNuevo.indexOf('id="answer"') < reversoNuevo.indexOf('{{Imagen}}'), 'Al enseñar la respuesta, Anki no salta la frase: el ancla va arriba');
 comprobar(anki.mazos.includes('Pruebas Kotonoha'), 'Crea el mazo');
 const nota = anki.notas[0];
 comprobar(nota?.modelName === 'Kotonoha' && nota?.deckName === 'Pruebas Kotonoha', 'Añade la nota al mazo y modelo elegidos');
@@ -144,6 +169,7 @@ comprobar(/<a href="https:\/\/ejemplo\.test\/video">Canción<\/a>/.test(nota?.fi
 comprobar(nota?.audio?.length === 2 && nota.audio[0].fields[0] === 'AudioFrase' && nota.audio[0].data === 'QUJD', 'Adjunta los dos audios en sus campos');
 comprobar(nota?.picture?.[0]?.fields?.[0] === 'Imagen', 'Adjunta la imagen');
 comprobar(nota?.tags?.includes('kotonoha'), 'Añade las etiquetas', nota?.tags?.join(' '));
+comprobar(nota?.tags?.includes('kotonoha::ja'), 'Y la de su lengua, con la que la plantilla elige la letra', nota?.tags?.join(' '));
 comprobar(nota?.options?.allowDuplicate === false, 'No permite duplicados');
 
 comprobar((await motor('ankiTieneTarjeta', '星')).length === 1, 'Detecta que la palabra ya tiene tarjeta');
@@ -153,6 +179,23 @@ const importadas = await motor('importarConocidasAnki', 'deck:Prueba', 'Palabra'
 comprobar(importadas >= 1, 'Importa como conocidas las palabras con intervalo largo', String(importadas));
 const fila = (await motor('listarPalabras', { busqueda: '学校', limite: 5 })).filas[0];
 comprobar(fila?.estado === 'conocida', 'Una tarjeta madura queda como conocida', fila?.estado);
+
+// ---------- El diseño de las tarjetas ----------
+
+console.log('\n== El diseño de las tarjetas ==');
+const plantillaVieja = () => ({ [PLANTILLA.NOMBRE_PLANTILLA]: { Front: PLANTILLA.ANVERSO_PLANTILLA_1, Back: PLANTILLA.REVERSO_PLANTILLA_1 } });
+// Quien creó tarjetas con una versión anterior tiene el tipo de nota de antes, tal cual: se pone al día con la tarjeta
+// siguiente, y con él todas las que ya tiene.
+anki.estilos.Kotonoha = PLANTILLA.CSS_PLANTILLA_1.replace(/\n/g, '\r\n');
+anki.plantillas.Kotonoha = plantillaVieja();
+await motor('crearTarjeta', { ...borrador, palabra: '空', frase: '空が<b>青い</b>' }, 'anki');
+comprobar(anki.estilos.Kotonoha.includes(PLANTILLA.MARCA_PLANTILLA) && /kk-frase/.test(anki.plantillas.Kotonoha.Frase.Front), 'El tipo de nota de antes, sin tocar, pasa solo al diseño nuevo');
+// Con cambios propios no se toca, hasta que se pida.
+anki.estilos.Kotonoha = `${PLANTILLA.CSS_PLANTILLA_1}\n.card { color: crimson; }`;
+anki.plantillas.Kotonoha = plantillaVieja();
+comprobar((await motor('ankiDisenoTarjetas', false)) === 'personalizado' && anki.estilos.Kotonoha.includes('crimson'), 'Con cambios propios, no se toca');
+comprobar((await motor('ankiDisenoTarjetas', true)) === 'actualizado' && !anki.estilos.Kotonoha.includes('crimson'), 'Y se pone al día si se pide');
+comprobar((await motor('ankiDisenoTarjetas', false)) === 'al-dia', 'Después, ya está al día');
 
 // ---------- Memoria interna ----------
 

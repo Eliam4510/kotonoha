@@ -21,7 +21,7 @@ import { instalarAtajosWeb } from './webAtajos';
 import { bcp47Actual, fijarIdioma, tr, idiomaActual } from '../compartido/i18n';
 import { seguirEstadosGramatica } from '../ui/gramatica';
 
-const SITIOS_VIDEO = /(^|\.)(youtube\.com|netflix\.com|disneyplus\.com|viki\.com|iq\.com|bilibili\.com|crunchyroll\.com|primevideo\.com)$/;
+const SITIOS_VIDEO = /(^|\.)(youtube\.com|netflix\.com|bilibili\.com)$/;
 
 function montar(): HTMLElement {
   const anfitrion = document.createElement('kotonoha-overlay');

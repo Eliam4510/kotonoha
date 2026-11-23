@@ -2,6 +2,15 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.49.0 · 2026-11-22
+
+Las tarjetas de Anki, con un diseño nuevo.
+
+- **Tarjetas de Anki.** El tipo de nota Kotonoha tiene un diseño nuevo. En el anverso, la frase con la palabra marcada como con rotulador y su audio. En el reverso, la escena, la frase con su furigana o su pinyin, la traducción y la palabra con su lectura, su audio y su definición, con el sentido en la frase destacado; después, las notas, los ejemplos plegados y la fuente. Lo que no tiene datos no se pinta, sigue el modo noche de Anki y se ve bien en el móvil.
+- **Las que ya tienes.** Si tu tipo de nota Kotonoha está como lo creó Kotonoha, pasa solo al diseño nuevo, y con él todas tus tarjetas. Si le hiciste cambios, no se toca: en **Ajustes**, **Tarjetas y Anki**, **Usar el diseño nuevo**.
+- **Su lengua.** Cada nota lleva la etiqueta `kotonoha::` con su lengua (`kotonoha::ja`, `kotonoha::zh`…): con ella la plantilla elige la letra, y en Anki se pueden buscar las de cada lengua. El pinyin del chino, más grande, se lee bien.
+- **La Memoria**, con el mismo estilo: la palabra marcada, la lectura en su píldora y el sentido en la frase destacado.
+
 ## 0.48.1 · 2026-11-22
 
 Estudiar más hoy en la Memoria, y dos textos que ya salen en el idioma de la interfaz.
@@ -503,6 +512,15 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.49.0 · 2026-11-22
+
+Anki cards, with a new design.
+
+- **Anki cards.** The Kotonoha note type has a new design. On the front, the sentence with the word highlighted like a marker pen, and its audio. On the back, the scene, the sentence with its furigana or pinyin, the translation and the word with its reading, audio and definition, with the meaning in the sentence highlighted; then the notes, the folded examples and the source. Anything without data is left out, it follows Anki's night mode and it looks good on a phone.
+- **The ones you already have.** If your Kotonoha note type is as Kotonoha created it, it moves to the new design by itself, and all your cards with it. If you changed it, it is left alone: in **Settings**, **Cards and Anki**, **Use the new design**.
+- **Its language.** Each note carries the `kotonoha::` tag with its language (`kotonoha::ja`, `kotonoha::zh`…): the template uses it to pick the font, and in Anki you can search the cards of each language. Chinese pinyin, now larger, is easy to read.
+- **Memory**, in the same style: the word highlighted, the reading in its pill and the meaning in the sentence highlighted.
 
 ## 0.48.1 · 2026-11-22
 

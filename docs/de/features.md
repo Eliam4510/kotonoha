@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.48.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.49.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -66,7 +66,6 @@ Stand jeder Funktion in Version 0.48.1 und die Art ihrer Überprüfung.
 | YouTube: vom Player signierte Spuren | Echte Sitzung. Die automatischen Tests nutzen eine nachgebildete Seite, weil die Website einem automatisierten Browser keine Untertitel liefert |
 | Netflix: Spuren des Players, TTML | Nachgebildete Seite. Eine echte Sitzung steht aus |
 | Bilibili: die Untertitel des Uploaders und die seiner KI, über die API seines Players und mit Anmeldung; Videos mit ihren Teilen und Bangumi | Nachgebildete Seite, nach dem, was in einer echten Sitzung zu sehen war, weil die Website automatisierte Browser abweist. Mit installierter Erweiterung ausstehend |
-| Disney+, Crunchyroll, Viki, iQIYI und Prime Video über die generische Erkennung | Ausstehend |
 | Zweite Spur in der Hilfssprache | Automatisch |
 | Übersetzung mit Claude in Abschnitten, beginnend an der Abspielposition, mit Fortsetzung nach einem Abbruch | Nachgebildete Seite |
 | Korrektur automatischer Untertitel, mit einsehbarem Originaltext | Nachgebildete Seite |
@@ -103,7 +102,7 @@ Stand jeder Funktion in Version 0.48.1 und die Art ihrer Überprüfung.
 |---|---|
 | Erstellen mit einem Klick | Simulator |
 | Karten-Ersteller mit allen Feldern | Simulator |
-| Senden an Anki über AnkiConnect, mit eigenem Notiztyp oder dem der Erweiterung | Simulator |
+| Senden an Anki über AnkiConnect, mit eigenem Notiztyp oder dem der Erweiterung, mit eigenem Design: markiertes Wort, Szene, Furigana oder Pinyin, Nachtmodus, und von selbst aktualisiert, wenn unverändert | Simulator |
 | Aus dem Video aufgenommenes Satz-Audio als MP3, im genauen Abschnitt und in normaler Geschwindigkeit | Automatisch, mit echter Tab-Aufnahme |
 | Die Aufnahme gilt pro Tab: Aus einem anderen wird keine Stille aufgenommen, und eine stumme Aufnahme wird nicht gespeichert | Automatisch, mit echter Tab-Aufnahme |
 | Aufnahme des Einzelbilds, mit dem Video als einzigem sichtbaren Inhalt | Automatisch, mit echter Tab-Aufnahme |

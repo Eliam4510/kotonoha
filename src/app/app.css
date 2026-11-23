@@ -894,17 +894,20 @@ section .ap-botones { margin-top: 10px; }
 
 /* ---------- Memoria ---------- */
 .ap-repaso { max-width: 720px; margin: 0 auto; }
-.ap-naipe { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 300px; padding: 44px 48px; text-align: center; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-2); animation: kk-aparecer 0.3s var(--salida); }
+.ap-naipe { --marca-palabra: #FF9166; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 300px; padding: 44px 48px; text-align: center; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r-5); box-shadow: var(--brillo), var(--sombra-2); animation: kk-aparecer 0.3s var(--salida); }
 /* Si quedan más tarjetas, se adivina el mazo debajo. */
 .ap-naipe.mazo { margin-bottom: 18px; box-shadow: var(--brillo), 0 10px 0 -5px color-mix(in srgb, var(--superficie) 72%, var(--fondo)), 0 20px 0 -10px color-mix(in srgb, var(--superficie) 40%, var(--fondo)), var(--sombra-2); }
 .ap-naipe-frente { font-size: 30px; font-weight: 700; line-height: 1.75; }
-.ap-naipe-frente b { color: var(--hoja); font-weight: 900; }
+/* La palabra de la frase, marcada como con rotulador: igual que en las tarjetas de Anki (motor/plantillaAnki.ts). */
+.kk-raiz[data-tema='claro'] .ap-naipe { --marca-palabra: #E8622E; }
+.ap-naipe-frente b { font-weight: 800; color: inherit; background: linear-gradient(transparent 58%, color-mix(in srgb, var(--marca-palabra) 20%, transparent) 58%, color-mix(in srgb, var(--marca-palabra) 20%, transparent) 92%, transparent 92%); box-shadow: inset 0 -3px 0 -1px var(--marca-palabra); padding: 0 0.08em; border-radius: 2px; }
 .ap-naipe-reverso { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 22px; margin-top: 6px; border-top: 1px solid var(--borde); animation: kk-aparecer 0.24s var(--salida); }
-.ap-naipe-reverso h3 { display: flex; align-items: baseline; gap: 10px; font-size: 22px; font-weight: 700; letter-spacing: 0; }
-.ap-naipe-reverso h3 small { font-size: 14px; font-weight: 500; color: var(--texto-2); }
-.ap-naipe-traduccion { font-size: 17px; font-weight: 600; }
-.ap-naipe-definicion { font-size: 14px; color: var(--texto-2); }
-.ap-naipe-reverso img { max-width: 100%; max-height: 220px; border-radius: var(--r-3); }
+.ap-naipe-reverso h3 { display: flex; align-items: center; gap: 10px; font-size: 26px; font-weight: 700; letter-spacing: 0; }
+.ap-naipe-reverso h3 small { font-size: 14px; font-weight: 700; color: var(--hoja); background: var(--hoja-suave); border-radius: var(--r-pill); padding: 3px 12px; }
+.ap-naipe-traduccion { font-size: 17px; font-weight: 500; color: var(--texto-2); max-width: 34em; }
+.ap-naipe-definicion { align-self: stretch; text-align: left; font-size: 15.5px; line-height: 1.65; color: var(--texto-2); padding: 14px 18px; border-radius: var(--r-4); background: var(--superficie-2); }
+.ap-naipe-definicion b { display: inline-block; color: var(--texto); font-weight: 700; padding-left: 12px; margin-bottom: 4px; border-left: 3px solid var(--marca-palabra); }
+.ap-naipe-reverso img { max-width: 100%; max-height: 220px; border-radius: var(--r-4); box-shadow: var(--sombra-2); }
 .ap-repaso-acciones { display: flex; justify-content: center; margin-top: 18px; }
 .ap-repaso-acciones .tecla { background: rgba(255, 255, 255, 0.35); color: var(--hoja-tinta); box-shadow: none; }
 .ap-notas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
