@@ -2,17 +2,23 @@
   <img src="docs/img/banner.en.png" alt="Kotonoha: interactive subtitles, a dictionary, flashcards and explanations from Claude for learning Japanese, English, Chinese and German" width="100%">
 </p>
 
-<h3 align="center">Learn Japanese from what you already watch and read.</h3>
+<h3 align="center">Learn Japanese from what you already watch, read and sing.</h3>
 
 <p align="center">
-  Interactive subtitles on your videos, a word panel that understands each word in its sentence, reading help for books, PDFs and manga, and flashcards for Anki. All in your browser, free and open source.
+  Interactive subtitles on your series and videos, your songs’ lyrics verse by verse, your manga and scanned books read with OCR, a word panel that understands each word in its sentence, and flashcards for Anki. Speech, OCR and text analysis run on your own computer, on the graphics card. Free and open source.
 </p>
 
 <p align="center">
   <a href="https://github.com/Eliam4510/kotonoha/releases/latest"><img src="https://img.shields.io/github/v/release/Eliam4510/kotonoha?style=for-the-badge&label=release&color=A9E45B&labelColor=101218" alt="Latest release"></a>
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Eliam4510/kotonoha/ci.yml?style=for-the-badge&label=tests&labelColor=101218" alt="Continuous integration"></a>
-  <img src="https://img.shields.io/badge/Chrome%20%C2%B7%20Edge-Manifest%20V3-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome and Edge, Manifest V3">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-BCA9FF?style=for-the-badge&labelColor=101218" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/tested%20on-Chrome%20%C2%B7%20Edge-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Tested on Chrome and Edge">
+  <img src="https://img.shields.io/badge/WebGPU-on%20your%20device-A9E45B?style=for-the-badge&logo=webgpu&logoColor=white&labelColor=101218" alt="WebGPU, on your device">
+  <img src="https://img.shields.io/badge/Anki-flashcards-BCA9FF?style=for-the-badge&logo=anki&logoColor=white&labelColor=101218" alt="Flashcards for Anki">
+  <img src="https://img.shields.io/badge/Claude-optional-F2B880?style=for-the-badge&logo=claude&logoColor=white&labelColor=101218" alt="Claude, optional">
 </p>
 
 <p align="center">
@@ -29,19 +35,22 @@
   <a href="#installation">Installation</a> ·
   <a href="docs/guide.md">User guide</a> ·
   <a href="docs/features.md">All features</a> ·
+  <a href="#under-the-hood">Under the hood</a> ·
   <a href="CHANGELOG.md">What’s new</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 ## What Kotonoha is
 
-Kotonoha (言の葉, “leaves of words”) is an extension for Chrome and Edge that turns what you already watch and read into study material: series and YouTube or Netflix videos, articles, chats, books and manga. Every word shows its reading and how well you know it, and tapping it opens a panel with its definition, its meaning in that exact sentence and a button that makes a flashcard.
+Kotonoha (言の葉, “leaves of words”) is an extension for Chrome and Edge that turns what you already watch, read and listen to into study material: series and videos from YouTube, Netflix or Bilibili, songs, articles, chats, books and manga. Every word shows its reading and how well you know it, and tapping it opens a panel with its definition, its meaning in that exact sentence and a button that makes a flashcard.
 
 It runs on your own computer. The dictionary, the text analysis, speech transcription and text recognition on book pages never leave the browser. Claude, by Anthropic, steps in only when you ask for an explanation or a translation, and every request is logged with its cost.
 
 <table>
   <tr><td><b>Watch</b></td><td>Subtitles with furigana, pitch accent and the state of every word on YouTube, Netflix, Bilibili and your own files.</td></tr>
-  <tr><td><b>Read</b></td><td>Any web page, whatever you copy, and EPUB, PDF and manga books, scanned ones and image folders included.</td></tr>
+  <tr><td><b>Sing</b></td><td>Paste a song’s lyrics as they are, and each verse appears as it is sung, like karaoke.</td></tr>
+  <tr><td><b>Read</b></td><td>Any web page, whatever you copy, and EPUB, PDF and manga books, scanned ones and image folders included: the text on each page is recognised on your own computer.</td></tr>
+  <tr><td><b>Speak</b></td><td>Read aloud and Kotonoha compares your voice with the pitch accent of each word, or with the tones in Chinese.</td></tr>
   <tr><td><b>Remember</b></td><td>One-click flashcards with the audio and image of the scene, for Anki or the built-in review.</td></tr>
   <tr><td><b>Languages</b></td><td>Study Japanese, English, Chinese or German. The interface is in English, Spanish, German, Chinese, Korean and Japanese.</td></tr>
 </table>
@@ -74,6 +83,25 @@ Subtitles appear over the player with furigana, a colour for each pitch accent a
 - Subtitles are translated into your language, and auto-generated ones are corrected using the title and the whole script as context.
 - Videos without subtitles are transcribed on your own computer, on the graphics card: 30 minutes of video in about a minute.
 
+### Your songs, like karaoke
+
+<img src="docs/img/letra-medidas.en.svg" alt="Chart of verses that start within 1 s of where they are sung: with complete lyrics, Claude on Whisper’s lines, 24%; letter by letter, 84%; with the isolated voice, 91%. With the chorus written only once: 24%, 80% without AI and 90% when Claude reads the lyrics" width="100%">
+
+Paste a song’s lyrics into **Song lyrics**, in the **AI subtitles** panel, and each verse appears as it is sung, over the music video or in the **Player**. They are subtitles like any others: with furigana, colours and word panels, they can be translated, and any verse can become a flashcard.
+
+The hard part is the exact moment, and Kotonoha gets it by splitting the work, all on your own computer:
+
+1. **Whisper Turbo** listens to the song and says, roughly, what is heard and when.
+2. **Demucs** separates the voice from the instruments on the graphics card: a four-minute song in about 20 seconds.
+3. The lyrics are matched **letter by letter** with what Whisper heard, and each verse gets a zone a few seconds wide.
+4. **narabas**, a phoneme model, says every 20 ms which phoneme the sound resembles, and a **forced alignment** walks through the phonemes of the lyrics in order within each zone: each verse starts where its first phoneme sounds.
+
+Whisper has to guess what is sung; Kotonoha already knows, because it has the lyrics, and only looks for where they sound. That is why half the verses start within 0.16 s of where they are sung. Up to version 0.49, the timing came from Whisper’s lines, and even with a Claude that never made a mistake, half the verses were almost 3 s off.
+
+Lyrics found online are rarely complete: the chorus written only once, “(サビ繰り返し)”, “[Chorus]”, “×2”, backing vocals in parentheses. Kotonoha unfolds them as they are sung, and with **Let Claude read the lyrics**, Claude reads them in full and says what is sung and in what order. Claude does not set the timing: the voice does. For what no model understands, **Mark the timings** lets you do it by hand with the space bar.
+
+<sub>The voice places Japanese lyrics; in other languages, the lyrics are matched letter by letter with what Whisper heard. Measured with 51 Japanese songs and their synced lyrics (2,253 verses): [how it works and how it was measured](docs/architecture.md#song-lyrics).</sub>
+
 ### Your videos and audio
 
 <img src="docs/img/reproductor.en.png" alt="The Kotonoha player with a speech in the Diet: the Japanese subtitles with their translation and, when hovering over the timeline, the sentence of another moment" width="100%">
@@ -101,6 +129,8 @@ The **Library** is a complete viewer, like a PDF reader: zoom, two-page spreads,
 <img src="docs/img/ocr.en.png" alt="Scanned page from an organic chemistry book, with its recognised text, each word's furigana and underline on the page, and the floating window with the sentence and the word 結合" width="100%">
 
 Pages that are images, such as manga, scanned books and many PDFs, are read with on-device text recognition (OCR) on the graphics card. There is a mode for printed books and another for manga, which reads vertical speech bubbles without mistaking furigana for text. Tapping a word on the page opens its whole sentence in a floating window, with furigana and its word panel, without covering what is left to read, and dragging selects any piece to translate or explain it. Each page is read only once and saved. And **Export PDF with text** turns the book into a PDF with that text on top, invisible, to search and copy it in any PDF reader; for low-resolution scans, the viewer has **Sharpness**.
+
+It is not just any OCR. In books, PP-OCRv6 reads the lines that PP-OCRv5 finds, keeps printed furigana apart from the text and reads two-column pages column by column; in a scanned PDF it reads the original image at its own resolution, not the page as drawn on screen: 0.2% character error on chemistry books scanned at 180 dpi. In manga, a detector finds the speech bubbles and manga-ocr reads them in panel order, leaving out watermarks and page numbers.
 
 <img src="docs/img/manga.en.png" alt="A page of 【推しの子】 read in Manga mode, with the speech bubble open in the floating window and the word 愛" width="100%">
 
@@ -189,6 +219,35 @@ In Chinese, words are split on their own even though the text has no spaces, and
 - **Your own files.** A player for videos on your computer, with the subtitles inside an MKV.
 - **Made to measure.** Colour-blind and high-contrast palettes, readings in kana or rōmaji, rebindable shortcuts and sites where it stays off.
 
+## Under the hood
+
+The heavy lifting runs on your own computer, with WebGPU and ONNX Runtime: there is no server and no account. Each piece was chosen by measuring it against the alternatives on real material, and the figures can be reproduced with the scripts in the repository.
+
+| What it does | With what | Measured |
+|---|---|---|
+| Transcribes what has no subtitles | Haas-ja, Parakeet and Whisper Turbo, with Transformers.js | 30 minutes of video in about a minute; on spoken Japanese, 3% errors against Whisper Turbo’s 9% |
+| Places a song’s lyrics | Demucs isolates the voice, and narabas, with a custom forced alignment over its CTC output, puts each phoneme in place | Half the verses within 0.16 s of where they are sung; with Whisper’s timing, almost 3 s off |
+| Knows where there is singing | YAMNet, on the processor, leaving the GPU to Whisper | Tells singing from instrumental passages with an AUC of 0.9 |
+| Reads scanned books | PP-OCRv5 finds the lines and PP-OCRv6 reads them, with furigana and columns kept apart | 0.2% character error on chemistry books scanned at 180 dpi |
+| Reads manga | A speech-bubble detector and manga-ocr, in panel order | 2.8% error on 18 pages from five series |
+| Reads aloud | AivisHub voices on WebGPU, with yomi, an OpenJTalk in TypeScript | The pitch of each mora matches AivisSpeech’s 92% of the time |
+| Counts a book’s vocabulary | Kuromoji and the dictionaries, in IndexedDB | A whole novel, about 135,000 words, in about four seconds |
+| Checks everything | Vitest, and Playwright with real Edge and the graphics card | More than 1,500 unit tests and more than 40 end-to-end runs |
+
+```mermaid
+flowchart LR
+  P["Adapters<br/>YouTube, Netflix, Bilibili, generic"] <--> C["Overlay on the video<br/>Shadow DOM"]
+  C <--> M["Offscreen engine<br/>tokenizer, dictionaries,<br/>IndexedDB, Whisper"]
+  A["App and viewer"] <--> M
+  M --> G["GPU<br/>WebGPU: speech, lyrics and OCR"]
+  M --> CL["Claude API"]
+  M --> AN["Anki"]
+  S["Service worker"] <--> M
+  S <-->|Native Messaging| H["Local helper<br/>PowerShell and yt-dlp"]
+```
+
+TypeScript, Preact, Dexie and esbuild, with ONNX Runtime and Transformers.js on WebGPU. Each part, the technical decisions and how each figure was measured are described in [docs/architecture.md](docs/architecture.md); [CONTRIBUTING.md](CONTRIBUTING.md) explains how to run the tests.
+
 ## What works without Claude, and what Claude adds
 
 Kotonoha works without any key. An optional Claude key adds what needs a language model.
@@ -200,6 +259,7 @@ Kotonoha works without any key. An optional Claude key adds what needs a languag
 | Page reader, Notebook and Library with OCR | Subtitle translation and correction |
 | On-device speech transcription | Review of furigana readings |
 | Cards for Anki and the built-in review | Stories written for your level |
+| Song lyrics, placed with the voice | Lyrics with marks and repeats, read by Claude |
 
 Normal use costs cents a month. The key is stored only in your browser. Task by task, OpenRouter, DeepSeek, OpenAI or a model on your own computer through LM Studio or Ollama can be used instead of Claude.
 
@@ -235,25 +295,9 @@ Every shortcut over the video can be changed, and they work with any keyboard la
 - Claude receives only what each request needs: the sentence, the subtitle script and the title.
 - Dictionaries and models are downloaded once, from GitHub and Hugging Face. [AVISOS.md](AVISOS.md#english) lists every source.
 
-## Architecture
-
-```mermaid
-flowchart LR
-  P["Adapters<br/>YouTube, Netflix, generic"] <--> C["Overlay on the video<br/>Shadow DOM"]
-  C <--> M["Offscreen engine<br/>tokenizer, dictionaries,<br/>IndexedDB, Whisper"]
-  A["App and viewer"] <--> M
-  M --> G["GPU<br/>WebGPU: speech and OCR"]
-  M --> CL["Claude API"]
-  M --> AN["Anki"]
-  S["Service worker"] <--> M
-  S <-->|Native Messaging| H["Local helper<br/>PowerShell and yt-dlp"]
-```
-
-TypeScript, Preact, Dexie and esbuild, with ONNX Runtime and Transformers.js on WebGPU for speech and OCR. Each part, the technical decisions and the performance measurements are described in [docs/architecture.md](docs/architecture.md). More than 750 unit tests cover the logic, and end-to-end tests cover the main flows with real Edge and the GPU; [CONTRIBUTING.md](CONTRIBUTING.md) explains how to run them.
-
 ## Project status
 
-Each release ships with its tests and its documentation in six languages; [What’s new](CHANGELOG.md) summarises them. YouTube and English have also been checked by hand with a real session. The interface translations were written with the help of AI and have not yet had a native review: corrections are welcome.
+Each release ships with its tests and its documentation in six languages; [What’s new](CHANGELOG.md) summarises them. It is used and tested on Chrome and Edge, on Windows. YouTube and English have also been checked by hand with a real session. The interface translations were written with the help of AI and have not yet had a native review: corrections are welcome.
 
 ## License and credits
 
@@ -261,6 +305,7 @@ The code is released under the [MIT license](LICENSE). Third-party components, t
 
 - Dictionaries: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) and KANJIDIC (EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium) and [JPDB](https://jpdb.io); for English and German, [Wiktionary](https://www.wiktionary.org) through [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) and [kaikki.org](https://kaikki.org); for Chinese, [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) through [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan).
 - Speech: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja and Parakeet, with [Transformers.js](https://github.com/huggingface/transformers.js).
+- Songs: [Demucs](https://github.com/facebookresearch/demucs) (htdemucs), by Meta, in [timcsy’s ONNX conversion](https://huggingface.co/timcsy/demucs-web-onnx); [narabas](https://github.com/darashi/narabas), by darashi, and [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet), by Google.
 - Text recognition: [PP-OCRv5 and PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) and a [speech bubble detector](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0; for Chinese, [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), from [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), Arphic Public License.
 - Image content: a speech in the Diet from the Prime Minister’s Office of Japan (PDL 1.0) and, in the public domain, Yosano Akiko’s 『源氏物語』 and 『羅生門』 from Aozora Bunko and the opening of 『吾輩は猫である』. The pages from two books carry their credit below the image.

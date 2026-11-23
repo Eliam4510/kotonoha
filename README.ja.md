@@ -2,17 +2,23 @@
   <img src="docs/img/banner.ja.png" alt="Kotonoha：インタラクティブな字幕、辞書、カード、Claude の解説で英語、中国語、ドイツ語を学ぶ" width="100%">
 </p>
 
-<h3 align="center">いつも見ている動画や記事で、英語を学ぶ。</h3>
+<h3 align="center">いつも見ている動画や記事、歌っている歌で、英語を学ぶ。</h3>
 
 <p align="center">
-  動画に重ねるインタラクティブな字幕、文の中での意味までわかる単語パネル、本・PDF・スキャンしたページのライブラリ、そして Anki 用のカード。すべてブラウザーの中で動く、無料のオープンソースです。
+  ドラマや動画に重ねるインタラクティブな字幕、1 行ずつ流れる歌の歌詞、文字認識で読むスキャンした本、文の中での意味までわかる単語パネル、そして Anki 用のカード。音声、文字認識、文の解析は自分のパソコンのグラフィックボードで動きます。無料のオープンソースです。
 </p>
 
 <p align="center">
   <a href="https://github.com/Eliam4510/kotonoha/releases/latest"><img src="https://img.shields.io/github/v/release/Eliam4510/kotonoha?style=for-the-badge&label=%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3&color=A9E45B&labelColor=101218" alt="最新バージョン"></a>
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Eliam4510/kotonoha/ci.yml?style=for-the-badge&label=%E3%83%86%E3%82%B9%E3%83%88&labelColor=101218" alt="継続的インテグレーション"></a>
-  <img src="https://img.shields.io/badge/Chrome%20%C2%B7%20Edge-Manifest%20V3-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome と Edge、Manifest V3">
   <a href="LICENSE"><img src="https://img.shields.io/badge/%E3%83%A9%E3%82%A4%E3%82%BB%E3%83%B3%E3%82%B9-MIT-BCA9FF?style=for-the-badge&labelColor=101218" alt="MIT ライセンス"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D%E6%B8%88%E3%81%BF-Chrome%20%C2%B7%20Edge-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome と Edge で動作確認済み">
+  <img src="https://img.shields.io/badge/WebGPU-%E7%AB%AF%E6%9C%AB%E5%86%85%E3%81%A7%E5%8B%95%E4%BD%9C-A9E45B?style=for-the-badge&logo=webgpu&logoColor=white&labelColor=101218" alt="WebGPU、端末内で動作">
+  <img src="https://img.shields.io/badge/Anki-%E3%82%AB%E3%83%BC%E3%83%89-BCA9FF?style=for-the-badge&logo=anki&logoColor=white&labelColor=101218" alt="Anki 用カード">
+  <img src="https://img.shields.io/badge/Claude-%E4%BB%BB%E6%84%8F-F2B880?style=for-the-badge&logo=claude&logoColor=white&labelColor=101218" alt="Claude は任意">
 </p>
 
 <p align="center">
@@ -29,19 +35,22 @@
   <a href="#インストール">インストール</a> ·
   <a href="docs/ja/guide.md">使い方</a> ·
   <a href="docs/ja/features.md">すべての機能</a> ·
+  <a href="#仕組み">仕組み</a> ·
   <a href="CHANGELOG.md">更新情報</a> ·
   <a href="CONTRIBUTING.md">開発に参加する</a>
 </p>
 
 ## Kotonoha とは
 
-Kotonoha（言の葉）は Chrome と Edge の拡張機能です。YouTube や Netflix のドラマと動画、記事、チャット、本など、ふだん見たり読んだりしているものを英語の教材に変えます。どの単語にも発音記号とその単語をどのくらい知っているかが表示され、タップするとその単語の意味、その文での具体的な意味、カードを作るボタンを備えた単語パネルが開きます。
+Kotonoha（言の葉）は Chrome と Edge の拡張機能です。YouTube、Netflix、Bilibili のドラマと動画、歌、記事、チャット、本など、ふだん見たり読んだり聞いたりしているものを英語の教材に変えます。どの単語にも発音記号とその単語をどのくらい知っているかが表示され、タップするとその単語の意味、その文での具体的な意味、カードを作るボタンを備えた単語パネルが開きます。
 
 すべてが自分のパソコンの中で動きます。辞書、文の解析、音声の文字起こし、本のページの文字認識はブラウザーの外に出ません。Anthropic の Claude は、解説や翻訳を頼んだときだけ使われ、リクエストごとに費用が記録されます。
 
 <table>
   <tr><td><b>見る</b></td><td>YouTube、Netflix、Bilibili、手元の動画ファイルで、単語ごとの学習状態がわかる英語字幕。</td></tr>
-  <tr><td><b>読む</b></td><td>あらゆるウェブページ、コピーした文章、EPUB や PDF の本、画像フォルダーの漫画。スキャンしたページも読めます。</td></tr>
+  <tr><td><b>歌う</b></td><td>歌詞をそのまま貼り付けると、歌われるタイミングで 1 行ずつ表示されます。カラオケのように。</td></tr>
+  <tr><td><b>読む</b></td><td>あらゆるウェブページ、コピーした文章、EPUB や PDF の本、画像フォルダーの漫画。スキャンしたページも、自分のパソコンで文字を認識して読めます。</td></tr>
+  <tr><td><b>話す</b></td><td>中国語の声調を、自分の声で音節ごとに確かめられます。</td></tr>
   <tr><td><b>覚える</b></td><td>場面の音声と画像付きのカードをワンクリックで作成し、Anki または内蔵の復習へ。</td></tr>
   <tr><td><b>言語</b></td><td>英語、中国語、ドイツ語を学べます。表示言語は日本語、英語、スペイン語、ドイツ語、中国語、韓国語です。</td></tr>
 </table>
@@ -74,6 +83,25 @@ flowchart LR
 - 字幕は日本語に翻訳でき、自動生成の字幕はタイトルと台本全体を文脈にして修正されます。
 - 字幕のない動画は、自分のパソコンのグラフィックボードで文字起こしできます。英語の話し声は Parakeet が、30 分の動画を約 1 分で書き起こします。
 
+### 歌の歌詞を、カラオケのように
+
+<img src="docs/img/letra-medidas.ja.svg" alt="グラフ：歌われる位置から 1 秒以内に始まるフレーズの割合。歌詞が全部書かれている場合、Claude が Whisper の行に合わせると 24%、一文字ずつ照合で 84%、声だけを取り出すと 91%。サビが 1 回だけ書かれている場合、24%、AI なしで 80%、Claude が歌詞を読むと 90%" width="100%">
+
+**AI 字幕**パネルの**曲の歌詞**に歌詞を貼り付けると、ミュージックビデオの上でも**プレーヤー**でも、歌われるタイミングで 1 行ずつ表示されます。ほかの字幕と同じように単語パネルが使え、翻訳もでき、どの行もカードにできます。
+
+難しいのは正確なタイミングです。Kotonoha は仕事を分けて、すべて自分のパソコンの中で行います。
+
+1. **Whisper Turbo** が曲を聞き、何がいつ聞こえるかを大まかに示します。
+2. **Demucs** がグラフィックボードで声と楽器を分けます。4 分の曲で約 20 秒です。
+3. 歌詞を Whisper が聞いた内容と**一文字ずつ照合**し、各フレーズに数秒の範囲を決めます。
+4. 音素モデル **narabas** が 20 ミリ秒ごとに音がどの音素に近いかを示し、**強制アライメント**が各範囲の中で歌詞の音素を順にたどります。各フレーズは最初の音素が鳴るところから始まります。
+
+Whisper は何が歌われているかを推測しなければなりませんが、Kotonoha は歌詞を持っているので内容はわかっていて、どこで鳴るかだけを探します。だからフレーズの半分は、歌われる位置から 0.16 秒以内に始まります。バージョン 0.49 までは Whisper の行のタイミングを使っていて、間違えない Claude でも半分は 3 秒近くずれていました。
+
+ネットで見つかる歌詞はたいてい不完全です。サビを 1 回しか書いていなかったり、「(サビ繰り返し)」「[Chorus]」「×2」だったり、コーラスがかっこの中だったり。Kotonoha はそれを実際に歌われるとおりに展開し、**Claude に歌詞を読ませる**をオンにすると、Claude が歌詞全体を読んで、何をどの順番で歌うかを示します。タイミングを決めるのは Claude ではなく声です。どのモデルにも聞き取れない部分は、**タイミングを記録する**でスペースキーを押して手で記録できます。
+
+<sub>声による配置は日本語の歌詞に対応しています。英語などほかの言語の歌詞は、Whisper が聞いた内容と一文字ずつ照合して置きます。同期歌詞のある日本語の曲 51 曲（2,253 フレーズ）で測定：[仕組みと測定方法](docs/ja/architecture.md#曲の歌詞)。</sub>
+
 ### 手元の動画と音声も
 
 <img src="docs/img/reproductor.ja.png" alt="NASA の動画を再生する Kotonoha のプレーヤー：英語字幕と日本語訳、シークバーに見える別の瞬間の台詞" width="100%">
@@ -103,6 +131,8 @@ flowchart LR
 <sub>『不思議の国のアリス』1866 年版、第 1 章の最初のページ。[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Carroll_-_Alice%27s_adventures_in_Wonderland,_1866.djvu)（パブリックドメイン）。</sub>
 
 スキャンした本や多くの PDF のように画像でできたページは、自分のパソコンのグラフィックボードで文字認識（OCR）をして読みます。ページ上の単語をタップすると、その文全体がフローティングウィンドウに単語パネルとともに開き、まだ読んでいない文字を隠しません。ドラッグすれば好きな部分を選んで翻訳や説明ができます。各ページは一度だけ読み取り、保存されます。**文字付きPDFを書き出す**で、その文字を見えないように重ねた PDF として本を書き出し、どの PDF ビューアーでも検索やコピーができます。解像度の低いスキャンには、ビューアーの**シャープネス**が使えます。
+
+ありきたりの文字認識ではありません。スキャンした PDF は、画面に描いたページではなく元の画像をその解像度のまま読みます。英語では 19 世紀の実際のスキャンで文字の誤りが 1.5%、コミックのテストページで 0.4% でした。日本語の本ならふりがなを本文と分け、2 段組みは段ごとに読み、漫画は吹き出しをコマの順に読みます。
 
 ### 読む前に、本の語彙を
 
@@ -157,6 +187,33 @@ flowchart LR
 - **手元のファイル。** パソコンの動画を再生し、MKV に入っている字幕も読み込みます。
 - **自分好みに。** 色覚多様性に配慮した配色や高コントラスト、変更できるショートカット、動作させないサイトの指定。
 
+## 仕組み
+
+重い処理は WebGPU と ONNX Runtime で、自分のパソコンの中で動きます。独自のサーバーもアカウントもありません。どの部品も実際の素材でほかの方法と比べて測ってから選び、数値はリポジトリのスクリプトで再現できます。
+
+| すること | 使うもの | 測定結果 |
+|---|---|---|
+| 字幕のない動画の文字起こし | Haas-ja、Parakeet、Whisper Turbo と Transformers.js | 30 分の動画を約 1 分で。英語の話し声で Parakeet の誤りは 6.8%、Whisper Turbo は 9.6% |
+| 歌詞の配置 | Demucs が声を取り出し、narabas が CTC の上の独自の強制アライメントで各音素を置く | フレーズの半分が歌われる位置から 0.16 秒以内。Whisper のタイミングでは 3 秒近くずれる |
+| 歌っている場所を知る | YAMNet。GPU を Whisper に残すためプロセッサーで | 歌と間奏を AUC 0.9 で区別 |
+| スキャンした本とコミックを読む | PP-OCRv5 が行を見つけ、PP-OCRv6 が読む。コミックは吹き出しごとに | 19 世紀の英語のスキャンで文字の誤り 1.5%、コミックのテストページで 0.4% |
+| 本の語彙を数える | 解析器と IndexedDB の辞書 | 小説 1 冊、約 13 万 5000 語を約 4 秒で |
+| すべてを確かめる | Vitest と、実際の Edge とグラフィックボードで動く Playwright | 単体テスト 1500 以上、エンドツーエンド 40 以上 |
+
+```mermaid
+flowchart LR
+  P["アダプター<br/>YouTube、Netflix、Bilibili、汎用"] <--> C["動画の上のインターフェース<br/>Shadow DOM"]
+  C <--> M["オフスクリーンのエンジン<br/>形態素解析、辞書、<br/>IndexedDB、Whisper"]
+  A["アプリとビューアー"] <--> M
+  M --> G["GPU<br/>WebGPU：音声、歌詞、OCR"]
+  M --> CL["Claude API"]
+  M --> AN["Anki"]
+  S["Service Worker"] <--> M
+  S <-->|Native Messaging| H["ローカルの補助ツール<br/>PowerShell と yt-dlp"]
+```
+
+TypeScript、Preact、Dexie、esbuild で作られ、モデルは WebGPU 上の ONNX Runtime と Transformers.js で動かしています。各部分、技術的な判断、各数値の測り方は [docs/ja/architecture.md](docs/ja/architecture.md) に、テストの実行方法は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
+
 ## Claude なしでできること、Claude で増えること
 
 Kotonoha はキーがなくても使えます。任意で Claude のキーを入れると、言語モデルが必要な機能が加わります。
@@ -166,8 +223,9 @@ Kotonoha はキーがなくても使えます。任意で Claude のキーを入
 | 学習状態がわかる字幕 | 文の中での単語の意味 |
 | 辞書、単語パネル、IPA の発音 | 単語、文、文法の解説 |
 | ページリーダー、ノート、OCR 付きのライブラリ | 字幕の翻訳と修正 |
-| 自分のパソコンでの音声の文字起こし | 歌詞をタイミングに合わせる |
+| 自分のパソコンでの音声の文字起こし | 記号や繰り返しのある歌詞を読む |
 | Anki 用のカードと内蔵の復習 | レベルに合わせた読み物 |
+| 声に合わせた歌詞の配置 | 文字認識の結果をページの画像と照合 |
 
 ふつうの使い方なら、費用は月に数セントです。キーはブラウザーの中だけに保存されます。作業ごとに、Claude の代わりに OpenRouter、DeepSeek、OpenAI、または LM Studio や Ollama で自分のパソコンのモデルを使うこともできます。
 
@@ -203,25 +261,9 @@ Windows ではヘルパーから始めることもできます。`kotonoha-<バ�
 - Claude に送るのは、リクエストに必要なものだけです。文、字幕の台本、タイトルです。
 - 辞書とモデルは GitHub と Hugging Face から一度だけダウンロードします。すべての出典は[告知](docs/ja/notices.md)にあります。
 
-## アーキテクチャ
-
-```mermaid
-flowchart LR
-  P["アダプター<br/>YouTube、Netflix、汎用"] <--> C["動画の上のインターフェース<br/>Shadow DOM"]
-  C <--> M["オフスクリーンのエンジン<br/>形態素解析、辞書、<br/>IndexedDB、Whisper"]
-  A["アプリとビューアー"] <--> M
-  M --> G["GPU<br/>WebGPU：音声と OCR"]
-  M --> CL["Claude API"]
-  M --> AN["Anki"]
-  S["Service Worker"] <--> M
-  S <-->|Native Messaging| H["ローカルの補助ツール<br/>PowerShell と yt-dlp"]
-```
-
-TypeScript、Preact、Dexie、esbuild で作られ、音声と OCR には WebGPU 上の ONNX Runtime と Transformers.js を使っています。各部分、技術的な判断、性能の測定は [docs/ja/architecture.md](docs/ja/architecture.md) にあります。750 を超える単体テストが中心のロジックを、エンドツーエンドのテストが実際の Edge と GPU で主な流れを確かめています。実行方法は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
-
 ## プロジェクトの状況
 
-どのバージョンもテストと 6 言語のドキュメントとともに公開され、[更新情報](CHANGELOG.md)にまとめています。YouTube と英語は、実際のセッションで手作業でも確認しました。表示言語の翻訳は AI の助けを借りて書いたもので、まだネイティブのチェックを受けていません。修正の提案を歓迎します。
+どのバージョンもテストと 6 言語のドキュメントとともに公開され、[更新情報](CHANGELOG.md)にまとめています。Windows の Chrome と Edge で使い、テストしています。YouTube と英語は、実際のセッションで手作業でも確認しました。表示言語の翻訳は AI の助けを借りて書いたもので、まだネイティブのチェックを受けていません。修正の提案を歓迎します。
 
 ## ライセンスとクレジット
 
@@ -229,6 +271,7 @@ TypeScript、Preact、Dexie、esbuild で作られ、音声と OCR には WebGPU
 
 - 辞書：英語とドイツ語は [Wiktionary](https://www.wiktionary.org)（[wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) と [kaikki.org](https://kaikki.org) による整形）、頻度は [FrequencyWords](https://github.com/hermitdave/FrequencyWords)、英語の解析は [wink-nlp](https://github.com/winkjs/wink-nlp)。中国語は [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)（[cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) による整形）。日本語は [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium)、[JPDB](https://jpdb.io)。
 - 音声：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja、Parakeet と [Transformers.js](https://github.com/huggingface/transformers.js)。
+- 歌：Meta の [Demucs](https://github.com/facebookresearch/demucs)（htdemucs）と [timcsy による ONNX 変換](https://huggingface.co/timcsy/demucs-web-onnx)、darashi の [narabas](https://github.com/darashi/narabas)、Google の [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet)。
 - 文字認識：[PP-OCRv5 と PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr)、[吹き出し検出モデル](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - 書き順：日本語は [KanjiVG](https://kanjivg.tagaini.net)（Ulrich Apel、CC BY-SA 3.0）、中国語は [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) 由来の [Hanzi Writer](https://github.com/chanind/hanzi-writer-data)（Arphic Public License）。
 - 画像の内容：NASA の動画とその字幕、ルイス・キャロル『不思議の国のアリス』（本文と 1866 年版のスキャンは Wikisource と Wikimedia Commons から）、ジェイン・オースティン『高慢と偏見』の冒頭で、すべてパブリックドメインです。

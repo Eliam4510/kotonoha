@@ -174,6 +174,7 @@ Gemessen mit japanischen Liedern offizieller Kanäle und ihrem synchronisierten 
 
 | Wie er gesetzt wird | Die Hälfte unter | Neun von zehn unter |
 |---|---|---|
+| Claude auf den Zeilen von Whisper, wie bis 0.49, mit einem idealen Claude | 2,99 s | 11,58 s |
 | Buchstabe für Buchstabe mit dem von Whisper Gehörten | 0,34 s | 1,46 s |
 | Mit der Stimme, auf der Mischung | 0,19 s | 1,59 s |
 | Mit freigestellter Stimme | 0,16 s | 0,9 s |

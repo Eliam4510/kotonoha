@@ -176,6 +176,7 @@ Medido con canciones japonesas de canales oficiales y su letra sincronizada, YAM
 
 | Cómo se coloca | La mitad, a menos de | Nueve de cada diez, a menos de |
 |---|---|---|
+| Claude sobre las líneas de Whisper, como hasta la 0.49, con un Claude ideal | 2,99 s | 11,58 s |
 | Letra a letra con lo que oyó Whisper | 0,34 s | 1,46 s |
 | Con la voz, sobre la mezcla | 0,19 s | 1,59 s |
 | Con la voz aislada | 0,16 s | 0,9 s |

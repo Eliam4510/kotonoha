@@ -176,6 +176,7 @@ Measured with Japanese songs from official channels and their synced lyrics, YAM
 
 | How it is placed | Half, within | Nine in ten, within |
 |---|---|---|
+| Claude on Whisper’s lines, as up to 0.49, with an ideal Claude | 2.99 s | 11.58 s |
 | Letter by letter with what Whisper heard | 0.34 s | 1.46 s |
 | With the voice, on the mix | 0.19 s | 1.59 s |
 | With the voice isolated | 0.16 s | 0.9 s |

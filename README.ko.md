@@ -2,17 +2,23 @@
   <img src="docs/img/banner.ko.png" alt="Kotonoha: 대화형 자막, 사전, 카드, Claude 설명으로 일본어, 영어, 중국어, 독일어를 배웁니다" width="100%">
 </p>
 
-<h3 align="center">늘 보고 읽는 콘텐츠로 일본어와 영어를 배우세요.</h3>
+<h3 align="center">늘 보고, 읽고, 부르는 콘텐츠로 일본어와 영어를 배우세요.</h3>
 
 <p align="center">
-  영상 위의 대화형 자막, 문장 속 뜻까지 알려 주는 단어 패널, 책·PDF·만화를 위한 서재, 그리고 Anki용 카드. 모두 브라우저 안에서, 무료 오픈 소스로 동작합니다.
+  드라마와 영상 위의 대화형 자막, 한 소절씩 따라 나오는 노래 가사, OCR로 읽는 만화와 스캔한 책, 문장 속 뜻까지 알려 주는 단어 패널, 그리고 Anki용 카드. 음성, OCR, 텍스트 분석은 내 컴퓨터의 그래픽카드에서 실행됩니다. 무료 오픈 소스입니다.
 </p>
 
 <p align="center">
   <a href="https://github.com/Eliam4510/kotonoha/releases/latest"><img src="https://img.shields.io/github/v/release/Eliam4510/kotonoha?style=for-the-badge&label=%EB%B2%84%EC%A0%84&color=A9E45B&labelColor=101218" alt="최신 버전"></a>
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Eliam4510/kotonoha/ci.yml?style=for-the-badge&label=%ED%85%8C%EC%8A%A4%ED%8A%B8&labelColor=101218" alt="지속적 통합"></a>
-  <img src="https://img.shields.io/badge/Chrome%20%C2%B7%20Edge-Manifest%20V3-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome과 Edge, Manifest V3">
   <a href="LICENSE"><img src="https://img.shields.io/badge/%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4-MIT-BCA9FF?style=for-the-badge&labelColor=101218" alt="MIT 라이선스"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/%ED%85%8C%EC%8A%A4%ED%8A%B8%20%EC%99%84%EB%A3%8C-Chrome%20%C2%B7%20Edge-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome과 Edge에서 테스트 완료">
+  <img src="https://img.shields.io/badge/WebGPU-%EB%82%B4%20%EC%BB%B4%ED%93%A8%ED%84%B0%EC%97%90%EC%84%9C-A9E45B?style=for-the-badge&logo=webgpu&logoColor=white&labelColor=101218" alt="WebGPU, 내 컴퓨터에서">
+  <img src="https://img.shields.io/badge/Anki-%EC%B9%B4%EB%93%9C-BCA9FF?style=for-the-badge&logo=anki&logoColor=white&labelColor=101218" alt="Anki 카드">
+  <img src="https://img.shields.io/badge/Claude-%EC%84%A0%ED%83%9D%20%EC%82%AC%ED%95%AD-F2B880?style=for-the-badge&logo=claude&logoColor=white&labelColor=101218" alt="Claude, 선택 사항">
 </p>
 
 <p align="center">
@@ -29,19 +35,22 @@
   <a href="#설치">설치</a> ·
   <a href="docs/ko/guide.md">사용 안내</a> ·
   <a href="docs/ko/features.md">전체 기능</a> ·
+  <a href="#내부-구조">내부 구조</a> ·
   <a href="CHANGELOG.md">새로운 기능</a> ·
   <a href="CONTRIBUTING.md">기여하기</a>
 </p>
 
 ## Kotonoha란
 
-Kotonoha(言の葉, '말의 잎')는 Chrome과 Edge용 확장 프로그램으로, 이미 보고 읽는 것을 학습 자료로 바꿔 줍니다. YouTube와 Netflix의 드라마와 영상, 기사, 채팅, 책과 만화까지요. 모든 단어에 읽는 법과 얼마나 알고 있는지가 표시되고, 단어를 누르면 뜻, 바로 그 문장에서의 의미, 카드를 만드는 버튼이 담긴 패널이 열립니다.
+Kotonoha(言の葉, '말의 잎')는 Chrome과 Edge용 확장 프로그램으로, 이미 보고, 읽고, 듣는 것을 학습 자료로 바꿔 줍니다. YouTube, Netflix, Bilibili의 드라마와 영상, 노래, 기사, 채팅, 책과 만화까지요. 모든 단어에 읽는 법과 얼마나 알고 있는지가 표시되고, 단어를 누르면 뜻, 바로 그 문장에서의 의미, 카드를 만드는 버튼이 담긴 패널이 열립니다.
 
 모든 것이 내 컴퓨터에서 실행됩니다. 사전, 텍스트 분석, 음성 받아쓰기, 책 페이지의 문자 인식은 브라우저 밖으로 나가지 않습니다. Anthropic의 Claude는 설명이나 번역을 요청할 때만 쓰이며, 요청마다 비용이 기록됩니다.
 
 <table>
   <tr><td><b>보기</b></td><td>YouTube, Netflix, Bilibili와 내 파일에서 후리가나, 높낮이 악센트, 단어별 학습 상태가 표시되는 자막.</td></tr>
-  <tr><td><b>읽기</b></td><td>모든 웹페이지, 복사한 내용, 스캔본과 이미지 폴더를 포함한 EPUB, PDF, 만화.</td></tr>
+  <tr><td><b>부르기</b></td><td>노래 가사를 있는 그대로 붙여넣으면, 부르는 순간에 맞춰 한 소절씩 나옵니다. 노래방처럼요.</td></tr>
+  <tr><td><b>읽기</b></td><td>모든 웹페이지, 복사한 내용, 스캔본과 이미지 폴더를 포함한 EPUB, PDF, 만화. 페이지의 글자는 내 컴퓨터에서 인식합니다.</td></tr>
+  <tr><td><b>말하기</b></td><td>소리 내어 읽으면 Kotonoha가 목소리를 단어마다의 높낮이 악센트와, 중국어라면 성조와 비교합니다.</td></tr>
   <tr><td><b>기억하기</b></td><td>장면의 오디오와 이미지가 담긴 카드를 클릭 한 번으로 Anki나 내장 복습에 보냅니다.</td></tr>
   <tr><td><b>언어</b></td><td>일본어, 영어, 중국어, 독일어를 배울 수 있습니다. 인터페이스는 한국어, 영어, 스페인어, 독일어, 중국어, 일본어로 제공됩니다.</td></tr>
 </table>
@@ -74,6 +83,25 @@ flowchart LR
 - 자막을 내 언어로 번역하고, 자동 생성 자막은 제목과 전체 대본을 맥락 삼아 바로잡습니다.
 - 자막이 없는 영상은 내 컴퓨터의 그래픽카드로 받아쓰기합니다. 30분짜리 영상이 약 1분이면 끝납니다.
 
+### 내 노래를 노래방처럼
+
+<img src="docs/img/letra-medidas.ko.svg" alt="그래프: 부르는 위치에서 1초 이내에 시작하는 소절의 비율. 가사가 전부 있을 때 Claude가 Whisper의 줄에 맞추면 24%, 글자 단위 대조 84%, 목소리를 분리하면 91%. 후렴을 한 번만 적었을 때 24%, AI 없이 80%, Claude가 가사를 읽으면 90%" width="100%">
+
+**AI 자막** 패널의 **노래 가사**에 노래 가사를 붙여넣으면, 뮤직비디오 위에서든 **플레이어**에서든 각 소절이 부르는 순간에 나옵니다. 다른 자막과 똑같이 후리가나, 색, 단어 패널이 붙고, 번역할 수 있으며, 어느 소절이든 카드로 만들 수 있습니다.
+
+어려운 것은 정확한 순간입니다. Kotonoha는 일을 나눠서, 모두 내 컴퓨터에서 해냅니다.
+
+1. **Whisper Turbo**가 노래를 듣고 무엇이 언제 들리는지 대략 알려 줍니다.
+2. **Demucs**가 그래픽카드에서 목소리를 악기와 분리합니다. 4분짜리 노래가 약 20초면 됩니다.
+3. 가사를 Whisper가 들은 내용과 **글자 단위로 대조**해, 소절마다 몇 초 폭의 구간을 정합니다.
+4. 음소 모델 **narabas**가 20ms마다 소리가 어떤 음소와 닮았는지 알려 주고, **강제 정렬**이 각 구간 안에서 가사의 음소를 순서대로 따라갑니다. 각 소절은 첫 음소가 울리는 곳에서 시작합니다.
+
+Whisper는 무엇을 부르는지 추측해야 하지만, Kotonoha는 가사가 있으니 이미 알고 있고, 어디서 울리는지만 찾습니다. 그래서 소절의 절반이 부르는 위치에서 0.16초 이내에 시작합니다. 0.49 버전까지는 Whisper의 줄 시간을 썼고, 실수하지 않는 Claude라도 절반이 3초 가까이 어긋났습니다.
+
+인터넷에서 찾은 가사는 완전한 경우가 드뭅니다. 후렴을 한 번만 적거나, '(サビ繰り返し)', '[Chorus]', '×2'로 적거나, 코러스를 괄호에 넣습니다. Kotonoha는 이를 실제로 부르는 대로 펼치고, **Claude가 가사를 읽게 하기**를 켜면 Claude가 가사 전체를 읽고 무엇을 어떤 순서로 부르는지 알려 줍니다. 시간은 Claude가 아니라 목소리가 정합니다. 어떤 모델도 알아듣지 못하는 부분은 **타이밍 표시하기**로 스페이스바를 눌러 직접 표시할 수 있습니다.
+
+<sub>목소리로 배치하는 것은 일본어 가사입니다. 다른 언어의 가사는 Whisper가 들은 내용과 글자 단위로 대조합니다. 싱크 가사가 있는 일본 노래 51곡(2,253소절)으로 측정: [작동 방식과 측정 방법](docs/ko/architecture.md#노래-가사).</sub>
+
 ### 내 영상과 오디오
 
 <img src="docs/img/reproductor.ko.png" alt="일본 국회 연설을 재생 중인 Kotonoha 플레이어: 일본어 자막과 번역, 재생 막대 위에 보이는 다른 순간의 문장" width="100%">
@@ -101,6 +129,8 @@ flowchart LR
 <img src="docs/img/ocr.ko.png" alt="유기화학 책의 스캔 페이지와 인식한 문자, 페이지 위 단어마다 붙은 후리가나와 밑줄, 문장과 結合을 보여 주는 떠 있는 창" width="100%">
 
 만화, 스캔한 책, 많은 PDF처럼 이미지로 된 페이지는 내 컴퓨터의 그래픽카드로 문자 인식(OCR)을 합니다. 인쇄된 책을 위한 모드와 만화를 위한 모드가 있으며, 만화 모드는 세로쓰기 말풍선을 읽으면서 후리가나를 본문과 섞지 않습니다. 페이지에서 단어를 누르면 그 문장 전체가 떠 있는 창에 후리가나, 단어 패널과 함께 열리며 아직 읽지 않은 글을 가리지 않습니다. 끌어서 원하는 부분을 선택해 번역하거나 설명을 볼 수 있습니다. 각 페이지는 한 번만 인식하고 저장합니다. **글이 들어간 PDF 내보내기**로 그 글을 보이지 않게 얹은 PDF로 책을 내보내, 어떤 PDF 뷰어에서든 검색하고 복사할 수 있습니다. 해상도가 낮은 스캔본을 위해 뷰어에는 **선명도**가 있습니다.
+
+평범한 OCR이 아닙니다. 책에서는 PP-OCRv5가 찾은 줄을 PP-OCRv6가 읽고, 인쇄된 후리가나를 본문과 구분하며, 2단 페이지는 단별로 읽습니다. 스캔한 PDF는 화면에 그린 페이지가 아니라 원본 이미지를 그 해상도 그대로 읽습니다. 180dpi로 스캔한 화학책에서 문자 오류율은 0.2%입니다. 만화에서는 검출기가 말풍선을 찾고, manga-ocr이 컷 순서대로 읽으며, 워터마크와 쪽 번호는 뺍니다.
 
 <img src="docs/img/manga.ko.png" alt="만화 모드로 읽은 【推しの子】의 한 페이지와 떠 있는 창에 열린 말풍선, 愛의 단어 패널" width="100%">
 
@@ -193,6 +223,35 @@ flowchart LR
 - **내 파일.** 컴퓨터에 있는 영상을 재생하고 MKV에 든 자막을 읽습니다.
 - **맞춤 설정.** 색각 이상과 고대비를 위한 색, 가나 또는 로마자 읽기, 바꿀 수 있는 단축키, 동작하지 않을 사이트.
 
+## 내부 구조
+
+무거운 작업은 WebGPU와 ONNX Runtime으로 내 컴퓨터에서 실행됩니다. 자체 서버도, 계정도 없습니다. 각 부품은 실제 자료로 다른 방법과 비교해 측정한 뒤 골랐고, 수치는 저장소의 스크립트로 다시 확인할 수 있습니다.
+
+| 하는 일 | 사용하는 것 | 측정 결과 |
+|---|---|---|
+| 자막 없는 영상 받아쓰기 | Haas-ja, Parakeet, Whisper Turbo와 Transformers.js | 30분짜리 영상을 약 1분에. 일본어 말소리에서 오류율 3%, Whisper Turbo는 9% |
+| 노래 가사 배치 | Demucs가 목소리를 분리하고, narabas가 CTC 위의 자체 강제 정렬로 각 음소를 제자리에 놓음 | 소절의 절반이 부르는 위치에서 0.16초 이내. Whisper의 시간으로는 3초 가까이 어긋남 |
+| 노래하는 곳 찾기 | YAMNet, GPU를 Whisper에 남기려고 프로세서에서 실행 | 노래와 간주를 AUC 0.9로 구분 |
+| 스캔한 책 읽기 | PP-OCRv5가 줄을 찾고 PP-OCRv6가 읽음. 후리가나와 단은 따로 처리 | 180dpi로 스캔한 화학책에서 문자 오류율 0.2% |
+| 만화 읽기 | 말풍선 검출기와 manga-ocr, 컷 순서대로 | 다섯 작품 18페이지에서 오류율 2.8% |
+| 소리 내어 읽기 | WebGPU에서 도는 AivisHub 음성과 TypeScript로 만든 OpenJTalk인 yomi | 모라마다의 높낮이가 AivisSpeech와 92% 일치 |
+| 책의 어휘 세기 | Kuromoji와 IndexedDB 속 사전 | 장편소설 한 권, 약 13만 5천 단어를 약 4초에 |
+| 모두 검증하기 | Vitest, 그리고 실제 Edge와 그래픽카드에서 도는 Playwright | 단위 테스트 1,500개 이상, 엔드투엔드 40개 이상 |
+
+```mermaid
+flowchart LR
+  P["어댑터<br/>YouTube, Netflix, Bilibili, 일반"] <--> C["영상 위 인터페이스<br/>Shadow DOM"]
+  C <--> M["오프스크린 엔진<br/>형태소 분석기, 사전,<br/>IndexedDB, Whisper"]
+  A["앱과 뷰어"] <--> M
+  M --> G["GPU<br/>WebGPU: 음성, 가사, OCR"]
+  M --> CL["Claude API"]
+  M --> AN["Anki"]
+  S["서비스 워커"] <--> M
+  S <-->|Native Messaging| H["로컬 도우미<br/>PowerShell과 yt-dlp"]
+```
+
+TypeScript, Preact, Dexie, esbuild를 쓰며, 모델은 WebGPU 위의 ONNX Runtime과 Transformers.js로 실행합니다. 각 부분, 기술적 결정, 각 수치를 어떻게 측정했는지는 [docs/ko/architecture.md](docs/ko/architecture.md)에, 테스트 실행 방법은 [CONTRIBUTING.md](CONTRIBUTING.md)에 있습니다.
+
 ## Claude 없이 되는 것, Claude로 더해지는 것
 
 Kotonoha는 키 없이도 동작합니다. 선택 사항인 Claude 키를 넣으면 언어 모델이 필요한 기능이 더해집니다.
@@ -204,6 +263,7 @@ Kotonoha는 키 없이도 동작합니다. 선택 사항인 Claude 키를 넣으
 | 페이지 리더, 노트, OCR을 갖춘 서재 | 자막 번역과 교정 |
 | 내 컴퓨터에서 하는 음성 받아쓰기 | 후리가나 읽기 검토 |
 | Anki 카드와 내장 복습 | 수준에 맞춘 이야기 |
+| 목소리에 맞춰 배치하는 노래 가사 | 표시와 반복이 있는 가사를 Claude가 읽기 |
 
 보통의 사용이라면 한 달에 몇 센트 정도입니다. 키는 브라우저에만 저장됩니다. 작업마다 Claude 대신 OpenRouter, DeepSeek, OpenAI, 또는 LM Studio나 Ollama로 자신의 컴퓨터에 있는 모델을 쓸 수도 있습니다.
 
@@ -239,25 +299,9 @@ Windows에서는 도우미부터 시작할 수도 있습니다. `kotonoha-<버�
 - Claude에는 요청마다 필요한 내용만 보냅니다. 문장, 자막 대본, 제목입니다.
 - 사전과 모델은 GitHub와 Hugging Face에서 한 번만 내려받습니다. [고지](docs/ko/notices.md)에 모든 출처가 있습니다.
 
-## 아키텍처
-
-```mermaid
-flowchart LR
-  P["어댑터<br/>YouTube, Netflix, 일반"] <--> C["영상 위 인터페이스<br/>Shadow DOM"]
-  C <--> M["오프스크린 엔진<br/>형태소 분석기, 사전,<br/>IndexedDB, Whisper"]
-  A["앱과 뷰어"] <--> M
-  M --> G["GPU<br/>WebGPU: 음성과 OCR"]
-  M --> CL["Claude API"]
-  M --> AN["Anki"]
-  S["서비스 워커"] <--> M
-  S <-->|Native Messaging| H["로컬 도우미<br/>PowerShell과 yt-dlp"]
-```
-
-TypeScript, Preact, Dexie, esbuild를 쓰며, 음성과 OCR에는 WebGPU 위의 ONNX Runtime과 Transformers.js를 사용합니다. 각 부분과 기술적 결정, 성능 측정은 [docs/ko/architecture.md](docs/ko/architecture.md)에 있습니다. 750개가 넘는 단위 테스트가 핵심 로직을, 엔드투엔드 테스트가 실제 Edge와 GPU에서 주요 흐름을 검증합니다. 실행 방법은 [CONTRIBUTING.md](CONTRIBUTING.md)에 있습니다.
-
 ## 프로젝트 상태
 
-모든 버전은 테스트와 6개 언어 문서와 함께 나오며, [새로운 기능](CHANGELOG.md)에 버전별 요약이 있습니다. YouTube와 영어는 실제 세션에서 직접 확인하기도 했습니다. 인터페이스 번역은 AI의 도움을 받아 작성했으며 아직 원어민 검토를 거치지 않았습니다. 수정 제안을 환영합니다.
+모든 버전은 테스트와 6개 언어 문서와 함께 나오며, [새로운 기능](CHANGELOG.md)에 버전별 요약이 있습니다. Windows의 Chrome과 Edge에서 사용하고 테스트합니다. YouTube와 영어는 실제 세션에서 직접 확인하기도 했습니다. 인터페이스 번역은 AI의 도움을 받아 작성했으며 아직 원어민 검토를 거치지 않았습니다. 수정 제안을 환영합니다.
 
 ## 라이선스와 크레디트
 
@@ -265,6 +309,7 @@ TypeScript, Preact, Dexie, esbuild를 쓰며, 음성과 OCR에는 WebGPU 위의 
 
 - 사전: [JMdict](https://www.edrdg.org/jmdict/j_jmdict.html)와 KANJIDIC(EDRDG), [Kanjium](https://github.com/mifunetoshiro/kanjium), [JPDB](https://jpdb.io). 영어와 독일어는 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan)과 [kaikki.org](https://kaikki.org)를 거친 [Wiktionary](https://www.wiktionary.org). 중국어는 [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan)을 거친 [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict).
 - 음성: [Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), Haas-ja, Parakeet과 [Transformers.js](https://github.com/huggingface/transformers.js).
+- 노래: Meta의 [Demucs](https://github.com/facebookresearch/demucs)(htdemucs)와 [timcsy의 ONNX 변환](https://huggingface.co/timcsy/demucs-web-onnx), darashi의 [narabas](https://github.com/darashi/narabas), Google의 [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet).
 - 문자 인식: [PP-OCRv5와 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr), [말풍선 검출기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - 획순: Ulrich Apel의 [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0. 중국어는 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)에서 나온 [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), Arphic Public License.
 - 그림의 내용: 일본 총리관저의 국회 연설(PDL 1.0), NASA 영상, 아오조라 문고의 요사노 아키코판 『源氏物語』와 『羅生門』, 『吾輩は猫である』의 첫머리로, 연설을 빼면 모두 퍼블릭 도메인입니다. 두 책의 페이지는 그림 아래에 출처를 적었습니다.

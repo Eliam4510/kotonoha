@@ -2,17 +2,23 @@
   <img src="docs/img/banner.zh.png" alt="Kotonoha：交互式字幕、词典、卡片和 Claude 讲解，学习日语、英语、中文和德语" width="100%">
 </p>
 
-<h3 align="center">用你每天在看、在读的内容学日语和英语。</h3>
+<h3 align="center">用你每天在看、在读、在唱的内容学日语和英语。</h3>
 
 <p align="center">
-  视频上的交互式字幕，能结合句子理解每个词的单词面板，书籍、PDF 和漫画的书库，以及可导入 Anki 的记忆卡片。全部在浏览器里完成，免费且开源。
+  剧集和视频上的交互式字幕，逐句跟唱的歌词，用 OCR 读懂的漫画和扫描书，能结合句子理解每个词的单词面板，以及可导入 Anki 的记忆卡片。语音、OCR 和文本分析都在你自己的电脑上用显卡完成。免费且开源。
 </p>
 
 <p align="center">
   <a href="https://github.com/Eliam4510/kotonoha/releases/latest"><img src="https://img.shields.io/github/v/release/Eliam4510/kotonoha?style=for-the-badge&label=%E7%89%88%E6%9C%AC&color=A9E45B&labelColor=101218" alt="最新版本"></a>
   <a href="https://github.com/Eliam4510/kotonoha/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Eliam4510/kotonoha/ci.yml?style=for-the-badge&label=%E6%B5%8B%E8%AF%95&labelColor=101218" alt="持续集成"></a>
-  <img src="https://img.shields.io/badge/Chrome%20%C2%B7%20Edge-Manifest%20V3-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="Chrome 和 Edge，Manifest V3">
   <a href="LICENSE"><img src="https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF-MIT-BCA9FF?style=for-the-badge&labelColor=101218" alt="MIT 许可"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/%E5%B7%B2%E6%B5%8B%E8%AF%95-Chrome%20%C2%B7%20Edge-8FCBFF?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=101218" alt="已在 Chrome 和 Edge 上测试">
+  <img src="https://img.shields.io/badge/WebGPU-%E5%9C%A8%E6%9C%AC%E6%9C%BA%E8%BF%90%E8%A1%8C-A9E45B?style=for-the-badge&logo=webgpu&logoColor=white&labelColor=101218" alt="WebGPU，在本机运行">
+  <img src="https://img.shields.io/badge/Anki-%E5%8D%A1%E7%89%87-BCA9FF?style=for-the-badge&logo=anki&logoColor=white&labelColor=101218" alt="Anki 卡片">
+  <img src="https://img.shields.io/badge/Claude-%E5%8F%AF%E9%80%89-F2B880?style=for-the-badge&logo=claude&logoColor=white&labelColor=101218" alt="Claude，可选">
 </p>
 
 <p align="center">
@@ -29,19 +35,22 @@
   <a href="#安装">安装</a> ·
   <a href="docs/zh/guide.md">使用指南</a> ·
   <a href="docs/zh/features.md">全部功能</a> ·
+  <a href="#技术内幕">技术内幕</a> ·
   <a href="CHANGELOG.md">更新内容</a> ·
   <a href="CONTRIBUTING.md">参与贡献</a>
 </p>
 
 ## Kotonoha 是什么
 
-Kotonoha（言の葉，“言语之叶”）是一款适用于 Chrome 和 Edge 的扩展，把你本来就在看、在读的内容变成学习材料：YouTube 和 Netflix 上的剧集与视频、文章、聊天、书籍和漫画。每个词都会显示读音和你的掌握程度，点一下就会打开单词面板，里面有释义、它在这句话里的具体含义，以及一个生成卡片的按钮。
+Kotonoha（言の葉，“言语之叶”）是一款适用于 Chrome 和 Edge 的扩展，把你本来就在看、在读、在听的内容变成学习材料：YouTube、Netflix 和哔哩哔哩上的剧集与视频、歌曲、文章、聊天、书籍和漫画。每个词都会显示读音和你的掌握程度，点一下就会打开单词面板，里面有释义、它在这句话里的具体含义，以及一个生成卡片的按钮。
 
 一切都在你自己的电脑上运行。词典、文本分析、语音转写和书页上的文字识别都不会离开浏览器。只有当你请求讲解或翻译时，才会用到 Anthropic 的 Claude，每次请求都会记录费用。
 
 <table>
   <tr><td><b>看</b></td><td>在 YouTube、Netflix、哔哩哔哩和本地文件中，字幕带有振假名、音调重音和每个词的学习状态。</td></tr>
-  <tr><td><b>读</b></td><td>任意网页、你复制的内容，以及 EPUB、PDF 和漫画书籍，扫描版和图片文件夹也可以。</td></tr>
+  <tr><td><b>唱</b></td><td>把歌词原样粘贴进来，每一句都会在唱到时出现，就像卡拉 OK。</td></tr>
+  <tr><td><b>读</b></td><td>任意网页、你复制的内容，以及 EPUB、PDF 和漫画书籍，扫描版和图片文件夹也可以：每一页的文字都在你自己的电脑上识别。</td></tr>
+  <tr><td><b>说</b></td><td>大声朗读，Kotonoha 会把你的声音和每个词的音调重音对比，学中文时则对比声调。</td></tr>
   <tr><td><b>记</b></td><td>一键生成卡片，附带场景的音频和画面，可送往 Anki 或内置复习。</td></tr>
   <tr><td><b>语言</b></td><td>可以学习日语、英语、中文或德语。界面提供简体中文、英语、西班牙语、德语、韩语和日语。</td></tr>
 </table>
@@ -74,6 +83,25 @@ flowchart LR
 - 字幕可以翻译成你的语言，自动生成的字幕会结合标题和整个剧本进行纠正。
 - 没有字幕的视频可以在你自己的电脑上用显卡转写：30 分钟的视频大约一分钟完成。
 
+### 你的歌，像卡拉 OK 一样
+
+<img src="docs/img/letra-medidas.zh.svg" alt="图表：在演唱位置 1 秒以内开始的句子比例。歌词完整时，Claude 依据 Whisper 的行为 24%，逐字对照为 84%，分离出人声后为 91%；副歌只写了一遍时，分别为 24%、不用 AI 的 80%，以及 Claude 阅读歌词时的 90%" width="100%">
+
+把一首歌的歌词粘贴到 **AI 字幕**面板的**歌词**中，每一句都会在唱到时出现，无论是在音乐视频上还是在**播放器**里。它们和其他字幕一样：带振假名、颜色和单词面板，可以翻译，每一句都能做成卡片。
+
+难的是准确的时刻。Kotonoha 把工作拆开来做，而且全部在你自己的电脑上完成：
+
+1. **Whisper Turbo** 听整首歌，大致说出听到了什么、在什么时候。
+2. **Demucs** 用显卡把人声从伴奏中分离出来：一首四分钟的歌大约 20 秒。
+3. 歌词与 Whisper 听到的内容**逐字对照**，每一句得到一个几秒宽的范围。
+4. **narabas** 是一个音素模型，每 20 毫秒说出当前的声音像哪个音素；**强制对齐**在每个范围内按顺序走过歌词的音素：每一句都从它的第一个音素响起的地方开始。
+
+Whisper 得去猜唱的是什么；Kotonoha 已经知道，因为它有歌词，只需找出歌词在哪里响起。所以一半的句子在离演唱位置不到 0.16 秒的地方开始。到 0.49 版为止，时间来自 Whisper 的行，即使 Claude 一点不出错，一半的句子也会差将近 3 秒。
+
+网上找到的歌词很少是完整的：副歌只写一遍、“(サビ繰り返し)”、“[Chorus]”、“×2”、括号里的和声。Kotonoha 会按实际演唱把它们展开；打开**让 Claude 阅读歌词**后，Claude 会通读歌词，说出唱什么、按什么顺序。时间不是 Claude 定的，而是由人声决定。任何模型都听不懂的部分，可以用**标记时间**按空格键手动标记。
+
+<sub>按人声定位适用于日语歌词；其他语言的歌词会与 Whisper 听到的内容逐字对照。用 51 首带同步歌词的日语歌曲（2253 句）测量：[工作原理与测量方法](docs/zh/architecture.md#歌词)。</sub>
+
 ### 你的视频和音频
 
 <img src="docs/img/reproductor.zh.png" alt="Kotonoha 播放器播放日本国会演讲：日语字幕和译文，鼠标移到进度条上时显示另一时刻的那句话" width="100%">
@@ -101,6 +129,8 @@ flowchart LR
 <img src="docs/img/ocr.zh.png" alt="一本有机化学书的扫描页面、识别出的文字、页面上每个词的注音和下划线，以及显示句子和 結合 的浮动窗口" width="100%">
 
 图片形式的页面，比如漫画、扫描书和许多 PDF，会在你自己的电脑上用显卡进行文字识别（OCR）。有印刷书籍模式，也有漫画模式；漫画模式能读取竖排对话框，而不会把振假名混进正文。在页面上点一个词，就会在浮动窗口中打开它所在的整句话，带振假名和单词面板，而且不会挡住还没读的文字；拖动可以选中任意一段，来翻译或解释。每一页只识别一次，并会保存下来。用**导出带文字的 PDF**，可以把书导出为叠着隐形文字的 PDF，在任何 PDF 阅读器中搜索和复制；对于低分辨率的扫描件，阅读器提供**清晰度**。
+
+这不是普通的 OCR。读书时，PP-OCRv5 找出文字行，PP-OCRv6 识别它们，把印刷的振假名和正文分开，双栏页面按栏阅读；扫描版 PDF 直接按原有分辨率读取原始图像，而不是屏幕上绘制的页面：在以 180 dpi 扫描的化学书上，字符错误率为 0.2%。读漫画时，检测器找出对话框，manga-ocr 按分镜顺序识别，并略去水印和页码。
 
 <img src="docs/img/manga.zh.png" alt="用漫画模式读取的 【推しの子】 页面，浮动窗口中打开了对话框，并显示 愛 的单词面板" width="100%">
 
@@ -193,6 +223,35 @@ flowchart LR
 - **本地文件。** 可以播放电脑上的视频，并读取 MKV 中的字幕。
 - **按需定制。** 色盲友好和高对比度配色、假名或罗马字读音、可修改的快捷键，以及可以停用的网站。
 
+## 技术内幕
+
+繁重的计算都在你自己的电脑上用 WebGPU 和 ONNX Runtime 完成：没有自己的服务器，也不需要账号。每个部件都用真实材料与其他方案对比测量后才选定，所有数字都能用仓库里的脚本复现。
+
+| 做什么 | 用什么 | 测量结果 |
+|---|---|---|
+| 转写没有字幕的内容 | Haas-ja、Parakeet 和 Whisper Turbo，借助 Transformers.js | 30 分钟的视频约一分钟；日语口语的错误率为 3%，Whisper Turbo 为 9% |
+| 放置歌词 | Demucs 分离人声，narabas 借助自研的 CTC 强制对齐把每个音素放到位 | 一半的句子离演唱位置不到 0.16 秒；用 Whisper 的时间则差将近 3 秒 |
+| 判断哪里在唱 | YAMNet，在处理器上运行，把 GPU 留给 Whisper | 区分演唱和间奏的 AUC 为 0.9 |
+| 读扫描书 | PP-OCRv5 找出文字行，PP-OCRv6 识别，振假名和分栏单独处理 | 以 180 dpi 扫描的化学书，字符错误率 0.2% |
+| 读漫画 | 对话框检测器和 manga-ocr，按分镜顺序 | 五部作品的 18 页中错误率 2.8% |
+| 朗读 | AivisHub 的语音在 WebGPU 上运行，配合 TypeScript 版的 OpenJTalk：yomi | 每个音拍的音高与 AivisSpeech 一致的比例为 92% |
+| 统计一本书的词汇 | Kuromoji 和 IndexedDB 中的词典 | 一整部小说，约 13.5 万词，大约四秒 |
+| 检查一切 | Vitest，以及在真实 Edge 和显卡上运行的 Playwright | 超过 1500 个单元测试和超过 40 个端到端流程 |
+
+```mermaid
+flowchart LR
+  P["适配器<br/>YouTube、Netflix、哔哩哔哩、通用"] <--> C["视频上的界面<br/>Shadow DOM"]
+  C <--> M["离屏引擎<br/>分词器、词典、<br/>IndexedDB、Whisper"]
+  A["应用和阅读器"] <--> M
+  M --> G["GPU<br/>WebGPU：语音、歌词和 OCR"]
+  M --> CL["Claude API"]
+  M --> AN["Anki"]
+  S["Service Worker"] <--> M
+  S <-->|Native Messaging| H["本地助手<br/>PowerShell 和 yt-dlp"]
+```
+
+使用 TypeScript、Preact、Dexie 和 esbuild，并通过 WebGPU 上的 ONNX Runtime 和 Transformers.js 运行模型。各部分的细节、技术决策和每个数字的测量方法见 [docs/zh/architecture.md](docs/zh/architecture.md)；如何运行测试见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
 ## 不用 Claude 能做什么，用 Claude 又能多做什么
 
 Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需要语言模型的功能。
@@ -204,6 +263,7 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 | 网页阅读器、笔记本和带 OCR 的书库 | 字幕翻译和纠正 |
 | 在本机进行语音转写 | 检查振假名读音 |
 | Anki 卡片和内置复习 | 按你的水平写的故事 |
+| 按人声放置的歌词 | 由 Claude 阅读带标记和重复的歌词 |
 
 正常使用每月只需几美分。密钥只保存在浏览器中。也可以按任务改用 OpenRouter、DeepSeek、OpenAI，或通过 LM Studio、Ollama 使用自己电脑上的模型。
 
@@ -239,25 +299,9 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 - Claude 只会收到每次请求所需的内容：句子、字幕文本和标题。
 - 词典和模型只下载一次，来自 GitHub 和 Hugging Face。[声明](docs/zh/notices.md)列出了每个来源。
 
-## 架构
-
-```mermaid
-flowchart LR
-  P["适配器<br/>YouTube、Netflix、通用"] <--> C["视频上的界面<br/>Shadow DOM"]
-  C <--> M["离屏引擎<br/>分词器、词典、<br/>IndexedDB、Whisper"]
-  A["应用和阅读器"] <--> M
-  M --> G["GPU<br/>WebGPU：语音和 OCR"]
-  M --> CL["Claude API"]
-  M --> AN["Anki"]
-  S["Service Worker"] <--> M
-  S <-->|Native Messaging| H["本地助手<br/>PowerShell 和 yt-dlp"]
-```
-
-使用 TypeScript、Preact、Dexie 和 esbuild，并通过 WebGPU 上的 ONNX Runtime 和 Transformers.js 处理语音和 OCR。各部分的细节、技术决策和性能测量见 [docs/zh/architecture.md](docs/zh/architecture.md)。超过 750 个单元测试覆盖核心逻辑，端到端测试在真实的 Edge 和 GPU 上覆盖主要流程；[CONTRIBUTING.md](CONTRIBUTING.md) 说明了如何运行。
-
 ## 项目状态
 
-每个版本都附带测试和六种语言的文档；[更新内容](CHANGELOG.md)对每个版本做了总结。YouTube 和英语还在真实会话中手动检查过。界面翻译借助 AI 完成，尚未经过母语者审校，欢迎指正。
+每个版本都附带测试和六种语言的文档；[更新内容](CHANGELOG.md)对每个版本做了总结。它在 Windows 上的 Chrome 和 Edge 中使用和测试。YouTube 和英语还在真实会话中手动检查过。界面翻译借助 AI 完成，尚未经过母语者审校，欢迎指正。
 
 ## 许可与致谢
 
@@ -265,6 +309,7 @@ flowchart LR
 
 - 词典：[JMdict](https://www.edrdg.org/jmdict/j_jmdict.html) 和 KANJIDIC（EDRDG）、[Kanjium](https://github.com/mifunetoshiro/kanjium) 和 [JPDB](https://jpdb.io)；英语和德语使用 [Wiktionary](https://www.wiktionary.org)，经 [wiktionary-to-yomitan](https://github.com/yomidevs/wiktionary-to-yomitan) 和 [kaikki.org](https://kaikki.org) 整理；中文使用 [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)，经 [cc-cedict-yomitan](https://github.com/MarvNC/cc-cedict-yomitan) 整理。
 - 语音：[Whisper large-v3-turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo)、Haas-ja 和 Parakeet，借助 [Transformers.js](https://github.com/huggingface/transformers.js)。
+- 歌曲：Meta 的 [Demucs](https://github.com/facebookresearch/demucs)（htdemucs），使用 [timcsy 的 ONNX 转换](https://huggingface.co/timcsy/demucs-web-onnx)；darashi 的 [narabas](https://github.com/darashi/narabas)，以及 Google 的 [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet)。
 - 文字识别：[PP-OCRv5 和 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr) 和[对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0；中文为源自 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) 的 [Hanzi Writer](https://github.com/chanind/hanzi-writer-data)，Arphic Public License。
 - 图片内容：日本首相官邸的国会演讲（PDL 1.0）、NASA 的视频、青空文库的与谢野晶子译『源氏物語』和『羅生門』，以及『吾輩は猫である』的开头；除演讲外均为公有领域。两本书的页面在图片下方注明出处。

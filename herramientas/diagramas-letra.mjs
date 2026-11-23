@@ -1,5 +1,5 @@
-// Genera los dos diagramas de cómo se coloca la letra de una canción (sección de letras de docs/*/architecture.md), uno
-// por idioma, y comprueba en Edge que cada texto cabe en su caja.
+// Genera los dos diagramas de cómo se coloca la letra de una canción (sección de letras de docs/*/architecture.md) y la
+// gráfica de lo medido (README), uno por idioma, y comprueba en Edge que cada texto cabe en su caja.
 // Uso: node herramientas/diagramas-letra.mjs
 //      KK_VISTAS=carpeta node herramientas/diagramas-letra.mjs   (además, capturas en claro y en oscuro para mirarlas)
 //
@@ -168,6 +168,90 @@ const TEXTOS = {
   },
 };
 
+// La gráfica de lo medido (README y arquitectura): versos a menos de 1 s de donde se cantan, con 51 canciones japonesas y
+// su LRC. Las cifras salen de capturas-e2e/canciones (forzada-real.mjs, imperfectas.mjs y claude-oraculo.mjs); la fila
+// de antes es la colocación de la 0.49 con un Claude ideal. Cada fila: [nombre, porcentaje, si es de la 0.50 en adelante].
+const MEDIDAS = {
+  es: {
+    titulo: 'Versos que empiezan a menos de 1 s de donde se cantan',
+    desc: 'Barras con el porcentaje de versos que empiezan a menos de 1 s de donde se cantan, en 51 canciones japonesas (2253 versos). Con la letra completa: Claude sobre las líneas de Whisper, como hasta la versión 0.49, el 24 %; letra a letra con lo que oyó Whisper, el 84 %; con la voz aislada, Demucs y narabas, el 91 %. Con el estribillo escrito una sola vez: Claude sobre las líneas de Whisper, el 24 %; reglas sin IA con la voz aislada, el 80 %; Claude lee la letra y la voz la coloca, el 90 %. Las barras con Claude usan un Claude ideal, sacado de los LRC.',
+    sub: '51 canciones japonesas con su letra sincronizada: 2253 versos',
+    paneles: ['Con la letra completa', 'Con el estribillo escrito una sola vez'],
+    filas: [
+      [['Claude, sobre las líneas de Whisper', 24, false], ['Letra a letra, con lo que oyó Whisper', 84, true], ['Con la voz aislada: Demucs y narabas', 91, true]],
+      [['Claude, sobre las líneas de Whisper', 24, false], ['Reglas sin IA, con la voz aislada', 80, true], ['Claude lee la letra, y la voz la coloca', 90, true]],
+    ],
+    nota: 'Con Claude: uno ideal, sacado de los LRC; el de verdad, sin medir aún.',
+    leyenda: ['Hasta la 0.49', 'Desde la 0.50'],
+    cifra: (n) => `${n} %`,
+  },
+  en: {
+    titulo: 'Share of verses that start within 1 s of where they are sung',
+    desc: 'Bars with the share of verses that start within 1 s of where they are sung, in 51 Japanese songs (2,253 verses). With complete lyrics: Claude on Whisper’s lines, as up to version 0.49, 24%; letter by letter with what Whisper heard, 84%; with the isolated voice, Demucs and narabas, 91%. With the chorus written only once: Claude on Whisper’s lines, 24%; rules without AI with the isolated voice, 80%; Claude reads the lyrics and the voice places them, 90%. The bars with Claude use an ideal Claude, derived from the LRC files.',
+    sub: '51 Japanese songs with synced lyrics: 2,253 verses',
+    paneles: ['With complete lyrics', 'With the chorus written only once'],
+    filas: [
+      [['Claude, on Whisper’s lines', 24, false], ['Letter by letter, with what Whisper heard', 84, true], ['With the isolated voice: Demucs and narabas', 91, true]],
+      [['Claude, on Whisper’s lines', 24, false], ['Rules without AI, with the isolated voice', 80, true], ['Claude reads the lyrics, and the voice places them', 90, true]],
+    ],
+    nota: 'With Claude: an ideal one, from the LRC files; the real one, not measured yet.',
+    leyenda: ['Up to 0.49', 'Since 0.50'],
+    cifra: (n) => `${n}%`,
+  },
+  de: {
+    titulo: 'Verse, die weniger als 1 s neben der gesungenen Stelle beginnen',
+    desc: 'Balken mit dem Anteil der Verse, die weniger als 1 s neben der gesungenen Stelle beginnen, in 51 japanischen Liedern (2253 Verse). Mit vollständigem Liedtext: Claude auf den Zeilen von Whisper, wie bis Version 0.49, 24 %; Buchstabe für Buchstabe mit dem von Whisper Gehörten, 84 %; mit freigestellter Stimme, Demucs und narabas, 91 %. Mit nur einmal geschriebenem Refrain: Claude auf den Zeilen von Whisper, 24 %; Regeln ohne KI mit freigestellter Stimme, 80 %; Claude liest den Liedtext und die Stimme platziert ihn, 90 %. Die Balken mit Claude nutzen einen idealen Claude, aus den LRC-Dateien abgeleitet.',
+    sub: '51 japanische Lieder mit synchronisiertem Liedtext: 2253 Verse',
+    paneles: ['Mit vollständigem Liedtext', 'Mit nur einmal geschriebenem Refrain'],
+    filas: [
+      [['Claude, auf den Zeilen von Whisper', 24, false], ['Buchstabe für Buchstabe, mit dem von Whisper Gehörten', 84, true], ['Mit freigestellter Stimme: Demucs und narabas', 91, true]],
+      [['Claude, auf den Zeilen von Whisper', 24, false], ['Regeln ohne KI, mit freigestellter Stimme', 80, true], ['Claude liest den Liedtext, die Stimme platziert ihn', 90, true]],
+    ],
+    nota: 'Mit Claude: ein idealer, aus den LRC-Dateien; der echte ist noch nicht gemessen.',
+    leyenda: ['Bis 0.49', 'Seit 0.50'],
+    cifra: (n) => `${n} %`,
+  },
+  zh: {
+    titulo: '在演唱位置 1 秒以内开始的句子比例',
+    desc: '条形图：在 51 首日语歌曲（2253 句）中，在演唱位置 1 秒以内开始的句子所占比例。歌词完整时：Claude 依据 Whisper 的行（0.49 及以前的做法）为 24%；逐字对照 Whisper 听到的内容为 84%；分离出人声、用 Demucs 和 narabas 为 91%。副歌只写了一遍时：Claude 依据 Whisper 的行为 24%；不用 AI 的规则加上分离出的人声为 80%；Claude 阅读歌词、由人声定位为 90%。带 Claude 的条目使用由 LRC 推出的理想 Claude。',
+    sub: '51 首带同步歌词的日语歌曲，共 2253 句',
+    paneles: ['歌词完整时', '副歌只写了一遍时'],
+    filas: [
+      [['Claude，依据 Whisper 的行', 24, false], ['逐字对照 Whisper 听到的内容', 84, true], ['分离出人声：Demucs 和 narabas', 91, true]],
+      [['Claude，依据 Whisper 的行', 24, false], ['不用 AI 的规则，加上分离出的人声', 80, true], ['Claude 阅读歌词，由人声定位', 90, true]],
+    ],
+    nota: '带 Claude 的条目：由 LRC 推出的理想 Claude；真实的 Claude 尚未测量。',
+    leyenda: ['0.49 及以前', '0.50 起'],
+    cifra: (n) => `${n}%`,
+  },
+  ko: {
+    titulo: '부르는 위치에서 1초 이내에 시작하는 소절의 비율',
+    desc: '막대그래프: 싱크 가사가 있는 일본 노래 51곡(2,253소절)에서 부르는 위치로부터 1초 이내에 시작하는 소절의 비율입니다. 가사가 전부 있을 때: 0.49까지의 방식인 Claude가 Whisper의 줄에 맞추면 24%, Whisper가 들은 것과 글자 단위로 대조하면 84%, 목소리를 분리해 Demucs와 narabas로 맞추면 91%입니다. 후렴을 한 번만 적었을 때: Claude가 Whisper의 줄에 맞추면 24%, AI 없는 규칙과 분리한 목소리로 80%, Claude가 가사를 읽고 목소리가 위치를 정하면 90%입니다. Claude가 들어간 막대는 LRC에서 만든 이상적인 Claude입니다.',
+    sub: '싱크 가사가 있는 일본 노래 51곡, 2,253소절',
+    paneles: ['가사가 전부 있을 때', '후렴을 한 번만 적었을 때'],
+    filas: [
+      [['Claude, Whisper의 줄에 맞춤', 24, false], ['Whisper가 들은 것과 글자 단위 대조', 84, true], ['분리한 목소리: Demucs와 narabas', 91, true]],
+      [['Claude, Whisper의 줄에 맞춤', 24, false], ['AI 없는 규칙과 분리한 목소리', 80, true], ['Claude가 가사를 읽고, 목소리가 위치를 정함', 90, true]],
+    ],
+    nota: 'Claude가 들어간 막대: LRC에서 만든 이상적인 Claude. 실제 Claude는 아직 측정하지 않음.',
+    leyenda: ['0.49까지', '0.50부터'],
+    cifra: (n) => `${n}%`,
+  },
+  ja: {
+    titulo: '歌われる位置から 1 秒以内に始まるフレーズの割合',
+    desc: '棒グラフ：同期歌詞のある日本語の曲 51 曲（2,253 フレーズ）で、歌われる位置から 1 秒以内に始まるフレーズの割合。歌詞が全部書かれている場合、0.49 までのやり方の「Claude が Whisper の行に合わせる」は 24%、「Whisper が聞いた内容と一文字ずつ照合」は 84%、「取り出した声で Demucs と narabas」は 91%。サビが 1 回だけ書かれている場合、「Claude が Whisper の行に合わせる」は 24%、「AI なしのルールと取り出した声」は 80%、「Claude が歌詞を読み、声で位置を決める」は 90%。Claude を使う項目は、LRC から作った理想の Claude です。',
+    sub: '同期歌詞のある日本語の曲 51 曲、2,253 フレーズで測定',
+    paneles: ['歌詞が全部書かれている場合', 'サビが 1 回だけ書かれている場合'],
+    filas: [
+      [['Claude が Whisper の行に合わせる', 24, false], ['Whisper が聞いた内容と一文字ずつ照合', 84, true], ['取り出した声：Demucs と narabas', 91, true]],
+      [['Claude が Whisper の行に合わせる', 24, false], ['AI なしのルールと、取り出した声', 80, true], ['Claude が歌詞を読み、声で位置を決める', 90, true]],
+    ],
+    nota: 'Claude を使う項目：LRC から作った理想の Claude。実際の Claude はまだ測定していません。',
+    leyenda: ['0.49 まで', '0.50 から'],
+    cifra: (n) => `${n}%`,
+  },
+};
+
 const LATINA = "system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
 const CJK = {
   ja: "'Hiragino Sans', 'Yu Gothic UI', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP'",
@@ -182,7 +266,24 @@ const estimar = (texto, tam) =>
   [...texto].reduce((a, c) => a + (/[ᄀ-ᇿ⺀-鿿가-힯豈-﫿＀-￯]/u.test(c) ? tam : /[A-Z]/.test(c) ? 0.68 * tam : c === ' ' ? 0.28 * tam : 0.56 * tam), 0);
 
 // Rampas de colores: relleno claro con texto oscuro de la misma rampa, y al revés con el tema oscuro.
-const estilo = (id) => `<style>
+// Solo la gráfica de lo medido: el acento (lo de la 0.50 en adelante) y el gris (lo de antes), con su pista, en las dos
+// rampas de los diagramas. Comprobados con el validador de colores: se distinguen también con daltonismo (ΔE 10,7 en
+// claro y 14,1 en oscuro), y el gris, por debajo de 3:1, lleva siempre su nombre y su cifra al lado.
+const ESTILO_MEDIDAS = `
+.p { fill: #1f2328; }
+.titulo { font-size: 16px; font-weight: 600; }
+.panel { font-size: 13.5px; font-weight: 600; }
+.nombre { font-size: 13px; }
+.cifra { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.acento { fill: #1d9e75; } .pista-acento { fill: #e1f5ee; }
+.atenuado { fill: #b4b2a9; } .pista-atenuado { fill: #f1efe8; }
+@media (prefers-color-scheme: dark) {
+  .p { fill: #e6edf3; }
+  .pista-acento { fill: #04342c; }
+  .atenuado { fill: #5f5e5a; } .pista-atenuado { fill: #2c2c2a; }
+}`;
+
+const estilo = (id, extra = '') => `<style>
 text { font-family: ${CJK[id] ? `${CJK[id]}, ${LATINA}` : LATINA}; }
 .fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
 .t { font-size: 14px; font-weight: 600; }
@@ -199,7 +300,7 @@ g rect { stroke-width: 1; }
 .guia { stroke: #8c959f; stroke-width: 1; stroke-dasharray: 4 4; }
 .eje { stroke: #8c959f; stroke-width: 1; }
 .canto { fill: #7f77dd; }
-.sin-canto { fill: none; stroke: #888780; stroke-dasharray: 3 3; }
+.sin-canto { fill: none; stroke: #888780; stroke-dasharray: 3 3; }${extra}
 @media (prefers-color-scheme: dark) {
   .fondo { fill: #0d1117; stroke: #30363d; }
   .e { fill: #9198a1; }
@@ -214,10 +315,10 @@ g rect { stroke-width: 1; }
 }
 </style>`;
 
-const documento = (id, alto, t, cuerpo) => `<svg xmlns="http://www.w3.org/2000/svg" xml:lang="${id}" width="680" height="${alto}" viewBox="0 0 680 ${alto}" role="img" aria-labelledby="titulo desc">
+const documento = (id, alto, t, cuerpo, extra = '') => `<svg xmlns="http://www.w3.org/2000/svg" xml:lang="${id}" width="680" height="${alto}" viewBox="0 0 680 ${alto}" role="img" aria-labelledby="titulo desc">
 <title id="titulo">${xml(t.titulo)}</title>
 <desc id="desc">${xml(t.desc)}</desc>
-${estilo(id)}
+${estilo(id, extra)}
 <defs><marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="punta" d="M2 1L8 5L2 9"/></marker></defs>
 <rect class="fondo" x="0.5" y="0.5" width="679" height="${alto - 1}" rx="12"/>
 ${cuerpo.flat().join('\n')}
@@ -293,11 +394,54 @@ function voz(id, t) {
   ]);
 }
 
+/**
+ * Lo medido: cuántos versos empiezan a menos de 1 s de donde se cantan, con la colocación de antes y la de ahora. Cada
+ * fila es un medidor: el nombre encima, la barra sobre su pista (el 100 %) y la cifra en su columna.
+ */
+function medidas(id, t) {
+  const X = 40;
+  const ANCHO = 548;
+  // Recta en la base, a la izquierda, y redondeada en el extremo del dato.
+  const barra = (largo, y) => {
+    const r = Math.min(4, largo / 2);
+    return `M${X} ${y}H${X + largo - r}Q${X + largo} ${y} ${X + largo} ${y + r}V${y + 10 - r}Q${X + largo} ${y + 10} ${X + largo - r} ${y + 10}H${X}Z`;
+  };
+  const cuerpo = [
+    `<text class="p titulo" x="${X}" y="36" dominant-baseline="central">${xml(t.titulo)}</text>`,
+    `<text class="e" x="${X}" y="58" dominant-baseline="central">${xml(t.sub)}</text>`,
+  ];
+  let y = 96;
+  t.paneles.forEach((panel, i) => {
+    cuerpo.push(`<text class="p panel" x="${X}" y="${y}" dominant-baseline="central">${xml(panel)}</text>`);
+    y += 26;
+    for (const [nombre, valor, ahora] of t.filas[i]) {
+      const clase = ahora ? 'acento' : 'atenuado';
+      cuerpo.push(`<g data-fila="">
+<text class="${ahora ? 'p' : 'e'} nombre" x="${X}" y="${y}" dominant-baseline="central">${xml(nombre)}</text>
+<path class="pista-${clase}" d="${barra(ANCHO, y + 11)}"/>
+<path class="${clase}" d="${barra(Math.round((ANCHO * valor) / 100), y + 11)}"/>
+<text class="p cifra" x="640" y="${y + 16}" text-anchor="end" dominant-baseline="central">${xml(t.cifra(valor))}</text>
+</g>`);
+      y += 44;
+    }
+    y += 8;
+  });
+  cuerpo.push(`<text class="e" x="${X}" y="${y + 6}" dominant-baseline="central">${xml(t.nota)}</text>`);
+  const cuadro = (clase) => (x, yy) => `<rect class="${clase}" x="${x}" y="${yy - 6}" width="12" height="12" rx="3"/>`;
+  cuerpo.push(
+    leyenda(y + 40, [
+      { ancho: 12, muestra: cuadro('atenuado'), texto: t.leyenda[0] },
+      { ancho: 12, muestra: cuadro('acento'), texto: t.leyenda[1] },
+    ])
+  );
+  return documento(id, y + 72, t, cuerpo, ESTILO_MEDIDAS);
+}
+
 mkdirSync(SALIDA, { recursive: true });
 const archivos = [];
 for (const [id, t] of Object.entries(TEXTOS)) {
   const sufijo = id === 'es' ? '' : `.${id}`;
-  for (const [nombre, dibujo, textos] of [['letra-flujo', flujo, t.flujo], ['letra-voz', voz, t.voz]]) {
+  for (const [nombre, dibujo, textos] of [['letra-flujo', flujo, t.flujo], ['letra-voz', voz, t.voz], ['letra-medidas', medidas, MEDIDAS[id]]]) {
     const archivo = join(SALIDA, `${nombre}${sufijo}.svg`);
     writeFileSync(archivo, dibujo(id, textos));
     archivos.push(archivo);
@@ -325,6 +469,14 @@ for (const archivo of archivos) {
     for (const texto of svg.querySelectorAll('text')) {
       const b = texto.getBBox();
       if (b.x < 10 || b.x + b.width > ancho - 10 || b.y < 6 || b.y + b.height > alto - 6) salida.push(`«${texto.textContent}» se sale de la tarjeta`);
+    }
+    // En la gráfica, el nombre no llega a la columna de las cifras, ni la cifra pisa el final de la pista.
+    for (const g of svg.querySelectorAll('[data-fila]')) {
+      const [nombre, cifra] = g.querySelectorAll('text');
+      const n = nombre.getBBox();
+      const c = cifra.getBBox();
+      if (n.x + n.width > 640) salida.push(`«${nombre.textContent}» no cabe en su fila`);
+      if (c.x < 592) salida.push(`«${cifra.textContent}» pisa la barra`);
     }
     const leyendas = [...svg.querySelectorAll('[data-leyenda]')].map((g) => g.getBBox());
     for (let i = 1; i < leyendas.length; i++) {

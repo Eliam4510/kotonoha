@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:lang="ko" width="680" height="500" viewBox="0 0 680 500" role="img" aria-labelledby="titulo desc">
+<title id="titulo">부르는 위치에서 1초 이내에 시작하는 소절의 비율</title>
+<desc id="desc">막대그래프: 싱크 가사가 있는 일본 노래 51곡(2,253소절)에서 부르는 위치로부터 1초 이내에 시작하는 소절의 비율입니다. 가사가 전부 있을 때: 0.49까지의 방식인 Claude가 Whisper의 줄에 맞추면 24%, Whisper가 들은 것과 글자 단위로 대조하면 84%, 목소리를 분리해 Demucs와 narabas로 맞추면 91%입니다. 후렴을 한 번만 적었을 때: Claude가 Whisper의 줄에 맞추면 24%, AI 없는 규칙과 분리한 목소리로 80%, Claude가 가사를 읽고 목소리가 위치를 정하면 90%입니다. Claude가 들어간 막대는 LRC에서 만든 이상적인 Claude입니다.</desc>
+<style>
+text { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', 'Noto Sans KR', system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
+.fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
+.t { font-size: 14px; font-weight: 600; }
+.s, .e { font-size: 12px; }
+.e { fill: #59636e; }
+g rect { stroke-width: 1; }
+.gris rect { fill: #f1efe8; stroke: #5f5e5a; } .gris .t { fill: #444441; } .gris .s { fill: #5f5e5a; }
+.verde rect { fill: #e1f5ee; stroke: #0f6e56; } .verde .t { fill: #085041; } .verde .s { fill: #0f6e56; }
+.coral rect { fill: #faece7; stroke: #993c1d; } .coral .t { fill: #712b13; } .coral .s { fill: #993c1d; }
+.morado rect { fill: #eeedfe; stroke: #534ab7; } .morado .s { fill: #3c3489; }
+.rojo rect { fill: #fcebeb; stroke: #a32d2d; } .rojo .s { fill: #791f1f; }
+.flecha { fill: none; stroke: #59636e; stroke-width: 1.5; }
+.punta { fill: none; stroke: #59636e; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.guia { stroke: #8c959f; stroke-width: 1; stroke-dasharray: 4 4; }
+.eje { stroke: #8c959f; stroke-width: 1; }
+.canto { fill: #7f77dd; }
+.sin-canto { fill: none; stroke: #888780; stroke-dasharray: 3 3; }
+.p { fill: #1f2328; }
+.titulo { font-size: 16px; font-weight: 600; }
+.panel { font-size: 13.5px; font-weight: 600; }
+.nombre { font-size: 13px; }
+.cifra { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.acento { fill: #1d9e75; } .pista-acento { fill: #e1f5ee; }
+.atenuado { fill: #b4b2a9; } .pista-atenuado { fill: #f1efe8; }
+@media (prefers-color-scheme: dark) {
+  .p { fill: #e6edf3; }
+  .pista-acento { fill: #04342c; }
+  .atenuado { fill: #5f5e5a; } .pista-atenuado { fill: #2c2c2a; }
+}
+@media (prefers-color-scheme: dark) {
+  .fondo { fill: #0d1117; stroke: #30363d; }
+  .e { fill: #9198a1; }
+  .gris rect { fill: #444441; stroke: #b4b2a9; } .gris .t { fill: #f1efe8; } .gris .s { fill: #d3d1c7; }
+  .verde rect { fill: #085041; stroke: #5dcaa5; } .verde .t { fill: #e1f5ee; } .verde .s { fill: #9fe1cb; }
+  .coral rect { fill: #712b13; stroke: #f0997b; } .coral .t { fill: #faece7; } .coral .s { fill: #f5c4b3; }
+  .morado rect { fill: #3c3489; stroke: #afa9ec; } .morado .s { fill: #eeedfe; }
+  .rojo rect { fill: #791f1f; stroke: #f09595; } .rojo .s { fill: #fcebeb; }
+  .flecha, .punta { stroke: #9198a1; }
+  .guia, .eje { stroke: #6e7681; }
+  .sin-canto { stroke: #9198a1; }
+}
+</style>
+<defs><marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="punta" d="M2 1L8 5L2 9"/></marker></defs>
+<rect class="fondo" x="0.5" y="0.5" width="679" height="499" rx="12"/>
+<text class="p titulo" x="40" y="36" dominant-baseline="central">부르는 위치에서 1초 이내에 시작하는 소절의 비율</text>
+<text class="e" x="40" y="58" dominant-baseline="central">싱크 가사가 있는 일본 노래 51곡, 2,253소절</text>
+<text class="p panel" x="40" y="96" dominant-baseline="central">가사가 전부 있을 때</text>
+<g data-fila="">
+<text class="e nombre" x="40" y="122" dominant-baseline="central">Claude, Whisper의 줄에 맞춤</text>
+<path class="pista-atenuado" d="M40 133H584Q588 133 588 137V139Q588 143 584 143H40Z"/>
+<path class="atenuado" d="M40 133H168Q172 133 172 137V139Q172 143 168 143H40Z"/>
+<text class="p cifra" x="640" y="138" text-anchor="end" dominant-baseline="central">24%</text>
+</g>
+<g data-fila="">
+<text class="p nombre" x="40" y="166" dominant-baseline="central">Whisper가 들은 것과 글자 단위 대조</text>
+<path class="pista-acento" d="M40 177H584Q588 177 588 181V183Q588 187 584 187H40Z"/>
+<path class="acento" d="M40 177H496Q500 177 500 181V183Q500 187 496 187H40Z"/>
+<text class="p cifra" x="640" y="182" text-anchor="end" dominant-baseline="central">84%</text>
+</g>
+<g data-fila="">
+<text class="p nombre" x="40" y="210" dominant-baseline="central">분리한 목소리: Demucs와 narabas</text>
+<path class="pista-acento" d="M40 221H584Q588 221 588 225V227Q588 231 584 231H40Z"/>
+<path class="acento" d="M40 221H535Q539 221 539 225V227Q539 231 535 231H40Z"/>
+<text class="p cifra" x="640" y="226" text-anchor="end" dominant-baseline="central">91%</text>
+</g>
+<text class="p panel" x="40" y="262" dominant-baseline="central">후렴을 한 번만 적었을 때</text>
+<g data-fila="">
+<text class="e nombre" x="40" y="288" dominant-baseline="central">Claude, Whisper의 줄에 맞춤</text>
+<path class="pista-atenuado" d="M40 299H584Q588 299 588 303V305Q588 309 584 309H40Z"/>
+<path class="atenuado" d="M40 299H168Q172 299 172 303V305Q172 309 168 309H40Z"/>
+<text class="p cifra" x="640" y="304" text-anchor="end" dominant-baseline="central">24%</text>
+</g>
+<g data-fila="">
+<text class="p nombre" x="40" y="332" dominant-baseline="central">AI 없는 규칙과 분리한 목소리</text>
+<path class="pista-acento" d="M40 343H584Q588 343 588 347V349Q588 353 584 353H40Z"/>
+<path class="acento" d="M40 343H474Q478 343 478 347V349Q478 353 474 353H40Z"/>
+<text class="p cifra" x="640" y="348" text-anchor="end" dominant-baseline="central">80%</text>
+</g>
+<g data-fila="">
+<text class="p nombre" x="40" y="376" dominant-baseline="central">Claude가 가사를 읽고, 목소리가 위치를 정함</text>
+<path class="pista-acento" d="M40 387H584Q588 387 588 391V393Q588 397 584 397H40Z"/>
+<path class="acento" d="M40 387H529Q533 387 533 391V393Q533 397 529 397H40Z"/>
+<text class="p cifra" x="640" y="392" text-anchor="end" dominant-baseline="central">90%</text>
+</g>
+<text class="e" x="40" y="434" dominant-baseline="central">Claude가 들어간 막대: LRC에서 만든 이상적인 Claude. 실제 Claude는 아직 측정하지 않음.</text>
+<g data-leyenda=""><rect class="atenuado" x="249" y="462" width="12" height="12" rx="3"/><text class="e" x="269" y="468" dominant-baseline="central">0.49까지</text></g>
+<g data-leyenda=""><rect class="acento" x="360" y="462" width="12" height="12" rx="3"/><text class="e" x="380" y="468" dominant-baseline="central">0.50부터</text></g>
+</svg>
