@@ -33,6 +33,7 @@ import {
   type TrozoAudio,
   ventajaSobreVideo,
   ventanasDeHueco,
+  videoEnPausa,
 } from '../nucleo/transcripcion';
 import type { CantoPorTramos } from '../nucleo/letra';
 import { abrirDescarga } from './ayudante';
@@ -582,7 +583,7 @@ async function transcribirMuestras(
       total += lineas.length;
       emitir({ tipo: 'lineas', lineas });
     }
-    await descansar(ms, intensidad, emitir, senal, { ventajaS: ventajaSobreVideo(frenteMs, marca, performance.now()), tirones: huboTirones });
+    await descansar(ms, intensidad, emitir, senal, { ventajaS: ventajaSobreVideo(frenteMs, marca, performance.now()), tirones: huboTirones, enPausa: videoEnPausa(marca, performance.now()) });
   };
 
   try {

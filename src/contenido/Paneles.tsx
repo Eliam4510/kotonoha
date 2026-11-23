@@ -11,6 +11,7 @@ import { Icono, type NombreIcono } from '../ui/iconos';
 import {
   ajustarDesfase,
   ajustarLetra,
+  borrarSubtitulosDelVideo,
   modeloQueTranscribiria,
   pistaObjetivoEsLetra,
   cancelarGeneracion,
@@ -321,6 +322,46 @@ function ControlVelo({ titulo, clave, cfg, alCambiar }: { titulo: string; clave:
   );
 }
 
+/** Cuánto espera la confirmación de un borrado antes de volver a como estaba, y la pausa que distingue un doble clic. */
+const ESPERA_CONFIRMAR_MS = 4500;
+const PAUSA_DOBLE_CLIC_MS = 350;
+
+/**
+ * Borra lo guardado de los subtítulos de este video. La primera pulsación pregunta, en el mismo sitio; la segunda lo hace.
+ * Si no se confirma en unos segundos, o el foco se va, vuelve a como estaba.
+ */
+function BorrarSubtitulosVideo() {
+  const armado = useSignal(0);
+  useEffect(() => {
+    if (!armado.value) return;
+    const id = setTimeout(() => (armado.value = 0), ESPERA_CONFIRMAR_MS);
+    return () => clearTimeout(id);
+  }, [armado.value]);
+  return (
+    <>
+      <div class="fila">
+        <span class="etq">{tr('De este video')}</span>
+        <button
+          class={`btn chico ${armado.value ? 'peligro' : 'fantasma'}`}
+          onBlur={() => (armado.value = 0)}
+          onClick={() => {
+            if (!armado.value) {
+              armado.value = performance.now();
+              return;
+            }
+            if (performance.now() - armado.value < PAUSA_DOBLE_CLIC_MS) return;
+            armado.value = 0;
+            borrarSubtitulosDelVideo().catch(console.error);
+          }}
+        >
+          <Icono n="basura" t={14} /> {armado.value ? tr('Confirmar') : tr('Borrar')}
+        </button>
+      </div>
+      <p class="nota-grupo">{tr('Borra sus transcripciones, traducciones, letras e importados, con sus correcciones y su sincronía. Las pistas del propio sitio se quedan.')}</p>
+    </>
+  );
+}
+
 /** Si los secundarios que se ven son una traducción de Claude: entonces el botón la vuelve a hacer, desde cero. */
 const hayTraduccionClaude = () => lineasSecundarias.value.length > 0 && pistas.value.some((p) => p.id === idSecundaria.value && p.origen === 'claude');
 
@@ -341,7 +382,7 @@ function ControlPista({ titulo, icono, valor, idioma, alElegir, destino, puedeEx
         <button class="btn chico" disabled={!puedeExportar} onClick={() => exportarSrt(destino)}><Icono n="exportar" t={15} /> {tr('Exportar SRT')}</button>
         {destino === 'secundaria' && <button class="btn chico ia" disabled={!lineasObjetivo.value.length || !!generacion.value} onClick={() => generarSecundarios()}><Icono n="traducir" t={15} /> {hayTraduccionClaude() ? tr('Volver a traducir con Claude') : tr('Traducir con Claude')}</button>}
       </div>
-      <input ref={entrada} type="file" accept=".srt,.vtt,.ass,.ssa,.ttml,.dfxp,.xml" hidden aria-label={tr('Importar {0}', titulo)} onChange={(e) => {
+      <input ref={entrada} type="file" accept=".srt,.vtt,.ass,.ssa,.ttml,.dfxp,.xml,.lrc" hidden aria-label={tr('Importar {0}', titulo)} onChange={(e) => {
         const f = e.currentTarget.files?.[0];
         if (f) importarArchivo(f, destino);
         e.currentTarget.value = '';
@@ -498,7 +539,7 @@ function PanelVideo() {
             <ControlPista titulo={tr(lengua.value.textos.subtitulos)} icono="subtitulos" valor={idObjetivo.value} idioma={a.idiomaObjetivo} destino="objetivo" alElegir={seleccionarObjetivo} puedeExportar={lineasObjetivo.value.length > 0} />
             <ControlPista titulo={tr('Subtítulos secundarios')} icono="traducir" valor={idSecundaria.value} idioma={a.idiomaSecundario} destino="secundaria" alElegir={seleccionarSecundaria} puedeExportar={lineasSecundarias.value.length > 0} />
           </div>
-          <p class="nota-grupo">{tr('También puedes arrastrar un archivo SRT, VTT, ASS o TTML directamente sobre el video.')}</p>
+          <p class="nota-grupo">{tr('También puedes arrastrar un archivo SRT, VTT, ASS, TTML o la letra de una canción en LRC directamente sobre el video.')}</p>
           <div class="columnas separada">
             <div class="grupo">
               <Fila etq={tr(lengua.value.textos.mostrar)}><Interruptor on={!a.ocultarObjetivo} etiqueta={tr(lengua.value.textos.mostrar)} alCambiar={(v) => cambiarAjuste({ ocultarObjetivo: !v })} /></Fila>
@@ -538,6 +579,14 @@ function PanelVideo() {
               </Fila>
             )}
           </div>
+          {infoVideo.value?.idVideo && (
+            <>
+              <TituloGrupo>{tr('Subtítulos guardados')}</TituloGrupo>
+              <div class="grupo">
+                <BorrarSubtitulosVideo />
+              </div>
+            </>
+          )}
         </>
       )}
 

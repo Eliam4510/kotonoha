@@ -1435,6 +1435,16 @@ function SeccionDatos({ a, cambiar }: PropsSeccion) {
         <Opcion titulo={tr('Guardar las frases que ves')} ayuda={tr('Sirven para buscar ejemplos de lo que ya conoces.')}>
           <Interruptor etiqueta={tr('Guardar historial')} on={a.guardarHistorial} alCambiar={(v) => cambiar({ guardarHistorial: v })} />
         </Opcion>
+        <Opcion titulo={tr('Subtítulos guardados')} ayuda={tr('Las transcripciones, traducciones, letras e importados de todos los videos, con sus correcciones y su sincronía. Los de un solo video se borran sobre el video, en Ajustes de video, Subtítulos.')}>
+          <BotonBorrar etiqueta={tr('Borrar todos los subtítulos guardados')} texto={tr('Borrar todos')} alBorrar={async () => {
+            const n = await motor.borrarTodosLosSubtitulos().catch(() => -1);
+            // La sincronía de cada pista va aparte, en el almacenamiento de la extensión.
+            const guardado = await chrome.storage.local.get(null).catch(() => ({}) as Record<string, unknown>);
+            const claves = Object.keys(guardado).filter((k) => k.startsWith('kotonohaSincronia:'));
+            if (claves.length) await chrome.storage.local.remove(claves).catch(() => {});
+            fijarMensaje(n < 0 ? { texto: tr('No se pudieron borrar los subtítulos guardados.'), error: true } : { texto: n === 1 ? tr('Se borró 1 pista de subtítulos.') : tr('Se borraron {0} pistas de subtítulos.', n) });
+          }} />
+        </Opcion>
       </div>
       {mensaje && <Mensaje error={mensaje.error}>{mensaje.texto}</Mensaje>}
     </Seccion>

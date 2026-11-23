@@ -3,6 +3,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { AnalisisLinea } from '../nucleo/analisisProfundo';
 import type { CantoPorTramos } from '../nucleo/letra';
+import type { ProgresoTranscripcion } from '../nucleo/transcripcion';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { AnotacionLibro, ColeccionBiblioteca, ElementoBiblioteca, EstadoGramatica, EstadoPalabra, FichaCaracter, GramaticaVista, InfoDiccionario, TarjetaMemoria } from '../compartido/tipos';
@@ -100,6 +101,8 @@ export interface FilaSubtitulosGenerados {
   origen?: string;
   /** Dónde se canta, si es una canción transcrita con Whisper: para colocar su letra (ver nucleo/letra.ts). */
   canto?: CantoPorTramos;
+  /** Hasta dónde llegó la transcripción del audio entero, y si terminó: solo una cortada sigue desde ahí. */
+  transcrito?: ProgresoTranscripcion;
   creado: number;
 }
 

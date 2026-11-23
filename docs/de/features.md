@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.49.1 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.49.2 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -70,7 +70,7 @@ Stand jeder Funktion in Version 0.49.1 und die Art ihrer Überprüfung.
 | Übersetzung mit Claude in Abschnitten, beginnend an der Abspielposition, mit Fortsetzung nach einem Abbruch | Nachgebildete Seite |
 | Korrektur automatischer Untertitel, mit einsehbarem Originaltext | Nachgebildete Seite |
 | Erstellen von Japanisch aus einer anderen Sprache | Nachgebildete Seite |
-| Import von SRT, VTT, ASS, SSA, TTML und DFXP, gespeichert pro Titel | Nachgebildete Seite |
+| Import von SRT, VTT, ASS, SSA, TTML, DFXP und LRC-Liedtexten, gespeichert pro Titel | Nachgebildete Seite |
 | Export als SRT, mit angewendeter Synchronisierung | Nachgebildete Seite |
 | Gemerkte japanische Spuren über Netflix-Regionen hinweg | Nachgebildete Seite. Mit echten Sitzungen ist noch zu bestätigen, dass die Titelkennung übereinstimmt |
 | Synchronisierung über Versatz oder mit einer oder zwei Markierungen | Automatisch |

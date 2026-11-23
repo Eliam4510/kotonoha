@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.49.1, along with how it has been verified.
+Status of each feature in version 0.49.2, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -70,7 +70,7 @@ Status of each feature in version 0.49.1, along with how it has been verified.
 | Translation with Claude, in batches, starting at the playback position, resumable after cancelling | Imitation page |
 | Correction of automatic subtitles, with the original text available | Imitation page |
 | Creating Japanese from another language | Imitation page |
-| Importing SRT, VTT, ASS, SSA, TTML and DFXP, saved per title | Imitation page |
+| Importing SRT, VTT, ASS, SSA, TTML, DFXP and LRC lyrics, saved per title | Imitation page |
 | Exporting to SRT, with synchronization applied | Imitation page |
 | Japanese tracks remembered across Netflix regions | Imitation page. Real sessions must still confirm that the title identifier matches |
 | Synchronization by offset or with one or two marks | Automated |

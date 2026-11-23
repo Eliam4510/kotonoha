@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.49.1, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.49.2, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -70,7 +70,7 @@ Estado de cada función en la versión 0.49.1, con la forma en que se ha verific
 | Traducción con Claude, por tramos, empezando por el punto de reproducción, con continuación si se cancela | Página imitada |
 | Corrección de subtítulos automáticos, con el texto original consultable | Página imitada |
 | Creación de japonés desde otro idioma | Página imitada |
-| Importación de SRT, VTT, ASS, SSA, TTML y DFXP, guardada por título | Página imitada |
+| Importación de SRT, VTT, ASS, SSA, TTML, DFXP y letras LRC, guardada por título | Página imitada |
 | Exportación a SRT, con la sincronía aplicada | Página imitada |
 | Pistas de japonés recordadas entre regiones de Netflix | Página imitada. Falta confirmar con sesiones reales que el identificador del título coincide |
 | Sincronización por desfase o con una o dos marcas | Automática |

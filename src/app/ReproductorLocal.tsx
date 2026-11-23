@@ -16,7 +16,7 @@ import { tr } from '../compartido/i18n';
 import { lengua } from '../ui/lengua';
 import { letraElegida } from '../ui/letra';
 import { porNombre } from '../nucleo/carpetas';
-import { ACEPTADOS, claveArchivo, emparejar, enOrden, haTerminado, partesDeSubtitulo, puntoDeReanudar, reloj, sinExtension, tipoDeArchivo, velocidadVecina } from '../nucleo/reproductor';
+import { ACEPTADOS, claveArchivo, emparejar, enOrden, esCancionPorArchivo, haTerminado, partesDeSubtitulo, puntoDeReanudar, reloj, sinExtension, tipoDeArchivo, velocidadVecina } from '../nucleo/reproductor';
 import { alternarSonido, CLAVES_RECORDADAS, ControlesReproductor, fijarVelocidadVideo, recordado, textoVelocidad } from './ControlesReproductor';
 import { type Elemento, type Fuente, PanelLista, Recientes } from './ListaReproductor';
 import {
@@ -53,7 +53,8 @@ let turnoApertura = 0;
 const control: Control = {
   sitio: 'local',
   async info() {
-    return { sitio: 'local', activo: !!elVideo?.src, idVideo: nombreVideo || null, titulo: sinExtension(nombreVideo), anuncio: false };
+    // Un audio suelto es una canción: así se transcribe con el modelo que mejor oye el canto, y se sabe dónde se canta.
+    return { sitio: 'local', activo: !!elVideo?.src, idVideo: nombreVideo || null, titulo: sinExtension(nombreVideo), anuncio: false, ...(esCancionPorArchivo(nombreVideo) ? { categoria: 'Music' } : {}) };
   },
   // Los subtítulos incrustados en el archivo aparecen como cualquier otra pista.
   async listarPistas() {
@@ -341,7 +342,7 @@ export function ReproductorLocal({ a }: { a: Ajustes }) {
     fijarActual(i);
     actualRef.current = i;
     await cargarVideoActual();
-    infoVideo.value = { sitio: 'local', idVideo: archivo.name, titulo: sinExtension(archivo.name) };
+    infoVideo.value = { sitio: 'local', idVideo: archivo.name, titulo: sinExtension(archivo.name), ...(esCancionPorArchivo(archivo.name) ? { categoria: 'Music' } : {}) };
     // Primero los de la lengua que se estudia, luego la traducción.
     for (const s of [...subs].sort((x, y) => (destinoDe(x.name) === 'objetivo' ? 0 : 1) - (destinoDe(y.name) === 'objetivo' ? 0 : 1))) await importarArchivo(s, destinoDe(s.name));
     const previo = await leerVisto(clave).catch(() => undefined);

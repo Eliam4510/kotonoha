@@ -5,6 +5,7 @@ import type { Ajustes, VozInstalada } from './ajustes';
 import type { ResumenInmersion, TipoInmersion } from '../nucleo/inmersion';
 import type { EntradaBreve } from '../nucleo/explorar';
 import type { CantoPorTramos } from '../nucleo/letra';
+import type { ProgresoTranscripcion } from '../nucleo/transcripcion';
 import type { FilaConsumo } from '../nucleo/precios';
 import type { Linea } from '../nucleo/subtitulos';
 import type { DatosTrazos } from '../nucleo/trazos';
@@ -358,8 +359,12 @@ export interface ApiMotor {
   importarDatos(json: string): Promise<Partial<Ajustes> | null>;
   // Lo generado para un video se guarda en la base de la lengua que se estudia, `estudio`, que dice quien lo pide: al
   // cambiar de lengua, el motor puede no haberse enterado aún, y leería o escribiría en la base de la anterior.
-  guardarSubtitulosGenerados(idVideo: string, idioma: string, lineas: Linea[], origen: string | undefined, estudio: string, canto?: CantoPorTramos): Promise<void>;
-  subtitulosGenerados(idVideo: string, estudio: string): Promise<{ idioma: string; lineas: Linea[]; origen?: string; canto?: CantoPorTramos; creado: number }[]>;
+  guardarSubtitulosGenerados(idVideo: string, idioma: string, lineas: Linea[], origen: string | undefined, estudio: string, canto?: CantoPorTramos, transcrito?: ProgresoTranscripcion): Promise<void>;
+  subtitulosGenerados(idVideo: string, estudio: string): Promise<{ idioma: string; lineas: Linea[]; origen?: string; canto?: CantoPorTramos; transcrito?: ProgresoTranscripcion; creado: number }[]>;
+  /** Borra todos los subtítulos guardados de un video, en todas las lenguas: generados, importados, letras y correcciones. Devuelve cuántas pistas había. */
+  borrarSubtitulosVideo(idVideo: string): Promise<number>;
+  /** Borra los subtítulos guardados de todos los videos. Devuelve cuántas pistas había. */
+  borrarTodosLosSubtitulos(): Promise<number>;
   correccionesPista(clave: string, estudio: string): Promise<{ cambios: Record<number, string>; completa: boolean } | undefined>;
   guardarCorreccionesPista(clave: string, cambios: Record<number, string>, completa: boolean, estudio: string): Promise<void>;
 }

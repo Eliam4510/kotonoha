@@ -791,6 +791,29 @@ if (quiere('negativas')) {
   vistas = await secundarias();
   comprobar(vistas.every((t) => t.includes('traducción')), 'Y la traducción anterior sigue ahí', vistas.join(' | '));
   mock.control.negativa = null;
+
+  console.log('\n== Borrar lo guardado de un video ==');
+  const pistasSecundarias = async () => {
+    await abrirSubtitulos(p);
+    return (await elegida(p, 'Subtítulos secundarios'))?.todas ?? [];
+  };
+  comprobar((await pistasSecundarias()).some((t) => /Claude/.test(t)), 'Antes, la traducción de Claude está entre las pistas');
+  const pulsarBorrar = () =>
+    enOverlay(p, (r) => {
+      const b = [...r.querySelectorAll('.panel-flotante .fila')].find((f) => f.textContent.includes('De este video'))?.querySelector('button');
+      b?.click();
+      return b?.textContent.trim() ?? '';
+    });
+  comprobar((await pulsarBorrar()) === 'Borrar', 'En los subtítulos del video hay un botón para borrar lo guardado');
+  await p.waitForTimeout(500);
+  comprobar((await pulsarBorrar()) === 'Confirmar', 'Pide confirmarlo antes de borrar');
+  const borrado = await hasta(p, (r) => [...r.querySelectorAll('.aviso')].some((x) => /Se borraron los subtítulos guardados de este video/.test(x.textContent)), undefined, 8000);
+  comprobar(!!borrado, 'Avisa de que se borraron');
+  comprobar(!(await pistasSecundarias()).some((t) => /Claude/.test(t)), 'La traducción de Claude ya no está', (await pistasSecundarias()).join(' | '));
+  await p.reload();
+  await hasta(p, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000);
+  await p.waitForTimeout(800);
+  comprobar(!(await pistasSecundarias()).some((t) => /Claude/.test(t)), 'Tampoco al volver al video', (await pistasSecundarias()).join(' | '));
   await p.close();
 }
 

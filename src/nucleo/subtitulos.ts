@@ -11,7 +11,10 @@ export interface Linea {
 
 type LineaCruda = Omit<Linea, 'id'>;
 
-export type FormatoSubtitulo = 'vtt' | 'srt' | 'ass' | 'ttml' | 'json3' | 'srv3';
+export type FormatoSubtitulo = 'vtt' | 'srt' | 'ass' | 'ttml' | 'json3' | 'srv3' | 'lrc';
+
+/** Una marca de tiempo de LRC: [mm:ss.xx], también con milésimas o sin fracción. */
+const MARCA_LRC = /\[(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
 
 export function detectarFormato(texto: string): FormatoSubtitulo | null {
   const inicio = texto.trimStart().slice(0, 2000);
@@ -22,6 +25,7 @@ export function detectarFormato(texto: string): FormatoSubtitulo | null {
   if (/<tt[\s>:]/.test(inicio)) return 'ttml';
   if (/\[Script Info\]|\[V4\+? Styles\]|^Dialogue:/m.test(inicio)) return 'ass';
   if (/\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}\s*-->/.test(inicio)) return inicio.includes(',') ? 'srt' : 'vtt';
+  if (/^\s*\[\d{1,3}:\d{2}(?:[.:]\d{1,3})?\]/m.test(inicio)) return 'lrc';
   return null;
 }
 
@@ -40,6 +44,8 @@ export function analizarSubtitulos(texto: string, formato?: FormatoSubtitulo | n
       return normalizar(analizarJson3(texto));
     case 'srv3':
       return normalizar(analizarSrv3(texto));
+    case 'lrc':
+      return normalizar(analizarLrc(texto));
     default:
       throw new Error(tr('Formato de subtítulos no reconocido'));
   }
@@ -415,6 +421,45 @@ export function analizarSrv3(texto: string): LineaCruda[] {
       nodo.hijos.map((h) => (typeof h === 'string' ? h : contenido(h))).join('');
     salida.push({ inicio, fin, texto: contenido(n) });
   }
+  return salida;
+}
+
+// ---------- LRC: letras de canciones ----------
+
+/** Un verso de LRC dura hasta el siguiente, pero no más que esto: tras él suele venir un pasaje sin letra. */
+const DURACION_MAXIMA_LRC_MS = 10000;
+/** Lo que dura el último verso, que no tiene otro detrás. */
+const DURACION_ULTIMA_LRC_MS = 6000;
+
+/**
+ * Cada verso lleva la hora a la que empieza: [mm:ss.xx]. Uno que se repite puede llevar varias ([00:12.00][01:30.00]), una
+ * marca sin texto cierra el verso anterior, [offset:±ms] adelanta o retrasa toda la letra, y las marcas de cada palabra
+ * (<mm:ss.xx>) se quitan.
+ */
+export function analizarLrc(texto: string): LineaCruda[] {
+  const desplazamiento = Number(/^\s*\[offset:\s*([+-]?\d+)\s*\]/im.exec(texto)?.[1] ?? 0);
+  const marcas: { inicio: number; texto: string }[] = [];
+  for (const fila of texto.split(/\r?\n/)) {
+    const tiempos = [...fila.matchAll(MARCA_LRC)];
+    if (!tiempos.length) continue;
+    const cuerpo = fila
+      .replace(MARCA_LRC, '')
+      .replace(/<\d{1,3}:\d{2}(?:[.:]\d{1,3})?>/g, '')
+      .trim();
+    for (const m of tiempos) {
+      // Dos cifras son centésimas y tres, milésimas.
+      const fraccion = m[3] ? Number(m[3].padEnd(3, '0')) : 0;
+      marcas.push({ inicio: Math.max(0, Number(m[1]) * 60000 + Number(m[2]) * 1000 + fraccion - desplazamiento), texto: cuerpo });
+    }
+  }
+  marcas.sort((a, b) => a.inicio - b.inicio);
+  const salida: LineaCruda[] = [];
+  marcas.forEach(({ inicio, texto }, k) => {
+    if (!texto) return;
+    const siguiente = marcas.slice(k + 1).find((m) => m.inicio > inicio)?.inicio;
+    const fin = siguiente === undefined ? inicio + DURACION_ULTIMA_LRC_MS : Math.min(siguiente, inicio + DURACION_MAXIMA_LRC_MS);
+    salida.push({ inicio, fin, texto });
+  });
   return salida;
 }
 

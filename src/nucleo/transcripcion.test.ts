@@ -6,6 +6,7 @@ import {
 import {
   AcumuladorAudio,
   colapsarRepeticiones,
+  desdeDondeSeguir,
   elegirCorte,
   esAlucinacion as esAlucinacionCon,
   esBucle,
@@ -23,6 +24,7 @@ import {
   segundosRestantes,
   segmentosALineas as segmentosALineasCon,
   ventajaSobreVideo,
+  videoEnPausa,
   ventanasDeHueco,
   videoEn,
   type SegmentoWhisper,
@@ -189,6 +191,22 @@ describe('control de carga', () => {
     expect(ocupacionObjetivo('auto', false)).toBeGreaterThan(ocupacionObjetivo('auto', true));
   });
 
+  it('con el video en pausa trabaja como en rápido: nada que se vea necesita la gráfica', () => {
+    const pausa = { ventajaS: null, tirones: false, enPausa: true };
+    expect(ocupacionObjetivo('auto', true, pausa)).toBe(ocupacionObjetivo('rapida', true));
+    // Lo elegido a mano manda.
+    expect(ocupacionObjetivo('suave', true, pausa)).toBe(ocupacionObjetivo('suave', true));
+    // Sin saber dónde va el video, como siempre.
+    expect(ocupacionObjetivo('auto', true, { ventajaS: null, tirones: false })).toBe(ocupacionObjetivo('auto', true));
+  });
+
+  it('sabe que el video está en pausa solo con una marca reciente', () => {
+    expect(videoEnPausa({ videoMs: 5000, reproduciendo: false, velocidad: 1, instante: 1000 }, 2000)).toBe(true);
+    expect(videoEnPausa({ videoMs: 5000, reproduciendo: true, velocidad: 1, instante: 1000 }, 2000)).toBe(false);
+    expect(videoEnPausa({ videoMs: 5000, reproduciendo: false, velocidad: 1, instante: 1000 }, 9000)).toBe(false);
+    expect(videoEnPausa({ videoMs: 0, reproduciendo: false, velocidad: 1, instante: 0 }, 100)).toBe(false);
+  });
+
   it('el descanso es proporcional a lo que tardó el trozo', () => {
     expect(pausaTrasTrozo(1000, 0.25)).toBe(3000);
     expect(pausaTrasTrozo(1000, 0.5)).toBe(1000);
@@ -336,5 +354,23 @@ describe('una grabación del dictado sin voz', () => {
     const largo = new Float32Array(FRECUENCIA * 60);
     largo.set(tono(0.5, 0.02), FRECUENCIA * 30);
     expect(esGrabacionMuda(largo)).toBe(false);
+  });
+});
+
+describe('desdeDondeSeguir', () => {
+  const minutos = (m: number) => m * 60000;
+
+  it('una transcripción terminada, o de la que no se sabe, empieza de cero', () => {
+    expect(desdeDondeSeguir(undefined, minutos(4))).toBe(0);
+    expect(desdeDondeSeguir({ hastaMs: minutos(4), completa: true }, minutos(4))).toBe(0);
+    // Una canción con 40 s de final instrumental: antes parecía a medias y solo se transcribía el final.
+    expect(desdeDondeSeguir({ hastaMs: minutos(4), completa: true }, minutos(4) + 40000)).toBe(0);
+  });
+
+  it('una que se cortó sigue desde donde iba, un segundo antes', () => {
+    expect(desdeDondeSeguir({ hastaMs: minutos(30), completa: false }, minutos(60))).toBe(minutos(30) - 1000);
+    // Si apenas empezó, o ya estaba al final, no hay nada que seguir.
+    expect(desdeDondeSeguir({ hastaMs: 800, completa: false }, minutos(60))).toBe(0);
+    expect(desdeDondeSeguir({ hastaMs: minutos(60) - 1000, completa: false }, minutos(60))).toBe(0);
   });
 });

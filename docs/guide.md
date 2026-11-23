@@ -118,7 +118,7 @@ When subtitles exist only in another language, Claude can adapt them to Japanese
 
 ### Importing and exporting
 
-Each track has **Import** and **Export SRT** buttons. A file can also be dragged onto the video. SRT, VTT, ASS, SSA, TTML and DFXP are supported.
+Each track has **Import** and **Export SRT** buttons. A file can also be dragged onto the video. SRT, VTT, ASS, SSA, TTML, DFXP and song lyrics in LRC are supported, with each verse at its moment.
 
 - Imported files are saved for that title and take priority over the site's tracks.
 - Exports include the synchronization adjustments.
@@ -158,7 +158,7 @@ Whisper generates Japanese subtitles when a video has none. It runs on the graph
 | Whisper Turbo ligero (light) | 564 MB | Slightly less accurate, with less video memory |
 | Whisper Base | 165 MB | For computers without a powerful GPU |
 
-In automatic mode, a video counts as a song if its lyrics have been pasted, if the site classifies it as music, or if the title says so, such as "MV" or "歌ってみた". With Japanese speech, Haas-ja makes 3 % errors against 9 % for Whisper Turbo, and transcribes 30 minutes in about a minute, against about 5. With songs it writes only part of what is sung, and there Whisper Turbo is better. The same happens in English with Parakeet: 6.8 % errors against 9.6 % for Whisper Turbo, and timing three times more precise. While transcribing, the panel shows which model is working.
+In automatic mode, a video counts as a song if its lyrics have been pasted, if the site classifies it as music, or if the title says so, such as "MV" or "歌ってみた"; in the player, also an audio file, except an M4B audiobook. With Japanese speech, Haas-ja makes 3 % errors against 9 % for Whisper Turbo, and transcribes 30 minutes in about a minute, against about 5. With songs it writes only part of what is sung, and there Whisper Turbo is better. The same happens in English with Parakeet: 6.8 % errors against 9.6 % for Whisper Turbo, and timing three times more precise. While transcribing, the panel shows which model is working.
 
 Models are stored in the browser and are not downloaded again: each time they load from disk, which can take a few seconds. **Settings, Speech transcription, Saved models** shows the space each one takes and allows it to be deleted. Uninstalling the extension also deletes them.
 
@@ -170,7 +170,9 @@ Models are stored in the browser and are not downloaded again: each time they lo
 | Suave (gentle) | 30 % | About 12 minutes |
 | Rápida (fast) | 90 % | About 4 minutes |
 
-Transcription can be paused to free the card at once and resumed from the same point. If the video driver restarts, Whisper waits 20 seconds, reloads the model and continues at the lowest intensity. On a second failure it stops, and what has been transcribed stays saved. If what you are watching catches up with the transcription and the card cannot keep up, Kotonoha says so and offers **Wait for the transcription**, which pauses the video and resumes it by itself as soon as the transcription is ahead again.
+Transcription can be paused to free the card at once and resumed from the same point. If the video driver restarts, Whisper waits 20 seconds, reloads the model and continues at the lowest intensity. On a second failure it stops, and what has been transcribed stays saved. If what you are watching catches up with the transcription and the card cannot keep up, Kotonoha says so and offers **Wait for the transcription**, which pauses the video and resumes it by itself as soon as the transcription is ahead again. With the video paused it works at full speed, since there is nothing to play.
+
+**Transcribing again.** If a transcription of the whole audio was cut short, transcribing the same video again continues from where it was, and the notice offers **Start over**. A finished one is redone in full, and the new one replaces the old as soon as its first lines arrive. What is saved for a video (transcriptions, translations, lyrics and imports, with their corrections and sync) is deleted on it, in **Video settings**, **Subtitles**, **Saved subtitles**; for all videos, in **Settings, Your data**.
 
 ### Song lyrics
 
@@ -303,7 +305,7 @@ None of this adds anything to the page's content. Colors use the CSS Custom High
 
 **PDFs with text.** If a PDF contains its text, it is used directly, without OCR or downloads: just tap a word. In a PDF with text or on a page read in **Book** mode, it opens with its sentence and its word panel, and is marked on the page.
 
-**Player.** Plays your own videos and audio files with the same tools as on any site, and with its own controls: speed, volume, jumping between lines and, when you hover over the timeline, the sentence spoken at that moment. In full screen (F) the subtitles stay, above the controls. **Open a folder** puts a whole season in the **Playlist**, in the order of its episodes and with each one's subtitles: those whose name carries the language you study (`Episode 01.ja.srt`) are the main ones, and those in another language, the translation. It remembers where you left each file and continues from there; **Continue watching** gathers the latest ones, and anything chosen with the system file picker or dropped on the window opens again with one click. It also plays audio, such as podcasts and audiobooks (MP3, M4A, OGG, WAV, FLAC), and if there are no subtitles, **Generate the subtitles** writes them with Whisper. Embedded MKV subtitles and the choice of audio track use ffmpeg.wasm. Keys: Space plays or pauses, F toggles full screen, M mutes and `<` `>` change the speed.
+**Player.** Plays your own videos and audio files with the same tools as on any site, and with its own controls: speed, volume, jumping between lines and, when you hover over the timeline, the sentence spoken at that moment. In full screen (F) the subtitles stay, above the controls. **Open a folder** puts a whole season in the **Playlist**, in the order of its episodes and with each one's subtitles: those whose name carries the language you study (`Episode 01.ja.srt`) are the main ones, and those in another language, the translation. It remembers where you left each file and continues from there; **Continue watching** gathers the latest ones, and anything chosen with the system file picker or dropped on the window opens again with one click. It also plays audio: songs, podcasts and audiobooks (MP3, M4A, OGG, WAV, FLAC). A song next to its lyrics in LRC with the same name opens with each verse at its moment; if it has no lyrics or subtitles, **Generate the subtitles** transcribes it with Whisper, as a song. Embedded MKV subtitles and the choice of audio track use ffmpeg.wasm. Keys: Space plays or pauses, F toggles full screen, M mutes and `<` `>` change the speed.
 
 **Words and assessment.** The explorer lists vocabulary by status, and the level assessment estimates the initial known words.
 

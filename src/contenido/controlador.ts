@@ -9,7 +9,7 @@ import { decidirSalto, duracionPausaDinamica, type LineaModo, MotorModos } from 
 import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, sincroniaDesdePuntos } from '../nucleo/sincronia';
 import { aplicarAjuste, type CantoPorTramos, type EntradaAjuste, ID_LETRA, versosDeLetra, vozDeCanto } from '../nucleo/letra';
 import { analizarSubtitulos, aSrt, esSoloAcotacion, type Linea, siguienteLinea } from '../nucleo/subtitulos';
-import { fusionarLineas, MedidorTirones, noLlega, VENTAJA_PARA_SEGUIR_S } from '../nucleo/transcripcion';
+import { desdeDondeSeguir, fusionarLineas, MedidorTirones, noLlega, type ProgresoTranscripcion, VENTAJA_PARA_SEGUIR_S } from '../nucleo/transcripcion';
 import { anotarUso, guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
 import {
   ajustes,
@@ -528,6 +528,8 @@ function elegirPista(lista: PistaInfo[], idioma: string): PistaInfo | undefined 
 const importadas = new Map<string, Linea[]>();
 /** Dónde se canta en cada canción transcrita con Whisper, por video: para colocar su letra. */
 const cantos = new Map<string, CantoPorTramos>();
+/** Hasta dónde llegó la transcripción del audio entero de cada video, y si terminó: solo una cortada sigue desde ahí. */
+const transcritos = new Map<string, ProgresoTranscripcion>();
 
 // Tiempos originales de cada pista. Lo que se muestra es esto con la sincronización aplicada.
 let baseObjetivo: LineaAnalizada[] = [];
@@ -544,6 +546,16 @@ async function leerSincronia(pista: string | null): Promise<Sincronia> {
 function publicarObjetivo(lineas: LineaAnalizada[]) {
   baseObjetivo = lineas;
   lineasObjetivo.value = aplicarSincronia(lineas, sincronias.value.objetivo);
+}
+
+/** Una transcripción nueva de la pista que se ve empieza sin la sincronía ni las correcciones de la anterior: eran de otras líneas. */
+async function olvidarArreglosDe(id: string | null) {
+  if (!id || id !== idObjetivo.value) return;
+  originales.value = new Map();
+  anclas.value = [];
+  sincronias.value = { ...sincronias.value, objetivo: SINCRONIA_NEUTRA };
+  await chrome.storage.local.remove(claveSincronia(id)).catch(() => {});
+  await motor.guardarCorreccionesPista(clavePista(id), {}, false, ajustes.value.idiomaObjetivo).catch(() => {});
 }
 
 function publicarSecundaria(lineas: Linea[]) {
@@ -832,6 +844,10 @@ export async function cargarVideoActual() {
     const generadas = await motor.subtitulosGenerados(info.idVideo, ajustes.value.idiomaObjetivo).catch(() => []);
     for (const g of generadas) {
       if (g.canto) cantos.set(info.idVideo, g.canto);
+      if (g.origen === 'whisper' && g.idioma === ajustes.value.idiomaObjetivo) {
+        if (g.transcrito) transcritos.set(info.idVideo, g.transcrito);
+        else transcritos.delete(info.idVideo);
+      }
       // Si esta región ya trae esa pista, lo recordado de otra no aporta nada.
       if (g.origen === 'recordada' && lista.some((p) => p.idioma.split('-')[0] === g.idioma.split('-')[0] && !p.automatica)) continue;
       const id = g.origen === 'letra' ? `letra:${g.idioma}` : `generada:${g.idioma}`;
@@ -897,6 +913,8 @@ export async function importarArchivo(archivo: File, destino: 'objetivo' | 'secu
     pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (importados)', nombreIdioma(idioma)), origen: 'importada' }];
     const video = infoVideo.value?.idVideo;
     const estudio = ajustes.value.idiomaObjetivo;
+    // En la lengua que se estudia sustituye a la transcripción: ya no hay nada que seguir.
+    if (video && destino === 'objetivo') transcritos.delete(video);
     if (video) await motor.guardarSubtitulosGenerados(video, idioma, lineas, 'importada', estudio).catch(() => {});
     // Un archivo nuevo empieza sin el ajuste de sincronía del anterior, y sin sus correcciones.
     await chrome.storage.local.remove(claveSincronia(id)).catch(() => {});
@@ -1290,7 +1308,8 @@ async function guardarGenerada() {
   const origen = pistas.value.find((p) => p.id === idObjetivo.value)?.origen;
   const estudio = ajustes.value.idiomaObjetivo;
   const canto = origen === 'whisper' && video ? cantos.get(video) : undefined;
-  if (video) await motor.guardarSubtitulosGenerados(video, estudio, crudas(baseObjetivo), origen, estudio, canto).catch(() => {});
+  const transcrito = origen === 'whisper' && video ? transcritos.get(video) : undefined;
+  if (video) await motor.guardarSubtitulosGenerados(video, estudio, crudas(baseObjetivo), origen, estudio, canto, transcrito).catch(() => {});
 }
 
 /** Corrección en tiempo real: un lote pequeño con todo lo transcrito hasta ahora como contexto. */
@@ -1309,10 +1328,12 @@ async function corregirLote(lote: Linea[]) {
   }
 }
 
-async function recibirLineasWhisper(nuevas: Linea[], fuente: { titulo?: string; url?: string; idVideo?: string }, vigente: () => boolean) {
+/** Con `sustituir`, la primera tanda de una transcripción desde cero: lo de antes se va, con sus arreglos, y queda lo nuevo. */
+async function recibirLineasWhisper(nuevas: Linea[], fuente: { titulo?: string; url?: string; idVideo?: string }, vigente: () => boolean, sustituir = false) {
   const analizadas = await motor.analizarLineas(nuevas, fuente);
   if (!vigente()) return;
-  publicarObjetivo(fusionarLineas(baseObjetivo, analizadas));
+  if (sustituir) await olvidarArreglosDe(idObjetivo.value);
+  publicarObjetivo(sustituir ? analizadas : fusionarLineas(baseObjetivo, analizadas));
   await guardarGenerada();
   // Un archivo se corrige entero al final; en tiempo real se va corrigiendo sin frenar las líneas nuevas.
   if (!vigente() || whisper.value?.desdeArchivo) return;
@@ -1387,7 +1408,7 @@ function urlDelVideo(): string {
  * internet, lo procesa entero a toda velocidad. Si no, transcribe mientras se reproduce, con la
  * captura de audio activa.
  */
-export async function iniciarWhisper(enVivo = false) {
+export async function iniciarWhisper(enVivo = false, desdeCero = false) {
   if (whisper.value) return;
   const desdeArchivo = fuenteArchivo;
   // Netflix siempre tiene subtítulos y su audio no se puede bajar: ahí nunca se usa el ayudante.
@@ -1423,17 +1444,24 @@ export async function iniciarWhisper(enVivo = false) {
     if (audio) URL.revokeObjectURL(audio.url);
     return;
   }
-  // Si una transcripción anterior de este archivo quedó a medias, se sigue desde ahí.
+  // Con el audio entero, una transcripción que se cortó sigue desde donde iba; si no, se empieza de cero y lo nuevo
+  // sustituye a lo de antes en cuanto llega. En tiempo real, lo que se oye se suma a lo que ya hubiera.
+  const idVideo = infoVideo.value?.idVideo ?? null;
+  const duracionMs = (control.video()?.duration ?? 0) * 1000;
+  const entero = !!audio || conAyudante;
   let desdeMs = 0;
-  if (audio || conAyudante) {
-    const ultimo = baseObjetivo[baseObjetivo.length - 1]?.fin ?? 0;
-    const duracionMs = (control.video()?.duration ?? 0) * 1000;
-    if (ultimo > 0 && duracionMs && ultimo < duracionMs - 20000) {
-      desdeMs = Math.max(0, ultimo - 1000);
+  let sustituir = false;
+  if (entero) {
+    desdeMs = desdeCero ? 0 : desdeDondeSeguir(idVideo ? transcritos.get(idVideo) : undefined, duracionMs);
+    sustituir = desdeMs === 0 && baseObjetivo.length > 0;
+    if (desdeMs > 0) {
       const s = Math.floor(desdeMs / 1000);
-      avisar(tr('Sigo desde donde iba: {0}:{1}.', Math.floor(s / 60), String(s % 60).padStart(2, '0')));
+      avisar(tr('Sigo desde donde iba: {0}:{1}.', Math.floor(s / 60), String(s % 60).padStart(2, '0')), undefined, { texto: tr('Empezar de cero'), fn: () => empezarDeCero(enVivo) }, 10000);
     }
+    if (idVideo) transcritos.set(idVideo, { hastaMs: desdeMs, completa: false });
   }
+  /** La transcripción llegó al final del audio: la próxima vez se empieza de cero. */
+  let llegoAlFinal = false;
   sinCorregir = [];
   colaWhisper = Promise.resolve();
   colaCorreccion = Promise.resolve();
@@ -1466,7 +1494,9 @@ export async function iniciarWhisper(enVivo = false) {
       const actual = whisper.value ?? { fase: 'preparando' as const, lineas: 0 };
       if (e.tipo === 'lineas') {
         whisper.value = { ...actual, lineas: actual.lineas + e.lineas.length };
-        colaWhisper = colaWhisper.then(() => recibirLineasWhisper(e.lineas, fuente, vigente)).catch(console.error);
+        const primeraDeCero = sustituir;
+        sustituir = false;
+        colaWhisper = colaWhisper.then(() => recibirLineasWhisper(e.lineas, fuente, vigente, primeraDeCero)).catch(console.error);
       } else if (e.tipo === 'canto') {
         if (videoCanto) {
           cantos.set(videoCanto, { pasoMs: e.pasoMs, puntos: e.puntos });
@@ -1481,17 +1511,21 @@ export async function iniciarWhisper(enVivo = false) {
         whisper.value = { ...actual, fase: 'descargando', porcentaje: e.porcentaje, cargadoMb: e.cargadoMb, totalMb: e.totalMb };
       } else if (e.tipo === 'escuchando') {
         avisarSiNoHayGpu(actual.dispositivo, e.dispositivo);
-        whisper.value = { ...actual, fase: actual.fase === 'terminando' ? 'terminando' : 'escuchando', dispositivo: e.dispositivo };
+        whisper.value = { ...actual, fase: actual.fase === 'terminando' ? 'terminando' : 'escuchando', dispositivo: e.dispositivo, porcentaje: undefined };
       } else if (e.tipo === 'procesando') {
         avisarSiNoHayGpu(actual.dispositivo, e.dispositivo);
         // Desde aquí se mide el ritmo: lo de antes era cargar el modelo y, con el ayudante, bajar el audio.
         if (e.frenteMs !== undefined && !ritmo.inicio) ritmo.inicio = { t: performance.now(), frenteMs: e.frenteMs };
+        if (e.porcentaje === 100) llegoAlFinal = true;
+        if (entero && idVideo && e.frenteMs !== undefined) transcritos.set(idVideo, { hastaMs: e.frenteMs, completa: false });
+        // El porcentaje de la fase anterior (el 100 % de la descarga del modelo) no es el de la transcripción.
+        const sigue = actual.fase === 'procesando' || actual.fase === 'terminando';
         whisper.value = {
           ...actual,
           fase: actual.fase === 'terminando' ? 'terminando' : 'procesando',
-          porcentaje: e.porcentaje ?? actual.porcentaje,
+          porcentaje: e.porcentaje ?? (sigue ? actual.porcentaje : undefined),
           dispositivo: e.dispositivo ?? actual.dispositivo,
-          restanteS: e.restanteS ?? actual.restanteS,
+          restanteS: e.restanteS ?? (sigue ? actual.restanteS : undefined),
           frenteMs: e.frenteMs ?? actual.frenteMs,
           audioS: e.audioS ?? actual.audioS,
           velocidad: e.velocidad ?? actual.velocidad,
@@ -1516,7 +1550,7 @@ export async function iniciarWhisper(enVivo = false) {
           );
         avisoRetraso = true;
       } else if (e.tipo === 'preparando') {
-        whisper.value = { ...actual, fase: 'preparando' };
+        whisper.value = { ...actual, fase: 'preparando', porcentaje: undefined };
       }
     }
   });
@@ -1525,6 +1559,11 @@ export async function iniciarWhisper(enVivo = false) {
     await f;
     await colaWhisper;
     if (!vigente()) return;
+    // Terminada, y no detenida: la próxima vez se empieza de cero.
+    if (entero && idVideo && llegoAlFinal) {
+      transcritos.set(idVideo, { hastaMs: Math.max(duracionMs, transcritos.get(idVideo)?.hastaMs ?? 0), completa: true });
+      if (whisper.value?.lineas) await guardarGenerada();
+    }
     const lote = sinCorregir;
     sinCorregir = [];
     await colaCorreccion;
@@ -1639,6 +1678,34 @@ export function pausarWhisper(pausado: boolean) {
   if (!whisper.value) return;
   whisper.value = { ...whisper.value, pausado };
   motor.whisperPausar(pausado).catch(() => {});
+}
+
+/** Corta la transcripción que siguió desde donde iba y la empieza otra vez desde el principio. */
+function empezarDeCero(enVivo: boolean) {
+  cortarWhisper();
+  iniciarWhisper(enVivo, true).catch(console.error);
+}
+
+/**
+ * Borra todo lo guardado de los subtítulos de este video, en todas las lenguas: transcripciones, traducciones, letras,
+ * importados, correcciones y sincronía. Quedan las pistas del propio sitio.
+ */
+export async function borrarSubtitulosDelVideo() {
+  const video = infoVideo.value?.idVideo;
+  if (!video) return;
+  cortarWhisper();
+  cancelarGeneracion();
+  cancelarCorreccion();
+  const n = await motor.borrarSubtitulosVideo(video).catch(() => -1);
+  // La sincronía de cada pista va aparte, en el almacenamiento de la extensión.
+  const guardado = await chrome.storage.local.get(null).catch(() => ({}) as Record<string, unknown>);
+  const claves = Object.keys(guardado).filter((k) => k.startsWith(`kotonohaSincronia:${video}:`));
+  if (claves.length) await chrome.storage.local.remove(claves).catch(() => {});
+  cantos.delete(video);
+  transcritos.delete(video);
+  await cargarVideoActual();
+  if (n < 0) avisar(tr('No se pudieron borrar los subtítulos guardados de este video.'), 'error');
+  else avisar(n ? tr('Se borraron los subtítulos guardados de este video.') : tr('Este video no tenía subtítulos guardados.'), n ? 'exito' : undefined);
 }
 
 /** Para de escuchar, pero termina de transcribir lo que ya se oyó. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emparejar, enOrden, haTerminado, lineaEn, partesDeSubtitulo, puntoDeReanudar, reloj, tipoDeArchivo, velocidadVecina } from './reproductor';
+import { emparejar, enOrden, esCancionPorArchivo, haTerminado, lineaEn, partesDeSubtitulo, puntoDeReanudar, reloj, tipoDeArchivo, velocidadVecina } from './reproductor';
 
 const a = (...nombres: string[]) => nombres.map((nombre) => ({ nombre }));
 const casados = (r: ReturnType<typeof emparejar<{ nombre: string }, { nombre: string }>>) =>
@@ -82,5 +82,19 @@ describe('el reproductor de archivos', () => {
     expect([0, 1000, 2999, 3200, 5000, 7000, 10000, 21000].map((ms) => lineaEn(l, ms)?.texto ?? null)).toEqual([
       null, 'a', 'a', 'a', 'b', 'b', null, 'c',
     ]);
+  });
+});
+
+describe('esCancionPorArchivo', () => {
+  it('un audio suelto es una canción, salvo un audiolibro; un video o unos subtítulos no', () => {
+    expect(esCancionPorArchivo('01. Readymade.flac')).toBe(true);
+    expect(esCancionPorArchivo('夜に駆ける.MP3')).toBe(true);
+    expect(esCancionPorArchivo('Kokoro.m4b')).toBe(false);
+    expect(esCancionPorArchivo('episodio.mkv')).toBe(false);
+    expect(esCancionPorArchivo('01. Readymade.lrc')).toBe(false);
+  });
+
+  it('acepta letras LRC como subtítulos', () => {
+    expect(tipoDeArchivo('01. Readymade.lrc')).toBe('subtitulos');
   });
 });

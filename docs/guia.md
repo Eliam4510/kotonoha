@@ -118,7 +118,7 @@ Cuando solo hay subtítulos en otro idioma, Claude puede adaptarlos al japonés.
 
 ### Importar y exportar
 
-Cada pista tiene los botones **Importar** y **Exportar SRT**. También se puede arrastrar un archivo sobre el video. Se admiten SRT, VTT, ASS, SSA, TTML y DFXP.
+Cada pista tiene los botones **Importar** y **Exportar SRT**. También se puede arrastrar un archivo sobre el video. Se admiten SRT, VTT, ASS, SSA, TTML, DFXP y la letra de una canción en LRC, con cada verso en su momento.
 
 - Lo importado queda guardado para ese título, y tiene prioridad sobre las pistas del sitio.
 - La exportación incluye los ajustes de sincronía.
@@ -158,7 +158,7 @@ Whisper genera subtítulos en japonés cuando un video no los trae. Se ejecuta e
 | Whisper Turbo ligero | 564 MB | Algo menos preciso, con menos memoria de video |
 | Whisper Base | 165 MB | Para equipos sin una GPU potente |
 
-En automático, un video es una canción si se ha pegado su letra, si el sitio lo clasifica como música o si el título lo dice, como «MV» o «歌ってみた». Con voz hablada en japonés, Haas-ja comete un 3 % de errores frente al 9 % de Whisper Turbo, y transcribe 30 minutos en alrededor de un minuto, frente a unos 5. Con canciones escribe solo una parte de lo que se canta, y ahí Whisper Turbo es mejor. En inglés pasa lo mismo con Parakeet: un 6,8 % de errores frente al 9,6 % de Whisper Turbo, y tiempos tres veces más exactos. Mientras transcribe, el panel indica qué modelo está trabajando.
+En automático, un video es una canción si se ha pegado su letra, si el sitio lo clasifica como música o si el título lo dice, como «MV» o «歌ってみた»; en el reproductor, también un archivo de audio, salvo un audiolibro en M4B. Con voz hablada en japonés, Haas-ja comete un 3 % de errores frente al 9 % de Whisper Turbo, y transcribe 30 minutos en alrededor de un minuto, frente a unos 5. Con canciones escribe solo una parte de lo que se canta, y ahí Whisper Turbo es mejor. En inglés pasa lo mismo con Parakeet: un 6,8 % de errores frente al 9,6 % de Whisper Turbo, y tiempos tres veces más exactos. Mientras transcribe, el panel indica qué modelo está trabajando.
 
 Los modelos se guardan en el navegador y no se vuelven a descargar: cada vez se leen del disco, lo que puede tardar unos segundos. En **Ajustes, Transcripción de voz, Modelos guardados** se ve lo que ocupa cada uno y se puede borrar. Desinstalar la extensión también los borra.
 
@@ -170,7 +170,9 @@ Los modelos se guardan en el navegador y no se vuelven a descargar: cada vez se 
 | Suave | 30 % | Unos 12 minutos |
 | Rápida | 90 % | Unos 4 minutos |
 
-Durante la transcripción se puede pausar para liberar la tarjeta al instante y reanudar por el mismo punto. Si el controlador de video se reinicia, Whisper espera 20 segundos, recarga el modelo y continúa a la mínima intensidad. Al segundo fallo se detiene, y lo transcrito queda guardado. Si lo que se ve alcanza a lo transcrito y la transcripción no da abasto, Kotonoha lo dice y ofrece **Esperar a la transcripción**, que pausa el video y lo reanuda solo en cuanto vuelve a ir por delante.
+Durante la transcripción se puede pausar para liberar la tarjeta al instante y reanudar por el mismo punto. Si el controlador de video se reinicia, Whisper espera 20 segundos, recarga el modelo y continúa a la mínima intensidad. Al segundo fallo se detiene, y lo transcrito queda guardado. Si lo que se ve alcanza a lo transcrito y la transcripción no da abasto, Kotonoha lo dice y ofrece **Esperar a la transcripción**, que pausa el video y lo reanuda solo en cuanto vuelve a ir por delante. Con el video en pausa trabaja a toda marcha, porque no hay nada que reproducir.
+
+**Volver a transcribir.** Si una transcripción del audio entero se cortó, transcribir otra vez el mismo video sigue desde donde iba, y el aviso ofrece **Empezar de cero**. Una que terminó se rehace entera, y la nueva sustituye a la anterior en cuanto llegan sus primeras líneas. Lo guardado de un video (transcripciones, traducciones, letras e importados, con sus correcciones y su sincronía) se borra sobre él, en **Ajustes de video**, **Subtítulos**, **Subtítulos guardados**; lo de todos, en **Ajustes, Tus datos**.
 
 ### Letras de canciones
 
@@ -303,7 +305,7 @@ Nada de esto añade nada al contenido de la página. Los colores usan la CSS Cus
 
 **PDF con texto.** Si un PDF trae su texto, se usa directamente, sin OCR ni descargas: basta con tocar una palabra. En un PDF con texto o en una página leída en modo **Libro**, se abre con su frase y su ficha, y queda marcada sobre la página.
 
-**Reproductor.** Reproduce tus videos y audios con las mismas herramientas que en cualquier sitio y con sus propios controles: velocidad, volumen, saltar de línea y, al pasar por la barra de tiempo, la frase que se dice en ese momento. En pantalla completa (F) los subtítulos siguen ahí, por encima de los controles. **Abrir una carpeta** pone una temporada entera en la **Lista de reproducción**, en el orden de sus capítulos y con los subtítulos de cada uno: los que llevan en el nombre la lengua que estudias (`Capítulo 01.ja.srt`) son los principales, y los de otro idioma, la traducción. Recuerda dónde se dejó cada archivo y sigue desde ahí; **Seguir viendo** reúne lo último, y lo que se eligió con el selector del sistema o se soltó en la ventana se vuelve a abrir con un clic. También lee audio, como podcasts y audiolibros (MP3, M4A, OGG, WAV, FLAC), y si no trae subtítulos, **Generar los subtítulos** los escribe con Whisper. Los subtítulos incrustados de un MKV y la elección de pista de audio van con ffmpeg.wasm. Teclas: Espacio reproduce o pausa, F pone la pantalla completa, M silencia y `<` `>` cambian la velocidad.
+**Reproductor.** Reproduce tus videos y audios con las mismas herramientas que en cualquier sitio y con sus propios controles: velocidad, volumen, saltar de línea y, al pasar por la barra de tiempo, la frase que se dice en ese momento. En pantalla completa (F) los subtítulos siguen ahí, por encima de los controles. **Abrir una carpeta** pone una temporada entera en la **Lista de reproducción**, en el orden de sus capítulos y con los subtítulos de cada uno: los que llevan en el nombre la lengua que estudias (`Capítulo 01.ja.srt`) son los principales, y los de otro idioma, la traducción. Recuerda dónde se dejó cada archivo y sigue desde ahí; **Seguir viendo** reúne lo último, y lo que se eligió con el selector del sistema o se soltó en la ventana se vuelve a abrir con un clic. También lee audio: canciones, podcasts y audiolibros (MP3, M4A, OGG, WAV, FLAC). Una canción junto a su letra en LRC con el mismo nombre se abre con cada verso en su momento; si no trae letra ni subtítulos, **Generar los subtítulos** la transcribe con Whisper, como canción. Los subtítulos incrustados de un MKV y la elección de pista de audio van con ffmpeg.wasm. Teclas: Espacio reproduce o pausa, F pone la pantalla completa, M silencia y `<` `>` cambian la velocidad.
 
 **Palabras y evaluación.** El explorador lista el vocabulario por estado, y la evaluación de nivel estima las palabras conocidas de partida.
 

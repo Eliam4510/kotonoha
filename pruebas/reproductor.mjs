@@ -48,6 +48,11 @@ writeFileSync(join(MEDIOS, 'Ep 2.ja.vtt'), vtt(0));
 writeFileSync(join(MEDIOS, 'Ep 2.es.vtt'), vtt(1));
 const AUDIO = join(MEDIOS, 'podcast.mp3');
 if (!existsSync(AUDIO)) ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=440:sample_rate=44100', '-t', '12', '-c:a', 'libmp3lame', '-b:a', '64k', AUDIO);
+// Una canción con su letra sincronizada, como las de una biblioteca de música: un FLAC y un .lrc con el mismo nombre.
+const CANCION = join(MEDIOS, 'Canción.flac');
+if (!existsSync(CANCION)) ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=523:sample_rate=44100', '-t', '20', '-c:a', 'flac', CANCION);
+const LETRA_LRC = join(MEDIOS, 'Canción.lrc');
+writeFileSync(LETRA_LRC, '[ti:Canción]\n[00:02.00]星の歌が聞こえる\n[00:06.50]遠い街の灯り\n[00:12.00]\n[00:14.25]明日の約束\n');
 // Una carpeta con una temporada: un capítulo con sus subtítulos y otro sin ellos.
 const TEMPORADA = join(MEDIOS, 'Temporada 1');
 mkdirSync(TEMPORADA, { recursive: true });
@@ -299,6 +304,62 @@ comprobar(carpeta, 'Una carpeta abre su temporada en lugar de la lista anterior'
 comprobar((await p.locator('.ap-rep-elemento.actual b').innerText().catch(() => '')) === 'Cap 1', 'Y empieza por el primer capítulo');
 comprobar((await p.locator('.ap-rep-elemento', { hasText: 'Cap 1' }).locator('.ap-rep-con-subs').count()) === 1, 'Con los subtítulos de cada capítulo', `${await p.locator('.ap-rep-elemento', { hasText: 'Cap 2' }).locator('.ap-rep-con-subs').count()} en Cap 2`);
 await p.screenshot({ path: join(CAPTURAS, '2-carpeta.png') });
+
+// ---------- Una canción con su letra en LRC ----------
+
+await p.setInputFiles('input[type="file"]:not([webkitdirectory])', [CANCION, LETRA_LRC]);
+await p.waitForTimeout(800);
+await p.locator('.ap-rep-elemento-abrir', { hasText: 'Canción' }).click();
+// Hasta que suena la canción, el video sigue teniendo lo anterior: se espera a su portada.
+comprobar(await esperar(() => document.querySelector('.ap-rep-portada b')?.textContent === 'Canción' && document.querySelector('.ap-local video')?.readyState >= 2, undefined, 15000), 'Una canción se abre junto a su letra en LRC');
+const versoEn = async (s) => {
+  // Buscar en un FLAC tarda: se lee cuando el video ya ha llegado.
+  await p.evaluate(
+    (s) =>
+      new Promise((ok) => {
+        const x = document.querySelector('.ap-local video');
+        x.pause();
+        if (Math.abs(x.currentTime - s) < 0.01) return ok();
+        x.addEventListener('seeked', () => ok(), { once: true });
+        x.currentTime = s;
+        setTimeout(ok, 4000);
+      }),
+    s
+  );
+  await p.waitForTimeout(450);
+  return p.evaluate(() => {
+    const el = document.querySelector('.linea-sub .linea-texto');
+    if (!el) return '';
+    const c = el.cloneNode(true);
+    for (const x of c.querySelectorAll('rt, .glosa')) x.remove();
+    return (c.textContent ?? '').replace(/\s/g, '');
+  });
+};
+const dondeVa = () => p.evaluate(() => {
+  const x = document.querySelector('.ap-local video');
+  return `${x.currentTime.toFixed(2)} s de ${x.duration.toFixed(1)}, ${x.paused ? 'en pausa' : 'en marcha'}, ${decodeURIComponent(x.src).slice(-20)}`;
+});
+// La letra tarda un momento en analizarse tras abrir la canción.
+let segundo = '';
+for (const limite = Date.now() + 10000; Date.now() < limite && !segundo; ) segundo = await versoEn(7);
+comprobar(segundo === '遠い街の灯り', 'Cada verso sale en su momento', `${segundo} · ${await dondeVa()}`);
+// En pausa, la última frase se queda a la vista para estudiarla: el hueco se mira con la canción sonando.
+await p.evaluate(() => {
+  const x = document.querySelector('.ap-local video');
+  x.currentTime = 12.4;
+  x.play();
+});
+await p.waitForTimeout(1000);
+// Al quedarse sin línea, la última se desvanece en vez de desaparecer de golpe: la zona lleva entonces «saliendo».
+const hueco = await p.evaluate(() => {
+  const el = document.querySelector('.linea-sub .linea-texto');
+  return !el || document.querySelector('.subs-bloque.saliendo') ? '' : (el.textContent ?? '').replace(/\s/g, '');
+});
+const durante = await dondeVa();
+await p.evaluate(() => document.querySelector('.ap-local video').pause());
+comprobar(hueco === '', 'Una marca vacía cierra el verso anterior', `${hueco || 'nada'} · ${durante}`);
+const tercero = await versoEn(15);
+comprobar(tercero === '明日の約束', 'Y el siguiente empieza en la suya', tercero);
 
 // ---------- Vaciar ----------
 

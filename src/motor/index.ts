@@ -756,10 +756,31 @@ const api: ApiMotor = {
     await fondo.difundir({ tipo: 'gramatica' });
     return d.ajustes ?? null;
   },
-  async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen, estudio, canto) {
+  async guardarSubtitulosGenerados(idVideo, idioma, lineas: Linea[], origen, estudio, canto, transcrito) {
     // La letra no sustituye a la transcripción de la que salieron sus tiempos: con otra letra se volverá a necesitar.
     const clave = origen === 'letra' ? `${idVideo}|${idioma}|letra` : `${idVideo}|${idioma}`;
-    await baseDeEstudio(estudio).generados.put({ clave, idVideo, idioma, lineas, origen, ...(canto ? { canto } : {}), creado: Date.now() });
+    await baseDeEstudio(estudio).generados.put({ clave, idVideo, idioma, lineas, origen, ...(canto ? { canto } : {}), ...(transcrito ? { transcrito } : {}), creado: Date.now() });
+  },
+  async borrarSubtitulosVideo(idVideo) {
+    let n = 0;
+    for (const { id } of PAQUETES) {
+      if (!(await existeBaseDe(id))) continue;
+      const base = baseDe(id);
+      n += await base.generados.where('idVideo').equals(idVideo).delete();
+      await base.correcciones.where('clave').startsWith(`${idVideo}|`).delete();
+    }
+    return n;
+  },
+  async borrarTodosLosSubtitulos() {
+    let n = 0;
+    for (const { id } of PAQUETES) {
+      if (!(await existeBaseDe(id))) continue;
+      const base = baseDe(id);
+      n += await base.generados.count();
+      await base.generados.clear();
+      await base.correcciones.clear();
+    }
+    return n;
   },
   correccionesPista: (clave, estudio) => baseDeEstudio(estudio).correcciones.get(clave),
   async guardarCorreccionesPista(clave, cambios, completa, estudio) {

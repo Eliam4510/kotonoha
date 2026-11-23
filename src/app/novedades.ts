@@ -5,11 +5,12 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.49.1',
+  version: '0.49.2',
   puntos: [
-    tm('Volver a traducir los subtítulos empieza desde cero, con los subtítulos como están ahora.'),
-    tm('Si Claude no traduce una línea, como un verso de una canción, queda vacía y se avisa de cuántas son: su disculpa ya no se guarda como si fuera la traducción.'),
-    tm('Si esa vez no traduce nada, se queda la traducción que había.'),
+    tm('Transcribir otra vez una canción ya no transcribe solo el final: una transcripción terminada se rehace entera, y una cortada sigue donde iba.'),
+    tm('Un archivo de audio se transcribe como canción, y una canción se abre con su letra en LRC, con cada verso en su momento.'),
+    tm('El progreso dice qué hace en cada fase, y con el video en pausa la transcripción va a toda marcha.'),
+    tm('Los subtítulos guardados se borran: los de un video, en su panel de subtítulos, y los de todos, en Ajustes.'),
   ],
 };
 

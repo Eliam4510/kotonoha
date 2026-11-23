@@ -732,7 +732,7 @@ function Barra() {
         {whisper.value && (
           <span class="barra-proceso local barra-opcional" data-tip={tr('Whisper está transcribiendo el video en tu equipo')}>
             <Icono n="ondas" t={15} />
-            {whisper.value.pausado ? tr('En pausa') : whisper.value.fase === 'descargando' ? tr('Descargando {0} %', Math.round(whisper.value.porcentaje ?? 0)) : whisper.value.fase === 'bajando' ? tr('Bajando audio {0} %', Math.round(whisper.value.porcentaje ?? 0)) : whisper.value.fase === 'extrayendo' ? tr('Extrayendo {0} %', Math.round(whisper.value.porcentaje ?? 0)) : whisper.value.desdeArchivo && whisper.value.porcentaje !== undefined ? `${Math.round(whisper.value.porcentaje)} %` : (whisper.value.lineas === 1 ? tr('1 línea') : tr('{0} líneas', whisper.value.lineas))}
+            {etiquetaWhisper(whisper.value)}
           </span>
         )}
         <span class="barra-sep" />
@@ -977,7 +977,7 @@ function ZonaSoltar() {
       if (!arrastrando.value) return;
       e.preventDefault();
       arrastrando.value = false;
-      const archivos = [...(e.dataTransfer?.files ?? [])].filter((f) => /\.(srt|vtt|ass|ssa|ttml|xml|dfxp)$/i.test(f.name));
+      const archivos = [...(e.dataTransfer?.files ?? [])].filter((f) => /\.(srt|vtt|ass|ssa|ttml|xml|dfxp|lrc)$/i.test(f.name));
       if (archivos[0]) importarArchivo(archivos[0], lineasObjetivo.value.length ? 'secundaria' : 'objetivo');
     };
     window.addEventListener('dragenter', entrar);
@@ -1001,6 +1001,21 @@ function ZonaSoltar() {
       </div>
     </div>
   );
+}
+
+/**
+ * Lo que dice la barra de una transcripción en marcha: cada fase con su nombre y su propio porcentaje. Un porcentaje solo,
+ * sin nombre, parecía volver atrás: del 100 % de la descarga del modelo al 0 % de la transcripción.
+ */
+function etiquetaWhisper(w: NonNullable<typeof whisper.value>): string {
+  const pct = Math.round(w.porcentaje ?? 0);
+  if (w.pausado) return tr('En pausa');
+  if (w.fase === 'descargando') return tr('Descargando {0} %', pct);
+  if (w.fase === 'bajando') return tr('Bajando audio {0} %', pct);
+  if (w.fase === 'extrayendo') return tr('Extrayendo {0} %', pct);
+  if (w.fase === 'preparando') return tr('Preparando el modelo…');
+  if (w.desdeArchivo && w.fase === 'procesando' && w.porcentaje !== undefined) return tr('Transcribiendo {0} %', pct);
+  return w.lineas === 1 ? tr('1 línea') : tr('{0} líneas', w.lineas);
 }
 
 export function Reproductor({ sinBarra = false }: { sinBarra?: boolean }) {

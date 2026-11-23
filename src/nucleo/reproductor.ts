@@ -10,8 +10,18 @@ const EXTENSIONES: Record<TipoArchivo, string[]> = {
   video: ['mp4', 'webm', 'mkv', 'mov', 'm4v', 'ogv'],
   // Podcasts, audiolibros y canciones: suenan en el mismo reproductor, con sus subtítulos o con Whisper.
   audio: ['mp3', 'm4a', 'm4b', 'aac', 'ogg', 'oga', 'opus', 'wav', 'flac', 'weba'],
-  subtitulos: ['srt', 'vtt', 'ass', 'ssa', 'ttml', 'dfxp', 'xml'],
+  // Con las canciones suele venir su letra sincronizada en LRC.
+  subtitulos: ['srt', 'vtt', 'ass', 'ssa', 'ttml', 'dfxp', 'xml', 'lrc'],
 };
+
+/** Audiolibros: un archivo de audio que no es una canción. */
+const SIN_CANTO = ['m4b'];
+
+/** Si un archivo es, casi seguro, una canción: el audio suelto lo es, salvo un audiolibro. */
+export function esCancionPorArchivo(nombre: string): boolean {
+  const ext = nombre.slice(nombre.lastIndexOf('.') + 1).toLowerCase();
+  return tipoDeArchivo(nombre) === 'audio' && !SIN_CANTO.includes(ext);
+}
 
 /** Las extensiones que acepta el selector de archivos, con su punto. */
 export const ACEPTADOS = Object.values(EXTENSIONES).flat().map((e) => `.${e}`);

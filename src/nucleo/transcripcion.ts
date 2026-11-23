@@ -341,6 +341,8 @@ export interface RitmoVideo {
   ventajaS: number | null;
   /** Si el video ha perdido fotogramas mientras se transcribía. */
   tirones: boolean;
+  /** El video está en pausa: nada que se vea necesita la tarjeta gráfica. */
+  enPausa?: boolean;
 }
 
 /** Con menos ventaja, lo que se ve está a punto de alcanzar a lo transcrito: en automático se trabaja a toda marcha. */
@@ -356,11 +358,38 @@ export const VENTAJA_HOLGADA_S = 60;
 export function ocupacionObjetivo(intensidad: IntensidadWhisper, enUso: boolean, ritmo?: RitmoVideo): number {
   if (intensidad === 'suave') return 0.3;
   if (intensidad === 'rapida') return 0.9;
+  // Con el video en pausa iba más lenta que viéndolo: descansaba como si hubiera algo que reproducir.
+  if (ritmo?.enPausa) return 0.9;
   if (ritmo && ritmo.ventajaS !== null) {
     if (ritmo.ventajaS < VENTAJA_JUSTA_S) return 0.9;
     if (ritmo.tirones && ritmo.ventajaS > VENTAJA_HOLGADA_S) return 0.3;
   }
   return enUso ? 0.75 : 0.9;
+}
+
+/** Si se sabe dónde va el video y está en pausa: con una marca vieja no se sabe nada. */
+export const videoEnPausa = (marca: MarcaVideo, ahora: number): boolean => !marca.reproduciendo && marca.instante > 0 && ahora - marca.instante <= MARCA_VIEJA_MS;
+
+/** Hasta dónde llegó la transcripción del audio entero de un video, y si terminó. */
+export interface ProgresoTranscripcion {
+  hastaMs: number;
+  completa: boolean;
+}
+
+/** Lo que se repite al seguir, para no partir una frase por la mitad. */
+const SOLAPE_AL_SEGUIR_MS = 1000;
+/** Tan cerca del final ya no queda nada que seguir. */
+const CASI_AL_FINAL_MS = 2000;
+
+/**
+ * Desde dónde sigue una transcripción del audio entero: solo la que se cortó, desde donde iba. Una terminada, o una de la
+ * que no se sabe (las guardadas antes de la 0.49.2), empieza de cero. Antes se miraba dónde acababa la última línea, y el
+ * final instrumental de una canción parecía una transcripción a medias: se volvía a transcribir solo el final.
+ */
+export function desdeDondeSeguir(previo: ProgresoTranscripcion | undefined, duracionMs: number): number {
+  if (!previo || previo.completa || previo.hastaMs <= SOLAPE_AL_SEGUIR_MS) return 0;
+  if (duracionMs > 0 && previo.hastaMs >= duracionMs - CASI_AL_FINAL_MS) return 0;
+  return previo.hastaMs - SOLAPE_AL_SEGUIR_MS;
 }
 
 /** La última marca del reproductor: dónde iba el video, si se estaba viendo, a qué velocidad y cuándo se marcó. */

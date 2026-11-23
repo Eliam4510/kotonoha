@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.49.2 · 2026-11-22
+
+La transcripción de canciones, arreglada, y las letras en LRC.
+
+- **Volver a transcribir.** En una canción que acaba con un pasaje instrumental, transcribir otra vez solo volvía a transcribir el final, porque parecía a medias. Ahora Kotonoha sabe si una transcripción terminó o se cortó: una cortada sigue desde donde iba, con **Empezar de cero** en el aviso, y una terminada se rehace entera y la nueva sustituye a la anterior.
+- **Archivos de audio.** En el reproductor, un archivo de audio se transcribe como canción, con Whisper Turbo y oyendo dónde se canta. Antes se trataba como voz hablada y salía solo una parte de lo que se canta.
+- **Letras en LRC.** Se importan como cualquier subtítulo, también arrastrándolas sobre el video, y en el reproductor una canción se abre junto a su .lrc del mismo nombre, con cada verso en su momento.
+- **El progreso.** Cada fase dice lo que hace con su propio porcentaje: el 100 % de la descarga del modelo ya no se queda puesto hasta que empieza a transcribir, ni parece volver a 0.
+- **En pausa, a toda marcha.** Con el video en pausa, la transcripción descansaba como si hubiera algo que reproducir.
+- **Borrar los subtítulos guardados.** Los de un video, sobre él, en **Ajustes de video**, **Subtítulos**, **Subtítulos guardados**; los de todos, en **Ajustes, Tus datos**.
+
 ## 0.49.1 · 2026-11-22
 
 Volver a traducir empieza desde cero, y una línea que Claude no traduce ya no se guarda con su disculpa.
@@ -519,6 +530,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.49.2 · 2026-11-22
+
+Song transcription, fixed, and lyrics in LRC.
+
+- **Transcribing again.** With a song that ends in an instrumental passage, transcribing it again only redid the ending, because it looked half done. Now Kotonoha knows whether a transcription finished or was cut short: one that was cut continues from where it was, with **Start over** in the notice, and a finished one is redone in full, the new one replacing the old.
+- **Audio files.** In the player, an audio file is transcribed as a song, with Whisper Turbo and hearing where there is singing. Before, it was treated as speech, and only part of what is sung came out.
+- **LRC lyrics.** They import like any subtitles, also by dropping them on the video, and in the player a song opens with its .lrc of the same name, each verse at its moment.
+- **Progress.** Each phase says what it is doing with its own percentage: the 100 % of the model download no longer stays up until transcription starts, nor seems to go back to 0.
+- **Full speed when paused.** With the video paused, transcription used to rest as if there were something to play.
+- **Deleting saved subtitles.** Those of a video, on it, in **Video settings**, **Subtitles**, **Saved subtitles**; those of all videos, in **Settings, Your data**.
 
 ## 0.49.1 · 2026-11-22
 

@@ -162,3 +162,38 @@ describe('utilidades', () => {
     expect(aSrt(lineas)).toContain('00:00:01,000 --> 00:00:02,000');
   });
 });
+
+describe('LRC', () => {
+  const lrc = [
+    '[ti:Readymade]',
+    '[ar:Ado]',
+    '[00:16.36] ロンリー ロンリー',
+    '[00:18.75] 寄る辺ない侘しさに',
+    '[00:21.380]頬杖ついてる',
+    '[00:40.00]',
+    '[01:05.5][01:30.25] サビ',
+  ].join('\n');
+
+  it('se reconoce por sus marcas de tiempo', () => {
+    expect(detectarFormato(lrc)).toBe('lrc');
+    expect(detectarFormato('[Script Info]\nTitle: x')).toBe('ass');
+  });
+
+  it('cada verso empieza en su marca y dura hasta el siguiente, sin pasar de 10 s', () => {
+    const l = analizarSubtitulos(lrc);
+    expect(l.map((x) => [x.inicio, x.fin, x.texto])).toEqual([
+      [16360, 18750, 'ロンリー ロンリー'],
+      [18750, 21380, '寄る辺ない侘しさに'],
+      // La marca vacía de 0:40 lo cierra, pero antes llegan los 10 s.
+      [21380, 31380, '頬杖ついてる'],
+      // Un verso con dos marcas sale dos veces; décimas, centésimas y milésimas valen.
+      [65500, 75500, 'サビ'],
+      [90250, 96250, 'サビ'],
+    ]);
+  });
+
+  it('atiende al desplazamiento y quita las marcas de cada palabra', () => {
+    const l = analizarSubtitulos('[offset:+500]\n[00:10.00]<00:10.00>夜に<00:10.80>駆ける\n[00:12.00]次');
+    expect(l[0]).toMatchObject({ inicio: 9500, fin: 11500, texto: '夜に駆ける' });
+  });
+});
