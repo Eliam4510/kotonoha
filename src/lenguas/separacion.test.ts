@@ -45,6 +45,8 @@ describe('lo japonés está en su paquete', () => {
       'motor/ia.ts': /接続/,
       // Cómo dice Claude que no traduce algo, en cada lengua a la que se traduce, se estudie lo que se estudie.
       'nucleo/negativas.ts': /^\s*String\.raw`/,
+      // Las marcas de sección y los créditos de una letra pegada, en las lenguas de estudio: no se cantan.
+      'nucleo/noSeCanta.ts': /^\s*String\.raw`/,
       // Cómo se nombran los tomos, los capítulos y las portadas en las carpetas y los CBZ de manga, se estudie lo que se estudie.
       'nucleo/carpetas.ts': /^const (TOMO|CAPITULO|EMPIEZA_POR_TOMO) = \//,
       'nucleo/libro.ts': /^const PORTADA = \//,

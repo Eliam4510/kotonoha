@@ -82,6 +82,7 @@ const PISTAS_YT = {
   soloespanol: [{ languageCode: 'es', vssId: '.es', name: { simpleText: 'Español' } }],
   largolargo1: [{ languageCode: 'ja', vssId: '.ja', name: { simpleText: '日本語' } }],
   cancion0001: [{ languageCode: 'ja', vssId: '.ja', name: { simpleText: '日本語' } }],
+  marcado0001: [{ languageCode: 'ja', vssId: '.ja', name: { simpleText: '日本語' } }],
 };
 
 function paginaYouTube(id) {
@@ -814,6 +815,88 @@ if (quiere('negativas')) {
   await hasta(p, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000);
   await p.waitForTimeout(800);
   comprobar(!(await pistasSecundarias()).some((t) => /Claude/.test(t)), 'Tampoco al volver al video', (await pistasSecundarias()).join(' | '));
+  await p.close();
+}
+
+// ---------- Marcar los tiempos a mano ----------
+
+if (quiere('marcar')) {
+  console.log('\n== Marcar los tiempos a mano, con la barra espaciadora ==');
+  const p = abrir(await contexto.newPage(), 'marcar');
+  await p.goto('https://www.youtube.com/watch?v=marcado0001');
+  comprobar(!!(await hasta(p, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000)), 'Carga sus seis líneas');
+  // Se pulsa y se suelta con el video quieto en cada momento: lo marcado es exacto, sin depender de que se reproduzca.
+  const enMomento = (s) => p.evaluate((s) => new Promise((ok) => {
+    const v = document.querySelector('#v');
+    v.pause();
+    if (Math.abs(v.currentTime - s) < 0.01) return ok();
+    v.addEventListener('seeked', () => ok(), { once: true });
+    v.currentTime = s;
+  }), s).then(() => p.waitForTimeout(150));
+  const marcar = async (desde, hasta) => {
+    await enMomento(desde);
+    await p.keyboard.down(' ');
+    await enMomento(hasta);
+    await p.keyboard.up(' ');
+    await p.waitForTimeout(150);
+  };
+  const banner = () => enOverlay(p, (r) => r.querySelector('.banner-marcado')?.textContent ?? '');
+  await enMomento(0);
+  await abrirPanel(p, 'Ajustes de video');
+  await pulsar(p, 'Sincronizar', '.panel-flotante');
+  await p.waitForTimeout(200);
+  comprobar(await pulsar(p, 'Marcar los tiempos', '.panel-flotante'), 'En Sincronizar, «Marcar los tiempos»');
+  await p.waitForTimeout(300);
+  const alEmpezar = await banner();
+  comprobar(/1 de 6/.test(alEmpezar) && alEmpezar.includes('泥だらけの道でも花は咲いた'), 'Dice la línea que toca y cuántas hay', alEmpezar.slice(0, 80));
+  await marcar(2, 4.5);
+  comprobar(/2 de 6/.test(await banner()), 'Al soltar, pasa a la siguiente');
+  await marcar(8, 10);
+  // Deshacer la segunda y marcarla otra vez.
+  await p.keyboard.press('Backspace');
+  await p.waitForTimeout(300);
+  comprobar(/2 de 6/.test(await banner()), 'Retroceso deshace la última');
+  await marcar(7.5, 9.5);
+  await p.keyboard.press('Escape');
+  const guardado = await hasta(p, (r) => [...r.querySelectorAll('.aviso')].some((x) => /Tiempos marcados en 2 líneas/.test(x.textContent)), undefined, 8000);
+  comprobar(!!guardado, 'Escape termina y lo guarda', await avisos(p));
+  comprobar(!(await banner()), 'Y el banner se va');
+  // Lo guardado se lee desde una página de la extensión: en la del sitio no hay chrome.runtime.
+  const app = await contexto.newPage();
+  await app.goto(`chrome-extension://${idExtension}/app.html#/ajustes`);
+  await app.waitForTimeout(800);
+  const filas = await app.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({ canal: 'motor', metodo: 'subtitulosGenerados', args: ['marcado0001', 'ja'] });
+    return r?.valor ?? [];
+  }).catch(() => null);
+  await app.close();
+  const g = (filas ?? []).find((x) => x.idioma === 'ja');
+  const tiempos = g?.lineas.map((l) => `${l.inicio}-${l.fin}`) ?? [];
+  comprobar(tiempos[0] === '2000-4500' && tiempos[1] === '7500-9500', 'Cada línea, con lo marcado', tiempos.slice(0, 3).join(' '));
+  // La tercera no se marcó: se movió con la segunda (de 7 s a 7,5 s) y con la primera (un segundo después).
+  comprobar(tiempos[2] === '12500-16500', 'Las que faltan se mueven con la última marcada', tiempos[2]);
+  await p.reload();
+  await hasta(p, (r) => r.querySelectorAll('.nav-linea').length === 6, undefined, 30000);
+  await enMomento(8);
+  await p.waitForTimeout(300);
+  comprobar((await textoLinea(p, 'objetivo')).includes('授業の後は'), 'Al volver al video, sigue con los tiempos marcados', await textoLinea(p, 'objetivo'));
+  // Con la sincronía movida, empezar a marcar y salir sin marcar nada la deja como estaba.
+  const valorSincronia = () => enOverlay(p, (r) => r.querySelector('.panel-flotante .sinc-valor')?.textContent ?? '');
+  await abrirPanel(p, 'Ajustes de video');
+  await pulsar(p, 'Sincronizar', '.panel-flotante');
+  await p.waitForTimeout(200);
+  await pulsar(p, '+1 s', '.panel-flotante');
+  await p.waitForTimeout(300);
+  const conDesfase = await valorSincronia();
+  await pulsar(p, 'Marcar los tiempos', '.panel-flotante');
+  await p.waitForTimeout(300);
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(300);
+  await abrirPanel(p, 'Ajustes de video');
+  await pulsar(p, 'Sincronizar', '.panel-flotante');
+  await p.waitForTimeout(300);
+  const despues = await valorSincronia();
+  comprobar(conDesfase.includes('+1.00 s') && despues === conDesfase, 'Sin marcar nada, la sincronía se queda como estaba', `${conDesfase} → ${despues}`);
   await p.close();
 }
 

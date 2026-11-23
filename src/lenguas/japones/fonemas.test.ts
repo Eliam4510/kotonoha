@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fonemasDeMora, fonemasDeMoras, morasEspeciales } from './fonemas';
+import { fonemasDeLatina, fonemasDeMora, fonemasDeMoras, fonemasDeTokens, morasEspeciales } from './fonemas';
 
 describe('los fonemas de cada mora', () => {
   it('escribe cada kana como OpenJTalk', () => {
@@ -54,5 +54,21 @@ describe('las moras especiales', () => {
     expect(especiales('東京', ['と', 'う', 'きょ', 'う'])).toEqual([null, 'larga', null, 'larga']);
     // Pero no la い tras a: たいかい no tiene vocales largas.
     expect(especiales('大会', ['た', 'い', 'か', 'い'])).toEqual([null, null, null, null]);
+  });
+});
+
+describe('los fonemas de un verso, para colocar la letra con la voz', () => {
+  it('toma la pronunciación del diccionario: は como わ y la vocal larga repetida', () => {
+    const tokens = [
+      { surface_form: '東京', pronunciation: 'トーキョー', reading: 'トウキョウ' },
+      { surface_form: 'は', pronunciation: 'ワ', reading: 'ハ' },
+    ];
+    expect(fonemasDeTokens(tokens)).toEqual(['t', 'o', 'o', 'ky', 'o', 'o', 'w', 'a']);
+  });
+
+  it('una palabra en letras latinas lleva unos fonemas aproximados, antes de lo japonés', () => {
+    expect(fonemasDeLatina('Oh')).toEqual(['o']);
+    expect(fonemasDeLatina('Whoa')).toEqual(['w', 'o', 'a']);
+    expect(fonemasDeTokens([{ surface_form: 'Oh' }, { surface_form: 'メイビー', reading: 'メイビー' }])).toEqual(['o', 'm', 'e', 'i', 'b', 'i', 'i']);
   });
 });

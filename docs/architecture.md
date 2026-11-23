@@ -125,9 +125,9 @@ Working without pauses keeps the GPU at 100 % for hours, which makes the desktop
 
 ## Song lyrics
 
-Pasted lyrics are placed on the audio by dividing the work, and each piece decides only what it does well: Whisper hears when each line sounds, YAMNet where there is singing, Claude which verse belongs to each line, and `src/nucleo/letra.ts` computes the timing.
+Pasted lyrics are placed on the audio by dividing the work, and each piece decides only what it knows how to do: Whisper hears what is sung and when, Demucs separates the voice from the music, narabas hears where each phoneme starts, YAMNet where there is singing, and `src/nucleo/letra.ts` calculates the timing. Claude only steps in if the lyrics barely match what is heard.
 
-<p align="center"><img src="img/letra-flujo.en.svg" width="100%" alt="The path of the lyrics: the song's audio goes to Whisper Turbo and to YAMNet; Claude matches the pasted lyrics to what Whisper heard; letra.ts brings it all together, computes the timing and produces the lyrics track"></p>
+<p align="center"><img src="img/letra-flujo.en.svg" width="100%" alt="The path of the lyrics: the song's audio goes to Whisper Turbo and to Demucs; the pasted lyrics are matched letter by letter with what Whisper heard, and narabas finds in each verse's zone, on the voice alone, where its phonemes start; Claude only if they barely match; letra.ts calculates the timing and produces the lyrics track"></p>
 
 **Song or speech.** A video is treated as a song if it has lyrics waiting to be placed, if YouTube classifies it as music or if the title says so: MV, lyric video, official audio, karaoke and the like. It is then transcribed with Whisper Turbo, which hears singing over music better than the speech models.
 
@@ -135,7 +135,13 @@ Pasted lyrics are placed on the audio by dividing the work, and each piece decid
 
 **Where there is singing.** YAMNet, Google's sound classifier trained on AudioSet (521 classes), hears the same 60 s blocks as Whisper, in its own worker and on the CPU, so as not to compete for the GPU. For each 2 s segment, the score of the "Singing" class is kept. The threshold is 0.02, because the score is very low even during singing, and a single segment without singing between two with it counts as singing: it is almost never an instrumental passage. The score only exists when the song is transcribed whole from the start, with the helper or from a file; real-time transcription does not use it.
 
-**The matching.** Claude receives the lyrics and the transcription as two numbered lists, the second with its timing, which helps it see the instrumental passages. For each verse it returns `{v, de, a}`: the first and the last line of the transcription the verse sounds over. With -1, the verse is sung, but the transcription does not pick it up; with -2, it is not sung, like a section mark, a title or a credit. The prompt asks it to:
+**Each verse's zone.** `src/nucleo/casarLetra.ts` matches the lyrics with what Whisper heard letter by letter, without AI. Both are turned into comparable letters (katakana into hiragana, without punctuation or spaces), and identical runs of at least two letters are looked for and chained in order: the heaviest chain is kept, with a Fenwick tree, where a kanji weighs 6, a kana 4 and a Latin letter 1, so that a chorus in English does not drag the Japanese verses along. Each verse that matches takes the moment its runs give it, the median: that is its zone. Without the voice, the timing comes from there.
+
+**The voice alone.** Demucs (htdemucs, by Meta) separates the voice in a worker, with ONNX Runtime and WebGPU. The song's audio, which the engine keeps at 16 kHz, is raised to 44.1 kHz with a sinc filter and cut into 7.8 s chunks that overlap by a quarter. The model receives each chunk and its spectrogram (an STFT of 4096 samples with hops of 1024) and returns two branches, the time one and the frequency one; the latter is turned back into time (ISTFT) and added to the former. The voice is lowered back to 16 kHz and the chunks are joined with a triangular weight. `src/nucleo/demucs.ts` does that part, checked against the direct transform, and the GPU is only used if, with a fixed signal, it gives the same as the processor.
+
+**The phonemes.** narabas, a wav2vec2 for Japanese phonemes, gives every 20 ms the probability of each of its 43 phonemes. The verses are turned into phonemes with Kuromoji's pronunciation, and a forced alignment (Viterbi over the CTC, in `src/nucleo/alineacionForzada.ts`) places all of the lyrics' phonemes, in order, over those probabilities. Each phoneme can only land in its verse's zone, with 2 s of margin on each side, or between its neighbours' zones if its verse did not match, such as a chorus repeated just like the verse next to it. A verse starts at the first frame of its first phoneme and ends 0.4 s after its last one.
+
+**If they barely match, Claude.** If less than a quarter of the verses match, as with lyrics in rōmaji, Claude receives the lyrics and the transcription as two numbered lists, the second with its timing, which helps it see the instrumental passages. For each verse it returns `{v, de, a}`: the first and the last line of the transcription the verse sounds over. With -1, the verse is sung, but the transcription does not pick it up; with -2, it is not sung, like a section mark, a title or a credit. The prompt asks it to:
 
 - compare by sound, not by spelling: in Japanese, 会いたい, 逢いたい and あいたい are the same; in English, "night" and "knight", and in German, "Meer" and "mehr";
 - keep the order: `de` never goes back;
@@ -159,6 +165,16 @@ The answer is small, follows a JSON schema and is cached: aligning the same lyri
 
 Measured with Japanese songs from official channels and their synced lyrics, YAMNet separates singing from instrumental passages with an AUC of 0.9. Of 164 verses Whisper did not hear, with YAMNet inside Kotonoha 21 end up more than a second closer to their place and 3 further away, and those more than 5 s off go from 32 to 28. The large errors left come from long passages Whisper does not hear: YAMNet knows there is singing there, but not which verse.
 
+**What was measured.** With 51 Japanese songs and their synced lyrics (2253 verses), how far the start of each verse lands from where it is sung:
+
+| How it is placed | Half, within | Nine in ten, within |
+|---|---|---|
+| Letter by letter with what Whisper heard | 0.34 s | 1.46 s |
+| With the voice, on the mix | 0.19 s | 1.59 s |
+| With the voice isolated | 0.16 s | 0.9 s |
+
+The large errors that remain come from passages Whisper does not hear: the verse has no zone of its own, and narabas looks for it over a long stretch.
+
 The result is a separate track, analyzed and translated like any other. The final notice says how many verses have an estimated time, and **Sync: this line is playing now**, in the navigator, fine-tunes the sync; with two marks it also corrects the speed.
 
 ## Technical decisions
@@ -173,6 +189,8 @@ The result is a separate track, analyzed and translated like any other. The fina
 | AI | Official `@anthropic-ai/sdk` from the engine | The key never reaches scripts running in pages |
 | Transcription | Whisper large-v3-turbo with Transformers.js and WebGPU, with a 16-bit encoder and a quantized decoder | The most accurate of those compared, with nothing to install |
 | Singing detection | Google's YAMNet in ONNX, with ONNX Runtime on the CPU | With real songs it separates singing from instrumental passages with an AUC of 0.9. It takes 16 MB, and on the CPU it leaves the GPU to Whisper |
+| Placing lyrics with the voice | narabas, a wav2vec2 for Japanese phonemes, with its own forced alignment over its CTC, in the zone given by what Whisper heard | It was already in the extension, for the pitch accent practice. It places each verse where its phonemes start: more precise than matching the text alone |
+| Isolating the voice | Demucs (htdemucs) in ONNX, with ONNX Runtime and WebGPU; the STFT, the ISTFT and the resampling in JavaScript | With the voice alone, narabas makes far fewer mistakes. It takes 181 MB, and a four-minute song takes about 20 s |
 | Audio from online videos | yt-dlp in a local PowerShell program, over Native Messaging, and FFmpeg if installed | The only way to process it without waiting for playback. It downloads to a temporary file instead of streaming, so it is read at the GPU's pace and nothing stalls |
 | Local files | ffmpeg.wasm | Embedded subtitles and MKV audio tracks, without external programs |
 | Flashcards | AnkiConnect and a built-in FSRS review | Integration with Anki, or review inside the application |

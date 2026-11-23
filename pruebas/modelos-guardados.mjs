@@ -127,6 +127,19 @@ await p.waitForTimeout(500);
 comprobar(!(await p.evaluate(() => caches.has('kotonoha-modelo-moras'))), 'Borrarlo quita su caché');
 comprobar(!(await p.locator('#transcripcion').innerText()).includes('Modelos guardados'), 'Y la lista vuelve a desaparecer');
 
+// Demucs, que aísla la voz al colocar una letra, también va en la suya.
+await p.evaluate(async () => {
+  const cache = await caches.open('kotonoha-modelo-voz');
+  await cache.put('https://github.com/Eliam4510/kotonoha/releases/download/v0.50.0/htdemucs.onnx', new Response('x', { headers: { 'content-length': '180534758' } }));
+});
+await abrir();
+lista = await filas();
+comprobar(lista.length === 1 && lista[0].includes('Demucs, para aislar la voz al colocar una letra') && lista[0].includes('181 MB'), 'Demucs, con su tamaño', lista.join(' | '));
+await p.locator('button[aria-label="Borrar: Demucs"]').click();
+await confirmarBorrado(p);
+await p.waitForTimeout(500);
+comprobar(!(await p.evaluate(() => caches.has('kotonoha-modelo-voz'))), 'Borrar Demucs quita su caché');
+
 // Otro idioma de la interfaz.
 await sw.evaluate(async () => {
   const d = await chrome.storage.local.get('ajustes');

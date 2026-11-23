@@ -4,6 +4,8 @@
 
 import { tr } from '../compartido/i18n';
 import { MODELO_MORAS } from '../compartido/modelosGuardados';
+import type { ProbabilidadesCtc } from '../nucleo/alineacionForzada';
+import { FONEMAS_NARABAS } from '../nucleo/alineacion';
 import { esGrabacionMuda, FRECUENCIA } from '../nucleo/transcripcion';
 import type { Dispositivo, PedidoNarabas, RespuestaNarabas } from './narabasTrabajador';
 import { abrirAudio } from './whisper';
@@ -19,7 +21,8 @@ let temporizador: ReturnType<typeof setTimeout> | null = null;
 let siguienteId = 1;
 /** Tras un fallo en la GPU, el procesador hasta que se recargue la extensión. */
 let soloCpu = false;
-const pendientes = new Map<number, { ok: (f: string[]) => void; mal: (e: Error, dispositivo?: Dispositivo) => void; emitir: (e: EventoMoras) => void }>();
+type Resultado = { tipo: 'fonemas'; fonemas: string[] } | { tipo: 'probabilidades'; logp: Float32Array; marcos: number; clases: number };
+const pendientes = new Map<number, { ok: (r: Resultado) => void; mal: (e: Error, dispositivo?: Dispositivo) => void; emitir: (e: EventoMoras) => void }>();
 
 function cerrar() {
   trabajador?.terminate();
@@ -44,7 +47,10 @@ function trabajadorListo(): Worker {
     pendientes.delete(r.id);
     if (r.tipo === 'fonemas') {
       console.info(`narabas: ${r.fonemas.length} fonemas en ${r.ms} ms (${r.dispositivo})`);
-      p?.ok(r.fonemas);
+      p?.ok({ tipo: 'fonemas', fonemas: r.fonemas });
+    } else if (r.tipo === 'probabilidades') {
+      console.info(`narabas: ${r.marcos} marcos en ${r.ms} ms (${r.dispositivo})`);
+      p?.ok({ tipo: 'probabilidades', logp: r.logp, marcos: r.marcos, clases: r.clases });
     } else {
       p?.mal(new Error(r.codigo === 'modelo-distinto' ? tr('El modelo descargado no coincide con el publicado, así que se ha borrado. Vuelve a probar más tarde.') : r.mensaje), r.dispositivo);
     }
@@ -64,7 +70,7 @@ function programarCierre() {
   temporizador = setTimeout(cerrar, LIBERAR_TRAS_MS);
 }
 
-function pedir(muestras: Float32Array, emitir: (e: EventoMoras) => void, senal: AbortSignal): Promise<string[]> {
+function pedir(tipo: 'oir' | 'probabilidades', muestras: Float32Array, emitir: (e: EventoMoras) => void, senal: AbortSignal): Promise<Resultado> {
   return new Promise((ok, mal) => {
     const id = siguienteId++;
     const alCancelar = () => {
@@ -75,9 +81,9 @@ function pedir(muestras: Float32Array, emitir: (e: EventoMoras) => void, senal: 
     };
     senal.addEventListener('abort', alCancelar, { once: true });
     pendientes.set(id, {
-      ok: (f) => {
+      ok: (r) => {
         senal.removeEventListener('abort', alCancelar);
-        ok(f);
+        ok(r);
       },
       mal: (e, dispositivo) => {
         senal.removeEventListener('abort', alCancelar);
@@ -85,14 +91,14 @@ function pedir(muestras: Float32Array, emitir: (e: EventoMoras) => void, senal: 
         if (dispositivo === 'webgpu' && !soloCpu && !senal.aborted) {
           soloCpu = true;
           cerrar();
-          pedir(muestras, emitir, senal).then(ok, mal);
+          pedir(tipo, muestras, emitir, senal).then(ok, mal);
           return;
         }
         mal(e);
       },
       emitir,
     });
-    trabajadorListo().postMessage({ tipo: 'oir', id, muestras: muestras.slice(), cpu: soloCpu } satisfies PedidoNarabas);
+    trabajadorListo().postMessage({ tipo, id, muestras: muestras.slice(), cpu: soloCpu } satisfies PedidoNarabas);
   });
 }
 
@@ -111,5 +117,22 @@ export async function fonemasDeGrabacion(url: string, emitir: (e: EventoMoras) =
   if (!audio) throw new Error(tr('El navegador no pudo leer la grabación.'));
   const pcm = await audio.leer(0, Math.min(audio.muestras, MAXIMO_S * FRECUENCIA));
   if (esGrabacionMuda(pcm) || senal.aborted) return [];
-  return pedir(pcm, emitir, senal);
+  const r = await pedir('oir', pcm, emitir, senal);
+  return r.tipo === 'fonemas' ? r.fonemas : [];
+}
+
+/** Lo que oye narabas en una canción entera (audio a 16 kHz), marco a marco: para colocar su letra con la voz. */
+export async function probabilidadesDe(pcm: Float32Array, emitir: (e: EventoMoras) => void, senal: AbortSignal): Promise<ProbabilidadesCtc> {
+  const r = await pedir('probabilidades', pcm, emitir, senal);
+  if (r.tipo !== 'probabilidades') throw new Error(tr('No se pudo oír la canción.'));
+  return { logp: r.logp, marcos: r.marcos, clases: r.clases, blanco: FONEMAS_NARABAS.indexOf('[PAD]') };
+}
+
+/** A 16 kHz, narabas da un marco cada 20 ms. */
+export const MS_POR_MARCO = 20;
+
+/** Si narabas ya está en el disco: sin pedirlo, no se bajan 1,26 GB. Sin abrir una caché que no existe, que la crearía. */
+export async function enDisco(): Promise<boolean> {
+  if (!(await caches.has(MODELO_MORAS.cache))) return false;
+  return !!(await (await caches.open(MODELO_MORAS.cache)).match(MODELO_MORAS.url));
 }

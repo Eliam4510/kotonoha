@@ -16,6 +16,7 @@ import {
   pistaObjetivoEsLetra,
   cancelarGeneracion,
   detenerWhisper,
+  empezarMarcado,
   pausarWhisper,
   exportarSrt,
   actualizarAyudante,
@@ -612,6 +613,18 @@ function PanelVideo() {
               </button>
             </div>
           </div>
+          <TituloGrupo>{tr('Marcar los tiempos a mano')}</TituloGrupo>
+          <div class="grupo">
+            <div class="bloque-generar">
+              <p>{tr('Para una canción que nadie entiende, o unos subtítulos desfasados a trozos: con el video en marcha, mantén pulsada la barra espaciadora mientras suena cada línea y suéltala al acabar. La siguiente pulsación es la línea siguiente, y lo marcado se guarda para este video.')}</p>
+              <button class="btn bloque" disabled={!lineasObjetivo.value.length} onClick={() => {
+                empezarMarcado();
+                panel.value = null;
+              }}>
+                <Icono n="reloj" t={16} /> {tr('Marcar los tiempos')}
+              </button>
+            </div>
+          </div>
         </>
       )}
 
@@ -885,17 +898,17 @@ function SeccionLetra() {
   const hayTiempos = lineasObjetivo.value.length > 0;
   return (
     <>
-      <TituloGrupo icono="musica" ia>{tr('Letra de la canción')}</TituloGrupo>
+      <TituloGrupo icono="musica">{tr('Letra de la canción')}</TituloGrupo>
       <div class="grupo">
         <div class="bloque-generar">
-          <p>{tr('Whisper acierta los tiempos, pero no siempre las palabras. Pega aquí la letra, por ejemplo la de un comentario, y Claude la coloca sobre esos tiempos. Las palabras salen tal cual de tu letra.')}</p>
+          <p>{tr('Pega aquí la letra, por ejemplo la de un comentario, y Kotonoha la coloca donde se canta: con la voz, si la canción se transcribió entera, o casándola con lo que oyó Whisper. Las palabras salen tal cual de tu letra.')}</p>
           <textarea class="campo area-letra" lang={lengua.value.id} rows={5} aria-label={tr('Letra de la canción')} placeholder={tr('Un verso por línea…')} value={letraPegada.value} disabled={ajustandoLetra.value} onInput={(e) => (letraPegada.value = e.currentTarget.value)} onKeyDown={(e) => e.stopPropagation()} />
           {ajustandoLetra.value ? (
             <p class="nota-grupo">{tr('Ajustando la letra a los tiempos…')}</p>
           ) : transcribiendo ? (
             hayLetra && <p class="nota-grupo">{tr('Cuando termine la transcripción, la letra se ajustará sola.')}</p>
           ) : (
-            <button class="btn ia bloque" disabled={!hayLetra} onClick={() => (hayTiempos ? ajustarLetra() : iniciarWhisper())}><Icono n="musica" t={16} /> {hayTiempos ? tr('Ajustar la letra a estos tiempos') : tr('Transcribir y ajustar la letra')}</button>
+            <button class="btn primario bloque" disabled={!hayLetra} onClick={() => (hayTiempos ? ajustarLetra() : iniciarWhisper())}><Icono n="musica" t={16} /> {hayTiempos ? tr('Ajustar la letra a estos tiempos') : tr('Transcribir y ajustar la letra')}</button>
           )}
         </div>
       </div>

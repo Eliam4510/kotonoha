@@ -19,12 +19,14 @@ const TEXTOS = {
   es: {
     flujo: {
       titulo: 'Cómo se coloca la letra de una canción',
-      desc: 'El audio de la canción va a Whisper Turbo, que oye qué se canta y cuándo, y a YAMNet, que marca dónde se canta. Claude empareja cada verso de la letra pegada con las líneas de Whisper. letra.ts reúne la letra, ese emparejamiento, los tiempos de Whisper y el canto de YAMNet, y genera la pista de la letra, que se analiza y se traduce.',
+      desc: 'El audio de la canción va a Whisper Turbo, que oye qué se canta y cuándo, y a Demucs, que separa la voz. La letra pegada se casa letra a letra con lo que oyó Whisper, y eso da la zona de cada verso. narabas busca en esa zona, sobre la voz sola, dónde empiezan sus fonemas. Si la letra apenas casa, Claude dice qué verso va sobre qué líneas. letra.ts reúne los tiempos y genera la pista de la letra, que se analiza y se traduce.',
       letra: ['Letra pegada', 'Versos, sin tiempos'],
       audio: ['Audio de la canción', 'Entero, a 16 kHz'],
       whisper: ['Whisper Turbo', 'Qué se oye y cuándo'],
-      yamnet: ['YAMNet', 'Dónde se canta'],
-      claude: ['Claude empareja', 'Cada verso con su línea'],
+      demucs: ['Demucs', 'Solo la voz'],
+      casar: ['Letra a letra', 'La zona de cada verso'],
+      narabas: ['narabas', 'Dónde empieza cada fonema'],
+      claude: ['Claude', 'Si apenas casa'],
       letrats: ['letra.ts pone los tiempos', 'Reglas fijas, sin IA'],
       pista: ['Pista de la letra', 'Se analiza y se traduce'],
       leyenda: ['En el navegador', 'Claude, por la API'],
@@ -42,12 +44,14 @@ const TEXTOS = {
   en: {
     flujo: {
       titulo: 'How song lyrics are placed',
-      desc: "The song's audio goes to Whisper Turbo, which hears what is sung and when, and to YAMNet, which marks where there is singing. Claude matches each verse of the pasted lyrics to Whisper's lines. letra.ts combines the lyrics, that matching, Whisper's timing and YAMNet's singing, and produces the lyrics track, which is analyzed and translated.",
+      desc: "The song's audio goes to Whisper Turbo, which hears what is sung and when, and to Demucs, which separates the voice. The pasted lyrics are matched letter by letter with what Whisper heard, which gives each verse's zone. In that zone, narabas finds on the voice alone where its phonemes start. If the lyrics barely match, Claude says which verse goes over which lines. letra.ts combines the timing and produces the lyrics track, which is analyzed and translated.",
       letra: ['Pasted lyrics', 'Verses, no timing'],
       audio: ['Song audio', 'Whole, at 16 kHz'],
       whisper: ['Whisper Turbo', 'What is heard, and when'],
-      yamnet: ['YAMNet', 'Where there is singing'],
-      claude: ['Claude matches', 'Each verse to its lines'],
+      demucs: ['Demucs', 'Only the voice'],
+      casar: ['Letter by letter', "Each verse's zone"],
+      narabas: ['narabas', 'Where each phoneme starts'],
+      claude: ['Claude', 'If they barely match'],
       letrats: ['letra.ts sets the timing', 'Fixed rules, no AI'],
       pista: ['Lyrics track', 'Analyzed and translated'],
       leyenda: ['In the browser', 'Claude, through the API'],
@@ -65,12 +69,14 @@ const TEXTOS = {
   de: {
     flujo: {
       titulo: 'Wie ein Liedtext platziert wird',
-      desc: 'Das Audio des Liedes geht an Whisper Turbo, das hört, was wann gesungen wird, und an YAMNet, das markiert, wo gesungen wird. Claude ordnet jeden Vers des eingefügten Liedtexts den Zeilen von Whisper zu. letra.ts verbindet den Liedtext, diese Zuordnung, die Zeiten von Whisper und den Gesang laut YAMNet und erzeugt die Liedtext-Spur, die analysiert und übersetzt wird.',
+      desc: 'Das Audio des Liedes geht an Whisper Turbo, das hört, was wann gesungen wird, und an Demucs, das die Stimme freistellt. Der eingefügte Liedtext wird Buchstabe für Buchstabe mit dem von Whisper Gehörten abgeglichen; das ergibt den Bereich jedes Verses. Darin sucht narabas auf der freigestellten Stimme, wo seine Phoneme beginnen. Passt der Text kaum, sagt Claude, welcher Vers über welchen Zeilen liegt. letra.ts verbindet die Zeiten und erzeugt die Liedtext-Spur, die analysiert und übersetzt wird.',
       letra: ['Liedtext', 'Eingefügt, ohne Zeiten'],
       audio: ['Audio des Liedes', 'Vollständig, mit 16 kHz'],
       whisper: ['Whisper Turbo', 'Was wann zu hören ist'],
-      yamnet: ['YAMNet', 'Wo gesungen wird'],
-      claude: ['Claude ordnet zu', 'Jeden Vers seinen Zeilen'],
+      demucs: ['Demucs', 'Nur die Stimme'],
+      casar: ['Buchstabenabgleich', 'Bereich jedes Verses'],
+      narabas: ['narabas', 'Wo jedes Phonem beginnt'],
+      claude: ['Claude', 'Wenn er kaum passt'],
       letrats: ['letra.ts setzt die Zeiten', 'Feste Regeln, ohne KI'],
       pista: ['Liedtext-Spur', 'Analysiert und übersetzt'],
       leyenda: ['Im Browser', 'Claude, über die API'],
@@ -88,12 +94,14 @@ const TEXTOS = {
   zh: {
     flujo: {
       titulo: '歌词如何放到歌曲上',
-      desc: '歌曲音频交给 Whisper Turbo，由它听出唱了什么、何时唱；同时交给 YAMNet，由它标出哪里有歌声。Claude 把粘贴的歌词中的每一句与 Whisper 的行配对。letra.ts 综合歌词、配对结果、Whisper 的时间和 YAMNet 的歌声，生成歌词字幕轨，并进行分析和翻译。',
+      desc: '歌曲音频交给 Whisper Turbo，由它听出唱了什么、何时唱；同时交给 Demucs，由它分离出人声。粘贴的歌词与 Whisper 听到的内容逐字对照，得出每一句所在的范围。narabas 在这个范围内、在分离出的人声上找出其音素开始的位置。如果歌词几乎对不上，由 Claude 指出哪一句对应哪几行。letra.ts 汇总时间，生成歌词字幕轨，并进行分析和翻译。',
       letra: ['粘贴的歌词', '只有句子，没有时间'],
       audio: ['歌曲音频', '完整音频，16 kHz'],
       whisper: ['Whisper Turbo', '听到什么、何时听到'],
-      yamnet: ['YAMNet', '哪里有歌声'],
-      claude: ['Claude 配对', '每句对应哪些行'],
+      demucs: ['Demucs', '只留人声'],
+      casar: ['逐字对照', '每句所在的范围'],
+      narabas: ['narabas', '每个音素从哪里开始'],
+      claude: ['Claude', '几乎对不上时'],
       letrats: ['letra.ts 计算时间', '固定规则，不用 AI'],
       pista: ['歌词字幕轨', '分析并翻译'],
       leyenda: ['在浏览器中', 'Claude，通过 API'],
@@ -111,12 +119,14 @@ const TEXTOS = {
   ko: {
     flujo: {
       titulo: '노래 가사를 배치하는 방법',
-      desc: '노래 오디오는 무엇이 언제 들리는지 듣는 Whisper Turbo와, 어디서 노래하는지 표시하는 YAMNet으로 갑니다. Claude는 붙여넣은 가사의 각 소절을 Whisper의 줄과 맞춥니다. letra.ts는 가사, 그 대응, Whisper의 시간, YAMNet의 노랫소리를 모아 가사 트랙을 만들고, 이 트랙은 분석되고 번역됩니다.',
+      desc: '노래 오디오는 무엇이 언제 들리는지 듣는 Whisper Turbo와, 목소리를 분리하는 Demucs로 갑니다. 붙여넣은 가사를 Whisper가 들은 내용과 글자 단위로 대조해 소절마다 구간을 정합니다. narabas는 그 구간 안에서, 분리한 목소리로 음소가 시작되는 곳을 찾습니다. 가사가 거의 맞지 않으면 Claude가 어떤 소절이 어느 줄에 해당하는지 알려 줍니다. letra.ts는 시간을 모아 가사 트랙을 만들고, 이 트랙은 분석되고 번역됩니다.',
       letra: ['붙여넣은 가사', '소절만, 시간 없음'],
       audio: ['노래 오디오', '전체를 16kHz로'],
       whisper: ['Whisper Turbo', '무엇이 언제 들리는지'],
-      yamnet: ['YAMNet', '어디서 노래하는지'],
-      claude: ['Claude의 소절 매칭', '소절마다 해당 줄'],
+      demucs: ['Demucs', '목소리만'],
+      casar: ['글자 단위 대조', '소절마다 구간'],
+      narabas: ['narabas', '각 음소가 시작되는 곳'],
+      claude: ['Claude', '거의 맞지 않을 때'],
       letrats: ['letra.ts의 시간 계산', '고정 규칙, AI 없음'],
       pista: ['가사 트랙', '분석과 번역'],
       leyenda: ['브라우저에서', 'Claude, API로'],
@@ -134,12 +144,14 @@ const TEXTOS = {
   ja: {
     flujo: {
       titulo: '曲の歌詞をどう配置するか',
-      desc: '曲の音声は、何がいつ歌われているかを聞き取る Whisper Turbo と、どこで歌っているかを示す YAMNet に渡ります。Claude は貼り付けた歌詞の各フレーズを Whisper の行と対応付けます。letra.ts は歌詞、その対応、Whisper のタイミング、YAMNet の歌声をまとめて歌詞トラックを作り、それを解析して翻訳します。',
+      desc: '曲の音声は、何がいつ歌われているかを聞き取る Whisper Turbo と、声を取り出す Demucs に渡ります。貼り付けた歌詞を Whisper が聞いた内容と一文字ずつ照らし合わせ、各フレーズの範囲を決めます。narabas はその範囲で、取り出した声から音素が始まる位置を探します。歌詞がほとんど一致しないときは、どのフレーズがどの行に当たるかを Claude が示します。letra.ts はタイミングをまとめて歌詞トラックを作り、それを解析して翻訳します。',
       letra: ['貼り付けた歌詞', 'フレーズのみ、時間なし'],
       audio: ['曲の音声', '全体を 16 kHz で'],
       whisper: ['Whisper Turbo', '何がいつ聞こえるか'],
-      yamnet: ['YAMNet', 'どこで歌っているか'],
-      claude: ['Claude の対応付け', 'フレーズごとに行を'],
+      demucs: ['Demucs', '声だけ'],
+      casar: ['一文字ずつ照合', 'フレーズごとの範囲'],
+      narabas: ['narabas', '各音素が始まる位置'],
+      claude: ['Claude', 'ほとんど一致しないとき'],
       letrats: ['letra.ts の時間計算', '固定ルール、AI なし'],
       pista: ['歌詞トラック', '解析して翻訳'],
       leyenda: ['ブラウザー内', 'Claude（API 経由）'],
@@ -230,16 +242,20 @@ function flujo(id, t) {
 <text class="t" x="${x + ancho / 2}" y="${y + 19}" text-anchor="middle" dominant-baseline="central">${xml(titulo)}</text>
 <text class="s" x="${x + ancho / 2}" y="${y + 39}" text-anchor="middle" dominant-baseline="central">${xml(sub)}</text>
 </g>`;
-  // La letra va a Claude y a letra.ts; Whisper, a los dos; YAMNet, solo a letra.ts. Ninguna cruza una caja.
-  const flechas = ['M440 96 V122 H340 V148', 'M440 96 V122 H540 V148', 'M180 96 V258', 'M290 206 V258', 'M100 96 V398 H218', 'M270 316 V368', 'M400 206 V368', 'M540 206 V398 H462', 'M340 426 V478'];
+  // El audio va a Whisper y a Demucs; la letra y lo que oyó Whisper se casan letra a letra, y eso da a narabas la zona de
+  // cada verso, que busca sobre la voz sola. Sin la voz, lo casado va directo a letra.ts, y si apenas casa, pasa por
+  // Claude. Ninguna flecha cruza una caja.
+  const flechas = ['M540 96 V122 H340 V148', 'M540 96 V148', 'M140 96 V258', 'M340 206 V232 H240 V258', 'M540 206 V258', 'M280 288 H398', 'M520 316 V342 H400 V368', 'M200 316 V342 H280 V368', 'M100 316 V368', 'M190 398 H218', 'M340 426 V478'];
   const cuadro = (clase) => (x, y) => `<g class="${clase}"><rect x="${x}" y="${y - 6}" width="12" height="12" rx="3"/></g>`;
   return documento(id, 600, t, [
-    caja('gris', 50, 40, 180, t.letra),
-    caja('gris', 340, 40, 200, t.audio),
+    caja('gris', 40, 40, 200, t.letra),
+    caja('gris', 440, 40, 200, t.audio),
     flechas.map((d) => `<path class="flecha" d="${d}" marker-end="url(#punta)"/>`),
-    caja('verde', 250, 150, 180, t.whisper),
-    caja('verde', 450, 150, 180, t.yamnet),
-    caja('coral', 130, 260, 200, t.claude),
+    caja('verde', 240, 150, 200, t.whisper),
+    caja('verde', 460, 150, 160, t.demucs),
+    caja('verde', 40, 260, 240, t.casar),
+    caja('verde', 400, 260, 240, t.narabas),
+    caja('coral', 20, 370, 170, t.claude),
     caja('verde', 220, 370, 240, t.letrats),
     caja('gris', 240, 480, 200, t.pista),
     leyenda(566, [

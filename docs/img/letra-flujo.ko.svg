@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:lang="ko" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo desc">
 <title id="titulo">노래 가사를 배치하는 방법</title>
-<desc id="desc">노래 오디오는 무엇이 언제 들리는지 듣는 Whisper Turbo와, 어디서 노래하는지 표시하는 YAMNet으로 갑니다. Claude는 붙여넣은 가사의 각 소절을 Whisper의 줄과 맞춥니다. letra.ts는 가사, 그 대응, Whisper의 시간, YAMNet의 노랫소리를 모아 가사 트랙을 만들고, 이 트랙은 분석되고 번역됩니다.</desc>
+<desc id="desc">노래 오디오는 무엇이 언제 들리는지 듣는 Whisper Turbo와, 목소리를 분리하는 Demucs로 갑니다. 붙여넣은 가사를 Whisper가 들은 내용과 글자 단위로 대조해 소절마다 구간을 정합니다. narabas는 그 구간 안에서, 분리한 목소리로 음소가 시작되는 곳을 찾습니다. 가사가 거의 맞지 않으면 Claude가 어떤 소절이 어느 줄에 해당하는지 알려 줍니다. letra.ts는 시간을 모아 가사 트랙을 만들고, 이 트랙은 분석되고 번역됩니다.</desc>
 <style>
 text { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', 'Noto Sans KR', system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
 .fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
@@ -35,38 +35,50 @@ g rect { stroke-width: 1; }
 <defs><marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="punta" d="M2 1L8 5L2 9"/></marker></defs>
 <rect class="fondo" x="0.5" y="0.5" width="679" height="599" rx="12"/>
 <g class="gris" data-caja="">
-<rect x="50" y="40" width="180" height="56" rx="8"/>
+<rect x="40" y="40" width="200" height="56" rx="8"/>
 <text class="t" x="140" y="59" text-anchor="middle" dominant-baseline="central">붙여넣은 가사</text>
 <text class="s" x="140" y="79" text-anchor="middle" dominant-baseline="central">소절만, 시간 없음</text>
 </g>
 <g class="gris" data-caja="">
-<rect x="340" y="40" width="200" height="56" rx="8"/>
-<text class="t" x="440" y="59" text-anchor="middle" dominant-baseline="central">노래 오디오</text>
-<text class="s" x="440" y="79" text-anchor="middle" dominant-baseline="central">전체를 16kHz로</text>
+<rect x="440" y="40" width="200" height="56" rx="8"/>
+<text class="t" x="540" y="59" text-anchor="middle" dominant-baseline="central">노래 오디오</text>
+<text class="s" x="540" y="79" text-anchor="middle" dominant-baseline="central">전체를 16kHz로</text>
 </g>
-<path class="flecha" d="M440 96 V122 H340 V148" marker-end="url(#punta)"/>
-<path class="flecha" d="M440 96 V122 H540 V148" marker-end="url(#punta)"/>
-<path class="flecha" d="M180 96 V258" marker-end="url(#punta)"/>
-<path class="flecha" d="M290 206 V258" marker-end="url(#punta)"/>
-<path class="flecha" d="M100 96 V398 H218" marker-end="url(#punta)"/>
-<path class="flecha" d="M270 316 V368" marker-end="url(#punta)"/>
-<path class="flecha" d="M400 206 V368" marker-end="url(#punta)"/>
-<path class="flecha" d="M540 206 V398 H462" marker-end="url(#punta)"/>
+<path class="flecha" d="M540 96 V122 H340 V148" marker-end="url(#punta)"/>
+<path class="flecha" d="M540 96 V148" marker-end="url(#punta)"/>
+<path class="flecha" d="M140 96 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M340 206 V232 H240 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M540 206 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M280 288 H398" marker-end="url(#punta)"/>
+<path class="flecha" d="M520 316 V342 H400 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M200 316 V342 H280 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M100 316 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M190 398 H218" marker-end="url(#punta)"/>
 <path class="flecha" d="M340 426 V478" marker-end="url(#punta)"/>
 <g class="verde" data-caja="">
-<rect x="250" y="150" width="180" height="56" rx="8"/>
+<rect x="240" y="150" width="200" height="56" rx="8"/>
 <text class="t" x="340" y="169" text-anchor="middle" dominant-baseline="central">Whisper Turbo</text>
 <text class="s" x="340" y="189" text-anchor="middle" dominant-baseline="central">무엇이 언제 들리는지</text>
 </g>
 <g class="verde" data-caja="">
-<rect x="450" y="150" width="180" height="56" rx="8"/>
-<text class="t" x="540" y="169" text-anchor="middle" dominant-baseline="central">YAMNet</text>
-<text class="s" x="540" y="189" text-anchor="middle" dominant-baseline="central">어디서 노래하는지</text>
+<rect x="460" y="150" width="160" height="56" rx="8"/>
+<text class="t" x="540" y="169" text-anchor="middle" dominant-baseline="central">Demucs</text>
+<text class="s" x="540" y="189" text-anchor="middle" dominant-baseline="central">목소리만</text>
+</g>
+<g class="verde" data-caja="">
+<rect x="40" y="260" width="240" height="56" rx="8"/>
+<text class="t" x="160" y="279" text-anchor="middle" dominant-baseline="central">글자 단위 대조</text>
+<text class="s" x="160" y="299" text-anchor="middle" dominant-baseline="central">소절마다 구간</text>
+</g>
+<g class="verde" data-caja="">
+<rect x="400" y="260" width="240" height="56" rx="8"/>
+<text class="t" x="520" y="279" text-anchor="middle" dominant-baseline="central">narabas</text>
+<text class="s" x="520" y="299" text-anchor="middle" dominant-baseline="central">각 음소가 시작되는 곳</text>
 </g>
 <g class="coral" data-caja="">
-<rect x="130" y="260" width="200" height="56" rx="8"/>
-<text class="t" x="230" y="279" text-anchor="middle" dominant-baseline="central">Claude의 소절 매칭</text>
-<text class="s" x="230" y="299" text-anchor="middle" dominant-baseline="central">소절마다 해당 줄</text>
+<rect x="20" y="370" width="170" height="56" rx="8"/>
+<text class="t" x="105" y="389" text-anchor="middle" dominant-baseline="central">Claude</text>
+<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">거의 맞지 않을 때</text>
 </g>
 <g class="verde" data-caja="">
 <rect x="220" y="370" width="240" height="56" rx="8"/>

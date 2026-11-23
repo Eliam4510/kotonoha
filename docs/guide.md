@@ -135,6 +135,8 @@ Bilibili only provides its subtitles when you are signed in: the uploader's and 
 
 The **Sync** tab adjusts the offset of each track. **Sync: this line is playing now** in the navigator also works: one mark corrects the offset, and two also correct the speed. The offset is adjusted with `Alt+I` and `Alt+O`.
 
+**Marking the timings by hand.** For a singer no model understands, or subtitles that drift now and then: in the **Sync** tab, **Mark the timings**. It starts with the line playing at that moment. With the video playing, hold the space bar (or **Hold while it is sung**, with the mouse) while each line sounds, and release it when the line ends; the next press is the next line. Backspace undoes the last one and goes back a little, and Escape finishes. The lines still to mark move with the last one marked, and what is marked is saved for that video.
+
 **Netflix and its ads.** After a mid-roll ad, when the next episode starts on its own or after a jump, the clock of Netflix's video can drift away from the episode, and subtitles would show early or late. Kotonoha compares the video's clock with the Netflix player's while you watch and keeps subtitles on Netflix's clock, without reloading the page; when it adjusts them, it says “Subtitles synced with Netflix”. If after an ad Netflix's clock does not leave it out, or gives no position, the adjustment is how long the video ran during the ad (“Subtitles adjusted for ads”), and both clocks are still compared: as soon as Netflix's gives its measurement, that one rules. In the **Sync** tab, **Netflix clock** shows how both line up and what each one says, **Sync again** (or `Alt+Shift+S`) measures again, and **Remove adjustment** removes the ad adjustment if it does not fit. This adjustment is not saved: each track's offset stays separate.
 
 ## Whisper transcription
@@ -176,15 +178,17 @@ Transcription can be paused to free the card at once and resumed from the same p
 
 ### Song lyrics
 
-Whisper gets the timing right, but in a song it misses many words. If someone has published the lyrics, for example in a comment on the video, they can be pasted into **Song lyrics**, in the **AI subtitles** panel, and Claude places them on that timing.
+Whisper gets almost all the timing right, but in a song it misses many words. If someone has published the lyrics, for example in a comment on the video, they can be pasted into **Song lyrics**, in the **AI subtitles** panel, and Kotonoha places them where they are sung. The words come exactly from the lyrics.
 
-- Claude only says which verse sounds over which lines of the transcription. The words come exactly from the lyrics, and the timing from Whisper.
-- If the lyrics are pasted before or during transcription, they are aligned automatically at the end, and nothing is spent correcting or reviewing what Whisper heard. If the video already has a track, it can also serve as the timing reference, with **Align the lyrics to this timing**.
-- A chorus written only once is placed wherever it sounds. What is not sung, such as section marks, rōmaji or translations, is ignored.
-- A verse Whisper did not pick up gets an estimated time, and the final notice says how many there are. In that case, **Sync: this line is playing now**, in the navigator, fine-tunes the timing.
-- When a whole song is transcribed, with the helper or from a file, Kotonoha also hears where there is singing, with YAMNet, and does not put those verses in an instrumental passage: if only music plays right before the next verse, they go before it. YAMNet takes 16 MB: it is downloaded the first time and kept in **Saved models**, in **Settings, Speech transcription**. It is not used in real-time transcription.
-- The result is one more track, "Japanese (lyrics)", saved for that video. The original transcription stays available. Each song takes a single request to Claude, and repeating the alignment with the same lyrics costs nothing.
-- On an online video without the local helper, Whisper has to hear the whole song: when the video ends, transcription stops by itself and the lyrics are aligned.
+- **With the voice.** In a song transcribed in full, narabas, the phoneme model of the pitch accent practice, hears when each verse sounds: it looks for it in the zone given by what Whisper heard and places it where its phonemes start.
+- **With the voice isolated.** First, Demucs separates the voice from the music on the graphics card, and narabas hears only what is sung. Measured with 51 Japanese songs and their synced lyrics: half of the verses start less than 0.16 s from where they are sung, and nine in ten less than 0.9 s; on the mix, without isolating the voice, 0.19 s and 1.59 s. A four-minute song takes about 20 s longer.
+- narabas takes 1.26 GB and Demucs 181 MB, and neither is downloaded without asking: without them, the final notice offers **Fine-tune with the voice (1.4 GB)**, and with narabas but no Demucs, **Fine-tune by isolating the voice (181 MB)**. Both stay in **Saved models**, in **Settings, Speech transcription**. Demucs needs WebGPU; without a graphics card that calculates correctly, the lyrics are placed on the mix.
+- **Without the voice**, the lyrics are matched letter by letter with what Whisper heard, without asking anyone: that is how they are placed on a track from the site itself, or when narabas is not there. Only if they barely match, as with lyrics in rōmaji, does Claude say which verse sounds over which lines.
+- If the lyrics are pasted before or during transcription, they are placed automatically at the end, and nothing is spent correcting or reviewing what Whisper heard. If the video already has a track, it can also serve as the timing reference, with **Align the lyrics to this timing**.
+- What is not sung, such as section marks ("[サビ]", "(Chorus)") and credits ("作詞：…"), is removed, and a verse with "×2" is placed twice. Lyrics in LRC can be pasted as they are: they are read without their timestamps, in their order.
+- When a whole song is transcribed, with the helper or from a file, Kotonoha also hears where there is singing, with YAMNet, and does not put verses in an instrumental passage. YAMNet takes 16 MB and also stays in **Saved models**.
+- The result is one more track, "Japanese (lyrics)", saved for that video. The original transcription stays available.
+- On an online video without the local helper, Whisper has to hear the whole song: when the video ends, transcription stops by itself and the lyrics are placed.
 
 How it works inside, with diagrams: [Song lyrics](architecture.md#song-lyrics), in the architecture.
 

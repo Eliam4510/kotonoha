@@ -681,6 +681,11 @@ export interface MotorLengua {
    * caracteres tradicionales se pasa a simplificados. Sus palabras dan el texto ya cambiado, que es lo que se ve.
    */
   normalizarTexto?(texto: string): string;
+  /**
+   * Los fonemas de narabas de un verso, para colocar una letra con la voz (la alineación forzada). Solo en la lengua que
+   * oye narabas, el japonés. Necesita el analizador cargado.
+   */
+  fonemasDeVerso?(texto: string): string[];
   /** Cómo se le enseña a Claude una palabra analizada. Sin esto, con su lectura entre paréntesis. */
   describirPalabra?(token: TokenUnido): string;
   /** La parte de una definición que cabe bajo una palabra. Sin esto, hasta el primer punto y coma. */

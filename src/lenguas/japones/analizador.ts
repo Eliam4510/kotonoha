@@ -1,6 +1,7 @@
 // El análisis del japonés corre con Kuromoji y su diccionario IPADIC.
 
 import type { Analizador } from '../tipos';
+import { fonemasDeTokens } from './fonemas';
 import { kataAHira, type TokenCrudo, unirTokens } from './tokens';
 
 interface Tokenizador {
@@ -39,3 +40,6 @@ export const ANALIZADOR: Analizador = {
       .map((x) => (x.reading && x.reading !== '*' ? kataAHira(x.reading) : kataAHira(x.surface_form)))
       .join(''),
 };
+
+/** Los fonemas de narabas de un texto, para colocar una letra con la voz. Necesita el analizador cargado. */
+export const fonemasDeTexto = (texto: string): string[] => fonemasDeTokens(tokenizador!.tokenize(texto));

@@ -425,3 +425,22 @@
 .dictado-nota.baja { color: var(--est-desconocida); }
 .dictado-escrito { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--texto-2); font-size: 13px; }
 .dictado-hueco { flex: 1; }
+
+/* Marcar los tiempos a mano: arriba, en el centro, sin tapar los subtítulos. Mientras la tecla está pulsada, se nota. */
+.banner-marcado {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 45;
+  width: min(560px, calc(100vw - 24px)); padding: 14px 18px 16px; border-radius: var(--r-5);
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--vidrio-denso); backdrop-filter: blur(30px) saturate(1.5);
+  box-shadow: var(--sombra-3), inset 0 0 0 1px var(--borde-2);
+}
+.banner-marcado .bm-cab { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--texto-2); }
+.banner-marcado .bm-cab .num { margin-left: auto; font-variant-numeric: tabular-nums; }
+.banner-marcado .bm-linea { font-size: 20px; font-weight: 600; line-height: 1.35; color: var(--texto); }
+.banner-marcado .bm-siguiente { font-size: 14px; line-height: 1.4; color: var(--texto-3); }
+.banner-marcado .bm-ayuda { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--texto-3); }
+.banner-marcado .bm-botones { display: flex; gap: 8px; align-items: center; }
+.banner-marcado .bm-tecla { flex: 1; min-height: 44px; font-weight: 600; touch-action: none; user-select: none; }
+.banner-marcado.pulsado { box-shadow: var(--sombra-3), inset 0 0 0 2px var(--acento); }
+.banner-marcado.pulsado .bm-linea { color: var(--acento); }
+.banner-marcado.pulsado .bm-tecla { background: var(--acento); color: #fff; }

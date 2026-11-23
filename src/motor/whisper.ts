@@ -499,12 +499,13 @@ export async function transcribirArchivo(
   senal: AbortSignal,
   pcmCrudo = false,
   desdeMs = 0,
-  conCanto = false
+  conCanto = false,
+  clave?: string
 ): Promise<number> {
   emitir({ tipo: 'preparando' });
   const audio = await abrirAudio(url, pcmCrudo);
   if (!audio) throw new Error(tr('El navegador no puede leer el audio de este archivo. Reprodúcelo y usa la transcripción en tiempo real.'));
-  return transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs, conCanto);
+  return transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs, conCanto, clave);
 }
 
 /** El ayudante local baja el audio del video: se transcribe entero, sin esperar a reproducirlo. */
@@ -515,7 +516,8 @@ export async function transcribirDescarga(
   emitir: Emitir,
   senal: AbortSignal,
   desdeMs = 0,
-  conCanto = false
+  conCanto = false,
+  clave?: string
 ): Promise<number> {
   emitir({ tipo: 'bajandoAudio', porcentaje: 0 });
   const audio = await abrirDescarga(
@@ -525,7 +527,7 @@ export async function transcribirDescarga(
     (porcentaje) => emitir({ tipo: 'extrayendoAudio', porcentaje })
   );
   try {
-    return await transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs, conCanto);
+    return await transcribirMuestras(audio, idModelo, intensidad, emitir, senal, desdeMs, conCanto, clave);
   } finally {
     audio.cerrar();
   }
@@ -542,7 +544,8 @@ async function transcribirMuestras(
   emitir: Emitir,
   senal: AbortSignal,
   desdeMs: number,
-  conCanto = false
+  conCanto = false,
+  clave?: string
 ): Promise<number> {
   pedidoDetener = false;
   fallosGpu = 0;
@@ -586,6 +589,9 @@ async function transcribirMuestras(
     await descansar(ms, intensidad, emitir, senal, { ventajaS: ventajaSobreVideo(frenteMs, marca, performance.now()), tirones: huboTirones, enPausa: videoEnPausa(marca, performance.now()) });
   };
 
+  // En una canción entera, su audio se guarda para colocar luego la letra con la voz (alinearConVoz): no hay que volver a
+  // leer el archivo ni a bajar el video.
+  const guardado = canto && clave && audio.muestras <= MAXIMO_AUDIO_CANCION_S * FRECUENCIA ? new Float32Array(audio.muestras) : null;
   try {
     const bloque = FRECUENCIA * 60;
     for (let p = inicioMuestra; p < audio.muestras && !senal.aborted; ) {
@@ -593,6 +599,7 @@ async function transcribirMuestras(
       while (acumulador.muestras < 30 * FRECUENCIA && p < audio.muestras) {
         const parte = await audio.leer(p, bloque);
         canto?.agregar(parte, p);
+        guardado?.set(parte, p);
         acumulador.agregar(parte, (p / FRECUENCIA) * 1000);
         p += parte.length;
       }
@@ -602,6 +609,7 @@ async function transcribirMuestras(
     if (final) await procesar(final, audio.muestras);
     const puntos = canto && !senal.aborted ? await canto.terminar(audio.muestras) : null;
     if (puntos) emitir({ tipo: 'canto', ...puntos });
+    if (guardado && clave && !senal.aborted) audioCancion = { clave, pcm: guardado };
     if (!senal.aborted) emitir({ tipo: 'procesando', porcentaje: 100, restanteS: 0, ...medida() });
   } finally {
     pausadoPorUsuario = false;
@@ -611,6 +619,15 @@ async function transcribirMuestras(
 }
 
 export const transcribiendoEnVivo = () => acumuladorVivo !== null;
+
+/** Una canción más larga no se guarda: su audio ocuparía demasiada memoria. */
+const MAXIMO_AUDIO_CANCION_S = 15 * 60;
+
+/** El audio de la última canción transcrita entera, a 16 kHz, con la clave de su video. */
+let audioCancion: { clave: string; pcm: Float32Array } | null = null;
+
+/** El audio de la canción de ese video, si fue la última que se transcribió entera. */
+export const audioDeCancion = (clave: string): Float32Array | null => (audioCancion?.clave === clave ? audioCancion.pcm : null);
 
 // ---------- Práctica de pronunciación ----------
 

@@ -23,12 +23,16 @@ import {
   alternarSeleccion,
   anclarLinea,
   combinarSeleccionadas,
+  deshacerMarca,
   fijarAbrirConsulta,
   grabandoLinea,
   importarArchivo,
   irALinea,
   pausasEnLinea,
+  pulsarMarca,
   refrescarAnalisis,
+  soltarMarca,
+  terminarMarcado,
   bordeVideo,
   videoEnPantalla,
 } from './controlador';
@@ -56,6 +60,7 @@ import {
   indiceVisual,
   infoVideo,
   lineasObjetivo,
+  marcado,
   lineasSecundarias,
   marcadas,
   opcionesFrase,
@@ -1018,6 +1023,43 @@ function etiquetaWhisper(w: NonNullable<typeof whisper.value>): string {
   return w.lineas === 1 ? tr('1 línea') : tr('{0} líneas', w.lineas);
 }
 
+/**
+ * Mientras se marcan los tiempos a mano: la línea que toca, la siguiente y cómo se hace. El botón grande sirve igual que la
+ * barra espaciadora: mantenido mientras suena la línea, suelto al acabar.
+ */
+function BannerMarcado() {
+  const m = marcado.value;
+  if (!m) return null;
+  const linea = lineasObjetivo.value[m.indice];
+  const siguiente = lineasObjetivo.value[m.indice + 1];
+  return (
+    <div class={`banner-marcado ${m.pulsado ? 'pulsado' : ''}`} role="status" onClick={(e) => e.stopPropagation()}>
+      <div class="bm-cab">
+        <Icono n="reloj" t={15} /> {tr('Marcando los tiempos')} <span class="num">{tr('{0} de {1}', Math.min(m.indice + 1, m.total), m.total)}</span>
+      </div>
+      <div class="bm-linea">{linea?.texto ?? tr('Ya no quedan líneas')}</div>
+      {siguiente && <div class="bm-siguiente">{siguiente.texto}</div>}
+      <p class="bm-ayuda">{tr('Mantén pulsada la barra espaciadora mientras suena la línea y suéltala al acabar. Retroceso deshace la última; Escape termina.')}</p>
+      <div class="bm-botones">
+        <button
+          class="btn bm-tecla"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+            pulsarMarca();
+          }}
+          onPointerUp={() => soltarMarca()}
+          onPointerCancel={() => soltarMarca()}
+        >
+          {m.pulsado ? tr('Suelta al acabar la línea') : tr('Mantén pulsado mientras suena')}
+        </button>
+        <button class="btn chico fantasma" disabled={!m.indice} onClick={deshacerMarca}>{tr('Deshacer')}</button>
+        <button class="btn chico" onClick={() => void terminarMarcado()}>{tr('Terminar')}</button>
+      </div>
+    </div>
+  );
+}
+
 export function Reproductor({ sinBarra = false }: { sinBarra?: boolean }) {
   const raiz = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -1065,6 +1107,7 @@ export function Reproductor({ sinBarra = false }: { sinBarra?: boolean }) {
         <PanelesFlotantes />
         <PopupPalabra />
         <PopupGramatica />
+        <BannerMarcado />
         <Avisos />
         <ZonaSoltar />
       </div>

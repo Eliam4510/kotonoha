@@ -7,7 +7,7 @@ import { urlDeVideo as urlDeVideoBilibili } from '../nucleo/bilibili';
 import { desconocidas } from '../nucleo/frases';
 import { decidirSalto, duracionPausaDinamica, type LineaModo, MotorModos } from '../nucleo/modos';
 import { aplicarSincronia, type PuntoAncla, type Sincronia, SINCRONIA_NEUTRA, sincroniaDesdePuntos } from '../nucleo/sincronia';
-import { aplicarAjuste, type CantoPorTramos, type EntradaAjuste, ID_LETRA, versosDeLetra, vozDeCanto } from '../nucleo/letra';
+import { alinearPorLetras, aplicarAjuste, type CantoPorTramos, type EntradaAjuste, ID_LETRA, type ResultadoAjuste, versosDeLetra, vozDeCanto } from '../nucleo/letra';
 import { analizarSubtitulos, aSrt, esSoloAcotacion, type Linea, siguienteLinea } from '../nucleo/subtitulos';
 import { desdeDondeSeguir, fusionarLineas, MedidorTirones, noLlega, type ProgresoTranscripcion, VENTAJA_PARA_SEGUIR_S } from '../nucleo/transcripcion';
 import { anotarUso, guardarAjustes, modeloParaTranscribir, MODELOS_WHISPER } from '../compartido/ajustes';
@@ -31,6 +31,7 @@ import {
   errorPista,
   generacion,
   idObjetivo,
+  marcado,
   idSecundaria,
   indiceActivo,
   indiceVisual,
@@ -53,6 +54,7 @@ import {
   ajustandoLetra,
   letraPegada,
   quitarAviso,
+  cambiarAviso,
   type EstadoWhisper,
 } from './estado';
 import type { Control } from './puente';
@@ -1483,7 +1485,8 @@ export async function iniciarWhisper(enVivo = false, desdeCero = false) {
   // En una canción, además, dónde se canta: para colocar luego su letra sin poner versos en un pasaje instrumental.
   const conCanto = esCancion();
   const videoCanto = info?.idVideo;
-  const f = flujoMotor(metodo, conAyudante ? [urlDelVideo(), desdeMs, modelo, conCanto] : audio ? [audio.url, audio.pcmCrudo, desdeMs, modelo, conCanto] : [modelo], (acumulado) => {
+  // Con la clave del video, el motor guarda el audio de una canción entera para colocar luego su letra con la voz.
+  const f = flujoMotor(metodo, conAyudante ? [urlDelVideo(), desdeMs, modelo, conCanto, videoCanto] : audio ? [audio.url, audio.pcmCrudo, desdeMs, modelo, conCanto, videoCanto] : [modelo], (acumulado) => {
     if (!vigente()) return;
     const texto = acumulado.slice(vistos);
     const fin = texto.lastIndexOf('\n');
@@ -1603,41 +1606,111 @@ export async function iniciarWhisper(enVivo = false, desdeCero = false) {
 
 const hayLetraPendiente = () => versosDeLetra(letraPegada.value).length > 0;
 
-/** Los tiempos sobre los que se coloca la letra: los de la pista elegida, salvo que sea una letra ya colocada. */
-function lineasConTiempos(): Linea[] {
+/**
+ * Los tiempos sobre los que se coloca la letra: los de la pista elegida. Si es una letra ya colocada, los de lo que se
+ * oyó: la transcripción de Whisper o, si no la hay, la pista automática del sitio en esa lengua.
+ */
+async function lineasConTiempos(): Promise<Linea[]> {
   const idioma = ajustes.value.idiomaObjetivo;
-  const transcripcion = idObjetivo.value === `letra:${idioma}` ? importadas.get(`generada:${idioma}`) : undefined;
-  return transcripcion ?? crudas(baseObjetivo);
+  if (idObjetivo.value !== `letra:${idioma}`) return crudas(baseObjetivo);
+  const transcripcion = importadas.get(`generada:${idioma}`);
+  if (transcripcion) return transcripcion;
+  const base = idioma.split('-')[0];
+  const oida = pistas.value.find((p) => p.origen !== 'letra' && p.automatica && p.idioma.split('-')[0] === base);
+  if (oida) {
+    try {
+      return await textoAPista(oida);
+    } catch {
+      // Sin la pista del sitio, la letra de antes da al menos sus tiempos.
+    }
+  }
+  return crudas(baseObjetivo);
+}
+
+/** Una letra que casa con lo oído en menos de esta parte de sus versos no se coloca sola: se le pregunta a Claude. */
+const PARTE_CASADA = 0.25;
+
+/**
+ * Lo que contesta el motor al colocar la letra con la voz: la letra colocada, o por qué no pudo. `aislada`, si Demucs le
+ * quitó antes la música; `sinDemucs`, si no lo hizo porque no está en el disco; `bajarDemucs`, si afinar lo bajaría.
+ */
+type AjusteConVoz = { resultado?: ResultadoAjuste & { conVoz: number }; motivo?: 'sin-audio' | 'sin-fonemas' | 'sin-narabas'; aislada?: boolean; sinDemucs?: boolean; bajarDemucs?: boolean };
+/** El avance de narabas (1,26 GB) y de Demucs (181 MB), que la primera vez se bajan. */
+type EventoVozLetra =
+  | { tipo: 'descarga' | 'descarga-voz' | 'separando'; porcentaje: number }
+  | { tipo: 'comprobando' | 'preparando' | 'procesando' | 'preparando-voz' };
+
+function textoAvanceVoz(e: EventoVozLetra): string {
+  if (e.tipo === 'descarga') return tr('Bajando narabas para oír los fonemas: {0} %', e.porcentaje);
+  if (e.tipo === 'descarga-voz') return tr('Bajando Demucs para aislar la voz: {0} %', e.porcentaje);
+  if (e.tipo === 'separando') return tr('Aislando la voz de la canción: {0} %', e.porcentaje);
+  if (e.tipo === 'preparando-voz') return tr('Preparando Demucs para aislar la voz…');
+  return tr('Oyendo los fonemas de la canción…');
 }
 
 /**
- * Coloca la letra pegada sobre los tiempos de la pista actual y deja el resultado como una pista más. Claude solo dice
- * qué verso suena dónde: las palabras salen tal cual de la letra, y los tiempos, de la pista.
+ * Coloca la letra pegada sobre lo que se oye y deja el resultado como una pista más; las palabras salen tal cual de la
+ * letra. Primero con la voz: en una canción transcrita entera, narabas pone cada verso donde suenan sus fonemas, buscándolo
+ * en la zona que da lo que oyó Whisper. Si no se puede, casándola letra a letra con lo que oyó Whisper, sin preguntar a
+ * nadie. Y si apenas casa (una letra en rōmaji, por ejemplo), Claude dice qué verso suena sobre qué líneas.
+ * `bajarVoz` baja narabas si hace falta; `versosDados`, para volver a colocar la misma letra.
  */
-export async function ajustarLetra() {
-  const versos = versosDeLetra(letraPegada.value);
-  const lineas = lineasConTiempos();
-  if (!versos.length || !lineas.length || ajustandoLetra.value) return;
-  const estado = await motor.estado().catch(() => null);
-  if (!estado?.claveIA) {
-    avisar(tr('Añade tu clave de la API de Claude en Ajustes para ajustar la letra.'), 'error', { texto: tr('Ajustes'), fn: () => fondo.abrirApp('ajustes') }, 8000);
+export async function ajustarLetra(bajarVoz = false, versosDados?: string[]) {
+  const versos = versosDados ?? versosDeLetra(letraPegada.value);
+  if (!versos.length || ajustandoLetra.value) return;
+  ajustandoLetra.value = true;
+  const lineas = await lineasConTiempos().catch(() => [] as Linea[]);
+  if (!lineas.length) {
+    ajustandoLetra.value = false;
     return;
   }
-  ajustandoLetra.value = true;
-  // Claude tarda unos segundos: si entretanto se cambia de video o de lengua, la letra es del video y la lengua de ahora.
+  // Colocarla tarda unos segundos: si entretanto se cambia de video o de lengua, la letra es del video y la lengua de ahora.
   const idioma = ajustes.value.idiomaObjetivo;
   const id = `letra:${idioma}`;
   const video = infoVideo.value?.idVideo;
   const claveSinc = claveSincronia(id);
   const claveCorrecciones = clavePista(id);
   const sigueAqui = () => infoVideo.value?.idVideo === video && ajustes.value.idiomaObjetivo === idioma;
+  // Si Whisper oyó la canción, también se sabe dónde se canta: los versos que no recogió no caen en un pasaje instrumental.
+  const canto = video ? (cantos.get(video) ?? null) : null;
+  const voz = canto ? vozDeCanto(canto) : undefined;
+  let avance: number | null = null;
+  const decir = (texto: string) => {
+    if (avance === null) avance = avisar(texto, undefined, undefined, 0);
+    else cambiarAviso(avance, texto);
+  };
   try {
-    const respuesta = await flujoMotor('ajustarLetra', [lineas, versos, infoVideo.value?.titulo], () => {});
-    const ajuste = JSON.parse(respuesta) as EntradaAjuste[];
-    // Si Whisper oyó la canción, también se sabe dónde se canta: los versos que no recogió no caen en un pasaje instrumental.
-    const canto = video ? cantos.get(video) : undefined;
-    const { lineas: finales, conTiempo, estimadas } = aplicarAjuste(versos, lineas, ajuste, ID_LETRA, canto ? vozDeCanto(canto) : undefined);
-    if (!conTiempo) {
+    let colocada: ResultadoAjuste | null = null;
+    let conLaVoz = false;
+    let respuestaVoz: AjusteConVoz = {};
+    if (video) {
+      try {
+        const respuesta = await flujoMotor('alinearLetraConVoz', [lineas, versos, video, canto, bajarVoz], lectorJson<EventoVozLetra>((e) => decir(textoAvanceVoz(e))));
+        respuestaVoz = JSON.parse(respuesta) as AjusteConVoz;
+        if (respuestaVoz.resultado?.conVoz) {
+          colocada = respuestaVoz.resultado;
+          conLaVoz = true;
+        }
+      } catch (e) {
+        console.warn('Kotonoha: no se pudo colocar la letra con la voz', e);
+      }
+    }
+    if (!colocada) {
+      const r = alinearPorLetras(versos, lineas, ID_LETRA, voz);
+      if (r.conTiempo >= Math.max(2, versos.length * PARTE_CASADA)) colocada = r;
+    }
+    if (!colocada) {
+      const estado = await motor.estado().catch(() => null);
+      if (!estado?.claveIA) {
+        if (sigueAqui()) avisar(tr('Esta letra apenas casa con lo que se oye. ¿Es la de esta canción? Con tu clave de la API, Claude puede intentarlo.'), 'error', { texto: tr('Ajustes'), fn: () => fondo.abrirApp('ajustes') }, 10000);
+        return;
+      }
+      decir(tr('Claude está colocando la letra…'));
+      const ajuste = JSON.parse(await flujoMotor('ajustarLetra', [lineas, versos, infoVideo.value?.titulo], () => {})) as EntradaAjuste[];
+      colocada = aplicarAjuste(versos, lineas, ajuste, ID_LETRA, voz);
+    }
+    const { lineas: finales, conTiempo, estimadas } = colocada;
+    if (!conTiempo && !conLaVoz) {
       if (sigueAqui()) avisar(tr('Claude no encontró esta letra en lo que se oye. ¿Es la de esta canción?'), 'error', undefined, 8000);
       return;
     }
@@ -1652,11 +1725,22 @@ export async function ajustarLetra() {
     letraPegada.value = '';
     await seleccionarObjetivo(id);
     retraducirTrasLetra();
-    avisar(estimadas ? tr('Letra ajustada: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas) : tr('Letra ajustada: {0} versos con sus tiempos.', conTiempo), 'exito');
+    if (conLaVoz) {
+      // Demucs la afina más, pero son 181 MB: se ofrece, no se baja sin pedirlo.
+      const aislar = respuestaVoz.sinDemucs ? { texto: tr('Afinar aislando la voz (181 MB)'), fn: () => ajustarLetra(true, versos) } : undefined;
+      const texto = respuestaVoz.aislada ? tr('Letra colocada con la voz aislada: {0} versos.', versos.length) : tr('Letra colocada con la voz: {0} versos.', versos.length);
+      avisar(texto, 'exito', aislar, aislar ? 15000 : 4500);
+    } else {
+      // narabas la afina, pero son 1,26 GB (con Demucs, 1,4 GB): se ofrece, no se baja sin pedirlo.
+      const tamano = respuestaVoz.bajarDemucs ? tr('Afinar con la voz (1,4 GB)') : tr('Afinar con la voz (1,26 GB)');
+      const afinar = respuestaVoz.motivo === 'sin-narabas' ? { texto: tamano, fn: () => ajustarLetra(true, versos) } : undefined;
+      avisar(estimadas ? tr('Letra ajustada: {0} versos con sus tiempos y {1} estimados.', conTiempo, estimadas) : tr('Letra ajustada: {0} versos con sus tiempos.', conTiempo), 'exito', afinar, afinar ? 15000 : 4500);
+    }
   } catch (e) {
     avisar(tr('No se pudo ajustar la letra: {0}', e instanceof Error ? e.message : e), 'error', undefined, 8000);
   } finally {
     ajustandoLetra.value = false;
+    if (avance !== null) quitarAviso(avance);
   }
 }
 
@@ -1678,6 +1762,122 @@ export function pausarWhisper(pausado: boolean) {
   if (!whisper.value) return;
   whisper.value = { ...whisper.value, pausado };
   motor.whisperPausar(pausado).catch(() => {});
+}
+
+// ---------- Marcar los tiempos a mano ----------
+
+/** Lo que se lleva marcado: la línea que toca, cuándo se pulsó la tecla y lo que tenía cada línea marcada, para deshacer. */
+/** Las líneas y la sincronía de antes de pasarla a las líneas, para dejarlas como estaban si no se marca nada. */
+type AntesDeMarcar = { base: LineaAnalizada[]; sinc: Sincronia; anclas: typeof anclas.value };
+let marcas: { indice: number; pulsadaEn: number | null; antes: { indice: number; inicio: number; fin: number; delta: number }[]; previa: AntesDeMarcar | null } | null = null;
+/** Una línea dura como poco esto, aunque la tecla se suelte enseguida. */
+const MARCA_MINIMA_MS = 300;
+/** Al deshacer, se vuelve a un poco antes de la línea, para marcarla otra vez. */
+const VOLVER_ANTES_MS = 2000;
+
+const ahoraEnVideo = () => {
+  const v = control.video();
+  return v ? Math.round(momentoDelVideo(v)) : tiempoMs.value;
+};
+
+/**
+ * Marcar los tiempos a mano, en la pista que se ve: se mantiene la barra espaciadora (o el botón) mientras suena cada
+ * línea y se suelta al acabar. Para un cantante al que ningún modelo entiende. Se marca sobre lo que se ve: si la pista
+ * tenía una sincronía, se queda en sus líneas.
+ */
+export function empezarMarcado() {
+  if (!baseObjetivo.length || marcas) return;
+  // La sincronía se pasa a las líneas, que es donde se marca; si al final no se marca nada, vuelve a como estaba.
+  const sinc = sincronias.value.objetivo;
+  let previa: AntesDeMarcar | null = null;
+  if (sinc.desfaseMs || sinc.escala !== 1) {
+    previa = { base: baseObjetivo, sinc, anclas: anclas.value };
+    baseObjetivo = aplicarSincronia(baseObjetivo, sinc);
+    anclas.value = [];
+    fijarSincronia('objetivo', SINCRONIA_NEUTRA);
+  }
+  const ahora = ahoraEnVideo();
+  const i = baseObjetivo.findIndex((l) => l.fin > ahora);
+  marcas = { indice: i < 0 ? 0 : i, pulsadaEn: null, antes: [], previa };
+  marcado.value = { indice: marcas.indice, total: baseObjetivo.length, pulsado: false };
+}
+
+/** La tecla baja: empieza la línea que toca. */
+export function pulsarMarca() {
+  if (!marcas || marcas.pulsadaEn !== null || marcas.indice >= baseObjetivo.length) return;
+  marcas.pulsadaEn = ahoraEnVideo();
+  marcado.value = { indice: marcas.indice, total: baseObjetivo.length, pulsado: true };
+}
+
+/** La tecla sube: la línea acaba, y las que faltan se mueven con ella para no quedarse atrás mientras se marca. */
+export function soltarMarca() {
+  if (!marcas || marcas.pulsadaEn === null) return;
+  const i = marcas.indice;
+  const l = baseObjetivo[i];
+  const inicio = marcas.pulsadaEn;
+  const fin = Math.max(ahoraEnVideo(), inicio + MARCA_MINIMA_MS);
+  const delta = inicio - l.inicio;
+  marcas.antes.push({ indice: i, inicio: l.inicio, fin: l.fin, delta });
+  publicarObjetivo(baseObjetivo.map((x, k) => (k === i ? { ...x, inicio, fin } : k > i ? { ...x, inicio: x.inicio + delta, fin: x.fin + delta } : x)));
+  marcas.indice = i + 1;
+  marcas.pulsadaEn = null;
+  marcado.value = { indice: marcas.indice, total: baseObjetivo.length, pulsado: false };
+  if (marcas.indice >= baseObjetivo.length) void terminarMarcado();
+}
+
+/** Deshace la última línea marcada y vuelve a un poco antes de ella. */
+export function deshacerMarca() {
+  const ultima = marcas?.antes.pop();
+  if (!marcas || !ultima) return;
+  const { indice: i, inicio, fin, delta } = ultima;
+  publicarObjetivo(baseObjetivo.map((x, k) => (k === i ? { ...x, inicio, fin } : k > i ? { ...x, inicio: x.inicio - delta, fin: x.fin - delta } : x)));
+  marcas.indice = i;
+  marcas.pulsadaEn = null;
+  marcado.value = { indice: i, total: baseObjetivo.length, pulsado: false };
+  void saltar(Math.max(0, inicio - VOLVER_ANTES_MS));
+}
+
+/** Termina de marcar y guarda la pista para este video. */
+export async function terminarMarcado() {
+  if (!marcas) return;
+  const hechas = marcas.antes.length;
+  const previa = marcas.previa;
+  marcas = null;
+  marcado.value = null;
+  if (!hechas) {
+    if (previa) {
+      baseObjetivo = previa.base;
+      anclas.value = previa.anclas;
+      fijarSincronia('objetivo', previa.sinc);
+    }
+    return;
+  }
+  await guardarPistaMarcada();
+  avisar(hechas === 1 ? tr('Tiempo marcado en 1 línea. Queda guardado para este video.') : tr('Tiempos marcados en {0} líneas. Quedan guardados para este video.', hechas), 'exito');
+}
+
+/**
+ * Guarda la pista con los tiempos marcados. Una transcripción, una letra o unos importados se guardan como lo que eran;
+ * los del propio sitio no se pueden cambiar, así que pasan a ser unos importados de este video.
+ */
+async function guardarPistaMarcada() {
+  const video = infoVideo.value?.idVideo;
+  const idioma = ajustes.value.idiomaObjetivo;
+  const actual = pistas.value.find((p) => p.id === idObjetivo.value);
+  const lineas = crudas(baseObjetivo);
+  if (actual?.id.startsWith('letra:')) {
+    importadas.set(actual.id, lineas);
+    if (video) await motor.guardarSubtitulosGenerados(video, idioma, lineas, 'letra', idioma).catch(() => {});
+    return;
+  }
+  const id = `generada:${idioma}`;
+  importadas.set(id, lineas);
+  if (actual?.id !== id) {
+    pistas.value = [...pistas.value.filter((p) => p.id !== id), { id, idioma, nombre: tr('{0} (importados)', nombreIdioma(idioma)), origen: 'importada' }];
+    idObjetivo.value = id;
+    if (video) transcritos.delete(video);
+  }
+  await guardarGenerada();
 }
 
 /** Corta la transcripción que siguió desde donde iba y la empieza otra vez desde el principio. */

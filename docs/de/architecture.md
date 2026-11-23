@@ -123,9 +123,9 @@ Pausenloses Arbeiten hält die GPU stundenlang bei 100 %, was den Desktop ausbre
 
 ## Liedtexte
 
-Ein eingefügter Liedtext wird durch Arbeitsteilung auf das Audio gelegt, und jedes Teil entscheidet nur, was es gut kann: Whisper hört, wann jede Zeile erklingt, YAMNet, wo gesungen wird, Claude, welcher Vers zu welcher Zeile gehört, und `src/nucleo/letra.ts` berechnet die Zeiten.
+Ein eingefügter Liedtext wird durch Arbeitsteilung auf das Audio gelegt, und jedes Teil entscheidet nur, was es kann: Whisper hört, was wann gesungen wird, Demucs trennt die Stimme von der Musik, narabas hört, wo jedes Phonem beginnt, YAMNet, wo gesungen wird, und `src/nucleo/letra.ts` berechnet die Zeiten. Claude kommt nur hinzu, wenn der Text kaum zu dem Gehörten passt.
 
-<p align="center"><img src="../img/letra-flujo.de.svg" width="100%" alt="Der Weg des Liedtexts: Das Audio des Liedes geht an Whisper Turbo und an YAMNet; Claude ordnet den eingefügten Text dem zu, was Whisper gehört hat; letra.ts führt alles zusammen, berechnet die Zeiten und erzeugt die Liedtext-Spur"></p>
+<p align="center"><img src="../img/letra-flujo.de.svg" width="100%" alt="Der Weg des Liedtexts: Das Audio des Liedes geht an Whisper Turbo und an Demucs; der eingefügte Text wird Buchstabe für Buchstabe mit dem von Whisper Gehörten abgeglichen, und narabas sucht im Bereich jedes Verses auf der freigestellten Stimme, wo seine Phoneme beginnen; Claude nur, wenn er kaum passt; letra.ts berechnet die Zeiten und erzeugt die Liedtext-Spur"></p>
 
 **Lied oder gesprochene Sprache.** Ein Video gilt als Lied, wenn ein Liedtext auf seine Platzierung wartet, wenn YouTube es als Musik einstuft oder wenn der Titel es sagt: MV, lyric video, official audio, karaoke und Ähnliches. Dann wird es mit Whisper Turbo transkribiert, das Gesang über Musik besser hört als die Sprachmodelle.
 
@@ -133,7 +133,13 @@ Ein eingefügter Liedtext wird durch Arbeitsteilung auf das Audio gelegt, und je
 
 **Wo gesungen wird.** YAMNet, der mit AudioSet (521 Klassen) trainierte Geräuschklassifikator von Google, hört dieselben 60-s-Blöcke wie Whisper, in einem eigenen Worker und auf dem Prozessor, um nicht um die GPU zu konkurrieren. Für jeden 2-s-Abschnitt wird der Wert der Klasse „Singing“ (Gesang) gespeichert. Die Schwelle liegt bei 0,02, weil der Wert selbst beim Singen sehr niedrig ist, und ein einzelner Abschnitt ohne Gesang zwischen zwei mit Gesang zählt als Gesang: Er ist fast nie eine Instrumentalpassage. Die Werte gibt es nur, wenn das Lied von Anfang an vollständig transkribiert wird, mit dem Helfer oder aus einer Datei; die Transkription in Echtzeit verwendet sie nicht.
 
-**Die Zuordnung.** Claude erhält den Liedtext und die Transkription als zwei nummerierte Listen, die zweite mit ihren Zeiten, die ihm helfen, die Instrumentalpassagen zu erkennen. Für jeden Vers gibt es `{v, de, a}` zurück: die erste und die letzte Zeile der Transkription, über denen der Vers erklingt. Mit -1 wird der Vers gesungen, aber die Transkription erfasst ihn nicht; mit -2 wird er nicht gesungen, etwa eine Abschnittsmarke, ein Titel oder eine Angabe der Mitwirkenden. Der Prompt verlangt:
+**Der Bereich jedes Verses.** `src/nucleo/casarLetra.ts` gleicht den Liedtext Buchstabe für Buchstabe mit dem von Whisper Gehörten ab, ohne KI. Beide werden in vergleichbare Buchstaben umgewandelt (Katakana in Hiragana, ohne Satz- und Leerzeichen), und es werden gleiche Abschnitte von mindestens zwei Buchstaben gesucht und der Reihe nach verkettet: Es bleibt die schwerste Kette, mit einem Fenwick-Baum, wobei ein Kanji 6 wiegt, ein Kana 4 und ein lateinischer Buchstabe 1, damit ein englischer Refrain die japanischen Verse nicht mitzieht. Jeder passende Vers erhält den Zeitpunkt, den ihm seine Abschnitte geben, den Median: Das ist sein Bereich. Ohne die Stimme stammen die Zeiten von dort.
+
+**Nur die Stimme.** Demucs (htdemucs, von Meta) stellt die Stimme in einem Worker frei, mit ONNX Runtime und WebGPU. Das Audio des Liedes, das die Engine mit 16 kHz aufbewahrt, wird mit einem Sinc-Filter auf 44,1 kHz gebracht und in Stücke von 7,8 s geteilt, die sich zu einem Viertel überlappen. Das Modell erhält jedes Stück und sein Spektrogramm (eine STFT mit 4096 Samples und Sprüngen von 1024) und gibt zwei Zweige zurück, den der Zeit und den der Frequenzen; dieser wird in die Zeit zurückgeführt (ISTFT) und zum anderen addiert. Die Stimme wird wieder auf 16 kHz gebracht, und die Stücke werden mit einem dreieckigen Gewicht zusammengefügt. `src/nucleo/demucs.ts` übernimmt diesen Teil, geprüft gegen die direkte Transformation, und die GPU wird nur verwendet, wenn sie mit einem festen Signal dasselbe ergibt wie der Prozessor.
+
+**Die Phoneme.** narabas, ein wav2vec2 für japanische Phoneme, liefert alle 20 ms die Wahrscheinlichkeit jedes seiner 43 Phoneme. Die Verse werden mit der Aussprache von Kuromoji in Phoneme umgewandelt, und eine erzwungene Ausrichtung (Viterbi über die CTC, in `src/nucleo/alineacionForzada.ts`) legt alle Phoneme des Liedtexts der Reihe nach über diese Wahrscheinlichkeiten. Jedes Phonem kann nur im Bereich seines Verses liegen, mit 2 s Spielraum auf jeder Seite, oder zwischen den Bereichen seiner Nachbarn, wenn sein Vers nicht passte, etwa ein Refrain, der genauso wiederholt wird wie der Vers daneben. Ein Vers beginnt im ersten Frame seines ersten Phonems und endet 0,4 s nach dem letzten.
+
+**Wenn er kaum passt, Claude.** Passt weniger als ein Viertel der Verse, etwa bei einem Text in Rōmaji, erhält Claude den Liedtext und die Transkription als zwei nummerierte Listen, die zweite mit ihren Zeiten, die ihm helfen, die Instrumentalpassagen zu erkennen. Für jeden Vers gibt es `{v, de, a}` zurück: die erste und die letzte Zeile der Transkription, über denen der Vers erklingt. Mit -1 wird der Vers gesungen, aber die Transkription erfasst ihn nicht; mit -2 wird er nicht gesungen, etwa eine Abschnittsmarke, ein Titel oder eine Angabe der Mitwirkenden. Der Prompt verlangt:
 
 - nach Klang statt nach Schreibweise zu vergleichen: Im Japanischen sind 会いたい, 逢いたい und あいたい dasselbe, im Englischen „night“ und „knight“, im Deutschen „Meer“ und „mehr“;
 - die Reihenfolge einzuhalten: `de` geht nie zurück;
@@ -157,6 +163,16 @@ Die Antwort ist klein, folgt einem JSON-Schema und wird zwischengespeichert: Den
 
 Gemessen mit japanischen Liedern offizieller Kanäle und ihrem synchronisierten Text trennt YAMNet Gesang von Instrumentalpassagen mit einer AUC von 0,9. Von 164 Versen, die Whisper nicht gehört hat, liegen mit YAMNet in Kotonoha 21 mehr als eine Sekunde näher an ihrer Stelle und 3 weiter entfernt, und die mehr als 5 s danebenliegenden gehen von 32 auf 28 zurück. Die verbleibenden großen Fehler stammen aus langen Passagen, die Whisper nicht hört: YAMNet weiß, dass dort gesungen wird, aber nicht, welcher Vers.
 
+**Das Gemessene.** Mit 51 japanischen Liedern und ihren synchronisierten Texten (2253 Verse), wie weit der Anfang jedes Verses von der Stelle entfernt liegt, an der er gesungen wird:
+
+| Wie er gesetzt wird | Die Hälfte unter | Neun von zehn unter |
+|---|---|---|
+| Buchstabe für Buchstabe mit dem von Whisper Gehörten | 0,34 s | 1,46 s |
+| Mit der Stimme, auf der Mischung | 0,19 s | 1,59 s |
+| Mit freigestellter Stimme | 0,16 s | 0,9 s |
+
+Die großen Fehler, die bleiben, stammen aus Passagen, die Whisper nicht hört: Der Vers hat keinen eigenen Bereich, und narabas sucht ihn in einem langen Abschnitt.
+
 Das Ergebnis ist eine eigene Spur, die wie jede andere analysiert und übersetzt wird. Der abschließende Hinweis nennt, wie viele Verse eine geschätzte Zeit haben, und **Synchronisieren: Diese Zeile ist gerade zu hören** im Navigator stimmt die Synchronisierung fein ab; mit zwei Markierungen korrigiert es auch die Geschwindigkeit.
 
 ## Technische Entscheidungen
@@ -171,6 +187,8 @@ Das Ergebnis ist eine eigene Spur, die wie jede andere analysiert und übersetzt
 | KI | Offizielles SDK `@anthropic-ai/sdk` aus der Engine | Der Schlüssel erreicht nie die Skripte, die auf Seiten laufen |
 | Transkription | Whisper large-v3-turbo mit Transformers.js und WebGPU, Encoder in 16 Bit und quantisierter Decoder | Das genaueste der verglichenen, und nichts zu installieren |
 | Gesangserkennung | YAMNet von Google in ONNX, mit ONNX Runtime auf dem Prozessor | Trennt bei echten Liedern Gesang von Instrumentalpassagen mit einer AUC von 0,9. Belegt 16 MB und lässt auf dem Prozessor die GPU für Whisper frei |
+| Liedtext mit der Stimme setzen | narabas, ein wav2vec2 für japanische Phoneme, mit einer eigenen erzwungenen Ausrichtung über seine CTC, in dem Bereich, den das von Whisper Gehörte vorgibt | Es war für die Akzentübung schon in der Erweiterung. Es setzt jeden Vers dort an, wo seine Phoneme beginnen: genauer als der bloße Textabgleich |
+| Die Stimme freistellen | Demucs (htdemucs) in ONNX, mit ONNX Runtime und WebGPU; STFT, ISTFT und Umrechnung der Abtastrate in JavaScript | Mit der Stimme allein irrt sich narabas deutlich seltener. Es belegt 181 MB, und ein vierminütiges Lied dauert etwa 20 s |
 | Audio von Internetvideos | yt-dlp in einem lokalen PowerShell-Programm, über Native Messaging, und FFmpeg, falls installiert | Die einzige Möglichkeit, es zu verarbeiten, ohne auf die Wiedergabe zu warten. Es lädt in eine temporäre Datei statt zu streamen, sodass im Tempo der GPU gelesen wird und nichts staut |
 | Eigene Dateien | ffmpeg.wasm | Eingebettete Untertitel und Audiospuren von MKV, ohne externe Programme |
 | Karten | AnkiConnect und eine interne Wiederholung mit FSRS | Anbindung an Anki oder Wiederholung in der Anwendung |

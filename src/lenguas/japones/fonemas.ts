@@ -91,3 +91,82 @@ export function fonemasDeMoras(frase: { texto: string; moras: string[] }): strin
     return f;
   });
 }
+
+/** La kana pequeña que va con la anterior en la misma mora. */
+const DE_LA_ANTERIOR = new Set(['ゃ', 'ゅ', 'ょ', 'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ', 'ゎ']);
+
+/**
+ * Los fonemas de narabas de una pronunciación en kana, mora a mora: la っ, la ん y la raya larga, que repite la vocal
+ * anterior (`vocal`), también.
+ */
+export function fonemasDePronunciacion(kana: string, vocal: string | null = null): string[] {
+  const moras: string[] = [];
+  for (const c of aHiragana(kana)) {
+    if (DE_LA_ANTERIOR.has(c) && moras.length) moras[moras.length - 1] += c;
+    else moras.push(c);
+  }
+  const salida: string[] = [];
+  let anterior = vocal;
+  for (const m of moras) {
+    const f = fonemasDeMora(m, anterior);
+    const fin = f[f.length - 1];
+    if (fin && /^[aiueo]$/.test(fin)) anterior = fin;
+    salida.push(...f);
+  }
+  return salida;
+}
+
+/** Cada letra latina como suena más o menos en japonés: narabas solo conoce los fonemas del japonés. */
+const LATINA: Record<string, string[]> = {
+  a: ['a'], b: ['b'], c: ['k'], d: ['d'], e: ['e'], f: ['f'], g: ['g'], h: ['h'], i: ['i'], j: ['j'], k: ['k'], l: ['r'], m: ['m'],
+  n: ['n'], o: ['o'], p: ['p'], q: ['k'], r: ['r'], s: ['s'], t: ['t'], u: ['u'], v: ['b'], w: ['w'], x: ['k', 's'], y: ['y'], z: ['z'],
+};
+const DIGRAFOS: [string, string[]][] = [['sh', ['sh']], ['ch', ['ch']], ['th', ['s']], ['ph', ['f']], ['wh', ['w']], ['ck', ['k']], ['ts', ['ts']]];
+
+/**
+ * Unos fonemas aproximados para una palabra en letras latinas («Oh», «Whoa», «baby»): narabas no la entiende, pero así
+ * ocupa su sitio antes de lo que sigue. Una h tras vocal no suena, ni las letras repetidas.
+ */
+export function fonemasDeLatina(palabra: string): string[] {
+  const p = palabra.toLowerCase().replace(/[^a-z]/g, '');
+  const salida: string[] = [];
+  for (let i = 0; i < p.length; ) {
+    const digrafo = DIGRAFOS.find(([d]) => p.startsWith(d, i));
+    if (digrafo) {
+      salida.push(...digrafo[1]);
+      i += 2;
+      continue;
+    }
+    const c = p[i];
+    const tras = salida[salida.length - 1];
+    if (!(c === 'h' && tras && /^[aiueo]$/.test(tras)) && c !== p[i - 1]) salida.push(...(LATINA[c] ?? []));
+    i++;
+  }
+  return salida;
+}
+
+/** Un token del analizador, con lo que hace falta para saber cómo suena. */
+export interface TokenSonoro {
+  surface_form: string;
+  pronunciation?: string;
+  reading?: string;
+}
+
+const SOLO_KANA = /^[ぁ-ゖァ-ヺー]+$/;
+
+/**
+ * Los fonemas de narabas de un verso ya analizado: la pronunciación que da el diccionario (la partícula は como わ, las
+ * vocales largas con raya) y, para una palabra en letras latinas, unos aproximados. Para colocar una letra con la voz.
+ */
+export function fonemasDeTokens(tokens: readonly TokenSonoro[]): string[] {
+  const salida: string[] = [];
+  let vocal: string | null = null;
+  for (const t of tokens) {
+    const kana = t.pronunciation && t.pronunciation !== '*' ? t.pronunciation : t.reading && t.reading !== '*' ? t.reading : SOLO_KANA.test(t.surface_form) ? t.surface_form : '';
+    const f: string[] = kana ? fonemasDePronunciacion(kana, vocal) : /[a-z]/i.test(t.surface_form) ? fonemasDeLatina(t.surface_form) : [];
+    const fin: string | undefined = f[f.length - 1];
+    if (fin && /^[aiueo]$/.test(fin)) vocal = fin;
+    salida.push(...f);
+  }
+  return salida;
+}

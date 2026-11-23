@@ -2,6 +2,17 @@
 
 Un resumen de cada versión. Las notas completas, con lo probado y los paquetes, están en [Releases](https://github.com/Eliam4510/kotonoha/releases). [English below](#whats-new).
 
+## 0.50.0 · 2026-11-23
+
+Los tiempos de las canciones: cada verso, donde se canta.
+
+- **La letra, con la voz.** Al colocar la letra de una canción transcrita entera, narabas, el modelo de fonemas de la práctica del acento, pone cada verso donde suenan sus fonemas, buscándolo en la zona que da lo que oyó Whisper. Antes los tiempos eran los de las líneas de Whisper, y quedaban desfasados.
+- **Con la voz aislada.** Antes de oírla, Demucs separa la voz de la música en la tarjeta gráfica. Medido con 51 canciones japonesas y su letra sincronizada: la mitad de los versos empieza a menos de 0,16 s de donde se canta, y nueve de cada diez, a menos de 0,9 s. Una canción de cuatro minutos tarda unos 20 s más.
+- **Nada se descarga sin pedirlo.** narabas pesa 1,26 GB y Demucs, 181 MB: el aviso final ofrece **Afinar con la voz (1,4 GB)** o **Afinar aislando la voz (181 MB)**, y los dos quedan en **Modelos guardados**, donde se pueden borrar.
+- **Sin la voz, sin Claude.** Sobre una pista del propio sitio, o sin narabas, la letra se casa letra a letra con lo que oyó Whisper, sin preguntar a nadie. Claude solo entra si apenas casa, como con una letra en rōmaji.
+- **Lo que no se canta.** Las marcas de sección («[サビ]», «(Chorus)») y los créditos («作詞：…») se quitan de la letra, y un verso con «×2» se coloca dos veces. Una letra en LRC se puede pegar tal cual: se lee sin sus horas, en su orden.
+- **Marcar los tiempos a mano.** Para un cantante al que ningún modelo entiende: en **Sincronizar**, **Marcar los tiempos**, y se mantiene pulsada la barra espaciadora mientras suena cada línea. Retroceso deshace la última, y lo marcado se guarda para ese video.
+
 ## 0.49.2 · 2026-11-22
 
 La transcripción de canciones, arreglada, y las letras en LRC.
@@ -530,6 +541,17 @@ Una versión de acabado, sin funciones nuevas. Se ha medido cada pantalla con mu
 # What’s new
 
 A summary of each release. The full notes, with what was tested and the packages, are in [Releases](https://github.com/Eliam4510/kotonoha/releases).
+
+## 0.50.0 · 2026-11-23
+
+Song timing: each verse where it is sung.
+
+- **Lyrics placed with the voice.** When placing the lyrics of a song transcribed in full, narabas, the phoneme model of the pitch accent practice, puts each verse where its phonemes sound, looking for it in the zone given by what Whisper heard. Before, the timing was that of Whisper's lines, and it drifted.
+- **With the voice isolated.** Before listening, Demucs separates the voice from the music on the graphics card. Measured with 51 Japanese songs and their synced lyrics: half of the verses start less than 0.16 s from where they are sung, and nine in ten less than 0.9 s. A four-minute song takes about 20 s longer.
+- **Nothing is downloaded without asking.** narabas takes 1.26 GB and Demucs 181 MB: the final notice offers **Fine-tune with the voice (1.4 GB)** or **Fine-tune by isolating the voice (181 MB)**, and both stay in **Saved models**, where they can be deleted.
+- **Without the voice, without Claude.** On a track from the site itself, or without narabas, the lyrics are matched letter by letter with what Whisper heard, without asking anyone. Claude only steps in if they barely match, as with lyrics in rōmaji.
+- **What is not sung.** Section marks ("[サビ]", "(Chorus)") and credits ("作詞：…") are removed from the lyrics, and a verse with "×2" is placed twice. Lyrics in LRC can be pasted as they are: they are read without their timestamps, in their order.
+- **Marking the timings by hand.** For a singer no model understands: in **Sync**, **Mark the timings**, and hold the space bar while each line sounds. Backspace undoes the last one, and what is marked is saved for that video.
 
 ## 0.49.2 · 2026-11-22
 

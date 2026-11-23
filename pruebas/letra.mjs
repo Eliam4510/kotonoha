@@ -4,7 +4,8 @@
 // Uso: KK_SALIDA=.dist-subs node build.mjs && node pruebas/letra.mjs [voz.wav [en|ja]]
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { createReadStream, existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
+import { createServer } from 'node:http';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { olvidarReproductor, recargarExtension } from './extension.mjs';
@@ -167,6 +168,25 @@ const enOverlay = (pagina, fn, arg) => pagina.evaluate(({ fn, arg }) => {
   const r = (document.querySelector('kotonoha-overlay:not([popover])') ?? document.querySelector('kotonoha-overlay'))?.shadowRoot;
   return r ? new Function('r', 'arg', `return (${fn})(r, arg)`)(r, arg) : null;
 }, { fn: fn.toString(), arg });
+/** Deja un archivo de este equipo en una caché del navegador, con la dirección de la que lo bajaría la extensión. */
+async function guardarEnCache(pagina, cache, url, archivo) {
+  const servidor = await new Promise((ok) => {
+    const s = createServer((_, res) => {
+      res.writeHead(200, { 'content-type': 'application/octet-stream', 'content-length': statSync(archivo).size, 'access-control-allow-origin': '*' });
+      createReadStream(archivo).pipe(res);
+    });
+    s.listen(0, '127.0.0.1', () => ok(s));
+  });
+  await pagina.evaluate(
+    async ([desde, cache, url]) => {
+      const resp = await fetch(desde);
+      await (await caches.open(cache)).put(url, new Response(resp.body, { headers: { 'content-type': 'application/octet-stream', 'content-length': resp.headers.get('content-length') } }));
+    },
+    [`http://127.0.0.1:${servidor.address().port}/modelo.onnx`, cache, url]
+  );
+  servidor.close();
+}
+
 const hasta = async (pagina, fn, arg, ms = 20000) => {
   const limite = Date.now() + ms;
   for (;;) {
@@ -230,14 +250,8 @@ await boton.click();
 const ajustada = await hasta(p, (r) => [...r.querySelectorAll('.aviso')].some((x) => /Letra ajustada/.test(x.textContent)), undefined, 20000);
 comprobar(!!ajustada, 'Avisa al terminar', await avisos(p));
 
-const pedida = pedidasLetra()[0];
-comprobar(pedidasLetra().length === 1, 'Se le pregunta a Claude una vez', pedidasLetra().length);
-comprobar(pedida?.cuerpo.model === 'claude-sonnet-5-5', 'A Sonnet, como las demás tareas de subtítulos', pedida?.cuerpo.model);
-const sistema = JSON.stringify(pedida?.cuerpo.system ?? '');
-comprobar(sistema.includes('Colocas la letra') && sistema.includes('japonesa'), 'Con la instrucción de su lengua');
-const usuario = pedida?.cuerpo.messages?.[0]?.content ?? '';
-comprobar(usuario.includes('2 [10.0-12.0] ご視聴ありがとうございました'), 'Lleva lo que se oyó con sus tiempos');
-comprobar(usuario.includes('夜の川を歩いて') && !usuario.includes('♪') && !usuario.includes('0:14'), 'Y la letra, sin adornos ni marcas de tiempo');
+// Casa con lo que se oyó (川 por 皮, 私 por 僕): se coloca letra a letra, sin preguntar a Claude.
+comprobar(pedidasLetra().length === 0, 'Casa con lo que se oyó: la coloca sin preguntar a Claude', pedidasLetra().length);
 
 const guardadas = await motor('subtitulosGenerados', ID);
 const fila = guardadas.find((g) => g.origen === 'letra');
@@ -245,9 +259,10 @@ comprobar(!!fila, 'Queda guardada para este video');
 const textos = fila?.lineas.map((l) => l.texto) ?? [];
 comprobar(textos.join('|') === '夜の川を歩いて|月が私を見ている|朝はまだ来ないの|月が私を見ている', 'Las palabras son las de la letra, tal cual', textos.join(' | '));
 comprobar(!textos.includes('[サビ]'), 'Sin lo que no se canta');
-comprobar(fila?.lineas[0]?.inicio === 2000, 'Los tiempos, los de la transcripción', fila?.lineas.map((l) => `${l.inicio}-${l.fin}`).join(' '));
-comprobar(fila?.lineas[2]?.inicio === 14000, 'Se salta lo que el reconocedor se inventó en el pasaje instrumental');
-comprobar(fila?.lineas[3]?.inicio === 18000, 'Y un verso repetido suena en su sitio');
+const cerca = (k, ms) => Math.abs((fila?.lineas[k]?.inicio ?? -1e9) - ms) <= 150;
+comprobar(cerca(0, 2000), 'Los tiempos, los de lo que se oyó', fila?.lineas.map((l) => `${l.inicio}-${l.fin}`).join(' '));
+comprobar(cerca(2, 14000), 'Se salta lo que el reconocedor se inventó en el pasaje instrumental');
+comprobar(cerca(3, 18000), 'Y un verso repetido suena en su sitio');
 comprobar((await lineaEn(p, 3)) === '夜の川を歩いて', 'Sobre el video se ve la letra verdadera', await lineaEn(p, 3));
 comprobar((await lineaEn(p, 11)) === '', 'Y nada donde no se canta', await lineaEn(p, 11));
 await p.screenshot({ path: join(CAPTURAS, 'video.png') });
@@ -282,7 +297,7 @@ await abrirGenerar(p);
 await area.fill(LETRA);
 await boton.click();
 await hasta(p, (r) => !r.querySelector('.panel-generar textarea')?.value, undefined, 15000);
-comprobar(pedidasLetra().length === 1, 'Ajustar otra vez lo mismo no se paga dos veces', pedidasLetra().length);
+comprobar(pedidasLetra().length === 0, 'Ajustar otra vez lo mismo tampoco pregunta a nadie', pedidasLetra().length);
 comprobar((await lineaEn(p, 3)) === '夜の川を歩いて', 'Y vuelve la letra');
 
 // Traducirla no arrastra lo traducido de la otra pista.
@@ -295,7 +310,7 @@ await p.reload();
 await hasta(p, (r) => r.querySelector('.barra') != null, undefined, 30000);
 await p.waitForTimeout(1200);
 comprobar((await lineaEn(p, 7)) === '月が私を見ている', 'Al volver al video, es la letra lo que se ve', await lineaEn(p, 7));
-comprobar(pedidasLetra().length === 1, 'Sin preguntar nada');
+comprobar(pedidasLetra().length === 0, 'Sin preguntar nada');
 const copia = JSON.parse(await motor('exportarDatos', await sw.evaluate(async () => (await chrome.storage.local.get('ajustes')).ajustes)));
 comprobar((copia.lenguas?.ja ?? copia).generados.some((g) => g.origen === 'letra' && g.idVideo === ID), 'La copia de seguridad la lleva');
 
@@ -316,7 +331,14 @@ const antes = pedidasLetra().length;
 await area.fill('zzz inventado que no suena en ningún sitio');
 await boton.click();
 await hasta(p, (r) => [...r.querySelectorAll('.aviso')].some((x) => /no encontró esta letra/.test(x.textContent)), undefined, 10000);
-comprobar(pedidasLetra().length === antes + 1, 'Una letra que no es de esta canción también se pregunta');
+comprobar(pedidasLetra().length === antes + 1, 'Una letra que no casa con lo que se oye se le pregunta a Claude');
+const pedida = pedidasLetra().at(-1);
+comprobar(pedida?.cuerpo.model === 'claude-sonnet-5-5', 'A Sonnet, como las demás tareas de subtítulos', pedida?.cuerpo.model);
+const sistema = JSON.stringify(pedida?.cuerpo.system ?? '');
+comprobar(sistema.includes('Colocas la letra') && sistema.includes('japonesa'), 'Con la instrucción de su lengua');
+const usuario = pedida?.cuerpo.messages?.[0]?.content ?? '';
+comprobar(usuario.includes('2 [10.0-12.0] ご視聴ありがとうございました'), 'Lleva lo que se oyó con sus tiempos');
+comprobar(usuario.includes('zzz inventado'), 'Y la letra');
 comprobar(/no encontró esta letra/.test(await avisos(p)), 'Y lo dice en lugar de inventarse una pista', await avisos(p));
 comprobar((await lineaEn(p, 7)) === '月が私を見ている', 'La pista de antes sigue intacta');
 await p.close();
@@ -347,6 +369,13 @@ if (voz) {
       };
     });
   }, muestra.base);
+  // Sin Demucs, para ver cómo se ofrece: una ejecución anterior lo dejaría guardado. narabas, en cambio, se deja en el
+  // perfil desde este equipo (1,26 GB), con la dirección de la que se baja: así se coloca con la voz sin bajarlo.
+  await app.evaluate(() => caches.delete('kotonoha-modelo-voz'));
+  const NARABAS = join(RAIZ, 'contenido-de-prueba', 'modelos', 'narabas-v0.onnx');
+  if (existsSync(NARABAS) && !(await app.evaluate(async () => !!(await (await caches.open('kotonoha-modelo-moras')).match('https://github.com/darashi/narabas-models/releases/download/v0/narabas-v0.onnx'))))) {
+    await guardarEnCache(app, 'kotonoha-modelo-moras', 'https://github.com/darashi/narabas-models/releases/download/v0/narabas-v0.onnx', NARABAS);
+  }
   const correccionesAntes =mock.peticiones.filter((x) => x.cuerpo.output_config?.format?.schema?.properties?.correcciones).length;
   const letraAntes = pedidasLetra().length;
   const r = await contexto.newPage();
@@ -384,16 +413,46 @@ if (voz) {
   comprobar(await r.evaluate(() => [...document.querySelectorAll('.panel-generar .nota-grupo')].some((x) => /se ajustará sola/.test(x.textContent))), 'Mientras transcribe, dice que la ajustará al terminar');
   await r.screenshot({ path: join(CAPTURAS, 'esperando.png') });
   const limite = Date.now() + 420000;
-  while (Date.now() < limite && pedidasLetra().length === letraAntes) await r.waitForTimeout(500);
+  // Con la voz (si narabas está en el disco) o letra a letra: Claude solo si apenas casa.
+  let colocada = false;
+  while (Date.now() < limite && !colocada) {
+    await r.waitForTimeout(500);
+    colocada = await r.evaluate(() => [...document.querySelectorAll('.aviso')].some((x) => /Letra ajustada|Letra colocada con la voz/.test(x.textContent)));
+  }
   clearInterval(vigia);
-  comprobar(pedidasLetra().length === letraAntes + 1, 'Al terminar de transcribir, la ajusta sola');
+  comprobar(colocada, 'Al terminar de transcribir, la ajusta sola', String(pedidasLetra().length - letraAntes));
   if (modeloEnDisco) comprobar(!dijoDescargando, 'No dice que descarga un modelo que ya tiene guardado');
   console.log(`  en ${Math.round((Date.now() - inicio) / 1000)} s`);
+
+  // Con narabas en el disco y sin Demucs, se ofrece aislar la voz. El modelo se sirve desde este equipo, guardado en su
+  // caché con la dirección de la publicación: así no se baja de GitHub.
+  const conNarabas = await r.evaluate(async () => (await caches.has('kotonoha-modelo-moras')) && (await (await caches.open('kotonoha-modelo-moras')).keys()).length > 0);
+  const MODELO_DEMUCS = join(RAIZ, 'contenido-de-prueba', 'modelos', 'htdemucs_embedded.onnx');
+  if (conNarabas && existsSync(MODELO_DEMUCS)) {
+    const avisosAhora = await r.evaluate(() => [...document.querySelectorAll('.aviso')].map((x) => x.textContent).join(' | '));
+    comprobar(/Letra colocada con la voz: \d+ versos/.test(avisosAhora), 'Con narabas, la coloca con la voz', avisosAhora);
+    comprobar(/Afinar aislando la voz \(181 MB\)/.test(avisosAhora), 'Sin Demucs, ofrece aislar la voz y dice cuánto se baja', avisosAhora);
+    await guardarEnCache(r, 'kotonoha-modelo-voz', 'https://github.com/Eliam4510/kotonoha/releases/download/v0.50.0/htdemucs.onnx', MODELO_DEMUCS);
+    const pasos = new Set();
+    const vigiaVoz = setInterval(() => r.evaluate(() => [...document.querySelectorAll('.aviso')].map((x) => x.textContent)).then((t) => t.forEach((x) => pasos.add(x.replace(/\d+ %/, '%')))).catch(() => {}), 150);
+    const afinar = r.locator('.aviso button', { hasText: 'Afinar aislando la voz' });
+    if (await afinar.count()) await afinar.first().click();
+    let aislada = false;
+    const limiteVoz = Date.now() + 180000;
+    while (Date.now() < limiteVoz && !aislada) {
+      await r.waitForTimeout(400);
+      aislada = await r.evaluate(() => [...document.querySelectorAll('.aviso')].some((x) => /colocada con la voz aislada/.test(x.textContent)));
+    }
+    clearInterval(vigiaVoz);
+    comprobar(aislada, 'Con Demucs, la coloca sobre la voz aislada', [...pasos].join(' → '));
+    comprobar([...pasos].some((x) => /Aislando la voz de la canción/.test(x)), 'Mientras, dice que aísla la voz');
+    // Lo que sigue lee la letra colocada sobre la voz aislada.
+  } else {
+    console.log(`  sin probar Demucs: ${conNarabas ? 'falta el modelo en contenido-de-prueba/modelos' : 'narabas no está en este perfil'}`);
+  }
   await r.waitForFunction(() => !document.querySelector('.panel-generar textarea')?.value, undefined, { timeout: 20000 }).catch(() => {});
   await r.waitForTimeout(1200);
   comprobar(mock.peticiones.filter((x) => x.cuerpo.output_config?.format?.schema?.properties?.correcciones).length === correccionesAntes, 'No se paga por corregir lo que oyó Whisper');
-  const pedidaEn = pedidasLetra().at(-1);
-  comprobar(JSON.stringify(pedidaEn?.cuerpo.system ?? '').includes(muestra.instruccion), 'Con la instrucción de su lengua');
   const claves = await r.evaluate(() => document.querySelector('.ap-local video').duration);
   const vistas = [];
   for (let s = 0.5; s < Math.min(claves, 26); s += 1) {

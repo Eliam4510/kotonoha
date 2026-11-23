@@ -2,7 +2,7 @@
 
 # Features
 
-Status of each feature in version 0.49.2, along with how it has been verified.
+Status of each feature in version 0.50.0, along with how it has been verified.
 
 | Verification | Meaning |
 |---|---|
@@ -74,6 +74,7 @@ Status of each feature in version 0.49.2, along with how it has been verified.
 | Exporting to SRT, with synchronization applied | Imitation page |
 | Japanese tracks remembered across Netflix regions | Imitation page. Real sessions must still confirm that the title identifier matches |
 | Synchronization by offset or with one or two marks | Automated |
+| Marking the timings by hand: the space bar (or a button) held while each line sounds, and Backspace to undo; the remaining lines move with the last one marked, and everything is saved for the video | Automated |
 | Netflix clock: after a mid-roll ad, when the next episode starts on its own or after a jump, subtitles follow the episode time given by the Netflix player, without reloading the page; if its clock does not leave the ad out, the adjustment is how long the video ran during it, until its clock gives its measurement; that adjustment can be removed. **Sync again**, **Remove adjustment** and `Alt+Shift+S` | Automated, with a simulated Netflix |
 
 ## Transcription
@@ -91,7 +92,7 @@ Status of each feature in version 0.49.2, along with how it has been verified.
 | **Update now**: the helper puts the new version in the copy's folder, with its SHA-256 and the same key, and the extension reloads | Automated, end to end with Edge |
 | Full copy in a folder: books, OCR text and dictations, without API keys | Automated, round trip |
 | Correction of the result with Claude | Simulator |
-| Song lyrics placed on the transcription timing: the text comes from the lyrics and the timing from Whisper | Simulator, with real Whisper, and real session with a song |
+| Song lyrics placed where they are sung: with the voice (narabas, in the zone given by what Whisper heard), with the voice isolated by Demucs on the GPU, or letter by letter with what Whisper heard; Claude, only if they barely match. The words come from the lyrics, without section marks or credits | Simulator, with real Whisper, narabas and Demucs; measured with 51 Japanese songs and their synced lyrics: with the isolated voice, half of the verses within 0.16 s and nine in ten within 0.9 s (on the mix, 0.19 s and 1.59 s) |
 | When placing lyrics, verses Whisper did not hear do not land in an instrumental passage: YAMNet hears where there is singing while the whole song is transcribed. Measured with 21 Japanese songs from official channels and their synced lyrics: of 164 unheard verses, 21 end up more than a second closer to their place and 3 farther | Measured with real songs and the real code; YAMNet inside Kotonoha |
 | Haas-ja for Japanese speech, Parakeet for English speech and Whisper Turbo for songs, chosen according to the video | Automated, with the three real models on the GPU, and a real session on YouTube |
 | Saved models list, with the space each one takes and per-model deletion. Loading from disk is no longer announced as a download | Automated, and with real Whisper |
@@ -337,4 +338,4 @@ Status of each feature in version 0.49.2, along with how it has been verified.
 | Viewer | OCR can confuse similar characters (エ and 工, ー and 一), skip one now and then and lose the subscripts of formulas; the original image always stays in view. Book mode has been measured with horizontal text. A book with DRM does not open. Book files are not included in the single-file backup, but they are in the full copy. A text EPUB is read chapter by chapter, by scrolling, not page by page; in Manga mode you tap the whole bubble, not each word: the word is picked in the window, and inside a bubble you cannot select by dragging. The aids on the page do not apply to manga bubbles, where the position of each letter is not known, and pages read by OCR before 0.37.0 spread their letters along the line. |
 | Synchronization | No server: moving between computers is done with the full copy |
 | Background music | Whisper can miss quiet conversation under loud music |
-| Song lyrics | Timing is per Whisper line, not per word. With very loud music Whisper may hear little, and then more verses get an estimated time |
+| Song lyrics | One verse in ten lands more than 0.9 s from where it is sung, and a few several seconds off, in passages Whisper does not hear. Without Demucs, on the mix, one in ten lands more than 1.59 s off. Demucs needs WebGPU, and narabas and Demucs are downloaded separately (1.4 GB) |

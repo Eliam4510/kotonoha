@@ -1,0 +1,69 @@
+Demucs y demucs-web
+
+Kotonoha usa Demucs (htdemucs), de Meta, para aislar la voz de una canción al colocar su letra con la voz.
+Kotonoha uses Demucs (htdemucs), by Meta, to isolate the voice of a song when placing its lyrics with the voice.
+
+Original: https://github.com/facebookresearch/demucs
+
+Conversión a ONNX / ONNX conversion: timcsy, https://huggingface.co/timcsy/demucs-web-onnx (commit 92e33df),
+sin cambiar sus pesos / weights unchanged.
+
+El archivo que descarga Kotonoha / The file Kotonoha downloads:
+https://github.com/Eliam4510/kotonoha/releases/download/v0.50.0/htdemucs.onnx
+SHA-256 e5e425c17683f163a472462eb5f5a4ffcd11c31858d57fbd0833b012d8b88077
+
+Lo que se hace antes y después del modelo (src/nucleo/demucs.ts) adapta el código de demucs-web, de timcsy:
+What is done before and after the model (src/nucleo/demucs.ts) adapts the code of demucs-web, by timcsy:
+https://github.com/timcsy/demucs-web
+
+------------------------------------------------------------------------------
+Demucs
+------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+------------------------------------------------------------------------------
+demucs-web
+------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2024 timcsy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

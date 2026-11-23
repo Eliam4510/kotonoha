@@ -2,7 +2,7 @@
 
 # Funktionen
 
-Stand jeder Funktion in Version 0.49.2 und die Art ihrer Überprüfung.
+Stand jeder Funktion in Version 0.50.0 und die Art ihrer Überprüfung.
 
 | Überprüfung | Bedeutung |
 |---|---|
@@ -74,6 +74,7 @@ Stand jeder Funktion in Version 0.49.2 und die Art ihrer Überprüfung.
 | Export als SRT, mit angewendeter Synchronisierung | Nachgebildete Seite |
 | Gemerkte japanische Spuren über Netflix-Regionen hinweg | Nachgebildete Seite. Mit echten Sitzungen ist noch zu bestätigen, dass die Titelkennung übereinstimmt |
 | Synchronisierung über Versatz oder mit einer oder zwei Markierungen | Automatisch |
+| Zeiten von Hand markieren: die Leertaste (oder eine Schaltfläche) gedrückt halten, solange jede Zeile erklingt, und mit der Rücktaste rückgängig machen; die übrigen Zeilen verschieben sich mit der zuletzt markierten, und alles wird für das Video gespeichert | Automatisch |
 | Netflix-Uhr: Nach Werbung, wenn die nächste Folge von selbst startet, oder nach einem Sprung folgen die Untertitel dem Zeitpunkt der Folge, den der Netflix-Player angibt, ohne die Seite neu zu laden; zieht seine Uhr die Werbung nicht ab, wird um die Zeit angepasst, die das Video währenddessen lief, bis ihre Uhr einen Messwert liefert; diese Anpassung lässt sich entfernen. **Erneut synchronisieren**, **Anpassung entfernen** und `Alt+Shift+S` | Automatisch, mit einem simulierten Netflix |
 
 ## Transkription
@@ -91,7 +92,7 @@ Stand jeder Funktion in Version 0.49.2 und die Art ihrer Überprüfung.
 | **Jetzt aktualisieren**: Der Helfer legt die neue Version mit ihrer SHA-256 und demselben Schlüssel in den Ordner der Kopie, und die Erweiterung lädt sich neu | Automatisch, durchgehend mit Edge |
 | Vollständige Kopie in einem Ordner: Bücher, OCR-Text und Diktate, ohne API-Schlüssel | Automatisch, hin und zurück |
 | Korrektur des Ergebnisses mit Claude | Simulator |
-| Liedtext auf die Zeiten der Transkription gelegt: der Text aus dem Liedtext, die Zeiten von Whisper | Simulator, mit echtem Whisper, und echte Sitzung mit einem Lied |
+| Liedtext dort platziert, wo gesungen wird: mit der Stimme (narabas, in dem Bereich, den das von Whisper Gehörte vorgibt), mit der von Demucs auf der GPU freigestellten Stimme oder Buchstabe für Buchstabe mit dem von Whisper Gehörten; Claude nur, wenn er kaum passt. Die Wörter aus dem Liedtext, ohne Abschnittsmarken und Urheberangaben | Simulator, mit echtem Whisper, narabas und Demucs; gemessen mit 51 japanischen Liedern und ihren synchronisierten Texten: mit freigestellter Stimme die Hälfte der Verse unter 0,16 s und neun von zehn unter 0,9 s (auf der Mischung 0,19 s und 1,59 s) |
 | Beim Anlegen eines Liedtexts landen Verse, die Whisper nicht gehört hat, nicht in einer instrumentalen Passage: YAMNet hört beim Transkribieren des ganzen Lieds, wo gesungen wird. Gemessen mit 21 japanischen Liedern aus offiziellen Kanälen und ihren synchronisierten Texten: Von 164 nicht gehörten Versen liegen 21 mehr als eine Sekunde näher an ihrer Stelle und 3 weiter weg | Gemessen mit echten Liedern und dem echten Code; YAMNet in Kotonoha |
 | Haas-ja für gesprochenes Japanisch, Parakeet für gesprochenes Englisch und Whisper Turbo für Lieder, je nach Video gewählt | Automatisch, mit den drei echten Modellen auf der GPU, und echte Sitzung auf YouTube |
 | Liste der gespeicherten Modelle mit dem Platzbedarf jedes Modells und Löschen pro Modell. Das Laden von der Festplatte wird nicht mehr als Download angezeigt | Automatisch und mit echtem Whisper |
@@ -337,4 +338,4 @@ Stand jeder Funktion in Version 0.49.2 und die Art ihrer Überprüfung.
 | Betrachter | Die Texterkennung kann ähnliche Zeichen verwechseln (エ und 工, ー und 一), gelegentlich eines auslassen und die Indizes von Formeln verlieren; das Originalbild bleibt immer sichtbar. Der Modus Buch ist mit horizontalem Text gemessen. Ein Buch mit DRM öffnet sich nicht. Die Buchdateien sind nicht Teil der Sicherung in einer Datei, wohl aber der vollständigen Kopie. Ein Text-EPUB wird kapitelweise mit Scrollen gelesen, nicht seitenweise; im Modus Manga wird die ganze Sprechblase angetippt, nicht jedes Wort: Das Wort wählt man im Fenster, und in einer Sprechblase lässt sich nicht durch Ziehen auswählen. Die Hilfen auf der Seite gelten nicht für Sprechblasen eines Mangas, in denen die Lage der Buchstaben unbekannt ist, und Seiten, die die Texterkennung vor 0.37.0 gelesen hat, verteilen ihre Buchstaben über die Zeile. |
 | Synchronisierung | Ohne Server: Die Übertragung zwischen Computern erfolgt über die vollständige Kopie |
 | Hintergrundmusik | Whisper kann leise Gespräche unter lauter Musik verlieren |
-| Liedtexte | Die Zeiten gelten je Whisper-Zeile, nicht je Wort. Bei sehr lauter Musik hört Whisper womöglich wenig, und dann erhalten mehr Verse eine geschätzte Zeit |
+| Liedtexte | Einer von zehn Versen landet mehr als 0,9 s von der Stelle entfernt, an der er gesungen wird, und einige wenige mehrere Sekunden, in Passagen, die Whisper nicht hört. Ohne Demucs, auf der Mischung, einer von zehn mehr als 1,59 s. Demucs braucht WebGPU, und narabas und Demucs werden eigens heruntergeladen (1,4 GB) |

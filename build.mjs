@@ -54,9 +54,10 @@ const opcionesWhisper = {
   ...opciones,
   // El OCR del visor también va aparte: carga sus modelos solo si se pide el texto de un libro.
   // Y las voces neuronales del inglés y del alemán, que solo se cargan si se activan, y narabas, el modelo de fonemas que
-  // comprueba las moras en la práctica del acento, y YAMNet, que oye dónde se canta al colocar la letra de una canción.
+  // comprueba las moras en la práctica del acento, y YAMNet, que oye dónde se canta al colocar la letra de una canción, y
+  // Demucs, que aísla su voz.
   // Y pdf-lib, que solo hace falta al exportar un PDF con su texto: así la ventana no la carga cada vez que se abre.
-  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts', ocr: 'src/visor/ocrTrabajador.ts', voz: 'src/motor/vozTrabajador.ts', narabas: 'src/motor/narabasTrabajador.ts', canto: 'src/motor/cantoTrabajador.ts', pdfTexto: 'src/nucleo/pdfActualizar.ts' },
+  entryPoints: { whisper: 'src/motor/whisperTrabajador.ts', ocr: 'src/visor/ocrTrabajador.ts', voz: 'src/motor/vozTrabajador.ts', narabas: 'src/motor/narabasTrabajador.ts', canto: 'src/motor/cantoTrabajador.ts', aislarVoz: 'src/motor/aislarVozTrabajador.ts', pdfTexto: 'src/nucleo/pdfActualizar.ts' },
   format: 'esm',
   sourcemap: false,
   minify: true,

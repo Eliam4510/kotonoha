@@ -125,9 +125,9 @@ Trabajar sin pausas deja la GPU al 100 % durante horas, lo que traba el escritor
 
 ## Letras de canciones
 
-Una letra pegada se coloca sobre el audio repartiendo el trabajo, y cada pieza decide solo lo que sabe hacer: Whisper oye cuándo suena cada línea, YAMNet dónde se canta, Claude qué verso corresponde a cada línea y `src/nucleo/letra.ts` calcula los tiempos.
+Una letra pegada se coloca sobre el audio repartiendo el trabajo, y cada pieza decide solo lo que sabe hacer: Whisper oye qué se canta y cuándo, Demucs separa la voz de la música, narabas oye dónde empieza cada fonema, YAMNet dónde se canta, y `src/nucleo/letra.ts` calcula los tiempos. Claude solo entra si la letra apenas casa con lo que se oye.
 
-<p align="center"><img src="img/letra-flujo.svg" width="100%" alt="Recorrido de una letra: el audio de la canción va a Whisper Turbo y a YAMNet; Claude empareja la letra pegada con lo que oyó Whisper; letra.ts lo reúne todo, calcula los tiempos y genera la pista de la letra"></p>
+<p align="center"><img src="img/letra-flujo.svg" width="100%" alt="Recorrido de una letra: el audio de la canción va a Whisper Turbo y a Demucs; la letra pegada se casa letra a letra con lo que oyó Whisper, y narabas busca en la zona de cada verso, sobre la voz sola, dónde empiezan sus fonemas; Claude, solo si apenas casa; letra.ts calcula los tiempos y genera la pista de la letra"></p>
 
 **Canción o voz hablada.** Un video se trata como canción si tiene una letra pendiente de colocar, si YouTube lo clasifica como música o si el título lo indica: MV, lyric video, official audio, karaoke y similares. En ese caso se transcribe con Whisper Turbo, que oye el canto sobre la música mejor que los modelos de voz hablada.
 
@@ -135,7 +135,13 @@ Una letra pegada se coloca sobre el audio repartiendo el trabajo, y cada pieza d
 
 **Dónde se canta.** YAMNet, el clasificador de sonidos de Google entrenado con AudioSet (521 clases), oye los mismos bloques de 60 s que Whisper, en su propio trabajador y en el procesador, para no competir por la GPU. De cada tramo de 2 s se guarda la puntuación de la clase «Singing» (canto). El umbral es 0,02, porque la puntuación es muy baja incluso cuando se canta, y un único tramo sin voz entre dos con voz cuenta como voz: casi nunca es un pasaje instrumental. La puntuación solo existe cuando la canción se transcribe entera desde el principio, con el ayudante o desde un archivo; la transcripción en tiempo real no la usa.
 
-**El emparejamiento.** Claude recibe la letra y la transcripción como dos listas numeradas, la segunda con sus tiempos, que le ayudan a ver los pasajes instrumentales. Por cada verso devuelve `{v, de, a}`: la primera y la última línea de la transcripción sobre las que suena. Con -1, el verso se canta, pero la transcripción no lo recoge; con -2, no se canta, como una marca de sección, un título o un crédito. El prompt pide:
+**La zona de cada verso.** `src/nucleo/casarLetra.ts` casa la letra con lo que oyó Whisper letra a letra, sin IA. Las dos se pasan a letras comparables (los katakana, a hiragana; sin signos ni espacios) y se buscan tramos iguales de al menos dos letras, encadenados en orden: se queda la cadena de más peso, con un árbol de Fenwick, y un kanji pesa 6, un kana 4 y una letra latina 1, para que un estribillo en inglés no arrastre a los versos japoneses. Cada verso que casa toma el momento que le dan sus tramos, la mediana: esa es su zona. Sin la voz, los tiempos salen de ahí.
+
+**La voz sola.** Demucs (htdemucs, de Meta) separa la voz en un trabajador, con ONNX Runtime y WebGPU. El audio de la canción, que el motor guarda a 16 kHz, se sube a 44,1 kHz con un filtro sinc y se parte en trozos de 7,8 s que se solapan una cuarta parte. El modelo recibe cada trozo y su espectrograma (STFT de 4096 muestras con saltos de 1024) y devuelve dos ramas, la del tiempo y la de las frecuencias; esta se vuelve al tiempo (ISTFT) y se suma a la otra. La voz se baja otra vez a 16 kHz y los trozos se juntan con un peso en triángulo. `src/nucleo/demucs.ts` hace esa parte, comprobada contra la transformada directa, y la GPU solo se usa si con una señal fija da lo mismo que el procesador.
+
+**Los fonemas.** narabas, un wav2vec2 de fonemas del japonés, da cada 20 ms la probabilidad de cada uno de sus 43 fonemas. Los versos se pasan a fonemas con la pronunciación de Kuromoji, y una alineación forzada (Viterbi sobre el CTC, en `src/nucleo/alineacionForzada.ts`) coloca todos los de la letra, en orden, sobre esas probabilidades. Cada fonema solo puede caer en la zona de su verso, con 2 s de margen a cada lado, o entre las de sus vecinos si su verso no casó, como un estribillo repetido igual que el verso de al lado. Un verso empieza en el primer marco de su primer fonema y acaba 0,4 s después del último.
+
+**Si apenas casa, Claude.** Si casa menos de una cuarta parte de los versos, como con una letra en rōmaji, Claude recibe la letra y la transcripción como dos listas numeradas, la segunda con sus tiempos, que le ayudan a ver los pasajes instrumentales. Por cada verso devuelve `{v, de, a}`: la primera y la última línea de la transcripción sobre las que suena. Con -1, el verso se canta, pero la transcripción no lo recoge; con -2, no se canta, como una marca de sección, un título o un crédito. El prompt pide:
 
 - comparar por sonido y no por escritura: en japonés, 会いたい, 逢いたい y あいたい son lo mismo; en inglés, «night» y «knight», y en alemán, «Meer» y «mehr»;
 - respetar el orden: `de` nunca retrocede;
@@ -159,6 +165,16 @@ La respuesta ocupa poco, sigue un esquema JSON y queda en caché: ajustar la mis
 
 Medido con canciones japonesas de canales oficiales y su letra sincronizada, YAMNet separa lo cantado de lo instrumental con un AUC de 0,9. De 164 versos que Whisper no oyó, con YAMNet dentro de Kotonoha 21 quedan más de un segundo más cerca de su sitio y 3 más lejos, y los que quedan a más de 5 s pasan de 32 a 28. Los errores grandes que quedan vienen de pasajes largos que Whisper no oye: YAMNet sabe que ahí se canta, pero no qué verso.
 
+**Lo medido.** Con 51 canciones japonesas y su letra sincronizada (2253 versos), lo que se aparta el principio de cada verso de donde se canta:
+
+| Cómo se coloca | La mitad, a menos de | Nueve de cada diez, a menos de |
+|---|---|---|
+| Letra a letra con lo que oyó Whisper | 0,34 s | 1,46 s |
+| Con la voz, sobre la mezcla | 0,19 s | 1,59 s |
+| Con la voz aislada | 0,16 s | 0,9 s |
+
+Los errores grandes que quedan vienen de pasajes que Whisper no oye: el verso no tiene zona propia, y narabas lo busca en un tramo largo.
+
 El resultado es una pista aparte, que se analiza y se traduce como cualquier otra. El aviso final indica cuántos versos llevan un tiempo estimado, y **Sincronizar: esta línea suena ahora**, en el navegador, afina la sincronía; con dos marcas corrige también la velocidad.
 
 ## Decisiones técnicas
@@ -173,6 +189,8 @@ El resultado es una pista aparte, que se analiza y se traduce como cualquier otr
 | IA | SDK oficial `@anthropic-ai/sdk` desde el motor | La clave nunca llega a los scripts que corren en páginas |
 | Transcripción | Whisper large-v3-turbo con Transformers.js y WebGPU, con el codificador en 16 bits y el decodificador cuantizado | El más preciso de los comparados, y sin instalar nada |
 | Detección del canto | YAMNet de Google, en ONNX, con ONNX Runtime en el procesador | Con canciones reales separa lo cantado de lo instrumental con un AUC de 0,9. Pesa 16 MB y, en el procesador, deja la GPU a Whisper |
+| Colocar la letra con la voz | narabas, un wav2vec2 de fonemas del japonés, con una alineación forzada propia sobre su CTC, en la zona que da lo que oyó Whisper | Ya estaba en la extensión, para la práctica del acento. Pone cada verso donde empiezan sus fonemas: más justo que casar solo el texto |
+| Aislar la voz | Demucs (htdemucs) en ONNX, con ONNX Runtime y WebGPU; la STFT, la ISTFT y el cambio de frecuencia, en JavaScript | Con la voz sola, narabas se equivoca bastante menos. Pesa 181 MB, y una canción de cuatro minutos tarda unos 20 s |
 | Audio de videos de internet | yt-dlp en un programa local en PowerShell, por Native Messaging, y FFmpeg si está instalado | Es la única forma de procesarlo sin esperar a reproducirlo. Baja a un archivo temporal en lugar de transmitir, de modo que se lee al ritmo de la GPU y nada se atasca |
 | Archivos propios | ffmpeg.wasm | Subtítulos incrustados y pistas de audio de MKV, sin programas externos |
 | Tarjetas | AnkiConnect y un repaso interno con FSRS | Integración con Anki, o repaso dentro de la aplicación |

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:lang="es" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo desc">
 <title id="titulo">Cómo se coloca la letra de una canción</title>
-<desc id="desc">El audio de la canción va a Whisper Turbo, que oye qué se canta y cuándo, y a YAMNet, que marca dónde se canta. Claude empareja cada verso de la letra pegada con las líneas de Whisper. letra.ts reúne la letra, ese emparejamiento, los tiempos de Whisper y el canto de YAMNet, y genera la pista de la letra, que se analiza y se traduce.</desc>
+<desc id="desc">El audio de la canción va a Whisper Turbo, que oye qué se canta y cuándo, y a Demucs, que separa la voz. La letra pegada se casa letra a letra con lo que oyó Whisper, y eso da la zona de cada verso. narabas busca en esa zona, sobre la voz sola, dónde empiezan sus fonemas. Si la letra apenas casa, Claude dice qué verso va sobre qué líneas. letra.ts reúne los tiempos y genera la pista de la letra, que se analiza y se traduce.</desc>
 <style>
 text { font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; }
 .fondo { fill: #ffffff; stroke: #d0d7de; stroke-width: 1; }
@@ -35,38 +35,50 @@ g rect { stroke-width: 1; }
 <defs><marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="punta" d="M2 1L8 5L2 9"/></marker></defs>
 <rect class="fondo" x="0.5" y="0.5" width="679" height="599" rx="12"/>
 <g class="gris" data-caja="">
-<rect x="50" y="40" width="180" height="56" rx="8"/>
+<rect x="40" y="40" width="200" height="56" rx="8"/>
 <text class="t" x="140" y="59" text-anchor="middle" dominant-baseline="central">Letra pegada</text>
 <text class="s" x="140" y="79" text-anchor="middle" dominant-baseline="central">Versos, sin tiempos</text>
 </g>
 <g class="gris" data-caja="">
-<rect x="340" y="40" width="200" height="56" rx="8"/>
-<text class="t" x="440" y="59" text-anchor="middle" dominant-baseline="central">Audio de la canción</text>
-<text class="s" x="440" y="79" text-anchor="middle" dominant-baseline="central">Entero, a 16 kHz</text>
+<rect x="440" y="40" width="200" height="56" rx="8"/>
+<text class="t" x="540" y="59" text-anchor="middle" dominant-baseline="central">Audio de la canción</text>
+<text class="s" x="540" y="79" text-anchor="middle" dominant-baseline="central">Entero, a 16 kHz</text>
 </g>
-<path class="flecha" d="M440 96 V122 H340 V148" marker-end="url(#punta)"/>
-<path class="flecha" d="M440 96 V122 H540 V148" marker-end="url(#punta)"/>
-<path class="flecha" d="M180 96 V258" marker-end="url(#punta)"/>
-<path class="flecha" d="M290 206 V258" marker-end="url(#punta)"/>
-<path class="flecha" d="M100 96 V398 H218" marker-end="url(#punta)"/>
-<path class="flecha" d="M270 316 V368" marker-end="url(#punta)"/>
-<path class="flecha" d="M400 206 V368" marker-end="url(#punta)"/>
-<path class="flecha" d="M540 206 V398 H462" marker-end="url(#punta)"/>
+<path class="flecha" d="M540 96 V122 H340 V148" marker-end="url(#punta)"/>
+<path class="flecha" d="M540 96 V148" marker-end="url(#punta)"/>
+<path class="flecha" d="M140 96 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M340 206 V232 H240 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M540 206 V258" marker-end="url(#punta)"/>
+<path class="flecha" d="M280 288 H398" marker-end="url(#punta)"/>
+<path class="flecha" d="M520 316 V342 H400 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M200 316 V342 H280 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M100 316 V368" marker-end="url(#punta)"/>
+<path class="flecha" d="M190 398 H218" marker-end="url(#punta)"/>
 <path class="flecha" d="M340 426 V478" marker-end="url(#punta)"/>
 <g class="verde" data-caja="">
-<rect x="250" y="150" width="180" height="56" rx="8"/>
+<rect x="240" y="150" width="200" height="56" rx="8"/>
 <text class="t" x="340" y="169" text-anchor="middle" dominant-baseline="central">Whisper Turbo</text>
 <text class="s" x="340" y="189" text-anchor="middle" dominant-baseline="central">Qué se oye y cuándo</text>
 </g>
 <g class="verde" data-caja="">
-<rect x="450" y="150" width="180" height="56" rx="8"/>
-<text class="t" x="540" y="169" text-anchor="middle" dominant-baseline="central">YAMNet</text>
-<text class="s" x="540" y="189" text-anchor="middle" dominant-baseline="central">Dónde se canta</text>
+<rect x="460" y="150" width="160" height="56" rx="8"/>
+<text class="t" x="540" y="169" text-anchor="middle" dominant-baseline="central">Demucs</text>
+<text class="s" x="540" y="189" text-anchor="middle" dominant-baseline="central">Solo la voz</text>
+</g>
+<g class="verde" data-caja="">
+<rect x="40" y="260" width="240" height="56" rx="8"/>
+<text class="t" x="160" y="279" text-anchor="middle" dominant-baseline="central">Letra a letra</text>
+<text class="s" x="160" y="299" text-anchor="middle" dominant-baseline="central">La zona de cada verso</text>
+</g>
+<g class="verde" data-caja="">
+<rect x="400" y="260" width="240" height="56" rx="8"/>
+<text class="t" x="520" y="279" text-anchor="middle" dominant-baseline="central">narabas</text>
+<text class="s" x="520" y="299" text-anchor="middle" dominant-baseline="central">Dónde empieza cada fonema</text>
 </g>
 <g class="coral" data-caja="">
-<rect x="130" y="260" width="200" height="56" rx="8"/>
-<text class="t" x="230" y="279" text-anchor="middle" dominant-baseline="central">Claude empareja</text>
-<text class="s" x="230" y="299" text-anchor="middle" dominant-baseline="central">Cada verso con su línea</text>
+<rect x="20" y="370" width="170" height="56" rx="8"/>
+<text class="t" x="105" y="389" text-anchor="middle" dominant-baseline="central">Claude</text>
+<text class="s" x="105" y="409" text-anchor="middle" dominant-baseline="central">Si apenas casa</text>
 </g>
 <g class="verde" data-caja="">
 <rect x="220" y="370" width="240" height="56" rx="8"/>

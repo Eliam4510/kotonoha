@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { aplicarAjuste, ID_LETRA, mensajeAjuste, versosDeLetra, vozDeCanto } from './letra';
+import type { ProbabilidadesCtc } from './alineacionForzada';
+import { alinearConVoz, alinearPorLetras, aplicarAjuste, ID_LETRA, mensajeAjuste, versosDeLetra, vozDeCanto } from './letra';
 import type { Linea } from './subtitulos';
 
 // Versos inventados para estas pruebas.
@@ -27,8 +28,21 @@ describe('versosDeLetra', () => {
     expect(versosDeLetra('palabra\u200b unida')).toEqual(['palabra unida']);
   });
 
-  it('una marca como [Coro] se queda: es Claude quien decide que no se canta', () => {
-    expect(versosDeLetra('[Coro]\nverso')).toEqual(['[Coro]', 'verso']);
+  it('sin lo que no se canta: marcas de sección y créditos', () => {
+    expect(versosDeLetra('[Coro]\nverso\n(Chorus)\n作詞：ハチ 作曲：ハチ\nLyrics by Someone\notro verso')).toEqual(['verso', 'otro verso']);
+  });
+
+  it('una letra en LRC pegada se lee en el orden de sus horas, sin ellas', () => {
+    const lrc = '[ti:Una canción]\n[ar:Alguien]\n[00:12.34]primer verso\n[00:15.00][00:30.50]estribillo\n[00:18.20]\n[00:20.00]<00:20.00>pa<00:20.40>la<00:20.80>bras';
+    expect(versosDeLetra(lrc)).toEqual(['primer verso', 'estribillo', 'palabras', 'estribillo']);
+  });
+
+  it('una marca con centésimas en un comentario se quita entera, sin tomar el resto por LRC', () => {
+    expect(versosDeLetra('[01:02.50] un verso\notro verso\nel último')).toEqual(['un verso', 'otro verso', 'el último']);
+  });
+
+  it('un verso con «×2» va dos veces, y sin la marca que lleve delante', () => {
+    expect(versosDeLetra('[Coro] la luna ×2\nfin')).toEqual(['la luna', 'la luna', 'fin']);
   });
 });
 
@@ -259,5 +273,69 @@ describe('dónde se canta', () => {
     const voz = canto([0.1, 0.1, 0, 0, 0.1, 0.1, 0.1, 0.1]);
     const r = aplicarAjuste(['a', 'abcdefghij'], [lin(1, 0, 4000)], [{ v: 0, de: 0, a: 0 }, { v: 1, de: -1, a: -1 }], ID_LETRA, voz);
     expect(tiempos(r.lineas)[1]).toEqual([8000, 11000]);
+  });
+});
+
+describe('alinearPorLetras', () => {
+  const versos = ['夜の川を歩いて', '月が私を見ている', '朝はまだ来ないの'];
+  const oido: Linea[] = [
+    { id: 0, inicio: 2000, fin: 5000, texto: '夜の皮を歩いて' },
+    { id: 1, inicio: 6000, fin: 9000, texto: '月が僕を見ている' },
+    { id: 2, inicio: 10000, fin: 12000, texto: 'ご視聴ありがとうございました' },
+    { id: 3, inicio: 14000, fin: 17000, texto: '朝はまだ来ない' },
+  ];
+
+  it('una línea por verso, con el texto de la letra y su hora', () => {
+    const r = alinearPorLetras(versos, oido);
+    expect(r.lineas.map((l) => l.texto)).toEqual(versos);
+    expect(r.lineas.map((l) => l.id)).toEqual([ID_LETRA, ID_LETRA + 1, ID_LETRA + 2]);
+    expect(r.conTiempo).toBe(3);
+    expect(r.lineas[0].inicio).toBe(2000);
+    expect(Math.abs(r.lineas[2].inicio - 14000)).toBeLessThan(150);
+  });
+
+  it('lo que el reconocedor se inventó en un pasaje instrumental no se lleva ningún verso', () => {
+    const r = alinearPorLetras(versos, oido);
+    expect(r.lineas.every((l) => l.inicio < 10000 || l.inicio >= 12000)).toBe(true);
+  });
+});
+
+describe('alinearConVoz', () => {
+  // Un modelo de juguete: el blanco es la clase 0; cada verso tiene un fonema propio (1, 2, 3) que suena en un marco.
+  function modelo(marcos: number, suenan: Record<number, number>): ProbabilidadesCtc {
+    const clases = 4;
+    const logp = new Float32Array(marcos * clases);
+    for (let t = 0; t < marcos; t++) {
+      const c = suenan[t] ?? 0;
+      for (let k = 0; k < clases; k++) logp[t * clases + k] = Math.log(k === c ? 0.9 : 0.1 / 3);
+    }
+    return { logp, marcos, clases, blanco: 0 };
+  }
+  const versos = ['夜の川を歩いて', '月が私を見ている', '朝はまだ来ないの'];
+  const oido: Linea[] = [
+    { id: 0, inicio: 2000, fin: 5000, texto: '夜の皮を歩いて' },
+    { id: 1, inicio: 6000, fin: 9000, texto: '月が僕を見ている' },
+    { id: 2, inicio: 14000, fin: 17000, texto: '朝はまだ来ない' },
+  ];
+
+  it('cada verso empieza donde suena su primer fonema, con la precisión del modelo', () => {
+    // A 20 ms por marco: 2,4 s, 6,62 s y 14,3 s, cerca de donde los pone lo que oyó Whisper.
+    const p = modelo(1000, { 120: 1, 331: 2, 715: 3 });
+    const r = alinearConVoz(versos, oido, [[1], [2], [3]], p, 20);
+    expect(r.conVoz).toBe(3);
+    expect(r.lineas.map((l) => l.inicio)).toEqual([2400, 6620, 14300]);
+  });
+
+  it('un verso sin fonemas se queda donde lo pone lo que oyó Whisper', () => {
+    const p = modelo(1000, { 120: 1, 715: 3 });
+    const r = alinearConVoz(versos, oido, [[1], [], [3]], p, 20);
+    expect(r.conVoz).toBe(2);
+    expect(Math.abs(r.lineas[1].inicio - 6000)).toBeLessThan(150);
+  });
+
+  it('si los fonemas no caben, todo se queda como lo pone lo que oyó Whisper', () => {
+    const r = alinearConVoz(versos, oido, [[1, 2, 3, 1, 2, 3], [2], [3]], modelo(3, {}), 20);
+    expect(r.conVoz).toBe(0);
+    expect(r.lineas[0].inicio).toBe(2000);
   });
 });

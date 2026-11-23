@@ -135,6 +135,8 @@ Bilibili da sus subtítulos solo con la sesión iniciada: los del autor del vide
 
 La pestaña **Sincronizar** ajusta el desfase de cada pista. También se puede pulsar **Esta línea suena ahora** en el navegador: con una marca se corrige el desfase, y con dos, también la velocidad. El desfase se ajusta con `Alt+I` y `Alt+O`.
 
+**Marcar los tiempos a mano.** Para un cantante al que ningún modelo entiende, o unos subtítulos que se desfasan a ratos: en la pestaña **Sincronizar**, **Marcar los tiempos**. Se empieza por la línea que suena en ese momento. Con el video en marcha, se mantiene pulsada la barra espaciadora (o **Mantén pulsado mientras suena**, con el ratón) mientras suena cada línea, y se suelta al acabar; la siguiente pulsación es la línea siguiente. Retroceso deshace la última y vuelve un poco atrás, y Escape termina. Las líneas que faltan se mueven con la última marcada, y lo marcado se guarda para ese video.
+
 **Netflix y sus anuncios.** Tras un anuncio del medio, al pasar solo al siguiente episodio o tras un salto, el reloj del video de Netflix puede irse del episodio, y los subtítulos saldrían adelantados o atrasados. Kotonoha compara el reloj del video con el del reproductor de Netflix mientras se ve el video y lleva los subtítulos por el de Netflix, sin recargar la página; al ajustarlos, avisa con «Subtítulos sincronizados con Netflix». Si tras un anuncio el reloj de Netflix no lo descuenta, o no da su momento, se ajusta por lo que corrió el video mientras duraba («Subtítulos ajustados por los anuncios»), y los dos relojes se siguen comparando: en cuanto el de Netflix da su medida, manda ella. En la pestaña **Sincronizar**, **Reloj de Netflix** dice cómo van los dos y lo que marca cada uno, **Volver a sincronizar** (o `Alt+Shift+S`) mide de nuevo, y **Quitar el ajuste** quita el de los anuncios si no cuadra. Este ajuste no se guarda: el desfase de cada pista sigue aparte.
 
 ## Transcripción con Whisper
@@ -176,15 +178,17 @@ Durante la transcripción se puede pausar para liberar la tarjeta al instante y 
 
 ### Letras de canciones
 
-Whisper acierta los tiempos, pero en una canción falla muchas palabras. Si alguien ha publicado la letra, por ejemplo en un comentario del video, se puede pegar en **Letra de la canción**, en el panel **Subtítulos con IA**, y Claude la coloca sobre esos tiempos.
+Whisper acierta casi todos los tiempos, pero en una canción falla muchas palabras. Si alguien ha publicado la letra, por ejemplo en un comentario del video, se puede pegar en **Letra de la canción**, en el panel **Subtítulos con IA**, y Kotonoha la coloca donde se canta. Las palabras salen tal cual de la letra.
 
-- Claude solo indica qué verso suena sobre qué líneas de la transcripción. Las palabras salen tal cual de la letra, y los tiempos, de Whisper.
-- Si la letra se pega antes de transcribir o durante la transcripción, se ajusta sola al terminar, y no se gasta en corregir ni en revisar lo que Whisper oyó. Si el video ya tiene una pista, también sirve como referencia de tiempos, con **Ajustar la letra a estos tiempos**.
-- Un estribillo escrito una sola vez se coloca en cada sitio donde suene. Lo que no se canta, como marcas de sección, rōmaji o traducciones, se ignora.
-- Un verso que Whisper no recogió recibe un tiempo estimado, y el aviso final dice cuántos hay. En ese caso, **Esta línea suena ahora**, en el navegador, permite afinar la sincronía.
-- Al transcribir una canción entera, con el ayudante o desde un archivo, Kotonoha oye además dónde se canta, con YAMNet, y no pone esos versos en un pasaje instrumental: si justo antes del verso siguiente solo suena música, van antes de ella. YAMNet pesa 16 MB: se descarga la primera vez y queda en **Modelos guardados**, en **Ajustes, Transcripción de voz**. En la transcripción en tiempo real no se usa.
-- El resultado es una pista más, «Japonés (letra)», guardada para ese video. La transcripción original sigue disponible. Se hace una sola petición a Claude por canción, y repetir el ajuste con la misma letra no vuelve a gastar.
-- En un video de internet sin el ayudante local, Whisper tiene que oír la canción entera: al terminar el video, la transcripción se detiene sola y la letra se ajusta.
+- **Con la voz.** En una canción transcrita entera, narabas, el modelo de fonemas de la práctica del acento, oye en qué momento suena cada verso: lo busca en la zona que da lo que oyó Whisper y lo pone donde empiezan sus fonemas.
+- **Con la voz aislada.** Antes, Demucs separa la voz de la música en la tarjeta gráfica, y narabas oye solo lo que se canta. Medido con 51 canciones japonesas y su letra sincronizada: la mitad de los versos empieza a menos de 0,16 s de donde se canta, y nueve de cada diez, a menos de 0,9 s; sobre la mezcla, sin aislar la voz, 0,19 s y 1,59 s. Una canción de cuatro minutos tarda unos 20 s más.
+- narabas pesa 1,26 GB y Demucs, 181 MB, y no se descargan sin pedirlo: sin ellos, el aviso final ofrece **Afinar con la voz (1,4 GB)**, y con narabas pero sin Demucs, **Afinar aislando la voz (181 MB)**. Los dos quedan en **Modelos guardados**, en **Ajustes, Transcripción de voz**. Demucs necesita WebGPU; sin una tarjeta gráfica que calcule bien, la letra se coloca sobre la mezcla.
+- **Sin la voz**, la letra se casa letra a letra con lo que oyó Whisper, sin preguntar a nadie: así se coloca sobre una pista del propio sitio, o si narabas no está. Solo si apenas casa, como una letra en rōmaji, Claude dice qué verso suena sobre qué líneas.
+- Si la letra se pega antes de transcribir o durante la transcripción, se coloca sola al terminar, y no se gasta en corregir ni en revisar lo que Whisper oyó. Si el video ya tiene una pista, también sirve de referencia de tiempos, con **Ajustar la letra a estos tiempos**.
+- Lo que no se canta, como las marcas de sección («[サビ]», «(Chorus)») y los créditos («作詞：…»), se quita, y un verso con «×2» se coloca dos veces. Una letra en LRC se puede pegar tal cual: se lee sin sus horas, en su orden.
+- Al transcribir una canción entera, con el ayudante o desde un archivo, Kotonoha oye además dónde se canta, con YAMNet, y no pone versos en un pasaje instrumental. YAMNet pesa 16 MB y también queda en **Modelos guardados**.
+- El resultado es una pista más, «Japonés (letra)», guardada para ese video. La transcripción original sigue disponible.
+- En un video de internet sin el ayudante local, Whisper tiene que oír la canción entera: al terminar el video, la transcripción se detiene sola y la letra se coloca.
 
 Cómo funciona por dentro, con diagramas: [Letras de canciones](arquitectura.md#letras-de-canciones), en la arquitectura.
 

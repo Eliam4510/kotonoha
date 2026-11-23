@@ -2,7 +2,7 @@
 
 import { leerTrazos } from '../../nucleo/trazos';
 import type { MotorLengua } from '../tipos';
-import { ANALIZADOR } from './analizador';
+import { ANALIZADOR, fonemasDeTexto } from './analizador';
 import { audiosJapones } from './audio';
 import { diccionariosPorReparar, FUENTES } from './diccionarios';
 import { detectarGramatica, puntosGramatica } from './gramatica';
@@ -14,6 +14,7 @@ import { urlTrazos, urlTrazosAlternativa } from './trazos';
 
 export const MOTOR_JAPONES: MotorLengua = {
   analizador: ANALIZADOR,
+  fonemasDeVerso: fonemasDeTexto,
   detectarGramatica,
   // En una tarjeta, べき también se escribe べきだ, y las alternativas van con punto medio.
   gramaticaAnki: { puntos: puntosGramatica, formas: { colas: ['', 'だ', 'です', 'な', 'に', 'の'], separadores: '・' } },

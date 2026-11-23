@@ -143,3 +143,28 @@ export async function bytesModeloCanto(): Promise<number> {
 export async function borrarModeloCanto(): Promise<void> {
   await caches.delete(MODELO_CANTO.cache);
 }
+
+// ---------- El modelo que aísla la voz ----------
+
+/**
+ * Demucs (htdemucs, de Meta, MIT), que separa la voz de la música para colocar la letra de una canción con más precisión.
+ * Es la conversión a ONNX de timcsy/demucs-web-onnx (Hugging Face, commit 92e33df), sin tocar sus pesos. Va en la versión
+ * 0.50.0 de Kotonoha para no depender de un repositorio ajeno, y se comprueba con su SHA-256.
+ */
+export const MODELO_VOZ = {
+  url: 'https://github.com/Eliam4510/kotonoha/releases/download/v0.50.0/htdemucs.onnx',
+  sha256: 'e5e425c17683f163a472462eb5f5a4ffcd11c31858d57fbd0833b012d8b88077',
+  bytes: 180534758,
+  cache: 'kotonoha-modelo-voz',
+};
+
+/** Lo que ocupa guardado: 0 si no está. Sin abrir la caché si no existe, que la crearía vacía. */
+export async function bytesModeloVoz(): Promise<number> {
+  if (!(await caches.has(MODELO_VOZ.cache))) return 0;
+  const r = await (await caches.open(MODELO_VOZ.cache)).match(MODELO_VOZ.url);
+  return r ? Number(r.headers.get('content-length') ?? 0) || MODELO_VOZ.bytes : 0;
+}
+
+export async function borrarModeloVoz(): Promise<void> {
+  await caches.delete(MODELO_VOZ.cache);
+}

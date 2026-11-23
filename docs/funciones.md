@@ -2,7 +2,7 @@
 
 # Funciones
 
-Estado de cada función en la versión 0.49.2, con la forma en que se ha verificado.
+Estado de cada función en la versión 0.50.0, con la forma en que se ha verificado.
 
 | Verificación | Significado |
 |---|---|
@@ -74,6 +74,7 @@ Estado de cada función en la versión 0.49.2, con la forma en que se ha verific
 | Exportación a SRT, con la sincronía aplicada | Página imitada |
 | Pistas de japonés recordadas entre regiones de Netflix | Página imitada. Falta confirmar con sesiones reales que el identificador del título coincide |
 | Sincronización por desfase o con una o dos marcas | Automática |
+| Marcar los tiempos a mano: la barra espaciadora (o un botón) mantenida mientras suena cada línea, y Retroceso para deshacer; las que faltan se mueven con la última marcada, y todo queda guardado para el video | Automática |
 | Reloj de Netflix: tras un anuncio del medio, al pasar solo al siguiente episodio o tras un salto, los subtítulos siguen el momento del episodio que da el reproductor de Netflix, sin recargar la página; si su reloj no descuenta el anuncio, se ajusta por lo que corrió el video durante él, hasta que su reloj dé su medida; ese ajuste se puede quitar. **Volver a sincronizar**, **Quitar el ajuste** y `Alt+Shift+S` | Automática, con un Netflix simulado |
 
 ## Transcripción
@@ -91,7 +92,7 @@ Estado de cada función en la versión 0.49.2, con la forma en que se ha verific
 | **Actualizar ahora**: el ayudante pone la versión nueva en la carpeta de la copia, con su SHA-256 y la misma clave, y la extensión se recarga | Automática, de punta a punta con Edge |
 | Copia completa en una carpeta: libros, texto del OCR y dictados, sin claves de API | Automática, de ida y vuelta |
 | Corrección del resultado con Claude | Simulador |
-| Letra de una canción colocada sobre los tiempos de la transcripción: el texto sale de la letra y los tiempos, de Whisper | Simulador, con Whisper real, y sesión real con una canción |
+| Letra de una canción colocada donde se canta: con la voz (narabas, en la zona que da lo que oyó Whisper), con la voz aislada por Demucs en la GPU, o letra a letra con lo que oyó Whisper; Claude, solo si apenas casa. Las palabras salen de la letra, sin marcas de sección ni créditos | Simulador, con Whisper real, narabas y Demucs; medido con 51 canciones japonesas y su letra sincronizada: con la voz aislada, la mitad de los versos a menos de 0,16 s y nueve de cada diez a menos de 0,9 s (sobre la mezcla, 0,19 s y 1,59 s) |
 | Al colocar una letra, los versos que Whisper no oyó no caen en un pasaje instrumental: YAMNet oye dónde se canta al transcribir la canción entera. Medido con 21 canciones japonesas de canales oficiales y su letra sincronizada: de 164 versos sin oír, 21 quedan más de un segundo más cerca de su sitio y 3 más lejos | Medida con canciones reales y el código real; YAMNet dentro de Kotonoha |
 | Haas-ja para la voz hablada en japonés, Parakeet para la del inglés y Whisper Turbo para las canciones, elegidos según el video | Automática, con los tres modelos reales en la GPU, y sesión real en YouTube |
 | Lista de modelos guardados, con lo que ocupa cada uno y borrado por modelo. Leerlos del disco ya no se anuncia como una descarga | Automática, y con Whisper real |
@@ -337,4 +338,4 @@ Estado de cada función en la versión 0.49.2, con la forma en que se ha verific
 | Visor | El OCR puede confundir letras parecidas (エ y 工, ー y 一), saltarse alguna y perder los subíndices de las fórmulas; la imagen original siempre queda a la vista. El modo Libro está medido con texto horizontal. Un libro con DRM no se abre. Los archivos de los libros no van en la copia de seguridad de un solo archivo, sino en la copia completa. Un EPUB de texto se recorre por capítulos, con desplazamiento, y no por páginas; en el modo Manga se toca el globo entero, no cada palabra: la palabra se elige en la ventana, y dentro de un globo no se selecciona arrastrando. Las ayudas sobre la página no van en los globos de manga, donde no se sabe dónde va cada letra, y las páginas leídas con el OCR antes de la 0.37.0 reparten sus letras a lo ancho del renglón. |
 | Sincronización | Sin servidor: el traspaso entre equipos se hace con la copia completa |
 | Música de fondo | Whisper puede perder conversaciones en voz baja bajo música fuerte |
-| Letras de canciones | Los tiempos son por línea de Whisper, no por palabra. Con música muy fuerte, Whisper puede oír poco, y entonces más versos llevan un tiempo estimado |
+| Letras de canciones | Uno de cada diez versos queda a más de 0,9 s de donde se canta, y unos pocos, a varios segundos, en pasajes que Whisper no oye. Sin Demucs, sobre la mezcla, uno de cada diez queda a más de 1,59 s. Demucs necesita WebGPU, y narabas y Demucs se descargan aparte (1,4 GB) |

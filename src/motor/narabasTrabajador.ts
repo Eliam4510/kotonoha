@@ -6,7 +6,11 @@ import * as ort from 'onnxruntime-web/webgpu';
 import { MODELO_MORAS } from '../compartido/modelosGuardados';
 import { fonemasOidos } from '../nucleo/alineacion';
 
-export type PedidoNarabas = { tipo: 'oir'; id: number; muestras: Float32Array; cpu: boolean } | { tipo: 'preparar'; cpu: boolean };
+export type PedidoNarabas =
+  | { tipo: 'oir'; id: number; muestras: Float32Array; cpu: boolean }
+  /** Lo que oye en un audio largo (una canción), para colocar su letra: log-probabilidades de cada clase cada 20 ms. */
+  | { tipo: 'probabilidades'; id: number; muestras: Float32Array; cpu: boolean }
+  | { tipo: 'preparar'; cpu: boolean };
 
 export type RespuestaNarabas =
   | { tipo: 'descarga'; cargado: number; total: number }
@@ -14,7 +18,46 @@ export type RespuestaNarabas =
   | { tipo: 'preparando' }
   | { tipo: 'procesando' }
   | { tipo: 'fonemas'; id: number; fonemas: string[]; ms: number; dispositivo: Dispositivo }
+  | { tipo: 'probabilidades'; id: number; logp: Float32Array; marcos: number; clases: number; ms: number; dispositivo: Dispositivo }
   | { tipo: 'error'; id: number; mensaje: string; codigo?: 'modelo-distinto'; dispositivo?: Dispositivo };
+
+/** A 16 kHz, narabas da un marco cada 320 muestras: cada 20 ms. */
+const MUESTRAS_POR_MARCO = 320;
+/** Un audio largo se oye por ventanas de 30 s que se solapan 2 s por cada lado: de cada una vale solo el centro. */
+const VENTANA = 16000 * 30;
+const SOLAPE = 16000 * 2;
+
+/** Lo que oye narabas en un audio largo: log-probabilidades de cada clase, marco a marco. */
+async function oirLargo(s: ort.InferenceSession, x: Float32Array): Promise<{ logp: Float32Array; marcos: number; clases: number }> {
+  const marcos = Math.floor(x.length / MUESTRAS_POR_MARCO);
+  let clases = 0;
+  let logp = new Float32Array(0);
+  const paso = VENTANA - 2 * SOLAPE;
+  for (let ini = 0; ini < x.length; ini += paso) {
+    const desde = Math.max(0, ini - SOLAPE);
+    const hasta = Math.min(x.length, ini + paso + SOLAPE);
+    const salida = (await s.run({ input: new ort.Tensor('float32', x.subarray(desde, hasta), [1, hasta - desde]) })).output;
+    const [, n, k] = salida.dims as number[];
+    if (!clases) {
+      clases = k;
+      logp = new Float32Array(marcos * k);
+    }
+    const datos = salida.data as Float32Array;
+    const primero = Math.round((ini - desde) / MUESTRAS_POR_MARCO);
+    const ultimo = Math.min(n, primero + Math.round(paso / MUESTRAS_POR_MARCO));
+    const base = Math.round(desde / MUESTRAS_POR_MARCO);
+    for (let t = primero; t < ultimo && base + t < marcos; t++) {
+      let max = Number.NEGATIVE_INFINITY;
+      for (let c = 0; c < k; c++) max = Math.max(max, datos[t * k + c]);
+      let suma = 0;
+      for (let c = 0; c < k; c++) suma += Math.exp(datos[t * k + c] - max);
+      const normal = max + Math.log(suma);
+      for (let c = 0; c < k; c++) logp[(base + t) * k + c] = datos[t * k + c] - normal;
+    }
+    if (hasta >= x.length) break;
+  }
+  return { logp, marcos, clases };
+}
 
 export type Dispositivo = 'webgpu' | 'wasm';
 
@@ -134,6 +177,11 @@ self.onmessage = (e: MessageEvent<PedidoNarabas>) => {
       const cargada = await cargar(p.cpu);
       dispositivo = cargada.dispositivo;
       avisar({ tipo: 'procesando' });
+      if (p.tipo === 'probabilidades') {
+        const r = await oirLargo(cargada.s, p.muestras);
+        self.postMessage({ tipo: 'probabilidades', id: p.id, ...r, ms: Math.round(performance.now() - inicio), dispositivo } satisfies RespuestaNarabas, { transfer: [r.logp.buffer] });
+        return;
+      }
       const salida = (await cargada.s.run({ input: new ort.Tensor('float32', p.muestras, [1, p.muestras.length]) })).output;
       const [, marcos, clases] = salida.dims as number[];
       avisar({ tipo: 'fonemas', id: p.id, fonemas: fonemasOidos(salida.data as Float32Array, marcos, clases), ms: Math.round(performance.now() - inicio), dispositivo });

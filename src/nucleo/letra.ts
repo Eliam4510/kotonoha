@@ -1,7 +1,10 @@
 // Coloca la letra verdadera de una canción sobre los tiempos de una transcripción que la oyó mal. Claude solo dice qué
 // verso suena sobre qué líneas; el resto sale de aquí. Así no puede cambiar una palabra de la letra ni inventarse un tiempo.
 
-import type { Linea } from './subtitulos';
+import { alinearCtc, bandaPorVersos, type ProbabilidadesCtc, zonasDeVersos } from './alineacionForzada';
+import { letrasComparables, versosOidos } from './casarLetra';
+import { noSeCanta, versosDelRenglon } from './noSeCanta';
+import { analizarLrc, type Linea } from './subtitulos';
 
 /**
  * El verso `v` suena sobre las líneas `de` a `a` de la transcripción. Con -1, se canta pero la transcripción no lo recoge;
@@ -31,11 +34,25 @@ const ESTIMADA_MAXIMA_MS = 8000;
 const MS_POR_CARACTER = 300;
 const HUECO_POR_LINEA_MS = 400;
 
-/** Los versos de una letra pegada, tal cual, sin líneas vacías, adornos ni la marca de tiempo que traen algunos comentarios. */
+/** Una letra pegada en LRC: la mayoría de sus renglones con letra empiezan por su hora, «[00:12.34]». */
+function esLetraLrc(texto: string): boolean {
+  const renglones = texto.split(/\r?\n/).filter((l) => /[\p{L}\p{N}]/u.test(l));
+  const conHora = renglones.filter((l) => /^\s*\[\d{1,3}:\d{2}(?:[.:]\d{1,3})?\]/.test(l)).length;
+  return conHora >= 3 && conHora >= renglones.length * 0.6;
+}
+
+/**
+ * Los versos de una letra pegada, tal cual, sin líneas vacías, adornos ni la marca de tiempo que traen algunos
+ * comentarios. Tampoco lo que no se canta (las marcas de sección y los créditos), y un verso con «×2» va dos veces.
+ * Una letra en LRC se lee en el orden de sus horas, sin ellas: un estribillo con dos marcas va en sus dos sitios.
+ */
 export function versosDeLetra(texto: string): string[] {
-  return texto
+  const fuente = esLetraLrc(texto) ? analizarLrc(texto).map((l) => l.texto).join('\n') : texto;
+  return fuente
     .split(/\r?\n/)
-    .map((l) => l.replace(/[\u200b-\u200d\u2060\ufeff]/g, '').replace(/^\s*\[?\d{1,2}:\d{2}(?::\d{2})?\]?\s*/, '').trim())
+    .map((l) => l.replace(/[\u200b-\u200d\u2060\ufeff]/g, '').replace(/^\s*\[?\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]?\s*/, '').trim())
+    .filter((l) => /[\p{L}\p{N}]/u.test(l) && !noSeCanta(l))
+    .flatMap(versosDelRenglon)
     .filter((l) => /[\p{L}\p{N}]/u.test(l));
 }
 
@@ -315,7 +332,12 @@ export function aplicarAjuste(versos: string[], lineas: Linea[], ajuste: Entrada
     i += versos.length;
     conTiempo += versos.length;
   }
-  // Una línea no sigue en pantalla cuando empieza la siguiente, ni pasa tan deprisa que no se pueda leer.
+  rematar(salida);
+  return { lineas: salida, conTiempo, estimadas };
+}
+
+/** Una línea no sigue en pantalla cuando empieza la siguiente, ni pasa tan deprisa que no se pueda leer. */
+function rematar(salida: Linea[]) {
   for (let k = 0; k < salida.length; k++) {
     const siguiente = salida[k + 1]?.inicio ?? Number.POSITIVE_INFINITY;
     const l = salida[k];
@@ -323,5 +345,81 @@ export function aplicarAjuste(versos: string[], lineas: Linea[], ajuste: Entrada
     l.inicio = Math.round(l.inicio);
     l.fin = Math.round(l.fin);
   }
+}
+
+/**
+ * Coloca la letra casándola letra a letra con la transcripción (ver casarLetra.ts), sin preguntar a nadie. Cada verso
+ * oído empieza donde se oye su primera letra, aunque el reconocedor lo juntara con otros en una línea: repartir esa línea
+ * entre sus versos según lo que se canta en cada uno los desfasaba cuando tras un silencio venían dos versos muy rápidos.
+ * Los que no se oyeron van entre sus vecinos como siempre, y con `voz`, donde se canta.
+ */
+export function alinearPorLetras(versos: string[], lineas: Linea[], idInicial = ID_LETRA, voz?: Voz): ResultadoAjuste {
+  const oidos = versosOidos(versos, lineas);
+  const salida: Linea[] = [];
+  const idDe = (k: number) => idInicial + k;
+  let conTiempo = 0;
+  let estimadas = 0;
+  let v = 0;
+  while (v < versos.length) {
+    const oido = oidos[v];
+    if (!oido) {
+      const sinTiempo: string[] = [];
+      while (v < versos.length && !oidos[v]) sinTiempo.push(versos[v++]);
+      colocarEstimadas(sinTiempo, salida, v < versos.length ? oidos[v]!.inicio : null, 0, idDe, voz);
+      estimadas += sinTiempo.length;
+      continue;
+    }
+    // En orden: un verso no empieza antes que el anterior, y el anterior acaba donde empieza este.
+    const previa = salida[salida.length - 1];
+    const inicio = previa ? Math.max(oido.inicio, previa.inicio + DURACION_MINIMA_MS / 2) : oido.inicio;
+    if (previa && previa.fin > inicio) previa.fin = inicio;
+    salida.push({ id: idDe(salida.length), inicio, fin: Math.max(oido.fin, inicio + DURACION_MINIMA_MS), texto: versos[v] });
+    conTiempo++;
+    v++;
+  }
+  rematar(salida);
   return { lineas: salida, conTiempo, estimadas };
+}
+
+/** La vocal del final de un verso se alarga más allá de donde la marca el modelo, que solo da su comienzo. */
+const COLA_VERSO_MS = 400;
+
+/**
+ * Coloca la letra con la voz. Lo que oyó Whisper dice dónde va cada verso a grandes rasgos (alinearPorLetras), y la
+ * alineación forzada de sus fonemas con lo que oye un modelo de fonemas (narabas, `p`), dónde empieza exactamente: cada
+ * verso se busca solo en su zona, así que una parte en otra lengua o un verso que no se canta no la desvían. `fonemas`
+ * son las clases del modelo de cada verso; uno sin fonemas (en otra escritura), o una alineación que no cabe, se queda
+ * donde lo pone lo que oyó Whisper. Medido con canciones japonesas y su letra sincronizada: ver la 0.50.0 en el CHANGELOG.
+ */
+export function alinearConVoz(versos: string[], lineas: Linea[], fonemas: number[][], p: ProbabilidadesCtc, msPorMarco: number, idInicial = ID_LETRA, voz?: Voz): ResultadoAjuste & { conVoz: number } {
+  const toscas = alinearPorLetras(versos, lineas, idInicial, voz);
+  // Un verso igual que su vecino (un estribillo repetido) no se sabe a qué copia de lo oído corresponde: se busca entre los
+  // versos anclados de antes y de después, y la alineación, que va en orden, pone cada copia en su repetición.
+  const normales = versos.map((v) => letrasComparables(v).join(''));
+  const oidos = versosOidos(versos, lineas).map((o, v) => o !== null && normales[v] !== normales[v - 1] && normales[v] !== normales[v + 1]);
+  const zonas = zonasDeVersos(toscas.lineas, oidos, p.marcos * msPorMarco, msPorMarco);
+  const colocados = alinearCtc(
+    p,
+    fonemas.flat(),
+    bandaPorVersos(
+      zonas,
+      fonemas.map((f) => f.length),
+      p.marcos
+    )
+  );
+  if (!colocados) return { ...toscas, conVoz: 0 };
+  const salida = toscas.lineas.map((l) => ({ ...l }));
+  let k = 0;
+  let conVoz = 0;
+  fonemas.forEach((f, v) => {
+    if (!f.length) return;
+    salida[v].inicio = colocados[k].primero * msPorMarco;
+    salida[v].fin = (colocados[k + f.length - 1].ultimo + 1) * msPorMarco + COLA_VERSO_MS;
+    k += f.length;
+    conVoz++;
+  });
+  // Un verso que se quedó con el tiempo de Whisper no empieza antes que el anterior, colocado con la voz.
+  for (let v = 1; v < salida.length; v++) if (salida[v].inicio <= salida[v - 1].inicio) salida[v].inicio = salida[v - 1].inicio + 1;
+  rematar(salida);
+  return { lineas: salida, conTiempo: toscas.conTiempo, estimadas: toscas.estimadas, conVoz };
 }

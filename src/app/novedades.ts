@@ -5,12 +5,12 @@
 import { tm } from '../compartido/i18n';
 
 export const NOVEDADES: { version: string; puntos: string[] } = {
-  version: '0.49.2',
+  version: '0.50.0',
   puntos: [
-    tm('Transcribir otra vez una canción ya no transcribe solo el final: una transcripción terminada se rehace entera, y una cortada sigue donde iba.'),
-    tm('Un archivo de audio se transcribe como canción, y una canción se abre con su letra en LRC, con cada verso en su momento.'),
-    tm('El progreso dice qué hace en cada fase, y con el video en pausa la transcripción va a toda marcha.'),
-    tm('Los subtítulos guardados se borran: los de un video, en su panel de subtítulos, y los de todos, en Ajustes.'),
+    tm('La letra de una canción se coloca con la voz: cada verso empieza donde suenan sus fonemas, y ya no donde Whisper cortó sus líneas.'),
+    tm('Con la voz aislada de la música, nueve de cada diez versos quedan a menos de un segundo de donde se cantan.'),
+    tm('Lo que no se canta, como las marcas de sección o los créditos, se quita de la letra, y un verso con «×2» se coloca dos veces.'),
+    tm('Para un cantante al que nadie entiende, en Sincronizar: mantén la barra espaciadora mientras suena cada línea, y queda guardado.'),
   ],
 };
 

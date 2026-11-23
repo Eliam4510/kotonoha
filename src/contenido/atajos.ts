@@ -12,12 +12,16 @@ import {
   alternarMarcador,
   alternarSeleccion,
   combinarSeleccionadas,
+  deshacerMarca,
   generarSecundarios,
   hayVideoAbierto,
   irALinea,
   lineaAnteriorOSiguiente,
+  pulsarMarca,
   reproducir,
   saltar,
+  soltarMarca,
+  terminarMarcado,
   sincronizarConSitio,
 } from './controlador';
 import {
@@ -29,6 +33,7 @@ import {
   indiceVisual,
   infoVideo,
   lineasObjetivo,
+  marcado,
   panel,
   pausado,
   seleccionadas,
@@ -101,6 +106,34 @@ function explicarCaptura() {
 }
 
 export function instalarAtajos(): void {
+  // Al marcar los tiempos a mano, la barra espaciadora es la marca: mantenida, la línea suena; al soltarla, acaba. Va antes
+  // que los demás atajos y que los del sitio, que con ella pausarían el video.
+  const escribiendo = (e: KeyboardEvent) => {
+    const objetivo = e.composedPath()[0] as HTMLElement | undefined;
+    return !!objetivo && (objetivo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(objetivo.tagName));
+  };
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      if (!marcado.value || escribiendo(e) || ![' ', 'Backspace', 'Escape'].includes(e.key)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (e.key === ' ' && !e.repeat) pulsarMarca();
+      else if (e.key === 'Backspace') deshacerMarca();
+      else if (e.key === 'Escape') void terminarMarcado();
+    },
+    true
+  );
+  window.addEventListener(
+    'keyup',
+    (e) => {
+      if (!marcado.value || e.key !== ' ' || escribiendo(e)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      soltarMarca();
+    },
+    true
+  );
   window.addEventListener(
     'keydown',
     (e) => {

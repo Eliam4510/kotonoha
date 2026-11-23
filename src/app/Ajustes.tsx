@@ -4,7 +4,7 @@ import type { EstadoVocesIntegradas, InfoAyudante, MotorVozLocal } from '../comp
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { AJUSTES_INICIALES, type Ajustes, type AjustesVozLocal, type AjustesVozNeuronal, CLAVE_API, type Esfuerzo, guardarAjustes, MODELO_AUTOMATICO, MODELOS, MODELOS_WHISPER, modeloSirveParaLengua, type ModeloWhisper, type PestanaDiccionario, type Prellenado, TAMANO_DICCIONARIO, type TareaIA, type Tema } from '../compartido/ajustes';
-import { borrarArchivosSueltos, borrarModeloCanto, borrarModeloGuardado, borrarModeloMoras, bytesModeloCanto, bytesModeloMoras, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
+import { borrarArchivosSueltos, borrarModeloCanto, borrarModeloGuardado, borrarModeloMoras, borrarModeloVoz, bytesModeloCanto, bytesModeloMoras, bytesModeloVoz, leerModelosGuardados, type ResumenModelos } from '../compartido/modelosGuardados';
 import { alRecibirEvento, fondo, motor } from '../compartido/rpc';
 import { ACCIONES_TECLADO, nombreAccion } from '../compartido/accionesTeclado';
 import { diaLocal } from '../nucleo/inmersion';
@@ -638,12 +638,15 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
   const [moras, fijarMoras] = useState(0);
   // YAMNet, que oye dónde se canta al colocar la letra de una canción: también en su propia caché.
   const [canto, fijarCanto] = useState(0);
+  // Y Demucs, que aísla la voz para colocarla con más precisión.
+  const [aislar, fijarAislar] = useState(0);
   // Las voces de AivisHub, en la lengua que las tenga: lo que comparten y cada voz.
   const [voces, fijarVoces] = useState<EstadoVocesIntegradas | null>(null);
   const releer = () => {
     leerModelosGuardados().then(fijarGuardados).catch(() => {});
     bytesModeloMoras().then(fijarMoras).catch(() => {});
     bytesModeloCanto().then(fijarCanto).catch(() => {});
+    bytesModeloVoz().then(fijarAislar).catch(() => {});
     if (lengua.value.vocesIntegradas) motor.estadoVoces().then(fijarVoces).catch(() => {});
   };
   const bytesVoces = (voces?.base.bytes ?? 0) + (voces?.voces.reduce((n, v) => n + v.bytes, 0) ?? 0);
@@ -682,12 +685,12 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
         </Opcion>
         <AyudanteLocal />
       </div>
-      {guardados && guardados.totalBytes + moras + canto + bytesVoces > 0 && (
+      {guardados && guardados.totalBytes + moras + canto + aislar + bytesVoces > 0 && (
         <>
           <Subtitulo>{tr('Modelos guardados')}</Subtitulo>
           <p class="ayuda ap-subtitulo-ayuda">
             {tr('Se guardan en este navegador: se leen del disco y no se vuelven a descargar. Si borras uno, se descargará de nuevo la próxima vez que lo uses. Desinstalar la extensión también los borra.')}
-            {guardados.modelos.length + (moras ? 1 : 0) + (canto ? 1 : 0) + (bytesVoces ? 1 : 0) > 1 && ` ${tr('En total ocupan {0}.', textoTamano((guardados.totalBytes + moras + canto + bytesVoces) / 1e6))}`}
+            {guardados.modelos.length + (moras ? 1 : 0) + (canto ? 1 : 0) + (aislar ? 1 : 0) + (bytesVoces ? 1 : 0) > 1 && ` ${tr('En total ocupan {0}.', textoTamano((guardados.totalBytes + moras + canto + aislar + bytesVoces) / 1e6))}`}
           </p>
           <div class="ap-grupo">
             {voces && voces.base.bytes > 0 && (
@@ -706,8 +709,13 @@ function SeccionTranscripcion({ a, cambiar }: PropsSeccion) {
                 );
               })}
             {moras > 0 && (
-              <Opcion titulo={tr('narabas, para las moras de la práctica del acento')} ayuda={textoTamano(moras / 1e6)}>
+              <Opcion titulo={tr('narabas, para las moras de la práctica del acento y para colocar letras con la voz')} ayuda={textoTamano(moras / 1e6)}>
                 <BotonBorrar etiqueta={`${tr('Borrar')}: narabas`} texto={tr('Borrar')} alBorrar={() => borrarModeloMoras().then(releer)} />
+              </Opcion>
+            )}
+            {aislar > 0 && (
+              <Opcion titulo={tr('Demucs, para aislar la voz al colocar una letra')} ayuda={textoTamano(aislar / 1e6)}>
+                <BotonBorrar etiqueta={`${tr('Borrar')}: Demucs`} texto={tr('Borrar')} alBorrar={() => borrarModeloVoz().then(releer)} />
               </Opcion>
             )}
             {canto > 0 && (

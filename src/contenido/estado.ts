@@ -70,6 +70,11 @@ export function quitarAviso(id: number) {
   avisos.value = avisos.value.filter((a) => a.id !== id);
 }
 
+/** Cambia el texto de un aviso que sigue a la vista, como el avance de una descarga, sin quitarlo y volverlo a poner. */
+export function cambiarAviso(id: number, texto: string) {
+  avisos.value = avisos.value.map((a) => (a.id === id ? { ...a, texto } : a));
+}
+
 export const capturaActiva = signal(false);
 export const sinAceleracion = signal(false);
 /** Los atajos que Chrome le ha dado a la extensión, que no siempre son los que pide. */
@@ -80,6 +85,8 @@ export const comoActivarCaptura = () => {
   return tecla ? `pulsa ${tecla}` : tr('usa el interruptor del menú de la extensión');
 };
 export const generacion = signal<{ tipo: 'secundarios' | 'objetivo'; hechas: number; total: number } | null>(null);
+/** Marcando los tiempos a mano: qué línea toca, cuántas hay y si la tecla está pulsada. */
+export const marcado = signal<{ indice: number; total: number; pulsado: boolean } | null>(null);
 export const analisisEnCurso = signal<{ hechas: number; total: number } | null>(null);
 /** Corrección con Claude de unos subtítulos automáticos. */
 export const correccion = signal<{ hechas: number; total: number; cambiadas: number } | null>(null);
