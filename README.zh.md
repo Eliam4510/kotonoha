@@ -112,17 +112,17 @@ Whisper 得去猜唱的是什么；Kotonoha 已经知道，因为它有歌词，
 
 ### 任意网页
 
-<img src="docs/img/paginas.zh.png" alt="青空文库中的『羅生門』，带颜色、振假名和阅读面板" width="100%">
+<img src="docs/img/paginas.zh.png" alt="NHK ONE 上关于旅行者 1 号探测器的新闻，带照片、Kotonoha 的颜色、振假名和阅读面板" width="100%">
 
-<sub>芥川龙之介『羅生門』，来自[青空文库](https://www.aozora.gr.jp/cards/000879/card127.html)（公有领域）。</sub>
+<sub>新闻：[「地球から1光日 259億キロ離れた宇宙を進むボイジャー1号の旅」](https://news.web.nhk/newsweb/na/nd-20261116de76380)，NHK ONE（2026 年 11 月 17 日；插图 NASA/JPL-Caltech）。仅用于展示网页阅读器，版权归 NHK 所有。</sub>
 
 在新闻、博客、百科或 Claude 这样的聊天页面里，日语文本同样会有颜色和振假名，点击一个词就能打开它的单词面板。网页内容不会被改动：链接和按钮照常工作，用 React 构建的网站也察觉不到。已在约三十个真实网站上测试。
 
 ### 书籍、PDF 和漫画
 
-<img src="docs/img/libro-texto.zh.png" alt="竖排的与谢野晶子译本『源氏物語』，带注音、颜色和 後宮 的单词面板" width="100%">
+<img src="docs/img/libro-antiguo.zh.png" alt="Kotonoha 阅读器中的 1650 年插图本『源氏物語』第 1 卷：跨页上是月下廊中的女子、带红色批注的草书假名正文，旁边是书的缩略图" width="100%">
 
-<sub>『源氏物語』「桐壺」，与谢野晶子译本，来自[青空文库](https://www.aozora.gr.jp/cards/000052/card5016.html)（公有领域）。词汇图中的书也是它。</sub>
+<sub>『源氏物語』1650 年（庆安 3 年）插图本第 1 卷，藏于[日本国立国会图书馆](https://dl.ndl.go.jp/pid/2579509)（公有领域）。</sub>
 
 **书库**是一个完整的阅读器，就像 PDF 阅读器一样：缩放、双页、连续滚动、目录、缩略图，并记住每本书读到的页码。各项操作都放在有名称的菜单里，按 Ctrl+K 输入想做的事即可找到任何操作；还有抓手、荧光笔，以及只留下页面的阅读模式。页面上的每个词都可以带上注音和按状态的下划线，句子的译文会像字幕一样显示在句子下方，还可以跟随句子朗读，并把查过的词连同页面截图做成卡片。在页面上框出的区域可以单独用文字识别读取，文字版 EPUB 和书库中的文本也在同一个查看器中阅读，菜单相同。像小说这样的文字版 EPUB 会保留原有的排版、注音和竖排，上面叠加网页阅读器：颜色、振假名和单词面板，和在网页上一样。带文字的 PDF 可以直接逐词阅读。图片文件夹形式的漫画只需选择文件夹即可导入：每一卷成为一本书，封面在前，彩色跨页完整显示。书架可以把书归入合集，例如一个系列及其各卷，并配上封面和描述，还会显示每本书和每个合集读了多少。在阅读器中可以给页面加书签、高亮或为文字加下划线并附评论，还能在页面上贴笔记，就像在 PDF 阅读器中一样。可以在整本书中搜索一个词，把每一页当作文字配合阅读辅助来读，还可以让 Claude 对照页面图像检查文字识别读出的文字。
 
@@ -139,6 +139,8 @@ Whisper 得去猜唱的是什么；Kotonoha 已经知道，因为它有歌词，
 ### 读书之前，先看它的词汇
 
 <img src="docs/img/vocabulario.zh.png" alt="『源氏物語』「桐壺」的词汇：理解度、待学习的词、90%、95% 和 98% 的目标，以及展开了 お 和书中例句的列表" width="100%">
+
+<sub>『源氏物語』「桐壺」，与谢野晶子译本，来自[青空文库](https://www.aozora.gr.jp/cards/000052/card5016.html)（公有领域）。</sub>
 
 每本书和每个合集都有自己的**词汇**：统计其中的所有词，出现最多的排在前面，附读音、释义、JLPT 级别和书中最合适的句子。上方显示你已经理解多少，以及要理解 90%、95% 或 98% 还需要多少个词。可以直接在这里把词标为已知或学习中，选中的词会连同书中的句子一次性加入记忆库或 Anki。小说、PDF、文本和用文字识别读取的漫画都适用；在系列中，每一卷都会显示它带来多少新词。书中的语法也在这里，逐条列出。
 
@@ -312,7 +314,7 @@ Kotonoha 不需要任何密钥就能使用。可选的 Claude 密钥会增加需
 - 歌曲：Meta 的 [Demucs](https://github.com/facebookresearch/demucs)（htdemucs），使用 [timcsy 的 ONNX 转换](https://huggingface.co/timcsy/demucs-web-onnx)；darashi 的 [narabas](https://github.com/darashi/narabas)，以及 Google 的 [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet)。
 - 文字识别：[PP-OCRv5 和 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR)、[manga-ocr](https://github.com/kha-white/manga-ocr) 和[对话框检测器](https://huggingface.co/ogkalu/comic-text-and-bubble-detector)。
 - 笔顺：[KanjiVG](https://kanjivg.tagaini.net)，作者 Ulrich Apel，CC BY-SA 3.0；中文为源自 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) 的 [Hanzi Writer](https://github.com/chanind/hanzi-writer-data)，Arphic Public License。
-- 图片内容：日本首相官邸的国会演讲（PDL 1.0）、NASA 的视频、青空文库的与谢野晶子译『源氏物語』和『羅生門』，以及『吾輩は猫である』的开头；除演讲外均为公有领域。两本书的页面在图片下方注明出处。
+- 图片内容：日本首相官邸的国会演讲（PDL 1.0）、NASA 的视频、日本国立国会图书馆的 1650 年插图本『源氏物語』、青空文库的与谢野晶子译『源氏物語』和『羅生門』，以及『吾輩は猫である』的开头；除演讲外均为公有领域。NHK ONE 的新闻和两本书的页面在图片下方注明出处。
 - 图标：[Phosphor](https://phosphoricons.com)。字体：[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) 和 [Nunito](https://fonts.google.com/specimen/Nunito)。
 
 名字出自《古今和歌集》假名序（约 905 年）：和歌以人心为种子，生出万千言语之叶。

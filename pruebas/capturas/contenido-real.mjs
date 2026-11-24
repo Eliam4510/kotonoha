@@ -221,6 +221,26 @@ export function parrafosAozora(texto, cuantos) {
 export const genji = (cuantos = 5) => parrafosAozora(readFileSync(archivoLibre('genji-kiritsubo.txt'), 'utf8'), cuantos);
 export const GENJI = { titulo: '源氏物語', autor: '紫式部・與謝野晶子訳', capitulo: '桐壺', carta: 'https://www.aozora.gr.jp/cards/000052/card5016.html' };
 
+/**
+ * El volumen 1 de 『源氏物語』 en su edición ilustrada de 1650 (慶安3年, 山本春正), de la Biblioteca Nacional de la Dieta,
+ * dominio público: la tapa (きりつほ, un 桐壺 escrito a mano) y trece dobles páginas recortadas de sus fotos
+ * (herramientas/contenido-readme.mjs). La 12 es la de la dama en la galería bajo la luna, con anotaciones en rojo. El
+ * título del CBZ no contiene el del EPUB del Genji, porque las tapas se buscan por lo que contiene su etiqueta.
+ */
+export const GENJI_1650 = { titulo: '絵入源氏 · 1650', archivo: 'genji-1650.cbz', carpeta: 'genji-1650', paginas: 14, abrir: 12, fuente: 'https://dl.ndl.go.jp/pid/2579509' };
+
+/**
+ * Una noticia de NHK ONE con su foto, para el lector de páginas: la sonda Voyager 1 a un día luz de la Tierra (2026-11-17).
+ * Se carga en vivo. Sus derechos son de NHK: se publica con su crédito, como las páginas de los libros de 聖臣. Las nuevas y
+ * las que se siguen son palabras de su titular y su entradilla; el resto de la página queda conocida.
+ */
+export const NHK_VOYAGER = {
+  url: 'https://news.web.nhk/newsweb/na/nd-20261116de76380',
+  titulo: '地球から1光日 259億キロ離れた宇宙を進むボイジャー1号の旅',
+  nuevas: ['探査機', '打ち上げ', '到達', '観測', '成果', '木星', '土星', '無人'],
+  seguidas: ['宇宙'],
+};
+
 /** 『羅生門』 de Akutagawa en el Aozora Bunko: la página de verdad y su hoja de estilo. */
 export const RASHOMON = { url: 'https://www.aozora.gr.jp/cards/000879/files/127_15260.html', pagina: 'rashomon.html', css: 'aozora.css' };
 

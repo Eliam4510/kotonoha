@@ -116,17 +116,17 @@ El **Reproductor** abre tus videos y audios, o una carpeta entera como lista de 
 
 ### Cualquier página web
 
-<img src="docs/img/paginas.png" alt="『羅生門』 en el Aozora Bunko, con colores, furigana y el panel del lector" width="100%">
+<img src="docs/img/paginas.png" alt="Una noticia de NHK ONE sobre la sonda Voyager 1, con su foto, los colores y el furigana de Kotonoha y el panel del lector" width="100%">
 
-<sub>『羅生門』, de 芥川龍之介, en el [Aozora Bunko](https://www.aozora.gr.jp/cards/000879/card127.html) (dominio público).</sub>
+<sub>Noticia: [«地球から1光日 259億キロ離れた宇宙を進むボイジャー1号の旅»](https://news.web.nhk/newsweb/na/nd-20261116de76380), NHK ONE (17 de noviembre de 2026; la ilustración, NASA/JPL-Caltech). Se muestra para ilustrar el lector de páginas; los derechos pertenecen a NHK.</sub>
 
 En noticias, blogs, wikis o en un chat como el de Claude, el texto japonés recibe los mismos colores y el mismo furigana, y un clic en una palabra abre su ficha. No cambia el contenido de la página: los enlaces y los botones siguen funcionando, y los sitios hechos con React no notan nada. Se ha probado en una treintena de sitios reales.
 
 ### Libros, PDF y manga
 
-<img src="docs/img/libro-texto.png" alt="El Genji de Yosano Akiko en vertical, con ruby, colores y la ficha de 後宮" width="100%">
+<img src="docs/img/libro-antiguo.png" alt="El primer volumen del 『源氏物語』 ilustrado de 1650 en el visor de Kotonoha: una doble página con una dama en la galería bajo la luna, texto en kana cursiva con anotaciones en rojo y, a un lado, las miniaturas del libro" width="100%">
 
-<sub>『源氏物語』「桐壺」, en la versión de 与謝野晶子, del [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (dominio público). Es también el libro del vocabulario.</sub>
+<sub>『源氏物語』, edición ilustrada de 1650 (慶安3年), volumen 1, en la [Biblioteca Nacional de la Dieta](https://dl.ndl.go.jp/pid/2579509) (dominio público).</sub>
 
 La **Biblioteca** es un visor completo, como un lector de PDF: zoom, doble página, desplazamiento continuo, índice, miniaturas y la página donde se dejó cada libro. Sus órdenes van en menús con nombre, y Ctrl+K encuentra cualquiera escribiendo lo que hace; hay mano, resaltador y un modo lectura que deja solo la página. Sobre la propia página, cada palabra puede llevar su furigana y el subrayado de su estado, la traducción de una frase sale debajo como un subtítulo, se puede leer en voz alta siguiendo la frase y las palabras consultadas pasan a tarjetas con un recorte de la página. Una zona dibujada sobre la página se lee aparte con el OCR, y los EPUB de texto y los textos de la Biblioteca se leen en el mismo visor, con los mismos menús. Un EPUB de texto, como una novela, se ve con su propio formato, su ruby y su escritura vertical, y con el lector de páginas encima: colores, furigana y fichas, como en una web. Un PDF que trae su texto se lee palabra a palabra sin hacer nada más. El manga que viene en carpetas de imágenes entra eligiendo la carpeta: cada tomo es un libro, con su portada delante y las dobles páginas a color enteras. La estantería agrupa los libros en colecciones, como una serie con sus tomos, con su portada y una descripción, y muestra cuánto se ha leído de cada libro y de cada colección. En el visor se marcan páginas, se resalta o subraya el texto con un comentario y se dejan notas sobre la página, como en un lector de PDF. Se busca una palabra en todo el libro, cada página se puede leer como texto, con la ayuda de lectura, y Claude puede revisar el texto que leyó el OCR comparándolo con la imagen de la página.
 
@@ -143,6 +143,8 @@ No es un OCR cualquiera. En los libros, PP-OCRv6 lee las líneas que encuentra P
 ### El vocabulario de un libro, antes de leerlo
 
 <img src="docs/img/vocabulario.png" alt="Vocabulario de 桐壺, del Genji: comprensión, palabras por aprender, metas del 90, 95 y 98 % y la lista con お abierto y sus frases del libro" width="100%">
+
+<sub>『源氏物語』「桐壺」, en la versión de 与謝野晶子, del [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (dominio público).</sub>
 
 Cada libro y cada colección tienen su **vocabulario**: todas sus palabras, contadas, las que más salen primero, con su lectura, su glosa, su nivel del JLPT y su mejor frase del libro. Arriba se ve cuánto se entiende ya y cuántas palabras hacen falta para entender el 90, el 95 o el 98 %. Las palabras se marcan aquí mismo como conocidas o en aprendizaje, y las elegidas pasan de golpe a Memoria o a Anki con su frase del libro. Vale para novelas, PDF, textos y manga leído con el OCR; en una serie, cada tomo dice cuántas palabras nuevas trae. También está la gramática del libro, punto por punto.
 
@@ -316,7 +318,7 @@ El código se publica bajo la [licencia MIT](LICENSE). Los componentes de tercer
 - Canciones: [Demucs](https://github.com/facebookresearch/demucs) (htdemucs), de Meta, en la [conversión a ONNX de timcsy](https://huggingface.co/timcsy/demucs-web-onnx); [narabas](https://github.com/darashi/narabas), de darashi, y [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet), de Google.
 - Reconocimiento de texto: [PP-OCRv5 y PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) y un [detector de globos de texto](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Orden de los trazos: [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel, CC BY-SA 3.0; en chino, [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), de [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), Arphic Public License.
-- Contenido de las imágenes: un discurso en la Dieta del 首相官邸 (PDL 1.0), un video de la NASA, 『源氏物語』 en la versión de 与謝野晶子 y 『羅生門』, del Aozora Bunko, y el comienzo de 『吾輩は猫である』, todos de dominio público salvo el discurso. Las páginas de dos libros llevan su crédito debajo de la imagen.
+- Contenido de las imágenes: un discurso en la Dieta del 首相官邸 (PDL 1.0), un video de la NASA, el 『源氏物語』 ilustrado de 1650, de la Biblioteca Nacional de la Dieta, 『源氏物語』 en la versión de 与謝野晶子 y 『羅生門』, del Aozora Bunko, y el comienzo de 『吾輩は猫である』, todos de dominio público salvo el discurso. Una noticia de NHK ONE y las páginas de dos libros llevan su crédito debajo de la imagen.
 - Iconos: [Phosphor](https://phosphoricons.com). Tipografía: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) y [Nunito](https://fonts.google.com/specimen/Nunito).
 
 El nombre procede del prólogo del *Kokin Wakashū* (c. 905): la poesía de Japón tiene por semilla el corazón humano, y de él brotan miríadas de hojas de palabras.

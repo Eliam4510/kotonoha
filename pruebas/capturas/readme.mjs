@@ -1,5 +1,6 @@
-// Las imágenes del README en cada idioma de la interfaz: la ficha sobre el video, un EPUB de texto en el visor, una
-// página leída con el OCR y una de manga. Con la interfaz en japonés se estudia inglés, que es lo que tiene sentido para
+// Las imágenes del README en cada idioma de la interfaz: la ficha sobre el video, el libro del visor (el Genji ilustrado
+// de 1650, escaneado, en los README que presentan el japonés; un EPUB de texto en el japonés), una página leída con el
+// OCR y una de manga. Con la interfaz en japonés se estudia inglés, que es lo que tiene sentido para
 // quien habla japonés. Todo el contenido es real (ver contenido-real.mjs): el video es un discurso en la Dieta publicado
 // por el 首相官邸, con su texto oficial; el EPUB, el Genji de Yosano Akiko o «Alice’s Adventures in Wonderland»; la
 // página en inglés, la de la edición de 1866, y el texto del lector, el comienzo de «Pride and Prejudice». La API de
@@ -21,7 +22,7 @@ import sharp from 'sharp';
 import { confirmarBorrado, recargarExtension } from '../extension.mjs';
 import { iniciarMock } from '../mock-claude.mjs';
 import { estadoOrden, orden } from '../ordenes.mjs';
-import { ALICE_1866, archivoLibre, AUSTEN, DIETA, GENJI, genji, servirVideo, traduccionDieta, vtt } from './contenido-real.mjs';
+import { ALICE_1866, archivoLibre, AUSTEN, DIETA, GENJI, GENJI_1650, genji, servirVideo, traduccionDieta, vtt } from './contenido-real.mjs';
 
 const RAIZ = resolve(import.meta.dirname, '..', '..');
 const DIST = resolve(process.env.KK_DIST ?? join(RAIZ, '.dist-subs'));
@@ -86,9 +87,18 @@ function epub({ titulo, autor, idioma, vertical, capitulo, parrafos }) {
 
 const cbz = (titulo, imagen) => zipSync({ 'ComicInfo.xml': strToU8(`<ComicInfo><Title>${titulo}</Title><Manga>No</Manga></ComicInfo>`), 'p001.jpg': new Uint8Array(imagen) });
 
+/** Un libro de imágenes de varias páginas, de derecha a izquierda como un libro japonés. */
+const cbzDeDerechaAIzquierda = (titulo, imagenes) =>
+  zipSync({
+    'ComicInfo.xml': strToU8(`<ComicInfo><Title>${titulo}</Title><Manga>YesAndRightToLeft</Manga></ComicInfo>`),
+    ...Object.fromEntries(imagenes.map((imagen, i) => [`p${String(i + 1).padStart(3, '0')}.jpg`, new Uint8Array(imagen)])),
+  });
+
 const LIBROS = {
   ja: {
     epub: { titulo: GENJI.titulo, archivo: 'genji.epub', datos: epub({ titulo: GENJI.titulo, autor: GENJI.autor, idioma: 'ja', vertical: true, capitulo: GENJI.capitulo, parrafos: GENJI_PARRAFOS }) },
+    // El libro del visor en los README que presentan el japonés: el Genji ilustrado de 1650, escaneado.
+    antiguo: GENJI_1650,
     // La página escaneada en japonés es la de KK_ESCANEO, de un libro de verdad: sin ella no hay imagen del OCR.
     pagina: null,
     texto: GENJI_PARRAFOS,
@@ -270,6 +280,11 @@ async function biblioteca(datos, reales) {
     const imagen = readFileSync(archivoLibre(datos.pagina.imagen));
     propios.push({ name: datos.pagina.archivo, mimeType: 'application/zip', buffer: Buffer.from(cbz(datos.pagina.titulo, imagen)) });
   }
+  if (datos.antiguo) {
+    const a = datos.antiguo;
+    const imagenes = Array.from({ length: a.paginas }, (_, i) => readFileSync(archivoLibre(`${a.carpeta}/p${String(i + 1).padStart(3, '0')}.jpg`)));
+    propios.push({ name: a.archivo, mimeType: 'application/zip', buffer: Buffer.from(cbzDeDerechaAIzquierda(a.titulo, imagenes)) });
+  }
   await importar(b, propios);
   // Los reales, de uno en uno: así se sabe qué tapa es de cuál, se llame como se llame el libro.
   const etiquetas = {};
@@ -319,6 +334,22 @@ async function libroDeTexto(b, datos, id) {
   await f.waitForFunction(() => document.querySelector('kotonoha-overlay')?.shadowRoot?.querySelector('.popup-palabra .ficha'), null, { timeout: 15000 });
   await v.waitForTimeout(1500);
   await guardar(v, 'libro-texto', id);
+  await v.close();
+}
+
+/** El libro escaneado de 1650 en el visor: la doble página de la ilustración, elegida en el panel de miniaturas. */
+async function libroAntiguo(b, datos, id) {
+  const a = datos.antiguo;
+  const v = await abrir(b, a.titulo);
+  await v.waitForSelector('.vs-pagina img', { timeout: 30000 });
+  if (!(await estadoOrden(v, 'miniaturas')).marcada) await orden(v, 'miniaturas');
+  await v.waitForSelector('.vs-miniatura', { timeout: 15000 });
+  await v.locator('.vs-miniatura').nth(a.abrir - 1).click();
+  await v.waitForFunction((n) => [...document.querySelectorAll('.vs-miniatura')][n - 1]?.classList.contains('actual'), a.abrir, { timeout: 15000 });
+  await v.waitForFunction(() => [...document.querySelectorAll('.vs-pagina img')].every((i) => i.complete && i.naturalWidth > 0), null, { timeout: 20000 });
+  await v.mouse.move(640, 790);
+  await v.waitForTimeout(1500);
+  await guardar(v, 'libro-antiguo', id);
   await v.close();
 }
 
@@ -488,7 +519,7 @@ for (const id of IDIOMAS) {
   const datos = LIBROS[estudia];
   const reales = estudia === 'ja' && (hacer('ocr') || hacer('manga')) ? [ESCANEO, MANGA].filter(Boolean) : [];
   const { b, etiquetas } = await biblioteca(datos, reales);
-  if (hacer('libro')) await libroDeTexto(b, datos, id);
+  if (hacer('libro')) await (datos.antiguo ? libroAntiguo(b, datos, id) : libroDeTexto(b, datos, id));
   if (hacer('ocr') && !etiquetas.ocr && datos.pagina) await paginaConOcr(b, datos, id);
   for (const r of reales) if (hacer(r.base)) await paginaReal(b, etiquetas[r.base], r, id);
   if (hacer('vocabulario')) await vocabularioDeLibro(b, datos, estudia, id);

@@ -112,17 +112,17 @@ The **Player** opens your own videos and audio files, or a whole folder as a pla
 
 ### Any web page
 
-<img src="docs/img/paginas.en.png" alt="『羅生門』 on Aozora Bunko, with colours, furigana and the reader panel" width="100%">
+<img src="docs/img/paginas.en.png" alt="A news story on NHK ONE about the Voyager 1 probe, with its photo, Kotonoha’s colours and furigana, and the reader panel" width="100%">
 
-<sub>『羅生門』 (Rashōmon), by Akutagawa Ryūnosuke, on [Aozora Bunko](https://www.aozora.gr.jp/cards/000879/card127.html) (public domain).</sub>
+<sub>Story: [“地球から1光日 259億キロ離れた宇宙を進むボイジャー1号の旅”](https://news.web.nhk/newsweb/na/nd-20261116de76380), NHK ONE (17 November 2026; illustration, NASA/JPL-Caltech). Shown to illustrate the page reader; the rights belong to NHK.</sub>
 
 On news sites, blogs, wikis or in a chat such as Claude’s, Japanese text gets the same colours and furigana, and clicking a word opens its panel. The page content is never changed: links and buttons keep working, and sites built with React notice nothing. It has been tested on about thirty real sites.
 
 ### Books, PDFs and manga
 
-<img src="docs/img/libro-texto.en.png" alt="Yosano Akiko’s Genji in vertical text, with ruby, colours and the panel for 後宮" width="100%">
+<img src="docs/img/libro-antiguo.en.png" alt="Volume 1 of the illustrated 1650 『源氏物語』 in Kotonoha’s viewer: a two-page spread with a lady on a veranda under the moon, cursive kana text with red annotations and, at the side, the book’s thumbnails" width="100%">
 
-<sub>『源氏物語』 (The Tale of Genji), chapter 「桐壺」, in Yosano Akiko’s version, from [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (public domain). It is also the book in the vocabulary image.</sub>
+<sub>『源氏物語』 (The Tale of Genji), illustrated edition of 1650 (Keian 3), volume 1, in the [National Diet Library](https://dl.ndl.go.jp/pid/2579509) (public domain).</sub>
 
 The **Library** is a complete viewer, like a PDF reader: zoom, two-page spreads, continuous scrolling, table of contents, thumbnails and the page where you left each book. Its commands sit in named menus, and Ctrl+K finds any of them by typing what it does; there is a hand tool, a highlighter and a reading mode that leaves just the page. On the page itself, each word can carry its furigana and the underline of its status, a sentence's translation appears under it like a subtitle, you can read aloud following the sentence, and the words you looked up become cards with a crop of the page. An area drawn on the page is read on its own with OCR, and text EPUBs and Library texts are read in the same viewer, with the same menus. A text EPUB, such as a novel, keeps its own formatting, ruby and vertical writing, with the page reader on top: colours, furigana and word panels, as on the web. A PDF that contains text can be read word by word right away. Manga that comes in image folders is imported by choosing the folder: each volume becomes a book, with its cover first and its colour spreads whole. The shelf groups books into collections, such as a series with its volumes, each with its cover and a description, and shows how much of each book and each collection has been read. In the viewer, pages can be bookmarked, text highlighted or underlined with a comment, and notes left on the page, as in a PDF reader. A word can be searched for in the whole book, each page can be read as text with the reading help, and Claude can review the text read by OCR by comparing it with the page image.
 
@@ -139,6 +139,8 @@ It is not just any OCR. In books, PP-OCRv6 reads the lines that PP-OCRv5 finds, 
 ### A book's vocabulary, before you read it
 
 <img src="docs/img/vocabulario.en.png" alt="Vocabulary of 桐壺, from the Genji: comprehension, words to learn, goals of 90, 95 and 98 % and the list with お open and its sentences from the book" width="100%">
+
+<sub>『源氏物語』 (The Tale of Genji), chapter 「桐壺」, in Yosano Akiko’s version, from [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (public domain).</sub>
 
 Every book and every collection has its **vocabulary**: all its words, counted, the most frequent first, with their reading, their gloss, their JLPT level and their best sentence from the book. At the top you see how much you already understand and how many words you need to understand 90, 95 or 98 %. Words are marked as known or learning right there, and the selected ones go straight to Memory or Anki with their sentence from the book. It works with novels, PDFs, texts and manga read with OCR; in a series, each volume shows how many new words it brings. The book's grammar is there too, point by point.
 
@@ -308,7 +310,7 @@ The code is released under the [MIT license](LICENSE). Third-party components, t
 - Songs: [Demucs](https://github.com/facebookresearch/demucs) (htdemucs), by Meta, in [timcsy’s ONNX conversion](https://huggingface.co/timcsy/demucs-web-onnx); [narabas](https://github.com/darashi/narabas), by darashi, and [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet), by Google.
 - Text recognition: [PP-OCRv5 and PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) and a [speech bubble detector](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Stroke order: [KanjiVG](https://kanjivg.tagaini.net), by Ulrich Apel, CC BY-SA 3.0; for Chinese, [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), from [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), Arphic Public License.
-- Image content: a speech in the Diet from the Prime Minister’s Office of Japan (PDL 1.0) and, in the public domain, Yosano Akiko’s 『源氏物語』 and 『羅生門』 from Aozora Bunko and the opening of 『吾輩は猫である』. The pages from two books carry their credit below the image.
+- Image content: a speech in the Diet from the Prime Minister’s Office of Japan (PDL 1.0) and, in the public domain, the illustrated 『源氏物語』 of 1650 from the National Diet Library, Yosano Akiko’s 『源氏物語』 and 『羅生門』 from Aozora Bunko and the opening of 『吾輩は猫である』. A news story from NHK ONE and the pages from two books carry their credit below the image.
 - Icons: [Phosphor](https://phosphoricons.com). Typefaces: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) and [Nunito](https://fonts.google.com/specimen/Nunito).
 
 The name comes from the preface of the *Kokin Wakashū* (c. 905): Japanese poetry takes the human heart as its seed, and from it grow countless leaves of words.

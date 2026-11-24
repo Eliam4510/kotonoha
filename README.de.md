@@ -112,17 +112,17 @@ Der **Player** öffnet eigene Videos und Audiodateien, oder einen ganzen Ordner 
 
 ### Jede Webseite
 
-<img src="docs/img/paginas.de.png" alt="『羅生門』 im Aozora Bunko, mit Farben, Furigana und dem Leserfenster" width="100%">
+<img src="docs/img/paginas.de.png" alt="Eine Nachricht auf NHK ONE über die Sonde Voyager 1, mit ihrem Foto, den Farben und Furigana von Kotonoha und dem Leserfenster" width="100%">
 
-<sub>『羅生門』 (Rashōmon) von Akutagawa Ryūnosuke, im [Aozora Bunko](https://www.aozora.gr.jp/cards/000879/card127.html) (gemeinfrei).</sub>
+<sub>Nachricht: [„地球から1光日 259億キロ離れた宇宙を進むボイジャー1号の旅“](https://news.web.nhk/newsweb/na/nd-20261116de76380), NHK ONE (17. November 2026; Illustration: NASA/JPL-Caltech). Gezeigt, um den Seitenleser zu veranschaulichen; die Rechte liegen bei NHK.</sub>
 
 Auf Nachrichtenseiten, Blogs, Wikis oder in einem Chat wie dem von Claude bekommt japanischer Text dieselben Farben und Furigana, und ein Klick auf ein Wort öffnet sein Wortfenster. Der Inhalt der Seite bleibt unverändert: Links und Schaltflächen funktionieren weiter, und mit React gebaute Seiten merken nichts. Getestet auf rund dreißig echten Websites.
 
 ### Bücher, PDFs und Manga
 
-<img src="docs/img/libro-texto.de.png" alt="Das Genji-monogatari in der Fassung von Yosano Akiko, vertikal, mit Ruby, Farben und dem Wortfenster zu 後宮" width="100%">
+<img src="docs/img/libro-antiguo.de.png" alt="Band 1 des illustrierten 『源氏物語』 von 1650 im Betrachter von Kotonoha: eine Doppelseite mit einer Dame auf der Veranda unter dem Mond, Text in kursiver Kana-Schrift mit roten Anmerkungen und am Rand die Miniaturen des Buchs" width="100%">
 
-<sub>『源氏物語』 (Die Geschichte vom Prinzen Genji), Kapitel 「桐壺」, in der Fassung von Yosano Akiko, aus dem [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (gemeinfrei). Es ist auch das Buch im Wortschatz.</sub>
+<sub>『源氏物語』 (Die Geschichte vom Prinzen Genji), illustrierte Ausgabe von 1650 (Keian 3), Band 1, in der [Nationalen Parlamentsbibliothek](https://dl.ndl.go.jp/pid/2579509) (gemeinfrei).</sub>
 
 Die **Bibliothek** ist ein vollständiger Betrachter wie ein PDF-Reader: Zoom, Doppelseiten, fortlaufendes Scrollen, Inhaltsverzeichnis, Miniaturen und die Seite, an der jedes Buch zuletzt aufgeschlagen war. Seine Befehle stehen in benannten Menüs, und Strg+K findet jeden, wenn man eintippt, was er tut; dazu gibt es eine Hand, einen Textmarker und einen Lesemodus, der nur die Seite lässt. Auf der Seite selbst kann jedes Wort sein Furigana und die Unterstreichung seines Status tragen, die Übersetzung eines Satzes erscheint wie ein Untertitel darunter, man kann dem Satz folgend vorlesen lassen, und die nachgeschlagenen Wörter werden zu Karten mit einem Ausschnitt der Seite. Ein auf der Seite gezogener Bereich wird eigens mit der Texterkennung gelesen, und Text-EPUBs und die Texte der Bibliothek werden im selben Betrachter mit denselben Menüs gelesen. Ein Text-EPUB wie ein Roman behält sein eigenes Layout, seine Ruby und seine vertikale Schrift, mit dem Seiten-Reader darüber: Farben, Furigana und Wortfenster wie im Web. Ein PDF, das Text enthält, lässt sich sofort Wort für Wort lesen. Manga in Bilderordnern werden durch Auswahl des Ordners importiert: Jeder Band wird ein Buch, mit der Titelseite vorn und den Farbdoppelseiten im Ganzen. Das Regal ordnet die Bücher in Sammlungen, etwa eine Reihe mit ihren Bänden, mit Titelbild und Beschreibung, und zeigt, wie viel von jedem Buch und jeder Sammlung gelesen ist. Im Betrachter lassen sich Seiten markieren, Text mit Kommentar hervorheben oder unterstreichen und Notizen auf der Seite hinterlassen, wie in einem PDF-Reader. Ein Wort lässt sich im ganzen Buch suchen, jede Seite als Text mit der Lesehilfe lesen, und Claude kann den von der Texterkennung gelesenen Text prüfen, indem es ihn mit dem Seitenbild vergleicht.
 
@@ -139,6 +139,8 @@ Es ist kein gewöhnliches OCR. In Büchern liest PP-OCRv6 die Zeilen, die PP-OCR
 ### Der Wortschatz eines Buchs, bevor du es liest
 
 <img src="docs/img/vocabulario.de.png" alt="Wortschatz von 桐壺 aus dem Genji-monogatari: Verständnis, zu lernende Wörter, Ziele von 90, 95 und 98 % und die Liste mit お geöffnet und seinen Sätzen aus dem Buch" width="100%">
+
+<sub>『源氏物語』 (Die Geschichte vom Prinzen Genji), Kapitel 「桐壺」, in der Fassung von Yosano Akiko, aus dem [Aozora Bunko](https://www.aozora.gr.jp/cards/000052/card5016.html) (gemeinfrei).</sub>
 
 Jedes Buch und jede Sammlung hat ihren **Wortschatz**: alle Wörter, gezählt, die häufigsten zuerst, mit Lesung, Glosse, JLPT-Stufe und ihrem besten Satz aus dem Buch. Oben steht, wie viel du schon verstehst und wie viele Wörter dir für 90, 95 oder 98 % fehlen. Die Wörter werden gleich dort als bekannt oder am Lernen markiert, und die ausgewählten gehen auf einmal ins Gedächtnis oder nach Anki, mit ihrem Satz aus dem Buch. Das geht mit Romanen, PDFs, Texten und mit der Texterkennung gelesenem Manga; in einer Reihe zeigt jeder Band, wie viele neue Wörter er bringt. Auch die Grammatik des Buchs ist da, Punkt für Punkt.
 
@@ -312,7 +314,7 @@ Der Code steht unter der [MIT-Lizenz](LICENSE). Komponenten Dritter, die bei der
 - Lieder: [Demucs](https://github.com/facebookresearch/demucs) (htdemucs), von Meta, in der [ONNX-Umwandlung von timcsy](https://huggingface.co/timcsy/demucs-web-onnx); [narabas](https://github.com/darashi/narabas), von darashi, und [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet), von Google.
 - Texterkennung: [PP-OCRv5 und PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr) und ein [Sprechblasen-Detektor](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - Strichfolge: [KanjiVG](https://kanjivg.tagaini.net), von Ulrich Apel, CC BY-SA 3.0; für Chinesisch [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), aus [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), Arphic Public License.
-- Bildinhalte: eine Rede im japanischen Parlament vom Premierministeramt (PDL 1.0), ein NASA-Video, 『源氏物語』 in der Fassung von Yosano Akiko und 『羅生門』 aus dem Aozora Bunko und der Anfang von 『吾輩は猫である』, alle gemeinfrei außer der Rede. Die Seiten aus zwei Büchern tragen ihren Nachweis unter dem Bild.
+- Bildinhalte: eine Rede im japanischen Parlament vom Premierministeramt (PDL 1.0), ein NASA-Video, das illustrierte 『源氏物語』 von 1650 aus der Nationalen Parlamentsbibliothek, 『源氏物語』 in der Fassung von Yosano Akiko und 『羅生門』 aus dem Aozora Bunko und der Anfang von 『吾輩は猫である』, alle gemeinfrei außer der Rede. Eine Nachricht von NHK ONE und die Seiten aus zwei Büchern tragen ihren Nachweis unter dem Bild.
 - Symbole: [Phosphor](https://phosphoricons.com). Schriften: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) und [Nunito](https://fonts.google.com/specimen/Nunito).
 
 Der Name stammt aus dem Vorwort des *Kokin Wakashū* (um 905): Die Dichtung Japans hat das menschliche Herz zum Samen, und aus ihm sprießen unzählige Blätter aus Worten.

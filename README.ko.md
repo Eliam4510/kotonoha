@@ -112,17 +112,17 @@ Whisper는 무엇을 부르는지 추측해야 하지만, Kotonoha는 가사가 
 
 ### 모든 웹페이지
 
-<img src="docs/img/paginas.ko.png" alt="색, 후리가나, 리더 패널이 표시된 아오조라 문고의 『羅生門』" width="100%">
+<img src="docs/img/paginas.ko.png" alt="보이저 1호 탐사선에 관한 NHK ONE 뉴스. 사진과 Kotonoha의 색, 후리가나, 리더 패널이 보입니다" width="100%">
 
-<sub>아쿠타가와 류노스케 『羅生門』, [아오조라 문고](https://www.aozora.gr.jp/cards/000879/card127.html) (퍼블릭 도메인).</sub>
+<sub>뉴스: [「地球から1光日 259億キロ離れた宇宙を進むボイジャー1号の旅」](https://news.web.nhk/newsweb/na/nd-20261116de76380), NHK ONE (2026년 11월 17일, 일러스트 NASA/JPL-Caltech). 웹페이지 리더를 보여 주기 위해 실었으며, 권리는 NHK에 있습니다.</sub>
 
 뉴스, 블로그, 위키, Claude 같은 채팅에서도 일본어 텍스트에 같은 색과 후리가나가 붙고, 단어를 클릭하면 단어 패널이 열립니다. 페이지 내용은 바뀌지 않습니다. 링크와 버튼은 그대로 작동하고 React로 만든 사이트도 알아채지 못합니다. 실제 사이트 약 서른 곳에서 시험했습니다.
 
 ### 책, PDF, 만화
 
-<img src="docs/img/libro-texto.ko.png" alt="루비, 색, 後宮의 단어 패널이 표시된 세로쓰기 『源氏物語』(요사노 아키코판)" width="100%">
+<img src="docs/img/libro-antiguo.ko.png" alt="Kotonoha 뷰어에 연 1650년 삽화본 『源氏物語』 1권: 달 아래 툇마루의 여인과 붉은 주석이 달린 초서체 가나 본문이 펼쳐진 두 쪽, 옆에는 책의 미리보기" width="100%">
 
-<sub>『源氏物語』(겐지 이야기) 「桐壺」, 요사노 아키코 번역본, [아오조라 문고](https://www.aozora.gr.jp/cards/000052/card5016.html) (퍼블릭 도메인). 어휘 그림의 책도 이것입니다.</sub>
+<sub>『源氏物語』(겐지 이야기) 1650년(게이안 3년) 삽화본 1권, [일본 국립국회도서관](https://dl.ndl.go.jp/pid/2579509) (퍼블릭 도메인).</sub>
 
 **서재**는 PDF 리더처럼 완전한 뷰어입니다. 확대·축소, 두 쪽 보기, 연속 스크롤, 목차, 썸네일을 갖추고 책마다 읽던 페이지를 기억합니다. 동작은 이름 있는 메뉴에 모여 있고, Ctrl+K로 하려는 일을 입력하면 어떤 동작이든 찾을 수 있습니다. 손 도구, 형광펜, 페이지만 남기는 읽기 모드도 있습니다. 페이지 위에는 단어마다 후리가나와 상태별 밑줄을 표시할 수 있고, 문장의 번역은 자막처럼 그 아래에 나옵니다. 문장을 따라 소리 내어 읽을 수 있으며, 찾아본 단어는 페이지 일부를 잘라 낸 이미지와 함께 카드가 됩니다. 페이지에 그린 영역만 문자 인식으로 따로 읽을 수 있고, 텍스트 EPUB과 서재의 텍스트도 같은 메뉴의 같은 뷰어에서 읽습니다. 소설 같은 텍스트 EPUB은 원래의 서식, 루비, 세로쓰기를 그대로 살리고, 그 위에 페이지 리더가 웹에서처럼 색, 후리가나, 단어 패널을 더합니다. 텍스트가 들어 있는 PDF는 곧바로 단어 단위로 읽을 수 있습니다. 이미지 폴더로 된 만화는 폴더를 고르기만 하면 들어오며, 권마다 책 한 권이 되고 표지가 맨 앞에, 컬러 두 쪽 그림은 통째로 보입니다. 책장은 시리즈와 그 권들처럼 책을 컬렉션으로 묶어 표지와 설명을 붙이고, 책과 컬렉션마다 얼마나 읽었는지 보여 줍니다. 뷰어에서는 PDF 리더처럼 페이지에 책갈피를 달고, 글을 강조하거나 밑줄을 그어 코멘트를 붙이고, 페이지에 메모를 남길 수 있습니다. 책 전체에서 단어를 찾고, 각 페이지를 읽기 도우미와 함께 글로 읽을 수 있으며, Claude가 문자 인식으로 읽은 글을 페이지 이미지와 비교해 검토할 수 있습니다.
 
@@ -139,6 +139,8 @@ Whisper는 무엇을 부르는지 추측해야 하지만, Kotonoha는 가사가 
 ### 읽기 전에 보는 책의 어휘
 
 <img src="docs/img/vocabulario.ko.png" alt="『源氏物語』 「桐壺」의 어휘: 이해도, 배울 단어, 90·95·98% 목표, お를 펼쳐 책 속 문장을 보여 주는 목록" width="100%">
+
+<sub>『源氏物語』(겐지 이야기) 「桐壺」, 요사노 아키코 번역본, [아오조라 문고](https://www.aozora.gr.jp/cards/000052/card5016.html) (퍼블릭 도메인).</sub>
 
 책과 컬렉션마다 **어휘**가 있습니다. 모든 단어를 세어 가장 많이 나오는 것부터 읽기, 뜻, JLPT 급수, 책 속 가장 알맞은 문장과 함께 보여 줍니다. 위쪽에는 지금 얼마나 이해하는지, 90·95·98%를 이해하려면 몇 단어가 더 필요한지가 나옵니다. 단어는 바로 여기서 아는 단어나 학습 중으로 표시하고, 고른 단어는 책 속 문장과 함께 한꺼번에 메모리나 Anki로 보냅니다. 소설, PDF, 글, 문자 인식으로 읽은 만화 모두에 쓸 수 있고, 시리즈에서는 권마다 새 단어가 몇 개인지 알려 줍니다. 책의 문법도 하나씩 볼 수 있습니다.
 
@@ -312,7 +314,7 @@ Windows에서는 도우미부터 시작할 수도 있습니다. `kotonoha-<버�
 - 노래: Meta의 [Demucs](https://github.com/facebookresearch/demucs)(htdemucs)와 [timcsy의 ONNX 변환](https://huggingface.co/timcsy/demucs-web-onnx), darashi의 [narabas](https://github.com/darashi/narabas), Google의 [YAMNet](https://github.com/tensorflow/models/tree/master/research/audioset/yamnet).
 - 문자 인식: [PP-OCRv5와 PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR), [manga-ocr](https://github.com/kha-white/manga-ocr), [말풍선 검출기](https://huggingface.co/ogkalu/comic-text-and-bubble-detector).
 - 획순: Ulrich Apel의 [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0. 중국어는 [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)에서 나온 [Hanzi Writer](https://github.com/chanind/hanzi-writer-data), Arphic Public License.
-- 그림의 내용: 일본 총리관저의 국회 연설(PDL 1.0), NASA 영상, 아오조라 문고의 요사노 아키코판 『源氏物語』와 『羅生門』, 『吾輩は猫である』의 첫머리로, 연설을 빼면 모두 퍼블릭 도메인입니다. 두 책의 페이지는 그림 아래에 출처를 적었습니다.
+- 그림의 내용: 일본 총리관저의 국회 연설(PDL 1.0), NASA 영상, 일본 국립국회도서관의 1650년 삽화본 『源氏物語』, 아오조라 문고의 요사노 아키코판 『源氏物語』와 『羅生門』, 『吾輩は猫である』의 첫머리로, 연설을 빼면 모두 퍼블릭 도메인입니다. NHK ONE의 뉴스와 두 책의 페이지는 그림 아래에 출처를 적었습니다.
 - 아이콘: [Phosphor](https://phosphoricons.com). 글꼴: [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic), [Nunito](https://fonts.google.com/specimen/Nunito).
 
 이름은 『고킨와카슈』 가나 서문(905년경)에서 왔습니다. 일본의 노래는 사람의 마음을 씨앗으로 삼아 수많은 말의 잎이 되었다는 구절입니다.
